@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-nbjunit</artifactId>
-            <version>${netbeans.version}</version>
+            <version>SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <!-- To use Jelly Tools in your functional tests, add or replace with:

@@ -30,6 +30,21 @@
             <layout>default</layout>
             <name>Repository for library Library[junit_4]</name>
         </repository>
+	
+	<repository>
+
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+
+          <id>repo.codahale.com</id>
+          <url>http://repo.codahale.com</url>
+        </repository>
+	
     </repositories>            
     <dependencies>
                <dependency>
@@ -91,6 +106,16 @@
         <module>application</module>
       <module>ProlineStudio-gui</module>
   </modules>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.codahale</groupId>
+        <artifactId>jerkson_2.9.1</artifactId>
+        <version>[0.6.0-SNAPSHOT,)</version>      
+      </dependency>
+    </dependencies>
+  </dependencyManagement>  
 
     <properties>
         <netbeans.version>RELEASE711</netbeans.version>

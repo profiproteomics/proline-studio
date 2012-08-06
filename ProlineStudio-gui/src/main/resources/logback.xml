@@ -9,7 +9,7 @@
   </appender>
   
    <appender name="Fappender" class="ch.qos.logback.core.FileAppender">
-      <file>PM_MascotParser-${user.name}.log</file>
+      <file>Proline_Studio-${user.name}.log</file>
       <append>true</append>
       <encoder>
         <pattern>%-5level: [%thread] %date{dd MMM yyyy - HH:mm:ss.SSS} %logger{35} - %msg%n</pattern>

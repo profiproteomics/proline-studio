@@ -6,12 +6,19 @@ package fr.proline.studio.action;
 
 import static fr.proline.studio.action.Bundle.*;
 import fr.proline.studio.dbs.ProlineDbManagment;
-import fr.proline.repository.ConnectionPrototype;
+import fr.proline.repository.DatabaseConnector;
 import fr.proline.repository.ProlineRepository;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -27,28 +34,75 @@ id = "fr.proline.studio.action.InitProlineRepositoryAction")
     @ActionReference(path = "Menu/File", position = 1450, separatorAfter = 1475)
 })
 @Messages({"CTL_InitProlineRepositoryAction=Initialize Repository",
-       "dbPropFileName=/proline_dbs_connection.properties",
-       "# {0} - cause of error ",
-       "connPrototype.error=Error reading UDS db properties ({0})"        
+    "get.UDS.configuration.title=Get UDS database configuration file",
+    "# {0} - cause of error ",
+    "initRepositity.error=Unable to initialize repository access ({0})",
+    "initRepositity.title=Initialization of repository access",
+    "initRepositity.success=Initialization of repository access successfull"
 })
+
 public final class InitProlineRepositoryAction implements ActionListener {
+//  "dbPropFileName=/proline_dbs_connection.properties",
 
     protected static Logger logger = LoggerFactory.getLogger(InitProlineRepositoryAction.class);
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        try {
-            logger.debug(" START Read UDS "+dbPropFileName());           
-            ConnectionPrototype conProto = new ConnectionPrototype( dbPropFileName()).namePattern("proline_default");
-            ProlineRepository repo = ProlineRepository.getRepositoryManager(conProto);            
-            ProlineDbManagment.intiProlineDbManagment(repo);
-            logger.info(" Used UDS Database connection = "+ProlineDbManagment.getProlineDbManagment().getDatabaseConnector(ProlineRepository.Databases.UDS).getConnection().getMetaData().getURL());        
-        } catch (SQLException sqle) {
-            logger.warn(connPrototype_error(sqle));        
-        }catch(IOException ioe){           
-            logger.warn(connPrototype_error(ioe));
+
+        logger.debug(" START InitProlineRepositoryAction ");
+        // Get UDS configuration file.
+        JFileChooser fchooser = new JFileChooser();
+        fchooser.setMultiSelectionEnabled(false);
+        fchooser.setDialogTitle(get_UDS_configuration_title());
+        File udsDBPropFile;
+        int result = fchooser.showOpenDialog(null);
+        switch (result) {
+            case JFileChooser.APPROVE_OPTION:
+                udsDBPropFile = fchooser.getSelectedFile();
+                break;
+            case JFileChooser.ERROR_OPTION:
+            case JFileChooser.CANCEL_OPTION:
+            default:
+                return;
+        }
+        logger.debug("Read File {}", udsDBPropFile.getAbsolutePath());
+        
+        try {                
+            DatabaseConnector udsConn = new DatabaseConnector(getFilePropertiesMap(udsDBPropFile));
+            ProlineDbManagment.initProlineDbManagment(udsConn);
+            JOptionPane.showMessageDialog(null, initRepositity_success(), initRepositity_title(), JOptionPane.INFORMATION_MESSAGE);
+        }catch (IOException ioe){
+            String msg = ioe.getMessage();
+            JOptionPane.showMessageDialog(null, initRepositity_error(msg), initRepositity_title(), JOptionPane.ERROR_MESSAGE);
+            logger.warn(initRepositity_error(msg));
         } catch (Exception ex) {
-            logger.warn(connPrototype_error(ex));        
-        }                    
+            String msg = ex.getMessage();
+            JOptionPane.showMessageDialog(null, initRepositity_error(msg), initRepositity_title(), JOptionPane.ERROR_MESSAGE);
+            logger.warn(initRepositity_error(msg));
+        }
+        
+        try {
+            logger.debug(" Used UDS Database connection = {}", ProlineDbManagment.getProlineDbManagment().getDatabaseConnector(ProlineRepository.Databases.UDS).getConnection().getMetaData().getURL());
+        } catch (Exception ex) {
+            String msg = ex.getMessage();
+            JOptionPane.showMessageDialog(null, initRepositity_error(msg), initRepositity_title(), JOptionPane.ERROR_MESSAGE);
+            logger.warn(initRepositity_error(msg));
+        }
+    }
+    
+    private Map getFilePropertiesMap(File propFile) throws IOException {
+        Properties p = new Properties();
+        p.load(new FileInputStream(propFile));
+
+        Map<String, String> propMap = new HashMap<String, String>((Map) p);
+
+        //
+        // Get the entry set of the Map and print it out.
+        //
+        Set<Map.Entry<String, String>> propertySet = propMap.entrySet();
+        for (Map.Entry entry : propertySet) {            
+            logger.debug("{} = {}", entry.getKey(), entry.getValue());
+        }
+        return propMap;
     }
 }

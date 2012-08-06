@@ -16,9 +16,10 @@ import fr.proline.repository.ProlineRepository;
 import fr.proline.studio.ParseMascotIdent;
 import static fr.proline.studio.action.Bundle.*;
 import fr.proline.studio.dbs.ProlineDbManagment;
-import fr.proline.studio.utils.AbstractProgressAction;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.HashMap;
+import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -41,14 +42,21 @@ id = "fr.proline.prolinestudio.action.ImportMascotIdent")
 })
 @Messages({"CTL_ImportMascotIdent=Import Mascot Identification",
            "error.title=Import Result Error",
-           "invalid.dbs.managment=The Databases managment system has not been initialized. Initialize it before running import"    
+           "invalid.dbs.managment=The Databases managment system has not been initialized. Initialize it before running import",
+           "mascot.parse.error=An error occured while parsing Mascot result file"
 })
-public final class ImportMascotIdentAction extends AbstractProgressAction {
+public final class ImportMascotIdentAction extends AbstractAction { // extends AbstractProgressAction {
 
     private static Logger logger =  LoggerFactory.getLogger(ImportMascotIdentAction.class);    
     ProlineDbManagment pdbM;
     
     @Override
+    public void actionPerformed(ActionEvent e) {
+       runAction();        
+    }
+    //
+    // AbstractProgressAction method containing action to execute
+//    @Override
     public void runAction() {
         JFileChooser fchooser = new JFileChooser();
         fchooser.setMultiSelectionEnabled(false);
@@ -64,7 +72,7 @@ public final class ImportMascotIdentAction extends AbstractProgressAction {
             default :
                 return;                         
         }
-        logger.debug(" Import Mascot dat file  "+mascotFile.getAbsolutePath());         
+        logger.debug(" Import Mascot dat file {} ", mascotFile.getAbsolutePath());         
              
         try {
             if(pdbM == null)
@@ -75,6 +83,11 @@ public final class ImportMascotIdentAction extends AbstractProgressAction {
         }
         
         initializeOMProviders();
+        ParseMascotIdent parser = new ParseMascotIdent();
+        boolean parseResult = parser.parseMascotResult(mascotFile);
+        if(!parseResult)
+            JOptionPane.showMessageDialog(null, mascot_parse_error(),error_title(),JOptionPane.ERROR_MESSAGE);
+        logger.debug(" Foward Result Set ");
     }
 
     private void initializeOMProviders() {            
@@ -87,18 +100,8 @@ public final class ImportMascotIdentAction extends AbstractProgressAction {
         
     }
 
-    @Override
+//    @Override
     public String getProgressBarMessage() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    protected Class<?>[] cookieClasses() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public String getName() {
         return CTL_ImportMascotIdent();
     }
     

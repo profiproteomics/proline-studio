@@ -8,6 +8,8 @@ import fr.proline.core.om.model.msi.IResultFile;
 import fr.proline.core.om.model.msi.ResultSet;
 import fr.proline.module.parser.mascot.MascotResultFileProvider;
 import java.io.File;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -15,23 +17,31 @@ import java.io.File;
  */
 public class ParseMascotIdent {
     public final static String PROVIDER_KEY="ProlineStudio_Mascot";
-
-    protected ResultSet newResultSet;
+    protected static Logger logger = LoggerFactory.getLogger(ParseMascotIdent.class);
+    
+    protected ResultSet fwrdResultSet;
+    protected ResultSet decoyResultSet;
     
     public ParseMascotIdent() {
-        
+        //VD TODO FIXME : 
+        logger.debug(" VALUE JavaLibPath ",System.getProperty("java.library.path") );
+        System.setProperty("java.library.path", "./");
     }
    
     
-    public ResultSet parseMascotResult(File mascotFile ){
+    public boolean parseMascotResult(File mascotFile ){
         IResultFile rf = MascotResultFileProvider.getResultFile(mascotFile, PROVIDER_KEY);
-        newResultSet = rf.getResultSet(false);   
-        return newResultSet;
+        fwrdResultSet = rf.getResultSet(false);   
+        decoyResultSet = rf.getResultSet(true);   
+        return true;
     }
         
-    public ResultSet getLastParsedResultSet(){
-        return newResultSet;
+    public ResultSet getLastParsedFowardRSet(){
+        return fwrdResultSet;
     }
             
-    
+    public ResultSet getLastParsedDecoyRSet(){
+        return decoyResultSet;
+    }
+       
 }

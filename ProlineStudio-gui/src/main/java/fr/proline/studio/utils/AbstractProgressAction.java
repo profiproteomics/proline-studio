@@ -1,54 +1,36 @@
 /*
- * Abstract CookieAction which display a ProgressBar during action duration.
+ * Abstract Action which display a ProgressBar during action duration.
  *
  * Warnings :
- * - The action should be defined in subclass run method and NOT in performAction
- * - The closeProgressBar method SHOULD be called at the end of the run method.
+ * - The action should be defined in subclass runAction method and NOT in actionPerformed nor run
+ * - The closeProgressBar method Will automatically be called at the end of the run method.
  *
  */
 package fr.proline.studio.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.openide.nodes.Node;
-import org.openide.util.HelpCtx;
-import org.openide.util.Lookup;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import org.openide.util.RequestProcessor;
-import org.openide.util.actions.CookieAction;
 import org.openide.windows.WindowManager;
 
-/**
- *
- * @author VD225637
- */
-public abstract class AbstractProgressAction extends CookieAction implements Runnable {
-
+//@ActionID(category = "Edit",
+//id = "fr.proline.studio.utils.AbstractProgressAction")
+//@ActionRegistration(displayName = "#CTL_AbstractProgressAction")
+//@ActionReferences({})
+//@Messages("CTL_AbstractProgressAction=To Be Redefined")
+public abstract class AbstractProgressAction extends AbstractAction implements  Runnable  {
     ProgressBarDialog dialog;
-    private Lookup nodeLookup;
-    private List<Lookup> allNodeLookup;
-
-    /**
-     * Return the message that should be displayed by ProgressBar dialog
-     *
-     * @return
-     */
-    public abstract String getProgressBarMessage();
-
-    /**
-     * Store currently active nodes, Start the ProgressBarDialog
-     * and call Runnable run method in another thread
+    ActionEvent event;
+    
+   /**
+     * Store specified ActionEvent, Start the ProgressBarDialog
+     * and call Runnable run method in another thread.
      * 
-     * @param activatedNodes 
+     * @param e ActionEvent 
      */
     @Override
-    protected void performAction(Node[] activatedNodes) {
-
-        nodeLookup = activatedNodes[0].getLookup();
-        allNodeLookup = new ArrayList<Lookup>();
-        for (Node node : activatedNodes) {
-            allNodeLookup.add(node.getLookup());
-        }
-
+    public void actionPerformed(ActionEvent e) {
+        this.event = e;
         dialog = new ProgressBarDialog(WindowManager.getDefault().getMainWindow(), true);
         dialog.setCommandLabel(getProgressBarMessage());
         dialog.setProgressBarIndeterminate(true);
@@ -56,40 +38,14 @@ public abstract class AbstractProgressAction extends CookieAction implements Run
         RequestProcessor.getDefault().post(this);
         dialog.setVisible(true);
     }
-
-    @Override
-    protected int mode() {
-        return CookieAction.MODE_EXACTLY_ONE;
+    
+    public ActionEvent getInitialActionEvent(){
+        return event;
     }
-
-    protected Lookup getFirstLookup() {
-        return nodeLookup;
-    }
-
-    protected List<Lookup> getAllLookups() {
-        return allNodeLookup;
-    }
-
-    @Override
-    protected void initialize() {
-        super.initialize();
-        // see org.openide.util.actions.SystemAction.iconResource() Javadoc for more details
-        putValue("noIconInMenu", Boolean.TRUE);
-    }
-
-    @Override
-    public HelpCtx getHelpCtx() {
-        return HelpCtx.DEFAULT_HELP;
-    }
-
-    @Override
-    protected boolean asynchronous() {
-        return false;
-    }
-
+    
     @Override
     /**
-     * This Runnable method will call the sb classes RunAction method
+     * This Runnable method will call the subclasses runAction method
      * and finally close the ProgressBarDialog if not already done
      */
     public void run(){
@@ -111,4 +67,12 @@ public abstract class AbstractProgressAction extends CookieAction implements Run
             dialog.setVisible(false);
         }
     }
+    
+    /**
+     * Return the message that should be displayed by ProgressBar dialog
+     *
+     * @return
+     */
+    public abstract String getProgressBarMessage();
+    
 }

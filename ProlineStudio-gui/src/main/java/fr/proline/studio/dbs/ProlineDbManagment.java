@@ -4,6 +4,7 @@
  */
 package fr.proline.studio.dbs;
 
+import fr.proline.core.dal.DatabaseManagment;
 import fr.proline.core.orm.utils.JPAUtil;
 import fr.proline.repository.DatabaseConnector;
 import fr.proline.repository.ProlineRepository;
@@ -19,66 +20,78 @@ import org.openide.util.NbBundle.Messages;
  * @author VD225637
  */
 @Messages({"getEMDB.error=Specified Database, {0}, is not unique. You must use appropriate method specifying project.",
-        "newRepo.error=Only one ProlineRepository could be specified.",
-        "existingRepo.error=ProlineDbManagment instance has not been initialized. Cass intiProlineDbManagment(ProlineRepository pr) first."
+            "unknown.db.error=Specified Database is of unknown type.",
+            "not.singleton.db.error=Specified Database is not a singleton Database.",
+            "noneInitDBManagment.error=ProlineDbManagment instance has not been initialized yet ! Call intiProlineDbManagment(DatabaseConnector) first."
         })
 public class ProlineDbManagment {
 
     protected static ProlineDbManagment instance = null;
     
-    protected ProlineRepository repository;
+    protected DatabaseManagment dbMgmt;
     protected EntityManager udsEM;
     protected EntityManager pdiEM;
     protected EntityManager psEM;
     
-    private ProlineDbManagment() {
+    private ProlineDbManagment(DatabaseConnector udsConnector) {
+        dbMgmt = new DatabaseManagment(udsConnector);        
     }
 
     /**
-     * initialize unique ProlineDbManagment instance. At first call, create ProlineDbManagment 
-     * with specified ProlineRepository.
-     * If ProlineDbManagment singleton instance has already been initialized with a different 
-     * ProlineRepository , an exception will be thrown. 
+     * initialize unique ProlineDbManagment instance. Specified UDS DatabaseConnector
+     * is used to create associated DatabaseManagment. 
+     * If ProlineDbManagment singleton instance has already been initialized false is returned
      * Use getProlineDbManagment() to get initialized instance. 
      * 
-     * @param prRepo associated ProlineRepository
-     * @return 
+     * @param udsConnector DatabaseConnector to access UDSdb
+     * @return true if initialization is successful false if ProlineDbManagment already initialized
      */
-    public static boolean intiProlineDbManagment(ProlineRepository prRepo) {
-        if (instance == null) {
-            instance = new ProlineDbManagment();
-            instance.setRepository(prRepo);
-        } else {
-            if(!prRepo.equals(instance.repository))
-                throw new IllegalArgumentException(newRepo_error());                
-        }    
+    public static boolean initProlineDbManagment(DatabaseConnector udsConnector) {
+        if(instance != null)
+            return false;
+        
+        instance = new ProlineDbManagment(udsConnector);                   
         return true;
     }
     
     /**
      * Get the unique ProlineDbManagment instance. If instance has not be initialized an exception
      * is thrown
-     * @see #intiProlineDbManagment(fr.proline.repository.ProlineRepository)  
+     * @see #initProlineDbManagment(fr.proline.repository.DatabaseConnector)  
      * @return the ProlineDbManagment instance
      * @throws UnsupportedOperationException if instance has not been initialized yet
      */
     public static ProlineDbManagment getProlineDbManagment() {
         if(instance == null)
-            throw new UnsupportedOperationException(existingRepo_error());
+            throw new UnsupportedOperationException(noneInitDBManagment_error());
         return instance;
     }
     
-    private void setRepository(ProlineRepository repo) {
-        repository = repo;
-    }
+    /**
+     * return true if ProlineDbManagment have been initialized, false otherwise
+     * @return 
+     */
+    public static boolean isInitilized(){ 
+        return instance != null;
+    }     
     
     /**
-     * Return the DatabaseConnector for specified Database
-     * @param db the Database  to get DatabaseConnector for 
+     * Return the DatabaseConnector for specified unique Database. If specified database
+     * is project dependant, an error is thrown
+     * @param db the singleton Database to get DatabaseConnector for 
      * @return the DatabaseConnector for specified Database
+     * @exception if specified database is not a singleton database.
      */
-    public DatabaseConnector getDatabaseConnector(ProlineRepository.Databases db){
-        return repository.getConnector(db);
+    public DatabaseConnector getDatabaseConnector(ProlineRepository.Databases db) throws IllegalArgumentException{
+        switch(db){
+            case PS: return dbMgmt.psDBConnector();
+            case PDI : return dbMgmt.pdiDBConnector();
+            case UDS : return dbMgmt.udsDBConnector();
+            case LCMS : 
+            case MSI : 
+                throw new IllegalArgumentException(not_singleton_db_error());
+        }
+        throw new IllegalArgumentException(unknown_db_error());    
     }
     
     /**
@@ -87,8 +100,9 @@ public class ProlineDbManagment {
      * @throws Exception 
      */
     public void closeAll() throws Exception{
-        repository.closeAll();
+       dbMgmt.closeAll();
     }
+    
     
     /**
      * 
@@ -117,17 +131,14 @@ public class ProlineDbManagment {
                 return psEM;
             case MSI:
                 throw new IllegalArgumentException(getEMDB_error(ProlineRepository.Databases.MSI.name()));
-        }
-        if(!udsEM.isOpen()){
-            DatabaseConnector dc = repository.getConnector(ProlineRepository.Databases.UDS);   
-            udsEM = createEM(ProlineRepository.Databases.UDS);
-        }
-        return udsEM;
+            default :
+                throw new IllegalArgumentException(unknown_db_error());
+        }  
     }
     
     private EntityManager createEM(ProlineRepository.Databases db){
         
-        final Map<String, Object> entityManagerSettings = repository.getConnector(db).getEntityManagerSettings();
+        final Map<String, Object> entityManagerSettings = getDatabaseConnector(db).getEntityManagerSettings();
         String persistenceName = JPAUtil.PersistenceUnitNames.getPersistenceUnitNameForDB(db);
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceName, entityManagerSettings);
         return  emf.createEntityManager();

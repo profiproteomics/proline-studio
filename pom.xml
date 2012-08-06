@@ -47,7 +47,7 @@
 	
     </repositories>            
     <dependencies>
-               <dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.6.5</version>
@@ -62,7 +62,7 @@
             <artifactId>logback-classic</artifactId>
             <version>1.0.6</version>
         </dependency>
-                <dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.10</version>
@@ -102,9 +102,16 @@
     </build>
 
     <modules>
-        <module>branding</module>
-        <module>application</module>
-      <module>ProlineStudio-gui</module>
+      <module>branding</module>
+      <module>application</module>
+      <module>ProlineStudio-Commons</module>
+      <module>ProlineStudio-DAM</module>
+      <module>ProlineStudio-RSExplorer</module>
+      <module>ProlineStudio-RSMExplorer</module>
+    <module>ProlineStudio-PJExplorer</module>
+        <module>ProlineStudio-IDFImport</module>
+    <module>ProlineStudio-RS2RSM</module>
+    <module>ProlineStudio-RepositoryMgr</module>
   </modules>
   
   <dependencyManagement>

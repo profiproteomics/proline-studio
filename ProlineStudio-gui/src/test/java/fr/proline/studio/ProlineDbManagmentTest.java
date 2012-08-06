@@ -5,12 +5,12 @@
 package fr.proline.studio;
 
 import fr.proline.core.om.model.msi.PtmDefinition;
+import fr.proline.core.om.model.msi.SeqDatabase;
 import fr.proline.core.om.provider.msi.impl.ORMPTMProvider;
-import fr.proline.repository.ConnectionPrototype;
+import fr.proline.core.om.provider.msi.impl.ORMSeqDatabaseProvider;
 import fr.proline.repository.DatabaseConnector;
 import fr.proline.repository.ProlineRepository;
 import fr.proline.studio.dbs.ProlineDbManagment;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.None;
 import scala.Option;
 
 /**
@@ -33,24 +32,14 @@ import scala.Option;
 public class ProlineDbManagmentTest {
     
     protected static Logger logger = LoggerFactory.getLogger(ProlineDbManagmentTest.class);
-    protected final static String DB_CONFIG_PROP="/dbs_test_connection.properties";
+//    protected final static String DB_CONFIG_PROP="/dbs_test_connection.properties";
     
     public ProlineDbManagmentTest() {
     }
 
     @org.junit.BeforeClass
     public static void setUpClass() throws Exception {
-        try {
-            ConnectionPrototype conProto = new ConnectionPrototype(DB_CONFIG_PROP);            
-            conProto.protocoleValue("./target/test-classes/");           
-            repo = ProlineRepository.getRepositoryManager(conProto);           
-            ProlineDbManagment.intiProlineDbManagment(repo);
-        } catch (IOException ioex) {
-            Exceptions.printStackTrace(ioex);
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);  
-            Assert.fail(ex.getMessage());
-        }
+         ProlineDbManagmentUtil.getOrInitDbManagment();       
     }
 
     @org.junit.AfterClass
@@ -62,7 +51,6 @@ public class ProlineDbManagmentTest {
         }
     }
     
-    protected static ProlineRepository repo;
     
     @Before
     public void setUp() {
@@ -80,7 +68,7 @@ public class ProlineDbManagmentTest {
             
             //Test JDBC Connection 
             DatabaseConnector dc = ProlineDbManagment.getProlineDbManagment().getDatabaseConnector(ProlineRepository.Databases.PS);
-            Assert.assertThat(dc.getConnection().getMetaData().getURL(), CoreMatchers.equalTo("jdbc:h2:file:./target/test-classes/test_ps"));
+            Assert.assertThat(dc.getConnection().getMetaData().getURL(), CoreMatchers.equalTo("jdbc:h2:file:target/test-classes/test_ps"));
             
             //Test EntityManager Connection 
             psEM = ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PS, false);
@@ -99,18 +87,48 @@ public class ProlineDbManagmentTest {
             Exceptions.printStackTrace(ex);
              Assert.fail(ex.getMessage());
         } finally {
-            psEM.close();
+            if(psEM != null)
+              psEM.close();
         }
     }
-        
+    
+    @Test
+    public void readPDIDBInfo(){
+        EntityManager pdiEM = null;
+        try {
+            
+            //Test JDBC Connection 
+            DatabaseConnector dc = ProlineDbManagment.getProlineDbManagment().getDatabaseConnector(ProlineRepository.Databases.PDI);
+            Assert.assertThat(dc.getConnection().getMetaData().getURL(), CoreMatchers.equalTo("jdbc:h2:file:target/test-classes/test_pdi"));
+            
+            //Test EntityManager Connection 
+            pdiEM = ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PDI, false);
+            fr.proline.core.orm.pdi.ProteinIdentifier  protId = pdiEM.find(fr.proline.core.orm.pdi.ProteinIdentifier.class, 341);
+            Assert.assertNotNull(protId);
+            Assert.assertEquals("1A1D_PSESP",protId.getValue());
+            Assert.assertThat(protId.getBioSequence().getLength(), CoreMatchers.equalTo(338));
+            
+            //Test ORMPTMProvider Connection 
+            ORMSeqDatabaseProvider seqDbPro=    new ORMSeqDatabaseProvider(pdiEM);
+            Option<SeqDatabase> seqDB = seqDbPro.getSeqDatabase(33);
+            Assert.assertNotNull(seqDB.get());
+            
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+             Assert.fail(ex.getMessage());
+        } finally {
+            if(pdiEM != null)
+                pdiEM.close();
+        }
+    }
+         
     @Test
     public void testGetUDSConnection(){
         try {
             
             DatabaseConnector udsDbConn1= ProlineDbManagment.getProlineDbManagment().getDatabaseConnector(ProlineRepository.Databases.UDS);
-            DatabaseConnector udsDbConn2 = repo.getConnector(ProlineRepository.Databases.UDS);
-            Assert.assertSame(udsDbConn1,udsDbConn2);
-
+            Assert.assertNotNull(udsDbConn1); 
+            
             Connection conn = udsDbConn1.getConnection();
             String URL = conn.getMetaData().getURL();                        
             Assert.assertThat(URL, CoreMatchers.equalTo("jdbc:h2:file:./target/test-classes/test_uds"));

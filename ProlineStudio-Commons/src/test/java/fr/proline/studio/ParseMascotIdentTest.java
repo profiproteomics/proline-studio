@@ -4,27 +4,12 @@
  */
 package fr.proline.studio;
 
-import fr.proline.core.om.model.msi.IResultFile;
-import fr.proline.core.om.model.msi.Protein;
-import fr.proline.core.om.model.msi.SeqDatabase;
-import fr.proline.core.om.provider.msi.IProteinProvider;
-import fr.proline.core.om.provider.msi.IProteinProvider$class;
-import fr.proline.core.om.provider.msi.ProvidersFactory;
-import fr.proline.core.om.provider.msi.impl.ORMPTMProvider;
-import fr.proline.core.om.provider.msi.impl.ORMPeptideProvider;
-import fr.proline.core.om.provider.msi.impl.ORMSeqDatabaseProvider;
-import fr.proline.module.parser.mascot.MascotResultFileProvider;
-import fr.proline.repository.ProlineRepository;
-import fr.proline.studio.dbs.ProlineDbManagment;
+import fr.proline.repository.DatabaseConnector;
+import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import org.hamcrest.CoreMatchers;
 import org.junit.*;
 import org.openide.util.Exceptions;
-import scala.Option;
-import scala.Some;
-import scala.collection.Seq;
 
 /**
  *
@@ -39,7 +24,7 @@ public class ParseMascotIdentTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {       
-        ProlineDbManagmentUtil.getOrInitDbManagment();
+        getOrInitDbManagment();
     }
 
     @AfterClass
@@ -48,10 +33,10 @@ public class ParseMascotIdentTest {
     
     @Before
     public void setUp() {        
-        ProvidersFactory.registerPeptideProvider(ParseMascotIdent.PROVIDER_KEY, new ORMPeptideProvider(ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PS, false)));
-        ProvidersFactory.registerPTMProvider(ParseMascotIdent.PROVIDER_KEY, new ORMPTMProvider(ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PS, false)));
-        ProvidersFactory.registerProteinProvider(ParseMascotIdent.PROVIDER_KEY, new ProteinFakeProvider());
-        ProvidersFactory.registerSeqDatabaseProvider(ParseMascotIdent.PROVIDER_KEY, new ORMSeqDatabaseProvider(ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PDI, false)));
+//        ProvidersFactory.registerPeptideProvider(ImportResultFile.PROVIDER_KEY, new ORMPeptideProvider(ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PS, false)));
+//        ProvidersFactory.registerPTMProvider(ImportResultFile.PROVIDER_KEY, new ORMPTMProvider(ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PS, false)));
+//        ProvidersFactory.registerProteinProvider(ImportResultFile.PROVIDER_KEY, new ProteinFakeProvider());
+//        ProvidersFactory.registerSeqDatabaseProvider(ImportResultFile.PROVIDER_KEY, new ORMSeqDatabaseProvider(ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PDI, false)));
     }
     
     @After
@@ -67,42 +52,25 @@ public class ParseMascotIdentTest {
             Exceptions.printStackTrace(ex);
             Assert.fail(ex.getMessage());
         }
-       IResultFile rf = MascotResultFileProvider.getResultFile(mascotFile, ParseMascotIdent.PROVIDER_KEY);    
-       Assert.assertThat(rf, CoreMatchers.notNullValue());
+//       IResultFile rf = MascotResultFileProvider.getResultFile(mascotFile, ImportResultFile.PROVIDER_KEY_);    
+//       Assert.assertThat(rf, CoreMatchers.notNullValue());
     }
-    
-    
-     public class ProteinFakeProvider implements IProteinProvider{
-        private HashMap <String, Protein> protByAcc = new HashMap<String, Protein>();
         
-        @Override
-        public Option<Protein>[] getProteins(Seq<Object> seq) {
-            Option<Protein>[] retArray =  new Option[1];            
-            retArray[0] = Option.empty();
-            return retArray;
-        }
+    private static ProlineDBManagement getOrInitDbManagment()  {        
+        try {
+             ProlineDBManagement.getProlineDBManagement();
+        } catch(UnsupportedOperationException uoe){
+            try {
+                //Should be initialized                
+                DatabaseConnector udsC = new DatabaseConnector(DB_CONFIG_PROP);
+                ProlineDBManagement.initProlineDBManagment(udsC);
 
-        @Override
-        public Option<Protein> getProtein(int i) {
-            return IProteinProvider$class.getProtein(this, i);
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);                  
+                return null;
+            }        
         }
-
-        @Override
-        public Option<Protein> getProtein(String string) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-         public Option<Protein> getProtein(String accession, SeqDatabase seqDb) {
-             Option<Protein> retVal;
-             Protein p = protByAcc.get(accession.concat(seqDb.name()));
-             if(p == null){
-                p= new Protein("AACCCMMM", Protein.generateNewId(),"aa" );
-                protByAcc.put(accession.concat(seqDb.name()),p);
-             }
-            retVal = new Some(p);        
-            return retVal;
-        }             
+        return ProlineDBManagement.getProlineDBManagement();
     }
     
 }

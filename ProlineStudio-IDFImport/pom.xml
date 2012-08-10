@@ -40,6 +40,17 @@
             <artifactId>org-netbeans-api-annotations-common</artifactId>
             <version>RELEASE711</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ProlineStudio-CoreWrapper</artifactId>
+            <version>${project.version}</version>
+            <type>nbm</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>PM-MascotParser</artifactId>
+            <version>0.0.1</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -5,9 +5,9 @@
 package fr.proline.studio.action;
 
 import static fr.proline.studio.action.Bundle.*;
-import fr.proline.studio.dbs.ProlineDbManagment;
 import fr.proline.repository.DatabaseConnector;
 import fr.proline.repository.ProlineRepository;
+import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -69,7 +69,7 @@ public final class InitProlineRepositoryAction implements ActionListener {
         
         try {                
             DatabaseConnector udsConn = new DatabaseConnector(getFilePropertiesMap(udsDBPropFile));
-            ProlineDbManagment.initProlineDbManagment(udsConn);
+            ProlineDBManagement.initProlineDBManagment(udsConn);
             JOptionPane.showMessageDialog(null, initRepositity_success(), initRepositity_title(), JOptionPane.INFORMATION_MESSAGE);
         }catch (IOException ioe){
             String msg = ioe.getMessage();
@@ -82,7 +82,7 @@ public final class InitProlineRepositoryAction implements ActionListener {
         }
         
         try {
-            logger.debug(" Used UDS Database connection = {}", ProlineDbManagment.getProlineDbManagment().getDatabaseConnector(ProlineRepository.Databases.UDS).getConnection().getMetaData().getURL());
+            logger.debug(" Used UDS Database connection = {}", ProlineDBManagement.getProlineDBManagement().getDatabaseConnector(ProlineRepository.Databases.UDS).getConnection().getMetaData().getURL());
         } catch (Exception ex) {
             String msg = ex.getMessage();
             JOptionPane.showMessageDialog(null, initRepositity_error(msg), initRepositity_title(), JOptionPane.ERROR_MESSAGE);

@@ -2,34 +2,32 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.proline.studio;
+package fr.proline.studio.repositorymgr;
 
 import fr.proline.repository.DatabaseConnector;
-import fr.proline.studio.dbs.ProlineDbManagment;
-import java.io.IOException;
 import org.openide.util.Exceptions;
 
 /**
  *
  * @author VD225637
  */
-public class ProlineDbManagmentUtil {
+public class ProlineDBManagementUtil {
     protected final static String DB_CONFIG_PROP="/dbs_test_connection.properties";
     
-    public static ProlineDbManagment getOrInitDbManagment()  {        
+    public static ProlineDBManagement getOrInitDbManagment()  {        
         try {
-             ProlineDbManagment.getProlineDbManagment();
+             ProlineDBManagement.getProlineDBManagement();
         } catch(UnsupportedOperationException uoe){
             try {
                 //Should be initialized                
                 DatabaseConnector udsC = new DatabaseConnector(DB_CONFIG_PROP);
-                ProlineDbManagment.initProlineDbManagment(udsC);
+                ProlineDBManagement.initProlineDBManagment(udsC);
 
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);                  
                 return null;
             }        
         }
-        return ProlineDbManagment.getProlineDbManagment();
+        return ProlineDBManagement.getProlineDBManagement();
     }
 }

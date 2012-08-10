@@ -112,6 +112,7 @@
         <module>ProlineStudio-IDFImport</module>
     <module>ProlineStudio-RS2RSM</module>
     <module>ProlineStudio-RepositoryMgr</module>
+    <module>ProlineStudio-CoreWrapper</module>
   </modules>
   
   <dependencyManagement>

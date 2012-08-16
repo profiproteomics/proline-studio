@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-nbjunit</artifactId>
-            <version>SNAPSHOT</version>
+            <version>${netbeans.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- To use Jelly Tools in your functional tests, add or replace with:
@@ -51,6 +51,26 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-Commons</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org-openide-util</artifactId>
+                    <groupId>org.netbeans.api</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org-openide-awt</artifactId>
+                    <groupId>org.netbeans.api</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-awt</artifactId>
+            <version>${netbeans.version}</version>
         </dependency>
     </dependencies>
 

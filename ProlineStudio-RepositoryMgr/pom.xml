@@ -44,13 +44,13 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-api-annotations-common</artifactId>
-            <version>RELEASE711</version>
+            <version>${netbeans.version}</version>
             <type>nbm</type>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util</artifactId>
-            <version>RELEASE711</version>
+            <version>${netbeans.version}</version>
             <type>nbm</type>
         </dependency>
        <dependency>
@@ -74,7 +74,7 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-nbjunit</artifactId>
-            <version>SNAPSHOT</version>
+            <version>${netbeans.version}</version>
             <scope>test</scope>
         </dependency>        
     </dependencies>

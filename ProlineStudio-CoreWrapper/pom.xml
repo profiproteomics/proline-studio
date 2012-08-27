@@ -42,6 +42,21 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>PM-MascotParser</artifactId>
+            <version>0.0.1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>dbunit</artifactId>
+                    <groupId>org.dbunit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>junit</artifactId>
+                    <groupId>junit</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>Proline-DAL</artifactId>
             <version>0.0.2-SNAPSHOT</version>
         </dependency>
@@ -77,7 +92,27 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>fr.proline.core.*</publicPackage>
+                        <publicPackage>fr.proline.module</publicPackage>
+                        <publicPackage>fr.proline.module.parser.mascot</publicPackage>
                         <publicPackage>fr.proline.repository</publicPackage>
+                        <publicPackage>javax.annotation</publicPackage>
+                        <publicPackage>javax.annotation.meta</publicPackage>
+                        <publicPackage>javax.persistence.*</publicPackage>
+                        <publicPackage>javax.sql</publicPackage>
+                        <publicPackage>javax.transaction</publicPackage>
+                        <publicPackage>javax.transaction.xa</publicPackage>
+                        <publicPackage>javax.xml.parsers</publicPackage>
+                        <publicPackage>javax.xml.transform.*</publicPackage>
+                        <publicPackage>org.apache.commons.lang3</publicPackage>
+                        <publicPackage>org.xml.sax</publicPackage>
+                        <publicPackage>org.xml.sax.ext</publicPackage>
+                        <publicPackage>org.xml.sax.helpers</publicPackage>
+                        <publicPackage>scala</publicPackage>
+                        <publicPackage>scala.collection</publicPackage>
+                        <publicPackage>scala.collection.generic</publicPackage>
+                        <publicPackage>scala.collection.immutable</publicPackage>
+                        <publicPackage>scala.collection.interfaces</publicPackage>
+                        <publicPackage>scala.collection.mutable</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

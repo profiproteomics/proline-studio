@@ -55,21 +55,7 @@
             <artifactId>org-openide-awt</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>PM-MascotParser</artifactId>
-            <version>0.0.1</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>dbunit</artifactId>
-                    <groupId>org.dbunit</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>junit</artifactId>
-                    <groupId>junit</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+        
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-windows</artifactId>
@@ -109,6 +95,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>13.0-rc1</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ProlineStudio-CoreWrapper</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

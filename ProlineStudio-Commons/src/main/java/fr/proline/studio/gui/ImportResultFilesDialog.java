@@ -186,8 +186,8 @@ public class ImportResultFilesDialog extends javax.swing.JDialog {
                 .addGap(29, 29, 29)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(projectIdTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(projectIdTF, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(projectIdLabel)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -213,11 +213,11 @@ public class ImportResultFilesDialog extends javax.swing.JDialog {
 
     private void OKBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OKBtnActionPerformed
       propertiesValue = new HashMap<String, Object>();
-      if(Strings.isNullOrEmpty(projectIdTF.getText()) || StringUtils.isNumeric(projectIdTF.getText()) ){
+      if(Strings.isNullOrEmpty(projectIdTF.getText()) || (!StringUtils.isNumeric(projectIdTF.getText())) ){
           JOptionPane.showMessageDialog(this, NbBundle.getMessage(ImportResultFilesDialog.class, "ImportResultFilesDialog.error.title"), NbBundle.getMessage(ImportResultFilesDialog.class, "ImportResultFilesDialog.require.err.msg", projectIdLabel.getText()),JOptionPane.ERROR_MESSAGE);
           return;
       }
-      if(Strings.isNullOrEmpty(instrumIdTF.getText()) || StringUtils.isNumeric(instrumIdTF.getText()) ){
+      if(Strings.isNullOrEmpty(instrumIdTF.getText()) || (!StringUtils.isNumeric(instrumIdTF.getText())) ){
           JOptionPane.showMessageDialog(this, NbBundle.getMessage(ImportResultFilesDialog.class, "ImportResultFilesDialog.error.title"), NbBundle.getMessage(ImportResultFilesDialog.class, "ImportResultFilesDialog.require.err.msg", instrumIdLabel.getText()),JOptionPane.ERROR_MESSAGE);
           return;
       }    
@@ -231,6 +231,9 @@ public class ImportResultFilesDialog extends javax.swing.JDialog {
             
       propertiesValue.put(ImportResultFile.IMPORT_RF_PROJECT_ID, Integer.parseInt(projectIdTF.getText()));
       propertiesValue.put(ImportResultFile.IMPORT_RF_INSTRUMNET_ID, Integer.parseInt(instrumIdTF.getText()));           
+      
+      setVisible(false);
+      
     }//GEN-LAST:event_OKBtnActionPerformed
 
     public Map<String, Object> getResultFileProperties(){

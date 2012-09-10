@@ -131,7 +131,7 @@
       <module>ProlineStudio-Commons</module>
       <module>ProlineStudio-DAM</module>
       <module>ProlineStudio-RSExplorer</module>
-      <module>ProlineStudio-RSMExplorer</module>
+      <module>ProlineStudio-ResultExplorer</module>
       <module>ProlineStudio-PJExplorer</module>
       <module>ProlineStudio-IDFImport</module>
       <module>ProlineStudio-RS2RSM</module>

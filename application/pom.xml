@@ -16,7 +16,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.run.params.ide/>
-        <netbeans.run.params>${netbeans.run.params.ide}</netbeans.run.params>
+        <netbeans.run.params>${netbeans.run.params.ide}</netbeans.run.params> <!-- -J-Dnetbeans.preresolve.classes=true -->
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
     </properties>
 
@@ -71,6 +71,11 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-awt</artifactId>
             <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ProlineStudio-ResultExplorer</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

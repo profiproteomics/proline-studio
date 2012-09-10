@@ -40,7 +40,7 @@
             <artifactId>org-netbeans-api-annotations-common</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>PM-MascotParser</artifactId>
             <version>0.0.1</version>
@@ -54,7 +54,7 @@
                     <groupId>junit</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Proline-DAL</artifactId>
@@ -70,6 +70,13 @@
             <artifactId>Proline-OM</artifactId>
             <version>0.0.2-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>fr.proline</groupId>
+            <artifactId>Proline-OM</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+            <type>test-jar</type>
+            <scope>compile</scope>
+        </dependency> <!-- JPM.TODO : to remove when we no longer use ResultSet Generator -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Proline-Databases</artifactId>
@@ -89,8 +96,11 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <version>3.7</version>
                 <extensions>true</extensions>
-                <configuration>
+                 <configuration>
                     <publicPackages>
+                        <!--<publicPackage>javax.transaction</publicPackage>
+                        <publicPackage>javax.transaction.xa</publicPackage>-->
+                        <!--<publicPackage>javax.xml.transform.*</publicPackage>-->
                         <publicPackage>fr.proline.core.*</publicPackage>
                         <publicPackage>fr.proline.module</publicPackage>
                         <publicPackage>fr.proline.module.parser.mascot</publicPackage>
@@ -99,10 +109,8 @@
                         <publicPackage>javax.annotation.meta</publicPackage>
                         <publicPackage>javax.persistence.*</publicPackage>
                         <publicPackage>javax.sql</publicPackage>
-                        <publicPackage>javax.transaction</publicPackage>
                         <publicPackage>javax.transaction.xa</publicPackage>
                         <publicPackage>javax.xml.parsers</publicPackage>
-                        <publicPackage>javax.xml.transform.*</publicPackage>
                         <publicPackage>org.apache.commons.lang3</publicPackage>
                         <publicPackage>org.xml.sax</publicPackage>
                         <publicPackage>org.xml.sax.ext</publicPackage>

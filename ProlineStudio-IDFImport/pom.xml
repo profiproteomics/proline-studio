@@ -42,14 +42,40 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-CoreWrapper</artifactId>
-            <version>${project.version}</version>
-            <type>nbm</type>
+            <artifactId>PM-MascotParser</artifactId>
+            <version>0.0.1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>dbunit</artifactId>
+                    <groupId>org.dbunit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>junit</artifactId>
+                    <groupId>junit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>Proline-OMP</artifactId>
+                    <groupId>fr.proline</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>Proline-DAL</artifactId>
+                    <groupId>fr.proline</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>Proline-OM</artifactId>
+                    <groupId>fr.proline</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>scala-library</artifactId>
+                    <groupId>org.scala-lang</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>PM-MascotParser</artifactId>
-            <version>0.0.1</version>
+            <artifactId>ProlineStudio-CoreWrapper</artifactId>
+            <version>${project.version}</version>
+            <type>nbm</type>
         </dependency>
     </dependencies>
 
@@ -60,6 +86,16 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <version>3.7</version>
                 <extensions>true</extensions>
+                 <configuration>
+                    <publicPackages>
+                        <publicPackage>fr.proline.module.parser.mascot</publicPackage>
+                        <publicPackage>javax.sql</publicPackage>
+                        <publicPackage>javax.xml.parsers</publicPackage>
+                        <publicPackage>org.xml.sax</publicPackage>
+                        <publicPackage>org.xml.sax.ext</publicPackage>
+                        <publicPackage>org.xml.sax.helpers</publicPackage>
+                    </publicPackages>
+                </configuration>
             </plugin>
 
             <plugin>

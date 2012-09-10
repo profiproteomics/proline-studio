@@ -19,6 +19,7 @@ public class ResultSummaryData extends ContainerData {
     
         public ResultSummaryData() {
             dataType = DataTypes.RESULT_SUMMARY;
+            generateTestData();
         }
     
     public void generateTestData() {
@@ -26,6 +27,10 @@ public class ResultSummaryData extends ContainerData {
         ResultSet resultSet = resultSetFakeBuilder.toResultSet();
         ParsimoniousProteinSetInferer ppsi = new ParsimoniousProteinSetInferer();
         resultSummary = ppsi.computeResultSummary(resultSet);
+    }
+    
+    public ResultSummary getResultSummary() {
+        return resultSummary;
     }
     
     /*

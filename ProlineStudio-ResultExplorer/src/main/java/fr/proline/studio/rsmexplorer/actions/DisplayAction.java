@@ -37,11 +37,6 @@ public class DisplayAction extends NodeAction implements Presenter.Popup {
    
 
    @Override
-   public void actionPerformed(ActionEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
-   }
-
-   @Override
    public JMenuItem getPopupPresenter() {
        
        System.out.println("getPopupPresenter");

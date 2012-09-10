@@ -18,6 +18,7 @@ public class ResultSetData extends ContainerData {
     
     public ResultSetData() {
         dataType = DataTypes.RESULT_SET;
+        generateTestData();
     }
     
     public void generateTestData() {

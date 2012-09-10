@@ -4,15 +4,21 @@
  */
 package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.core.om.model.msi.ResultSummary;
+import fr.proline.studio.dam.ContainerData;
+import fr.proline.studio.dam.ResultSummaryData;
+import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMResultSummaryNode;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.SwingUtilities;
 import org.openide.util.NbBundle;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.NodeAction;
+import org.openide.windows.WindowManager;
 
 /**
  *
@@ -33,12 +39,6 @@ public class ProteinGroupsAction extends NodeAction {
       return instance;
    }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-  
-
 
     @Override
     protected void performAction(Node[] nodes) {
@@ -48,14 +48,28 @@ public class ProteinGroupsAction extends NodeAction {
         }
         
         RSMResultSummaryNode node = (RSMResultSummaryNode) nodes[0];
-        //node. //JPM.TODO
+        final ResultSummary rsm = node.getResultSummary();
+        
+
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                DataViewerTopComponent viewer = (DataViewerTopComponent) WindowManager.getDefault().findTopComponent("DataViewerTopComponent");
+                viewer.open();
+                viewer.requestActive();
+
+                viewer.setSelectedResultSummary(rsm);
+            }
+        });
+
+        
     }
 
     @Override
     protected boolean enable(Node[] nodes) {
         
-        System.out.println("ProteinGroupsAction.enable");
-        
+
         // a node must be selected
         boolean actionEnabled = ((nodes != null) && (nodes.length == 1));
         

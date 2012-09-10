@@ -23,7 +23,7 @@ public abstract class ContainerData {
 
         name = String.valueOf(m_cnt++); //JPM.TODO
         
-        generateTestData(); //JPM.TODO
+        
     }
     private static int m_cnt = 0;
     
@@ -40,6 +40,5 @@ public abstract class ContainerData {
     public DataTypes getDataType() {
         return dataType;
     }
-    
-    public abstract void generateTestData();
+
 }

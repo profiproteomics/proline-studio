@@ -14,8 +14,6 @@ public class ContextData extends ContainerData {
         dataType = DataTypes.CONTEXT;
     }
  
-    public void generateTestData() {
-        
-    }
+
     
 }

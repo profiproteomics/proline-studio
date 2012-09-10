@@ -4,6 +4,8 @@
  */
 package fr.proline.studio.rsmexplorer;
 
+import fr.proline.core.om.model.msi.ProteinSet;
+import fr.proline.core.om.model.msi.ResultSummary;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -88,5 +90,15 @@ public final class DataViewerTopComponent extends TopComponent {
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
+    }
+    
+    
+    public void setSelectedResultSummary(ResultSummary rsm) {
+        // Retrieve Protein Groups ( <=> Protein Sets )
+        ProteinSet[] proteinSets = rsm.proteinSets();
+        
+        tabbedPane.setSelectedIndex(0); //JPM.TODO : remove 0 and put reference
+        proteinGroupPanel.getProteinGroupTablePanel().setData(proteinSets);
+        
     }
 }

@@ -4,7 +4,14 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.core.om.model.msi.Protein;
+import fr.proline.core.om.model.msi.ProteinMatch;
+import fr.proline.core.om.model.msi.ProteinSet;
+import javax.swing.table.AbstractTableModel;
+import org.jdesktop.swingx.JXTable;
+import org.openide.explorer.view.OutlineView;
 import org.openide.util.ImageUtilities;
+import scala.Option;
 
 /**
  *
@@ -19,6 +26,10 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel {
         initComponents();
     }
 
+    public void setData(ProteinSet[] proteinSets) {
+        ((ProteinTableModel) proteinGroupTable.getModel()).setData(proteinSets);
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -29,7 +40,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel {
     private void initComponents() {
 
         proteinGroupScrollPane = new javax.swing.JScrollPane();
-        proteinGroupTable = new javax.swing.JTable();
+        proteinGroupTable = new JXTable();
         searchButton = new javax.swing.JButton();
         try {
             searchButton.setIcon(new javax.swing.ImageIcon(ImageUtilities.loadImage ("fr/proline/studio/images/search.png")));
@@ -41,31 +52,10 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel {
 
         proteinGroupScrollPane.setBackground(new java.awt.Color(255, 255, 255));
 
-        proteinGroupTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4", "Title 5", "Title 6", "Title 7", "Title 8"
-            }
-        ));
+        proteinGroupTable.setModel(new ProteinTableModel());
         proteinGroupTable.setMinimumSize(new java.awt.Dimension(120, 220));
         proteinGroupTable.setPreferredSize(new java.awt.Dimension(600, 220));
         proteinGroupScrollPane.setViewportView(proteinGroupTable);
-        proteinGroupTable.getColumnModel().getColumn(0).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.proteinGroupTable.columnModel.title0")); // NOI18N
-        proteinGroupTable.getColumnModel().getColumn(1).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.proteinGroupTable.columnModel.title1")); // NOI18N
-        proteinGroupTable.getColumnModel().getColumn(2).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.proteinGroupTable.columnModel.title2")); // NOI18N
-        proteinGroupTable.getColumnModel().getColumn(3).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.proteinGroupTable.columnModel.title3")); // NOI18N
-        proteinGroupTable.getColumnModel().getColumn(4).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.proteinGroupTable.columnModel.title4")); // NOI18N
-        proteinGroupTable.getColumnModel().getColumn(5).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.proteinGroupTable.columnModel.title5")); // NOI18N
-        proteinGroupTable.getColumnModel().getColumn(6).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.proteinGroupTable.columnModel.title6")); // NOI18N
-        proteinGroupTable.getColumnModel().getColumn(7).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.proteinGroupTable.columnModel.title7")); // NOI18N
 
         searchButton.setText(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.searchButton.text")); // NOI18N
         searchButton.addActionListener(new java.awt.event.ActionListener() {
@@ -114,4 +104,78 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel {
     private javax.swing.JButton searchButton;
     private javax.swing.JTextField searchTextField;
     // End of variables declaration//GEN-END:variables
+
+
+    private static class ProteinTableModel extends AbstractTableModel {
+
+        private static final int COLTYPE_PROTEIN_NAME  = 0;
+        private static final int COLTYPE_PROTEIN_SCORE = 1;
+
+        
+        private static final String[] columnNames = { "Proteins Groups", "Score" };
+        
+        private ProteinSet[] proteinSets = null;
+        
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+        @Override
+        public int getRowCount() {
+            if (proteinSets == null) {
+                return 0;
+            }
+            return proteinSets.length;
+        }
+
+        @Override
+        public String getColumnName(int col) {
+            return columnNames[col];
+        }
+
+        @Override
+        public Object getValueAt(int row, int col) {
+            // Retrieve Protein Group
+            ProteinSet proteinSet = proteinSets[row];
+    
+            switch (col) {
+                case COLTYPE_PROTEIN_NAME:
+                    Option<ProteinMatch> optionProteinMatch = proteinSet.typicalProteinMatch();
+                    ProteinMatch proteinMatch = null;
+                    if ((optionProteinMatch!=null) && (optionProteinMatch.isDefined())) {
+                        proteinMatch = optionProteinMatch.get();
+                    }
+                    if (proteinMatch != null) {
+                        return proteinMatch.accession();
+                    } else {
+                        return "";
+                    }
+                case COLTYPE_PROTEIN_SCORE:
+                    return new Float(proteinSet.score()); //JPM.TODO get rid of the Float creation each time
+            }
+            return null; // should never happen
+        }
+
+        @Override
+        public Class getColumnClass(int col) {
+            switch (col) {
+                case COLTYPE_PROTEIN_NAME:
+                    return String.class;
+                case COLTYPE_PROTEIN_SCORE:
+                    return Float.class;
+            }
+            return null;
+        }
+
+
+        public void setData(ProteinSet[] proteinSets) {
+            this.proteinSets = proteinSets;
+            fireTableDataChanged();
+        }
+
+}
+    
+
+
 }

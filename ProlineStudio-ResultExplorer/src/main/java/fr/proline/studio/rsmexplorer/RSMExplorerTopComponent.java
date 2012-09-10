@@ -7,7 +7,13 @@ package fr.proline.studio.rsmexplorer;
 import fr.proline.studio.dam.ContextData;
 import fr.proline.studio.gui.SearchPanel;
 import fr.proline.studio.rsmexplorer.node.RSMChildFactory;
+import fr.proline.studio.rsmexplorer.node.RSMResultSummaryNode;
 import fr.proline.studio.rsmexplorer.node.RSMTreeParentNode;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -15,6 +21,7 @@ import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.nodes.Children;
+import org.openide.util.Lookup;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.lookup.Lookups;
@@ -52,7 +59,7 @@ public final class RSMExplorerTopComponent extends TopComponent implements Explo
         // create root node
         ContextData parent = new ContextData();
         mgr.setRootContext(new RSMTreeParentNode(Children.create(RSMChildFactory.getChildFactory(parent), true), Lookups.singleton(parent), null));
-   
+     
         associateLookup(ExplorerUtils.createLookup(mgr, getActionMap())); 
     }
 
@@ -113,4 +120,5 @@ public final class RSMExplorerTopComponent extends TopComponent implements Explo
     public ExplorerManager getExplorerManager() {
         return mgr;
     }
+    
 }

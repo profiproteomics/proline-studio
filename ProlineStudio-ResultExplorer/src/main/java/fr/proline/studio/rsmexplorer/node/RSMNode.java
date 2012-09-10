@@ -29,7 +29,7 @@ public class RSMNode extends AbstractNode {
     }
     private static Action[] actionInstance = null;
     private NodeTypes type;
-    private ContainerData data;
+    protected ContainerData data;
 
     public RSMNode(Children children, Lookup lookup, NodeTypes type, ContainerData data) {
         super(children, lookup);
@@ -39,6 +39,10 @@ public class RSMNode extends AbstractNode {
 
     public NodeTypes getType() {
         return type;
+    }
+    
+    public ContainerData getData() {
+        return data;
     }
 
     public boolean searchChildNodeOfAType(NodeTypes type) {
@@ -75,8 +79,6 @@ public class RSMNode extends AbstractNode {
 
     @Override
     public Action[] getActions(boolean arg0) {
-
-        System.out.println("getActions");
 
         if (actionInstance == null) {
             actionInstance = new Action[]{  DisplayAction.getInstance(),     // Display >

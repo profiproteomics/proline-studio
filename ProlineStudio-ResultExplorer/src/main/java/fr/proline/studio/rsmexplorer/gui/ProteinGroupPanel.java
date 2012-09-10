@@ -17,6 +17,10 @@ public class ProteinGroupPanel extends javax.swing.JPanel {
         initComponents();
     }
 
+    public ProteinGroupTablePanel getProteinGroupTablePanel() {
+        return proteinGroupTablePanel;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -27,11 +31,11 @@ public class ProteinGroupPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         splitPane = new javax.swing.JSplitPane();
-        proteinGroupPanel = new fr.proline.studio.rsmexplorer.gui.ProteinGroupTablePanel();
+        proteinGroupTablePanel = new fr.proline.studio.rsmexplorer.gui.ProteinGroupTablePanel();
         proteinSelectedPanel = new fr.proline.studio.rsmexplorer.gui.ProteinGroupProteinSelectedPanel();
 
         splitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        splitPane.setTopComponent(proteinGroupPanel);
+        splitPane.setTopComponent(proteinGroupTablePanel);
         splitPane.setBottomComponent(proteinSelectedPanel);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -46,7 +50,7 @@ public class ProteinGroupPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private fr.proline.studio.rsmexplorer.gui.ProteinGroupTablePanel proteinGroupPanel;
+    private fr.proline.studio.rsmexplorer.gui.ProteinGroupTablePanel proteinGroupTablePanel;
     private fr.proline.studio.rsmexplorer.gui.ProteinGroupProteinSelectedPanel proteinSelectedPanel;
     private javax.swing.JSplitPane splitPane;
     // End of variables declaration//GEN-END:variables

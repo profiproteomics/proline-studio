@@ -104,6 +104,12 @@
             <artifactId>ProlineStudio-DAM</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.swinglabs.swingx</groupId>
+            <artifactId>swingx-all</artifactId>
+            <version>1.6.3</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>

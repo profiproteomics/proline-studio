@@ -31,10 +31,6 @@ public class ChildParentAction extends NodeAction implements Presenter.Popup {
         return instance;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
     @Override
     public JMenuItem getPopupPresenter() {

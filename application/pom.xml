@@ -16,7 +16,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.run.params.ide/>
-        <netbeans.run.params>${netbeans.run.params.ide}</netbeans.run.params> <!-- -J-Dnetbeans.preresolve.classes=true -->
+        <netbeans.run.params>${netbeans.run.params.ide} -J-Xmx800m</netbeans.run.params> <!-- -J-Dnetbeans.preresolve.classes=true -->
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
     </properties>
 
@@ -76,6 +76,16 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-ResultExplorer</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-pool</artifactId>
+                    <groupId>commons-pool</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-dbcp</artifactId>
+                    <groupId>commons-dbcp</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

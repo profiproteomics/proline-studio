@@ -41,20 +41,15 @@
             <version>${netbeans.version}</version>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ProlineStudio-CoreWrapper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>fr.proline</groupId>
-            <artifactId>Proline-OM</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <artifactId>ProlineStudio-RepositoryMgr</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-CoreWrapper</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-CoreWrapper</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

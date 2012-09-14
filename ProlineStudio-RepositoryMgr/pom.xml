@@ -64,19 +64,13 @@
             <artifactId>ProlineStudio-CoreWrapper</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>persistence-api</artifactId>
-            <version>1.0.2</version>
-            <scope>runtime</scope>
-        </dependency>
         <!-- NbModuleSuite functional in RELEASE70 or later: -->
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-nbjunit</artifactId>
             <version>${netbeans.version}</version>
             <scope>test</scope>
-        </dependency>        
+        </dependency>
     </dependencies>
 
     <build>

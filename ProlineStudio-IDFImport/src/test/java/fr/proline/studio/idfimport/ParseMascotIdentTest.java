@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.proline.studio;
+package fr.proline.studio.idfimport;
 
 import fr.proline.repository.DatabaseConnector;
 import fr.proline.studio.repositorymgr.ProlineDBManagement;

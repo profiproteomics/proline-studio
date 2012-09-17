@@ -35,11 +35,32 @@
     </repositories>
 
     <dependencies>
+        
+        <!-- NetBeans dependencies -->
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-api-annotations-common</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-windows</artifactId>
+            <version>${netbeans.version}</version>            
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        
+        <!-- Other dependencies -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>13.0-rc1</version>
+        </dependency>
+        
+        <!-- Proline dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>PM-MascotParser</artifactId>
@@ -71,12 +92,18 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        
+        <!-- ProlineStudio dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-CoreWrapper</artifactId>
-            <version>${project.version}</version>
-            <type>nbm</type>
+            <version>${project.version}</version>            
         </dependency>
+         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ProlineStudio-RepositoryMgr</artifactId>
+            <version>${project.version}</version>
+         </dependency>        
     </dependencies>
 
     <build>

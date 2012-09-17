@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.proline.studio;
+package fr.proline.studio.idfimport;
 
 import fr.proline.core.om.model.msi.IResultFileProvider;
 import fr.proline.core.om.provider.msi.ProvidersFactory;
@@ -19,7 +19,6 @@ import javax.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.collection.JavaConversions;
-import scala.collection.JavaConversions.*;
 
 /**
  *

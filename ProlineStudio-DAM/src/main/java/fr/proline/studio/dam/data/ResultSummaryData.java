@@ -2,31 +2,34 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package fr.proline.studio.dam;
+package fr.proline.studio.dam.data;
 
+import fr.proline.studio.dam.data.Data;
 import fr.proline.core.algo.msi.inference.ParsimoniousProteinSetInferer;
-import fr.proline.core.om.model.msi.*;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.utils.generator.ResultSetFakeBuilder;
 import scala.Option;
+import scala.collection.immutable.Map;
 
 /**
  *
  * @author JM235353
  */
-public class ResultSummaryData extends ContainerData {
+public class ResultSummaryData extends Data {
  
-        public ResultSummary resultSummary = null;
-    
-        public ResultSummaryData() {
-            dataType = DataTypes.RESULT_SUMMARY;
-            generateTestData();
+    public ResultSummary resultSummary = null;
+
+    public ResultSummaryData(ResultSummary resultSummary) {
+        dataType = DataTypes.RESULT_SUMMARY;
+        this.resultSummary = resultSummary;
+    }
+
+    @Override
+    public String getName() {
+        if (resultSummary != null) {
+            return "Rsm"+resultSummary.getId();
         }
-    
-    public void generateTestData() {
-        ResultSetFakeBuilder resultSetFakeBuilder = new ResultSetFakeBuilder(10, 2, 0, 8, 20);
-        ResultSet resultSet = resultSetFakeBuilder.toResultSet();
-        ParsimoniousProteinSetInferer ppsi = new ParsimoniousProteinSetInferer();
-        resultSummary = ppsi.computeResultSummary(resultSet);
+        return "";
     }
     
     public ResultSummary getResultSummary() {
@@ -36,10 +39,7 @@ public class ResultSummaryData extends ContainerData {
     /*
      JPM.TODO : remove later
            
-        ResultSetFakeBuilder resultSetFakeBuilder = new ResultSetFakeBuilder(10, 2, 0, 8, 20);
-        ResultSet resultSet = resultSetFakeBuilder.toResultSet();
-        ParsimoniousProteinSetInferer ppsi = new ParsimoniousProteinSetInferer();
-	ResultSummary rsm = ppsi.computeResultSummary(resultSet);
+
         
         // Retrieve Protein Groups ( <=> Protein Sets )
         ProteinSet[] proteinSets = rsm.proteinSets();
@@ -91,5 +91,40 @@ public class ResultSummaryData extends ContainerData {
       
     
      */
+    
+        /*public void generateTestData() {
+        ResultSetFakeBuilder resultSetFakeBuilder = new ResultSetFakeBuilder(10, 2, 0, 8, 20);
+        ResultSet resultSet = resultSetFakeBuilder.toResultSet();
+        ParsimoniousProteinSetInferer ppsi = new ParsimoniousProteinSetInferer();
+        resultSummary = ppsi.computeResultSummary(resultSet);
+        
+        // Retrieve Protein Groups ( <=> Protein Sets )
+        ProteinSet[] proteinSets = resultSummary.proteinSets();
+        for (ProteinSet proteinSet : proteinSets) {
+            Option<ProteinMatch[]> optionMatches = proteinSet.proteinMatches();
+            ProteinMatch[] proteinMatches = null;
+            if ((optionMatches!=null) && (optionMatches.isDefined())) {
+                proteinMatches = optionMatches.get();
+            }
+            if (proteinMatches == null) {
+                int[] ids = proteinSet.proteinMatchIds();
+                Map<Object, ProteinMatch> map = resultSet.proteinMatchById();
+                
+                proteinMatches = new ProteinMatch[ids.length];
+                for (int i=0; i<ids.length ; i++) {
+                    ProteinMatch proteinMatch = null;
+                    Option<ProteinMatch> proteinMatchOption = map.get(new Integer(ids[i]));
+                    if ((proteinMatchOption!=null) && (proteinMatchOption.isDefined())) {
+                        proteinMatch = proteinMatchOption.get();
+                    }
+                    proteinMatches[i] = proteinMatch;
+                }
+                
+                proteinSet.proteinMatches_$eq(Option.apply(proteinMatches));
+            }
+        }
+        
+    }*/
+    
     
 }

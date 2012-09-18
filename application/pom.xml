@@ -21,17 +21,14 @@
     </properties>
 
     <dependencies>
+        <!-- NetBeans dependencies -->
         <dependency>
             <groupId>org.netbeans.cluster</groupId>
             <artifactId>platform</artifactId>
             <version>${netbeans.version}</version>
             <type>pom</type>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-branding</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+                
         <!-- NbModuleSuite functional in RELEASE70 or later: -->
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -58,7 +55,12 @@
             <version>${netbeans.version}</version>
         </dependency>
         
-        <!-- ProlineStudio dependencies -->
+        <!-- ProlineStudio dependencies -->        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ProlineStudio-branding</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-IDFImport</artifactId>

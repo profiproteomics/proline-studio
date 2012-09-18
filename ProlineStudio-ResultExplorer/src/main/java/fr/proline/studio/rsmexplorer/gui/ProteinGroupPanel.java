@@ -4,22 +4,34 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
+
 /**
  *
  * @author JM235353
  */
 public class ProteinGroupPanel extends javax.swing.JPanel {
 
+
+    
     /**
      * Creates new form ProteinGroupsPanel
      */
     public ProteinGroupPanel() {
         initComponents();
+        
+        DataViewerTopComponent.addPanel(proteinGroupTablePanel);
+        DataViewerTopComponent.addPanel(proteinSelectedPanel);
+        
     }
 
-    public ProteinGroupTablePanel getProteinGroupTablePanel() {
+    /*public ProteinGroupTablePanel getProteinGroupTablePanel() {
         return proteinGroupTablePanel;
     }
+    public ProteinGroupProteinSetPanel getProteinSetPanel() {
+        return proteinSelectedPanel.getProteinSetPanel();
+    }*/
+    
     
     /**
      * This method is called from within the constructor to initialize the form.

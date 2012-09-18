@@ -4,7 +4,7 @@
  */
 package fr.proline.studio.rsmexplorer.node;
 
-import fr.proline.studio.dam.ContainerData;
+import fr.proline.studio.dam.data.Data;
 import java.awt.Image;
 import org.openide.nodes.Children;
 import org.openide.util.ImageUtilities;
@@ -18,7 +18,7 @@ public class RSMContextNode extends RSMNode {
 
     private static Image icon = ImageUtilities.loadImage("fr/proline/studio/rsmexplorer/images/userContext.png");
 
-    public RSMContextNode(Children children, Lookup lookup, ContainerData data) {
+    public RSMContextNode(Children children, Lookup lookup, Data data) {
         super(children, lookup, NodeTypes.CONTEXT, data);
     }
 

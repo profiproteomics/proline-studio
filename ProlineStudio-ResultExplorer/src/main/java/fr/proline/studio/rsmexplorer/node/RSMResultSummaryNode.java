@@ -4,9 +4,10 @@
  */
 package fr.proline.studio.rsmexplorer.node;
 
-import fr.proline.core.om.model.msi.ResultSummary;
-import fr.proline.studio.dam.ContainerData;
-import fr.proline.studio.dam.ResultSummaryData;
+
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.studio.dam.data.Data;
+import fr.proline.studio.dam.data.ResultSummaryData;
 import java.awt.Image;
 import org.openide.nodes.Children;
 import org.openide.util.ImageUtilities;
@@ -20,7 +21,7 @@ public class RSMResultSummaryNode extends RSMNode {
 
     private static Image icon = ImageUtilities.loadImage("fr/proline/studio/rsmexplorer/images/resultSummary.png");
 
-    public RSMResultSummaryNode(Children children, Lookup lookup, ContainerData data) {
+    public RSMResultSummaryNode(Children children, Lookup lookup, Data data) {
         super(children, lookup, NodeTypes.RESULT_SUMMARY, data);
     }
 

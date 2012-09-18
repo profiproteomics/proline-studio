@@ -4,7 +4,7 @@
  */
 package fr.proline.studio.rsmexplorer;
 
-import fr.proline.studio.dam.ContextData;
+import fr.proline.studio.dam.data.ParentData;
 import fr.proline.studio.gui.SearchPanel;
 import fr.proline.studio.rsmexplorer.node.RSMChildFactory;
 import fr.proline.studio.rsmexplorer.node.RSMResultSummaryNode;
@@ -57,8 +57,8 @@ public final class RSMExplorerTopComponent extends TopComponent implements Explo
         setToolTipText(Bundle.HINT_RSMExplorerTopComponent());
 
         // create root node
-        ContextData parent = new ContextData();
-        mgr.setRootContext(new RSMTreeParentNode(Children.create(RSMChildFactory.getChildFactory(parent), true), Lookups.singleton(parent), null));
+        ParentData parent = new ParentData();  //JPM.TODO
+        mgr.setRootContext(new RSMTreeParentNode(Children.create(new RSMChildFactory(parent), true), Lookups.singleton(parent), null));
      
         associateLookup(ExplorerUtils.createLookup(mgr, getActionMap())); 
     }

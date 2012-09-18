@@ -4,9 +4,10 @@
  */
 package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.core.om.model.msi.ProteinMatch;
+import fr.proline.core.om.model.msi.ResultSet;
 import fr.proline.core.om.model.msi.ResultSummary;
-import fr.proline.studio.dam.ContainerData;
-import fr.proline.studio.dam.ResultSummaryData;
+import fr.proline.studio.dam.*;
 import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMResultSummaryNode;
@@ -42,7 +43,7 @@ public class ProteinGroupsAction extends NodeAction {
 
     @Override
     protected void performAction(Node[] nodes) {
-        if ((nodes == null) || (nodes.length != 1)) {
+        /*if ((nodes == null) || (nodes.length != 1)) {
             // should never happen
             return;
         }
@@ -50,9 +51,7 @@ public class ProteinGroupsAction extends NodeAction {
         RSMResultSummaryNode node = (RSMResultSummaryNode) nodes[0];
         final ResultSummary rsm = node.getResultSummary();
         
-
-        SwingUtilities.invokeLater(new Runnable() {
-
+        DatabaseCallback callback = new DatabaseCallback() {
             @Override
             public void run() {
                 DataViewerTopComponent viewer = (DataViewerTopComponent) WindowManager.getDefault().findTopComponent("DataViewerTopComponent");
@@ -61,8 +60,11 @@ public class ProteinGroupsAction extends NodeAction {
 
                 viewer.setSelectedResultSummary(rsm);
             }
-        });
-
+        };
+        
+        //JPM.TODO : create DatabaseAction which fetch needed data for ResultSummary
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseAction(callback));
+*/ // JPM.TODO
         
     }
 

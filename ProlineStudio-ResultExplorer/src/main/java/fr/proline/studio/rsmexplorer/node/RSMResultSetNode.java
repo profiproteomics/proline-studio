@@ -4,7 +4,7 @@
  */
 package fr.proline.studio.rsmexplorer.node;
 
-import fr.proline.studio.dam.ContainerData;
+import fr.proline.studio.dam.data.Data;
 import java.awt.Image;
 import org.openide.nodes.Children;
 import org.openide.util.ImageUtilities;
@@ -18,7 +18,7 @@ public class RSMResultSetNode extends RSMNode {
 
     private static Image icon = ImageUtilities.loadImage("fr/proline/studio/rsmexplorer/images/resultSet.png");
 
-    public RSMResultSetNode(Children children, Lookup lookup, ContainerData data) {
+    public RSMResultSetNode(Children children, Lookup lookup, Data data) {
         super(children, lookup, NodeTypes.RESULT_SET, data);
     }
 

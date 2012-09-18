@@ -38,10 +38,7 @@ public class DisplayAction extends NodeAction implements Presenter.Popup {
 
    @Override
    public JMenuItem getPopupPresenter() {
-       
-       System.out.println("getPopupPresenter");
 
-       
          if (menu == null) {
              menu = new JMenu(NbBundle.getMessage(DisplayAction.class, "CTL_DisplayAction"));
              proteinMenuItem = new JMenuItem(ProteinGroupsAction.getInstance());

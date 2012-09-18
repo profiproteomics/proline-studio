@@ -4,6 +4,8 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
+
 /**
  *
  * @author JM235353
@@ -15,8 +17,15 @@ public class ProteinGroupProteinSelectedPanel extends javax.swing.JPanel {
      */
     public ProteinGroupProteinSelectedPanel() {
         initComponents();
+        
+        DataViewerTopComponent.addPanel(proteinGroupPeptidePanel);
+        DataViewerTopComponent.addPanel(proteinGroupProteinSetPanel);
     }
 
+    public ProteinGroupProteinSetPanel getProteinSetPanel() {
+        return proteinGroupProteinSetPanel;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

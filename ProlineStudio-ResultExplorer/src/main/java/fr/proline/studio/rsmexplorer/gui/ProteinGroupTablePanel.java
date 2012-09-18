@@ -7,27 +7,40 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.om.model.msi.Protein;
 import fr.proline.core.om.model.msi.ProteinMatch;
 import fr.proline.core.om.model.msi.ProteinSet;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.DatabaseAction;
+import fr.proline.studio.dam.DatabaseCallback;
+import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
+import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import org.jdesktop.swingx.JXTable;
 import org.openide.explorer.view.OutlineView;
 import org.openide.util.ImageUtilities;
+import org.openide.windows.WindowManager;
 import scala.Option;
 
 /**
  *
  * @author JM235353
  */
-public class ProteinGroupTablePanel extends javax.swing.JPanel {
+public class ProteinGroupTablePanel extends javax.swing.JPanel  {
 
     /**
      * Creates new form ProteinGroupsTablePanel
      */
     public ProteinGroupTablePanel() {
         initComponents();
+        
+        proteinGroupTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+
     }
 
     public void setData(ProteinSet[] proteinSets) {
-        ((ProteinTableModel) proteinGroupTable.getModel()).setData(proteinSets);
+        ((ProteinGroupTableModel) proteinGroupTable.getModel()).setData(proteinSets);
     }
     
     /**
@@ -40,7 +53,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel {
     private void initComponents() {
 
         proteinGroupScrollPane = new javax.swing.JScrollPane();
-        proteinGroupTable = new JXTable();
+        proteinGroupTable = new ProteinGroupTable();
         searchButton = new javax.swing.JButton();
         try {
             searchButton.setIcon(new javax.swing.ImageIcon(ImageUtilities.loadImage ("fr/proline/studio/images/search.png")));
@@ -52,7 +65,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel {
 
         proteinGroupScrollPane.setBackground(new java.awt.Color(255, 255, 255));
 
-        proteinGroupTable.setModel(new ProteinTableModel());
+        proteinGroupTable.setModel(new ProteinGroupTableModel());
         proteinGroupTable.setMinimumSize(new java.awt.Dimension(120, 220));
         proteinGroupTable.setPreferredSize(new java.awt.Dimension(600, 220));
         proteinGroupScrollPane.setViewportView(proteinGroupTable);
@@ -105,77 +118,41 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel {
     private javax.swing.JTextField searchTextField;
     // End of variables declaration//GEN-END:variables
 
+    private class ProteinGroupTable extends JXTable  {
+        /** 
+         * Called whenever the value of the selection changes.
+         * @param e the event that characterizes the change.
+         */
 
-    private static class ProteinTableModel extends AbstractTableModel {
-
-        private static final int COLTYPE_PROTEIN_NAME  = 0;
-        private static final int COLTYPE_PROTEIN_SCORE = 1;
-
-        
-        private static final String[] columnNames = { "Proteins Groups", "Score" };
-        
-        private ProteinSet[] proteinSets = null;
-        
         @Override
-        public int getColumnCount() {
-            return columnNames.length;
+        public void valueChanged(ListSelectionEvent e) {
+            
+            super.valueChanged(e);
+             
+            int selectedRow = getSelectedRow();
+            
+            ProteinGroupTableModel tableModel = (ProteinGroupTableModel) getModel();
+            final ProteinSet proteinSet = tableModel.getProteinSet(selectedRow);
+            
+            //remove currently viewed data
+            ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
+            p.setData(null);
+            
+            // prepare callback to view new data
+            DatabaseCallback callback = new DatabaseCallback() {
+                @Override
+                public void run() {
+                    ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
+                    p.setData(proteinSet);
+                }
+            };
+            
+            //JPM.TODO : create DatabaseAction which fetch needed data for ProteinSet
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseAction(callback));
+
         }
-
-        @Override
-        public int getRowCount() {
-            if (proteinSets == null) {
-                return 0;
-            }
-            return proteinSets.length;
-        }
-
-        @Override
-        public String getColumnName(int col) {
-            return columnNames[col];
-        }
-
-        @Override
-        public Object getValueAt(int row, int col) {
-            // Retrieve Protein Group
-            ProteinSet proteinSet = proteinSets[row];
+    }
     
-            switch (col) {
-                case COLTYPE_PROTEIN_NAME:
-                    Option<ProteinMatch> optionProteinMatch = proteinSet.typicalProteinMatch();
-                    ProteinMatch proteinMatch = null;
-                    if ((optionProteinMatch!=null) && (optionProteinMatch.isDefined())) {
-                        proteinMatch = optionProteinMatch.get();
-                    }
-                    if (proteinMatch != null) {
-                        return proteinMatch.accession();
-                    } else {
-                        return "";
-                    }
-                case COLTYPE_PROTEIN_SCORE:
-                    return new Float(proteinSet.score()); //JPM.TODO get rid of the Float creation each time
-            }
-            return null; // should never happen
-        }
-
-        @Override
-        public Class getColumnClass(int col) {
-            switch (col) {
-                case COLTYPE_PROTEIN_NAME:
-                    return String.class;
-                case COLTYPE_PROTEIN_SCORE:
-                    return Float.class;
-            }
-            return null;
-        }
-
-
-        public void setData(ProteinSet[] proteinSets) {
-            this.proteinSets = proteinSets;
-            fireTableDataChanged();
-        }
-
-}
+   
     
-
-
 }

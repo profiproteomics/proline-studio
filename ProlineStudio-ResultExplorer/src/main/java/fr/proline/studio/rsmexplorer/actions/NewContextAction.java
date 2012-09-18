@@ -4,7 +4,7 @@
  */
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.studio.dam.ContextData;
+import fr.proline.studio.dam.data.IdentificationData;
 import fr.proline.studio.rsmexplorer.node.RSMContextNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import java.awt.Component;
@@ -60,7 +60,7 @@ public class NewContextAction extends NodeAction {
                             "");
                     if ((name != null) && (name.length() > 0)) {
 
-                        ContextData data = new ContextData();
+                        IdentificationData data = new IdentificationData(null);
                         data.setName(name);
                         RSMContextNode contextNode = new RSMContextNode(Children.LEAF, Lookups.singleton(data), data);
                         node.getChildren().add(new Node[]{contextNode});

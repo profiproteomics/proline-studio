@@ -4,6 +4,14 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.core.om.model.msi.ProteinMatch;
+import fr.proline.core.om.model.msi.ProteinSet;
+import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
+import org.jdesktop.swingx.JXTable;
+import java.util.LinkedList;
+import scala.Option;
+
 /**
  *
  * @author JM235353
@@ -17,6 +25,80 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
         initComponents();
     }
 
+    public void setData(ProteinSet proteinSet) {
+        
+        if (proteinSet == null) {
+            clearData();
+            return;
+        }
+        
+        // retrieve typical protein
+        Option<ProteinMatch> optionProteinMatch = proteinSet.typicalProteinMatch();
+        ProteinMatch typicalProteinMatch = null;
+        if ((optionProteinMatch!=null) && (optionProteinMatch.isDefined())) {
+            typicalProteinMatch = optionProteinMatch.get();
+        }
+        
+        if (typicalProteinMatch == null) {
+            // should never happen
+            clearData();
+            return;
+        } else {
+            // look for proteins in same set and subset
+            
+            int nbPeptides = typicalProteinMatch.peptideMatchesCount();
+            
+            Option<ProteinMatch[]> optionProteinMatches =  proteinSet.proteinMatches();
+            ProteinMatch[] proteinMatches = null;
+            if ((optionProteinMatches!=null) && (optionProteinMatches.isDefined())) {
+                proteinMatches = optionProteinMatches.get();
+            }
+            if (proteinMatches == null) {
+                // should never happen
+                clearData();
+                return;
+            }
+                     
+            
+            LinkedList<ProteinMatch> sameSet = new LinkedList<ProteinMatch>();
+            sameSet.add(typicalProteinMatch); // put typical protein match first.
+            
+            LinkedList<ProteinMatch> subSet = new LinkedList<ProteinMatch>();
+            
+            for (ProteinMatch proteinCur : proteinMatches) {
+                if (proteinCur == typicalProteinMatch) {
+                    // already put in the list
+                    continue;
+                }
+                int nbPeptidesCur = proteinCur.peptideMatchesCount();
+                if (nbPeptides == nbPeptidesCur) {
+                    // ProteinMatch is in Same Set
+                    sameSet.add(proteinCur);
+                } else {
+                    // ProteinMatch is in Sub Set
+                    subSet.add(proteinCur);
+                }
+            }
+            
+            ProteinMatch[] sameSetArray = new ProteinMatch[sameSet.size()];
+            sameSet.toArray(sameSetArray);
+            ((ProteinTableModel)sameSetTable.getModel()).setData(sameSetArray);
+            
+            ProteinMatch[] subSetArray = new ProteinMatch[subSet.size()];
+            subSet.toArray(subSetArray);
+            ((ProteinTableModel)subSetTable.getModel()).setData(subSetArray);
+            
+        }
+        
+        
+    }
+    
+    public void clearData() {
+        ((ProteinTableModel) sameSetTable.getModel()).setData(null);
+        ((ProteinTableModel) subSetTable.getModel()).setData(null);
+    }
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -29,38 +111,18 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
         proteinNameTextField = new javax.swing.JTextField();
         proteinSetTabbedPane = new javax.swing.JTabbedPane();
         sameSetScrollPane = new javax.swing.JScrollPane();
-        sameSetTable = new javax.swing.JTable();
+        sameSetTable = new JXTable();
         subSetScrollPane = new javax.swing.JScrollPane();
-        subSetTable = new javax.swing.JTable();
+        subSetTable = new JXTable();
 
         proteinNameTextField.setText(org.openide.util.NbBundle.getMessage(ProteinGroupProteinSetPanel.class, "ProteinGroupProteinSetPanel.proteinNameTextField.text")); // NOI18N
 
-        sameSetTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
+        sameSetTable.setModel(new ProteinTableModel());
         sameSetScrollPane.setViewportView(sameSetTable);
 
         proteinSetTabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupProteinSetPanel.class, "ProteinGroupProteinSetPanel.sameSetScrollPane.TabConstraints.tabTitle"), sameSetScrollPane); // NOI18N
 
-        subSetTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
+        subSetTable.setModel(new ProteinTableModel());
         subSetScrollPane.setViewportView(subSetTable);
 
         proteinSetTabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupProteinSetPanel.class, "ProteinGroupProteinSetPanel.subSetScrollPane.TabConstraints.tabTitle"), subSetScrollPane); // NOI18N

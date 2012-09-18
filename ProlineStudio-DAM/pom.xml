@@ -66,6 +66,8 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>fr.proline.studio.dam</publicPackage>
+                        <publicPackage>fr.proline.studio.dam.actions</publicPackage>
+                        <publicPackage>fr.proline.studio.dam.data</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

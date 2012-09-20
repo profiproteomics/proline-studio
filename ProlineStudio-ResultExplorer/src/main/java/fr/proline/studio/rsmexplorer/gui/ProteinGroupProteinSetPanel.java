@@ -1,16 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.om.model.msi.ProteinMatch;
-import fr.proline.core.om.model.msi.ProteinSet;
+
+import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.core.orm.msi.ProteinSet;
+import fr.proline.studio.dam.ORMDataManager;
+import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import org.jdesktop.swingx.JXTable;
-import java.util.LinkedList;
-import scala.Option;
 
 /**
  *
@@ -32,68 +29,33 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
             return;
         }
         
-        // retrieve typical protein
-        Option<ProteinMatch> optionProteinMatch = proteinSet.typicalProteinMatch();
-        ProteinMatch typicalProteinMatch = null;
-        if ((optionProteinMatch!=null) && (optionProteinMatch.isDefined())) {
-            typicalProteinMatch = optionProteinMatch.get();
-        }
+        ORMDataManager memMgr = ORMDataManager.instance();
         
-        if (typicalProteinMatch == null) {
-            // should never happen
-            clearData();
-            return;
-        } else {
-            // look for proteins in same set and subset
-            
-            int nbPeptides = typicalProteinMatch.peptideMatchesCount();
-            
-            Option<ProteinMatch[]> optionProteinMatches =  proteinSet.proteinMatches();
-            ProteinMatch[] proteinMatches = null;
-            if ((optionProteinMatches!=null) && (optionProteinMatches.isDefined())) {
-                proteinMatches = optionProteinMatches.get();
-            }
-            if (proteinMatches == null) {
-                // should never happen
-                clearData();
-                return;
-            }
-                     
-            
-            LinkedList<ProteinMatch> sameSet = new LinkedList<ProteinMatch>();
-            sameSet.add(typicalProteinMatch); // put typical protein match first.
-            
-            LinkedList<ProteinMatch> subSet = new LinkedList<ProteinMatch>();
-            
-            for (ProteinMatch proteinCur : proteinMatches) {
-                if (proteinCur == typicalProteinMatch) {
-                    // already put in the list
-                    continue;
-                }
-                int nbPeptidesCur = proteinCur.peptideMatchesCount();
-                if (nbPeptides == nbPeptidesCur) {
-                    // ProteinMatch is in Same Set
-                    sameSet.add(proteinCur);
-                } else {
-                    // ProteinMatch is in Sub Set
-                    subSet.add(proteinCur);
-                }
-            }
-            
-            ProteinMatch[] sameSetArray = new ProteinMatch[sameSet.size()];
-            sameSet.toArray(sameSetArray);
-            ((ProteinTableModel)sameSetTable.getModel()).setData(sameSetArray);
-            
-            ProteinMatch[] subSetArray = new ProteinMatch[subSet.size()];
-            subSet.toArray(subSetArray);
-            ((ProteinTableModel)subSetTable.getModel()).setData(subSetArray);
-            
-        }
+        // retrieve sameset and subset
+        ProteinMatch[] sameSetArray = (ProteinMatch[]) memMgr.get(ProteinSet.class, proteinSet.getId(), "ProteinMatch[].sameset");
+        ProteinMatch[] subSetArray =   (ProteinMatch[]) memMgr.get(ProteinSet.class, proteinSet.getId(), "ProteinMatch[].subset");
         
+        // retrieve Typical Protein Match
+        ProteinMatch typicalProtein = (ProteinMatch) memMgr.get(ProteinSet.class, proteinSet.getId(), "ProteinMatch");
+        
+        // Modify Panel Border Title
+        ((ProteinGroupProteinSelectedPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(typicalProtein.getAccession());
+        
+        // Modify protein description
+        proteinNameTextField.setText(typicalProtein.getDescription() );
+        
+        
+        // Modify Data in SameSet and SubSet Tables
+        ((ProteinTableModel) sameSetTable.getModel()).setData(sameSetArray);
+        ((ProteinTableModel)  subSetTable.getModel()).setData(subSetArray);
+        
+
         
     }
     
     public void clearData() {
+        proteinNameTextField.setText("");
+        ((ProteinGroupProteinSelectedPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(null);
         ((ProteinTableModel) sameSetTable.getModel()).setData(null);
         ((ProteinTableModel) subSetTable.getModel()).setData(null);
     }

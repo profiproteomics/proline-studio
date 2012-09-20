@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
@@ -25,13 +21,6 @@ public class ProteinGroupPanel extends javax.swing.JPanel {
         
     }
 
-    /*public ProteinGroupTablePanel getProteinGroupTablePanel() {
-        return proteinGroupTablePanel;
-    }
-    public ProteinGroupProteinSetPanel getProteinSetPanel() {
-        return proteinSelectedPanel.getProteinSetPanel();
-    }*/
-    
     
     /**
      * This method is called from within the constructor to initialize the form.

@@ -4,9 +4,9 @@
  */
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.om.model.msi.ProteinMatch;
-import fr.proline.core.om.model.msi.ProteinSet;
-import scala.Option;
+import fr.proline.core.orm.msi.ProteinMatch;
+
+
 
 /**
  *
@@ -33,9 +33,9 @@ public class ProteinTableModel extends AbstractProteinTableModel {
     
             switch (col) {
                 case COLTYPE_PROTEIN_NAME:
-                    return proteinMatch.accession();
+                    return proteinMatch.getAccession();
                 case COLTYPE_PROTEIN_SCORE:
-                    return proteinMatch.score();
+                    return proteinMatch.getScore();
             }
             return null; // should never happen
         }

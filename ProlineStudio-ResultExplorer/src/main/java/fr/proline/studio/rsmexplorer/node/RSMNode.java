@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.node;
 
-import fr.proline.studio.dam.data.Data;
+import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.rsmexplorer.actions.ChildParentAction;
 import fr.proline.studio.rsmexplorer.actions.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.DisplayAction;
@@ -29,9 +25,9 @@ public class RSMNode extends AbstractNode {
     }
     private static Action[] actionInstance = null;
     private NodeTypes type;
-    protected Data data;
+    protected AbstractData data;
 
-    public RSMNode(Children children, Lookup lookup, NodeTypes type, Data data) {
+    public RSMNode(Children children, Lookup lookup, NodeTypes type, AbstractData data) {
         super(children, lookup);
         this.type = type;
         this.data = data;
@@ -41,7 +37,7 @@ public class RSMNode extends AbstractNode {
         return type;
     }
     
-    public Data getData() {
+    public AbstractData getData() {
         return data;
     }
 
@@ -73,7 +69,7 @@ public class RSMNode extends AbstractNode {
 
     @Override
     public void setName(String name) {
-        data.setName(name);
+        //data.setName(name); //JPM.TODO
         super.setName(name);
     }
 
@@ -88,7 +84,6 @@ public class RSMNode extends AbstractNode {
                                             DeleteAction.getInstance()};     // Delete...
 
         }
-        //updateEnabledContextualActions();
 
         return actionInstance;
     }

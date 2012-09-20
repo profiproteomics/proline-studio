@@ -4,9 +4,11 @@
  */
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.om.model.msi.ProteinMatch;
-import fr.proline.core.om.model.msi.ProteinSet;
-import scala.Option;
+import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.core.orm.msi.ProteinSet;
+import fr.proline.studio.dam.ORMDataManager;
+
+
 
 /**
  *
@@ -34,40 +36,17 @@ public class ProteinGroupTableModel extends AbstractProteinTableModel {
     
             switch (col) {
                 case COLTYPE_PROTEIN_NAME:
-                    Option<ProteinMatch> optionProteinMatch = proteinSet.typicalProteinMatch();
-                    ProteinMatch proteinMatch = null;
-                    if ((optionProteinMatch!=null) && (optionProteinMatch.isDefined())) {
-                        proteinMatch = optionProteinMatch.get();
-                    }
-                    if (proteinMatch == null) {
-                        Option<ProteinMatch[]> optionProteinMatches =  proteinSet.proteinMatches();
-                        ProteinMatch[] proteinMatches = null;
-                        if ((optionProteinMatches!=null) && (optionProteinMatches.isDefined())) {
-                            proteinMatches = optionProteinMatches.get();
-                        }
-                        
-                        float bestScore = -1;
-                        for (ProteinMatch proteinCur : proteinMatches) {
-                            float scoreCur = proteinCur.score();
-                            if (scoreCur>bestScore) {
-                                bestScore = scoreCur;
-                                proteinMatch = proteinCur;
-                            }
-                        }
-                        
-                        if (proteinMatch != null) {
-                            proteinSet.typicalProteinMatch_$eq(Option.apply(proteinMatch));
-                            proteinSet.typicalProteinMatchId_$eq(proteinMatch.id());
-                        }
-                        
-                    }
+                    
+                    // Retrieve typical Protein Match
+                    ProteinMatch proteinMatch = (ProteinMatch) ORMDataManager.instance().get(ProteinSet.class, proteinSet.getId(), "ProteinMatch");
+
                     if (proteinMatch != null) {
-                        return proteinMatch.accession();
+                        return proteinMatch.getAccession();
                     } else {
                         return "";
                     }
                 case COLTYPE_PROTEIN_SCORE:
-                    return new Float(proteinSet.score()); //JPM.TODO get rid of the Float creation each time
+                    return new Float(proteinSet.getScore()); //JPM.TODO get rid of the Float creation each time
             }
             return null; // should never happen
         }

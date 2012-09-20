@@ -1,10 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
+import javax.swing.border.TitledBorder;
 
 /**
  *
@@ -22,9 +19,23 @@ public class ProteinGroupProteinSelectedPanel extends javax.swing.JPanel {
         DataViewerTopComponent.addPanel(proteinGroupProteinSetPanel);
     }
 
-    public ProteinGroupProteinSetPanel getProteinSetPanel() {
-        return proteinGroupProteinSetPanel;
+    public void updateTitle(String title) {
+        if (title == null) {
+            // set default title
+            title = org.openide.util.NbBundle.getMessage(ProteinGroupProteinSelectedPanel.class, "ProteinGroupProteinSelectedPanel.border.title");
+        }
+        
+        // Modify title border
+        TitledBorder titledBorder = (javax.swing.border.TitledBorder) getBorder();
+        titledBorder.setTitle(title);
+        repaint();
+        
+        
     }
+    
+    /*public ProteinGroupProteinSetPanel getProteinSetPanel() {
+        return proteinGroupProteinSetPanel;
+    }*/
     
     /**
      * This method is called from within the constructor to initialize the form.

@@ -1,15 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.node;
 
-import fr.proline.studio.dam.data.Data;
-import fr.proline.studio.dam.data.IdentificationData;
-import fr.proline.studio.dam.data.ResultSetData;
-import fr.proline.studio.dam.data.ResultSummaryData;
-import java.util.Arrays;
-import java.util.HashMap;
+import fr.proline.studio.dam.data.AbstractData;
 import java.util.List;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
@@ -17,31 +8,21 @@ import org.openide.nodes.Node;
 import org.openide.util.lookup.Lookups;
 
 /**
- *
+ * Class used to create children of a note asynchronously
  * @author JM235353
  */
-public class RSMChildFactory extends ChildFactory<Data> {
+public class RSMChildFactory extends ChildFactory<AbstractData> {
 
-    private Data m_data;
-    
-    /*private static HashMap<ContainerData, RSMChildFactory> childFactoriesMap = new HashMap<ContainerData, RSMChildFactory>();
+    private AbstractData m_data;
+   
 
-    public static RSMChildFactory getChildFactory(ContainerData key) {
-        RSMChildFactory childFactory = childFactoriesMap.get(key);
-        if (childFactory == null) {
-            childFactory = new RSMChildFactory();
-            childFactoriesMap.put(key, childFactory);
-        }
-        return childFactory;
-    }*/
-
-    public RSMChildFactory(Data data) {
+    public RSMChildFactory(AbstractData data) {
         m_data = data;
     }
     
 
     @Override
-    protected boolean createKeys(List<Data> list) {
+    protected boolean createKeys(List<AbstractData> list) {
         
         m_data.load(list);
         
@@ -50,24 +31,35 @@ public class RSMChildFactory extends ChildFactory<Data> {
     }
 
     @Override
-    protected Node createNodeForKey(Data key) {
+    protected Node createNodeForKey(AbstractData key) {
 
+        // result Node
         Node result = null;
 
-        Data.DataTypes type = key.getDataType();
+        // Children of the Node
+        Children children;
+        if (key.hasChildren()) {
+            // there are children in the database which will be loaded
+            children = Children.create(new RSMChildFactory(key), true);
+        } else {
+            // no child in the database
+            children = Children.LEAF;
+        }
+        
+        // Creation of the correct Node type
+        AbstractData.DataTypes type = key.getDataType();
         switch (type) {
             case PROJECT:
-                result = new RSMProjectNode(Children.create(new RSMChildFactory(key), true), Lookups.singleton(key), key);
+                result = new RSMProjectNode(children, Lookups.singleton(key), key);
                 break;
             case RESULT_SET:
-                result = new RSMResultSetNode(Children.LEAF, Lookups.singleton(key), key);
-
+                result = new RSMResultSetNode(children, Lookups.singleton(key), key);
                 break;
             case RESULT_SUMMARY:
-                result = new RSMResultSummaryNode(Children.create(new RSMChildFactory(key), true), Lookups.singleton(key), key);
+                result = new RSMResultSummaryNode(children, Lookups.singleton(key), key);
                 break;
             case CONTEXT:
-                result = new RSMContextNode(Children.create(new RSMChildFactory(key), true), Lookups.singleton(key), key);
+                result = new RSMContextNode(children, Lookups.singleton(key), key);
                 break;
         }
 

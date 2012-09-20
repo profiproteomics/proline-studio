@@ -4,53 +4,28 @@
  */
 package fr.proline.studio.dam.data;
 
-
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DatabaseCallback;
-import fr.proline.studio.dam.actions.DatabaseLoadProjectAction;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseLoadProjectTask;
 import java.util.List;
-import java.util.concurrent.Semaphore;
-
 
 /**
- *
+ * User Data for Parent Node of all other Nodes in Result Explorer
  * @author JM235353
  */
-public class ParentData extends Data{
-    
+public class ParentData extends AbstractData {
+
     public ParentData() {
         dataType = DataTypes.MAIN;
     }
-    
+
     @Override
-        public void load(List<Data> list) {
-        
-        
-        final Semaphore waitDataSemaphore = new Semaphore(0, true);
+    public void loadImpl(AbstractDatabaseCallback callback, List<AbstractData> list) {
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadProjectTask(callback, AccessDatabaseThread.getProjectIdTMP(), list));  //JPM.TODO
 
-
-        
-         DatabaseCallback callback = new DatabaseCallback() {
-            @Override
-            public void run() {
-                // data is ready
-                waitDataSemaphore.release();
-            }
-        };
-        
-        //JPM.TODO : create DatabaseAction which fetch needed data for ResultSummary
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadProjectAction(callback, AccessDatabaseThread.getProjectIdTMP(), list));  //JPM.TODO
-
-        // Wait for the end of task
-        try {
-            waitDataSemaphore.acquire();
-        } catch (InterruptedException e) {
-            // should not happen
-            //JPM.TODO
-            
-        }
-        // now data is loaded
-        
-        
+    }
+    
+    public String getName() {
+        return "";
     }
 }

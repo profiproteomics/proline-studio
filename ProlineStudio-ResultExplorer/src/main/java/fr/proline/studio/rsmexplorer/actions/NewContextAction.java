@@ -61,7 +61,7 @@ public class NewContextAction extends NodeAction {
                     if ((name != null) && (name.length() > 0)) {
 
                         IdentificationData data = new IdentificationData(null);
-                        data.setName(name);
+                        //data.setName(name);  //JPM.TODO
                         RSMContextNode contextNode = new RSMContextNode(Children.LEAF, Lookups.singleton(data), data);
                         node.getChildren().add(new Node[]{contextNode});
                     }

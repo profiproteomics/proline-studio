@@ -4,8 +4,9 @@
  */
 package fr.proline.studio.dam;
 
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.repository.DatabaseConnector;
-import fr.proline.studio.dam.actions.DatabaseConnectionAction;
+import fr.proline.studio.dam.tasks.DatabaseConnectionTask;
 import java.util.HashMap;
 import java.util.LinkedList;
 import javax.swing.SwingUtilities;
@@ -21,10 +22,10 @@ public class AccessDatabaseThread extends Thread {
     private static AccessDatabaseThread instance;
 
     
-    private static LinkedList<DatabaseAction> actions;
+    private static LinkedList<AbstractDatabaseTask> actions;
     
     private AccessDatabaseThread() {
-        actions = new LinkedList<DatabaseAction>();
+        actions = new LinkedList<AbstractDatabaseTask>();
         
         //JPM.TODO : remove it code for test
         // UDS DB properties
@@ -34,7 +35,7 @@ public class AccessDatabaseThread extends Thread {
         databaseProperties.put(DatabaseConnector.PROPERTY_DRIVERCLASSNAME, "org.postgresql.Driver");
         databaseProperties.put(DatabaseConnector.PROPERTY_URL, "jdbc:postgresql://gre037784:5433/UDS_db");
 
-        DatabaseConnectionAction connection = new DatabaseConnectionAction(null, databaseProperties, getProjectIdTMP());
+        DatabaseConnectionTask connection = new DatabaseConnectionTask(null, databaseProperties, getProjectIdTMP());
         addTask(connection);
     }
     
@@ -50,7 +51,7 @@ public class AccessDatabaseThread extends Thread {
     public void run() {
         try {
             while (true) {
-                DatabaseAction action = null;
+                AbstractDatabaseTask action = null;
                 synchronized(this) {
                     
                     while (true) {
@@ -63,23 +64,13 @@ public class AccessDatabaseThread extends Thread {
                     notifyAll();
                 }
                 
-                if (action.fetchData()) {
-                    //Thread.sleep(2000);
-                    if (action.callbackInAWT()) {
-                        final DatabaseAction _action = action;
-                        SwingUtilities.invokeLater(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                _action.callback();
-                            }
-                        });
-                    } else {
-                        action.callback();
-                    }
-                }
+                boolean success = action.fetchData();
+                action.callback(success);
                 
+                
+ 
             }
+
             
         } catch (Throwable t) {
             LoggerFactory.getLogger(AccessDatabaseThread.class).debug("Unexpected exception in main loop of AccessDatabaseThread", t);
@@ -88,13 +79,13 @@ public class AccessDatabaseThread extends Thread {
         
     }
     
-    public final synchronized void addTask(DatabaseAction action) {
+    public final synchronized void addTask(AbstractDatabaseTask action) {
         actions.add(action);
         notifyAll();
     }
     
     public static Integer getProjectIdTMP() {
-        // JPM.TODO : remove this methode
+        // JPM.TODO : remove this method
         return projectId;
     }
     private static Integer projectId = new Integer(1);

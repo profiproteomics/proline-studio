@@ -1,26 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.om.model.msi.Protein;
-import fr.proline.core.om.model.msi.ProteinMatch;
-import fr.proline.core.om.model.msi.ProteinSet;
+
+import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DatabaseAction;
-import fr.proline.studio.dam.DatabaseCallback;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseProteinsFromProteinSetTask;
 import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import org.jdesktop.swingx.JXTable;
-import org.openide.explorer.view.OutlineView;
 import org.openide.util.ImageUtilities;
-import org.openide.windows.WindowManager;
-import scala.Option;
 
 /**
  *
@@ -35,7 +26,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
         initComponents();
         
         proteinGroupTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
+
 
     }
 
@@ -124,6 +115,8 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
          * @param e the event that characterizes the change.
          */
 
+        ProteinSet proteinSetSelected = null;
+        
         @Override
         public void valueChanged(ListSelectionEvent e) {
             
@@ -134,21 +127,33 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
             ProteinGroupTableModel tableModel = (ProteinGroupTableModel) getModel();
             final ProteinSet proteinSet = tableModel.getProteinSet(selectedRow);
             
+            if (proteinSetSelected == proteinSet) {
+                return; // nothing to do
+            }
+            proteinSetSelected = proteinSet;
+            
             //remove currently viewed data
             ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
             p.setData(null);
             
             // prepare callback to view new data
-            DatabaseCallback callback = new DatabaseCallback() {
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+                
+                            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+                
                 @Override
-                public void run() {
+                public void run(boolean success) {
                     ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
+
                     p.setData(proteinSet);
                 }
             };
             
             //JPM.TODO : create DatabaseAction which fetch needed data for ProteinSet
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseAction(callback));
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromProteinSetTask(callback, proteinSet));
 
         }
     }

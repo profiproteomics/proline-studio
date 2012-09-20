@@ -1,70 +1,38 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam.data;
 
-import fr.proline.studio.dam.data.Data;
+import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DatabaseCallback;
-import fr.proline.studio.dam.actions.DatabaseLoadIdentificationAction;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseLoadIdentificationTask;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 /**
- *
+ * Correspond to the opened Project from UDS DB
  * @author JM235353
  */
-public class ProjectData extends Data {
-    
+public class ProjectData extends AbstractData {
+
     private Project project = null;
-    
+
     public ProjectData(Project project) {
-        dataType = Data.DataTypes.PROJECT;
+        dataType = AbstractData.DataTypes.PROJECT;
         this.project = project;
     }
-    
+
+    @Override
     public String getName() {
-        if (project == null) {
-            return "Loading Project...";
-        } else {
+        if (project != null) {
             return project.getName();
         }
+
+        return "";
     }
-    
-    
-    public void load(List<Data> list) {
-        
-        
-        final Semaphore waitDataSemaphore = new Semaphore(0, true);
 
+    @Override
+    public void loadImpl(AbstractDatabaseCallback callback, List<AbstractData> list) {
 
-        
-         DatabaseCallback callback = new DatabaseCallback() {
-            @Override
-            public void run() {
-                // data is ready
-                waitDataSemaphore.release();
-            }
-        };
-        
-        //JPM.TODO : create DatabaseAction which fetch needed data for ResultSummary
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadIdentificationAction(callback, project, list));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadIdentificationTask(callback, project, list));
 
-        // Wait for the end of task
-        try {
-            waitDataSemaphore.acquire();
-        } catch (InterruptedException e) {
-            // should not happen
-            //JPM.TODO
-            
-        }
-        // now data is loaded
-        
-        
     }
-    
-    
-    
 }

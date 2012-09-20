@@ -1,23 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam.data;
 
-import fr.proline.studio.dam.data.Data;
+import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Identification;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DatabaseCallback;
-import fr.proline.studio.dam.actions.DatabaseLoadIdentificationAction;
-import fr.proline.studio.dam.actions.DatabaseLoadIdentificationFractionAction;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseLoadIdentificationFractionTask;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 /**
- *
+ * Correspond to an Identification in UDS DB
  * @author JM235353
  */
-public class IdentificationData extends Data {
+public class IdentificationData extends AbstractData {
  
     Identification identification;
     
@@ -28,6 +22,7 @@ public class IdentificationData extends Data {
         
     }
     
+    @Override
     public String getName() {
         if (identification == null) {
             return "";
@@ -36,35 +31,12 @@ public class IdentificationData extends Data {
         }
     }
  
-   public void load(List<Data> list) {
-        
-        
-        final Semaphore waitDataSemaphore = new Semaphore(0, true);
+    @Override
+    public void loadImpl(AbstractDatabaseCallback callback, List<AbstractData> list) {
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadIdentificationFractionTask(callback, identification, list));
 
 
-        
-         DatabaseCallback callback = new DatabaseCallback() {
-            @Override
-            public void run() {
-                // data is ready
-                waitDataSemaphore.release();
-            }
-        };
-        
-        //JPM.TODO : create DatabaseAction which fetch needed data for ResultSummary
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadIdentificationFractionAction(callback, identification, list));
 
-        // Wait for the end of task
-        try {
-            waitDataSemaphore.acquire();
-        } catch (InterruptedException e) {
-            // should not happen
-            //JPM.TODO
-            
-        }
-        // now data is loaded
-        
-        
     }
     
     

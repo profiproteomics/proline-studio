@@ -19,6 +19,9 @@
   <logger name="fr.proline" level="DEBUG">
   </logger>
 
+  <logger name="org.hibernate.type" level="TRACE">
+  </logger>
+
   <root level="OFF">
       <appender-ref ref="STDOUT" />      
   </root>

@@ -4,11 +4,10 @@
  */
 package fr.proline.studio.rsmexplorer;
 
-import fr.proline.core.om.model.msi.ProteinSet;
-import fr.proline.core.om.model.msi.ResultSummary;
+
+import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.rsmexplorer.gui.ProteinGroupTablePanel;
 import java.util.HashMap;
-import java.util.Map;
 import javax.swing.JPanel;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
@@ -110,9 +109,9 @@ public final class DataViewerTopComponent extends TopComponent {
     }
     
     
-    public void setSelectedResultSummary(ResultSummary rsm) {
-        // Retrieve Protein Groups ( <=> Protein Sets )
-        ProteinSet[] proteinSets = rsm.proteinSets();
+    public void setSelectedResultSummary(ProteinSet[] proteinSets) {
+        // Note : Protein Groups <=> Protein Sets
+
         
         tabbedPane.setSelectedIndex(0); //JPM.TODO : remove 0 and put reference
         ((ProteinGroupTablePanel)getPanel(ProteinGroupTablePanel.class)).setData(proteinSets);

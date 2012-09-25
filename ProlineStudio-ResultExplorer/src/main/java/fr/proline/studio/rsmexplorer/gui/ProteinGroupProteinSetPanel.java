@@ -1,13 +1,18 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
-import fr.proline.studio.dam.ORMDataManager;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
-import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
-import org.jdesktop.swingx.JXTable;
+import fr.proline.studio.utils.DecoratedTable;
+import javax.swing.event.ListSelectionEvent;
+
 
 /**
  *
@@ -15,28 +20,37 @@ import org.jdesktop.swingx.JXTable;
  */
 public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
 
+    private Integer resultSummaryId = -1;
+
     /**
      * Creates new form ProteinGroupProteinSetPanel
      */
     public ProteinGroupProteinSetPanel() {
         initComponents();
+        
+        ((DecoratedTable)proteinsTable).displayColumnAsPercentage(ProteinTableModel.COLTYPE_PROTEIN_SCORE);
+        
+        //iniTable((JXTable)proteinsTable);
     }
 
+ 
+    
     public void setData(ProteinSet proteinSet) {
         
         if (proteinSet == null) {
             clearData();
             return;
         }
-        
-        ORMDataManager memMgr = ORMDataManager.instance();
+
+        // keep resultSummaryId
+        resultSummaryId = proteinSet.getResultSummary().getId();
         
         // retrieve sameset and subset
-        ProteinMatch[] sameSetArray = (ProteinMatch[]) memMgr.get(ProteinSet.class, proteinSet.getId(), "ProteinMatch[].sameset");
-        ProteinMatch[] subSetArray =   (ProteinMatch[]) memMgr.get(ProteinSet.class, proteinSet.getId(), "ProteinMatch[].subset");
+        ProteinMatch[] sameSetArray = proteinSet.getTransientSameSet(); 
+        ProteinMatch[] subSetArray =  proteinSet.getTransientSubSet();
         
         // retrieve Typical Protein Match
-        ProteinMatch typicalProtein = (ProteinMatch) memMgr.get(ProteinSet.class, proteinSet.getId(), "ProteinMatch");
+        ProteinMatch typicalProtein = proteinSet.getTransientTypicalProteinMatch();
         
         // Modify Panel Border Title
         ((ProteinGroupProteinSelectedPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(typicalProtein.getAccession());
@@ -46,18 +60,21 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
         
         
         // Modify Data in SameSet and SubSet Tables
-        ((ProteinTableModel) sameSetTable.getModel()).setData(sameSetArray);
-        ((ProteinTableModel)  subSetTable.getModel()).setData(subSetArray);
+        ((ProteinTableModel) proteinsTable.getModel()).setData(sameSetArray, subSetArray);
         
-
+        // select the first row
+        if ((sameSetArray != null) && (sameSetArray.length>0)) {
+            proteinsTable.getSelectionModel().setSelectionInterval(0, 0);
+        }
         
     }
     
     public void clearData() {
         proteinNameTextField.setText("");
         ((ProteinGroupProteinSelectedPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(null);
-        ((ProteinTableModel) sameSetTable.getModel()).setData(null);
-        ((ProteinTableModel) subSetTable.getModel()).setData(null);
+        ((ProteinTableModel) proteinsTable.getModel()).setData(null, null);
+        
+        resultSummaryId = -1;
     }
     
     
@@ -71,33 +88,23 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         proteinNameTextField = new javax.swing.JTextField();
-        proteinSetTabbedPane = new javax.swing.JTabbedPane();
-        sameSetScrollPane = new javax.swing.JScrollPane();
-        sameSetTable = new JXTable();
-        subSetScrollPane = new javax.swing.JScrollPane();
-        subSetTable = new JXTable();
+        scrollPane = new javax.swing.JScrollPane();
+        proteinsTable = new ProteinTable();
 
         proteinNameTextField.setText(org.openide.util.NbBundle.getMessage(ProteinGroupProteinSetPanel.class, "ProteinGroupProteinSetPanel.proteinNameTextField.text")); // NOI18N
 
-        sameSetTable.setModel(new ProteinTableModel());
-        sameSetScrollPane.setViewportView(sameSetTable);
-
-        proteinSetTabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupProteinSetPanel.class, "ProteinGroupProteinSetPanel.sameSetScrollPane.TabConstraints.tabTitle"), sameSetScrollPane); // NOI18N
-
-        subSetTable.setModel(new ProteinTableModel());
-        subSetScrollPane.setViewportView(subSetTable);
-
-        proteinSetTabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupProteinSetPanel.class, "ProteinGroupProteinSetPanel.subSetScrollPane.TabConstraints.tabTitle"), subSetScrollPane); // NOI18N
+        proteinsTable.setModel(new ProteinTableModel());
+        scrollPane.setViewportView(proteinsTable);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(proteinSetTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
-                    .addComponent(proteinNameTextField))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(proteinNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -105,17 +112,92 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(proteinNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(proteinSetTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField proteinNameTextField;
-    private javax.swing.JTabbedPane proteinSetTabbedPane;
-    private javax.swing.JScrollPane sameSetScrollPane;
-    private javax.swing.JTable sameSetTable;
-    private javax.swing.JScrollPane subSetScrollPane;
-    private javax.swing.JTable subSetTable;
+    private javax.swing.JTable proteinsTable;
+    private javax.swing.JScrollPane scrollPane;
     // End of variables declaration//GEN-END:variables
+
+    
+    
+    private class ProteinTable extends DecoratedTable  {
+        /** 
+         * Called whenever the value of the selection changes.
+         * @param e the event that characterizes the change.
+         */
+
+        ProteinMatch proteinMatchSelected = null;
+        
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            
+            super.valueChanged(e);
+            
+ 
+            ProteinGroupPeptideTablePanel p = (ProteinGroupPeptideTablePanel) DataViewerTopComponent.getPanel(ProteinGroupPeptideTablePanel.class);
+            
+            
+            // Retrieve Selected Row
+            int selectedRow = getSelectedRow();
+            
+
+            // nothing selected
+            if (selectedRow == -1) {
+                proteinMatchSelected = null;
+                p.setData(null);
+                return;
+                
+            }
+            
+            // convert according to the sorting
+            selectedRow = convertRowIndexToModel(selectedRow);
+            
+            
+            
+            // Retrived ProteinSet selected
+            ProteinTableModel tableModel = (ProteinTableModel) getModel();
+            final ProteinMatch proteinMatch= tableModel.getProteinMatch(selectedRow);
+            
+            if (proteinMatchSelected == proteinMatch) {
+                return; // nothing to do
+            }
+            proteinMatchSelected = proteinMatch;
+            
+            
+            
+            // prepare callback to view new data
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success) {
+                    ProteinGroupPeptideTablePanel p = (ProteinGroupPeptideTablePanel) DataViewerTopComponent.getPanel(ProteinGroupPeptideTablePanel.class);
+
+                    if (success) {
+                        PeptideSet peptideSet = proteinMatch.getTransientPeptideSet();
+                        PeptideInstance[] peptideInstances = peptideSet.getTransientPeptideInstances();
+                    
+                        p.setData(peptideInstances);
+                    } else {
+                        p.setData(null);
+                    }
+                }
+            };
+            
+            // Load data if needed asynchronously
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, proteinMatch, resultSummaryId));
+
+        }
+    }
+
+
 }

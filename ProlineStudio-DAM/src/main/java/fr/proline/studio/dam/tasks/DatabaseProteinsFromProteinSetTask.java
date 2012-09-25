@@ -25,7 +25,11 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask{
         this.proteinSet = proteinSet;        
     }
 
-
+    @Override
+    public boolean needToFetch() {
+        return (proteinSet.getTransientSameSet() == null);
+            
+    }
     
     @Override
     public boolean fetchData() {
@@ -34,17 +38,16 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask{
         try {
             
             entityManagerMSI.getTransaction().begin();
-    
-            ORMDataManager memMgr = ORMDataManager.instance();
             
             // number of proteins in sameset
-            ProteinMatch typicalProtein = (ProteinMatch) memMgr.get(ProteinSet.class, proteinSet.getId(), "ProteinMatch");
+            ProteinMatch typicalProtein = proteinSet.getTransientTypicalProteinMatch(); 
             int peptitesCountInSameSet = typicalProtein.getPeptideCount();
 
             
             // Load Proteins 
-            TypedQuery<ProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT pm FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm WHERE ps_to_pm.proteinSet.id=:proteinSetId AND ps_to_pm.proteinMatch.id=pm.id", ProteinMatch.class);
+            TypedQuery<ProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT pm FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm WHERE ps_to_pm.proteinSet.id=:proteinSetId AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId", ProteinMatch.class);
             proteinMatchQuery.setParameter("proteinSetId", proteinSet.getId());
+            proteinMatchQuery.setParameter("rsmId", proteinSet.getResultSummary().getId());
             List<ProteinMatch> proteinMatchList = proteinMatchQuery.getResultList();
             
             // Dispatch Proteins in sameSet and subSet
@@ -67,8 +70,9 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask{
             ProteinMatch[] subSetArray = subSet.toArray(new ProteinMatch[subSet.size()]);
 
             // check if Proteins are in same set or sub set.
-            memMgr.put(ProteinSet.class, proteinSet.getId(), "ProteinMatch[].sameset", sameSetArray);
-            memMgr.put(ProteinSet.class, proteinSet.getId(), "ProteinMatch[].subset",  subSetArray);
+            proteinSet.setTransientSameSet(sameSetArray);
+            proteinSet.setTransientSubSet(subSetArray);
+            
             
             entityManagerMSI.getTransaction().commit();
         } catch  (RuntimeException e) {

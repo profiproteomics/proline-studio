@@ -1,5 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
+
 /**
  *
  * @author JM235353
@@ -11,6 +13,10 @@ public class ProteinGroupPeptidePanel extends javax.swing.JPanel {
      */
     public ProteinGroupPeptidePanel() {
         initComponents();
+        
+        // register children panels
+        DataViewerTopComponent.addPanel(peptideInfoPanel);
+        DataViewerTopComponent.addPanel(peptidesTablePanel);
     }
 
     /**

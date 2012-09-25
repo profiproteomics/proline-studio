@@ -1,5 +1,18 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
+import fr.proline.studio.utils.DecoratedTable;
+import fr.proline.studio.utils.RelativePainterHighlighter;
+import java.awt.Color;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.jdesktop.swingx.painter.MattePainter;
+import org.jdesktop.swingx.util.PaintUtils;
+
 /**
  *
  * @author JM235353
@@ -11,6 +24,9 @@ public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
      */
     public ProteinGroupPeptideTablePanel() {
         initComponents();
+        
+        ((DecoratedTable)peptidesTable).displayColumnAsPercentage(PeptideTableModel.COLTYPE_PEPTIDE_SCORE);
+   
     }
 
     /**
@@ -23,24 +39,10 @@ public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
     private void initComponents() {
 
         scrollPane = new javax.swing.JScrollPane();
-        peptidesTable = new javax.swing.JTable();
+        peptidesTable = new PeptideTable();
 
-        peptidesTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
+        peptidesTable.setModel(new PeptideTableModel());
         scrollPane.setViewportView(peptidesTable);
-        peptidesTable.getColumnModel().getColumn(0).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideTablePanel.class, "ProteinGroupPeptideTablePanel.peptidesTable.columnModel.title0")); // NOI18N
-        peptidesTable.getColumnModel().getColumn(1).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideTablePanel.class, "ProteinGroupPeptideTablePanel.peptidesTable.columnModel.title1")); // NOI18N
-        peptidesTable.getColumnModel().getColumn(2).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideTablePanel.class, "ProteinGroupPeptideTablePanel.peptidesTable.columnModel.title2")); // NOI18N
-        peptidesTable.getColumnModel().getColumn(3).setHeaderValue(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideTablePanel.class, "ProteinGroupPeptideTablePanel.peptidesTable.columnModel.title3")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -63,4 +65,79 @@ public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
     private javax.swing.JTable peptidesTable;
     private javax.swing.JScrollPane scrollPane;
     // End of variables declaration//GEN-END:variables
+
+
+    public void setData(PeptideInstance[] peptideInstances) {
+        ((PeptideTableModel) peptidesTable.getModel()).setData(peptideInstances);
+    }
+    
+    
+    private class PeptideTable extends DecoratedTable  {
+        /** 
+         * Called whenever the value of the selection changes.
+         * @param e the event that characterizes the change.
+         */
+
+        //ProteinSet proteinSetSelected = null;
+        
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            
+            super.valueChanged(e);
+            
+            /*
+            ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
+            
+            
+            // Retrieve Selected Row
+            int selectedRow = getSelectedRow();
+            
+
+            // nothing selected
+            if (selectedRow == -1) {
+                proteinSetSelected = null;
+                p.setData(null);
+                return;
+                
+            }
+            
+            // convert according to the sorting
+            selectedRow = convertRowIndexToModel(selectedRow);
+            
+            
+            
+            // Retrived ProteinSet selected
+            ProteinGroupTableModel tableModel = (ProteinGroupTableModel) getModel();
+            final ProteinSet proteinSet = tableModel.getProteinSet(selectedRow);
+            
+            if (proteinSetSelected == proteinSet) {
+                return; // nothing to do
+            }
+            proteinSetSelected = proteinSet;
+            
+            
+            
+            // prepare callback to view new data
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success) {
+                    ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
+
+                    p.setData(proteinSet);
+                }
+            };
+            
+            // Load data if needed asynchronously
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromProteinSetTask(callback, proteinSet));
+          */ //JPM.TODO
+        }
+    }
+    
+    
 }

@@ -80,6 +80,12 @@
             <artifactId>org-netbeans-modules-settings</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.swinglabs.swingx</groupId>
+            <artifactId>swingx-all</artifactId>
+            <version>1.6.3</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>
@@ -115,6 +121,9 @@
                         <publicPackage>fr.proline.studio.action</publicPackage>
                         <publicPackage>fr.proline.studio.dbs</publicPackage>
                         <publicPackage>fr.proline.studio.gui</publicPackage>
+                        <publicPackage>fr.proline.studio.utils</publicPackage>
+                        <publicPackage>org.jdesktop.beans</publicPackage>
+                        <publicPackage>org.jdesktop.swingx.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

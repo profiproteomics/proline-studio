@@ -6,7 +6,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
-import fr.proline.studio.dam.ORMDataManager;
+import javax.swing.table.AbstractTableModel;
 
 
 
@@ -14,12 +14,39 @@ import fr.proline.studio.dam.ORMDataManager;
  *
  * @author JM235353
  */
-public class ProteinGroupTableModel extends AbstractProteinTableModel {
+public class ProteinGroupTableModel extends AbstractTableModel {
 
+        public static final int COLTYPE_PROTEIN_GROUPS_NAME  = 0;
+        public static final int COLTYPE_PROTEIN_SCORE = 1;
 
+        private static final String[] columnNames = { "Protein Group", "Score" };
+        
         private ProteinSet[] proteinSets = null;
 
 
+        @Override
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+
+
+        @Override
+        public String getColumnName(int col) {
+            return columnNames[col];
+        }
+
+        @Override
+        public Class getColumnClass(int col) {
+            switch (col) {
+                case COLTYPE_PROTEIN_GROUPS_NAME:
+                    return String.class;
+                case COLTYPE_PROTEIN_SCORE:
+                    return Float.class;
+            }
+            return null;
+        }
+        
+        
         @Override
         public int getRowCount() {
             if (proteinSets == null) {
@@ -35,10 +62,10 @@ public class ProteinGroupTableModel extends AbstractProteinTableModel {
             ProteinSet proteinSet = proteinSets[row];
     
             switch (col) {
-                case COLTYPE_PROTEIN_NAME:
+                case COLTYPE_PROTEIN_GROUPS_NAME:
                     
                     // Retrieve typical Protein Match
-                    ProteinMatch proteinMatch = (ProteinMatch) ORMDataManager.instance().get(ProteinSet.class, proteinSet.getId(), "ProteinMatch");
+                    ProteinMatch proteinMatch = proteinSet.getTransientTypicalProteinMatch();
 
                     if (proteinMatch != null) {
                         return proteinMatch.getAccession();

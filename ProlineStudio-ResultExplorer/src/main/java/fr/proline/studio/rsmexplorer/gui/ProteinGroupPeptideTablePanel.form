@@ -43,50 +43,17 @@
       <SubComponents>
         <Component class="javax.swing.JTable" name="peptidesTable">
           <Properties>
-            <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="4" rowCount="4">
-                <Column editable="true" title="Title 1" type="java.lang.Object"/>
-                <Column editable="true" title="Title 2" type="java.lang.Object"/>
-                <Column editable="true" title="Title 3" type="java.lang.Object"/>
-                <Column editable="true" title="Title 4" type="java.lang.Object"/>
-              </Table>
-            </Property>
-            <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
-              <TableColumnModel selectionModel="0">
-                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                    <ResourceString bundle="fr/proline/studio/rsmexplorer/gui/Bundle.properties" key="ProteinGroupPeptideTablePanel.peptidesTable.columnModel.title0" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-                  </Title>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                    <ResourceString bundle="fr/proline/studio/rsmexplorer/gui/Bundle.properties" key="ProteinGroupPeptideTablePanel.peptidesTable.columnModel.title1" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-                  </Title>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                    <ResourceString bundle="fr/proline/studio/rsmexplorer/gui/Bundle.properties" key="ProteinGroupPeptideTablePanel.peptidesTable.columnModel.title2" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-                  </Title>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                  <Title editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                    <ResourceString bundle="fr/proline/studio/rsmexplorer/gui/Bundle.properties" key="ProteinGroupPeptideTablePanel.peptidesTable.columnModel.title3" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
-                  </Title>
-                  <Editor/>
-                  <Renderer/>
-                </Column>
-              </TableColumnModel>
+            <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="new PeptideTableModel()" type="code"/>
             </Property>
             <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
               <TableHeader reorderingAllowed="true" resizingAllowed="true"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new PeptideTable();"/>
+            <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="ProteinGroupPeptideTablePanel_peptidesTable"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>

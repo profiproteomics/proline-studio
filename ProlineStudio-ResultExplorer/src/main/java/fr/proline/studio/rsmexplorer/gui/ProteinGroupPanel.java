@@ -16,6 +16,7 @@ public class ProteinGroupPanel extends javax.swing.JPanel {
     public ProteinGroupPanel() {
         initComponents();
         
+        // register children panels
         DataViewerTopComponent.addPanel(proteinGroupTablePanel);
         DataViewerTopComponent.addPanel(proteinSelectedPanel);
         

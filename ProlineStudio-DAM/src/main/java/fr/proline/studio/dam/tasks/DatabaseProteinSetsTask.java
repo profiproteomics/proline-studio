@@ -16,7 +16,7 @@ import javax.persistence.TypedQuery;
  * Load Protein Sets and their Typical ProteinMatch of a Result Summary
  * @author JM235353
  */
-public class DatabaseProteinSetsTask extends AbstractDatabaseTask{
+public class DatabaseProteinSetsTask extends AbstractDatabaseTask {
     
     private ResultSummary rsm = null;
 
@@ -25,7 +25,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseTask{
         this.rsm = rsm;        
     }
 
-
+    
+    @Override
+    public boolean needToFetch() {
+        return (rsm.getTransientProteinSets() == null);
+    }
     
     @Override
     public boolean fetchData() {
@@ -36,8 +40,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseTask{
             entityManagerMSI.getTransaction().begin();
             
             Integer rsmId = rsm.getId();
-            
-            ORMDataManager memMgr = ORMDataManager.instance();
+
             
             // Load Protein Sets
             TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId", ProteinSet.class);
@@ -45,8 +48,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseTask{
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
             
             ProteinSet[] proteinSetArray = proteinSets.toArray(new ProteinSet[proteinSets.size()]);
-            memMgr.put(ResultSummary.class, rsmId, "ProteinSet[]", proteinSetArray);
-            
+            rsm.setTransientProteinSets(proteinSetArray);
             
             
             Iterator<ProteinSet> it = proteinSets.iterator();
@@ -56,9 +58,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseTask{
                 // Load Typical Protein Match for each  Protein Set
                 Integer typicalProteinMatchId = proteinSetCur.getProteinMatchId();
                 ProteinMatch proteinMatch = entityManagerMSI.find(ProteinMatch.class, typicalProteinMatchId);
-                proteinMatch.getPeptideCount(); // force lazy peptideMatchCount to be loaded to be used later
-                memMgr.put(ProteinSet.class, proteinSetCur.getId(), "ProteinMatch", proteinMatch);
-            
+                proteinMatch.getPeptideCount();  // force fetch of lazy data
+                proteinSetCur.setTransientTypicalProteinMatch(proteinMatch);
+                proteinSetCur.getResultSummary(); // force fetch of lazy data
+                
+
             }
             
             

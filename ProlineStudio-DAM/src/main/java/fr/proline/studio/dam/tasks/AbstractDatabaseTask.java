@@ -33,6 +33,14 @@ public abstract class AbstractDatabaseTask {
     public abstract boolean fetchData();
 
     /**
+     * Method called by the AccessDatabaseThread to check if data is or not
+     * already known
+     * @return 
+     */
+    public abstract boolean needToFetch();
+    
+    
+    /**
      * Method called after the data has been fetched
      * @param success  boolean indicating if the fetch has succeeded
      */

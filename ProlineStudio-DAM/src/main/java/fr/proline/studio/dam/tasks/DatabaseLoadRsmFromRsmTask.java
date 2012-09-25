@@ -30,6 +30,12 @@ public class DatabaseLoadRsmFromRsmTask extends AbstractDatabaseTask {
     }
     
     @Override
+    public boolean needToFetch() {
+        return true; // anyway this task is used only one time for each node
+            
+    }
+    
+    @Override
     public boolean fetchData() {
 
         EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(ProlineRepository.Databases.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id

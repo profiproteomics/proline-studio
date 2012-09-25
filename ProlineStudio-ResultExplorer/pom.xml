@@ -65,7 +65,12 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-settings</artifactId>
             <version>${netbeans.version}</version>
-        </dependency>                   
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ProlineStudio-Commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-nodes</artifactId>
@@ -109,12 +114,12 @@
         </dependency>   
         
         <!-- Other dependencies -->
-        <dependency>
+        <!-- <dependency>
             <groupId>org.swinglabs.swingx</groupId>
             <artifactId>swingx-all</artifactId>
             <version>1.6.3</version>
             <type>jar</type>
-        </dependency>
+        </dependency> -->
     </dependencies>
 
     <build>

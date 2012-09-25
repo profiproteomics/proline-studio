@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam;
 
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
@@ -14,7 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Thread in charge to read asynchronously ORM objects from the database
+ * 
  * @author JM235353
  */
 public class AccessDatabaseThread extends Thread {
@@ -64,7 +61,10 @@ public class AccessDatabaseThread extends Thread {
                     notifyAll();
                 }
                 
+                // fetch data
                 boolean success = action.fetchData();
+                
+                // call callback code
                 action.callback(success);
                 
                 
@@ -79,9 +79,15 @@ public class AccessDatabaseThread extends Thread {
         
     }
     
-    public final synchronized void addTask(AbstractDatabaseTask action) {
-        actions.add(action);
-        notifyAll();
+    public final void addTask(AbstractDatabaseTask action) {
+        if (!action.needToFetch()) {
+            action.callback(true);
+            return;
+        }
+        synchronized(this) {
+            actions.add(action);
+            notifyAll();
+        }
     }
     
     public static Integer getProjectIdTMP() {

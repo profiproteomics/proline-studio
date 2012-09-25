@@ -1,16 +1,23 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
-import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsFromProteinSetTask;
 import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
+import fr.proline.studio.utils.RelativePainterHighlighter;
+import fr.proline.studio.utils.RelativePainterHighlighter.NumberRelativizer;
+import java.awt.Color;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.jdesktop.swingx.painter.MattePainter;
+import org.jdesktop.swingx.util.PaintUtils;
 import org.openide.util.ImageUtilities;
 
 /**
@@ -25,13 +32,39 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
     public ProteinGroupTablePanel() {
         initComponents();
         
-        proteinGroupTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+        JXTable table = (JXTable) proteinGroupTable;
+        
+        // only one Protein Set can be selected
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        // allow user to hide/show columns
+        table.setColumnControlVisible(true);
+        
+        // allow the user to search the table
+        //table.setSearchable(null); //JPM.TODO
+        
+        // highlight one line of two
+        table.addHighlighter(HighlighterFactory.createSimpleStriping()); 
+        
+        // Display of the Score Column as a percentage
+        Color base = PaintUtils.setSaturation(Color.BLUE, .7f); 
+        MattePainter matte = new MattePainter(PaintUtils.setAlpha(base, 125)); 
+        RelativePainterHighlighter highlighter = new RelativePainterHighlighter(matte);
+        highlighter.setRelativizer(new NumberRelativizer( ProteinGroupTableModel.COLTYPE_PROTEIN_SCORE, 0, 100) );
+        highlighter.setHighlightPredicate( new HighlightPredicate.ColumnHighlightPredicate(ProteinGroupTableModel.COLTYPE_PROTEIN_SCORE) );
+        table.addHighlighter(highlighter);
+        
 
     }
 
     public void setData(ProteinSet[] proteinSets) {
         ((ProteinGroupTableModel) proteinGroupTable.getModel()).setData(proteinSets);
+        
+        // select the first row
+        if ((proteinSets != null) && (proteinSets.length>0)) {
+            proteinGroupTable.getSelectionModel().setSelectionInterval(0, 0);
+        }
+        
     }
     
     /**
@@ -57,8 +90,8 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
         proteinGroupScrollPane.setBackground(new java.awt.Color(255, 255, 255));
 
         proteinGroupTable.setModel(new ProteinGroupTableModel());
-        proteinGroupTable.setMinimumSize(new java.awt.Dimension(120, 220));
-        proteinGroupTable.setPreferredSize(new java.awt.Dimension(600, 220));
+        proteinGroupTable.setMinimumSize(new java.awt.Dimension(120, 120));
+        proteinGroupTable.setPreferredSize(new java.awt.Dimension(600, 120));
         proteinGroupScrollPane.setViewportView(proteinGroupTable);
 
         searchButton.setText(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.searchButton.text")); // NOI18N
@@ -121,9 +154,29 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
         public void valueChanged(ListSelectionEvent e) {
             
             super.valueChanged(e);
-             
+            
+ 
+            ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
+            
+            
+            // Retrieve Selected Row
             int selectedRow = getSelectedRow();
             
+
+            // nothing selected
+            if (selectedRow == -1) {
+                proteinSetSelected = null;
+                p.setData(null);
+                return;
+                
+            }
+            
+            // convert according to the sorting
+            selectedRow = convertRowIndexToModel(selectedRow);
+            
+            
+            
+            // Retrived ProteinSet selected
             ProteinGroupTableModel tableModel = (ProteinGroupTableModel) getModel();
             final ProteinSet proteinSet = tableModel.getProteinSet(selectedRow);
             
@@ -132,18 +185,16 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
             }
             proteinSetSelected = proteinSet;
             
-            //remove currently viewed data
-            ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
-            p.setData(null);
+            
             
             // prepare callback to view new data
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-                
-                            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-                
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
                 @Override
                 public void run(boolean success) {
                     ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
@@ -152,7 +203,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
                 }
             };
             
-            //JPM.TODO : create DatabaseAction which fetch needed data for ProteinSet
+            // Load data if needed asynchronously
             AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromProteinSetTask(callback, proteinSet));
 
         }

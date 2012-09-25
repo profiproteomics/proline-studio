@@ -63,12 +63,13 @@ public class ProteinGroupsAction extends NodeAction {
                 viewer.open();
                 viewer.requestActive();
 
-                ProteinSet[] proteinSetArray = (ProteinSet[]) ORMDataManager.instance().get(ResultSummary.class, rsm.getId(), "ProteinSet[]");
+                ProteinSet[] proteinSetArray = rsm.getTransientProteinSets();
                 viewer.setSelectedResultSummary(proteinSetArray);
             }
         };
         
-        //JPM.TODO : create DatabaseAction which fetch needed data for ResultSummary
+
+        // ask asynchronous loading of data
         AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinSetsTask(callback, rsm));
 
         

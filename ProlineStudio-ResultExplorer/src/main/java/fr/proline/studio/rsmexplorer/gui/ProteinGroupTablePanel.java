@@ -7,17 +7,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsFromProteinSetTask;
 import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
-import fr.proline.studio.utils.RelativePainterHighlighter;
-import fr.proline.studio.utils.RelativePainterHighlighter.NumberRelativizer;
-import java.awt.Color;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
+import fr.proline.studio.utils.DecoratedTable;
 import javax.swing.event.ListSelectionEvent;
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
-import org.jdesktop.swingx.painter.MattePainter;
-import org.jdesktop.swingx.util.PaintUtils;
 import org.openide.util.ImageUtilities;
 
 /**
@@ -32,29 +23,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
     public ProteinGroupTablePanel() {
         initComponents();
         
-        JXTable table = (JXTable) proteinGroupTable;
-        
-        // only one Protein Set can be selected
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
-        // allow user to hide/show columns
-        table.setColumnControlVisible(true);
-        
-        // allow the user to search the table
-        //table.setSearchable(null); //JPM.TODO
-        
-        // highlight one line of two
-        table.addHighlighter(HighlighterFactory.createSimpleStriping()); 
-        
-        // Display of the Score Column as a percentage
-        Color base = PaintUtils.setSaturation(Color.BLUE, .7f); 
-        MattePainter matte = new MattePainter(PaintUtils.setAlpha(base, 125)); 
-        RelativePainterHighlighter highlighter = new RelativePainterHighlighter(matte);
-        highlighter.setRelativizer(new NumberRelativizer( ProteinGroupTableModel.COLTYPE_PROTEIN_SCORE, 0, 100) );
-        highlighter.setHighlightPredicate( new HighlightPredicate.ColumnHighlightPredicate(ProteinGroupTableModel.COLTYPE_PROTEIN_SCORE) );
-        table.addHighlighter(highlighter);
-        
-
+        ((DecoratedTable) proteinGroupTable).displayColumnAsPercentage(ProteinGroupTableModel.COLTYPE_PROTEIN_SCORE);
     }
 
     public void setData(ProteinSet[] proteinSets) {
@@ -90,8 +59,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
         proteinGroupScrollPane.setBackground(new java.awt.Color(255, 255, 255));
 
         proteinGroupTable.setModel(new ProteinGroupTableModel());
-        proteinGroupTable.setMinimumSize(new java.awt.Dimension(120, 120));
-        proteinGroupTable.setPreferredSize(new java.awt.Dimension(600, 120));
+        proteinGroupTable.setFillsViewportHeight(true);
         proteinGroupScrollPane.setViewportView(proteinGroupTable);
 
         searchButton.setText(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.searchButton.text")); // NOI18N
@@ -142,7 +110,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
     private javax.swing.JTextField searchTextField;
     // End of variables declaration//GEN-END:variables
 
-    private class ProteinGroupTable extends JXTable  {
+    private class ProteinGroupTable extends DecoratedTable  {
         /** 
          * Called whenever the value of the selection changes.
          * @param e the event that characterizes the change.

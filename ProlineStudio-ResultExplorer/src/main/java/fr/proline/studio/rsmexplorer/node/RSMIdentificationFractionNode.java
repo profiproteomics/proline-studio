@@ -7,15 +7,15 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 
 /**
- * Node for the opened Project
+ *
  * @author JM235353
  */
-public class RSMProjectNode extends RSMNode {
+public class RSMIdentificationFractionNode extends RSMNode {
 
-    private static Image icon = ImageUtilities.loadImage("fr/proline/studio/rsmexplorer/images/project.png");
+    private static Image icon = ImageUtilities.loadImage("fr/proline/studio/rsmexplorer/images/identificationFraction.png");
 
-    public RSMProjectNode(Children children, Lookup lookup, AbstractData data) {
-        super(children, lookup, RSMNode.NodeTypes.TREE_PARENT, data);
+    public RSMIdentificationFractionNode(Children children, Lookup lookup, AbstractData data) {
+        super(children, lookup, NodeTypes.IDENTIFICATION_FRACTION, data);
     }
 
     @Override
@@ -30,6 +30,6 @@ public class RSMProjectNode extends RSMNode {
 
     @Override
     public boolean canRename() {
-        return false;
+        return true;
     }
 }

@@ -14,7 +14,8 @@ public abstract class AbstractData {
     public enum DataTypes {
         MAIN,
         PROJECT,
-        CONTEXT,
+        IDENTIFICATION,
+        IDENTIFICATION_FRACTION,
         RESULT_SET,
         RESULT_SUMMARY}
     

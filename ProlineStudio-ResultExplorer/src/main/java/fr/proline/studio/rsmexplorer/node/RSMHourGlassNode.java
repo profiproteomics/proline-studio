@@ -1,6 +1,10 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package fr.proline.studio.rsmexplorer.node;
 
-import fr.proline.studio.dam.data.AbstractData;
+
 import java.awt.Image;
 import org.openide.nodes.Children;
 import org.openide.util.ImageUtilities;
@@ -10,12 +14,13 @@ import org.openide.util.Lookup;
  *
  * @author JM235353
  */
-public class RSMContextNode extends RSMNode {
+public class RSMHourGlassNode extends RSMNode {
+    
+    
+    private static Image icon = ImageUtilities.loadImage("fr/proline/studio/rsmexplorer/images/hourGlass.png");
 
-    private static Image icon = ImageUtilities.loadImage("fr/proline/studio/rsmexplorer/images/userContext.png");
-
-    public RSMContextNode(Children children, Lookup lookup, AbstractData data) {
-        super(children, lookup, NodeTypes.CONTEXT, data);
+    public RSMHourGlassNode(Children children, Lookup lookup) {
+        super(children, lookup, RSMNode.NodeTypes.HOUR_GLASS, null);
     }
 
     @Override
@@ -30,6 +35,7 @@ public class RSMContextNode extends RSMNode {
 
     @Override
     public boolean canRename() {
-        return true;
+        return false;
     }
+    
 }

@@ -30,7 +30,7 @@ public class DecoratedTable extends JXTable {
 
     public void displayColumnAsPercentage(int column) {
         // Display of the Score Column as a percentage
-        Color base = PaintUtils.setSaturation(Color.BLUE, .7f);
+        Color base = PaintUtils.setSaturation(Color.GREEN, .7f);
         MattePainter matte = new MattePainter(PaintUtils.setAlpha(base, 125));
         RelativePainterHighlighter highlighter = new RelativePainterHighlighter(matte);
         highlighter.setRelativizer(new RelativePainterHighlighter.NumberRelativizer(column, 0, 100));

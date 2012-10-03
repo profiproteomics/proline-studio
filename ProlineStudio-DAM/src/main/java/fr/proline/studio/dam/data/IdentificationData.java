@@ -16,7 +16,7 @@ public class IdentificationData extends AbstractData {
     Identification identification;
     
     public IdentificationData(Identification identification) {
-        dataType = DataTypes.CONTEXT;
+        dataType = DataTypes.IDENTIFICATION;
         
         this.identification = identification;
         

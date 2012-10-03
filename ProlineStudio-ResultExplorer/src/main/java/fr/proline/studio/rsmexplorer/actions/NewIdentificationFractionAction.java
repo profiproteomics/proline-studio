@@ -5,7 +5,9 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.studio.dam.data.IdentificationData;
-import fr.proline.studio.rsmexplorer.node.RSMContextNode;
+import fr.proline.studio.dam.data.IdentificationFractionData;
+import fr.proline.studio.rsmexplorer.node.RSMIdentificationFractionNode;
+import fr.proline.studio.rsmexplorer.node.RSMIdentificationNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import java.awt.Component;
 import java.lang.reflect.InvocationTargetException;
@@ -24,17 +26,17 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class NewContextAction extends NodeAction {
+public class NewIdentificationFractionAction extends NodeAction {
 
-    private static NewContextAction instance = null;
+    private static NewIdentificationFractionAction instance = null;
 
-    private NewContextAction() {
-        putValue(Action.NAME, NbBundle.getMessage(NewContextAction.class, "CTL_NewContextAction"));
+    private NewIdentificationFractionAction() {
+        putValue(Action.NAME, NbBundle.getMessage(NewIdentificationFractionAction.class, "CTL_NewFractionAction"));
     }
 
-    public static NewContextAction getInstance() {
+    public static NewIdentificationFractionAction getInstance() {
         if (instance == null) {
-            instance = new NewContextAction();
+            instance = new NewIdentificationFractionAction();
         }
         return instance;
     }
@@ -60,10 +62,10 @@ public class NewContextAction extends NodeAction {
                             "");
                     if ((name != null) && (name.length() > 0)) {
 
-                        IdentificationData data = new IdentificationData(null);
+                        IdentificationFractionData data = new IdentificationFractionData(null);
                         //data.setName(name);  //JPM.TODO
-                        RSMContextNode contextNode = new RSMContextNode(Children.LEAF, Lookups.singleton(data), data);
-                        node.getChildren().add(new Node[]{contextNode});
+                        RSMIdentificationFractionNode identificationFractionNode = new RSMIdentificationFractionNode(Children.LEAF, Lookups.singleton(data), data);
+                        node.getChildren().add(new Node[]{identificationFractionNode});
                     }
 
                 }
@@ -82,7 +84,7 @@ public class NewContextAction extends NodeAction {
 
         if (actionEnabled) {
             RSMNode node = (RSMNode) nodes[0];
-            actionEnabled = (node.getType() == (RSMNode.NodeTypes.CONTEXT) || (node.getType() == RSMNode.NodeTypes.TREE_PARENT));
+            actionEnabled = (node.getType() == (RSMNode.NodeTypes.IDENTIFICATION) || (node.getType() == RSMNode.NodeTypes.TREE_PARENT));
         }
 
         return actionEnabled;

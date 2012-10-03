@@ -206,8 +206,8 @@ public class ProlineDBManagement {
                     final Map<String, Object> entityManagerSettings = getProjectDatabaseConnector(db, projectID).getEntityManagerSettings(); 
                     
                     //JPM.TODO : code to trace sql queries from hibernate
-                    entityManagerSettings.put("hibernate.show_sql", "true");
-                    System.out.println("XXXXXXXXXX hibernate.show_sql=true");
+                    //entityManagerSettings.put("hibernate.show_sql", "true");
+                    //System.out.println("XXXXXXXXXX hibernate.show_sql=true");
                     
                     msiEMFByProject.put(projectID, Persistence.createEntityManagerFactory(JPAUtil.PersistenceUnitNames.getPersistenceUnitNameForDB(db),                                                                                          entityManagerSettings ));
                 }                

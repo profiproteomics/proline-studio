@@ -21,7 +21,9 @@ public class RSMNode extends AbstractNode {
         TREE_PARENT,
         RESULT_SET,
         RESULT_SUMMARY,
-        CONTEXT
+        IDENTIFICATION,
+        IDENTIFICATION_FRACTION,
+        HOUR_GLASS
     }
     private static Action[] actionInstance = null;
     private NodeTypes type;

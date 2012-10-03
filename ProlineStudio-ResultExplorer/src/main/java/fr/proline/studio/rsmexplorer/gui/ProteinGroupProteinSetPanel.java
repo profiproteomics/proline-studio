@@ -45,12 +45,14 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
         // keep resultSummaryId
         resultSummaryId = proteinSet.getResultSummary().getId();
         
+        ProteinSet.TransientProteinSetData proteinSetData = proteinSet.getTransientProteinSetData();
+        
         // retrieve sameset and subset
-        ProteinMatch[] sameSetArray = proteinSet.getTransientSameSet(); 
-        ProteinMatch[] subSetArray =  proteinSet.getTransientSubSet();
+        ProteinMatch[] sameSetArray = proteinSetData.getSameSet(); 
+        ProteinMatch[] subSetArray =  proteinSetData.getSubSet();
         
         // retrieve Typical Protein Match
-        ProteinMatch typicalProtein = proteinSet.getTransientTypicalProteinMatch();
+        ProteinMatch typicalProtein = proteinSetData.getTypicalProteinMatch();
         
         // Modify Panel Border Title
         ((ProteinGroupProteinSelectedPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(typicalProtein.getAccession());

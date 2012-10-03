@@ -36,19 +36,19 @@ public class ChildParentAction extends NodeAction implements Presenter.Popup {
     public JMenuItem getPopupPresenter() {
         if (menu == null) {
             menu = new JMenu(NbBundle.getMessage(DisplayAction.class, "CTL_ChildParentAction"));
-            newContextMenuItem = new JMenuItem(NewContextAction.getInstance());
-            menu.add(newContextMenuItem);
+            newFractionMenuItem = new JMenuItem(NewIdentificationFractionAction.getInstance());
+            menu.add(newFractionMenuItem);
             detachMenuItem = new JMenuItem(DetachAction.getInstance());
             menu.add(detachMenuItem);
         }
         menu.setEnabled(isEnabled());
-        newContextMenuItem.setEnabled(NewContextAction.getInstance().isEnabled());
+        newFractionMenuItem.setEnabled(NewIdentificationFractionAction.getInstance().isEnabled());
         detachMenuItem.setEnabled(DetachAction.getInstance().isEnabled());
 
         return menu;
     }
     private JMenu menu = null;
-    private JMenuItem newContextMenuItem = null;
+    private JMenuItem newFractionMenuItem = null;
     private JMenuItem detachMenuItem = null;
 
     @Override
@@ -62,7 +62,7 @@ public class ChildParentAction extends NodeAction implements Presenter.Popup {
 
         if (actionEnabled) {
             //JPM.hack : update enable of sub actions
-            NewContextAction.getInstance().enable(nodes);
+            NewIdentificationFractionAction.getInstance().enable(nodes);
             DetachAction.getInstance().enable(nodes);
         }
 

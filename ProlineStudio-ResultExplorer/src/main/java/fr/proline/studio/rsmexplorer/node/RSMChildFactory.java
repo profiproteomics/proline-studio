@@ -58,8 +58,11 @@ public class RSMChildFactory extends ChildFactory<AbstractData> {
             case RESULT_SUMMARY:
                 result = new RSMResultSummaryNode(children, Lookups.singleton(key), key);
                 break;
-            case CONTEXT:
-                result = new RSMContextNode(children, Lookups.singleton(key), key);
+            case IDENTIFICATION:
+                result = new RSMIdentificationNode(children, Lookups.singleton(key), key);
+                break;
+            case IDENTIFICATION_FRACTION:
+                result = new RSMIdentificationFractionNode(children, Lookups.singleton(key), key);
                 break;
         }
 

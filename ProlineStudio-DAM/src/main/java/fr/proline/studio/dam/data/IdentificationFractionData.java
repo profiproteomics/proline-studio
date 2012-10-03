@@ -16,7 +16,7 @@ public class IdentificationFractionData extends AbstractData {
     IdentificationFraction identificationFraction;
 
     public IdentificationFractionData(IdentificationFraction identificationFraction) {
-        dataType = AbstractData.DataTypes.CONTEXT;
+        dataType = AbstractData.DataTypes.IDENTIFICATION_FRACTION;
 
         this.identificationFraction = identificationFraction;
 

@@ -10,12 +10,27 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public abstract class AbstractDatabaseTask {
+public abstract class AbstractDatabaseTask implements Comparable<AbstractDatabaseTask> {
 
+    public enum Priority {
+        LOW   ,  // for batch actions
+        NORMAL,  // all actions
+        HIGH     // action needed as soon as possible 
+    };
+    
     protected static final Logger logger = LoggerFactory.getLogger(AbstractDatabaseTask.class);
+    
     // callback is called by the AccessDatabaseThread when the data is fetched
     protected AbstractDatabaseCallback callback;
 
+    // priority
+    protected Priority priority; 
+    
+    // id of the action
+    protected long id;
+    
+    private static long idIncrement = 0;
+    
     /**
      * Contructor
      *
@@ -23,7 +38,12 @@ public abstract class AbstractDatabaseTask {
      * fetched
      */
     public AbstractDatabaseTask(AbstractDatabaseCallback callback) {
+        this(callback,Priority.NORMAL);
+    }
+    public AbstractDatabaseTask(AbstractDatabaseCallback callback, Priority priority) {
         this.callback = callback;
+        this.priority = priority; 
+        id = idIncrement++;
     }
 
     /**
@@ -65,5 +85,27 @@ public abstract class AbstractDatabaseTask {
         }
 
 
+    }
+    
+    /**
+     * Used to prioritize actions
+     * @param task
+     * @return 
+     */
+    @Override
+    public int compareTo(AbstractDatabaseTask task) {
+        
+        // first we compare on priority
+        long diff = priority.ordinal()-task.priority.ordinal();
+        if (diff != 0) {
+            return (diff)>0 ? 1 : -1 ;
+        }
+        
+        // for equal priority, we compare on id
+        diff = id-task.id;
+        if (diff == 0) {
+            return 0;
+        }
+        return (diff)>0 ? 1 : -1 ;
     }
 }

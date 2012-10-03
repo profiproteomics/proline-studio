@@ -2,9 +2,11 @@ package fr.proline.studio.dam;
 
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.repository.DatabaseConnector;
+import fr.proline.studio.dam.tasks.CreateDatabaseTestTask;
 import fr.proline.studio.dam.tasks.DatabaseConnectionTask;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +21,10 @@ public class AccessDatabaseThread extends Thread {
     private static AccessDatabaseThread instance;
 
     
-    private static LinkedList<AbstractDatabaseTask> actions;
+    private static PriorityQueue<AbstractDatabaseTask> actions;
     
     private AccessDatabaseThread() {
-        actions = new LinkedList<AbstractDatabaseTask>();
+        actions = new PriorityQueue<AbstractDatabaseTask>();
         
         //JPM.TODO : remove it code for test
         // UDS DB properties
@@ -34,6 +36,10 @@ public class AccessDatabaseThread extends Thread {
 
         DatabaseConnectionTask connection = new DatabaseConnectionTask(null, databaseProperties, getProjectIdTMP());
         addTask(connection);
+        
+        //CreateDatabaseTestTask createDatabase = new CreateDatabaseTestTask(null);
+        //addTask(createDatabase);
+        
     }
     
     public static AccessDatabaseThread getAccessDatabaseThread() {
@@ -53,7 +59,7 @@ public class AccessDatabaseThread extends Thread {
                     
                     while (true) {
                         if (!actions.isEmpty()) {
-                            action = actions.removeFirst();
+                            action = actions.poll();
                             break;
                         }
                         wait();
@@ -80,10 +86,15 @@ public class AccessDatabaseThread extends Thread {
     }
     
     public final void addTask(AbstractDatabaseTask action) {
+        
+        // check if we need to fetch data for this action
         if (!action.needToFetch()) {
+            // fetch already done : return immediately
             action.callback(true);
             return;
         }
+        
+        // action is queued
         synchronized(this) {
             actions.add(action);
             notifyAll();

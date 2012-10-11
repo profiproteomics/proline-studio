@@ -3,13 +3,12 @@ package fr.proline.studio.dam.data;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadRsmFromRsetTask;
 import fr.proline.studio.dam.tasks.DatabaseLoadRsmFromRsmTask;
 import java.util.List;
 
-
 /**
- * Correspond to the ResultSummary in UDS DB
+ * Correspond to the ResultSummary in MSI DB
+ *
  * @author JM235353
  */
 public class ResultSummaryData extends AbstractData {
@@ -23,10 +22,10 @@ public class ResultSummaryData extends AbstractData {
     }
 
     @Override
-    public void loadImpl(AbstractDatabaseCallback callback, List<AbstractData> list) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadRsmFromRsmTask(callback, resultSummary, list));
-     
-        
+
+
     }
 
     @Override
@@ -40,7 +39,4 @@ public class ResultSummaryData extends AbstractData {
     public ResultSummary getResultSummary() {
         return resultSummary;
     }
-    
-    
-    
 }

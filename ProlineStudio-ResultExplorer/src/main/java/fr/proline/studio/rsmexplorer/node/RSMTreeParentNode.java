@@ -10,8 +10,8 @@ import org.openide.util.Lookup;
  */
 public class RSMTreeParentNode extends RSMNode {
 
-    public RSMTreeParentNode(Children children, Lookup lookup, AbstractData data) {
-        super(children, lookup, RSMNode.NodeTypes.TREE_PARENT, data);
+    public RSMTreeParentNode(AbstractData data) {
+        super(RSMNode.NodeTypes.TREE_PARENT, data);
     }
 
 }

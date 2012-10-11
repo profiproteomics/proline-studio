@@ -4,29 +4,22 @@
  */
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.studio.rsmexplorer.node.RSMNode;
-import java.awt.Component;
-import java.lang.reflect.InvocationTargetException;
-import javax.swing.*;
+
 import org.openide.util.NbBundle;
-import org.openide.nodes.Node;
-import org.openide.util.HelpCtx;
-import org.openide.util.actions.NodeAction;
-import org.openide.windows.WindowManager;
 
 /**
  *
  * @author JM235353
  */
-public class RenameAction extends NodeAction {
+public class RenameAction extends AbstractRSMAction {
 
-    private static RenameAction instance = null;
+    //private static RenameAction instance = null;
 
-    private RenameAction() {
-        putValue(Action.NAME, NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"));
+    public RenameAction() {
+        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"));
     }
 
-    public static RenameAction getInstance() {
+    /*public static RenameAction getInstance() {
         if (instance == null) {
             instance = new RenameAction();
         }
@@ -35,7 +28,7 @@ public class RenameAction extends NodeAction {
 
     @Override
     protected void performAction(Node[] nodes) {
-
+/*
         final RSMNode node = (RSMNode) nodes[0];
 
         try {
@@ -61,13 +54,13 @@ public class RenameAction extends NodeAction {
         } catch (InterruptedException e1) {
         } catch (InvocationTargetException e2) {
         }
+*/ //JPM.TODO
 
-
-    }
+  /*  }
 
     @Override
-    protected boolean enable(Node[] nodes) {
-
+    protected boolean enable(Node[] nodes) {*/
+/*
         // a node must be selected
         boolean actionEnabled = ((nodes != null) && (nodes.length == 1));
 
@@ -78,7 +71,8 @@ public class RenameAction extends NodeAction {
         }
 
         return actionEnabled;
-    }
+        return true;*/
+  /*  }
 
     @Override
     public String getName() {
@@ -88,5 +82,5 @@ public class RenameAction extends NodeAction {
     @Override
     public HelpCtx getHelpCtx() {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
+    }*/
 }

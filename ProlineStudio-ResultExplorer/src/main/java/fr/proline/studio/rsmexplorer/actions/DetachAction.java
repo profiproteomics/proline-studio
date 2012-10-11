@@ -5,28 +5,21 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 
-import fr.proline.studio.rsmexplorer.node.RSMNode;
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import org.openide.nodes.Node;
-import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
-import org.openide.util.actions.NodeAction;
 
 /**
  *
  * @author JM235353
  */
-public class DetachAction extends NodeAction {
+public class DetachAction extends AbstractRSMAction {
 
-   private static DetachAction instance = null;
+   //private static DetachAction instance = null;
 
-   private DetachAction() {
-       putValue(Action.NAME, NbBundle.getMessage(DetachAction.class, "CTL_DetachAction"));
+   public DetachAction() {
+       super(NbBundle.getMessage(DetachAction.class, "CTL_DetachAction"));
    }
 
-   public static DetachAction getInstance() {
+   /*public static DetachAction getInstance() {
       if (instance == null) {
          instance = new DetachAction();
       }
@@ -55,7 +48,7 @@ public class DetachAction extends NodeAction {
     @Override
     public HelpCtx getHelpCtx() {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
+    }*/
     
     
 }

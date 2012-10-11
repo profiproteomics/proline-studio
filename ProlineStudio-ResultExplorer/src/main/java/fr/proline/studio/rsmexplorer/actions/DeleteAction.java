@@ -4,25 +4,20 @@
  */
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.studio.rsmexplorer.node.RSMNode;
-import javax.swing.Action;
-import org.openide.nodes.Node;
-import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
-import org.openide.util.actions.NodeAction;
 
 /**
  *
  * @author JM235353
  */
-public class DeleteAction extends NodeAction {
+public class DeleteAction extends AbstractRSMAction {
 
-    private static DeleteAction instance = null;
+   // private static DeleteAction instance = null;
 
-    private DeleteAction() {
-        putValue(Action.NAME, NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"));
+    public DeleteAction() {
+        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"));
     }
-
+/*
     public static DeleteAction getInstance() {
         if (instance == null) {
             instance = new DeleteAction();
@@ -37,7 +32,7 @@ public class DeleteAction extends NodeAction {
 
     @Override
     protected boolean enable(Node[] nodes) {
-        // a node must be selected
+       /* // a node must be selected
         boolean actionEnabled = ((nodes != null) && (nodes.length >= 1));
 
         // the parent node of all other nodes can not be deleted
@@ -48,7 +43,8 @@ public class DeleteAction extends NodeAction {
             }
         }
 
-        return actionEnabled;
+        return actionEnabled;*/ //JPM.TODO
+     /*   return true;
     }
 
     @Override
@@ -59,5 +55,5 @@ public class DeleteAction extends NodeAction {
     @Override
     public HelpCtx getHelpCtx() {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
+    }*/
 }

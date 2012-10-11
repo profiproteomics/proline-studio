@@ -7,14 +7,6 @@ package fr.proline.studio.dam.tasks;
  */
 public abstract class AbstractDatabaseCallback {
     
-    //protected HashMap<Class,Object> results = null;
-    
-    /*public void addResult(Class key, Object result) {
-        if (results == null) {
-            results = new HashMap<Class, Object>();
-        }
-        results.put(key, result);
-    }*/
     
     /**
      * Returns if the callback must be called 
@@ -25,8 +17,11 @@ public abstract class AbstractDatabaseCallback {
     
     /**
      * Method called by the AccessDatabaseThread when the data is fetched
+     * 
      * @param success   indicates if the loading of data has been a success or not
+     * @param taskId    id of the task which has been executed
+     * @param slice     if subTask is not null : only a subpart of the task has been done
      */
-    public abstract void run(boolean success);
+    public abstract void run(boolean success, long taskId, SubTask subTask);
     
 }

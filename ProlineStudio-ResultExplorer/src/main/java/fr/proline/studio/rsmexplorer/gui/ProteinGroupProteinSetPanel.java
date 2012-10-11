@@ -8,6 +8,7 @@ import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.utils.DecoratedTable;
@@ -20,8 +21,9 @@ import javax.swing.event.ListSelectionEvent;
  */
 public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
 
-    private Integer resultSummaryId = -1;
 
+    private ProteinSet proteinSetCur = null;
+    
     /**
      * Creates new form ProteinGroupProteinSetPanel
      */
@@ -29,21 +31,22 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
         initComponents();
         
         ((DecoratedTable)proteinsTable).displayColumnAsPercentage(ProteinTableModel.COLTYPE_PROTEIN_SCORE);
-        
-        //iniTable((JXTable)proteinsTable);
+ 
     }
 
  
     
     public void setData(ProteinSet proteinSet) {
         
+        if (proteinSet == proteinSetCur) {
+            return;
+        }
+        proteinSetCur = proteinSet;
+        
         if (proteinSet == null) {
             clearData();
             return;
         }
-
-        // keep resultSummaryId
-        resultSummaryId = proteinSet.getResultSummary().getId();
         
         ProteinSet.TransientProteinSetData proteinSetData = proteinSet.getTransientProteinSetData();
         
@@ -71,12 +74,11 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
         
     }
     
-    public void clearData() {
+    private void clearData() {
         proteinNameTextField.setText("");
         ((ProteinGroupProteinSelectedPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(null);
         ((ProteinTableModel) proteinsTable.getModel()).setData(null, null);
-        
-        resultSummaryId = -1;
+
     }
     
     
@@ -128,13 +130,13 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
     
     
     private class ProteinTable extends DecoratedTable  {
+
+        ProteinMatch proteinMatchSelected = null;
+        
         /** 
          * Called whenever the value of the selection changes.
          * @param e the event that characterizes the change.
          */
-
-        ProteinMatch proteinMatchSelected = null;
-        
         @Override
         public void valueChanged(ListSelectionEvent e) {
             
@@ -181,7 +183,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
                 }
 
                 @Override
-                public void run(boolean success) {
+                public void run(boolean success, long taskId, SubTask subTask) {
                     ProteinGroupPeptideTablePanel p = (ProteinGroupPeptideTablePanel) DataViewerTopComponent.getPanel(ProteinGroupPeptideTablePanel.class);
 
                     if (success) {
@@ -196,7 +198,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
             };
             
             // Load data if needed asynchronously
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, proteinMatch, resultSummaryId));
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, proteinMatch, proteinSetCur.getResultSummary().getId()));
 
         }
     }

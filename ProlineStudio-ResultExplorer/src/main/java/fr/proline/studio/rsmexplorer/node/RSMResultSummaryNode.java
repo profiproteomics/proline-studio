@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ResultSummaryData;
 import java.awt.Image;
+import javax.swing.ImageIcon;
 import org.openide.nodes.Children;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
@@ -15,18 +16,18 @@ import org.openide.util.Lookup;
  */
 public class RSMResultSummaryNode extends RSMNode {
 
-    private static Image icon = ImageUtilities.loadImage("fr/proline/studio/rsmexplorer/images/resultSummary.png");
+    private static ImageIcon icon = ImageUtilities.loadImageIcon("fr/proline/studio/rsmexplorer/images/resultSummary.png", false);
 
-    public RSMResultSummaryNode(Children children, Lookup lookup, AbstractData data) {
-        super(children, lookup, NodeTypes.RESULT_SUMMARY, data);
+    public RSMResultSummaryNode(AbstractData data) {
+        super(NodeTypes.RESULT_SUMMARY, data);
     }
 
     @Override
-    public Image getIcon(int type) {
+    public ImageIcon getIcon() {
         return icon;
     }
 
-    @Override
+    /*@Override
     public Image getOpenedIcon(int i) {
         return icon;
     }
@@ -34,9 +35,10 @@ public class RSMResultSummaryNode extends RSMNode {
     @Override
     public boolean canRename() {
         return true;
-    }
+    }*/
     
+ 
     public ResultSummary getResultSummary() {
-        return ((ResultSummaryData) data).getResultSummary();
+        return ((ResultSummaryData) getData()).getResultSummary();
     }
 }

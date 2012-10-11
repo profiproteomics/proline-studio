@@ -20,7 +20,7 @@ import javax.persistence.TypedQuery;
  * (with its Result Summary)
  * @author JM235353
  */
-public class DatabaseLoadIdentificationFractionTask extends AbstractDatabaseTask{
+public class DatabaseLoadIdentificationFractionTask extends AbstractDatabaseTask {
     
     private Identification identification = null;
     private List<AbstractData> list = null;

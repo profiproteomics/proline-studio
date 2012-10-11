@@ -101,4 +101,7 @@ public class ProteinTableModel extends AbstractTableModel {
         this.subSetMatches = subSetMatches;
         fireTableDataChanged();
     }
+    
+  
+    
 }

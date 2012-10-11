@@ -1,37 +1,44 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.actions;
 
-import java.awt.event.ActionEvent;
+
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.openide.nodes.Node;
-import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
-import org.openide.util.actions.NodeAction;
-import org.openide.util.actions.Presenter;
 
 /**
  *
  * @author JM235353
  */
-public class ChildParentAction extends NodeAction implements Presenter.Popup {
+public class ChildParentAction extends AbstractRSMAction {
 
-    private static ChildParentAction instance = null;
+    //private static ChildParentAction instance = null;
 
-    private ChildParentAction() {
+    public ChildParentAction() {
+        super(NbBundle.getMessage(DisplayAction.class, "CTL_ChildParentAction"));
     }
 
-    public static ChildParentAction getInstance() {
+    @Override
+    public JMenuItem getPopupPresenter() {
+        JMenu menu = new JMenu((String) getValue(NAME));
+        
+        JMenuItem newFractionMenuItem = new JMenuItem(new NewIdentificationFractionAction());
+        menu.add(newFractionMenuItem);
+        
+        JMenuItem detachMenuItem = new JMenuItem(new DetachAction());
+        menu.add(detachMenuItem);
+
+        return menu;
+    }
+    
+    
+    /*public static ChildParentAction getInstance() {
         if (instance == null) {
             instance = new ChildParentAction();
         }
         return instance;
-    }
+    }*/
 
-
+    /*
     @Override
     public JMenuItem getPopupPresenter() {
         if (menu == null) {
@@ -51,10 +58,7 @@ public class ChildParentAction extends NodeAction implements Presenter.Popup {
     private JMenuItem newFractionMenuItem = null;
     private JMenuItem detachMenuItem = null;
 
-    @Override
-    protected void performAction(Node[] nodes) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+
 
     @Override
     protected boolean enable(Node[] nodes) {
@@ -78,5 +82,5 @@ public class ChildParentAction extends NodeAction implements Presenter.Popup {
     @Override
     public HelpCtx getHelpCtx() {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
+    }*/
 }

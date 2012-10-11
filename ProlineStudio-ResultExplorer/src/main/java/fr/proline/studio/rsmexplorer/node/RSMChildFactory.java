@@ -1,71 +1,60 @@
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.studio.dam.data.AbstractData;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import org.openide.nodes.ChildFactory;
-import org.openide.nodes.Children;
-import org.openide.nodes.Node;
-import org.openide.util.lookup.Lookups;
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 
 /**
  * Class used to create children of a note asynchronously
  * @author JM235353
  */
-public class RSMChildFactory extends ChildFactory<AbstractData> {
+public class RSMChildFactory  {
 
-    private AbstractData m_data;
-   
-
-    public RSMChildFactory(AbstractData data) {
-        m_data = data;
-    }
-    
-
-    @Override
-    protected boolean createKeys(List<AbstractData> list) {
+    public static RSMNode createNode(AbstractData key) {
         
-        m_data.load(list);
-        
-        
-        return true;
-    }
-
-    @Override
-    protected Node createNodeForKey(AbstractData key) {
-
         // result Node
-        Node result = null;
-
-        // Children of the Node
-        Children children;
-        if (key.hasChildren()) {
-            // there are children in the database which will be loaded
-            children = Children.create(new RSMChildFactory(key), true);
-        } else {
-            // no child in the database
-            children = Children.LEAF;
-        }
+        RSMNode result = null;
         
-        // Creation of the correct Node type
+                // Creation of the correct Node type
         AbstractData.DataTypes type = key.getDataType();
         switch (type) {
+            case MAIN:
+                result = new RSMTreeParentNode(key);
+                break;
             case PROJECT:
-                result = new RSMProjectNode(children, Lookups.singleton(key), key);
+                result = new RSMProjectNode(key);
                 break;
             case RESULT_SET:
-                result = new RSMResultSetNode(children, Lookups.singleton(key), key);
+                result = new RSMResultSetNode(key);
                 break;
             case RESULT_SUMMARY:
-                result = new RSMResultSummaryNode(children, Lookups.singleton(key), key);
+                result = new RSMResultSummaryNode(key);
                 break;
             case IDENTIFICATION:
-                result = new RSMIdentificationNode(children, Lookups.singleton(key), key);
+                result = new RSMIdentificationNode(key);
                 break;
             case IDENTIFICATION_FRACTION:
-                result = new RSMIdentificationFractionNode(children, Lookups.singleton(key), key);
+                result = new RSMIdentificationFractionNode(key);
                 break;
         }
-
+        
+        if (key.hasChildren()) {
+            result.add(new RSMHourGlassNode(null));
+        }
+        
         return result;
     }
+    
+    
+    
+    
+    
+ 
+    
 }

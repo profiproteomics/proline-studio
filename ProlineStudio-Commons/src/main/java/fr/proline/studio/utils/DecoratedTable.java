@@ -1,7 +1,6 @@
 package fr.proline.studio.utils;
 
 import java.awt.Color;
-import javax.swing.ListSelectionModel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
@@ -9,23 +8,21 @@ import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.util.PaintUtils;
 
 /**
- * 
+ * Table which has a bi-color striping, an hability to select columns viewed and
+ * the possibility to display an "histogram" on a column
+ *
  * @author JM235353
  */
 public class DecoratedTable extends JXTable {
 
     public DecoratedTable() {
-        // only one row can be selected
-        setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         // allow user to hide/show columns
         setColumnControlVisible(true);
 
-        // allow the user to search the table
-        //table.setSearchable(null); //JPM.TODO
-
         // highlight one line of two
         addHighlighter(HighlighterFactory.createSimpleStriping());
+
     }
 
     public void displayColumnAsPercentage(int column) {

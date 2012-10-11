@@ -10,29 +10,63 @@ import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.*;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMResultSummaryNode;
-import javax.swing.Action;
 import org.openide.util.NbBundle;
-import org.openide.nodes.Node;
-import org.openide.util.HelpCtx;
-import org.openide.util.actions.NodeAction;
 import org.openide.windows.WindowManager;
 
 /**
  *
  * @author JM235353
  */
-public class ProteinGroupsAction extends NodeAction {
+public class ProteinGroupsAction extends AbstractRSMAction {
 
-   private static ProteinGroupsAction instance = null;
+   //private static ProteinGroupsAction instance = null;
 
-   private ProteinGroupsAction() {
-       putValue(Action.NAME, NbBundle.getMessage(ProteinGroupsAction.class, "CTL_ProteinGroupsAction"));
+   public ProteinGroupsAction() {
+       super(NbBundle.getMessage(ProteinGroupsAction.class, "CTL_ProteinGroupsAction"));
    }
 
-   public static ProteinGroupsAction getInstance() {
+    @Override
+    public void actionPerformed(RSMNode n) {
+        
+
+        final ResultSummary rsm = ((RSMResultSummaryNode) n).getResultSummary();
+
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask) {
+                
+                DataViewerTopComponent viewer = (DataViewerTopComponent) WindowManager.getDefault().findTopComponent("DataViewerTopComponent");
+                
+                
+                if (subTask == null) {
+                    viewer.open();
+                    viewer.requestActive();
+
+                    ProteinSet[] proteinSetArray = rsm.getTransientProteinSets();
+                    viewer.setSelectedResultSummary(taskId, proteinSetArray);
+                } else {
+                    viewer.dataUpdated(subTask);
+                }
+            }
+        };
+        
+
+        // ask asynchronous loading of data
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinSetsTask(callback, rsm));
+
+    }
+   
+   /*public static ProteinGroupsAction getInstance() {
       if (instance == null) {
          instance = new ProteinGroupsAction();
       }
@@ -42,7 +76,7 @@ public class ProteinGroupsAction extends NodeAction {
 
     @Override
     protected void performAction(Node[] nodes) {
-        if ((nodes == null) || (nodes.length != 1)) {
+        /*if ((nodes == null) || (nodes.length != 1)) {
             // should never happen
             return;
         }
@@ -71,14 +105,14 @@ public class ProteinGroupsAction extends NodeAction {
 
         // ask asynchronous loading of data
         AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinSetsTask(callback, rsm));
-
+*/ //JPM.TODO
         
-    }
+  /*  }
 
     @Override
     protected boolean enable(Node[] nodes) {
         
-
+/*
         // a node must be selected
         boolean actionEnabled = ((nodes != null) && (nodes.length == 1));
         
@@ -87,7 +121,8 @@ public class ProteinGroupsAction extends NodeAction {
             actionEnabled =  node.searchChildNodeOfAType(RSMNode.NodeTypes.RESULT_SUMMARY);
         }
         
-        return actionEnabled;
+        return actionEnabled;*/ //JPM.TODO
+   /*     return true;
     }
 
     @Override
@@ -98,7 +133,7 @@ public class ProteinGroupsAction extends NodeAction {
     @Override
     public HelpCtx getHelpCtx() {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
+    }*/
             
 
     

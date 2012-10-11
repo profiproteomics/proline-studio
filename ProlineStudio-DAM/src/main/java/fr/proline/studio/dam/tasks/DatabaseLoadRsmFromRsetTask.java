@@ -14,34 +14,34 @@ import javax.persistence.TypedQuery;
 
 /**
  * Load a Result Summary of a Result Set
+ *
  * @author JM235353
  */
-public class DatabaseLoadRsmFromRsetTask extends AbstractDatabaseTask{
-    
+public class DatabaseLoadRsmFromRsetTask extends AbstractDatabaseTask {
+
     private ResultSet resultSet = null;
     private List<AbstractData> list = null;
-    
+
     public DatabaseLoadRsmFromRsetTask(AbstractDatabaseCallback callback, ResultSet resultSet, List<AbstractData> list) {
         super(callback);
         this.resultSet = resultSet;
         this.list = list;
-        
+
     }
-    
+
     @Override
     public boolean needToFetch() {
         return true; // anyway this task is used only one time for each node
-            
+
     }
-    
-    
+
     @Override
     public boolean fetchData() {
 
-        
+
         Integer id = resultSet.getId();
 
-        
+
 
         EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(ProlineRepository.Databases.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
         try {
@@ -55,12 +55,12 @@ public class DatabaseLoadRsmFromRsetTask extends AbstractDatabaseTask{
             Iterator<ResultSummary> it = rsmList.iterator();
             while (it.hasNext()) {
                 ResultSummary rsmCur = it.next();
-                
+
                 // Check if the ResultSummary has Children without loading them.
                 TypedQuery<Long> isEmptyQuery = entityManagerMSI.createQuery("SELECT count(*) FROM ResultSummary rs WHERE rs.id=:resultSummaryId AND rs.children IS EMPTY", Long.class);
                 isEmptyQuery.setParameter("resultSummaryId", rsmCur.getId());
                 boolean hasChildren = (isEmptyQuery.getSingleResult() == 0);
-                
+
                 list.add(new ResultSummaryData(rsmCur, hasChildren));
             }
 
@@ -75,6 +75,4 @@ public class DatabaseLoadRsmFromRsetTask extends AbstractDatabaseTask{
 
         return true;
     }
-    
-    
 }

@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.studio.dam.data.AbstractData;
 import java.awt.Image;
+import javax.swing.ImageIcon;
 import org.openide.nodes.Children;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
@@ -12,14 +13,14 @@ import org.openide.util.Lookup;
  */
 public class RSMProjectNode extends RSMNode {
 
-    private static Image icon = ImageUtilities.loadImage("fr/proline/studio/rsmexplorer/images/project.png");
+    private static ImageIcon icon = ImageUtilities.loadImageIcon("fr/proline/studio/rsmexplorer/images/project.png", false);
 
-    public RSMProjectNode(Children children, Lookup lookup, AbstractData data) {
-        super(children, lookup, RSMNode.NodeTypes.TREE_PARENT, data);
+    public RSMProjectNode(AbstractData data) {
+        super(RSMNode.NodeTypes.TREE_PARENT, data);
     }
 
-    @Override
-    public Image getIcon(int type) {
+    /*@Override
+    public Image getIcon() {
         return icon;
     }
 
@@ -31,5 +32,5 @@ public class RSMProjectNode extends RSMNode {
     @Override
     public boolean canRename() {
         return false;
-    }
+    }*/
 }

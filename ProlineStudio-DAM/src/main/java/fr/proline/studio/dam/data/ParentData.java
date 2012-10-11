@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * User Data for Parent Node of all other Nodes in Result Explorer
+ *
  * @author JM235353
  */
 public class ParentData extends AbstractData {
@@ -20,11 +21,11 @@ public class ParentData extends AbstractData {
     }
 
     @Override
-    public void loadImpl(AbstractDatabaseCallback callback, List<AbstractData> list) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadProjectTask(callback, AccessDatabaseThread.getProjectIdTMP(), list));  //JPM.TODO
 
     }
-    
+
     public String getName() {
         return "";
     }

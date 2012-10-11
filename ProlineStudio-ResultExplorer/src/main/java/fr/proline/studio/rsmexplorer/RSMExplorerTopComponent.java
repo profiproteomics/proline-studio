@@ -4,19 +4,20 @@
  */
 package fr.proline.studio.rsmexplorer;
 
+import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ParentData;
-import fr.proline.studio.rsmexplorer.node.RSMChildFactory;
-import fr.proline.studio.rsmexplorer.node.RSMTreeParentNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
+import javax.swing.JTree;
+import javax.swing.event.TreeWillExpandListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
-import org.openide.explorer.ExplorerManager;
-import org.openide.explorer.ExplorerUtils;
-import org.openide.explorer.view.BeanTreeView;
-import org.openide.nodes.Children;
+
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.lookup.Lookups;
+
 
 /**
  * Top component which displays something.
@@ -38,9 +39,7 @@ preferredID = "RSMExplorerTopComponent")
     "CTL_RSMExplorerTopComponent=Identifications",
     "HINT_RSMExplorerTopComponent=Identifications of your Project"
 })
-public final class RSMExplorerTopComponent extends TopComponent implements ExplorerManager.Provider {
-
-    private final ExplorerManager mgr = new ExplorerManager();
+public final class RSMExplorerTopComponent extends TopComponent  {
 
     
     public RSMExplorerTopComponent() {
@@ -48,13 +47,10 @@ public final class RSMExplorerTopComponent extends TopComponent implements Explo
         setName(Bundle.CTL_RSMExplorerTopComponent());
         setToolTipText(Bundle.HINT_RSMExplorerTopComponent());
 
-        // create root node
-        ParentData parent = new ParentData();  //JPM.TODO
-        mgr.setRootContext(new RSMTreeParentNode(Children.create(new RSMChildFactory(parent), true), Lookups.singleton(parent), null));
-     
-        associateLookup(ExplorerUtils.createLookup(mgr, getActionMap())); 
     }
-
+    
+ 
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -63,8 +59,11 @@ public final class RSMExplorerTopComponent extends TopComponent implements Explo
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        explorerScrollPane = new BeanTreeView();
+        explorerScrollPane = new javax.swing.JScrollPane();
+        tree = RSMTree.getTree();;
         searchPanel = new fr.proline.studio.gui.SearchPanel();
+
+        explorerScrollPane.setViewportView(tree);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -85,6 +84,7 @@ public final class RSMExplorerTopComponent extends TopComponent implements Explo
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane explorerScrollPane;
     private fr.proline.studio.gui.SearchPanel searchPanel;
+    private javax.swing.JTree tree;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
@@ -108,9 +108,10 @@ public final class RSMExplorerTopComponent extends TopComponent implements Explo
         // TODO read your settings according to their version
     }
 
-    @Override
-    public ExplorerManager getExplorerManager() {
-        return mgr;
-    }
+    
+        
+    
+    
+    
     
 }

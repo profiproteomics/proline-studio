@@ -13,32 +13,32 @@ import javax.persistence.EntityManager;
 
 /**
  * Load Identifications of a Project
+ *
  * @author JM235353
  */
 public class DatabaseLoadIdentificationTask extends AbstractDatabaseTask {
-    
+
     private Project project = null;
     private List<AbstractData> list = null;
-    
+
     public DatabaseLoadIdentificationTask(AbstractDatabaseCallback callback, Project project, List<AbstractData> list) {
         super(callback);
         this.project = project;
         this.list = list;
-        
+
     }
 
     @Override
     public boolean needToFetch() {
         return true; // anyway this task is used only one time for each node
-            
+
     }
 
-    
     @Override
     public boolean fetchData() {
-        
+
         Integer projectId = project.getId();
-        
+
         EntityManager entityManagerUDS = ProlineDBManagement.getProlineDBManagement().getEntityManager(ProlineRepository.Databases.UDS, true);
         try {
             entityManagerUDS.getTransaction().begin();
@@ -46,13 +46,13 @@ public class DatabaseLoadIdentificationTask extends AbstractDatabaseTask {
             // load identifications
             IdentificationRepository identificationRepository = new IdentificationRepository(entityManagerUDS);
             List<Identification> identifications = identificationRepository.findIdentificationsByProject(projectId);
-            
+
             Iterator<Identification> it = identifications.iterator();
             while (it.hasNext()) {
                 Identification identification = it.next();
                 list.add(new IdentificationData(identification));
             }
-            
+
             entityManagerUDS.getTransaction().commit();
 
         } catch (RuntimeException e) {
@@ -62,9 +62,7 @@ public class DatabaseLoadIdentificationTask extends AbstractDatabaseTask {
         } finally {
             entityManagerUDS.close();
         }
-        
+
         return true;
     }
-    
-    
 }

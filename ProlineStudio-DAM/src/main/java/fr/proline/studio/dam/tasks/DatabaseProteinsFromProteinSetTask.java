@@ -16,12 +16,12 @@ import javax.persistence.TypedQuery;
  * Load Proteins of a Protein Set and dispatch them in subset or sameset 
  * @author JM235353
  */
-public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask{
+public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
     
     private ProteinSet proteinSet = null;
 
     public DatabaseProteinsFromProteinSetTask(AbstractDatabaseCallback callback, ProteinSet proteinSet) {
-        super(callback);
+        super(callback, Priority.NORMAL_3);
         this.proteinSet = proteinSet;        
     }
 
@@ -41,6 +41,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask{
             
             // number of proteins in sameset
             ProteinMatch typicalProtein = proteinSet.getTransientProteinSetData().getTypicalProteinMatch(); 
+            
             int peptitesCountInSameSet = typicalProtein.getPeptideCount();
 
             

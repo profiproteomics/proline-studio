@@ -5,26 +5,22 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 
-import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;
-import org.openide.util.actions.Presenter;
-import org.openide.nodes.Node;
-import org.openide.util.HelpCtx;
-import org.openide.util.actions.NodeAction;
 
 /**
  *
  * @author JM235353
  */
-public class DisplayAction extends NodeAction implements Presenter.Popup {
+public class DisplayAction extends AbstractRSMAction {
 
-   private static DisplayAction instance = null;
+   ///private static DisplayAction instance = null;
 
-   private DisplayAction() {
+   public DisplayAction() {
+       super(NbBundle.getMessage(DisplayAction.class, "CTL_DisplayAction"));
    }
-
+/*
    public static DisplayAction getInstance() {
       if (instance == null) {
          instance = new DisplayAction();
@@ -32,36 +28,35 @@ public class DisplayAction extends NodeAction implements Presenter.Popup {
       
       return instance;
    }
-   
+   */
 
    
 
-   @Override
-   public JMenuItem getPopupPresenter() {
+    @Override
+    public JMenuItem getPopupPresenter() {
+        JMenu menu = new JMenu((String) getValue(NAME));
 
-         if (menu == null) {
-             menu = new JMenu(NbBundle.getMessage(DisplayAction.class, "CTL_DisplayAction"));
-             proteinMenuItem = new JMenuItem(ProteinGroupsAction.getInstance());
-             menu.add(proteinMenuItem);
-         /*menu.add(new JMenuItem(PeptidsGroupsAction.getInstance()));
-         menu.add(new JMenuItem(QueriesGroupsAction.getInstance()));
-         menu.add(new JMenuItem(PropertiesAction.getInstance()));*/
-             //JPM.TODO
-         }
-         
-         menu.setEnabled(isEnabled());
-         proteinMenuItem.setEnabled(ProteinGroupsAction.getInstance().isEnabled());
-         return menu;
-   }
-   private JMenu menu = null;
-   private JMenuItem proteinMenuItem = null;
+        JMenuItem proteinMenuItem = new JMenuItem(new ProteinGroupsAction());
+        menu.add(proteinMenuItem);
+        /*
+         * menu.add(new JMenuItem(PeptidsGroupsAction.getInstance()));
+         * menu.add(new JMenuItem(QueriesGroupsAction.getInstance()));
+         * menu.add(new JMenuItem(PropertiesAction.getInstance()));
+         */
+        //JPM.TODO
+
+        return menu;
+    }
+    
+    
+
    
    
     /*   @Override
     public void updateEnabled(Node[] selectedNodes) {
 
     }*/
-
+/*
     @Override
     protected void performAction(Node[] nodes) {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -91,7 +86,7 @@ public class DisplayAction extends NodeAction implements Presenter.Popup {
     @Override
     public HelpCtx getHelpCtx() {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
+    }*/
    
    
 }

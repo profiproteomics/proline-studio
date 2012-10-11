@@ -6,6 +6,7 @@ package fr.proline.studio.rsmexplorer;
 
 
 import fr.proline.core.orm.msi.ProteinSet;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.ProteinGroupTablePanel;
 import java.util.HashMap;
 import javax.swing.JPanel;
@@ -109,12 +110,18 @@ public final class DataViewerTopComponent extends TopComponent {
     }
     
     
-    public void setSelectedResultSummary(ProteinSet[] proteinSets) {
+    public void setSelectedResultSummary(Long taskId, ProteinSet[] proteinSets) {
         // Note : Protein Groups <=> Protein Sets
 
         
         tabbedPane.setSelectedIndex(0); //JPM.TODO : remove 0 and put reference
-        ((ProteinGroupTablePanel)getPanel(ProteinGroupTablePanel.class)).setData(proteinSets);
+        ((ProteinGroupTablePanel)getPanel(ProteinGroupTablePanel.class)).setData(taskId, proteinSets);
         
     }
+    
+    public void dataUpdated(SubTask subTask) {
+        ((ProteinGroupTablePanel)getPanel(ProteinGroupTablePanel.class)).dataUpdated(subTask);
+    }
+    
+
 }

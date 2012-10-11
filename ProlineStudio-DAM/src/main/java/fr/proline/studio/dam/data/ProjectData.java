@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  * Correspond to the opened Project from UDS DB
+ *
  * @author JM235353
  */
 public class ProjectData extends AbstractData {
@@ -30,7 +31,7 @@ public class ProjectData extends AbstractData {
     }
 
     @Override
-    public void loadImpl(AbstractDatabaseCallback callback, List<AbstractData> list) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
 
         AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadIdentificationTask(callback, project, list));
 

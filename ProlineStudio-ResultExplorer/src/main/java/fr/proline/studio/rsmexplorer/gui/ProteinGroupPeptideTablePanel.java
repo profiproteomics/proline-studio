@@ -2,16 +2,8 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
-import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
 import fr.proline.studio.utils.DecoratedTable;
-import fr.proline.studio.utils.RelativePainterHighlighter;
-import java.awt.Color;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
-import org.jdesktop.swingx.painter.MattePainter;
-import org.jdesktop.swingx.util.PaintUtils;
 
 /**
  *

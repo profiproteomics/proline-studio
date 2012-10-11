@@ -5,8 +5,10 @@ import fr.proline.studio.rsmexplorer.actions.ChildParentAction;
 import fr.proline.studio.rsmexplorer.actions.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.DisplayAction;
 import fr.proline.studio.rsmexplorer.actions.RenameAction;
+import java.awt.Image;
 import javax.swing.Action;
-import org.openide.nodes.AbstractNode;
+import javax.swing.ImageIcon;
+import javax.swing.tree.DefaultMutableTreeNode;
 import org.openide.nodes.Children;
 import org.openide.util.Lookup;
 
@@ -14,7 +16,7 @@ import org.openide.util.Lookup;
  *
  * @author JM235353
  */
-public class RSMNode extends AbstractNode {
+public class RSMNode extends DefaultMutableTreeNode {
 
     public enum NodeTypes {
 
@@ -27,12 +29,12 @@ public class RSMNode extends AbstractNode {
     }
     private static Action[] actionInstance = null;
     private NodeTypes type;
-    protected AbstractData data;
+    //protected AbstractData data;
 
-    public RSMNode(Children children, Lookup lookup, NodeTypes type, AbstractData data) {
-        super(children, lookup);
+    public RSMNode(/*Children children,*/ NodeTypes type, AbstractData data) {
+        super(data);
         this.type = type;
-        this.data = data;
+        //this.data = data;
     }
 
     public NodeTypes getType() {
@@ -40,9 +42,13 @@ public class RSMNode extends AbstractNode {
     }
     
     public AbstractData getData() {
-        return data;
+        return (AbstractData) getUserObject();
     }
 
+    public ImageIcon getIcon() {
+        return null;
+    }
+    
     public boolean searchChildNodeOfAType(NodeTypes type) {
         if (this.type == type) {
             return true;
@@ -61,7 +67,8 @@ public class RSMNode extends AbstractNode {
     }
 
     @Override
-    public String getDisplayName() {
+    public String toString() {
+        AbstractData data = getData();
         if (data == null) {
             return "";
         }
@@ -69,13 +76,13 @@ public class RSMNode extends AbstractNode {
         return data.getName();
     }
 
-    @Override
+    /*@Override */
     public void setName(String name) {
         //data.setName(name); //JPM.TODO
-        super.setName(name);
+     //   super.setName(name);
     }
 
-    @Override
+    /*@Override
     public Action[] getActions(boolean arg0) {
 
         if (actionInstance == null) {
@@ -88,5 +95,5 @@ public class RSMNode extends AbstractNode {
         }
 
         return actionInstance;
-    }
+    }*/
 }

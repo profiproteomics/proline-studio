@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  * Correspond to an Identification Fraction in UDS DB
+ *
  * @author JM235353
  */
 public class IdentificationFractionData extends AbstractData {
@@ -32,7 +33,7 @@ public class IdentificationFractionData extends AbstractData {
     }
 
     @Override
-    public void loadImpl(AbstractDatabaseCallback callback, List<AbstractData> list) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadResultSetTask(callback, identificationFraction, list));
 
     }

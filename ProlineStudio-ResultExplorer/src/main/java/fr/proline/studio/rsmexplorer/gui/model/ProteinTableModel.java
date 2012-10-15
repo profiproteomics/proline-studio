@@ -87,11 +87,11 @@ public class ProteinTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return Integer.valueOf(proteinMatch.getPeptideCount());
             case COLTYPE_PROTEIN_MASS:
-                double mass = proteinMatch.getTransientBioSequence().getMass();
-                if (mass < 0) {
+                BioSequence bioSequence = proteinMatch.getTransientBioSequence();
+                if (bioSequence == null) {
                     return "";
                 }
-                return String.valueOf(mass);
+                return String.valueOf(bioSequence.getMass());
         }
         return null; // should never happen
     }

@@ -16,7 +16,9 @@ import javax.swing.event.ListSelectionEvent;
 import org.openide.util.ImageUtilities;
 
 /**
- *
+ * In : Window which display Protein Groups of a Result Summary
+ * - Panel used to display Protein Groups (at the top)
+ * 
  * @author JM235353
  */
 public class ProteinGroupTablePanel extends javax.swing.JPanel  {
@@ -153,17 +155,17 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
         
         private void doSearch() {
             
-            String searchText = searchTextField.getText().trim();
+            final String searchText = searchTextField.getText().trim();
 
             if (searchText.compareTo(previousSearch) == 0) {
                 // search already done, display next result
                 searchIndex++;
-                if (searchIndex > proteinSetIds.size()) {
+                if (searchIndex >= proteinSetIds.size()) {
                     searchIndex = 0;
                 }
                 
                 if (!proteinSetIds.isEmpty()) {
-                    ((ProteinGroupTable) proteinGroupTable).selectProteinSet(proteinSetIds.get(searchIndex));
+                    ((ProteinGroupTable) proteinGroupTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
                 }
                 
             } else {
@@ -188,7 +190,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
                             
                             ((ProteinGroupTableModel) proteinGroupTable.getModel()).sortAccordingToModel(proteinSetIds);
 
-                            ((ProteinGroupTable) proteinGroupTable).selectProteinSet(proteinSetIds.get(searchIndex));
+                            ((ProteinGroupTable) proteinGroupTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
                             
                         }
 
@@ -246,7 +248,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
             // nothing selected
             if (selectedRow == -1) {
                 proteinSetSelected = null;
-                p.setData(null);
+                p.setData(null, null);
                 return;
                 
             }
@@ -275,6 +277,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
             
             
             // prepare callback to view new data
+            final String searchedText = searchTextBeingDone;
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                 @Override
@@ -286,7 +289,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
                 public void run(boolean success, long taskId, SubTask subTask) {
                     ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
 
-                    p.setData(proteinSet);
+                    p.setData(proteinSet, searchedText);
                 }
             };
             
@@ -295,12 +298,17 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
 
         }
         
-        public void selectProteinSet(Integer proteinSetId) {
+        public void selectProteinSet(Integer proteinSetId, String searchText) {
             ProteinGroupTableModel tableModel = (ProteinGroupTableModel) getModel();
             int row = tableModel.findRow(proteinSetId);
             if (row == -1) {
                 return;
             }
+            
+            // JPM.hack we need to keep the search text
+            // to be able to give it if needed to the panel
+            // which display proteins of a protein group
+            searchTextBeingDone = searchText;
             
             // must convert row index if there is a sorting
             row = convertRowIndexToView(row);
@@ -311,8 +319,10 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
             // scroll to the row
             scrollRowToVisible(row);
 
+            searchTextBeingDone = null;
             
         }
+        String searchTextBeingDone = null;
 
         public void dataUpdated(SubTask subTask) {
             

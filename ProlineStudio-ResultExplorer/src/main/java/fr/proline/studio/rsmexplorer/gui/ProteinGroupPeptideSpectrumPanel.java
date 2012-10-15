@@ -11,6 +11,10 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
      */
     public ProteinGroupPeptideSpectrumPanel() {
         initComponents();
+        
+        editorPane.setEditable(false);
+        editorPane.setContentType("text/html");
+        editorPane.setText("");
     }
 
     /**
@@ -22,37 +26,41 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        peptideInfoTabbedPane = new javax.swing.JTabbedPane();
-        jPanel1 = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
+        tabPanel = new javax.swing.JTabbedPane();
+        sequencePanel = new javax.swing.JPanel();
+        sequenceScrollPane = new javax.swing.JScrollPane();
+        editorPane = new javax.swing.JEditorPane();
+        spectrumPanel = new javax.swing.JPanel();
 
         setMaximumSize(new java.awt.Dimension(32767, 800));
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        sequenceScrollPane.setViewportView(editorPane);
+
+        javax.swing.GroupLayout sequencePanelLayout = new javax.swing.GroupLayout(sequencePanel);
+        sequencePanel.setLayout(sequencePanelLayout);
+        sequencePanelLayout.setHorizontalGroup(
+            sequencePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(sequenceScrollPane)
+        );
+        sequencePanelLayout.setVerticalGroup(
+            sequencePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(sequenceScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
+        );
+
+        tabPanel.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideSpectrumPanel.class, "ProteinGroupPeptideSpectrumPanel.sequencePanel.TabConstraints.tabTitle"), sequencePanel); // NOI18N
+
+        javax.swing.GroupLayout spectrumPanelLayout = new javax.swing.GroupLayout(spectrumPanel);
+        spectrumPanel.setLayout(spectrumPanelLayout);
+        spectrumPanelLayout.setHorizontalGroup(
+            spectrumPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 375, Short.MAX_VALUE)
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        spectrumPanelLayout.setVerticalGroup(
+            spectrumPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 88, Short.MAX_VALUE)
         );
 
-        peptideInfoTabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideSpectrumPanel.class, "ProteinGroupPeptideSpectrumPanel.jPanel1.TabConstraints.tabTitle"), jPanel1); // NOI18N
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 375, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 88, Short.MAX_VALUE)
-        );
-
-        peptideInfoTabbedPane.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideSpectrumPanel.class, "ProteinGroupPeptideSpectrumPanel.jPanel2.TabConstraints.tabTitle"), jPanel2); // NOI18N
+        tabPanel.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideSpectrumPanel.class, "ProteinGroupPeptideSpectrumPanel.spectrumPanel.TabConstraints.tabTitle"), spectrumPanel); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -60,20 +68,22 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(peptideInfoTabbedPane)
+                .addComponent(tabPanel)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(peptideInfoTabbedPane)
+                .addComponent(tabPanel)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JTabbedPane peptideInfoTabbedPane;
+    private javax.swing.JEditorPane editorPane;
+    private javax.swing.JPanel sequencePanel;
+    private javax.swing.JScrollPane sequenceScrollPane;
+    private javax.swing.JPanel spectrumPanel;
+    private javax.swing.JTabbedPane tabPanel;
     // End of variables declaration//GEN-END:variables
 }

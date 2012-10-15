@@ -1,5 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
+import fr.proline.core.orm.msi.BioSequence;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.repository.ProlineRepository;
@@ -57,8 +58,8 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
             ArrayList<ProteinMatch> sameSet = new ArrayList<ProteinMatch>(proteinMatchList.size());
             ArrayList<ProteinMatch> subSet  = new ArrayList<ProteinMatch>(proteinMatchList.size());
             
-            // temporary Map for retrieving mass
-            HashMap<Integer,ProteinMatch> massMap = new HashMap<Integer,ProteinMatch>();
+            // temporary Map to link a bioSequenceId to a ProteinMatch
+            HashMap<Integer, ProteinMatch> biosequenceToProteinMap = new HashMap<Integer,ProteinMatch>();
             
             Iterator<ProteinMatch> it = proteinMatchList.iterator();
             while (it.hasNext()) {
@@ -75,19 +76,19 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
                 
                 Integer bioSequenceId = proteinMatch.getBioSequenceId();
                 if (bioSequenceId != null) {
-                    massMap.put(bioSequenceId, proteinMatch);
+                    biosequenceToProteinMap.put(bioSequenceId, proteinMatch);
                 }
  
             }
             
             // retrieve mass
-            if (massMap.size()>0) {
-                Set idSet = massMap.keySet();
+            if (biosequenceToProteinMap.size()>0) {
+                Set idSet = biosequenceToProteinMap.keySet();
                 List<Integer> ids = new ArrayList<Integer>(idSet.size());
                 ids.addAll(idSet);
 
 
-                Query massQuery = entityManagerMSI.createQuery("SELECT bs.id, bs.mass FROM BioSequence bs WHERE bs.id IN (:listId)");
+                Query massQuery = entityManagerMSI.createQuery("SELECT bs.id, bs FROM BioSequence bs WHERE bs.id IN (:listId)");
                 massQuery.setParameter("listId", ids);
                 
                 List l = massQuery.getResultList();
@@ -95,8 +96,8 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
                 while (itMass.hasNext()) {
                     Object[] resCur = itMass.next();
                     Integer bioSequenceId = (Integer) resCur[0];
-                    Double mass = (Double) resCur[1];
-                    massMap.get(bioSequenceId).setTransientMass(mass);
+                    BioSequence bioSequence = (BioSequence) resCur[1];
+                    biosequenceToProteinMap.get(bioSequenceId).setTransientBioSequence(bioSequence);
                 }
        
             }

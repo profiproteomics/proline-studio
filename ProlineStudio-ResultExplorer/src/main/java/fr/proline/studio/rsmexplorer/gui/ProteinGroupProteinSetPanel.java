@@ -16,7 +16,9 @@ import javax.swing.event.ListSelectionEvent;
 
 
 /**
- *
+ * In : Window which display Protein Groups of a Result Summary
+ * - Panel used to display Proteins of a Protein Group (at the center of the window)
+ * 
  * @author JM235353
  */
 public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
@@ -36,7 +38,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
 
  
     
-    public void setData(ProteinSet proteinSet) {
+    public void setData(ProteinSet proteinSet, String searchedText) {
         
         if (proteinSet == proteinSetCur) {
             return;
@@ -64,13 +66,12 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
         proteinNameTextField.setText(typicalProtein.getDescription() );
         
         
-        // Modify Data in SameSet and SubSet Tables
+        // Modify the Model
         ((ProteinTableModel) proteinsTable.getModel()).setData(sameSetArray, subSetArray);
         
-        // select the first row
-        if ((sameSetArray != null) && (sameSetArray.length>0)) {
-            proteinsTable.getSelectionModel().setSelectionInterval(0, 0);
-        }
+        // Select the Row
+        int row = ((ProteinTableModel) proteinsTable.getModel()).findRowToSelect(searchedText);
+        proteinsTable.getSelectionModel().setSelectionInterval(row, row);
         
     }
     

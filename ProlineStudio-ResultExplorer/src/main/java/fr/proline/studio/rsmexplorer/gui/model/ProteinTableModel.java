@@ -87,7 +87,7 @@ public class ProteinTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return Integer.valueOf(proteinMatch.getPeptideCount());
             case COLTYPE_PROTEIN_MASS:
-                double mass =proteinMatch.getTransientMass();
+                double mass = proteinMatch.getTransientBioSequence().getMass();
                 if (mass < 0) {
                     return "";
                 }
@@ -100,8 +100,25 @@ public class ProteinTableModel extends AbstractTableModel {
         this.sameSetMatches = sameSetMatches;
         this.subSetMatches = subSetMatches;
         fireTableDataChanged();
+        
+
     }
     
-  
+    public int findRowToSelect(String searchedText) {
+        int rowToBeSelected = 0;
+        if ((searchedText != null) && (searchedText.length() > 0)) {
+
+            String searchedTextUpper = searchedText.toUpperCase();
+
+            for (int row = 0; row < getRowCount(); row++) {
+                String proteinName = ((String) getValueAt(row, COLTYPE_PROTEIN_NAME)).toUpperCase();
+                if (proteinName.indexOf(searchedTextUpper) != -1) {
+                    rowToBeSelected = row;
+                }
+            }
+        }
+
+        return rowToBeSelected;
+    }
     
 }

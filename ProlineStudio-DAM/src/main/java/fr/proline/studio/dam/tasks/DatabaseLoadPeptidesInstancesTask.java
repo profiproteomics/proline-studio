@@ -72,9 +72,9 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             
             // Load the SequenceMatch for each peptide
             
-            // SELECT SequenceMatch, sm.peptideId FROM SequenceMatch as sm
+            // SELECT sm, sm.id.peptideId FROM SequenceMatch as sm
             // WHERE sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId IN :peptideIdList
-            String sequenceMatchQueryString = "SELECT SequenceMatch, sm.peptideId FROM SequenceMatch as sm WHERE sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId IN :peptideIdList";
+            String sequenceMatchQueryString = "SELECT sm, sm.id.peptideId FROM SequenceMatch as sm WHERE sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId IN :peptideIdList";
             Query sequenceMatchQuery = entityManagerMSI.createQuery(sequenceMatchQueryString);
             sequenceMatchQuery.setParameter("proteinMatchId", proteinMatch.getId());
             sequenceMatchQuery.setParameter("peptideIdList", peptideMap.keySet());

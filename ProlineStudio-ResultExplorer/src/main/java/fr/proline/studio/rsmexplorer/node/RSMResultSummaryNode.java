@@ -4,11 +4,8 @@ package fr.proline.studio.rsmexplorer.node;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ResultSummaryData;
-import java.awt.Image;
 import javax.swing.ImageIcon;
-import org.openide.nodes.Children;
 import org.openide.util.ImageUtilities;
-import org.openide.util.Lookup;
 
 /**
  * Node for a ResultSummary

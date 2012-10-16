@@ -1,8 +1,6 @@
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.studio.dam.data.AbstractData;
-import org.openide.nodes.Children;
-import org.openide.util.Lookup;
 
 /**
  * Node used a the Tree Parent

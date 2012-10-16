@@ -1,13 +1,7 @@
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.studio.dam.data.AbstractData;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import javax.swing.SwingUtilities;
-import javax.swing.tree.DefaultMutableTreeNode;
+
 
 
 /**

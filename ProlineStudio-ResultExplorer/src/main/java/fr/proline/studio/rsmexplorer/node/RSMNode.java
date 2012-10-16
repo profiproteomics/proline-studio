@@ -1,16 +1,9 @@
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.studio.dam.data.AbstractData;
-import fr.proline.studio.rsmexplorer.actions.ChildParentAction;
-import fr.proline.studio.rsmexplorer.actions.DeleteAction;
-import fr.proline.studio.rsmexplorer.actions.DisplayAction;
-import fr.proline.studio.rsmexplorer.actions.RenameAction;
-import java.awt.Image;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
-import org.openide.nodes.Children;
-import org.openide.util.Lookup;
 
 /**
  *

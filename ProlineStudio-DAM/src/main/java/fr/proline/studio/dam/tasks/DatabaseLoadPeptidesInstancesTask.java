@@ -51,7 +51,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
 
             // Retrieve peptideInstances of a peptideSet
-            TypedQuery<PeptideInstance> peptideInstanceQuery = entityManagerMSI.createQuery("SELECT pi FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id", PeptideInstance.class);
+            TypedQuery<PeptideInstance> peptideInstanceQuery = entityManagerMSI.createQuery("SELECT pi FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideMatch pm WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id AND pi.bestPeptideMatchId=pm.id ORDER BY pm.score DESC", PeptideInstance.class);
             peptideInstanceQuery.setParameter("peptideSetId", peptideSet.getId());
             List<PeptideInstance> peptideInstanceList = peptideInstanceQuery.getResultList();
             PeptideInstance[] peptideInstances = peptideInstanceList.toArray(new PeptideInstance[peptideInstanceList.size()]);
@@ -84,6 +84,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             while (sequenceMatchQueryIt.hasNext()) {
                 Object[] cur = sequenceMatchQueryIt.next();
                 SequenceMatch sequenceMatch = (SequenceMatch) cur[0];
+                sequenceMatch.getId();  // avoid lazy problem
                 Integer peptideId = (Integer) cur[1];
                 Peptide p = peptideMap.get(peptideId);
                 p.setTransientSequenceMatch(sequenceMatch);

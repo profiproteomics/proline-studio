@@ -1,6 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideSet;
+import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
 import fr.proline.studio.utils.DecoratedTable;
 import javax.swing.event.ListSelectionEvent;
@@ -11,6 +15,8 @@ import javax.swing.event.ListSelectionEvent;
  */
 public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
 
+    ProteinMatch currentProteinMatch = null;
+    
     /**
      * Creates new form ProteinGroupPeptideTablePanel
      */
@@ -59,8 +65,24 @@ public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
 
-    public void setData(PeptideInstance[] peptideInstances) {
-        ((PeptideTableModel) peptidesTable.getModel()).setData(peptideInstances);
+    public void setData(ProteinMatch proteinMatch) {
+
+        currentProteinMatch = proteinMatch;
+        
+        if (proteinMatch == null) {
+            ((PeptideTableModel) peptidesTable.getModel()).setData(null);
+        } else {
+            PeptideSet peptideSet = proteinMatch.getTransientPeptideSet();
+            PeptideInstance[] peptideInstances = peptideSet.getTransientPeptideInstances();
+
+            ((PeptideTableModel) peptidesTable.getModel()).setData(peptideInstances);
+
+            // select the first peptide
+            if ((peptideInstances != null) && (peptideInstances.length > 0)) {
+                peptidesTable.getSelectionModel().setSelectionInterval(0, 0);
+            }
+        }
+        
     }
     
     
@@ -77,57 +99,11 @@ public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
             
             super.valueChanged(e);
             
-            /*
-            ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
-            
-            
-            // Retrieve Selected Row
-            int selectedRow = getSelectedRow();
-            
+            ProteinGroupPeptideSpectrumPanel p = (ProteinGroupPeptideSpectrumPanel) DataViewerTopComponent.getPanel(ProteinGroupPeptideSpectrumPanel.class);
 
-            // nothing selected
-            if (selectedRow == -1) {
-                proteinSetSelected = null;
-                p.setData(null);
-                return;
-                
-            }
+            int indexInModelSelected = peptidesTable.convertRowIndexToModel(peptidesTable.getSelectionModel().getMinSelectionIndex());
             
-            // convert according to the sorting
-            selectedRow = convertRowIndexToModel(selectedRow);
-            
-            
-            
-            // Retrived ProteinSet selected
-            ProteinGroupTableModel tableModel = (ProteinGroupTableModel) getModel();
-            final ProteinSet proteinSet = tableModel.getProteinSet(selectedRow);
-            
-            if (proteinSetSelected == proteinSet) {
-                return; // nothing to do
-            }
-            proteinSetSelected = proteinSet;
-            
-            
-            
-            // prepare callback to view new data
-            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success) {
-                    ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
-
-                    p.setData(proteinSet);
-                }
-            };
-            
-            // Load data if needed asynchronously
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromProteinSetTask(callback, proteinSet));
-          */ //JPM.TODO
+            p.setData(currentProteinMatch, indexInModelSelected, ((PeptideTableModel) peptidesTable.getModel()).getPeptideInstances());
         }
     }
     

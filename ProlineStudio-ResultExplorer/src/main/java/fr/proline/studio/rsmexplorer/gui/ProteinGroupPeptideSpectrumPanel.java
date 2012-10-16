@@ -1,5 +1,15 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.core.orm.msi.SequenceMatchPK;
+import java.awt.Color;
+import javax.swing.UIManager;
+import javax.swing.text.Document;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
+
 /**
  *
  * @author JM235353
@@ -14,7 +24,24 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
         
         editorPane.setEditable(false);
         editorPane.setContentType("text/html");
-        editorPane.setText("");
+
+        
+        HTMLEditorKit kit = new HTMLEditorKit();
+        editorPane.setEditorKit(kit);
+        
+        StyleSheet styleSheet = kit.getStyleSheet();
+
+        
+        Color selectionColor = UIManager.getColor ("Table.selectionBackground");
+
+        styleSheet.addRule("body {color:black; font: bold 10px monospace; margin: 4px; }");
+        styleSheet.addRule("span.peptidesel {background-color:#"+Integer.toHexString(selectionColor.getRGB() & 0xffffff)+"; color:white;}");
+        styleSheet.addRule("span.onepeptide {background-color: #DDDDDD;}");
+        styleSheet.addRule("span.multipeptides {background-color: #C0C0C0;}");
+        
+
+        Document doc = kit.createDefaultDocument();
+        editorPane.setDocument(doc);      
     }
 
     /**
@@ -34,18 +61,15 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
 
         setMaximumSize(new java.awt.Dimension(32767, 800));
 
+        sequencePanel.setMaximumSize(new java.awt.Dimension(0, 0));
+        sequencePanel.setLayout(new java.awt.GridLayout());
+
+        sequenceScrollPane.setMaximumSize(new java.awt.Dimension(0, 0));
+
+        editorPane.setMaximumSize(new java.awt.Dimension(0, 0));
         sequenceScrollPane.setViewportView(editorPane);
 
-        javax.swing.GroupLayout sequencePanelLayout = new javax.swing.GroupLayout(sequencePanel);
-        sequencePanel.setLayout(sequencePanelLayout);
-        sequencePanelLayout.setHorizontalGroup(
-            sequencePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(sequenceScrollPane)
-        );
-        sequencePanelLayout.setVerticalGroup(
-            sequencePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(sequenceScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
-        );
+        sequencePanel.add(sequenceScrollPane);
 
         tabPanel.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideSpectrumPanel.class, "ProteinGroupPeptideSpectrumPanel.sequencePanel.TabConstraints.tabTitle"), sequencePanel); // NOI18N
 
@@ -86,4 +110,103 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
     private javax.swing.JPanel spectrumPanel;
     private javax.swing.JTabbedPane tabPanel;
     // End of variables declaration//GEN-END:variables
+
+
+    public void setData(ProteinMatch pm, int selectedPeptide, PeptideInstance[] peptideInstances) {
+        
+        if ((pm == null) || (pm.getTransientBioSequence() == null)) {
+            editorPane.setText("");
+            return;
+        }
+        
+        String sequence = pm.getTransientBioSequence().getSequence();
+        
+        int nbPeptides = peptideInstances.length;
+        
+        int[] starts = new int[nbPeptides];
+        int[] stops  = new int[nbPeptides];
+         
+        for (int i = 0; i < nbPeptides; i++) {
+            
+            Peptide p = peptideInstances[i].getTransientBestPeptideMatch().getTransientPeptide();
+            SequenceMatchPK smpk = p.getTransientSequenceMatch().getId();
+            starts[i] = smpk.getStart().intValue();
+            stops[i]  = smpk.getStop().intValue();
+        }
+       
+        editorPane.setText(constructDisplayedSequence(sequence, selectedPeptide, starts, stops));
+        
+    }
+    
+    public String constructDisplayedSequence(String sequence, int selectedPeptide, int[] starts, int[] stops) {
+
+        final int NO_PEPTIDE = 0;
+        final int PEPTIDE_SELECTED = 1;
+        final int ONE_PEPTIDE_NOT_SELECTED = 2;
+        final int MULTI_PEPTIDES_NOT_SELECTED = 3;
+
+        StringBuilder sb = new StringBuilder();
+
+        int previousState = NO_PEPTIDE;
+
+        int nb = sequence.length();
+        for (int i = 0; i < nb; i++) {
+            char c = sequence.charAt(i);
+
+            boolean inSelectedPeptide = false;
+            int nbNonSelectedPeptides = 0;
+            int nbProteins = starts.length;
+            for (int j = 0; j < nbProteins; j++) {
+                boolean inProtein = (i+1 >= starts[j]) && (i+1 <= stops[j]); // in database it starts at 1
+
+                if (j == selectedPeptide) {
+                    inSelectedPeptide = inProtein;
+                } else if (inProtein) {
+                    nbNonSelectedPeptides++;
+                }
+            }
+
+            int state = NO_PEPTIDE;
+            if (inSelectedPeptide) {
+                state = PEPTIDE_SELECTED;
+            } else if (nbNonSelectedPeptides == 1) {
+                state = ONE_PEPTIDE_NOT_SELECTED;
+            } else if (nbNonSelectedPeptides > 1) {
+                state = MULTI_PEPTIDES_NOT_SELECTED;
+            }
+
+            if (state != previousState) {
+                if (previousState != NO_PEPTIDE) {
+                    sb.append("</span>");
+                }
+                switch (state) {
+                    case PEPTIDE_SELECTED:
+                        sb.append("<span class=\"peptidesel\">");
+                        break;
+                    case ONE_PEPTIDE_NOT_SELECTED:
+                        sb.append("<span class=\"onepeptide\">");
+                        break;
+                    case MULTI_PEPTIDES_NOT_SELECTED:
+                        sb.append("<span class=\"multipeptides\">");
+                        break;
+                }
+            }
+
+            sb.append(c);
+
+            // add a blank space every ten characters
+            if ((i + 1) % 10 == 0) {
+                sb.append(' ');
+            }
+
+            previousState = state;
+        }
+
+        // close last span if needed
+        if (previousState != NO_PEPTIDE) {
+            sb.append("</span>");
+        }
+
+        return sb.toString();
+    }
 }

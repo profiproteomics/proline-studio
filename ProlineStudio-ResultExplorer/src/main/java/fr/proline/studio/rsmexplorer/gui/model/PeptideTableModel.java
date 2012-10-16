@@ -8,6 +8,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideMatch;
+import fr.proline.core.orm.msi.SequenceMatch;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -72,7 +73,36 @@ public class PeptideTableModel extends AbstractTableModel {
                         return ""; // should never happen
                         
                     }
+                    
+                    SequenceMatch sequenceMatch = peptide.getTransientSequenceMatch();
+                    
+                    if (sequenceMatch != null) {
+                        
+                        // Add Before and After residue to the peptide
+                        
+                        StringBuilder display = new StringBuilder();
+                        display.append("<HTML>");
+                        String residueBefore = sequenceMatch.getResidueBefore();
+                        if (residueBefore != null) {
+                            display.append("<span style='color:#fd9b1d;'>");
+                            display.append(residueBefore.toUpperCase());
+                            display.append("</span>");
+                        }
+                        display.append(peptide.getSequence());
+                        String residueAfter = sequenceMatch.getResidueAfter();
+                        if (residueAfter != null) {
+                            display.append("<span style='color:#fd9b1d;'>");
+                            display.append(residueAfter.toUpperCase());
+                            display.append("</span>");
+                        }
+                        display.append("</HTML>");
+                        
+                        return display.toString();
+                    }
+                    
                     return peptide.getSequence();
+
+                    
                 }    
                 case COLTYPE_PEPTIDE_SCORE: {
                     // Retrieve typical Peptide Match
@@ -93,7 +123,9 @@ public class PeptideTableModel extends AbstractTableModel {
             
         }
     
-        
+        public PeptideInstance[] getPeptideInstances() {
+            return peptideInstances;
+        }
         
 
     

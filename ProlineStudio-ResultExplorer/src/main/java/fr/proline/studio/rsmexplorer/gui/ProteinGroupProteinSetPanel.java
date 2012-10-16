@@ -188,10 +188,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
                     ProteinGroupPeptideTablePanel p = (ProteinGroupPeptideTablePanel) DataViewerTopComponent.getPanel(ProteinGroupPeptideTablePanel.class);
 
                     if (success) {
-                        PeptideSet peptideSet = proteinMatch.getTransientPeptideSet();
-                        PeptideInstance[] peptideInstances = peptideSet.getTransientPeptideInstances();
-                    
-                        p.setData(peptideInstances);
+                        p.setData(proteinMatch);
                     } else {
                         p.setData(null);
                     }

@@ -7,6 +7,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.core.orm.msi.BioSequence;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
+import fr.proline.studio.utils.DataFormat;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -47,15 +48,12 @@ public class ProteinTableModel extends AbstractTableModel {
     public Class getColumnClass(int col) {
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
+            case COLTYPE_PROTEIN_SCORE:
+            case COLTYPE_PROTEIN_PEPTIDES_COUNT:
+            case COLTYPE_PROTEIN_MASS:
                 return String.class;
             case COLTYPE_SAMESET_SUBSET:
                 return Boolean.class;
-            case COLTYPE_PROTEIN_SCORE:
-                return Float.class;
-            case COLTYPE_PROTEIN_PEPTIDES_COUNT:
-                return Integer.class;
-            case COLTYPE_PROTEIN_MASS:
-                return String.class;
         }
         return null;
     }
@@ -83,15 +81,15 @@ public class ProteinTableModel extends AbstractTableModel {
                     return Boolean.FALSE;
                 }
             case COLTYPE_PROTEIN_SCORE:
-                return Float.valueOf(proteinMatch.getScore());
+                return DataFormat.format(proteinMatch.getScore(),2);
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
-                return Integer.valueOf(proteinMatch.getPeptideCount());
+                return DataFormat.format(proteinMatch.getPeptideCount());
             case COLTYPE_PROTEIN_MASS:
                 BioSequence bioSequence = proteinMatch.getTransientBioSequence();
                 if (bioSequence == null) {
                     return "";
                 }
-                return String.valueOf(bioSequence.getMass());
+                return DataFormat.format(bioSequence.getMass(), 2);
         }
         return null; // should never happen
     }

@@ -101,9 +101,14 @@ public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
             
             ProteinGroupPeptideSpectrumPanel p = (ProteinGroupPeptideSpectrumPanel) DataViewerTopComponent.getPanel(ProteinGroupPeptideSpectrumPanel.class);
 
-            int indexInModelSelected = peptidesTable.convertRowIndexToModel(peptidesTable.getSelectionModel().getMinSelectionIndex());
+            int selectedIndex = peptidesTable.getSelectionModel().getMinSelectionIndex();
             
-            p.setData(currentProteinMatch, indexInModelSelected, ((PeptideTableModel) peptidesTable.getModel()).getPeptideInstances());
+            if (selectedIndex == -1) {
+                 p.setData(null, -1, null);
+            } else {
+                int indexInModelSelected = peptidesTable.convertRowIndexToModel(selectedIndex);
+                p.setData(currentProteinMatch, indexInModelSelected, ((PeptideTableModel) peptidesTable.getModel()).getPeptideInstances());
+            }
         }
     }
     

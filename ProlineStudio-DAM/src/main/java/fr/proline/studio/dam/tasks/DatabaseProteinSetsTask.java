@@ -89,8 +89,8 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             for (int i = 0; i < proteinSetArray.length; i++) {
                 ProteinSet proteinSetCur = proteinSetArray[i];
                 proteinSetMap.put(proteinSetCur.getId(), proteinSetCur);
-                ProteinSet.TransientProteinSetData proteinSetData = new ProteinSet.TransientProteinSetData();
-                proteinSetCur.setTransientProteinSetData(proteinSetData);
+                ProteinSet.TransientData proteinSetData = new ProteinSet.TransientData();
+                proteinSetCur.setTransientData(proteinSetData);
             }
 
 
@@ -278,7 +278,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         }
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
             ProteinSet proteinSetCur = proteinSetArray[i];
-            proteinSetCur.getTransientProteinSetData().setTypicalProteinMatch(typicalProteinMap.get(proteinSetCur.getProteinMatchId()));
+            proteinSetCur.getTransientData().setTypicalProteinMatch(typicalProteinMap.get(proteinSetCur.getProteinMatchId()));
         }
     }
 
@@ -317,7 +317,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
             ProteinSet proteinSetCur = proteinSetArray[i];
-            ProteinSet.TransientProteinSetData proteinSetData = proteinSetCur.getTransientProteinSetData();
+            ProteinSet.TransientData proteinSetData = proteinSetCur.getTransientData();
 
             Integer spectralCount = spectralCountMap.get(proteinSetCur.getProteinMatchId());
             if (spectralCount != null) {  // should not happen
@@ -364,7 +364,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
             ProteinSet proteinSetCur = proteinSetArray[i];
-            ProteinSet.TransientProteinSetData proteinSetData = proteinSetCur.getTransientProteinSetData();
+            ProteinSet.TransientData proteinSetData = proteinSetCur.getTransientData();
 
             Integer specificSpectralCount = spectralCountMap.get(proteinSetCur.getProteinMatchId());
             if (specificSpectralCount != null) {  // should not happen
@@ -409,7 +409,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             Integer proteinSetId = (Integer) cur[0];
             ProteinSet proteinSet = proteinSetMap.get(proteinSetId);
             int sameSetCount = ((Long) cur[1]).intValue();
-            proteinSet.getTransientProteinSetData().setSameSetCount(sameSetCount);
+            proteinSet.getTransientData().setSameSetCount(sameSetCount);
         }
 
         // All proteins in Protein Group count query
@@ -432,7 +432,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             Integer proteinSetId = (Integer) cur[0];
             ProteinSet proteinSet = proteinSetMap.get(proteinSetId);
             int allCount = ((Long) cur[1]).intValue();
-            ProteinSet.TransientProteinSetData data = proteinSet.getTransientProteinSetData();
+            ProteinSet.TransientData data = proteinSet.getTransientData();
             data.setSubSetCount(allCount - data.getSameSetCount());
         }
 

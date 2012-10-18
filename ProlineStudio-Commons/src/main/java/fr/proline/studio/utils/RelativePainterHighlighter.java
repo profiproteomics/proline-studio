@@ -134,10 +134,15 @@ public class RelativePainterHighlighter extends PainterHighlighter {
         @Override
         public float getRelativeValue(ComponentAdapter adapter) {
             
-            float value = ((Number)adapter.getValue(valueColumn)).floatValue();
-            
+            float floatValue;
+            Object value = adapter.getValue(valueColumn);
+            if (value instanceof String) {
+                floatValue = Float.valueOf((String) value);
+            } else {
+                floatValue = ((Number) value).floatValue();
+            }
 
-            float percent = value / max.floatValue()-min.floatValue();
+            float percent = floatValue / max.floatValue()-min.floatValue();
             
             return percent;
    

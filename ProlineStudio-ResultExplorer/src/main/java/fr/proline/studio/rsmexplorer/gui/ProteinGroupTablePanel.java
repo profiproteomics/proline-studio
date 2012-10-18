@@ -267,7 +267,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
             }
             
             // check if data is ready to load Proteins of Protein set
-            if (proteinSet.getTransientProteinSetData().getTypicalProteinMatch() == null) {
+            if (proteinSet.getTransientData().getTypicalProteinMatch() == null) {
                 return;
             }
             

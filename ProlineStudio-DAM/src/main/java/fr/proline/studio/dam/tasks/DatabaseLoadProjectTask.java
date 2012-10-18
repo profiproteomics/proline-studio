@@ -43,6 +43,8 @@ public class DatabaseLoadProjectTask extends AbstractDatabaseTask {
             Project project = entityManagerUDS.find(Project.class, projectId);
             list.add(new ProjectData(project));
 
+            
+            
             entityManagerUDS.getTransaction().commit();
 
         } catch (RuntimeException e) {

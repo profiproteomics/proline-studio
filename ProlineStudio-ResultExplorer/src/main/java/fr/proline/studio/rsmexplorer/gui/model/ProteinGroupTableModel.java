@@ -8,6 +8,7 @@ import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
+import fr.proline.studio.utils.DataFormat;
 import fr.proline.studio.utils.LazyData;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
@@ -52,21 +53,10 @@ public class ProteinGroupTableModel extends LazyTableModel {
 
     @Override
     public Class getColumnClass(int col) {
-        switch (col) {
-            case COLTYPE_PROTEIN_GROUPS_NAME:
-                return LazyData.class;
-            case COLTYPE_PROTEIN_SCORE:
-                return Float.class;
-            case COLTYPE_PROTEINS_COUNT:
-                return LazyData.class;
-            case COLTYPE_PEPTIDES_COUNT:
-                return LazyData.class;
-            case COLTYPE_SPECTRAL_COUNT:
-                return LazyData.class;
-            case COLTYPE_SPECIFIC_SPECTRAL_COUNT:
-                return LazyData.class;
+        if (col == COLTYPE_PROTEIN_SCORE) {
+            return String.class;
         }
-        return null;
+        return LazyData.class;
     }
     
     @Override
@@ -109,7 +99,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 LazyData lazyData = getLazyData(row,col);
                 
                 // Retrieve typical Protein Match
-                ProteinMatch proteinMatch = proteinSet.getTransientProteinSetData().getTypicalProteinMatch();
+                ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
 
                 if (proteinMatch == null) {
                     lazyData.setData(null);
@@ -120,15 +110,15 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 return lazyData;
             }
             case COLTYPE_PROTEIN_SCORE:
-                return new Float(proteinSet.getScore()); //JPM.TODO get rid of the Float creation each time
+                return DataFormat.format(proteinSet.getScore(), 2);
             case COLTYPE_PROTEINS_COUNT: {
                 
                 
                 
                 LazyData lazyData = getLazyData(row,col);
                 
-                Integer sameSetCount = proteinSet.getTransientProteinSetData().getSameSetCount();
-                Integer subSetCount = proteinSet.getTransientProteinSetData().getSubSetCount();
+                Integer sameSetCount = proteinSet.getTransientData().getSameSetCount();
+                Integer subSetCount = proteinSet.getTransientData().getSubSetCount();
                 
                 if ((sameSetCount == null) || (subSetCount == null)) {
                     // data is not already fetched
@@ -153,22 +143,22 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 LazyData lazyData = getLazyData(row,col);
                 
                 // Retrieve typical Protein Match
-                ProteinMatch proteinMatch = proteinSet.getTransientProteinSetData().getTypicalProteinMatch();
+                ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
 
                 if (proteinMatch == null) {
                     lazyData.setData(null);
                     
                     givePriorityTo(taskId, row, col);
                 } else {
-                    lazyData.setData(new Integer(proteinMatch.getPeptideCount()));
+                    lazyData.setData( DataFormat.format(proteinMatch.getPeptideCount()));
                 }
                 return lazyData;
    
             }
             case COLTYPE_SPECTRAL_COUNT: {
                 LazyData lazyData = getLazyData(row,col);
-                Integer spectralCount = proteinSet.getTransientProteinSetData().getSpectralCount();
-                lazyData.setData(spectralCount);
+                Integer spectralCount = proteinSet.getTransientData().getSpectralCount();
+                lazyData.setData(DataFormat.format(spectralCount));
                 if (spectralCount == null) {
                     givePriorityTo(taskId, row, col);
                 }
@@ -176,8 +166,8 @@ public class ProteinGroupTableModel extends LazyTableModel {
             }
             case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
                 LazyData lazyData = getLazyData(row,col);
-                Integer specificSpectralCount = proteinSet.getTransientProteinSetData().getSpecificSpectralCount();
-                lazyData.setData(specificSpectralCount);
+                Integer specificSpectralCount = proteinSet.getTransientData().getSpecificSpectralCount();
+                lazyData.setData(DataFormat.format(specificSpectralCount));
                 if (specificSpectralCount == null) {
                     givePriorityTo(taskId, row, col);
                 }

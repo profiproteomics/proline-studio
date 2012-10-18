@@ -28,7 +28,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
 
     @Override
     public boolean needToFetch() {
-        return (proteinSet.getTransientProteinSetData() == null) || (proteinSet.getTransientProteinSetData().getSameSet() == null);
+        return (proteinSet.getTransientData() == null) || (proteinSet.getTransientData().getSameSet() == null);
             
     }
     
@@ -41,7 +41,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().begin();
             
             // number of proteins in sameset
-            ProteinMatch typicalProtein = proteinSet.getTransientProteinSetData().getTypicalProteinMatch(); 
+            ProteinMatch typicalProtein = proteinSet.getTransientData().getTypicalProteinMatch(); 
             
             int peptitesCountInSameSet = typicalProtein.getPeptideCount();
 
@@ -107,8 +107,8 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
             ProteinMatch[] subSetArray = subSet.toArray(new ProteinMatch[subSet.size()]);
 
             // check if Proteins are in same set or sub set.
-            proteinSet.getTransientProteinSetData().setSameSet(sameSetArray);
-            proteinSet.getTransientProteinSetData().setSubSet(subSetArray);
+            proteinSet.getTransientData().setSameSet(sameSetArray);
+            proteinSet.getTransientData().setSubSet(subSetArray);
             
             
             entityManagerMSI.getTransaction().commit();

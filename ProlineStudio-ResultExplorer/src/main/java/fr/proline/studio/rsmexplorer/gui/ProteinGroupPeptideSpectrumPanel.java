@@ -129,7 +129,7 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
         for (int i = 0; i < nbPeptides; i++) {
             
             Peptide p = peptideInstances[i].getTransientBestPeptideMatch().getTransientPeptide();
-            SequenceMatchPK smpk = p.getTransientSequenceMatch().getId();
+            SequenceMatchPK smpk = p.getTransientData().getSequenceMatch().getId();
             starts[i] = smpk.getStart().intValue();
             stops[i]  = smpk.getStop().intValue();
         }

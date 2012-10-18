@@ -15,7 +15,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
     // used for UDS Connection
     private Map<String, String> databaseProperties;
-    // used for MSI Connection
+    // used for MSI and PS Connection
     private int projectId;
 
     /**
@@ -66,6 +66,10 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 // MSI Connection
                 EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(ProlineRepository.Databases.MSI, true, projectId);
                 entityManagerMSI.close();
+                
+                // PS Connection
+                EntityManager entityManagerPS = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(ProlineRepository.Databases.PS, true, projectId);
+                entityManagerPS.close();
             }
         } catch (Exception e) {
             logger.error("DatabaseConnectionAction failed", e);

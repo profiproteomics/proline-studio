@@ -1,6 +1,7 @@
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.*;
+import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.repository.ProlineRepository;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.repositorymgr.ProlineDBManagement;
@@ -20,12 +21,12 @@ import javax.persistence.TypedQuery;
 public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
     private ProteinMatch proteinMatch = null;
-    private Integer rsmId = null;
+    private ResultSummary rsm = null;
 
-    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, ProteinMatch proteinMatch, Integer rsmId) {
+    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, ProteinMatch proteinMatch, ResultSummary rsm) {
         super(callback);
         this.proteinMatch = proteinMatch;
-        this.rsmId = rsmId;
+        this.rsm = rsm;
     }
 
     @Override
@@ -36,60 +37,94 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
 
+        HashMap<Integer, Peptide> peptideMap = null;
+        
         EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(ProlineRepository.Databases.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
         try {
 
             entityManagerMSI.getTransaction().begin();
 
 
-            // Retrieve peptideSet of a peptideMatch
+            // Retrieve peptideSet of a proteinMatch
             TypedQuery<PeptideSet> peptideSetQuery = entityManagerMSI.createQuery("SELECT ps FROM PeptideSet ps, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId=:proteinMatchId AND ps_to_pm.id.peptideSetId=ps.id AND ps_to_pm.resultSummary.id=:rsmId", PeptideSet.class);
             peptideSetQuery.setParameter("proteinMatchId", proteinMatch.getId());
-            peptideSetQuery.setParameter("rsmId", rsmId);
+            peptideSetQuery.setParameter("rsmId", rsm.getId());
             PeptideSet peptideSet = peptideSetQuery.getSingleResult();
             proteinMatch.setTransientPeptideSet(peptideSet);
 
+            // Retrieve the list of PeptideInstance, PeptideMatch, Peptide, MSQuery, Spectrum of a PeptideSet
+            // MSQuery and Spectrum are loaded to force lazy fetch.
+            Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm, p, sm, ms, sp  FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem ps_to_pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.SequenceMatch as sm, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ORDER BY pm.score DESC");
+           
+            peptidesQuery.setParameter("peptideSetId", peptideSet.getId());
+            peptidesQuery.setParameter("proteinMatchId", proteinMatch.getId());
+            
+            ArrayList<PeptideInstance> peptideInstanceList = new ArrayList<PeptideInstance>();
+            List l = peptidesQuery.getResultList();
+            Iterator<Object[]> itPeptidesQuery=l.iterator();
+            while (itPeptidesQuery.hasNext()) {
+                Object[] resCur = itPeptidesQuery.next();
+                PeptideInstance pi = (PeptideInstance) resCur[0];
+                PeptideMatch pm = (PeptideMatch) resCur[1];
+                Peptide p = (Peptide) resCur[2];
+                
+                SequenceMatch sm = (SequenceMatch) resCur[3];
+                MsQuery msq = (MsQuery) resCur[4];
+                Spectrum sp = (Spectrum) resCur[5];
 
-            // Retrieve peptideInstances of a peptideSet
-            TypedQuery<PeptideInstance> peptideInstanceQuery = entityManagerMSI.createQuery("SELECT pi FROM PeptideInstance pi, PeptideSetPeptideInstanceItem ps_to_pi, PeptideMatch pm WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id AND pi.bestPeptideMatchId=pm.id ORDER BY pm.score DESC", PeptideInstance.class);
-            peptideInstanceQuery.setParameter("peptideSetId", peptideSet.getId());
-            List<PeptideInstance> peptideInstanceList = peptideInstanceQuery.getResultList();
-            PeptideInstance[] peptideInstances = peptideInstanceList.toArray(new PeptideInstance[peptideInstanceList.size()]);
+                pi.setTransientBestPeptideMatch(pm);
+                
+                Peptide.TransientData data = new Peptide.TransientData();
+                p.setTransientData(data);
+                data.setSequenceMatch(sm);
+                
+                pm.setTransientPeptide(p);
+
+                peptideInstanceList.add(pi);
+            }
+            
+            int nbPeptides = peptideInstanceList.size();
+            PeptideInstance[] peptideInstances = peptideInstanceList.toArray(new PeptideInstance[nbPeptides]);
             peptideSet.setTransientPeptideInstances(peptideInstances);
-
-            // Retrieve Best Peptide Match for each peptideInstance
-            HashMap<Integer, Peptide> peptideMap = new HashMap<Integer, Peptide>();
-            for (PeptideInstance peptideInstanceCur : peptideInstances) {
-                PeptideMatch peptideMatch = entityManagerMSI.find(PeptideMatch.class, peptideInstanceCur.getBestPeptideMatchId());
-                peptideInstanceCur.setTransientBestPeptideMatch(peptideMatch);
-
-                // Retrieve peptide of the peptideMatch
-                Peptide peptide = entityManagerMSI.find(Peptide.class, peptideMatch.getPeptideId());
-                peptideMatch.setTransientPeptide(peptide);
-
-                peptideMap.put(peptide.getId(), peptide);
+            
+            peptideMap = new HashMap<Integer, Peptide>();
+            //ArrayList<Integer> peptideIds = new ArrayList<Integer>(nbPeptides);
+            for (int i=0;i<nbPeptides;i++) {
+                //peptideIds.add(peptideInstances[i].getPeptideId());
+                peptideMap.put(peptideInstances[i].getPeptideId(), peptideInstances[i].getTransientBestPeptideMatch().getTransientPeptide());
             }
             
-            // Load the SequenceMatch for each peptide
-            
-            // SELECT sm, sm.id.peptideId FROM SequenceMatch as sm
-            // WHERE sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId IN :peptideIdList
-            String sequenceMatchQueryString = "SELECT sm, sm.id.peptideId FROM SequenceMatch as sm WHERE sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId IN :peptideIdList";
-            Query sequenceMatchQuery = entityManagerMSI.createQuery(sequenceMatchQueryString);
-            sequenceMatchQuery.setParameter("proteinMatchId", proteinMatch.getId());
-            sequenceMatchQuery.setParameter("peptideIdList", peptideMap.keySet());
-            
-            List<Object[]> sequenceMatchQueryRes = sequenceMatchQuery.getResultList();
-            Iterator<Object[]> sequenceMatchQueryIt = sequenceMatchQueryRes.iterator();
-            while (sequenceMatchQueryIt.hasNext()) {
-                Object[] cur = sequenceMatchQueryIt.next();
-                SequenceMatch sequenceMatch = (SequenceMatch) cur[0];
-                sequenceMatch.getId();  // avoid lazy problem
-                Integer peptideId = (Integer) cur[1];
-                Peptide p = peptideMap.get(peptideId);
-                p.setTransientSequenceMatch(sequenceMatch);
-            }
 
+            // Retrieve the list of Protein Groups of Peptides
+            // typical ProteinMatch is loaded in the same time, to avoir lazy fetch 
+            Query proteinGroupsQuery = entityManagerMSI.createQuery("SELECT ps, p, pm FROM fr.proline.core.orm.msi.ProteinMatch pm, fr.proline.core.orm.msi.ProteinSet ps, fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.Peptide p WHERE ps.typicalProteinMatchId=pm.id AND pm.id=sm.id.proteinMatchId AND p.id=sm.id.peptideId AND p.id IN (:peptideIds) AND sm.resultSetId=:rsetId AND ps.resultSummary.id=:rsmId");
+            proteinGroupsQuery.setParameter("rsmId", rsm.getId());
+            proteinGroupsQuery.setParameter("rsetId", rsm.getResultSet().getId());
+            proteinGroupsQuery.setParameter("peptideIds", peptideMap.keySet());
+            l = proteinGroupsQuery.getResultList();
+            Iterator<Object[]> itProteinGroupsQuery=l.iterator();
+            while (itProteinGroupsQuery.hasNext()) {
+                Object[] resCur = itProteinGroupsQuery.next();
+                ProteinSet ps = (ProteinSet) resCur[0];
+                Peptide p = (Peptide) resCur[1];
+                ProteinMatch pm = (ProteinMatch) resCur[2];
+                ProteinSet.TransientData data = ps.getTransientData();
+                if (data == null) {
+                    data = new ProteinSet.TransientData();
+                    ps.setTransientData(data);
+                }
+                if (data.getTypicalProteinMatch() == null) {
+                    data.setTypicalProteinMatch(pm);
+                }
+                
+                ArrayList<ProteinSet> proteinSetArray = p.getTransientData().getProteinSetArray();
+                if (proteinSetArray == null) {
+                    proteinSetArray = new ArrayList<ProteinSet>();
+                    p.getTransientData().setProteinSetArray(proteinSetArray);
+                }
+                proteinSetArray.add(ps);
+            }
+            
             
             entityManagerMSI.getTransaction().commit();
         } catch (RuntimeException e) {
@@ -99,6 +134,37 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             entityManagerMSI.close();
         }
 
+        EntityManager entityManagerPS = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(ProlineRepository.Databases.PS, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
+        try {
+
+            entityManagerPS.getTransaction().begin();
+            
+            TypedQuery<PeptidePtm> ptmQuery = entityManagerPS.createQuery("SELECT ptm FROM fr.proline.core.orm.ps.PeptidePtm ptm WHERE ptm.peptide.id IN (:peptideIds)", PeptidePtm.class);
+            ptmQuery.setParameter("peptideIds", peptideMap.keySet());
+            List<PeptidePtm> ptmList = ptmQuery.getResultList();
+            
+            Iterator<PeptidePtm> it = ptmList.iterator();
+            while (it.hasNext()) {
+                PeptidePtm ptm = it.next();
+                
+                Peptide p = peptideMap.get(ptm.getPeptide().getId());
+                HashMap<Integer, PeptidePtm> map = p.getTransientData().getPeptidePtmMap();
+                if (map == null) {
+                    map = new HashMap<Integer, PeptidePtm>();
+                    p.getTransientData().setPeptidePtmMap(map);
+                }
+                map.put(ptm.getSeqPosition(), ptm);
+               
+            }
+            
+            entityManagerPS.getTransaction().commit();
+        } catch (RuntimeException e) {
+            logger.error("DatabaseLoadPeptidesInstancesTask failed", e);
+            return false;
+        } finally {
+            entityManagerPS.close();
+        }
+        
         return true;
     }
 }

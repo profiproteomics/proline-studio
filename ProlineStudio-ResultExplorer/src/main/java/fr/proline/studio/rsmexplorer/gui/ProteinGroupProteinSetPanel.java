@@ -50,7 +50,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
             return;
         }
         
-        ProteinSet.TransientProteinSetData proteinSetData = proteinSet.getTransientProteinSetData();
+        ProteinSet.TransientData proteinSetData = proteinSet.getTransientData();
         
         // retrieve sameset and subset
         ProteinMatch[] sameSetArray = proteinSetData.getSameSet(); 
@@ -196,7 +196,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
             };
             
             // Load data if needed asynchronously
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, proteinMatch, proteinSetCur.getResultSummary().getId()));
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, proteinMatch, proteinSetCur.getResultSummary()));
 
         }
     }

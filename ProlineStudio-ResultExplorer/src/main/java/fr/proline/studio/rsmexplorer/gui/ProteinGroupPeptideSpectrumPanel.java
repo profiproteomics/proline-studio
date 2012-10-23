@@ -1,14 +1,37 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideInstance;
-import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.core.orm.msi.SequenceMatchPK;
-import java.awt.Color;
+import fr.proline.core.orm.msi.*;
+import fr.proline.core.orm.ps.PeptidePtm;
+import fr.proline.core.utils.lzma.package$EasyLzma$;
+import fr.proline.core.utils.lzma.*;
+import fr.proline.studio.utils.GlobalValues;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.nio.ByteBuffer;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import javax.swing.UIManager;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.CrosshairState;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYItemRendererState;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
+import org.slf4j.LoggerFactory;
+
 
 /**
  *
@@ -16,11 +39,36 @@ import javax.swing.text.html.StyleSheet;
  */
 public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
 
+    private DefaultXYDataset dataSet;
+    private JFreeChart chart;
+     
     /**
      * Creates new form ProteinGroupPeptideSpectrumPanel
      */
     public ProteinGroupPeptideSpectrumPanel() {
+        
+        
+        
+        dataSet = new DefaultXYDataset();
+        chart = ChartFactory.createXYLineChart("", "m/z", "intensity", dataSet, PlotOrientation.VERTICAL, true, true, false);
+        
+        chart.removeLegend();
+        chart.setBackgroundPaint(Color.white);
+        TextTitle textTitle = chart.getTitle();
+        textTitle.setFont(textTitle.getFont().deriveFont(Font.PLAIN, 10.0f));
+
+        XYPlot plot = (XYPlot) chart.getPlot();
+        plot.getRangeAxis().setUpperMargin(0.2);
+        
+        plot.setBackgroundPaint(Color.white);
+
+        XYStickRenderer renderer = new XYStickRenderer();
+        renderer.setBaseStroke(new BasicStroke(1.0f));
+        plot.setRenderer(renderer);
+        
         initComponents();
+        
+        
         
         editorPane.setEditable(false);
         editorPane.setContentType("text/html");
@@ -34,10 +82,13 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
         
         Color selectionColor = UIManager.getColor ("Table.selectionBackground");
 
-        styleSheet.addRule("body {color:black; font: bold 10px monospace; margin: 4px; }");
+        styleSheet.addRule("p.body {color:black; font: bold 10px monospace; margin: 4px; }"); // JPM.HACK : this rule was for the body, but there is a Java bug, and it was later used for all html display
         styleSheet.addRule("span.peptidesel {background-color:#"+Integer.toHexString(selectionColor.getRGB() & 0xffffff)+"; color:white;}");
         styleSheet.addRule("span.onepeptide {background-color: #DDDDDD;}");
         styleSheet.addRule("span.multipeptides {background-color: #C0C0C0;}");
+        styleSheet.addRule("span.modif_nter_cter {background-color: "+GlobalValues.HTML_COLOR_VIOLET+"}");
+        styleSheet.addRule("span.modif {background-color: "+GlobalValues.HTML_COLOR_ORANGE+"}");
+        styleSheet.addRule("span.nter_cter {background-color: "+GlobalValues.HTML_COLOR_GREEN+"}");
         
 
         Document doc = kit.createDefaultDocument();
@@ -57,12 +108,12 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
         sequencePanel = new javax.swing.JPanel();
         sequenceScrollPane = new javax.swing.JScrollPane();
         editorPane = new javax.swing.JEditorPane();
-        spectrumPanel = new javax.swing.JPanel();
+        spectrumPanel = new ChartPanel(chart, true);
 
         setMaximumSize(new java.awt.Dimension(32767, 800));
 
         sequencePanel.setMaximumSize(new java.awt.Dimension(0, 0));
-        sequencePanel.setLayout(new java.awt.GridLayout());
+        sequencePanel.setLayout(new java.awt.GridLayout(1, 0));
 
         sequenceScrollPane.setMaximumSize(new java.awt.Dimension(0, 0));
 
@@ -111,6 +162,13 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
     private javax.swing.JTabbedPane tabPanel;
     // End of variables declaration//GEN-END:variables
 
+    private final int HIGHLIGHT_NONE                       = 0x00;
+    private final int HIGHLIGHT_PEPTIDE_SELECTED           = 0x01;
+    private final int HIGHLIGHT_PEPTIDE_NOT_SELECTED       = 0x02;
+    private final int HIGHLIGHT_MULTI_PEPTIDE_NOT_SELECTED = 0x04;
+    private final int HIGHLIGHT_NTER_OR_CTER_MODIFICATION  = 0x08;
+    private final int HIGHLIGHT_OTHER_MODIFICATION         = 0x10;
+    
 
     public void setData(ProteinMatch pm, int selectedPeptide, PeptideInstance[] peptideInstances) {
         
@@ -121,92 +179,304 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
         
         String sequence = pm.getTransientBioSequence().getSequence();
         
-        int nbPeptides = peptideInstances.length;
+        int sequenceLength = sequence.length();
         
-        int[] starts = new int[nbPeptides];
-        int[] stops  = new int[nbPeptides];
-         
+        int[] highlights = new int[sequenceLength];
+        for (int i=0;i<sequenceLength;i++) {
+            highlights[i] = HIGHLIGHT_NONE;
+        }
+        
+        // highlight for non selected peptides
+        int nbPeptides = peptideInstances.length;
         for (int i = 0; i < nbPeptides; i++) {
             
+            if (i== selectedPeptide) {
+                continue;
+            }
+            
             Peptide p = peptideInstances[i].getTransientBestPeptideMatch().getTransientPeptide();
-            SequenceMatchPK smpk = p.getTransientData().getSequenceMatch().getId();
-            starts[i] = smpk.getStart().intValue();
-            stops[i]  = smpk.getStop().intValue();
+            hightlight(p, false, highlights);
         }
+        // highlight for selecte peptide (must be done last to override modifications
+        // of overlaping non selected peptides
+        hightlight(peptideInstances[selectedPeptide].getTransientBestPeptideMatch().getTransientPeptide(), true, highlights);
+        
+
        
-        editorPane.setText(constructDisplayedSequence(sequence, selectedPeptide, starts, stops));
+        editorPane.setText(constructDisplayedSequence(sequence, highlights));
+        
+        constructSpectrumChart(peptideInstances[selectedPeptide].getTransientBestPeptideMatch());
         
     }
+    private void hightlight(Peptide p, boolean selectedPeptide, int[] highlights) {
+                   
+            Peptide.TransientData peptideData = p.getTransientData();
+            SequenceMatchPK smpk = peptideData.getSequenceMatch().getId();
+            
+            
+            int start = smpk.getStart().intValue();
+            int stop = smpk.getStop().intValue();
+            
+            if (selectedPeptide) {
+                for (int j=start;j<=stop;j++) {
+                    highlights[j-1] = HIGHLIGHT_PEPTIDE_SELECTED;
+                }
+            } else {
+                for (int j=start;j<=stop;j++) {
+                    if ((highlights[j-1] & HIGHLIGHT_PEPTIDE_NOT_SELECTED) == HIGHLIGHT_PEPTIDE_NOT_SELECTED) {
+                        highlights[j-1] |= HIGHLIGHT_MULTI_PEPTIDE_NOT_SELECTED;
+                    } else {
+                        highlights[j-1] |= HIGHLIGHT_PEPTIDE_NOT_SELECTED;
+                    }
+                }
+            }
+            
+            HashMap<Integer,PeptidePtm> ptmMap = peptideData.getPeptidePtmMap();
+            if (ptmMap != null) {
+                Collection<PeptidePtm> peptidePtms = ptmMap.values();
+                Iterator<PeptidePtm> it = peptidePtms.iterator();
+                while (it.hasNext()) {
+                    PeptidePtm ptm = it.next();
+                    int pos = ptm.getSeqPosition();
+                    if (pos == 0){
+                        // Nter
+                        highlights[start-1] |= HIGHLIGHT_NTER_OR_CTER_MODIFICATION;
+                    } else if (pos==-1) {
+                        // Cter
+                        highlights[stop-1] |= HIGHLIGHT_NTER_OR_CTER_MODIFICATION;
+                    } else {
+                        highlights[start-1+pos-1] |= HIGHLIGHT_OTHER_MODIFICATION; 
+                    }
+                }
+            }
+    }
     
-    public String constructDisplayedSequence(String sequence, int selectedPeptide, int[] starts, int[] stops) {
+    private String constructDisplayedSequence(String sequence, int[] highlights) {
 
-        final int NO_PEPTIDE = 0;
-        final int PEPTIDE_SELECTED = 1;
-        final int ONE_PEPTIDE_NOT_SELECTED = 2;
-        final int MULTI_PEPTIDES_NOT_SELECTED = 3;
+
 
         StringBuilder sb = new StringBuilder();
 
-        int previousState = NO_PEPTIDE;
+        sb.append("<html><body><p class='body'>");
+        
+        int previousState = HIGHLIGHT_NONE;
 
         int nb = sequence.length();
         for (int i = 0; i < nb; i++) {
             char c = sequence.charAt(i);
-
-            boolean inSelectedPeptide = false;
-            int nbNonSelectedPeptides = 0;
-            int nbProteins = starts.length;
-            for (int j = 0; j < nbProteins; j++) {
-                boolean inProtein = (i+1 >= starts[j]) && (i+1 <= stops[j]); // in database it starts at 1
-
-                if (j == selectedPeptide) {
-                    inSelectedPeptide = inProtein;
-                } else if (inProtein) {
-                    nbNonSelectedPeptides++;
-                }
-            }
-
-            int state = NO_PEPTIDE;
-            if (inSelectedPeptide) {
-                state = PEPTIDE_SELECTED;
-            } else if (nbNonSelectedPeptides == 1) {
-                state = ONE_PEPTIDE_NOT_SELECTED;
-            } else if (nbNonSelectedPeptides > 1) {
-                state = MULTI_PEPTIDES_NOT_SELECTED;
-            }
+            
+            int state = highlights[i];
 
             if (state != previousState) {
-                if (previousState != NO_PEPTIDE) {
+                if (previousState != HIGHLIGHT_NONE) {
                     sb.append("</span>");
                 }
-                switch (state) {
-                    case PEPTIDE_SELECTED:
-                        sb.append("<span class=\"peptidesel\">");
-                        break;
-                    case ONE_PEPTIDE_NOT_SELECTED:
-                        sb.append("<span class=\"onepeptide\">");
-                        break;
-                    case MULTI_PEPTIDES_NOT_SELECTED:
-                        sb.append("<span class=\"multipeptides\">");
-                        break;
+                
+                // add a blank space every ten characters
+                if (i % 10 == 0) {
+                    sb.append(' ');
+                }
+                
+                if ((state & HIGHLIGHT_OTHER_MODIFICATION) == HIGHLIGHT_OTHER_MODIFICATION) {
+                    if ((state & HIGHLIGHT_NTER_OR_CTER_MODIFICATION) == HIGHLIGHT_NTER_OR_CTER_MODIFICATION) {
+                        // Modification and (nter or cter) in the same time
+                        sb.append("<span class='modif_nter_cter'>");
+                    } else {
+                        sb.append("<span class='modif'>");
+                    }
+                } else  if ((state & HIGHLIGHT_NTER_OR_CTER_MODIFICATION) == HIGHLIGHT_NTER_OR_CTER_MODIFICATION) {
+                    sb.append("<span class='nter_cter'>");
+                } else if ((state & HIGHLIGHT_PEPTIDE_SELECTED) == HIGHLIGHT_PEPTIDE_SELECTED) {
+                    sb.append("<span class='peptidesel'>");
+                } else if ((state & HIGHLIGHT_MULTI_PEPTIDE_NOT_SELECTED) == HIGHLIGHT_MULTI_PEPTIDE_NOT_SELECTED) {
+                    sb.append("<span class='multipeptides'>");
+                } else if ((state & HIGHLIGHT_PEPTIDE_NOT_SELECTED) == HIGHLIGHT_PEPTIDE_NOT_SELECTED) {
+                    sb.append("<span class='onepeptide'>");
+                }
+            } else {
+                // add a blank space every ten characters
+                if (i % 10 == 0) {
+                    sb.append(' ');
                 }
             }
 
             sb.append(c);
 
-            // add a blank space every ten characters
-            if ((i + 1) % 10 == 0) {
-                sb.append(' ');
-            }
+            
 
             previousState = state;
         }
 
         // close last span if needed
-        if (previousState != NO_PEPTIDE) {
+        if (previousState != HIGHLIGHT_NONE) {
             sb.append("</span>");
         }
 
+        sb.append("<br><br>");
+        sb.append("<span class='nter_cter'>&nbsp;&nbsp;</span>&nbsp;N/C-ter PTM&nbsp;&nbsp;&nbsp;&nbsp;");
+        sb.append("<span class='modif'>&nbsp;&nbsp;</span>&nbsp;AA PTM&nbsp;&nbsp;&nbsp;&nbsp;");
+        sb.append("<span class='modif_nter_cter'>&nbsp;&nbsp;</span>&nbsp;N/C-ter and AA PTM");
+        
+        sb.append("</p></body></html>");
+        
         return sb.toString();
+    }
+    
+    
+    private void constructSpectrumChart(PeptideMatch pm) {
+        
+        
+        // Set fate for the spectrum chart
+        Spectrum spectrum = pm.getMsQuery().getSpectrum();
+        
+         byte[] intensityByteArray = package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
+         byte[] massByteArray = package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
+         
+         String intensityListString = new String(intensityByteArray);
+         String massListString      = new String(massByteArray);
+         
+         
+         String[] intensitiyStringArray = intensityListString.split(" ");
+         String[] massListStringArray   = massListString.split(" ");
+         
+         int size = massListStringArray.length;
+         if (size != intensitiyStringArray.length) {
+             LoggerFactory.getLogger(ProteinGroupPeptideSpectrumPanel.class).error("Intensity and Mass List have different size");
+             return;
+         }
+         
+         double[][] data = new double[2][size]; 
+         for (int i=0;i<size;i++) {
+             data[0][i] = Double.parseDouble(massListStringArray[i]);
+             data[1][i] = Double.parseDouble(intensitiyStringArray[i]);
+         }
+
+         dataSet.addSeries("spectrumData", data);
+         
+         
+         // Set title
+         String title = "Query "+pm.getMsQuery().getId()+ " - " + pm.getTransientPeptide().getSequence();
+         chart.setTitle(title);
+
+         // reset X/Y zooming
+         ((ChartPanel)  spectrumPanel).restoreAutoBounds();
+        ((ChartPanel)  spectrumPanel).setBackground(Color.white);
+        
+        
+
+/*
+        JPM.TODO : remove this code
+         double[] testDoubleArray = {249.16047, 277.07924, 345.25926, 460.17262, 487.1969, 488.94819, 496.33015, 529.94808, 550.16391, 560.08066, 568.25882, 577.32167, 587.56737, 593.09499, 597.3877, 606.54872, 611.80013, 615.26313, 616.35124, 618.61268, 621.87094, 624.89078, 627.93345, 645.56085, 646.36873, 676.12191, 680.33725, 746.90784, 769.88574, 776.95404, 799.45519, 802.4195, 815.88137, 839.65211, 895.25795, 991.44372, 1087.5766, 1093.553};
+        int nb = testDoubleArray.length;
+
+        DecimalFormatSymbols decimalSymbols = new DecimalFormatSymbols();
+        decimalSymbols.setDecimalSeparator('.');
+        decimalSymbols.setGroupingSeparator('\0');
+
+        DecimalFormat doubleFormat = new DecimalFormat("#.######", decimalSymbols);
+
+        DecimalFormat doubleFormat0 = new DecimalFormat("0.000000" , decimalSymbols);
+         
+         int LOOP_SIZE = 10000;
+         
+        // TEST 1 : ByteBuffer sans compression
+        long timeStart = System.currentTimeMillis();
+        int totalSize = 0;
+        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
+            byte[] bufferArray = new byte[nb * 8];
+            ByteBuffer buffer = ByteBuffer.wrap(bufferArray);
+            for (int i = 0; i < nb; i++) {
+                buffer.putDouble(testDoubleArray[i]);
+            }
+            totalSize += bufferArray.length;
+        }
+        long deltaTime = System.currentTimeMillis()-timeStart;
+
+        
+        // TEST 2 : String avec compression et "#.######"
+        long timeStart2 = System.currentTimeMillis();
+        int totalSize2 = 0;
+        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
+            StringBuilder sb = new StringBuilder(10 * nb);
+            for (int i = 0; i < nb; i++) {
+                sb.append(doubleFormat.format(testDoubleArray[i])).append(' ');
+            }
+            byte[] byteArray = sb.toString().getBytes();
+            byte[] testByteCompressed = package$EasyLzma$.MODULE$.compress(byteArray);
+            totalSize2 += testByteCompressed.length;
+        }
+        long deltaTime2 = System.currentTimeMillis()-timeStart2;
+
+        // TEST 3 : String sans compression et "#.######"
+        long timeStart3 = System.currentTimeMillis();
+        int totalSize3 = 0;
+        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
+            StringBuilder sb = new StringBuilder(10 * nb);
+            for (int i = 0; i < nb; i++) {
+                sb.append(doubleFormat.format(testDoubleArray[i])).append(' ');
+                
+            }
+            byte[] byteArray = sb.toString().getBytes();
+            totalSize3 += byteArray.length;
+        }
+        long deltaTime3 = System.currentTimeMillis()-timeStart3;
+       
+        // TEST 4 : String sans compression et "0.000000"
+        long timeStart4 = System.currentTimeMillis();
+        int totalSize4 = 0;
+        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
+            StringBuilder sb = new StringBuilder(10 * nb);
+            for (int i = 0; i < nb; i++) {
+                sb.append(doubleFormat0.format(testDoubleArray[i])).append(' ');
+                
+            }
+            byte[] byteArray = sb.toString().getBytes();
+            totalSize4 += byteArray.length;
+        }
+        long deltaTime4 = System.currentTimeMillis()-timeStart4;
+        
+        
+        System.out.println(" ByteBuffer sans compression :"+totalSize + " "+deltaTime);
+        
+        System.out.println(" String avec compression et #.###### :"+totalSize2 + " "+deltaTime2);
+        
+        System.out.println(" String sans compression et #.###### :"+totalSize3 + " "+deltaTime3);
+
+        System.out.println(" String sans compression et 0.000000 :"+totalSize4 + " "+deltaTime4);
+        */
+        
+    }
+    
+    public static class XYStickRenderer extends AbstractXYItemRenderer {
+
+        @Override
+        public void drawItem(Graphics2D g2, XYItemRendererState state, Rectangle2D dataArea,
+                PlotRenderingInfo info, XYPlot plot, ValueAxis domainAxis, ValueAxis rangeAxis,
+                XYDataset dataset, int series, int item, CrosshairState crosshairState, int pass) {
+
+            double x = dataset.getXValue(series, item);
+            double y = dataset.getYValue(series, item);
+            if (!Double.isNaN(y)) {
+                org.jfree.ui.RectangleEdge xAxisLocation = plot.getDomainAxisEdge();
+                org.jfree.ui.RectangleEdge yAxisLocation = plot.getRangeAxisEdge();
+                double transX = domainAxis.valueToJava2D(x, dataArea, xAxisLocation);
+                double transOX = domainAxis.valueToJava2D(0, dataArea, xAxisLocation);
+                double transY = rangeAxis.valueToJava2D(y, dataArea, yAxisLocation);
+                double transOY = rangeAxis.valueToJava2D(0, dataArea, yAxisLocation);
+                g2.setPaint(getItemPaint(series, item));
+                g2.setStroke(getBaseStroke());
+                PlotOrientation orientation = plot.getOrientation();
+                if (orientation == PlotOrientation.VERTICAL) {
+                    g2.drawLine((int) transX, (int) transOY, (int) transX, (int) transY);
+                } else if (orientation == PlotOrientation.HORIZONTAL) {
+                    g2.drawLine((int) transOY, (int) transX, (int) transY, (int) transX);
+                }
+                int domainAxisIndex = plot.getDomainAxisIndex(domainAxis);
+                int rangeAxisIndex = plot.getRangeAxisIndex(rangeAxis);
+                updateCrosshairValues(crosshairState, x, y, domainAxisIndex, rangeAxisIndex, transX, transY,
+                        orientation);
+
+            }
+        }
     }
 }

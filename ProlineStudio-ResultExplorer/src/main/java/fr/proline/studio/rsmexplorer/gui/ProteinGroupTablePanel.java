@@ -41,7 +41,6 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
             
         });
         
- 
 
     }
 

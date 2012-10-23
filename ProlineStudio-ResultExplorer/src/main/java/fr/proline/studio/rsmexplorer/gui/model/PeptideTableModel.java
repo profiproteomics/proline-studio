@@ -38,6 +38,9 @@ public class PeptideTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int col) {
+        if (col == COLTYPE_PEPTIDE_NAME) {
+            return Peptide.class;
+        }
         return String.class;
     }
 
@@ -60,15 +63,7 @@ public class PeptideTableModel extends AbstractTableModel {
                 PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
                 if (peptideMatch == null) {
                 }
-                Peptide peptide = peptideMatch.getTransientPeptide();
-                if (peptide == null) {
-                    return ""; // should never happen
-
-                }
-
-                return constructPeptideDisplay(peptide);
-
-
+                return peptideMatch.getTransientPeptide();
             }
             case COLTYPE_PEPTIDE_SCORE: {
                 // Retrieve typical Peptide Match
@@ -181,75 +176,5 @@ public class PeptideTableModel extends AbstractTableModel {
         return peptideInstances;
     }
 
-    private String constructPeptideDisplay(Peptide peptide) {
-
-        SequenceMatch sequenceMatch = peptide.getTransientData().getSequenceMatch();
-
-        if (sequenceMatch != null) {
-
-            // Add Before residue of the peptide
-            String residueBefore = sequenceMatch.getResidueBefore();
-            if (residueBefore != null) {
-                displaySB.append(residueBefore.toUpperCase());
-                displaySB.append('-');
-            }
-            
-            HashMap<Integer,PeptidePtm> ptmMap = peptide.getTransientData().getPeptidePtmMap();
-            
-            if (ptmMap == null) {
-                displaySB.append(peptide.getSequence());
-            } else {
-                displaySB.append("<HTML>");
-                
-                String sequence = peptide.getSequence();
-                PeptidePtm nterPtm = ptmMap.get(0);
-                if (nterPtm != null) {
-                    displaySB.append("<span style='color:#fd9b1d;'>");
-                    displaySB.append(sequence.charAt(0));
-                    displaySB.append("</span>");
-                } else {
-                    displaySB.append(sequence.charAt(0));
-                }
-                
-                for (int i = 1; i<sequence.length()-1; i++) {
-                    if (ptmMap.get(i+1) != null) {
-                        displaySB.append("<span style='color:#fd9b1d;'>");
-                        displaySB.append(sequence.charAt(i));
-                        displaySB.append("</span>");
-                    } else {
-                        displaySB.append(sequence.charAt(i));
-                    }
-                }
-                
-                PeptidePtm cterPtm = ptmMap.get(-1);
-                if (cterPtm != null) {
-                    displaySB.append("<span style='color:#fd9b1d;'>");
-                    displaySB.append(sequence.charAt(sequence.length()-1));
-                    displaySB.append("</span>");
-                } else {
-                    displaySB.append(sequence.charAt(sequence.length()-1));
-                }
-            }
-            
-            // Add After residue of the peptide
-            String residueAfter = sequenceMatch.getResidueAfter();
-            if (residueAfter != null) {
-                displaySB.append('-');
-                displaySB.append(residueAfter.toUpperCase());
-            }
-            
-            if (ptmMap != null) {
-                displaySB.append("</HTML>");
-            }
-            
-            String res = displaySB.toString();
-            displaySB.setLength(0);
-            return res;
-        }
-
-        return peptide.getSequence();
-
-        
-    }
-    private static StringBuilder displaySB = new StringBuilder();
+    
 }

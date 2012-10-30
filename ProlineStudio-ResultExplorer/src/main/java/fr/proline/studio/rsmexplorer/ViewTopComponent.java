@@ -4,9 +4,12 @@
  */
 package fr.proline.studio.rsmexplorer;
 
-
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.rsmexplorer.gui.ProteinGroupPeptideSpectrumPanel;
+import fr.proline.studio.rsmexplorer.gui.ProteinGroupPeptideTablePanel;
+import fr.proline.studio.rsmexplorer.gui.ProteinGroupProteinSetPanel;
 import fr.proline.studio.rsmexplorer.gui.ProteinGroupTablePanel;
 import java.util.HashMap;
 import javax.swing.JPanel;
@@ -19,41 +22,68 @@ import org.openide.util.NbBundle.Messages;
 /**
  * Top component which displays something.
  */
-@ConvertAsProperties(dtd = "-//fr.proline.studio.rsmexplorer//DataViewer//EN",
+@ConvertAsProperties(dtd = "-//fr.proline.studio.rsmexplorer//View//EN",
 autostore = false)
-@TopComponent.Description(preferredID = "DataViewerTopComponent",
+@TopComponent.Description(preferredID = "ViewTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
-@TopComponent.Registration(mode = "editor", openAtStartup = true)
-@ActionID(category = "Window", id = "fr.proline.studio.rsmexplorer.DataViewerTopComponent")
+@TopComponent.Registration(mode = "explorer", openAtStartup = true)
+@ActionID(category = "Window", id = "fr.proline.studio.rsmexplorer.ViewTopComponent")
 @ActionReference(path = "Menu/Window" /*
  * , position = 333
  */)
-@TopComponent.OpenActionRegistration(displayName = "#CTL_DataViewerAction",
-preferredID = "DataViewerTopComponent")
+@TopComponent.OpenActionRegistration(displayName = "#CTL_ViewAction",
+preferredID = "ViewTopComponent")
 @Messages({
-    "CTL_DataViewerAction=DataViewer",
-    "CTL_DataViewerTopComponent=DataViewer Window",
-    "HINT_DataViewerTopComponent=This is a DataViewer window"
+    "CTL_ViewAction=View",
+    "CTL_ViewTopComponent=View Window",
+    "HINT_ViewTopComponent=This is a View window"
 })
-public final class DataViewerTopComponent extends TopComponent {
+public final class ViewTopComponent extends TopComponent {
 
     private static HashMap<Class<?>, JPanel> panelMap = new HashMap<Class<?>, JPanel>();
     
-    
-    public DataViewerTopComponent() {
+    public ViewTopComponent() {
         initComponents();
-        setName(Bundle.CTL_DataViewerTopComponent());
-        setToolTipText(Bundle.HINT_DataViewerTopComponent());
-        
-        addPanel(proteinGroupPanel);
+        setName(Bundle.CTL_ViewTopComponent());
+        setToolTipText(Bundle.HINT_ViewTopComponent());
 
+        add(createMainPanel());
     }
 
+    public JPanel createMainPanel() {
+        
+        SplittedPanelContainer splittedPanel = new SplittedPanelContainer();
+        
+        JPanel p = new ProteinGroupTablePanel();
+        p.setName("Protein Groups");
+        splittedPanel.registerPanel(p);
+        registerPanel(p);
+        
+        p = new ProteinGroupProteinSetPanel();
+        p.setName("Proteins");
+        splittedPanel.registerPanel(p);
+        registerPanel(p);
+        
+        p = new ProteinGroupPeptideTablePanel();
+        p.setName("Peptides");
+        splittedPanel.registerPanel(p);
+        registerPanel(p);
+        
+        p = new ProteinGroupPeptideSpectrumPanel();
+        p.setName("Spectrum");
+        splittedPanel.registerPanel(p);
+        registerPanel(p);
+        
+        splittedPanel.createPanel();
+        
+        return splittedPanel;
+    }
+    
     public static JPanel getPanel(Class panelClass) {
         return panelMap.get(panelClass);
     }
-    public static void addPanel(JPanel panel) {
+    public static void registerPanel(JPanel panel) {
         panelMap.put(panel.getClass(), panel);
     }
     
@@ -66,26 +96,10 @@ public final class DataViewerTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        tabbedPane = new javax.swing.JTabbedPane();
-        proteinGroupPanel = new fr.proline.studio.rsmexplorer.gui.ProteinGroupPanel();
-
-        tabbedPane.addTab(org.openide.util.NbBundle.getMessage(DataViewerTopComponent.class, "DataViewerTopComponent.proteinGroupPanel.TabConstraints.tabTitle_1"), proteinGroupPanel); // NOI18N
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(tabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 867, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(tabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 815, Short.MAX_VALUE)
-        );
+        setLayout(new java.awt.GridLayout());
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private fr.proline.studio.rsmexplorer.gui.ProteinGroupPanel proteinGroupPanel;
-    private javax.swing.JTabbedPane tabbedPane;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
@@ -109,12 +123,9 @@ public final class DataViewerTopComponent extends TopComponent {
         // TODO read your settings according to their version
     }
     
-    
     public void setSelectedResultSummary(Long taskId, ProteinSet[] proteinSets) {
         // Note : Protein Groups <=> Protein Sets
 
-        
-        tabbedPane.setSelectedIndex(0); //JPM.TODO : remove 0 and put reference
         ((ProteinGroupTablePanel)getPanel(ProteinGroupTablePanel.class)).setData(taskId, proteinSets);
         
     }
@@ -122,6 +133,4 @@ public final class DataViewerTopComponent extends TopComponent {
     public void dataUpdated(SubTask subTask) {
         ((ProteinGroupTablePanel)getPanel(ProteinGroupTablePanel.class)).dataUpdated(subTask);
     }
-    
-
 }

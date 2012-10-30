@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.core.utils.lzma.package$EasyLzma$;
-import fr.proline.core.utils.lzma.*;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -17,10 +16,10 @@ import javax.swing.UIManager;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
+import org.jfree.chart.*;
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.entity.ChartEntity;
+import org.jfree.chart.entity.XYItemEntity;
 import org.jfree.chart.plot.CrosshairState;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
@@ -65,8 +64,40 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
         XYStickRenderer renderer = new XYStickRenderer();
         renderer.setBaseStroke(new BasicStroke(1.0f));
         plot.setRenderer(renderer);
+      
         
         initComponents();
+        
+        
+        
+               ((ChartPanel) spectrumPanel).addChartMouseListener(new ChartMouseListener() {
+
+            @Override
+            public void chartMouseClicked(ChartMouseEvent cme) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public void chartMouseMoved(ChartMouseEvent cme) {
+                ChartEntity e = cme.getEntity();
+     
+                System.out.println(e.getClass());
+                if (e != null && e instanceof XYItemEntity) {
+                    XYItemEntity cyEnt = (XYItemEntity) e;
+                    int sindex = cyEnt.getSeriesIndex();
+                    int iindex = cyEnt.getItem();
+
+                    System.out.println("x = " + dataSet.getXValue(sindex, iindex));
+                    System.out.println("y = " + dataSet.getYValue(sindex, iindex));
+                    ((ChartPanel) spectrumPanel).setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
+                } else if (e!=null) {
+                    ((ChartPanel) spectrumPanel).setCursor(null);
+                    //System.out.println(e.getArea());
+                }
+
+            }
+        });
+        
         
         
         
@@ -324,49 +355,58 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
     
     
     private void constructSpectrumChart(PeptideMatch pm) {
-        
-        
+
+
         // Set fate for the spectrum chart
         Spectrum spectrum = pm.getMsQuery().getSpectrum();
-        
-         byte[] intensityByteArray = package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
-         byte[] massByteArray = package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
-         
-         String intensityListString = new String(intensityByteArray);
-         String massListString      = new String(massByteArray);
-         
-         
-         String[] intensitiyStringArray = intensityListString.split(" ");
-         String[] massListStringArray   = massListString.split(" ");
-         
-         int size = massListStringArray.length;
-         if (size != intensitiyStringArray.length) {
-             LoggerFactory.getLogger(ProteinGroupPeptideSpectrumPanel.class).error("Intensity and Mass List have different size");
-             return;
-         }
-         
-         double[][] data = new double[2][size]; 
-         for (int i=0;i<size;i++) {
-             data[0][i] = Double.parseDouble(massListStringArray[i]);
-             data[1][i] = Double.parseDouble(intensitiyStringArray[i]);
-         }
 
-         dataSet.addSeries("spectrumData", data);
-         
-         
-         // Set title
-         String title = "Query "+pm.getMsQuery().getId()+ " - " + pm.getTransientPeptide().getSequence();
-         chart.setTitle(title);
+        byte[] intensityByteArray = package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
+        byte[] massByteArray = package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
 
-         // reset X/Y zooming
-         ((ChartPanel)  spectrumPanel).restoreAutoBounds();
-        ((ChartPanel)  spectrumPanel).setBackground(Color.white);
-        
-        
+        String intensityListString = new String(intensityByteArray);
+        String massListString = new String(massByteArray);
+
+
+        String[] intensitiyStringArray = intensityListString.split(" ");
+        String[] massListStringArray = massListString.split(" ");
+
+        int size = massListStringArray.length;
+        if (size != intensitiyStringArray.length) {
+            LoggerFactory.getLogger(ProteinGroupPeptideSpectrumPanel.class).error("Intensity and Mass List have different size");
+            return;
+        }
+
+        double[][] data = new double[2][size];
+        for (int i = 0; i < size; i++) {
+            data[0][i] = Double.parseDouble(massListStringArray[i]);
+            data[1][i] = Double.parseDouble(intensitiyStringArray[i]);
+        }
+
+        dataSet.addSeries("spectrumData", data);
+
+
+        // Set title
+        String title = "Query " + pm.getMsQuery().getId() + " - " + pm.getTransientPeptide().getSequence();
+        chart.setTitle(title);
+
+        // reset X/Y zooming
+        ((ChartPanel) spectrumPanel).restoreAutoBounds();
+        ((ChartPanel) spectrumPanel).setBackground(Color.white);
 
 /*
-        JPM.TODO : remove this code
-         double[] testDoubleArray = {249.16047, 277.07924, 345.25926, 460.17262, 487.1969, 488.94819, 496.33015, 529.94808, 550.16391, 560.08066, 568.25882, 577.32167, 587.56737, 593.09499, 597.3877, 606.54872, 611.80013, 615.26313, 616.35124, 618.61268, 621.87094, 624.89078, 627.93345, 645.56085, 646.36873, 676.12191, 680.33725, 746.90784, 769.88574, 776.95404, 799.45519, 802.4195, 815.88137, 839.65211, 895.25795, 991.44372, 1087.5766, 1093.553};
+        double[] arrayDouble = {218.167,38.6325 ,219.228 ,7.4968 ,220.195 ,9.2462 ,221.040 ,4.9537 ,224.869 ,9.6648 ,227.207 ,10.7915 ,230.186 ,42.6373 ,231.167 ,13.7717 ,232.121 ,11.2532 ,235.112 ,4.4089 ,238.237 ,11.7136 ,239.295 ,3.8114 ,240.144 ,17.3850 ,241.184 ,15.5716 ,243.160 ,35.2149 ,244.055 ,6.8280 ,245.324 ,6.4921 ,246.236 ,13.4056 ,249.215 ,12.3351 ,251.193 ,6.7994 ,252.250 ,28.5956 ,252.901 ,4.2328 ,254.224 ,28.0237 ,255.140 ,17.3905 ,256.018 ,14.0457 ,257.086 ,51.6179 ,258.117 ,62.3664 ,260.997 ,12.7562 ,262.319 ,18.1671 ,266.246 ,37.4814 ,267.182 ,37.3385 ,268.345 ,36.5953 ,270.384 ,6.5858 ,271.498 ,4.7876 ,273.932 ,47.1861 ,275.215 ,30.8821 ,276.129 ,12.0070 ,277.055 ,19.1447 ,278.120 ,14.4563 ,279.212 ,27.1620 ,281.290 ,2.1814 ,282.057 ,15.7147 ,283.198 ,39.0104 ,284.460 ,3.6088 ,285.279 ,20.3408 ,286.244 ,28.2633 ,287.299 ,31.3079 ,288.177 ,45.9132 ,289.395 ,88.9587 ,293.357 ,6.3089 ,294.095 ,4.3184 ,296.235 ,25.2655 ,297.111 ,15.7737 ,298.200 ,30.3427 ,299.285 ,12.5086 ,299.961 ,45.3049 ,301.002 ,42.0009 ,302.039 ,30.8951 ,303.185 ,64.0312 ,304.218 ,24.4937 ,306.228 ,9.4962 ,308.498 ,4.8733 ,309.424 ,3.0481 ,310.190 ,21.8745 ,311.174 ,9.9419 ,313.269 ,50.7549 ,314.339 ,4.0106 ,315.319 ,11.7750 ,316.409 ,17.9728 ,317.366 ,20.9276 ,318.453 ,8.6063 ,319.233 ,20.4673 ,320.157 ,12.3963 ,322.256 ,29.0946 ,324.275 ,10.7189 ,325.207 ,72.0097 ,326.092 ,26.4483 ,327.278 ,9.8810 ,329.041 ,5.0960 ,331.128 ,7.4991 ,332.595 ,13.7649 ,333.388 ,19.7459 ,335.212 ,8.1600 ,336.127 ,16.0901 ,337.289 ,13.7105 ,338.243 ,35.2687 ,339.349 ,5.2358 ,340.355 ,16.4033 ,341.216 ,8.7768 ,342.239 ,26.9793 ,344.177 ,36.6838 ,345.233 ,19.5339 ,347.375 ,9.8961 ,347.988 ,29.5680 ,349.070 ,24.1451 ,350.133 ,10.9454 ,352.309 ,26.3988 ,353.277 ,12.2452 ,354.391 ,9.8573 ,355.388 ,25.2476 ,356.100 ,14.4592 ,357.213 ,22.0625 ,359.822 ,50.5993 ,361.438 ,9.7021 ,363.168 ,66.0803 ,364.130 ,6.3977 ,365.321 ,6.2256 ,366.492 ,9.9714 ,367.313 ,24.9568 ,368.308 ,20.1699 ,369.350 ,25.3079 ,370.228 ,48.0010 ,371.285 ,29.0436 ,372.157 ,8.3865 ,373.246 ,10.6549 ,373.984 ,16.9530 ,374.939 ,61.8239 ,376.254 ,40.9317 ,377.246 ,4.6574 ,378.357 ,5.5349 ,379.269 ,44.4651 ,381.267 ,26.0305 ,382.266 ,9.0382 ,383.317 ,7.9425 ,384.201 ,16.1626 ,385.176 ,49.7709 ,386.164 ,111.4748 ,387.221 ,109.4114 ,388.108 ,73.2414 ,388.986 ,18.0491 ,390.172 ,19.0355 ,391.555 ,34.2794 ,392.195 ,24.9725 ,393.402 ,13.1314 ,394.274 ,11.3136 ,395.339 ,7.4395 ,396.295 ,46.0300 ,397.257 ,9.8461 ,398.116 ,15.4401 ,399.119 ,18.3208 ,400.040 ,11.7191 ,400.688 ,41.0376 ,401.512 ,14.5725 ,403.186 ,509.5765 ,404.048 ,49.8665 ,405.277 ,67.1821 ,406.920 ,20.5902 ,409.275 ,20.8919 ,410.307 ,42.8174 ,411.246 ,42.9056 ,412.194 ,34.0648 ,413.132 ,28.2077 ,414.052 ,45.6869 ,414.979 ,66.5417 ,416.313 ,79.0306 ,417.503 ,349.5804 ,418.992 ,9.8033 ,420.082 ,9.8342 ,420.782 ,4.6179 ,422.057 ,38.3960 ,423.373 ,33.8279 ,424.588 ,20.0521 ,425.259 ,37.4349 ,426.011 ,63.2024 ,427.260 ,36.7249 ,428.247 ,5.2962 ,429.302 ,9.3741 ,430.385 ,10.0488 ,431.337 ,48.9540 ,432.223 ,11.1381 ,433.359 ,15.6303 ,435.132 ,23.3523 ,435.921 ,26.8135 ,437.333 ,51.2684 ,438.214 ,129.9237 ,439.233 ,46.7890 ,440.201 ,66.8805 ,441.382 ,24.0192 ,442.523 ,11.9337 ,443.438 ,5.0420 ,444.376 ,8.4859 ,445.323 ,23.3374 ,446.271 ,18.5846 ,447.370 ,30.9320 ,448.267 ,12.9198 ,450.398 ,49.2908 ,451.156 ,82.1294 ,451.948 ,48.4899 ,452.725 ,50.7009 ,453.393 ,25.0232 ,454.334 ,26.7626 ,455.239 ,43.1259 ,456.080 ,114.6247 ,457.243 ,78.8586 ,458.069 ,10.1689 ,458.932 ,40.8718 ,459.893 ,17.0711 ,461.136 ,172.0723 ,462.171 ,96.6013 ,463.123 ,47.0043 ,464.260 ,89.6317 ,465.341 ,48.2755 ,466.266 ,5.6878 ,466.992 ,192.6822 ,468.355 ,84.0356 ,469.608 ,52.7184 ,470.401 ,67.2049 ,471.408 ,24.9393 ,472.311 ,12.2874 ,473.220 ,30.0311 ,474.407 ,25.4751 ,475.533 ,21.2084 ,476.354 ,12.4830 ,476.974 ,11.1848 ,477.988 ,26.7510 ,478.912 ,79.0449 ,480.100 ,38.1064 ,481.264 ,43.2079 ,482.410 ,55.2867 ,483.527 ,9.0633 ,484.703 ,29.6861 ,485.460 ,46.6136 ,486.099 ,40.4559 ,486.951 ,63.9794 ,488.180 ,15.8588 ,489.258 ,50.6932 ,490.406 ,20.4305 ,491.118 ,10.8187 ,491.914 ,75.1339 ,493.222 ,14.3124 ,494.170 ,37.1280 ,495.420 ,49.8839 ,496.329 ,41.2599 ,497.350 ,32.3766 ,498.345 ,24.8646 ,499.330 ,64.5482 ,500.227 ,134.6163 ,501.255 ,59.0232 ,502.286 ,30.7678 ,503.352 ,26.0857 ,504.074 ,4.6059 ,504.996 ,14.2217 ,506.391 ,48.7598 ,507.406 ,36.8553 ,508.257 ,125.9845 ,509.085 ,73.2862 ,509.817 ,31.1714 ,510.472 ,29.6196 ,511.238 ,51.1076 ,512.087 ,36.6255 ,513.272 ,323.6948 ,514.048 ,69.1913 ,515.302 ,33.9552 ,516.269 ,486.8853 ,517.231 ,121.2980 ,517.943 ,147.6159 ,518.597 ,20.9257 ,519.240 ,33.4222 ,520.397 ,91.4632 ,521.141 ,116.1879 ,521.940 ,113.2976 ,522.669 ,114.8046 ,523.312 ,245.3700 ,524.243 ,132.9573 ,525.282 ,140.0184 ,526.179 ,44.9199 ,527.203 ,68.0204 ,528.197 ,72.5738 ,529.384 ,65.6305 ,530.645 ,19.3167 ,531.390 ,22.9045 ,532.401 ,44.2663 ,533.525 ,31.6898 ,534.328 ,32.9512 ,535.270 ,40.6282 ,536.323 ,67.2242 ,537.440 ,85.7064 ,538.363 ,68.3478 ,539.350 ,133.8249 ,540.264 ,41.5915 ,541.185 ,83.4064 ,542.240 ,81.1290 ,543.242 ,112.7662 ,544.216 ,54.1751 ,545.541 ,35.3952 ,546.426 ,33.8342 ,547.214 ,44.2510 ,548.227 ,73.1078 ,549.405 ,54.9092 ,550.416 ,15.3021 ,551.342 ,136.9056 ,552.276 ,83.1611 ,554.139 ,73.7115 ,555.203 ,241.6423 ,556.237 ,201.4381 ,557.385 ,173.9327 ,558.204 ,47.5098 ,559.097 ,90.8006 ,560.242 ,81.7274 ,561.433 ,68.5278 ,562.506 ,37.9284 ,563.418 ,33.5585 ,564.280 ,46.7448 ,565.107 ,40.4628 ,565.794 ,166.2962 ,567.206 ,15.7232 ,567.996 ,66.0977 ,569.109 ,25.9616 ,569.864 ,81.7443 ,571.915 ,88.5353 ,573.198 ,259.0898 ,574.185 ,189.0121 ,575.306 ,125.1667 ,576.288 ,55.3596 ,577.367 ,94.6602 ,578.714 ,82.0625 ,579.357 ,375.1078 ,580.211 ,112.3702 ,581.255 ,144.4306 ,582.246 ,96.5854 ,583.397 ,13.1435 ,584.187 ,39.5472 ,585.832 ,349.6872 ,587.088 ,180.0975 ,588.172 ,952.7253 ,590.372 ,26.3510 ,591.342 ,95.5442 ,592.141 ,82.8947 ,593.300 ,147.2772 ,594.412 ,43.1066 ,595.417 ,55.4313 ,596.406 ,58.0221 ,597.220 ,13.4423 ,598.130 ,69.2022 ,599.334 ,40.8852 ,600.380 ,46.6035 ,601.724 ,59.0207 ,602.376 ,118.3563 ,603.345 ,48.4787 ,604.294 ,42.1979 ,605.286 ,134.7506 ,606.322 ,31.2926 ,607.420 ,126.3996 ,608.338 ,16.3497 ,609.196 ,219.5427 ,610.366 ,202.0666 ,611.475 ,52.0970 ,612.171 ,49.3298 ,613.245 ,48.8409 ,614.323 ,121.4166 ,615.156 ,142.7217 ,616.217 ,376.4675 ,617.273 ,171.7274 ,618.297 ,103.2671 ,619.475 ,73.5468 ,620.338 ,13.3717 ,621.249 ,23.2478 ,621.874 ,24.1447 ,623.171 ,93.4522 ,624.297 ,125.9764 ,625.025 ,72.9691 ,625.831 ,86.4558 ,627.284 ,258.3807 ,628.292 ,510.4409 ,629.339 ,160.1137 ,630.339 ,144.6669 ,631.539 ,112.4040 ,633.382 ,62.0239 ,634.615 ,27.9246 ,635.288 ,20.6903 ,636.409 ,91.6263 ,637.420 ,133.8184 ,638.692 ,133.2467 ,639.441 ,27.4997 ,640.385 ,52.8314 ,641.512 ,91.9017 ,642.692 ,248.7294 ,644.111 ,50.1703 ,645.109 ,122.5163 ,646.449 ,212.7581 ,647.633 ,107.2054 ,648.296 ,37.4938 ,649.218 ,83.0998 ,650.256 ,392.9307 ,651.089 ,124.3597 ,652.409 ,110.8611 ,653.528 ,84.2304 ,654.272 ,130.4832 ,655.433 ,310.2738 ,656.378 ,156.7687 ,657.217 ,73.9727 ,658.211 ,41.9544 ,659.265 ,188.3655 ,659.901 ,58.9318 ,660.571 ,24.3040 ,661.399 ,13.8002 ,662.498 ,163.9487 ,663.363 ,1026.7490 ,664.408 ,782.0067 ,665.251 ,403.6715 ,666.298 ,162.6967 ,667.635 ,524.1084 ,668.400 ,104.2227 ,669.349 ,132.4883 ,670.276 ,77.3764 ,671.277 ,79.9789 ,672.347 ,249.3389 ,673.230 ,388.7476 ,674.162 ,506.2481 ,675.613 ,101.4614 ,676.475 ,51.9063 ,677.227 ,171.2856 ,678.068 ,189.0189 ,679.296 ,193.7329 ,680.003 ,68.2414 ,680.788 ,107.5119 ,681.713 ,63.8901 ,682.999 ,270.0985 ,684.082 ,134.5290 ,685.267 ,212.1063 ,686.249 ,215.6463 ,687.484 ,224.8752 ,688.350 ,86.6139 ,689.326 ,44.9396 ,690.305 ,134.8022 ,690.978 ,33.8858 ,691.680 ,101.0421 ,692.310 ,112.5147 ,693.089 ,233.8643 ,694.453 ,298.9066 ,695.480 ,21.7849 ,696.122 ,37.4547 ,697.219 ,39.6082 ,698.236 ,94.9568 ,699.186 ,142.3709 ,699.917 ,41.1461 ,700.732 ,122.8819 ,701.597 ,37.3070 ,702.439 ,180.6606 ,703.351 ,148.8295 ,704.427 ,71.1374 ,706.057 ,169.5980 ,707.078 ,230.3295 ,708.200 ,74.7947 ,709.219 ,144.4462 ,710.372 ,214.1460 ,711.359 ,304.0718 ,712.293 ,245.1401 ,713.210 ,243.8697 ,714.538 ,175.7718 ,715.731 ,118.8701 ,716.647 ,53.2413 ,717.900 ,376.4854 ,719.198 ,242.3905 ,720.292 ,588.8421 ,721.398 ,217.9578 ,722.508 ,181.7489 ,723.536 ,84.9023 ,724.321 ,158.2958 ,725.130 ,173.1250 ,726.189 ,251.6775 ,727.236 ,459.1000 ,728.381 ,475.3607 ,729.565 ,241.4360 ,730.447 ,73.8946 ,731.160 ,191.9651 ,732.015 ,47.3703 ,732.741 ,73.8664 ,733.355 ,285.7547 ,734.254 ,170.5527 ,735.203 ,769.5286 ,736.106 ,245.8474 ,736.720 ,335.3624 ,737.445 ,2244.6541 ,738.509 ,2628.6689 ,740.591 ,383.6093 ,741.410 ,199.2810 ,742.986 ,489.7415 ,744.115 ,3562.2712 ,745.391 ,93.8305 ,746.135 ,806.3931 ,747.238 ,494.3546 ,748.356 ,26.0247 ,749.462 ,39.6216 ,756.562 ,18.1823 ,760.716 ,6.2287 ,761.377 ,17.0036 ,762.069 ,45.6890 ,763.223 ,36.9530 ,764.415 ,31.1616 ,765.703 ,62.9664 ,766.709 ,12.7489 ,767.453 ,41.0669 ,768.623 ,14.1131 ,769.856 ,52.0046 ,770.776 ,15.6472 ,771.604 ,53.2936 ,772.612 ,18.6970 ,773.560 ,49.5744 ,774.391 ,138.4211 ,775.387 ,159.2823 ,776.313 ,85.5431 ,777.209 ,7.0631 ,778.370 ,45.9320 ,779.277 ,216.7745 ,780.518 ,324.4636 ,782.279 ,48.2601 ,782.922 ,10.3945 ,783.534 ,70.7744 ,784.441 ,129.6126 ,785.403 ,132.9312 ,786.053 ,4.1607 ,787.109 ,68.4988 ,788.327 ,56.4711 ,789.465 ,21.2480 ,791.432 ,767.7416 ,792.404 ,584.0481 ,793.218 ,376.9453 ,793.965 ,42.6629 ,794.578 ,70.7641 ,795.395 ,28.1083 ,796.114 ,32.9967 ,797.245 ,36.3156 ,799.344 ,20.9323 ,800.303 ,113.4190 ,801.388 ,301.8697 ,802.190 ,746.8550 ,803.208 ,138.1482 ,804.405 ,53.1522 ,805.473 ,17.5436 ,806.477 ,253.5363 ,807.445 ,187.7723 ,808.402 ,76.8317 ,809.457 ,69.7671 ,810.709 ,72.9018 ,811.739 ,124.6471 ,813.466 ,62.5111 ,814.246 ,139.7874 ,815.111 ,142.3687 ,816.946 ,10.3303 ,817.690 ,33.7008 ,819.087 ,132.2368 ,820.300 ,123.1569 ,822.436 ,5.8756 ,823.666 ,31.3068 ,824.330 ,13.2524 ,825.332 ,44.1985 ,826.463 ,278.1372 ,827.162 ,24.7235 ,828.131 ,20.1820 ,829.154 ,82.6354 ,830.344 ,40.9948 ,831.520 ,59.7296 ,832.522 ,9.5872 ,833.302 ,181.8731 ,834.269 ,156.6394 ,835.280 ,19.2187 ,836.272 ,15.2939 ,837.044 ,19.5782 ,839.010 ,59.1880 ,840.511 ,67.8338 ,841.566 ,23.3284 ,842.393 ,17.2209 ,843.328 ,6.9158 ,844.518 ,74.2717 ,846.497 ,16.9537 ,847.785 ,126.9185 ,848.912 ,58.9095 ,849.690 ,129.5061 ,850.917 ,98.9095 ,852.301 ,13.5637 ,853.008 ,126.1655 ,855.347 ,44.2030 ,856.224 ,7.5686 ,857.393 ,24.6475 ,858.380 ,185.0557 ,859.608 ,74.6040 ,860.306 ,63.5210 ,861.493 ,261.8697 ,862.429 ,73.4290 ,863.615 ,16.2947 ,864.575 ,3.5702 ,865.655 ,106.2990 ,866.624 ,360.1343 ,867.531 ,43.7196 ,868.568 ,24.8180 ,869.683 ,6.8594 ,870.588 ,23.2156 ,871.444 ,10.2522 ,872.139 ,48.3036 ,873.341 ,60.7085 ,875.426 ,387.9618 ,876.165 ,103.3733 ,876.819 ,164.7400 ,878.411 ,469.2307 ,879.540 ,168.5640 ,880.422 ,16.2236 ,881.616 ,6.3621 ,882.234 ,51.1685 ,883.584 ,51.8668 ,884.674 ,113.3007 ,885.629 ,17.7506 ,886.360 ,58.5874 ,887.672 ,120.9690 ,888.623 ,27.9361 ,889.239 ,23.0890 ,890.372 ,62.9815 ,891.278 ,45.3868 ,892.680 ,39.4795 ,893.511 ,57.2405 ,894.200 ,20.6923 ,895.039 ,13.0715 ,895.882 ,43.6831 ,897.033 ,81.9251 ,897.798 ,50.0374 ,898.497 ,82.3087 ,899.604 ,34.6485 ,900.525 ,47.5601 ,901.564 ,82.0759 ,902.496 ,318.6947 ,903.537 ,136.7642 ,904.619 ,69.5382 ,905.351 ,63.2060 ,905.971 ,143.7200 ,907.019 ,93.9510 ,908.559 ,49.5167 ,909.925 ,33.8597 ,911.067 ,45.6421 ,912.129 ,18.1914 ,913.174 ,115.8055 ,914.702 ,267.4026 ,916.436 ,57.4595 ,917.380 ,80.0414 ,918.196 ,77.8581 ,919.044 ,90.7895 ,919.812 ,51.5582 ,920.430 ,459.4992 ,921.510 ,277.3262 ,922.653 ,146.1411 ,923.337 ,214.3490 ,924.187 ,112.4682 ,925.181 ,44.9789 ,925.891 ,12.2094 ,926.624 ,99.1198 ,927.575 ,38.5584 ,928.745 ,46.2448 ,929.462 ,60.7772 ,930.084 ,98.9136 ,930.693 ,229.8651 ,931.706 ,633.4830 ,932.344 ,1165.4968 ,933.273 ,366.2429 ,934.338 ,225.1953 ,935.419 ,325.2716 ,936.593 ,126.4093 ,937.577 ,33.0823 ,938.592 ,31.5826 ,939.700 ,288.0080 ,940.629 ,77.2382 ,941.997 ,28.9235 ,943.006 ,34.6172 ,943.949 ,68.5185 ,945.232 ,43.6005 ,946.606 ,35.6332 ,947.438 ,26.4895 ,948.957 ,9.4085 ,949.719 ,14.0719 ,951.555 ,20.4632 ,952.281 ,14.2625 ,955.623 ,49.3717 ,956.739 ,42.8328 ,957.594 ,56.6314 ,958.525 ,18.3751 ,959.570 ,53.2236 ,960.484 ,7.3282 ,961.561 ,32.4199 ,962.406 ,40.7329 ,963.013 ,35.6239 ,963.686 ,4.9626 ,964.824 ,30.5595 ,965.732 ,29.0573 ,966.576 ,20.8618 ,967.179 ,69.3210 ,968.033 ,47.1378 ,970.166 ,13.2219 ,971.206 ,47.2135 ,972.196 ,57.2142 ,973.700 ,111.0118 ,974.613 ,75.7048 ,975.392 ,111.2680 ,976.492 ,9.1783 ,977.672 ,11.8231 ,979.220 ,48.8727 ,979.861 ,65.0616 ,980.635 ,112.6141 ,981.728 ,76.1564 ,982.394 ,24.6599 ,983.554 ,149.6297 ,984.829 ,19.9290 ,986.692 ,83.4185 ,988.212 ,70.9907 ,988.860 ,103.5972 ,989.466 ,355.0362 ,990.228 ,40.9605 ,991.559 ,217.3999 ,992.620 ,55.2873 ,993.632 ,66.1659 ,994.678 ,20.0604 ,997.407 ,42.0240 ,998.082 ,12.6020 ,998.728 ,29.5394 ,999.438 ,38.3265 ,1000.578 ,38.8461 ,1001.658 ,77.8072 ,1003.532 ,50.2631 ,1005.100 ,18.9630 ,1006.333 ,63.1670 ,1007.692 ,97.1452 ,1008.611 ,12.4397 ,1010.954 ,38.6942 ,1011.897 ,30.2908 ,1012.501 ,19.4535 ,1013.308 ,25.6616 ,1014.725 ,209.0407 ,1015.552 ,231.9930 ,1016.325 ,93.9669 ,1017.488 ,226.1768 ,1018.462 ,75.5365 ,1019.449 ,58.3868 ,1020.424 ,91.1073 ,1021.209 ,8.0721 ,1021.946 ,39.4201 ,1023.171 ,40.9995 ,1023.862 ,57.7072 ,1024.778 ,575.4131 ,1025.643 ,153.7129 ,1026.722 ,20.7321 ,1027.792 ,45.5749 ,1029.007 ,31.7831 ,1030.763 ,63.4922 ,1032.061 ,33.4478 ,1032.861 ,10.2795 ,1033.609 ,13.4473 ,1034.536 ,263.1145 ,1035.486 ,132.0577 ,1036.138 ,4.5121 ,1036.822 ,25.6671 ,1037.575 ,52.5669 ,1038.460 ,27.1765 ,1039.663 ,80.2739 ,1040.969 ,69.8341 ,1041.888 ,28.8976 ,1042.516 ,149.3527 ,1043.512 ,49.2466 ,1044.465 ,87.8135 ,1045.456 ,396.8928 ,1046.631 ,234.0585 ,1047.579 ,66.4287 ,1048.551 ,189.3625 ,1049.845 ,31.3798 ,1050.865 ,118.7766 ,1051.693 ,312.6375 ,1052.694 ,33.9082 ,1053.656 ,26.7835 ,1054.763 ,23.2015 ,1056.618 ,52.6982 ,1057.687 ,7.0760 ,1059.114 ,159.6633 ,1060.286 ,991.1507 ,1061.229 ,129.3348 ,1062.334 ,24.2982 ,1063.042 ,81.6013 ,1063.935 ,53.5978 ,1064.921 ,28.8364 ,1065.576 ,10.5204 ,1067.441 ,41.7203 ,1068.414 ,143.6855 ,1070.114 ,15.6505 ,1071.513 ,16.0244 ,1072.655 ,7.4810 ,1073.566 ,61.6406 ,1074.488 ,175.2681 ,1075.761 ,101.4258 ,1076.772 ,19.2427 ,1077.756 ,18.8289 ,1081.393 ,20.1612 ,1082.301 ,51.1169 ,1083.410 ,33.5297 ,1084.404 ,7.8444 ,1086.937 ,26.2066 ,1089.126 ,29.4744 ,1090.112 ,45.3027 ,1091.532 ,585.3680 ,1092.547 ,370.5219 ,1093.720 ,162.5784 ,1094.689 ,31.5087 ,1095.678 ,33.5773 ,1096.605 ,6.5513 ,1097.381 ,12.9416 ,1099.553 ,22.2048 ,1102.358 ,16.2818 ,1104.799 ,3.8095 ,1106.637 ,11.5731 ,1107.586 ,3.7035 ,1108.578 ,5.2054 ,1109.666 ,9.7262 ,1111.443 ,53.1517 ,1113.420 ,51.8473 ,1114.116 ,4.3674 ,1114.803 ,88.1006 ,1115.723 ,19.7614 ,1117.229 ,37.2770 ,1120.697 ,79.0741 ,1121.639 ,20.9691 ,1122.666 ,37.2396 ,1123.769 ,15.0012 ,1125.707 ,27.6978 ,1127.602 ,3.4302 ,1128.693 ,36.5299 ,1129.506 ,10.1352 ,1130.781 ,60.1708 ,1131.675 ,7.8132 ,1134.752 ,46.6334 ,1135.799 ,5.6179 ,1136.614 ,16.8325 ,1138.417 ,45.9239 ,1141.952 ,9.2207 ,1142.884 ,26.8460 ,1144.177 ,32.5830 ,1145.645 ,20.5001 ,1146.658 ,79.5698 ,1147.903 ,13.0288 ,1148.960 ,34.5715 ,1149.757 ,28.9499 ,1152.096 ,7.4903 ,1154.456 ,12.8082 ,1155.591 ,24.2087 ,1156.602 ,90.9862 ,1157.751 ,30.0925 ,1160.578 ,42.7452 ,1161.600 ,68.1507 ,1162.850 ,26.4369 ,1164.809 ,11.0480 ,1166.498 ,15.9499 ,1167.432 ,8.0797 ,1169.594 ,7.9010 ,1171.733 ,48.2538 ,1172.511 ,13.3331 ,1173.513 ,50.3910 ,1174.503 ,106.5758 ,1175.632 ,157.4329 ,1176.593 ,11.8399 ,1177.521 ,63.2462 ,1178.501 ,29.6601 ,1179.797 ,29.4263 ,1180.833 ,35.9600 ,1181.620 ,93.8806 ,1182.654 ,9.2253 ,1184.549 ,17.2932 ,1185.718 ,34.1998 ,1186.621 ,117.0522 ,1187.672 ,30.2827 ,1188.710 ,11.7076 ,1189.791 ,24.1841 ,1194.916 ,12.1154 ,1195.814 ,3.2496 ,1196.664 ,8.8845 ,1197.626 ,22.2140 ,1198.345 ,9.9824 ,1200.399 ,35.1264 ,1201.553 ,16.3278 ,1202.646 ,106.7086 ,1203.659 ,135.5896 ,1204.445 ,20.3236 ,1205.607 ,46.4897 ,1206.536 ,5.9913 ,1207.665 ,9.4224 ,1209.054 ,8.0987 ,1210.517 ,5.4833 ,1211.883 ,28.2138 ,1212.590 ,20.6937 ,1213.542 ,24.8423 ,1214.637 ,6.3644 ,1215.489 ,18.4966 ,1216.671 ,14.6465 ,1217.596 ,7.3406 ,1220.537 ,143.9495 ,1221.677 ,50.2347 ,1222.575 ,50.0795 ,1223.615 ,15.0616 ,1224.975 ,20.8996 ,1226.295 ,16.6670 ,1228.615 ,9.4367 ,1229.602 ,26.0930 ,1231.474 ,108.6064 ,1232.639 ,57.0345 ,1233.756 ,65.4845 ,1238.748 ,6.3582 ,1240.390 ,12.9227 ,1241.308 ,28.7162 ,1245.434 ,6.3886 ,1247.736 ,4.0770 ,1248.739 ,12.8181 ,1249.631 ,39.4697 ,1250.401 ,44.3134 ,1253.203 ,7.9221 ,1255.030 ,19.3830 ,1256.766 ,17.2759 ,1258.446 ,16.0124 ,1260.478 ,16.6308 ,1261.580 ,7.8827 ,1268.692 ,37.2079 ,1269.572 ,14.2787 ,1270.740 ,26.0241 ,1273.809 ,41.0307 ,1274.894 ,6.1509 ,1276.759 ,11.9944 ,1279.776 ,4.0269 ,1280.639 ,44.4430 ,1281.625 ,34.1119 ,1282.666 ,32.5323 ,1283.830 ,25.0555 ,1284.948 ,9.3906 ,1285.559 ,8.2274 ,1287.680 ,11.3691 ,1289.806 ,6.2981 ,1291.898 ,9.0814 ,1292.713 ,17.7015 ,1293.766 ,29.9623 ,1295.200 ,3.2280 ,1297.547 ,8.1594 ,1298.801 ,24.5683 ,1299.907 ,6.0085 ,1300.532 ,31.3938 ,1301.340 ,5.5324 ,1304.686 ,3.7137 ,1306.744 ,8.1827 ,1308.612 ,7.3936 ,1309.753 ,28.3390 ,1310.710 ,13.6614 ,1314.261 ,33.1216 ,1315.737 ,4.9805 ,1316.799 ,4.5900 ,1318.748 ,25.4397 ,1322.613 ,12.1786 ,1326.655 ,8.6398 ,1327.438 ,24.6201 ,1328.741 ,48.4081 ,1329.597 ,21.0433 ,1333.718 ,15.8411 ,1334.883 ,35.9129 ,1335.802 ,34.3696 ,1336.543 ,20.8248 ,1342.433 ,21.5270 ,1343.606 ,60.9101 ,1344.782 ,21.0343 ,1345.707 ,116.6500 ,1346.750 ,25.3541 ,1347.709 ,29.1325 ,1357.325 ,4.8978 ,1362.741 ,28.5157 ,1363.798 ,27.6819 ,1364.755 ,22.6381 ,1366.287 ,8.3418 ,1367.144 ,19.0338 ,1369.852 ,6.5757 ,1370.811 ,14.4460 ,1375.528 ,22.5961 ,1378.669 ,27.0375 ,1379.593 ,36.8035 ,1380.816 ,10.4626 ,1381.658 ,4.4572 ,1383.718 ,7.3722 ,1385.703 ,7.6941 ,1391.875 ,7.8328 ,1393.950 ,7.3241 ,1395.877 ,6.0274 ,1396.637 ,10.5360 ,1401.411 ,5.5881 ,1409.015 ,35.3748 ,1409.956 ,31.1825 ,1414.666 ,15.5263 ,1418.579 ,8.5186 ,1431.704 ,11.2935 ,1437.587 ,10.7694 ,1438.537 ,6.9551 ,1441.084 ,4.3423 ,1441.752 ,10.0537 ,1446.905 ,5.6719 ,1449.848 ,5.6657 ,1456.630 ,32.6633 ,1457.771 ,22.5664 ,1458.646 ,10.1668 ,1460.788 ,9.9844 ,1474.635 ,29.0195 ,1475.841 ,24.5744 ,1494.553 ,4.2249 ,1504.925 ,6.3530 ,1509.150 ,17.0171 ,1523.228 ,6.5611 ,1528.574 ,11.7460 ,1533.795 ,6.1960 ,1585.881 ,17.6678 ,1588.805 ,11.1955 ,1602.550 ,6.3948 ,1614.855 ,3.9083 ,1622.138 ,5.7574 ,1640.073 ,5.7661 ,1706.866 ,17.7329 ,1714.236 ,8.5763 ,1726.244 ,17.8669 ,1731.977 ,9.5520 ,1746.661 ,13.8948 ,1750.856 ,5.3470 ,1773.047 ,10.0703};
+        
+    double[] testDoubleArray = new double[arrayDouble.length/2];
+    float[] testDoubleInFloatArray = new float[arrayDouble.length/2];
+    float[] testFloatArray = new float[arrayDouble.length/2];
+    for (int i=0;i<testDoubleArray.length;i++) {
+        testDoubleArray[i] = arrayDouble[i*2];
+        testDoubleInFloatArray[i] = (float)  arrayDouble[i*2];
+        testFloatArray[i] = (float) arrayDouble[i*2+1];
+    }
+    
+
+        //JPM.TODO : remove this code
         int nb = testDoubleArray.length;
 
         DecimalFormatSymbols decimalSymbols = new DecimalFormatSymbols();
@@ -375,76 +415,167 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
 
         DecimalFormat doubleFormat = new DecimalFormat("#.######", decimalSymbols);
 
-        DecimalFormat doubleFormat0 = new DecimalFormat("0.000000" , decimalSymbols);
+        //DecimalFormat doubleFormat0 = new DecimalFormat("0.000000" , decimalSymbols);
          
+        byte[] testByteDouble = null;
+        byte[] testByteFloat  = null;
+        byte[] testByteDouble2 = null;
+        byte[] testByteFloat2  = null;
+        byte[] testByteDouble3 = null;
+        byte[] testByteFloat3  = null;
+        byte[] testByteDouble4 = null;
+        byte[] testByteFloat4  = null;
+        byte[] testByteFloat5_1 = null;
+        byte[] testByteFloat5_2  = null;
+        
          int LOOP_SIZE = 10000;
+         
+        // TEST 5 : ByteBuffer avec compression avec deux array floats
+        long timeStart5 = System.currentTimeMillis();
+        int totalSizeFloat5_1 = 0;
+        int totalSizeFloat5_2 = 0;
+        byte[] bufferFloatArray5_1 = null;
+        byte[] bufferFloatArray5_2 = null;
+        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
+            bufferFloatArray5_1 = new byte[nb * 4];
+            bufferFloatArray5_2 = new byte[nb * 4];
+            ByteBuffer buffer = ByteBuffer.wrap(bufferFloatArray5_1);
+            ByteBuffer bufferFloat = ByteBuffer.wrap(bufferFloatArray5_2);
+            for (int i = 0; i < nb; i++) {
+                buffer.putFloat(testDoubleInFloatArray[i]);
+                bufferFloat.putFloat(testFloatArray[i]);
+            }
+            //bufferFloatArray5_1 = package$EasyLzma$.MODULE$.compress(bufferFloatArray5_1);
+            //bufferFloatArray5_2 = package$EasyLzma$.MODULE$.compress(bufferFloatArray5_2);
+            totalSizeFloat5_1 += bufferFloatArray5_1.length;
+            totalSizeFloat5_2 += bufferFloatArray5_2.length;
+            
+        }
+        testByteFloat5_1 = bufferFloatArray5_1;
+        testByteFloat5_2 = bufferFloatArray5_2;
+        long deltaTime5 = System.currentTimeMillis()-timeStart5;
+         */
+         /*
+         // TEST 4 : String sans compression et "#.######"
+        long timeStart4 = System.currentTimeMillis();
+        int totalSizeDouble4 = 0;
+        int totalSizeFloat4 = 0;
+        byte[] byteDoubleArray = null;
+        byte[] byteFloatArray = null;
+        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
+            StringBuilder sbDouble = new StringBuilder(10 * nb);
+            StringBuilder sbFloat = new StringBuilder(10 * nb);
+            for (int i = 0; i < nb; i++) {
+                sbDouble.append(doubleFormat.format(testDoubleArray[i])).append(' ');
+                sbFloat.append(doubleFormat.format(testFloatArray[i])).append(' ');
+            }
+            byteDoubleArray = sbDouble.toString().getBytes();
+            byteFloatArray = sbFloat.toString().getBytes();
+            totalSizeDouble4 += byteDoubleArray.length;
+            totalSizeFloat4 += byteFloatArray.length;
+        }
+        testByteDouble4 = byteDoubleArray;
+        testByteFloat4 = byteFloatArray;
+        long deltaTime4 = System.currentTimeMillis()-timeStart4;
+         
+         
+        // TEST 3 : String avec compression et "#.######"
+        long timeStart3 = System.currentTimeMillis();
+        int totalSizeDouble3 = 0;
+        int totalSizeFloat3 = 0;
+        byte[] testByteDoubleCompressed = null;
+        byte[] testByteFloatCompressed = null;
+        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
+            StringBuilder sbDouble = new StringBuilder(10 * nb);
+            StringBuilder sbFloat = new StringBuilder(10 * nb);
+            for (int i = 0; i < nb; i++) {
+                sbDouble.append(doubleFormat.format(testDoubleArray[i])).append(' ');
+                sbFloat.append(doubleFormat.format(testFloatArray[i])).append(' ');
+            }
+            byte[] byteDoubleArrayTmp = sbDouble.toString().getBytes();
+            byte[] byteFloatArrayTmp = sbFloat.toString().getBytes();
+            testByteDoubleCompressed = package$EasyLzma$.MODULE$.compress(byteDoubleArrayTmp);
+            testByteFloatCompressed = package$EasyLzma$.MODULE$.compress(byteFloatArrayTmp);
+            totalSizeDouble3 += testByteDoubleCompressed.length;
+            totalSizeFloat3 += testByteFloatCompressed.length;
+        }
+        testByteDouble3 = testByteDoubleCompressed;
+        testByteFloat3 = testByteFloatCompressed;
+        long deltaTime3 = System.currentTimeMillis()-timeStart3;
+         
+         
+        // TEST 2 : ByteBuffer avec compression
+        long timeStart2 = System.currentTimeMillis();
+        int totalSizeDouble2 = 0;
+        int totalSizeFloat2 = 0;
+        byte[] bufferArray2 = null;
+        byte[] bufferFloatArray2 = null;
+        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
+            bufferArray2 = new byte[nb * 8];
+            bufferFloatArray2 = new byte[nb * 4];
+            ByteBuffer buffer = ByteBuffer.wrap(bufferArray2);
+            ByteBuffer bufferFloat = ByteBuffer.wrap(bufferFloatArray2);
+            for (int i = 0; i < nb; i++) {
+                buffer.putDouble(testDoubleArray[i]);
+                bufferFloat.putFloat(testFloatArray[i]);
+            }
+            bufferArray2 = package$EasyLzma$.MODULE$.compress(bufferArray2);
+            bufferFloatArray2 = package$EasyLzma$.MODULE$.compress(bufferFloatArray2);
+            totalSizeDouble2 += bufferArray2.length;
+            totalSizeFloat2 += bufferFloatArray2.length;
+            
+        }
+        testByteDouble = bufferArray2;
+        testByteFloat = bufferFloatArray2;
+        long deltaTime2 = System.currentTimeMillis()-timeStart2;
          
         // TEST 1 : ByteBuffer sans compression
         long timeStart = System.currentTimeMillis();
-        int totalSize = 0;
+        int totalSizeDouble = 0;
+        int totalSizeFloat = 0;
+        byte[] bufferArray = null;
+        byte[] bufferFloatArray = null;
         for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
-            byte[] bufferArray = new byte[nb * 8];
+            bufferArray = new byte[nb * 8];
+            bufferFloatArray = new byte[nb * 4];
             ByteBuffer buffer = ByteBuffer.wrap(bufferArray);
+            ByteBuffer bufferFloat = ByteBuffer.wrap(bufferFloatArray);
             for (int i = 0; i < nb; i++) {
                 buffer.putDouble(testDoubleArray[i]);
+                bufferFloat.putFloat(testFloatArray[i]);
             }
-            totalSize += bufferArray.length;
+            
+            totalSizeDouble += bufferArray.length;
+            totalSizeFloat += bufferFloatArray.length;
+            
         }
-        long deltaTime = System.currentTimeMillis()-timeStart;
+        testByteDouble = bufferArray;
+        testByteFloat = bufferFloatArray;
+        long deltaTime = System.currentTimeMillis()-timeStart;*/
+
+ 
+        
+/*
 
         
-        // TEST 2 : String avec compression et "#.######"
-        long timeStart2 = System.currentTimeMillis();
-        int totalSize2 = 0;
-        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
-            StringBuilder sb = new StringBuilder(10 * nb);
-            for (int i = 0; i < nb; i++) {
-                sb.append(doubleFormat.format(testDoubleArray[i])).append(' ');
-            }
-            byte[] byteArray = sb.toString().getBytes();
-            byte[] testByteCompressed = package$EasyLzma$.MODULE$.compress(byteArray);
-            totalSize2 += testByteCompressed.length;
-        }
-        long deltaTime2 = System.currentTimeMillis()-timeStart2;
-
-        // TEST 3 : String sans compression et "#.######"
-        long timeStart3 = System.currentTimeMillis();
-        int totalSize3 = 0;
-        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
-            StringBuilder sb = new StringBuilder(10 * nb);
-            for (int i = 0; i < nb; i++) {
-                sb.append(doubleFormat.format(testDoubleArray[i])).append(' ');
-                
-            }
-            byte[] byteArray = sb.toString().getBytes();
-            totalSize3 += byteArray.length;
-        }
-        long deltaTime3 = System.currentTimeMillis()-timeStart3;
-       
-        // TEST 4 : String sans compression et "0.000000"
-        long timeStart4 = System.currentTimeMillis();
-        int totalSize4 = 0;
-        for (int lIndex = 0; lIndex < LOOP_SIZE; lIndex++) {
-            StringBuilder sb = new StringBuilder(10 * nb);
-            for (int i = 0; i < nb; i++) {
-                sb.append(doubleFormat0.format(testDoubleArray[i])).append(' ');
-                
-            }
-            byte[] byteArray = sb.toString().getBytes();
-            totalSize4 += byteArray.length;
-        }
-        long deltaTime4 = System.currentTimeMillis()-timeStart4;
+System.out.println(" bytebyffer avec compression et 2 arrays float :"+totalSizeFloat5_1 + " "+totalSizeFloat5_2 + " "+deltaTime5);
+ fr.proline.studio.dam.tasks.DatabaseConnectionTask.testInsert(testByteFloat5_1, testByteFloat5_2);      
         
-        
-        System.out.println(" ByteBuffer sans compression :"+totalSize + " "+deltaTime);
-        
-        System.out.println(" String avec compression et #.###### :"+totalSize2 + " "+deltaTime2);
-        
-        System.out.println(" String sans compression et #.###### :"+totalSize3 + " "+deltaTime3);
-
-        System.out.println(" String sans compression et 0.000000 :"+totalSize4 + " "+deltaTime4);
         */
         
+        /*System.out.println(" ByteBuffer sans compression :"+totalSizeDouble + " "+totalSizeFloat + " "+deltaTime);
+        
+        System.out.println(" ByteBuffer avec compression:"+totalSizeDouble2 + " "+totalSizeFloat2 + " "+deltaTime2);
+        
+        System.out.println(" String avec compression et #.###### :"+totalSizeDouble3 + " "+totalSizeFloat3 + " "+deltaTime3);
+
+        System.out.println(" String sans compression et #.###### :"+totalSizeDouble4 + " "+totalSizeFloat4 + " "+deltaTime4);
+        */
+        
+       /* fr.proline.studio.dam.tasks.DatabaseConnectionTask.testInsert(testByteDouble, testByteFloat);
+        fr.proline.studio.dam.tasks.DatabaseConnectionTask.testInsert(testByteDouble2, testByteFloat2);
+        fr.proline.studio.dam.tasks.DatabaseConnectionTask.testInsert(testByteDouble3, testByteFloat3);
+        fr.proline.studio.dam.tasks.DatabaseConnectionTask.testInsert(testByteDouble4, testByteFloat4);*/
     }
     
     public static class XYStickRenderer extends AbstractXYItemRenderer {

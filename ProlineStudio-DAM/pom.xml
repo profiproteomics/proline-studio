@@ -65,9 +65,12 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publicPackages>
+                        <publicPackage>fr.proline.repository</publicPackage>
                         <publicPackage>fr.proline.studio.dam</publicPackage>
                         <publicPackage>fr.proline.studio.dam.data</publicPackage>
                         <publicPackage>fr.proline.studio.dam.tasks</publicPackage>
+                        <publicPackage>fr.proline.studio.repositorymgr</publicPackage>
+                        <publicPackage>fr.proline.studio.repositorymgr.action</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

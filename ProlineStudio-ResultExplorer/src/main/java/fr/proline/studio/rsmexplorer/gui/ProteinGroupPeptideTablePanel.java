@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
-import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
+import fr.proline.studio.rsmexplorer.ViewTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
 import fr.proline.studio.utils.DecoratedTable;
 import java.awt.Component;
@@ -104,7 +104,7 @@ public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
             
             super.valueChanged(e);
             
-            ProteinGroupPeptideSpectrumPanel p = (ProteinGroupPeptideSpectrumPanel) DataViewerTopComponent.getPanel(ProteinGroupPeptideSpectrumPanel.class);
+            ProteinGroupPeptideSpectrumPanel p = (ProteinGroupPeptideSpectrumPanel) ViewTopComponent.getPanel(ProteinGroupPeptideSpectrumPanel.class);
 
             int selectedIndex = peptidesTable.getSelectionModel().getMinSelectionIndex();
             

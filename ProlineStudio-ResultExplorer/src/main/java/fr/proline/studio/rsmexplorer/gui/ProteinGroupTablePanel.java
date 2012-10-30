@@ -5,7 +5,7 @@ import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
-import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
+import fr.proline.studio.rsmexplorer.ViewTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
 import fr.proline.studio.utils.LazyTable;
 import java.awt.event.ActionEvent;
@@ -237,7 +237,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
                 return;
             }
  
-            ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
+            ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) ViewTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
             
             
             // Retrieve Selected Row
@@ -286,7 +286,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask) {
-                    ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
+                    ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) ViewTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
 
                     p.setData(proteinSet, searchedText);
                 }

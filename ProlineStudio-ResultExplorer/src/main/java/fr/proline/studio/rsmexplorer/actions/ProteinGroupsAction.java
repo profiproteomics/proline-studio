@@ -11,7 +11,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.*;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
+import fr.proline.studio.rsmexplorer.ViewTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMResultSummaryNode;
 import org.openide.util.NbBundle;
@@ -45,7 +45,7 @@ public class ProteinGroupsAction extends AbstractRSMAction {
             @Override
             public void run(boolean success, long taskId, SubTask subTask) {
                 
-                DataViewerTopComponent viewer = (DataViewerTopComponent) WindowManager.getDefault().findTopComponent("DataViewerTopComponent");
+                ViewTopComponent viewer = (ViewTopComponent) WindowManager.getDefault().findTopComponent("ViewTopComponent");
                 
                 
                 if (subTask == null) {

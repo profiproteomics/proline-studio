@@ -2,14 +2,13 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 import fr.proline.core.orm.msi.PeptideInstance;
-import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.DataViewerTopComponent;
+import fr.proline.studio.rsmexplorer.ViewTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.utils.DecoratedTable;
 import javax.swing.event.ListSelectionEvent;
@@ -60,7 +59,9 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
         ProteinMatch typicalProtein = proteinSetData.getTypicalProteinMatch();
         
         // Modify Panel Border Title
-        ((ProteinGroupProteinSelectedPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(typicalProtein.getAccession());
+        //((ProteinGroupProteinSelectedPanel) ViewTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(typicalProtein.getAccession());
+        //JPM.TODO
+        
         
         // Modify protein description
         proteinNameTextField.setText(typicalProtein.getDescription() );
@@ -77,7 +78,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
     
     private void clearData() {
         proteinNameTextField.setText("");
-        ((ProteinGroupProteinSelectedPanel) DataViewerTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(null);
+        //((ProteinGroupProteinSelectedPanel) ViewTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(null); //JPM.TODO
         ((ProteinTableModel) proteinsTable.getModel()).setData(null, null);
 
     }
@@ -144,7 +145,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
             super.valueChanged(e);
             
  
-            ProteinGroupPeptideTablePanel p = (ProteinGroupPeptideTablePanel) DataViewerTopComponent.getPanel(ProteinGroupPeptideTablePanel.class);
+            ProteinGroupPeptideTablePanel p = (ProteinGroupPeptideTablePanel) ViewTopComponent.getPanel(ProteinGroupPeptideTablePanel.class);
             
             
             // Retrieve Selected Row
@@ -185,7 +186,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask) {
-                    ProteinGroupPeptideTablePanel p = (ProteinGroupPeptideTablePanel) DataViewerTopComponent.getPanel(ProteinGroupPeptideTablePanel.class);
+                    ProteinGroupPeptideTablePanel p = (ProteinGroupPeptideTablePanel) ViewTopComponent.getPanel(ProteinGroupPeptideTablePanel.class);
 
                     if (success) {
                         p.setData(proteinMatch);

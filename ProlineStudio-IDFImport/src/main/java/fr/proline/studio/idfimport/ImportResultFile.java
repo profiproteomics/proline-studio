@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.Option;
 import scala.collection.JavaConversions;
 
 /**
@@ -66,14 +67,19 @@ public class ImportResultFile {
         scala.collection.immutable.Map propScalaMap ;
         scala.collection.mutable.Map propScalaMap2 = JavaConversions.mapAsScalaMap(parseProperties);
         propScalaMap = propScalaMap2.toMap(null);
+
         
+        
+        Option<scala.util.matching.Regex> noneRegex = Option.apply(null);
+
         ResultFileImporter importer = new ResultFileImporter( ProlineDBManagement.getProlineDBManagement().getAssociatedDBManagement(),
                                                               ((Integer)parseProperties.get(IMPORT_RF_PROJECT_ID)),                                                                
                                                               idfResultFile,
                                                               rfProvider.fileType(), 
                                                               getProviderKey(),
                                                               ((Integer)parseProperties.get(IMPORT_RF_INSTRUMNET_ID)),
-                                                              propScalaMap);
+                                                              propScalaMap,
+                                                              noneRegex);
         importer.runService();
         targetResultSetId = importer.getTargetResultSetId();
         return true;

@@ -2,7 +2,8 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
-import fr.proline.studio.rsmexplorer.ViewTopComponent;
+import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
 import fr.proline.studio.utils.DecoratedTable;
 import java.awt.Component;
@@ -15,14 +16,16 @@ import fr.proline.studio.utils.GlobalValues;
  *
  * @author JM235353
  */
-public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
+public class RsmPeptidesOfProteinPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
 
+    private AbstractDataBox dataBox;
+    
     ProteinMatch currentProteinMatch = null;
     
     /**
-     * Creates new form ProteinGroupPeptideTablePanel
+     * Creates new form RsmPeptidesOfProteinPanel
      */
-    public ProteinGroupPeptideTablePanel() {
+    public RsmPeptidesOfProteinPanel() {
         initComponents();
         
         ((DecoratedTable)peptidesTable).displayColumnAsPercentage(PeptideTableModel.COLTYPE_PEPTIDE_SCORE);
@@ -66,7 +69,18 @@ public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane scrollPane;
     // End of variables declaration//GEN-END:variables
 
-
+    public PeptideInstance getSelectedPeptide() {
+        int selectedIndex = peptidesTable.getSelectionModel().getMinSelectionIndex();
+            
+        if (selectedIndex == -1) {
+            return null;
+        } 
+        
+        int indexInModelSelected = peptidesTable.convertRowIndexToModel(selectedIndex);
+        return ((PeptideTableModel) peptidesTable.getModel()).getPeptide(indexInModelSelected);
+        
+    }
+    
     public void setData(ProteinMatch proteinMatch) {
 
         currentProteinMatch = proteinMatch;
@@ -87,6 +101,10 @@ public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
         
     }
     
+    @Override
+    public void setDataBox(AbstractDataBox dataBox) {
+        this.dataBox = dataBox;
+    }
     
     private class PeptideTable extends DecoratedTable  {
         
@@ -104,16 +122,19 @@ public class ProteinGroupPeptideTablePanel extends javax.swing.JPanel {
             
             super.valueChanged(e);
             
+            dataBox.propagateDataChanged();
+            
+            /*
             ProteinGroupPeptideSpectrumPanel p = (ProteinGroupPeptideSpectrumPanel) ViewTopComponent.getPanel(ProteinGroupPeptideSpectrumPanel.class);
 
             int selectedIndex = peptidesTable.getSelectionModel().getMinSelectionIndex();
             
             if (selectedIndex == -1) {
-                 p.setData(null, -1, null);
+                 p.setData(null, null, null);
             } else {
                 int indexInModelSelected = peptidesTable.convertRowIndexToModel(selectedIndex);
-                p.setData(currentProteinMatch, indexInModelSelected, ((PeptideTableModel) peptidesTable.getModel()).getPeptideInstances());
-            }
+                p.setData(currentProteinMatch, ((PeptideTableModel) peptidesTable.getModel()).getPeptideInstances()[indexInModelSelected], ((PeptideTableModel) peptidesTable.getModel()).getPeptideInstances());
+            }*/
         }
         
         private class PeptideRenderer extends DefaultTableCellRenderer {

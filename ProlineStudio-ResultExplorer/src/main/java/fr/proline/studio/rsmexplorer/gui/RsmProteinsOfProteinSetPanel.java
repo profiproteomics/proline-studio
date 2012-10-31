@@ -1,14 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
-import fr.proline.core.orm.msi.PeptideInstance;
+
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
-import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.ViewTopComponent;
+import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.utils.DecoratedTable;
 import javax.swing.event.ListSelectionEvent;
@@ -20,21 +17,46 @@ import javax.swing.event.ListSelectionEvent;
  * 
  * @author JM235353
  */
-public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
+public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
 
-
+    private AbstractDataBox dataBox;
+    
     private ProteinSet proteinSetCur = null;
     
     /**
-     * Creates new form ProteinGroupProteinSetPanel
+     * Creates new form RsmProteinsOfProteinSetPanel
      */
-    public ProteinGroupProteinSetPanel() {
+    public RsmProteinsOfProteinSetPanel() {
         initComponents();
         
         ((DecoratedTable)proteinsTable).displayColumnAsPercentage(ProteinTableModel.COLTYPE_PROTEIN_SCORE);
  
     }
 
+    public ProteinMatch getSelectedProteinMatch() {
+        
+        ProteinTable table = (ProteinTable) proteinsTable;
+        
+            // Retrieve Selected Row
+            int selectedRow = table.getSelectedRow();
+            
+
+            // nothing selected
+            if (selectedRow == -1) {
+                return null;
+                
+            }
+            
+            // convert according to the sorting
+            selectedRow = table.convertRowIndexToModel(selectedRow);
+            
+            
+            
+            // Retrieve ProteinSet selected
+            ProteinTableModel tableModel = (ProteinTableModel) table.getModel();
+            
+            return tableModel.getProteinMatch(selectedRow);
+    }
  
     
     public void setData(ProteinSet proteinSet, String searchedText) {
@@ -83,6 +105,10 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
 
     }
     
+    @Override
+    public void setDataBox(AbstractDataBox dataBox) {
+        this.dataBox = dataBox;
+    }
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -97,7 +123,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
         scrollPane = new javax.swing.JScrollPane();
         proteinsTable = new ProteinTable();
 
-        proteinNameTextField.setText(org.openide.util.NbBundle.getMessage(ProteinGroupProteinSetPanel.class, "ProteinGroupProteinSetPanel.proteinNameTextField.text")); // NOI18N
+        proteinNameTextField.setText(org.openide.util.NbBundle.getMessage(RsmProteinsOfProteinSetPanel.class, "RsmProteinsOfProteinSetPanel.proteinNameTextField.text")); // NOI18N
 
         proteinsTable.setModel(new ProteinTableModel());
         scrollPane.setViewportView(proteinsTable);
@@ -144,7 +170,9 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
             
             super.valueChanged(e);
             
- 
+            dataBox.propagateDataChanged();
+            
+            /*
             ProteinGroupPeptideTablePanel p = (ProteinGroupPeptideTablePanel) ViewTopComponent.getPanel(ProteinGroupPeptideTablePanel.class);
             
             
@@ -198,7 +226,7 @@ public class ProteinGroupProteinSetPanel extends javax.swing.JPanel {
             
             // Load data if needed asynchronously
             AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, proteinMatch, proteinSetCur.getResultSummary()));
-
+            * */
         }
     }
 

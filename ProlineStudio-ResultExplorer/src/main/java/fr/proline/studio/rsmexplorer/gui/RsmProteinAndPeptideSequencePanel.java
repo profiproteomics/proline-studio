@@ -3,12 +3,11 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.core.utils.lzma.package$EasyLzma$;
+import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.nio.ByteBuffer;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,15 +35,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
+public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implements DataBoxPanelInterface {
 
+    private AbstractDataBox dataBox;
+    
     private DefaultXYDataset dataSet;
     private JFreeChart chart;
      
     /**
-     * Creates new form ProteinGroupPeptideSpectrumPanel
+     * Creates new form RsmProteinAndPeptideSequencePanel
      */
-    public ProteinGroupPeptideSpectrumPanel() {
+    public RsmProteinAndPeptideSequencePanel() {
         
         
         
@@ -153,7 +154,7 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
 
         sequencePanel.add(sequenceScrollPane);
 
-        tabPanel.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideSpectrumPanel.class, "ProteinGroupPeptideSpectrumPanel.sequencePanel.TabConstraints.tabTitle"), sequencePanel); // NOI18N
+        tabPanel.addTab(org.openide.util.NbBundle.getMessage(RsmProteinAndPeptideSequencePanel.class, "RsmProteinAndPeptideSequencePanel.sequencePanel.TabConstraints.tabTitle"), sequencePanel); // NOI18N
 
         javax.swing.GroupLayout spectrumPanelLayout = new javax.swing.GroupLayout(spectrumPanel);
         spectrumPanel.setLayout(spectrumPanelLayout);
@@ -166,7 +167,7 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
             .addGap(0, 88, Short.MAX_VALUE)
         );
 
-        tabPanel.addTab(org.openide.util.NbBundle.getMessage(ProteinGroupPeptideSpectrumPanel.class, "ProteinGroupPeptideSpectrumPanel.spectrumPanel.TabConstraints.tabTitle"), spectrumPanel); // NOI18N
+        tabPanel.addTab(org.openide.util.NbBundle.getMessage(RsmProteinAndPeptideSequencePanel.class, "RsmProteinAndPeptideSequencePanel.spectrumPanel.TabConstraints.tabTitle"), spectrumPanel); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -201,7 +202,7 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
     private final int HIGHLIGHT_OTHER_MODIFICATION         = 0x10;
     
 
-    public void setData(ProteinMatch pm, int selectedPeptide, PeptideInstance[] peptideInstances) {
+    public void setData(ProteinMatch pm, PeptideInstance selectedPeptide, PeptideInstance[] peptideInstances) {
         
         if ((pm == null) || (pm.getTransientBioSequence() == null)) {
             editorPane.setText("");
@@ -221,7 +222,7 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
         int nbPeptides = peptideInstances.length;
         for (int i = 0; i < nbPeptides; i++) {
             
-            if (i== selectedPeptide) {
+            if (peptideInstances[i].equals(selectedPeptide)) {
                 continue;
             }
             
@@ -230,13 +231,14 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
         }
         // highlight for selecte peptide (must be done last to override modifications
         // of overlaping non selected peptides
-        hightlight(peptideInstances[selectedPeptide].getTransientBestPeptideMatch().getTransientPeptide(), true, highlights);
+        hightlight(selectedPeptide.getTransientBestPeptideMatch().getTransientPeptide(), true, highlights);
         
 
        
         editorPane.setText(constructDisplayedSequence(sequence, highlights));
+        sequenceScrollPane.scrollRectToVisible(new Rectangle(0,0,1,1));
         
-        constructSpectrumChart(peptideInstances[selectedPeptide].getTransientBestPeptideMatch());
+        constructSpectrumChart(selectedPeptide.getTransientBestPeptideMatch());
         
     }
     private void hightlight(Peptide p, boolean selectedPeptide, int[] highlights) {
@@ -372,7 +374,7 @@ public class ProteinGroupPeptideSpectrumPanel extends javax.swing.JPanel {
 
         int size = massListStringArray.length;
         if (size != intensitiyStringArray.length) {
-            LoggerFactory.getLogger(ProteinGroupPeptideSpectrumPanel.class).error("Intensity and Mass List have different size");
+            LoggerFactory.getLogger(RsmProteinAndPeptideSequencePanel.class).error("Intensity and Mass List have different size");
             return;
         }
 
@@ -576,6 +578,11 @@ System.out.println(" bytebyffer avec compression et 2 arrays float :"+totalSizeF
         fr.proline.studio.dam.tasks.DatabaseConnectionTask.testInsert(testByteDouble2, testByteFloat2);
         fr.proline.studio.dam.tasks.DatabaseConnectionTask.testInsert(testByteDouble3, testByteFloat3);
         fr.proline.studio.dam.tasks.DatabaseConnectionTask.testInsert(testByteDouble4, testByteFloat4);*/
+    }
+
+    @Override
+    public void setDataBox(AbstractDataBox dataBox) {
+        this.dataBox = dataBox;
     }
     
     public static class XYStickRenderer extends AbstractXYItemRenderer {

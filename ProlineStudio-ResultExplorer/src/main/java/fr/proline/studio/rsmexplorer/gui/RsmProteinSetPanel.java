@@ -5,7 +5,8 @@ import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
-import fr.proline.studio.rsmexplorer.ViewTopComponent;
+import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
 import fr.proline.studio.utils.LazyTable;
 import java.awt.event.ActionEvent;
@@ -21,12 +22,14 @@ import org.openide.util.ImageUtilities;
  * 
  * @author JM235353
  */
-public class ProteinGroupTablePanel extends javax.swing.JPanel  {
+public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
 
+    private AbstractDataBox dataBox;
+    
     /**
      * Creates new form ProteinGroupsTablePanel
      */
-    public ProteinGroupTablePanel() {
+    public RsmProteinSetPanel() {
         initComponents();
         
 
@@ -46,21 +49,49 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
 
     public void setData(Long taskId, ProteinSet[] proteinSets) {
         ((ProteinGroupTableModel) proteinGroupTable.getModel()).setData(taskId, proteinSets);
-        
+
         // select the first row
-        if ((proteinSets != null) && (proteinSets.length>0)) {
+        if ((proteinSets != null) && (proteinSets.length > 0)) {
             proteinGroupTable.getSelectionModel().setSelectionInterval(0, 0);
-        } 
+        }
     }
-    
+
     public void dataUpdated(SubTask subTask) {
 
-        ((ProteinGroupTable)proteinGroupTable).dataUpdated(subTask);
+        ((ProteinGroupTable) proteinGroupTable).dataUpdated(subTask);
 
-        
+
     }
-    
-    
+
+    public ProteinSet getSelectedProteinSet() {
+
+        ProteinGroupTable table = ((ProteinGroupTable) proteinGroupTable);
+
+        // Retrieve Selected Row
+        int selectedRow = table.getSelectedRow();
+
+
+        // nothing selected
+        if (selectedRow == -1) {
+            return null;
+
+        }
+
+        // convert according to the sorting
+        selectedRow = table.convertRowIndexToModel(selectedRow);
+
+
+
+        // Retrieve ProteinSet selected
+        ProteinGroupTableModel tableModel = (ProteinGroupTableModel) table.getModel();
+        return tableModel.getProteinSet(selectedRow);
+    }
+
+    @Override
+    public void setDataBox(AbstractDataBox dataBox) {
+        this.dataBox = dataBox;
+    }
+        
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -87,9 +118,9 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
         proteinGroupTable.setFillsViewportHeight(true);
         proteinGroupScrollPane.setViewportView(proteinGroupTable);
 
-        searchButton.setText(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.searchButton.text")); // NOI18N
+        searchButton.setText(org.openide.util.NbBundle.getMessage(RsmProteinSetPanel.class, "RsmProteinSetPanel.searchButton.text")); // NOI18N
 
-        searchTextField.setText(org.openide.util.NbBundle.getMessage(ProteinGroupTablePanel.class, "ProteinGroupTablePanel.searchTextField.text")); // NOI18N
+        searchTextField.setText(org.openide.util.NbBundle.getMessage(RsmProteinSetPanel.class, "RsmProteinSetPanel.searchTextField.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -237,6 +268,8 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
                 return;
             }
  
+            dataBox.propagateDataChanged();
+            /*
             ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) ViewTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
             
             
@@ -257,7 +290,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
             
             
             
-            // Retrived ProteinSet selected
+            // Retrieve ProteinSet selected
             ProteinGroupTableModel tableModel = (ProteinGroupTableModel) getModel();
             final ProteinSet proteinSet = tableModel.getProteinSet(selectedRow);
             
@@ -294,7 +327,7 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
             
             // Load data if needed asynchronously
             AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromProteinSetTask(callback, proteinSet));
-
+*/
         }
         
         public void selectProteinSet(Integer proteinSetId, String searchText) {
@@ -378,5 +411,16 @@ public class ProteinGroupTablePanel extends javax.swing.JPanel  {
         
         
     }
+    
+    
+    /*public void setSelectedResultSummary(Long taskId, ProteinSet[] proteinSets) {
+        // Note : Protein Groups <=> Protein Sets
+
+        setData(taskId, proteinSets);
+
+    }*/
+
+
+    
     
 }

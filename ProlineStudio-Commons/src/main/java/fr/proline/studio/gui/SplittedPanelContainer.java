@@ -36,6 +36,23 @@ public class SplittedPanelContainer extends JPanel {
         panelArray.add(splittedPanel);
     }
 
+    public void resetDefaultSize() {
+        int[] heights = getHeights();
+        
+        int totalHeight = 0;
+        int nb = heights.length;
+        for (int i=0;i<nb;i++) {
+            totalHeight += heights[i];
+        }
+        int defaultHeight = totalHeight/4;
+        for (int i=0;i<nb;i++) {
+            heights[i] = defaultHeight;
+        }
+        
+        dispatchHeight(heights);
+        
+    }
+    
     /**
      * Must be called when all the sub panels are registered, to finish
      * the creation of the SplittedPanelContainer
@@ -323,14 +340,7 @@ public class SplittedPanelContainer extends JPanel {
         
         // dispatch new heights
         if (calculateNewHeight) {
-            final int[] _newHeights = newHeights;
-            SwingUtilities.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    dispatchHeight(_newHeights);
-                }
-            });
+            dispatchHeight(newHeights);
         }
 
     }
@@ -370,7 +380,7 @@ public class SplittedPanelContainer extends JPanel {
                 }
             }
 
-            final int[] newHeights = new int[heights.length + 1];
+            int[] newHeights = new int[heights.length + 1];
             int newHeightIndex = 0;
             for (int i = 0; i < heights.length; i++) {
                 if (i == insertIndex) {
@@ -381,16 +391,7 @@ public class SplittedPanelContainer extends JPanel {
                 }
             }
 
-
-      
-
-            SwingUtilities.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    dispatchHeight(newHeights);
-                }
-            });
+            dispatchHeight(newHeights);
 
         }
     }
@@ -430,7 +431,7 @@ public class SplittedPanelContainer extends JPanel {
      * Reduce the maximized panel to its original place
      * @param panel 
      */
-    public void reduce(SplittedPanel panelToReduce) {
+    private void reduce(SplittedPanel panelToReduce) {
         // remove splittedPanel maximized
         remove(0);
         
@@ -443,15 +444,7 @@ public class SplittedPanelContainer extends JPanel {
         revalidate();
         repaint();
         
-        final int[] _previousHeights = previousHeights;
-        SwingUtilities.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                dispatchHeight(_previousHeights);
-            }
-            
-        });
+        dispatchHeight(previousHeights);
         
     }
     
@@ -474,12 +467,21 @@ public class SplittedPanelContainer extends JPanel {
      * Dispatch the new heights
      * @param heights 
      */
-    private void dispatchHeight(int[] heights) {
-        // set new height to split pane
-        int nbSplits = splitPaneArray.size();
-        for (int i=nbSplits-1;i>=0;i--) {
-            splitPaneArray.get(i).setDividerLocation(heights[i]);
-        }
+    private void dispatchHeight(final int[] heights) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                // set new height to split pane
+                int nbSplits = splitPaneArray.size();
+                for (int i = nbSplits - 1; i >= 0; i--) {
+                    splitPaneArray.get(i).setDividerLocation(heights[i]);
+                }
+            }
+        });
+
+
+
     }
     
     /**

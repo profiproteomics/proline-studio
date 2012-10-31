@@ -26,6 +26,11 @@ public class PeptideTableModel extends AbstractTableModel {
     private static final String[] columnNames = {"Peptide", "Score", "Protein G. Matches", "Charge", "MoZ Exp.", "Mass Calc.", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
     private PeptideInstance[] peptideInstances = null;
 
+    public PeptideInstance getPeptide(int row) {
+        return peptideInstances[row];
+
+    }
+    
     @Override
     public int getColumnCount() {
         return columnNames.length;

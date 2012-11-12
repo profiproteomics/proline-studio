@@ -5,6 +5,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -24,13 +25,17 @@ public class DataboxRsmPeptidesOfProtein extends AbstractDataBox {
     
     public DataboxRsmPeptidesOfProtein() {
 
+        // Name of this databox
+        name = "Peptides";
+        
         // Register Possible in parameters
         // One ResultSummary
         registerInParameterType(null, ProteinMatch.class);
         
         // Register possible out parameters
-        // One ProteinSet
+        // One PeptideInstance or PeptideMatch
         registerOutParameterType(null, PeptideInstance.class);
+        registerOutParameterType(null, PeptideMatch.class);
         
         // Multiple ProteinSet as a List
         registerOutParameterType(List.class, PeptideInstance.class);
@@ -42,7 +47,7 @@ public class DataboxRsmPeptidesOfProtein extends AbstractDataBox {
      @Override
     public void createPanel() {
         RsmPeptidesOfProteinPanel p = new RsmPeptidesOfProteinPanel();
-        p.setName("Peptides");
+        p.setName(name);
         p.setDataBox(this);
         panel = p;
     }
@@ -87,6 +92,11 @@ public class DataboxRsmPeptidesOfProtein extends AbstractDataBox {
     public Object getData(Class arrayParameterType, Class parameterType) {
         if (parameterType!= null && (parameterType.equals(PeptideInstance.class))) {
             return ((RsmPeptidesOfProteinPanel)panel).getSelectedPeptide();
+        } else if (parameterType!= null && (parameterType.equals(PeptideMatch.class))) {
+            PeptideInstance pi = ((RsmPeptidesOfProteinPanel)panel).getSelectedPeptide();
+            if (pi != null) {
+                return pi.getTransientBestPeptideMatch();
+            }
         }
         return super.getData(arrayParameterType, parameterType);
     }

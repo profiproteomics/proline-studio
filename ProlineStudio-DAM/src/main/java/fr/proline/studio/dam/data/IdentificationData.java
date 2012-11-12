@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class IdentificationData extends AbstractData {
 
-    Identification identification;
+    private Identification identification;
 
     public IdentificationData(Identification identification) {
         dataType = DataTypes.IDENTIFICATION;

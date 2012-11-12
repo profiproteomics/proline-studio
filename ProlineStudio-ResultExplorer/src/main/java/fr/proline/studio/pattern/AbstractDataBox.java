@@ -14,14 +14,22 @@ import java.util.Iterator;
  */
 public abstract class AbstractDataBox {
    
+    public enum DataBoxLayout {
+      VERTICAL,
+      HORIZONTAL,
+      TABBED
+    };
+    
     // Panel corresponding to this box
-    DataBoxPanelInterface panel;
+    protected DataBoxPanelInterface panel;
     
     // In and out Parameters Registration
-    HashMap<Class, HashSet<Class>> inParametersMap = new HashMap<Class, HashSet<Class>>();
-    HashMap<Class, HashSet<Class>> outParametersMap = new HashMap<Class, HashSet<Class>>();
+    private HashMap<Class, HashSet<Class>> inParametersMap = new HashMap<Class, HashSet<Class>>();
+    private HashMap<Class, HashSet<Class>> outParametersMap = new HashMap<Class, HashSet<Class>>();
     
-    private String name;
+    protected String name;
+    
+    private DataBoxLayout layout = DataBoxLayout.VERTICAL;
     
     protected AbstractDataBox nextDataBox = null;
     protected AbstractDataBox previousDataBox = null;
@@ -101,6 +109,15 @@ public abstract class AbstractDataBox {
         return panel;
     }
     
+    public void setLayout(DataBoxLayout layout) {
+        this.layout = layout;
+    }
     
+    public DataBoxLayout getLayout() {
+        return layout;
+    }
     
+    public String getName() {
+        return name;
+    }
 }

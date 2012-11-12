@@ -412,14 +412,6 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
         
     }
     
-    
-    /*public void setSelectedResultSummary(Long taskId, ProteinSet[] proteinSets) {
-        // Note : Protein Groups <=> Protein Sets
-
-        setData(taskId, proteinSets);
-
-    }*/
-
 
     
     

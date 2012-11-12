@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class ResultSummaryData extends AbstractData {
 
-    public ResultSummary resultSummary = null;
+    private ResultSummary resultSummary = null;
 
     public ResultSummaryData(ResultSummary resultSummary, boolean hasChildren) {
         dataType = DataTypes.RESULT_SUMMARY;

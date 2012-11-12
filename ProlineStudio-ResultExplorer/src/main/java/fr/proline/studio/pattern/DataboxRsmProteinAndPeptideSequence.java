@@ -13,6 +13,9 @@ public class DataboxRsmProteinAndPeptideSequence extends AbstractDataBox {
 
     public DataboxRsmProteinAndPeptideSequence() {
 
+        // Name of this databox
+        name = "Protein Sequence";
+        
         // Register in parameters
         registerInParameterType(null, ProteinMatch.class);
         registerInParameterType(null, PeptideInstance.class);
@@ -24,7 +27,7 @@ public class DataboxRsmProteinAndPeptideSequence extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsmProteinAndPeptideSequencePanel p = new RsmProteinAndPeptideSequencePanel();
-        p.setName("Sequence/Spectrum");
+        p.setName(name);
         p.setDataBox(this);
         panel = p;
     }

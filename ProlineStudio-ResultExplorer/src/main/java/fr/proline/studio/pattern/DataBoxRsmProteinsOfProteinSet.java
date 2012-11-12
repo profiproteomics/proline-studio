@@ -25,6 +25,9 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
 
     public DataBoxRsmProteinsOfProteinSet() {
 
+         // Name of this databox
+        name = "Proteins";
+        
         // Register Possible in parameters
         // One ResultSummary
         registerInParameterType(null, ProteinSet.class);
@@ -41,7 +44,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsmProteinsOfProteinSetPanel p = new RsmProteinsOfProteinSetPanel();
-        p.setName("Proteins");
+        p.setName(name);
         p.setDataBox(this);
         panel = p;
     }

@@ -31,7 +31,7 @@ public class SplittedPanelContainer extends JPanel {
      * Register a panel which will be put in the container panel
      * @param panel 
      */
-    public void registerPanel(JPanel panel) {
+    public void registerPanel(JComponent panel) {
         SplittedPanel splittedPanel = new SplittedPanel(panelArray.size(), panel, this);
         panelArray.add(splittedPanel);
     }
@@ -490,7 +490,7 @@ public class SplittedPanelContainer extends JPanel {
      */
     private class SplittedPanel extends javax.swing.JPanel {
 
-        private JPanel embededPanel;
+        private JComponent embededPanel;
         private SplittedPanelContainer container;
         private int index;
         private int previousHeight = 0;
@@ -503,7 +503,7 @@ public class SplittedPanelContainer extends JPanel {
         JPanel buttonPanel;
         
         
-        public SplittedPanel(int index, JPanel embededPanel, SplittedPanelContainer container) {
+        public SplittedPanel(int index, JComponent embededPanel, SplittedPanelContainer container) {
             
             this.embededPanel = embededPanel;
             this.container = container;

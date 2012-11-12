@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class IdentificationFractionData extends AbstractData {
 
-    IdentificationFraction identificationFraction;
+    private IdentificationFraction identificationFraction;
 
     public IdentificationFractionData(IdentificationFraction identificationFraction) {
         dataType = AbstractData.DataTypes.IDENTIFICATION_FRACTION;

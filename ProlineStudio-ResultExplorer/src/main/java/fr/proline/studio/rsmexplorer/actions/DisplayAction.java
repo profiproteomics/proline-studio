@@ -36,7 +36,10 @@ public class DisplayAction extends AbstractRSMAction {
     public JMenuItem getPopupPresenter() {
         JMenu menu = new JMenu((String) getValue(NAME));
 
+        JMenuItem peptidesMenuItem = new JMenuItem(new PeptidesAction());
         JMenuItem proteinMenuItem = new JMenuItem(new ProteinGroupsAction());
+        
+        menu.add(peptidesMenuItem);
         menu.add(proteinMenuItem);
         /*
          * menu.add(new JMenuItem(PeptidsGroupsAction.getInstance()));

@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class ResultSetData extends AbstractData {
 
-    public ResultSet resultSet = null;
+    private ResultSet resultSet = null;
 
     public ResultSetData(ResultSet resultSet, boolean hasChildren) {
         dataType = DataTypes.RESULT_SET;
@@ -35,5 +35,9 @@ public class ResultSetData extends AbstractData {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadRsmFromRsetTask(callback, resultSet, list));
 
 
+    }
+    
+    public ResultSet getResultSet() {
+        return resultSet;
     }
 }

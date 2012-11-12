@@ -1,6 +1,8 @@
 package fr.proline.studio.rsmexplorer.node;
 
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.studio.dam.data.AbstractData;
+import fr.proline.studio.dam.data.ResultSetData;
 import javax.swing.ImageIcon;
 import org.openide.util.ImageUtilities;
 
@@ -30,4 +32,8 @@ public class RSMResultSetNode extends RSMNode {
     public boolean canRename() {
         return true;
     }*/
+    
+    public ResultSet getResultSet() {
+        return ((ResultSetData) getData()).getResultSet();
+    }
 }

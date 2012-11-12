@@ -4,46 +4,47 @@
  */
 package fr.proline.studio.pattern;
 
-
-import fr.proline.core.orm.msi.ProteinSet;
-import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.PeptideMatch;
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchFromRestTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
+import fr.proline.studio.rsmexplorer.gui.RsetPeptideMatchPanel;
 import java.util.List;
 
 /**
  *
  * @author JM235353
  */
-public class DataBoxRsmProteinSet extends AbstractDataBox {
-    
-    ResultSummary rsm = null;
-    
-    public DataBoxRsmProteinSet() {
+public class DataBoxRsetPeptide extends AbstractDataBox {
 
-         // Name of this databox
-        name = "Protein Set";
+    
+    ResultSet rset = null;
+    
+    public DataBoxRsetPeptide() {
+
+        // Name of this databox
+        name = "Peptides";
         
         // Register Possible in parameters
         // One ResultSummary
-        registerInParameterType(null, ResultSummary.class);
+        registerInParameterType(null, ResultSet.class);
         
         // Register possible out parameters
         // One ProteinSet
-        registerOutParameterType(null, ProteinSet.class);
+        registerOutParameterType(null, PeptideMatch.class);
         
         // Multiple ProteinSet as a List
-        registerOutParameterType(List.class, ProteinSet.class);
+        registerOutParameterType(List.class, PeptideMatch.class);
+       
        
     }
     
 
     @Override
     public void createPanel() {
-        RsmProteinSetPanel p = new RsmProteinSetPanel();
+        RsetPeptideMatchPanel p = new RsetPeptideMatchPanel();
         p.setName(name);
         p.setDataBox(this);
         panel = p;
@@ -52,7 +53,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     @Override
     public void dataChanged(AbstractDataBox srcDataBox) {
         
-        final ResultSummary _rsm = (rsm!=null) ? rsm : (ResultSummary) srcDataBox.getData(null, ResultSummary.class);
+        final ResultSet _rset = (rset!=null) ? rset : (ResultSet) srcDataBox.getData(null, ResultSet.class);
 
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -67,19 +68,19 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
                 
                 
                 
-                if (subTask == null) {
+                //if (subTask == null) {
 
-                    ProteinSet[] proteinSetArray = _rsm.getTransientProteinSets();
-                    ((RsmProteinSetPanel)panel).setData(taskId, proteinSetArray);
-                } else {
-                    ((RsmProteinSetPanel)panel).dataUpdated(subTask);
-                }
+                    PeptideMatch[] peptideMatchArray = _rset.getTransientPeptideMatches();
+                    ((RsetPeptideMatchPanel)panel).setData(taskId, peptideMatchArray);
+               /* } else {
+                    ((RsetPeptideMatchPanel)panel).dataUpdated(subTask);
+                }*/
             }
         };
         
 
         // ask asynchronous loading of data
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinSetsTask(callback, _rsm));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptideMatchFromRestTask(callback, _rset));
 
        
         
@@ -88,12 +89,12 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     @Override
     public Object getData(Class arrayParameterType, Class parameterType) {
         if (parameterType!= null ) {
-            if (parameterType.equals(ProteinSet.class)) {
-                return ((RsmProteinSetPanel)panel).getSelectedProteinSet();
+            if (parameterType.equals(PeptideMatch.class)) {
+                return ((RsetPeptideMatchPanel)panel).getSelectedPeptideMatch();
             }
-            if (parameterType.equals(ResultSummary.class)) {
-                if (rsm != null) {
-                    return rsm;
+            if (parameterType.equals(ResultSet.class)) {
+                if (rset != null) {
+                    return rset;
                 }
             }
         }
@@ -102,7 +103,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
  
     @Override
     public void setEntryData(Object data) {
-        rsm = (ResultSummary) data;
+        rset = (ResultSet) data;
         dataChanged(null);
     }
 }

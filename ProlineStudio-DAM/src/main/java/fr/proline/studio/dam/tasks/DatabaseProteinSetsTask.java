@@ -197,7 +197,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             entityManagerMSI.getTransaction().commit();
         } catch (RuntimeException e) {
-            logger.error("DatabaseProteinSetsTask failed", e);
+            logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -245,7 +245,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             entityManagerMSI.getTransaction().commit();
         } catch (RuntimeException e) {
-            logger.error("DatabaseProteinSetsAction failed", e);
+            logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();

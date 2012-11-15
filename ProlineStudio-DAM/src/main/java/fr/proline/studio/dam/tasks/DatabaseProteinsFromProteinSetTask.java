@@ -113,7 +113,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
             
             entityManagerMSI.getTransaction().commit();
         } catch  (RuntimeException e) {
-            logger.error("DatabaseProteinSetsAction failed", e);
+            logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();

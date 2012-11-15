@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -21,13 +17,14 @@ public class WindowBoxFactory {
     public static WindowBox getPeptidesWindowBox() {
         
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        AbstractDataBox[] boxes = new AbstractDataBox[3];
         boxes[0] = new DataBoxRsetPeptide();
         boxes[1] = new DataBoxRsetPeptideSpectrum();
         boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[2] = new DataBoxRsetProteinsForPeptideMatch();
         /*boxes[1] = new DataBoxRsmProteinsOfProteinSet();
-        boxes[2] = new DataboxRsmPeptidesOfProtein();
-        boxes[3] = new DataboxRsmProteinAndPeptideSequence();*/
+        boxes[2] = new DataBoxRsmPeptidesOfProtein();
+        boxes[3] = new DataBoxRsmProteinAndPeptideSequence();*/
         
         return new WindowBox( "Peptides", generatePanel(boxes), boxes[0] );
     }
@@ -38,8 +35,8 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxRsmProteinSet();
         boxes[1] = new DataBoxRsmProteinsOfProteinSet();
-        boxes[2] = new DataboxRsmPeptidesOfProtein();
-        boxes[3] = new DataboxRsmProteinAndPeptideSequence();
+        boxes[2] = new DataBoxRsmPeptidesOfProtein();
+        boxes[3] = new DataBoxRsmProteinAndPeptideSequence();
         boxes[4] = new DataBoxRsetPeptideSpectrum();
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         

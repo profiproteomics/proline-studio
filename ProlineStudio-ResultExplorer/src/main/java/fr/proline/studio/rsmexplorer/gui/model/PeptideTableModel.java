@@ -68,7 +68,7 @@ public class PeptideTableModel extends AbstractTableModel {
                 PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
                 if (peptideMatch == null) {
                 }
-                return peptideMatch.getTransientPeptide();
+                return peptideMatch.getTransientData().getPeptide();
             }
             case COLTYPE_PEPTIDE_SCORE: {
                 // Retrieve typical Peptide Match
@@ -83,7 +83,7 @@ public class PeptideTableModel extends AbstractTableModel {
                 if (peptideMatch == null) {
                     return ""; // should never happen   
                 }
-                Peptide p = peptideMatch.getTransientPeptide();
+                Peptide p = peptideMatch.getTransientData().getPeptide();
                 if (p == null) {
                     return "";
                 }
@@ -124,7 +124,7 @@ public class PeptideTableModel extends AbstractTableModel {
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
                 PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
                 if (peptideMatch != null) {
-                    Peptide p = peptideMatch.getTransientPeptide();
+                    Peptide p = peptideMatch.getTransientData().getPeptide();
                     if (p != null) {
                         return DataFormat.format(p.getCalculatedMass(), 2);
                     }
@@ -160,7 +160,7 @@ public class PeptideTableModel extends AbstractTableModel {
             case COLTYPE_PEPTIDE_PTM: {
                 PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
                 if (peptideMatch != null) {
-                    Peptide p = peptideMatch.getTransientPeptide();
+                    Peptide p = peptideMatch.getTransientData().getPeptide();
                     if (p != null) {
                         return p.getPtmString();
                     }

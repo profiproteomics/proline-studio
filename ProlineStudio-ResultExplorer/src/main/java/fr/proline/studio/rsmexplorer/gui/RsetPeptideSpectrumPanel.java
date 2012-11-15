@@ -5,6 +5,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
+import fr.proline.core.orm.msi.MsQuery;
 import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.Spectrum;
 import java.awt.BasicStroke;
@@ -143,14 +144,23 @@ public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements Data
     private void constructSpectrumChart(PeptideMatch pm) {
 
         final String SERIES_NAME = "spectrumData";
-        
         if (pm == null) {
             dataSet.removeSeries(SERIES_NAME);
             return;
         }
 
-        // Set fate for the spectrum chart
-        Spectrum spectrum = pm.getMsQuery().getSpectrum();
+        MsQuery msQuery = pm.getTransientData().getIsMsQuerySet() ? pm.getMsQuery() : null;
+        if (msQuery == null) {
+            dataSet.removeSeries(SERIES_NAME);
+            return;
+        }
+        
+        Spectrum spectrum = msQuery.getTransientIsSpectrumSet() ? msQuery.getSpectrum() : null;
+        if (spectrum == null) {
+            dataSet.removeSeries(SERIES_NAME);
+            return;
+        }
+
 
         byte[] intensityByteArray = package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
         byte[] massByteArray = package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
@@ -178,7 +188,7 @@ public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements Data
 
 
         // Set title
-        String title = "Query " + pm.getMsQuery().getId() + " - " + pm.getTransientPeptide().getSequence();
+        String title = "Query " + pm.getMsQuery().getId() + " - " + pm.getTransientData().getPeptide().getSequence();
         chart.setTitle(title);
 
         // reset X/Y zooming

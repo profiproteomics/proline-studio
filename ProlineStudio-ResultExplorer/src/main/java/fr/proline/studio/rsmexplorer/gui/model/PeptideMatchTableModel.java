@@ -1,18 +1,22 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.MsQuery;
 import fr.proline.core.orm.msi.PeptideMatch;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchFromRsetTask;
 import fr.proline.studio.utils.DataFormat;
-import javax.swing.table.AbstractTableModel;
+import fr.proline.studio.utils.LazyData;
+import fr.proline.studio.utils.LazyTable;
+import fr.proline.studio.utils.LazyTableModel;
 
 /**
  *
  * @author JM235353
  */
-public class PeptideMatchTableModel extends AbstractTableModel {
+public class PeptideMatchTableModel extends LazyTableModel {
 
     public static final int COLTYPE_PEPTIDE_NAME = 0;
     public static final int COLTYPE_PEPTIDE_SCORE = 1;
+    public static final int COLTYPE_PEPTIDE_MSQUERY = 2;
     /*public static final int COLTYPE_PROTEIN_GROUPS_MATCHES = 2;
     public static final int COLTYPE_PEPTIDE_CHARGE = 3;
     public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 4;
@@ -21,9 +25,15 @@ public class PeptideMatchTableModel extends AbstractTableModel {
     public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 7;
     public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
     public static final int COLTYPE_PEPTIDE_PTM = 9;*/
-    private static final String[] columnNames = {"Peptide", "Score"/*, "Protein G. Matches", "Charge", "MoZ Exp.", "Mass Calc.", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"*/};
+    private static final String[] columnNames = {"Peptide", "Score", "MsQuery"/*, "Protein G. Matches", "Charge", "MoZ Exp.", "Mass Calc.", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"*/};
     private PeptideMatch[] peptideMatches = null;
 
+    
+    public PeptideMatchTableModel(LazyTable table) {
+        super(table);
+    }
+    
+    
     public PeptideMatch getPeptideMatch(int row) {
         return peptideMatches[row];
 
@@ -41,12 +51,25 @@ public class PeptideMatchTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int col) {
-        if (col == COLTYPE_PEPTIDE_NAME) {
+        /*if (col == COLTYPE_PEPTIDE_NAME) {
             return Peptide.class;
+        } else */if (col == COLTYPE_PEPTIDE_SCORE) {
+            return String.class;
         }
-        return String.class;
+        return LazyData.class;
     }
 
+        @Override
+    public int getSubTaskId(int col) {
+        switch (col) {
+            case COLTYPE_PEPTIDE_NAME:
+                return DatabaseLoadPeptideMatchFromRsetTask.SUB_TASK_PEPTIDE;
+            case COLTYPE_PEPTIDE_MSQUERY:
+                return DatabaseLoadPeptideMatchFromRsetTask.SUB_TASK_MSQUERY;
+        }
+        return -1;
+    }
+    
     @Override
     public int getRowCount() {
         if (peptideMatches == null) {
@@ -62,12 +85,39 @@ public class PeptideMatchTableModel extends AbstractTableModel {
 
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
-                // Retrieve typical Peptide Match
-                return peptideMatch.getTransientPeptide();
+                
+                LazyData lazyData = getLazyData(row,col);
+                
+                PeptideMatch.TransientData data = peptideMatch.getTransientData();
+                if ((data == null) || (data.getPeptide() == null)) {
+                    givePriorityTo(taskId, row, col);
+                    lazyData.setData(null);
+                } else {
+                    lazyData.setData(data.getPeptide());
+                }
+                
+                return lazyData;
             }
             case COLTYPE_PEPTIDE_SCORE: {
                 // Retrieve typical Peptide Match
                 return DataFormat.format(peptideMatch.getScore(), 2);
+            }
+            case COLTYPE_PEPTIDE_MSQUERY: {
+                
+                LazyData lazyData = getLazyData(row,col);
+                
+                PeptideMatch.TransientData data = peptideMatch.getTransientData();
+                if ((data == null) || (!data.getIsMsQuerySet())) {
+                    givePriorityTo(taskId, row, col);
+                    lazyData.setData(null);
+                    
+                } else {
+                    MsQuery msQuery = peptideMatch.getMsQuery();
+                    lazyData.setData( String.valueOf(msQuery.getId())  ); //JPM.TODO
+                }
+                return lazyData;
+
+   
             }
             /*case COLTYPE_PROTEIN_GROUPS_MATCHES: {
                 PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
@@ -172,5 +222,8 @@ public class PeptideMatchTableModel extends AbstractTableModel {
         return peptideMatches;
     }
 
-    
+    public void dataUpdated() {
+
+        fireTableDataChanged();
+    }
 }

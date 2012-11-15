@@ -1,36 +1,35 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package fr.proline.studio.rsmexplorer.gui;
 
-
-
+import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.ProteinsOfPeptideMatchTableModel;
 import fr.proline.studio.utils.DecoratedTable;
 import javax.swing.event.ListSelectionEvent;
 
-
 /**
- * In : Window which display Protein Groups of a Result Summary
- * - Panel used to display Proteins of a Protein Group (at the center of the window)
- * 
+ *
  * @author JM235353
  */
-public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
+public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel  implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
     
-    private ProteinSet proteinSetCur = null;
+    private PeptideMatch peptideMatchCur = null;
     
     /**
-     * Creates new form RsmProteinsOfProteinSetPanel
+     * Creates new form RsetProteinsForPeptideMatchPanel
      */
-    public RsmProteinsOfProteinSetPanel() {
+    public RsetProteinsForPeptideMatchPanel() {
         initComponents();
         
         ((DecoratedTable)proteinTable).displayColumnAsPercentage(ProteinTableModel.COLTYPE_PROTEIN_SCORE);
- 
     }
 
     public ProteinMatch getSelectedProteinMatch() {
@@ -57,53 +56,38 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
             
             return tableModel.getProteinMatch(selectedRow);
     }
- 
     
-    public void setData(ProteinSet proteinSet, String searchedText) {
+
+    public void setData(PeptideMatch peptideMatch) {
         
-        if (proteinSet == proteinSetCur) {
+        if (peptideMatch == peptideMatchCur) {
             return;
         }
-        proteinSetCur = proteinSet;
+        peptideMatchCur = peptideMatch;
         
-        if (proteinSet == null) {
+        if (peptideMatch == null) {
             clearData();
             return;
         }
         
-        ProteinSet.TransientData proteinSetData = proteinSet.getTransientData();
-        
-        // retrieve sameset and subset
-        ProteinMatch[] sameSetArray = proteinSetData.getSameSet(); 
-        ProteinMatch[] subSetArray =  proteinSetData.getSubSet();
-        
-        // retrieve Typical Protein Match
-        ProteinMatch typicalProtein = proteinSetData.getTypicalProteinMatch();
-        
-        // Modify Panel Border Title
-        //((ProteinGroupProteinSelectedPanel) ViewTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(typicalProtein.getAccession());
-        //JPM.TODO
-        
-        
-        // Modify protein description
-        proteinNameTextField.setText(typicalProtein.getDescription() );
+
+        ProteinMatch[] proteinMatchArray = peptideMatch.getTransientData().getProteinMatches(); 
+
         
         
         // Modify the Model
-        ((ProteinTableModel) proteinTable.getModel()).setData(sameSetArray, subSetArray);
+        ((ProteinsOfPeptideMatchTableModel) proteinTable.getModel()).setData(proteinMatchArray);
         
-        // Select the Row
-        int row = ((ProteinTableModel) proteinTable.getModel()).findRowToSelect(searchedText);
-        proteinTable.getSelectionModel().setSelectionInterval(row, row);
+        // Select the first row
+        proteinTable.getSelectionModel().setSelectionInterval(0, 0);
         
     }
     
     private void clearData() {
-        proteinNameTextField.setText("");
-        //((ProteinGroupProteinSelectedPanel) ViewTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(null); //JPM.TODO
-        ((ProteinTableModel) proteinTable.getModel()).setData(null, null);
+        ((ProteinsOfPeptideMatchTableModel) proteinTable.getModel()).setData(null);
 
     }
+    
     
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
@@ -119,44 +103,35 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        proteinNameTextField = new javax.swing.JTextField();
         scrollPane = new javax.swing.JScrollPane();
         proteinTable = new ProteinTable();
 
-        proteinNameTextField.setText(org.openide.util.NbBundle.getMessage(RsmProteinsOfProteinSetPanel.class, "RsmProteinsOfProteinSetPanel.proteinNameTextField.text")); // NOI18N
-
-        proteinTable.setModel(new ProteinTableModel());
+        proteinTable.setModel(new ProteinsOfPeptideMatchTableModel());
         scrollPane.setViewportView(proteinTable);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(proteinNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE))
+                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(proteinNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
+                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField proteinNameTextField;
     private javax.swing.JTable proteinTable;
     private javax.swing.JScrollPane scrollPane;
     // End of variables declaration//GEN-END:variables
 
-    
-    
+
     private class ProteinTable extends DecoratedTable  {
         
         /** 
@@ -169,10 +144,8 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
             super.valueChanged(e);
             
             dataBox.propagateDataChanged(ProteinMatch.class);
-            
 
         }
     }
-
 
 }

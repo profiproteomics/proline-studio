@@ -57,10 +57,7 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
     }
 
     public void dataUpdated(SubTask subTask) {
-
         ((ProteinGroupTable) proteinGroupTable).dataUpdated(subTask);
-
-
     }
 
     public ProteinSet getSelectedProteinSet() {
@@ -268,66 +265,8 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
                 return;
             }
  
-            dataBox.propagateDataChanged();
-            /*
-            ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) ViewTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
-            
-            
-            // Retrieve Selected Row
-            int selectedRow = getSelectedRow();
-            
+            dataBox.propagateDataChanged(ProteinSet.class);
 
-            // nothing selected
-            if (selectedRow == -1) {
-                proteinSetSelected = null;
-                p.setData(null, null);
-                return;
-                
-            }
-            
-            // convert according to the sorting
-            selectedRow = convertRowIndexToModel(selectedRow);
-            
-            
-            
-            // Retrieve ProteinSet selected
-            ProteinGroupTableModel tableModel = (ProteinGroupTableModel) getModel();
-            final ProteinSet proteinSet = tableModel.getProteinSet(selectedRow);
-            
-            if (proteinSetSelected == proteinSet) {
-                return; // nothing to do
-            }
-            
-            // check if data is ready to load Proteins of Protein set
-            if (proteinSet.getTransientData().getTypicalProteinMatch() == null) {
-                return;
-            }
-            
-            
-            proteinSetSelected = proteinSet;
-            
-            
-            
-            // prepare callback to view new data
-            final String searchedText = searchTextBeingDone;
-            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success, long taskId, SubTask subTask) {
-                    ProteinGroupProteinSetPanel p = (ProteinGroupProteinSetPanel) ViewTopComponent.getPanel(ProteinGroupProteinSetPanel.class);
-
-                    p.setData(proteinSet, searchedText);
-                }
-            };
-            
-            // Load data if needed asynchronously
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromProteinSetTask(callback, proteinSet));
-*/
         }
         
         public void selectProteinSet(Integer proteinSetId, String searchText) {

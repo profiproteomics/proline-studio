@@ -4,11 +4,15 @@
  */
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideMatch;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
+import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.utils.DecoratedTable;
+import fr.proline.studio.utils.LazyTable;
 import javax.swing.event.ListSelectionEvent;
 
 /**
@@ -43,12 +47,12 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
         }
     }
 
-    /*public void dataUpdated(SubTask subTask) {
+    public void dataUpdated(SubTask subTask) {
 
-        ((ProteinGroupTable) proteinGroupTable).dataUpdated(subTask);
+        ((PeptideMatchTable) peptideMatchTable).dataUpdated(subTask);
 
 
-    }*/
+    }
     
     
     public PeptideMatch getSelectedPeptideMatch() {
@@ -87,7 +91,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
         scrollPane = new javax.swing.JScrollPane();
         peptideMatchTable = new PeptideMatchTable();
 
-        peptideMatchTable.setModel(new PeptideMatchTableModel());
+        peptideMatchTable.setModel(new PeptideMatchTableModel((LazyTable)peptideMatchTable));
         scrollPane.setViewportView(peptideMatchTable);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -107,7 +111,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
     // End of variables declaration//GEN-END:variables
 
 
-    private class PeptideMatchTable extends DecoratedTable  {
+    private class PeptideMatchTable extends LazyTable  {
         /** 
          * Called whenever the value of the selection changes.
          * @param e the event that characterizes the change.
@@ -117,7 +121,8 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
         
         
         public PeptideMatchTable() {
-            //super(proteinGroupScrollPane.getVerticalScrollBar() );
+            super(scrollPane.getVerticalScrollBar() );
+            setDefaultRenderer(Peptide.class, new PeptideRenderer());
         }
         
         /** 
@@ -129,7 +134,11 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
             
             super.valueChanged(e);
             
-            dataBox.propagateDataChanged();
+            if (selectionWillBeRestored) {
+                return;
+            }
+            
+            dataBox.propagateDataChanged(PeptideMatch.class);
 
         }
         
@@ -159,7 +168,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
         }
         String searchTextBeingDone = null;*/
 
-        /*public void dataUpdated(SubTask subTask) {
+        public void dataUpdated(SubTask subTask) {
             
             LastAction keepLastAction = lastAction;
             try {
@@ -173,7 +182,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
             
             selectionWillBeRestored(true);
             try {
-                ((ProteinGroupTableModel) getModel()).dataUpdated();
+                ((PeptideMatchTableModel) getModel()).dataUpdated();
             } finally {
                 selectionWillBeRestored(false);
             }
@@ -183,14 +192,12 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
             // restore selected row
             if (rowSelectedInModel != -1) {
                 int rowSelectedInView = convertRowIndexToView(rowSelectedInModel);
-                //getSelectionModel().setSelectionInterval(rowSelectedInView, rowSelectedInView);
                 setSelection(rowSelectedInView);
-
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((ProteinGroupTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
-                    ((ProteinGroupTable) proteinGroupTable).scrollRowToVisible(rowSelectedInView);
+                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((PeptideMatchTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                    ((PeptideMatchTable) peptideMatchTable).scrollRowToVisible(rowSelectedInView);
                 }
                     
             }
@@ -200,17 +207,17 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
                 lastAction = keepLastAction;
  
             }
-        }*/
+        }
         
-        /*@Override
+        @Override
         public void sortingChanged(int col) {
-            ((SearchButton)searchButton).sortingChanged();
+            //((SearchButton)searchButton).sortingChanged();
         }
     
         public void selectionWillBeRestored(boolean b) {
             selectionWillBeRestored = b;
         }
-        private boolean selectionWillBeRestored = false;*/
+        private boolean selectionWillBeRestored = false;
         
         
     }

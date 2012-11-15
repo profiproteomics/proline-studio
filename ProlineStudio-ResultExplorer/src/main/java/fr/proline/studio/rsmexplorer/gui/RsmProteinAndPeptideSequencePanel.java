@@ -108,7 +108,7 @@ public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implem
         if ((pm == null) || (pm.getTransientBioSequence() == null)) {
             editorPane.setText("");
             
-            dataBox.propagateDataChanged();
+            //dataBox.propagateDataChanged(); //JPM.TODO ???
             return;
         }
         
@@ -129,19 +129,19 @@ public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implem
                 continue;
             }
             
-            Peptide p = peptideInstances[i].getTransientBestPeptideMatch().getTransientPeptide();
+            Peptide p = peptideInstances[i].getTransientBestPeptideMatch().getTransientData().getPeptide();
             hightlight(p, false, highlights);
         }
         // highlight for selecte peptide (must be done last to override modifications
         // of overlaping non selected peptides
-        hightlight(selectedPeptide.getTransientBestPeptideMatch().getTransientPeptide(), true, highlights);
+        hightlight(selectedPeptide.getTransientBestPeptideMatch().getTransientData().getPeptide(), true, highlights);
         
 
        
         editorPane.setText(constructDisplayedSequence(sequence, highlights));
         sequenceScrollPane.scrollRectToVisible(new Rectangle(0,0,1,1));
         
-        dataBox.propagateDataChanged();
+        //dataBox.propagateDataChanged(); //JPM.TODO ???
     }
     private void hightlight(Peptide p, boolean selectedPeptide, int[] highlights) {
                    

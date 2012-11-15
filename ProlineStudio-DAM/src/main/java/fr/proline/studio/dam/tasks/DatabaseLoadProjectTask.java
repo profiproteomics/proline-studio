@@ -48,7 +48,7 @@ public class DatabaseLoadProjectTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().commit();
 
         } catch (RuntimeException e) {
-            logger.error("DatabaseLoadAction failed", e);
+            logger.error(getClass().getSimpleName()+" failed", e);
             entityManagerUDS.getTransaction().rollback();
         }
 

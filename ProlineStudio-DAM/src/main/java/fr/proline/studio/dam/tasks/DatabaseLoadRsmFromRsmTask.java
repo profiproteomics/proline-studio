@@ -63,7 +63,7 @@ public class DatabaseLoadRsmFromRsmTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().commit();
 
         } catch (RuntimeException e) {
-            logger.error("DatabaseLoadResultSetAction failed", e);
+            logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();

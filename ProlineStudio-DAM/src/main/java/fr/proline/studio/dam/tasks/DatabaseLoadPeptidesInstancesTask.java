@@ -61,7 +61,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             
             ArrayList<PeptideInstance> peptideInstanceList = new ArrayList<PeptideInstance>();
             List l = peptidesQuery.getResultList();
-            Iterator<Object[]> itPeptidesQuery=l.iterator();
+            Iterator<Object[]> itPeptidesQuery = l.iterator();
             while (itPeptidesQuery.hasNext()) {
                 Object[] resCur = itPeptidesQuery.next();
                 PeptideInstance pi = (PeptideInstance) resCur[0];
@@ -78,7 +78,10 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
                 p.setTransientData(data);
                 data.setSequenceMatch(sm);
                 
-                pm.setTransientPeptide(p);
+                PeptideMatch.TransientData pmData = new PeptideMatch.TransientData();
+                pmData.setPeptide(p);
+                pmData.setIsMsQuerySet(true);
+                pm.setTransientData(pmData);
 
                 peptideInstanceList.add(pi);
             }
@@ -91,7 +94,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             //ArrayList<Integer> peptideIds = new ArrayList<Integer>(nbPeptides);
             for (int i=0;i<nbPeptides;i++) {
                 //peptideIds.add(peptideInstances[i].getPeptideId());
-                peptideMap.put(peptideInstances[i].getPeptideId(), peptideInstances[i].getTransientBestPeptideMatch().getTransientPeptide());
+                peptideMap.put(peptideInstances[i].getPeptideId(), peptideInstances[i].getTransientBestPeptideMatch().getTransientData().getPeptide());
             }
             
 
@@ -128,7 +131,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             
             entityManagerMSI.getTransaction().commit();
         } catch (RuntimeException e) {
-            logger.error("DatabaseLoadPeptidesInstancesTask failed", e);
+            logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -159,7 +162,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             
             entityManagerPS.getTransaction().commit();
         } catch (RuntimeException e) {
-            logger.error("DatabaseLoadPeptidesInstancesTask failed", e);
+            logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerPS.close();

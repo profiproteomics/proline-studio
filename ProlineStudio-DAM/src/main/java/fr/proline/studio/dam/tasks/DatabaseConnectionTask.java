@@ -76,7 +76,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 entityManagerPS.close();
             }
         } catch (Exception e) {
-            logger.error("DatabaseConnectionAction failed", e);
+            logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         }
         return true;

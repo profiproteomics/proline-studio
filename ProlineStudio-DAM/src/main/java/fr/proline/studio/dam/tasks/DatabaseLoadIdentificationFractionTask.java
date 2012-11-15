@@ -87,7 +87,7 @@ public class DatabaseLoadIdentificationFractionTask extends AbstractDatabaseTask
                     entityManagerMSI.getTransaction().commit();
                     
                 } catch  (RuntimeException e) {
-                    logger.error("DatabaseLoadIdentificationFractionAction failed", e);
+                    logger.error(getClass().getSimpleName()+" failed", e);
                 } finally {
                     entityManagerMSI.close();
                 }
@@ -96,7 +96,7 @@ public class DatabaseLoadIdentificationFractionTask extends AbstractDatabaseTask
             entityManagerUDS.getTransaction().commit();
 
         } catch (RuntimeException e) {
-            logger.error("DatabaseLoadIdentificationFractionAction failed", e);
+            logger.error(getClass().getSimpleName()+" failed", e);
             entityManagerUDS.getTransaction().rollback();
             return false;
         } finally {

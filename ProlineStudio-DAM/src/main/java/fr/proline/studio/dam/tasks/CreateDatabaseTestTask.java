@@ -179,7 +179,7 @@ public class CreateDatabaseTestTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().commit();
 
         } catch (RuntimeException e) {
-            logger.error("CreateDatabaseTestTask failed", e);
+            logger.error(getClass().getSimpleName()+" failed", e);
             entityManagerMSI.getTransaction().rollback();
         }
 

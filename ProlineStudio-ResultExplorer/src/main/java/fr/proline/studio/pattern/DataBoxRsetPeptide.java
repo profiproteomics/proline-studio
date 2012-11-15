@@ -8,7 +8,7 @@ import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchFromRestTask;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchFromRsetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsetPeptideMatchPanel;
 import java.util.List;
@@ -29,15 +29,16 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
         
         // Register Possible in parameters
         // One ResultSummary
-        registerInParameterType(null, ResultSet.class);
+        DataParameter inParameter = new DataParameter();
+        inParameter.addParameter(ResultSet.class, false);
+
         
         // Register possible out parameters
-        // One ProteinSet
-        registerOutParameterType(null, PeptideMatch.class);
+        // One or Multiple PeptideMatch
+        DataParameter outParameter = new DataParameter();
+        outParameter.addParameter(PeptideMatch.class, true);
         
-        // Multiple ProteinSet as a List
-        registerOutParameterType(List.class, PeptideMatch.class);
-       
+
        
     }
     
@@ -51,7 +52,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     }
     
     @Override
-    public void dataChanged(AbstractDataBox srcDataBox) {
+    public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
         
         final ResultSet _rset = (rset!=null) ? rset : (ResultSet) srcDataBox.getData(null, ResultSet.class);
 
@@ -66,21 +67,19 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask) {
                 
-                
-                
-                //if (subTask == null) {
+               if (subTask == null) {
 
                     PeptideMatch[] peptideMatchArray = _rset.getTransientPeptideMatches();
                     ((RsetPeptideMatchPanel)panel).setData(taskId, peptideMatchArray);
-               /* } else {
+               } else {
                     ((RsetPeptideMatchPanel)panel).dataUpdated(subTask);
-                }*/
+                }
             }
         };
         
 
         // ask asynchronous loading of data
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptideMatchFromRestTask(callback, _rset));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptideMatchFromRsetTask(callback, _rset));
 
        
         
@@ -104,6 +103,6 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         rset = (ResultSet) data;
-        dataChanged(null);
+        dataChanged(null, ResultSet.class);
     }
 }

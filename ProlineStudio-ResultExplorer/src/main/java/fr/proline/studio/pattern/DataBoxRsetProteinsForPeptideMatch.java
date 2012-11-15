@@ -1,40 +1,33 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
-
+import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseProteinsFromProteinSetTask;
+import fr.proline.studio.dam.tasks.DatabaseProteinsFromPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.gui.RsmProteinsOfProteinSetPanel;
-
-
+import fr.proline.studio.rsmexplorer.gui.RsetProteinsForPeptideMatchPanel;
 
 /**
  *
  * @author JM235353
  */
-public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
+public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     
 
-    public DataBoxRsmProteinsOfProteinSet() {
+    public DataBoxRsetProteinsForPeptideMatch() {
 
          // Name of this databox
         name = "Proteins";
         
         // Register Possible in parameters
-        // One ProteinSet
+        // One PeptideMatch
         DataParameter inParameter = new DataParameter();
-        inParameter.addParameter(ProteinSet.class, false);
+        inParameter.addParameter(PeptideMatch.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
-        // One ProteinMatch
+        // One or Multiple ProteinMatch
         DataParameter outParameter = new DataParameter();
         outParameter.addParameter(ProteinMatch.class, true);
         registerOutParameter(outParameter);
@@ -42,18 +35,26 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
        
     }
 
+    
     @Override
     public void createPanel() {
-        RsmProteinsOfProteinSetPanel p = new RsmProteinsOfProteinSetPanel();
+        RsetProteinsForPeptideMatchPanel p = new RsetProteinsForPeptideMatchPanel();
         p.setName(name);
         p.setDataBox(this);
         panel = p;
     }
     
+
     @Override
     public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
-        final ProteinSet proteinSet = (ProteinSet) srcDataBox.getData(null, ProteinSet.class);
+        final PeptideMatch peptideMatch = (PeptideMatch) srcDataBox.getData(null, PeptideMatch.class);
 
+        if (peptideMatch == null) {
+            ((RsetProteinsForPeptideMatchPanel)panel).setData(null);
+            return;
+        }
+
+        
         //final String searchedText = searchTextBeingDone; //JPM.TODO
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -66,14 +67,12 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask) {
 
 
-                ((RsmProteinsOfProteinSetPanel)panel).setData(proteinSet, null /*
-                         * searchedText
-                         */); //JPM.TODO
+                ((RsetProteinsForPeptideMatchPanel)panel).setData(peptideMatch);
             }
         };
 
         // Load data if needed asynchronously
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromProteinSetTask(callback, proteinSet));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromPeptideMatchTask(callback, peptideMatch));
 
 
     }
@@ -81,7 +80,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     @Override
     public Object getData(Class arrayParameterType, Class parameterType) {
         if (parameterType!= null && (parameterType.equals(ProteinMatch.class))) {
-            return ((RsmProteinsOfProteinSetPanel)panel).getSelectedProteinMatch();
+            return ((RsetProteinsForPeptideMatchPanel)panel).getSelectedProteinMatch();
         }
         return super.getData(arrayParameterType, parameterType);
     }

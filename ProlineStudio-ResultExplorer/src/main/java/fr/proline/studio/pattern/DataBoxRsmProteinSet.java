@@ -29,14 +29,16 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
         
         // Register Possible in parameters
         // One ResultSummary
-        registerInParameterType(null, ResultSummary.class);
-        
+        DataParameter inParameter = new DataParameter();
+        inParameter.addParameter(ResultSummary.class, false);
+        registerInParameter(inParameter);
+   
         // Register possible out parameters
-        // One ProteinSet
-        registerOutParameterType(null, ProteinSet.class);
-        
-        // Multiple ProteinSet as a List
-        registerOutParameterType(List.class, ProteinSet.class);
+        // One or Multiple ProteinSet
+        DataParameter outParameter = new DataParameter();
+        outParameter.addParameter(ProteinSet.class, true);
+        registerOutParameter(outParameter);
+
        
     }
     
@@ -50,7 +52,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     }
     
     @Override
-    public void dataChanged(AbstractDataBox srcDataBox) {
+    public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
         
         final ResultSummary _rsm = (rsm!=null) ? rsm : (ResultSummary) srcDataBox.getData(null, ResultSummary.class);
 
@@ -103,6 +105,6 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         rsm = (ResultSummary) data;
-        dataChanged(null);
+        dataChanged(null, ResultSummary.class);
     }
 }

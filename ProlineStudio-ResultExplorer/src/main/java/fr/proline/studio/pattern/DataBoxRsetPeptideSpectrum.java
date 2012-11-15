@@ -1,11 +1,12 @@
 package fr.proline.studio.pattern;
 
 
-import fr.proline.core.orm.msi.PeptideMatch;
-import fr.proline.core.orm.msi.PeptideSet;
-import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.core.orm.msi.*;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseLoadSpectrumsTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsetPeptideSpectrumPanel;
-import fr.proline.studio.rsmexplorer.gui.RsmProteinAndPeptideSequencePanel;
 
 /**
  *
@@ -19,7 +20,13 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         name = "Spectrum";
         
         // Register in parameters
-        registerInParameterType(null, PeptideMatch.class);
+        DataParameter inParameter = new DataParameter();
+        inParameter.addParameter(PeptideMatch.class, false);
+        registerInParameter(inParameter);
+        
+        inParameter = new DataParameter();
+        inParameter.addParameter(PeptideInstance.class, false);
+        registerInParameter(inParameter);
 
         // Register possible out parameters
         // none
@@ -34,9 +41,44 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
     }
 
     @Override
-    public void dataChanged(AbstractDataBox srcDataBox) {
-        PeptideMatch peptideMatch = (PeptideMatch) srcDataBox.getData(null, PeptideMatch.class);
+    public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
+        final PeptideMatch peptideMatch = (PeptideMatch) srcDataBox.getData(null, PeptideMatch.class);
 
-        ((RsetPeptideSpectrumPanel) panel).setData(peptideMatch);
+        if (peptideMatch == null) {
+            ((RsetPeptideSpectrumPanel) panel).setData(null);
+            return;
+        }
+
+        boolean needToLoadData = ((peptideMatch.getTransientData() == null) ||
+                                 (! peptideMatch.getTransientData().getIsMsQuerySet()) ||
+                                 (! peptideMatch.getMsQuery().getTransientIsSpectrumSet()));
+        
+        if (needToLoadData) {
+         
+                    //final String searchedText = searchTextBeingDone; //JPM.TODO
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask) {
+
+
+                ((RsetPeptideSpectrumPanel) panel).setData(peptideMatch);
+            }
+        };
+
+        // Load data if needed asynchronously
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadSpectrumsTask(callback, peptideMatch));
+
+                 
+                 
+            
+        } else {
+            ((RsetPeptideSpectrumPanel) panel).setData(peptideMatch);
+        }
     }
 }

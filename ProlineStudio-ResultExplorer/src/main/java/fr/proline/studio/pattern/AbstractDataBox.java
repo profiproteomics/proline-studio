@@ -4,7 +4,7 @@
  */
 package fr.proline.studio.pattern;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -24,8 +24,8 @@ public abstract class AbstractDataBox {
     protected DataBoxPanelInterface panel;
     
     // In and out Parameters Registration
-    private HashMap<Class, HashSet<Class>> inParametersMap = new HashMap<Class, HashSet<Class>>();
-    private HashMap<Class, HashSet<Class>> outParametersMap = new HashMap<Class, HashSet<Class>>();
+    private HashSet<DataParameter> inParameters = new HashSet<DataParameter>();
+    private ArrayList<DataParameter> outParameters = new ArrayList<DataParameter>();
     
     protected String name;
     
@@ -34,43 +34,35 @@ public abstract class AbstractDataBox {
     protected AbstractDataBox nextDataBox = null;
     protected AbstractDataBox previousDataBox = null;
     
-    protected void registerInParameterType(Class arrayParameterType, Class parameterType) {
-        registerParameter(inParametersMap, arrayParameterType, parameterType);
+    protected void registerInParameter(DataParameter parameter) {
+        inParameters.add(parameter);
     }
     
-    protected void registerOutParameterType(Class arrayParameterType, Class parameterType) {
-        registerParameter(outParametersMap, arrayParameterType, parameterType);
+    protected void registerOutParameter(DataParameter parameter)  {
+        outParameters.add(parameter);
     }
     
-    private void registerParameter(HashMap<Class, HashSet<Class>> map, Class arrayParameterType, Class parameterType) {
-        HashSet<Class> subMap = map.get(parameterType);
-        if (subMap == null) {
-            subMap = new HashSet<Class>();
-            map.put(parameterType, subMap);
+    public boolean isDataDependant(Class dataType) {
+        Iterator<DataParameter> it = inParameters.iterator();
+        while (it.hasNext()) {
+            DataParameter parameter = it.next();
+            if (parameter.isDataDependant(dataType)) {
+                return true;
+            }
         }
-        subMap.add(arrayParameterType);
+        return false;
     }
-    
-    private boolean hasParameter(HashMap<Class, HashSet<Class>> map, Class arrayParameterType, Class parameterType) {
-        HashSet<Class> subMap = map.get(parameterType);
-        if (subMap == null) {
-            return false;
-        }
-        return subMap.contains(arrayParameterType);
-    }
-    
+  
     
     public boolean isCompatible(AbstractDataBox nextDataBox) {
-        Iterator<Class> it = nextDataBox.inParametersMap.keySet().iterator();
+        
+        Iterator<DataParameter> it = nextDataBox.inParameters.iterator();
+        
         while (it.hasNext()) {
-            Class parameterType = it.next();
-            HashSet<Class> arrayParameterTypeSet = nextDataBox.inParametersMap.get(parameterType);
-            Iterator<Class> itArray = arrayParameterTypeSet.iterator();
-            while (itArray.hasNext()) {
-                Class arrayParameterType = itArray.next();
-                if (hasParameter(outParametersMap, arrayParameterType, parameterType)) {
-                    return true;
-                }
+            DataParameter parameter = it.next();
+            
+            if (parameter.isCompatibleWithOutParameter(outParameters)) {
+                return true;
             }
         }
         if (previousDataBox != null) {
@@ -86,7 +78,7 @@ public abstract class AbstractDataBox {
     
     public abstract void createPanel();
     
-    public abstract void dataChanged(AbstractDataBox srcDataBox);
+    public abstract void dataChanged(AbstractDataBox srcDataBox, Class dataType);
     
     public Object getData(Class arrayParameterType, Class parameterType) {
         if (previousDataBox != null) {
@@ -99,10 +91,17 @@ public abstract class AbstractDataBox {
         throw new UnsupportedOperationException();
     }
     
-    public void propagateDataChanged() {
+    public void propagateDataChanged(Class dataType) {
+        propagateDataChanged(this, dataType);
+    }
+    public void propagateDataChanged(AbstractDataBox srcDataBox, Class dataType) {
         if (nextDataBox != null) {
-            nextDataBox.dataChanged(this);
+            if (nextDataBox.isDataDependant(dataType)) {
+                nextDataBox.dataChanged(srcDataBox, dataType);
+            }
+            nextDataBox.propagateDataChanged(srcDataBox, dataType);
         }
+        
     }
     
     public DataBoxPanelInterface getPanel() {

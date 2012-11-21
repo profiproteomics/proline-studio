@@ -59,7 +59,7 @@ public class DatabaseLoadResultSetTask extends AbstractDatabaseTask {
                 // Check if the ResultSet has ResultSummary Children.
                 TypedQuery<Long> hasChildrenQuery = entityManagerMSI.createQuery("SELECT count(rset.id) FROM ResultSummary rsm, ResultSet rset WHERE rset.id=:resultSetId AND rsm.resultSet.id=rset.id", Long.class);
                 hasChildrenQuery.setParameter("resultSetId", rset.getId());
-                boolean hasChildren = (hasChildrenQuery.getSingleResult() == 1);
+                boolean hasChildren = (hasChildrenQuery.getSingleResult() >= 1);
 
                 list.add(new ResultSetData(rset, hasChildren));
             }

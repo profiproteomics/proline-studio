@@ -11,7 +11,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchFromRsetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsetPeptideMatchPanel;
-import java.util.List;
 
 /**
  *

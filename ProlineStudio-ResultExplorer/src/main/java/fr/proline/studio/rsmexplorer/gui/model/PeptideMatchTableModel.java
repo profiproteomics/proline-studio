@@ -107,7 +107,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
                 LazyData lazyData = getLazyData(row,col);
                 
                 PeptideMatch.TransientData data = peptideMatch.getTransientData();
-                if ((data == null) || (!data.getIsMsQuerySet())) {
+                if (!data.getIsMsQuerySet()) {
                     givePriorityTo(taskId, row, col);
                     lazyData.setData(null);
                     

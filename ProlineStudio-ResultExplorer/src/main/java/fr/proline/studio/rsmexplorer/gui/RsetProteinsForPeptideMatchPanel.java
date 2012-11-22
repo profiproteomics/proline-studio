@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.PeptideMatch;
@@ -17,7 +13,7 @@ import javax.swing.event.ListSelectionEvent;
  *
  * @author JM235353
  */
-public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel  implements DataBoxPanelInterface {
+public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
     
@@ -52,7 +48,7 @@ public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel  implem
             
             
             // Retrieve ProteinSet selected
-            ProteinTableModel tableModel = (ProteinTableModel) table.getModel();
+            ProteinsOfPeptideMatchTableModel tableModel = (ProteinsOfPeptideMatchTableModel) table.getModel();
             
             return tableModel.getProteinMatch(selectedRow);
     }

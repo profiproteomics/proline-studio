@@ -76,14 +76,14 @@ public class RsmPeptidesOfProteinPanel extends javax.swing.JPanel implements Dat
         
     }
     
-    public void setData(ProteinMatch proteinMatch) {
+    public void setData(ProteinMatch proteinMatch, ResultSummary rsm) {
 
         currentProteinMatch = proteinMatch;
         
-        if (proteinMatch == null) {
+        if ((proteinMatch == null) || (rsm == null)) {
             ((PeptideTableModel) peptidesTable.getModel()).setData(null);
         } else {
-            PeptideSet peptideSet = proteinMatch.getTransientPeptideSet();
+            PeptideSet peptideSet = proteinMatch.getTransientData().getPeptideSet(rsm.getId());
             PeptideInstance[] peptideInstances = peptideSet.getTransientPeptideInstances();
 
             ((PeptideTableModel) peptidesTable.getModel()).setData(peptideInstances);

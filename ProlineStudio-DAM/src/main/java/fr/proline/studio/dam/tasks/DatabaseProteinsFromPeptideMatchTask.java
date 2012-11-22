@@ -31,7 +31,7 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
 
     @Override
     public boolean needToFetch() {
-        return (peptideMatch.getTransientData() == null) || (peptideMatch.getTransientData().getProteinMatches() == null);
+        return (peptideMatch.getTransientData().getProteinMatches() == null);
             
     }
     
@@ -79,7 +79,8 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
                     Object[] resCur = itMass.next();
                     Integer bioSequenceId = (Integer) resCur[0];
                     BioSequence bioSequence = (BioSequence) resCur[1];
-                    biosequenceToProteinMap.get(bioSequenceId).setTransientBioSequence(bioSequence);
+                    ProteinMatch pm = biosequenceToProteinMap.get(bioSequenceId);
+                    pm.getTransientData().setBioSequence(bioSequence);
                 }
        
             }

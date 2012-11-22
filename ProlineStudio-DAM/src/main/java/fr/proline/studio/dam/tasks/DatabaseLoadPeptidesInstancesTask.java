@@ -31,7 +31,11 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
     @Override
     public boolean needToFetch() {
-        return (proteinMatch.getTransientPeptideSet() == null);
+        PeptideSet peptideSet = proteinMatch.getTransientData().getPeptideSet(rsm.getId());
+        if (peptideSet == null) {
+            return true;
+        }
+        return ( peptideSet.getTransientPeptideInstances() == null);
     }
 
     @Override
@@ -46,12 +50,15 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
 
             // Retrieve peptideSet of a proteinMatch
-            TypedQuery<PeptideSet> peptideSetQuery = entityManagerMSI.createQuery("SELECT ps FROM PeptideSet ps, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId=:proteinMatchId AND ps_to_pm.id.peptideSetId=ps.id AND ps_to_pm.resultSummary.id=:rsmId", PeptideSet.class);
-            peptideSetQuery.setParameter("proteinMatchId", proteinMatch.getId());
-            peptideSetQuery.setParameter("rsmId", rsm.getId());
-            PeptideSet peptideSet = peptideSetQuery.getSingleResult();
-            proteinMatch.setTransientPeptideSet(peptideSet);
-
+            PeptideSet peptideSet = proteinMatch.getTransientData().getPeptideSet(rsm.getId());
+            if (peptideSet == null) {
+                TypedQuery<PeptideSet> peptideSetQuery = entityManagerMSI.createQuery("SELECT ps FROM PeptideSet ps, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId=:proteinMatchId AND ps_to_pm.id.peptideSetId=ps.id AND ps_to_pm.resultSummary.id=:rsmId", PeptideSet.class);
+                peptideSetQuery.setParameter("proteinMatchId", proteinMatch.getId());
+                peptideSetQuery.setParameter("rsmId", rsm.getId());
+                peptideSet = peptideSetQuery.getSingleResult();
+                proteinMatch.getTransientData().setPeptideSet(rsm.getId(), peptideSet);
+            }
+            
             // Retrieve the list of PeptideInstance, PeptideMatch, Peptide, MSQuery, Spectrum of a PeptideSet
             // MSQuery and Spectrum are loaded to force lazy fetch.
             Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm, p, sm, ms, sp  FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem ps_to_pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.SequenceMatch as sm, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ORDER BY pm.score DESC");
@@ -74,14 +81,12 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
                 pi.setTransientBestPeptideMatch(pm);
                 
-                Peptide.TransientData data = new Peptide.TransientData();
-                p.setTransientData(data);
-                data.setSequenceMatch(sm);
-                
-                PeptideMatch.TransientData pmData = new PeptideMatch.TransientData();
+
+                p.getTransientData().setSequenceMatch(sm);
+
+                PeptideMatch.TransientData pmData = pm.getTransientData();
                 pmData.setPeptide(p);
                 pmData.setIsMsQuerySet(true);
-                pm.setTransientData(pmData);
 
                 peptideInstanceList.add(pi);
             }
@@ -112,10 +117,6 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
                 Peptide p = (Peptide) resCur[1];
                 ProteinMatch pm = (ProteinMatch) resCur[2];
                 ProteinSet.TransientData data = ps.getTransientData();
-                if (data == null) {
-                    data = new ProteinSet.TransientData();
-                    ps.setTransientData(data);
-                }
                 if (data.getTypicalProteinMatch() == null) {
                     data.setTypicalProteinMatch(pm);
                 }

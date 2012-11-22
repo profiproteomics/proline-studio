@@ -1,5 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
+import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
@@ -89,8 +90,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             for (int i = 0; i < proteinSetArray.length; i++) {
                 ProteinSet proteinSetCur = proteinSetArray[i];
                 proteinSetMap.put(proteinSetCur.getId(), proteinSetCur);
-                ProteinSet.TransientData proteinSetData = new ProteinSet.TransientData();
-                proteinSetCur.setTransientData(proteinSetData);
             }
 
 
@@ -122,7 +121,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             // execute the first slice now
             typicalProteinMatch(entityManagerMSI, subTask);
 
+            
 
+            
+            
+            
             /*
              * timeStop = System.currentTimeMillis(); delta = ((double)
              * (timeStop-timeStart))/1000; System.out.println("Load Typical
@@ -185,8 +188,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             // execute the first slice now
             sameSetAndSubSetCount(entityManagerMSI, proteinSetIds, subTask);
-
-
 
 
             /*
@@ -265,22 +266,30 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         ProteinSet[] proteinSetArray = rsm.getTransientProteinSets();
         List sliceOfProteinMatchIds = subTask.getSubList(proteinMatchIds);
 
-        TypedQuery<ProteinMatch> typicalProteinQuery = entityManagerMSI.createQuery("SELECT pm FROM ProteinMatch pm WHERE pm.id IN (:listId)", ProteinMatch.class);
+        Query typicalProteinQuery = entityManagerMSI.createQuery("SELECT pm, pepset FROM ProteinMatch pm, PeptideSet pepset, PeptideSetProteinMatchMap pset_to_pm  WHERE pm.id IN (:listId) AND pset_to_pm.id.proteinMatchId=pm.id AND pset_to_pm.id.peptideSetId=pepset.id AND pset_to_pm.resultSummary.id=:rsmId");
         typicalProteinQuery.setParameter("listId", sliceOfProteinMatchIds);
+        typicalProteinQuery.setParameter("rsmId", rsm.getId());
 
-        List<ProteinMatch> typicalProteinMatches = typicalProteinQuery.getResultList();
+        List<Object[]> typicalProteinMatches = typicalProteinQuery.getResultList();
         HashMap<Integer, ProteinMatch> typicalProteinMap = new HashMap<Integer, ProteinMatch>();
-        Iterator<ProteinMatch> itTypical = typicalProteinMatches.iterator();
+        Iterator<Object[]> itTypical = typicalProteinMatches.iterator();
         while (itTypical.hasNext()) {
-            ProteinMatch pmCur = itTypical.next();
+            Object[] resCur = itTypical.next();
+            ProteinMatch pmCur = (ProteinMatch) resCur[0];
+            PeptideSet peptideSet = (PeptideSet) resCur[1];
+            pmCur.getTransientData().setPeptideSet(rsm.getId(), peptideSet);
             typicalProteinMap.put(pmCur.getId(), pmCur);
-            pmCur.getPeptideCount();  // force fetch of lazy data
         }
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
             ProteinSet proteinSetCur = proteinSetArray[i];
             proteinSetCur.getTransientData().setTypicalProteinMatch(typicalProteinMap.get(proteinSetCur.getProteinMatchId()));
         }
     }
+    
+    
+
+    
+    
 
     /**
      * Retrieve spectral count for a Sub Task

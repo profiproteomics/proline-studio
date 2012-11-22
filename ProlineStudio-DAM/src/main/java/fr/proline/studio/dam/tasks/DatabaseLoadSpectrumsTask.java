@@ -25,8 +25,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
 
     @Override
     public boolean needToFetch() {
-        return ((peptideMatch.getTransientData() == null) ||
-                (! peptideMatch.getTransientData().getIsMsQuerySet()) ||
+        return ((! peptideMatch.getTransientData().getIsMsQuerySet()) ||
                 (! peptideMatch.getMsQuery().getTransientIsSpectrumSet()));
     }
 
@@ -40,8 +39,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().begin();
 
             // Load MsQuery if needed
-            if ((peptideMatch.getTransientData() == null) ||
-                (! peptideMatch.getTransientData().getIsMsQuerySet())) {
+            if (! peptideMatch.getTransientData().getIsMsQuerySet()) {
 
                TypedQuery<MsQuery> msQueryQuery = entityManagerMSI.createQuery("SELECT ms FROM fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.MsQuery ms WHERE pm.msQuery=ms AND pm.id=:peptideMatchId", MsQuery.class);
            
@@ -49,9 +47,6 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
 
                 MsQuery msq = msQueryQuery.getSingleResult();
                 peptideMatch.setMsQuery(msq);
-                if (peptideMatch.getTransientData() == null) {
-                    peptideMatch.setTransientData(new PeptideMatch.TransientData());
-                }
                 peptideMatch.getTransientData().setIsMsQuerySet(true);
                 
             }

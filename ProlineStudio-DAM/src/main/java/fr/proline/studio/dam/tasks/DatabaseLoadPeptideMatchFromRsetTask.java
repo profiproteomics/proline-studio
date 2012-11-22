@@ -5,7 +5,6 @@
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.*;
-import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.repository.ProlineRepository;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.repositorymgr.ProlineDBManagement;
@@ -33,9 +32,9 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
     
     private ResultSet rset = null;
     // data kept for sub tasks
-    ArrayList<Integer> peptideMatchIds = null;
-    /*HashMap<Integer, ProteinSet> proteinSetMap = null;
-    ArrayList<Integer> proteinSetIds = null;*/
+    private ArrayList<Integer> peptideMatchIds = null;
+    private HashMap<Integer, PeptideMatch> peptideMatchMap = null;
+    
 
     public DatabaseLoadPeptideMatchFromRsetTask(AbstractDatabaseCallback callback, ResultSet rset) {
         super(callback, SUB_TASK_COUNT);
@@ -67,23 +66,25 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
 
             Integer rsetId = rset.getId();
 
-            // Load Peptide Match
-            // SELECT pm FROM PeptideMatch pm WHERE pm.resultSet.id=:rsetId ORDER BY pm.score DESC
-            TypedQuery<PeptideMatch> peptideMatchQuery = entityManagerMSI.createQuery("SELECT pm FROM PeptideMatch pm WHERE pm.resultSet.id=:rsetId ORDER BY pm.score DESC", PeptideMatch.class);
+            // Load Peptide Match order by query id and Peptide name
+            // SELECT pm FROM PeptideMatch pm, Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id ORDER BY pm.msQuery.id ASC, p.sequence ASC
+            TypedQuery<PeptideMatch> peptideMatchQuery = entityManagerMSI.createQuery("SELECT pm FROM PeptideMatch pm, Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id ORDER BY pm.msQuery.id ASC, p.sequence ASC", PeptideMatch.class);
             peptideMatchQuery.setParameter("rsetId", rsetId);
             List<PeptideMatch> peptideMatches = peptideMatchQuery.getResultList();
 
             PeptideMatch[] peptideMatchArray = peptideMatches.toArray(new PeptideMatch[peptideMatches.size()]);
             rset.setTransientPeptideMatches(peptideMatchArray);
-            
-            
-            // Retrieve Protein Match Ids
-            peptideMatchIds = new ArrayList<Integer>(peptideMatchArray.length);
 
+            
+            // Retrieve Peptide Match Ids and create map of PeptideMatch in the same time
             int nb = peptideMatchArray.length;
+            peptideMatchIds = new ArrayList<Integer>(nb);
+            peptideMatchMap = new HashMap<Integer, PeptideMatch>();
             for (int i = 0; i < nb; i++) {
-                peptideMatchArray[i].setTransientData(new PeptideMatch.TransientData());
-                peptideMatchIds.add(i, peptideMatchArray[i].getId());
+                PeptideMatch pm = peptideMatchArray[i];
+                Integer id = pm.getId();
+                peptideMatchIds.add(i, id);
+                peptideMatchMap.put(id, pm);
             }
             
             
@@ -120,6 +121,9 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
             entityManagerMSI.close();
         }
 
+        // set priority as low for the possible sub tasks
+        defaultPriority = Priority.LOW;
+        currentPriority = Priority.LOW;
 
         return true;
     }
@@ -174,19 +178,19 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
         PeptideMatch[] peptideMatchArray = rset.getTransientPeptideMatches();
         List sliceOfPeptideMatchIds = subTask.getSubList(peptideMatchIds);
 
-        TypedQuery<Peptide> peptideQuery = entityManagerMSI.createQuery("SELECT p FROM PeptideMatch pm,fr.proline.core.orm.msi.Peptide p WHERE pm.id IN (:listId) AND pm.peptideId=p.id", Peptide.class);
+        Query peptideQuery = entityManagerMSI.createQuery("SELECT pm.id, p FROM PeptideMatch pm,fr.proline.core.orm.msi.Peptide p WHERE pm.id IN (:listId) AND pm.peptideId=p.id");
         peptideQuery.setParameter("listId", sliceOfPeptideMatchIds);
 
-
+ 
+        
         int i = subTask.getStartIndex();
-        List<Peptide> peptides = peptideQuery.getResultList();
-        Iterator<Peptide> it = peptides.iterator();
+        List<Object[]> peptides = peptideQuery.getResultList();
+        Iterator<Object[]> it = peptides.iterator();
         while (it.hasNext()) {
-            Peptide peptide = it.next();
-            peptideMatchArray[i++].getTransientData().setPeptide(peptide);
-            
-            peptide.setTransientData(new Peptide.TransientData());
-
+            Object[] res = it.next();
+            Integer peptideMatchId = (Integer) res[0];
+            Peptide peptide = (Peptide) res[1];
+            peptideMatchMap.get(peptideMatchId).getTransientData().setPeptide(peptide);
         }
         
         /*
@@ -248,18 +252,22 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
      */
     private void fetchMsQuery(EntityManager entityManagerMSI, SubTask subTask) {
 
-        PeptideMatch[] peptideMatchArray = rset.getTransientPeptideMatches();
+
         List sliceOfPeptideMatchIds = subTask.getSubList(peptideMatchIds);
 
-        TypedQuery<MsQuery> msQueryQuery = entityManagerMSI.createQuery("SELECT msq FROM PeptideMatch pm,MsQuery msq WHERE pm.id IN (:listId) AND pm.msQuery=msq", MsQuery.class);
+        Query msQueryQuery = entityManagerMSI.createQuery("SELECT pm.id, msq FROM PeptideMatch pm,MsQuery msq WHERE pm.id IN (:listId) AND pm.msQuery=msq");
         msQueryQuery.setParameter("listId", sliceOfPeptideMatchIds);
 
         int i = subTask.getStartIndex();
-        List<MsQuery> msQueries = msQueryQuery.getResultList();
-        Iterator<MsQuery> it = msQueries.iterator();
+        List<Object[]> msQueries = msQueryQuery.getResultList();
+        Iterator<Object[]> it = msQueries.iterator();
         while (it.hasNext()) {
-            peptideMatchArray[i].getTransientData().setIsMsQuerySet(true);
-            peptideMatchArray[i++].setMsQuery(it.next());
+            Object[] resCur = it.next();
+            Integer peptideMatchId = (Integer) resCur[0];
+            MsQuery q = (MsQuery) resCur[1];
+            PeptideMatch peptideMatch = peptideMatchMap.get(peptideMatchId);
+            peptideMatch.getTransientData().setIsMsQuerySet(true);
+            peptideMatch.setMsQuery(q);
         }
     }
 

@@ -12,7 +12,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
-import java.util.List;
 
 /**
  *
@@ -37,6 +36,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
         // One or Multiple ProteinSet
         DataParameter outParameter = new DataParameter();
         outParameter.addParameter(ProteinSet.class, true);
+        outParameter.addParameter(ResultSummary.class, true);
         registerOutParameter(outParameter);
 
        

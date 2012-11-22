@@ -49,8 +49,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             return;
         }
 
-        boolean needToLoadData = ((peptideMatch.getTransientData() == null) ||
-                                 (! peptideMatch.getTransientData().getIsMsQuerySet()) ||
+        boolean needToLoadData = ((! peptideMatch.getTransientData().getIsMsQuerySet()) ||
                                  (! peptideMatch.getMsQuery().getTransientIsSpectrumSet()));
         
         if (needToLoadData) {

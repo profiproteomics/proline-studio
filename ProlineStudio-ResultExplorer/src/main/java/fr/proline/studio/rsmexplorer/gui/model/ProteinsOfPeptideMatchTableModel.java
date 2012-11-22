@@ -55,7 +55,7 @@ public class ProteinsOfPeptideMatchTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int col) {
-        // Retrieve Protein Group
+
         ProteinMatch proteinMatch = getProteinMatch(row);
 
         switch (col) {
@@ -66,7 +66,7 @@ public class ProteinsOfPeptideMatchTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return DataFormat.format(proteinMatch.getPeptideCount());
             case COLTYPE_PROTEIN_MASS:
-                BioSequence bioSequence = proteinMatch.getTransientBioSequence();
+                BioSequence bioSequence = proteinMatch.getTransientData().getBioSequence();
                 if (bioSequence == null) {
                     return "";
                 }

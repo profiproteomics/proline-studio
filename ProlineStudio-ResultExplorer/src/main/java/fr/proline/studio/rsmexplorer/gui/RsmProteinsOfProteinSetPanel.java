@@ -90,7 +90,7 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
         
         
         // Modify the Model
-        ((ProteinTableModel) proteinTable.getModel()).setData(sameSetArray, subSetArray);
+        ((ProteinTableModel) proteinTable.getModel()).setData(proteinSet.getResultSummary().getId(), sameSetArray, subSetArray);
         
         // Select the Row
         int row = ((ProteinTableModel) proteinTable.getModel()).findRowToSelect(searchedText);
@@ -101,7 +101,7 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
     private void clearData() {
         proteinNameTextField.setText("");
         //((ProteinGroupProteinSelectedPanel) ViewTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(null); //JPM.TODO
-        ((ProteinTableModel) proteinTable.getModel()).setData(null, null);
+        ((ProteinTableModel) proteinTable.getModel()).setData(null, null, null);
 
     }
     

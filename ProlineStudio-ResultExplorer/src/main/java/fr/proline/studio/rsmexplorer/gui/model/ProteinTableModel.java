@@ -6,7 +6,6 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.BioSequence;
 import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.utils.DataFormat;
 import javax.swing.table.AbstractTableModel;
 
@@ -24,6 +23,7 @@ public class ProteinTableModel extends AbstractTableModel {
     private static final String[] columnNames = {"Protein", "Same Set", "Score", "Peptides", "Mass"};
     private ProteinMatch[] sameSetMatches = null;
     private ProteinMatch[] subSetMatches = null;
+    private Integer rsmId = null;
 
     public ProteinMatch getProteinMatch(int row) {
 
@@ -83,9 +83,9 @@ public class ProteinTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_SCORE:
                 return DataFormat.format(proteinMatch.getScore(),2);
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
-                return DataFormat.format(proteinMatch.getPeptideCount());
+                return DataFormat.format(proteinMatch.getTransientData().getPeptideSet(rsmId).getPeptideCount());
             case COLTYPE_PROTEIN_MASS:
-                BioSequence bioSequence = proteinMatch.getTransientBioSequence();
+                BioSequence bioSequence = proteinMatch.getTransientData().getBioSequence();
                 if (bioSequence == null) {
                     return "";
                 }
@@ -93,8 +93,10 @@ public class ProteinTableModel extends AbstractTableModel {
         }
         return null; // should never happen
     }
+    
 
-    public void setData(ProteinMatch[] sameSetMatches, ProteinMatch[] subSetMatches) {
+    public void setData(Integer rsmId, ProteinMatch[] sameSetMatches, ProteinMatch[] subSetMatches) {
+        this.rsmId = rsmId;
         this.sameSetMatches = sameSetMatches;
         this.subSetMatches = subSetMatches;
         fireTableDataChanged();

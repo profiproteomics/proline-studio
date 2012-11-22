@@ -105,14 +105,14 @@ public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implem
 
     public void setData(ProteinMatch pm, PeptideInstance selectedPeptide, PeptideInstance[] peptideInstances) {
         
-        if ((pm == null) || (pm.getTransientBioSequence() == null)) {
+        if ((pm == null) || (pm.getTransientData().getBioSequence() == null)) {
             editorPane.setText("");
             
             //dataBox.propagateDataChanged(); //JPM.TODO ???
             return;
         }
         
-        String sequence = pm.getTransientBioSequence().getSequence();
+        String sequence = pm.getTransientData().getBioSequence().getSequence();
         
         int sequenceLength = sequence.length();
         

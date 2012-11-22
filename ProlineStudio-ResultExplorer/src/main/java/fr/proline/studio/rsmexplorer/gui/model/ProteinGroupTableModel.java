@@ -4,6 +4,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.model;
 
+import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
@@ -90,6 +91,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
     public Object getValueAt(int row, int col) {
         // Retrieve Protein Group
         ProteinSet proteinSet = proteinSets[row];
+        Integer rsmId = proteinSet.getResultSummary().getId();
 
         switch (col) {
             case COLTYPE_PROTEIN_GROUPS_NAME: {
@@ -144,13 +146,13 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 
                 // Retrieve typical Protein Match
                 ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
-
+                
                 if (proteinMatch == null) {
                     lazyData.setData(null);
                     
                     givePriorityTo(taskId, row, col);
                 } else {
-                    lazyData.setData( DataFormat.format(proteinMatch.getPeptideCount()));
+                    lazyData.setData( DataFormat.format(proteinMatch.getTransientData().getPeptideSet(rsmId).getPeptideCount() ));
                 }
                 return lazyData;
    

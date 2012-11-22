@@ -1,15 +1,19 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetCmpTableModel;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import fr.proline.studio.utils.CyclicColorPalette;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 import org.jdesktop.swingx.util.PaintUtils;
 
 /**
@@ -20,6 +24,8 @@ public class ProteinSetComparePanel extends JPanel {
 
     private ProteinSetCmpTable table;
 
+    private ProteinMatch previouslyProteinSelected = null;
+    
     public ProteinSetComparePanel() {
         setLayout(new GridLayout());
 
@@ -28,12 +34,16 @@ public class ProteinSetComparePanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.getViewport().setBackground(Color.white);
 
+ 
+     
 
         add(scrollPane);
 
     }
 
     public void setData(ProteinMatch proteinMatch) {
+        
+        previouslyProteinSelected = null;
         
         ProteinSetCmpTableModel tableModel = ((ProteinSetCmpTableModel) table.getModel());
         tableModel.setData(proteinMatch);
@@ -74,6 +84,17 @@ public class ProteinSetComparePanel extends JPanel {
 
             setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
+            // JPM.HACK : due to combined selection of cells in different rows/cols,
+            // we need to force a repaint after a selection
+            // (use of ListListener does not work, because it is not triggered
+            // when the user select a different cell in the same row)
+            addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    table.repaint();
+                }
+            });
             
         }
     }
@@ -93,19 +114,43 @@ public class ProteinSetComparePanel extends JPanel {
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+  
             ProteinMatch proteinMatch = (ProteinMatch) value;
 
             if (proteinMatch == null) {
                 return blankPanel;
             }
 
-            int status = ((ProteinSetCmpTableModel) table.getModel()).getStatus(proteinMatch);
+            ProteinSetCmpTableModel model = ((ProteinSetCmpTableModel) table.getModel());
+            
+            int status = model.getStatus(proteinMatch);
             
             int highlightColor = ProteinMatchPanel.HIGHLIGHT_NO;
             if (status == ProteinSetCmpTableModel.STATUS_NOT_ALWAYS_PRESENT ) {
                 highlightColor = ProteinMatchPanel.HIGHLIGHT_RED;
             } else if (status == ProteinSetCmpTableModel.STATUS_SAME_OR_SUB_SET ) {
                 highlightColor = ProteinMatchPanel.HIGHLIGHT_YELLOW;
+            }
+            
+            if (!isSelected) {
+                int selectedCol = table.getSelectedColumn();
+                if (selectedCol >0) { // first column is for SameSet / SubSet
+                    selectedCol = table.convertColumnIndexToModel(selectedCol);
+                    
+                    int selectedRow = table.getSelectedRow();
+                    if (selectedRow!=-1) {
+                        selectedRow = table.convertRowIndexToModel(selectedRow);
+                        
+                        ProteinMatch selectedProteinMatch = (ProteinMatch) model.getValueAt(selectedRow, selectedCol);
+                        if (selectedProteinMatch != null) { // could really happen == null
+                            if (proteinMatch.getAccession().compareTo(selectedProteinMatch.getAccession() ) == 0) {
+                                isSelected = true;
+                            }
+                        }
+                    }
+                    
+                }
+                
             }
             
             rendererPanel.setSelected(isSelected);
@@ -255,7 +300,6 @@ public class ProteinSetComparePanel extends JPanel {
         private ProteinNameLabel proteinLabel;
         private ScoreLabel scoreLabel;
         private boolean selected = false;
-        //private boolean firstOfSubSet = false;
 
         public ProteinMatchPanel() {
             setBackground(Color.white);
@@ -318,37 +362,15 @@ public class ProteinSetComparePanel extends JPanel {
 
         }
 
-        /*@Override
-        public void paint(Graphics g) {
-            super.paint(g);
-
-            Graphics2D g2 = (Graphics2D) g;
-
-            if (firstOfSubSet) {
-
-                g2.setColor(Color.lightGray);
-               
-                float dash1[] = {10.0f}; BasicStroke dashed = new
-                BasicStroke(1.0f, BasicStroke.CAP_BUTT,
-                 BasicStroke.JOIN_MITER, 10.0f, dash1, 0.0f);
-                g2.setStroke(dashed);
-                 
-                g2.drawLine(0, 0, getWidth() - 1, 0);
-
-
-            }
-
-        }*/
 
         public void setSelected(boolean selected) {
             this.selected = selected;
         }
 
-        public void setValues(String proteinName, double score, int highlight/*, boolean firstOfSubSet*/) {
+        public void setValues(String proteinName, double score, int highlight) {
             proteinLabel.setText(proteinName);
             proteinLabel.setHighlightState(highlight);
             scoreLabel.setScore(score);
-            //this.firstOfSubSet = firstOfSubSet;
         }
 
         public class ScoreLabel extends JLabel {
@@ -406,11 +428,11 @@ public class ProteinSetComparePanel extends JPanel {
                 if (highlightState == HIGHLIGHT_YELLOW) {
                     g.setColor(yellowHighlight);
 
-                    g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
+                    g.fillRect(0, 0, getWidth(), getHeight());
                 } else if (highlightState == HIGHLIGHT_RED) {
                     g.setColor(redHighlight);
 
-                    g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
+                    g.fillRect(0, 0, getWidth(), getHeight());
                 }
 
 
@@ -485,62 +507,8 @@ public class ProteinSetComparePanel extends JPanel {
                 c.gridwidth = 2;
                 add(Box.createGlue(), c);
 
-                /*if (sameSet) {
-                    // Same Set
-                    
-                    c.insets = new Insets(5, 0, 5, 0);
-                    
-                    c.weightx = 1;
-                    c.weighty = 1;
-                    c.gridwidth = 2;
-                    add(Box.createGlue(), c);
-
-                    c.gridwidth = 1;
-                    c.weighty = 0;
-                    c.gridy++;
-                    add(Box.createGlue(), c);
-
-                    c.gridx++;
-                    c.weightx = 0;
-                    JLabel sameSetLabel = new JLabel("Same Set");
-                    sameSetLabel.setBorder(new CompoundBorder(BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(2, 2, 2, 2)));
-                    add(sameSetLabel, c);
-
-                } else {
-                    // Sub Set
-                    
-                    c.insets = new Insets(5, 0, 5, 0);
-                    
-                    c.weightx = 1;
-                    add(Box.createGlue(), c);
-
-                    c.weightx = 0;
-                    c.gridx++;
-                    JLabel subSetLabel = new JLabel("Sub Set");
-                    subSetLabel.setBorder(new CompoundBorder(BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(2, 2, 2, 2)));
-                    add(subSetLabel, c);
-
-                    c.gridy++;
-                    c.gridx = 0;
-                    c.weightx = 1;
-                    c.weighty = 1;
-                    c.gridwidth = 2;
-                    add(Box.createGlue(), c);
-                }*/
-
-
             }
 
-            /*@Override
-            public void paint(Graphics g) {
-                super.paint(g);
-                if (!sameSet) {
-
-                    g.setColor(Color.lightGray);
-                    g.drawLine(0, 0, getWidth() - 1, 0);
-
-                }
-            }*/
         }
     }
 }

@@ -64,10 +64,8 @@ public class SplittedPanelContainer extends JPanel {
         mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
         add(mainPanel);
-        
-        
-       
-        iconifiedPanel = new IconifiedPanel(this);
+
+        iconifiedPanel = new IconifiedPanel();
         
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
@@ -493,14 +491,12 @@ public class SplittedPanelContainer extends JPanel {
         private JComponent embededPanel;
         private SplittedPanelContainer container;
         private int index;
-        private int previousHeight = 0;
-        
 
         // buttons
-        JButton maximizeButton;
-        JButton reduceButton;
-        JButton minimizeButton;
-        JPanel buttonPanel;
+        private JButton maximizeButton;
+        private JButton reduceButton;
+        private JButton minimizeButton;
+        private JPanel buttonPanel;
         
         
         public SplittedPanel(int index, JComponent embededPanel, SplittedPanelContainer container) {
@@ -578,8 +574,6 @@ public class SplittedPanelContainer extends JPanel {
                     maximizeButton.setVisible(true);
                     reduceButton.setVisible(false);
                     minimizeButton.setVisible(true);
-                    
-                    previousHeight = embededPanel.getHeight();
 
                     container.minimize(_p);
                 }
@@ -625,19 +619,20 @@ public class SplittedPanelContainer extends JPanel {
      */
     private class IconifiedPanel extends javax.swing.JPanel implements ActionListener {
         
-        SplittedPanelContainer splittedPanelContainer;
+        //private SplittedPanelContainer splittedPanelContainer;
         
-        ArrayList<JButton> buttons = new ArrayList<JButton>(4);
-        ArrayList<SplittedPanel> splittedPanels = new ArrayList<SplittedPanel>(4);
-        ArrayList<Integer> previousHeights = new ArrayList<Integer>(4);
+        private ArrayList<JButton> buttons = new ArrayList<JButton>(4);
+        private ArrayList<JSeparator> separators = new ArrayList<JSeparator>(4);
         
-        MouseAdapter mouseListenerForButtons;
+        private ArrayList<SplittedPanel> splittedPanels = new ArrayList<SplittedPanel>(4);
+        private ArrayList<Integer> previousHeights = new ArrayList<Integer>(4);
+        
+        private MouseAdapter mouseListenerForButtons;
         
         
         
-        public IconifiedPanel(SplittedPanelContainer splittedPanelContainer) {
-            
-            this.splittedPanelContainer = splittedPanelContainer;
+        public IconifiedPanel() {
+
             
             setLayout(new FlowLayout(FlowLayout.LEFT, 1, 1));
             
@@ -672,11 +667,22 @@ public class SplittedPanelContainer extends JPanel {
             button.setBorderPainted(false);
             button.setFocusPainted(false);
             button.setContentAreaFilled(false);
-            
             button.addMouseListener(mouseListenerForButtons);
 
-            add(button, i);
+            add(button, i*2);
             buttons.add(i, button);
+            
+            JSeparator separator = new JSeparator(SwingConstants.VERTICAL) {
+
+                @Override
+                public Dimension getPreferredSize() {
+                    return new Dimension(3,8);
+                }
+                
+            };
+            add(separator, i*2+1);
+            separators.add(i, separator);
+            
             splittedPanels.add(i, panel);
             previousHeights.add(i, height);
             
@@ -701,11 +707,15 @@ public class SplittedPanelContainer extends JPanel {
             
             // remove objects from arrays
             SplittedPanel splittedPanel = splittedPanels.remove(index);
+            
             JButton b = buttons.remove(index);
+            JSeparator separator = separators.remove(index);
+            
             Integer height = previousHeights.remove(index);
             
-            // remove b of the graphical
+            // remove the button and the separator of the graphical
             remove(b);
+            remove(separator);
             
             
             inflate(splittedPanel, height);

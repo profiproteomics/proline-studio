@@ -39,9 +39,9 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
 
     @Override
     public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
-        ProteinMatch proteinMatch = (ProteinMatch) srcDataBox.getData(null, ProteinMatch.class);
-        PeptideInstance selectedPeptide = (PeptideInstance) srcDataBox.getData(null, PeptideInstance.class);
-        ResultSummary resultSummary = (ResultSummary) srcDataBox.getData(null, ResultSummary.class);
+        ProteinMatch proteinMatch = (ProteinMatch) srcDataBox.getData(false, ProteinMatch.class);
+        PeptideInstance selectedPeptide = (PeptideInstance) srcDataBox.getData(false, PeptideInstance.class);
+        ResultSummary resultSummary = (ResultSummary) srcDataBox.getData(false, ResultSummary.class);
        
         
         if ((proteinMatch == null) || (selectedPeptide == null) || (resultSummary == null)) {

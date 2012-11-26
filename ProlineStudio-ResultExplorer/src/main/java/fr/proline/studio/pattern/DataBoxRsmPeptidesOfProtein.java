@@ -13,6 +13,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsmPeptidesOfProteinPanel;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -60,8 +62,8 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
 
     @Override
     public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
-        final ProteinMatch proteinMatch = (ProteinMatch) srcDataBox.getData(null, ProteinMatch.class);
-        final ResultSummary rsm = (ResultSummary) srcDataBox.getData(null, ResultSummary.class);
+        final ProteinMatch proteinMatch = (ProteinMatch) srcDataBox.getData(false, ProteinMatch.class);
+        final ResultSummary rsm = (ResultSummary) srcDataBox.getData(false, ResultSummary.class);
 
         if (proteinMatch == null) {
             ((RsmPeptidesOfProteinPanel) panel).setData(null, null);
@@ -88,13 +90,15 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         };
 
         // Load data if needed asynchronously
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, proteinMatch, rsm));
+        ArrayList<ResultSummary> rsmList = new ArrayList<ResultSummary>(1);
+        rsmList.add(rsm);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, proteinMatch, rsmList));
 
 
     }
     
     @Override
-    public Object getData(Class arrayParameterType, Class parameterType) {
+    public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null && (parameterType.equals(PeptideInstance.class))) {
             return ((RsmPeptidesOfProteinPanel)panel).getSelectedPeptide();
         } else if (parameterType!= null && (parameterType.equals(PeptideMatch.class))) {
@@ -103,7 +107,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
                 return pi.getTransientBestPeptideMatch();
             }
         }
-        return super.getData(arrayParameterType, parameterType);
+        return super.getData(getArray, parameterType);
     }
 
 }

@@ -52,7 +52,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     
     @Override
     public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
-        final ProteinSet proteinSet = (ProteinSet) srcDataBox.getData(null, ProteinSet.class);
+        final ProteinSet proteinSet = (ProteinSet) srcDataBox.getData(false, ProteinSet.class);
 
         //final String searchedText = searchTextBeingDone; //JPM.TODO
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -79,10 +79,10 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(Class arrayParameterType, Class parameterType) {
+    public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null && (parameterType.equals(ProteinMatch.class))) {
             return ((RsmProteinsOfProteinSetPanel)panel).getSelectedProteinMatch();
         }
-        return super.getData(arrayParameterType, parameterType);
+        return super.getData(getArray, parameterType);
     }
 }

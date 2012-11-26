@@ -54,7 +54,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     @Override
     public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
         
-        final ResultSummary _rsm = (rsm!=null) ? rsm : (ResultSummary) srcDataBox.getData(null, ResultSummary.class);
+        final ResultSummary _rsm = (rsm!=null) ? rsm : (ResultSummary) srcDataBox.getData(false, ResultSummary.class);
 
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -88,7 +88,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(Class arrayParameterType, Class parameterType) {
+    public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(ProteinSet.class)) {
                 return ((RsmProteinSetPanel)panel).getSelectedProteinSet();
@@ -99,7 +99,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(arrayParameterType, parameterType);
+        return super.getData(getArray, parameterType);
     }
  
     @Override

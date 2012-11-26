@@ -80,9 +80,9 @@ public abstract class AbstractDataBox {
     
     public abstract void dataChanged(AbstractDataBox srcDataBox, Class dataType);
     
-    public Object getData(Class arrayParameterType, Class parameterType) {
+    public Object getData(boolean getArray, Class parameterType) {
         if (previousDataBox != null) {
-            return previousDataBox.getData(arrayParameterType, parameterType);
+            return previousDataBox.getData(getArray, parameterType);
         }
         return null;
     }

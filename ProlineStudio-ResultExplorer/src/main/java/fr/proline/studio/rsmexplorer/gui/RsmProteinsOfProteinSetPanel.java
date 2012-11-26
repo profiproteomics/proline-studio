@@ -8,6 +8,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.utils.DecoratedTable;
+import java.awt.Color;
 import javax.swing.event.ListSelectionEvent;
 
 
@@ -120,6 +121,8 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
     private void initComponents() {
 
         proteinNameTextField = new javax.swing.JTextField();
+        proteinNameTextField.setEditable(false);
+        proteinNameTextField.setBackground(Color.white);
         scrollPane = new javax.swing.JScrollPane();
         proteinTable = new ProteinTable();
 

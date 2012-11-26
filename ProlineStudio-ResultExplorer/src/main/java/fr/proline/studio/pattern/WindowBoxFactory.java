@@ -17,15 +17,14 @@ public class WindowBoxFactory {
     public static WindowBox getPeptidesWindowBox() {
         
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[4];
+        AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxRsetPeptide();
         boxes[1] = new DataBoxRsetPeptideSpectrum();
         boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         boxes[2] = new DataBoxRsetProteinsForPeptideMatch();
         boxes[3] = new DataBoxProteinSetsCmp();
-        /*boxes[1] = new DataBoxRsmProteinsOfProteinSet();
-        boxes[2] = new DataBoxRsmPeptidesOfProtein();
-        boxes[3] = new DataBoxRsmProteinAndPeptideSequence();*/
+        boxes[4] = new DataBoxRsetPeptidesOfProteinsCmp();
+        boxes[4].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
         
         return new WindowBox( "Peptides", generatePanel(boxes), boxes[0] );
     }

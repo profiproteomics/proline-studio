@@ -14,7 +14,7 @@ import javax.swing.JPanel;
  */
 public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanelInterface {
     
-    private AbstractDataBox dataBox;
+    
     
     private ProteinSetComparePanel proteinSetComparePanel;
     
@@ -43,11 +43,18 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.dataBox = dataBox;
+        proteinSetComparePanel.setDataBox(dataBox);
     }
+   
     
     public void setData(ProteinMatch proteinMatch) {
         proteinSetComparePanel.setData(proteinMatch);
     }
+    
+    public ProteinSetComparePanel getComparePanel() {
+        return proteinSetComparePanel;
+    }
+    
+    
     
 }

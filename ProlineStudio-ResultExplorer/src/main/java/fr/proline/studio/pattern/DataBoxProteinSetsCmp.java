@@ -2,6 +2,7 @@ package fr.proline.studio.pattern;
 
 
 import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadProteinSetsFromProteinTask;
@@ -17,7 +18,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
     public DataBoxProteinSetsCmp() {
 
         // Name of this databox
-        name = "Protein Groups";
+        name = "Protein Sets";
 
         
         // Register Possible in parameters
@@ -29,9 +30,13 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
         // Register possible out parameters
         // One ProteinMatch
         DataParameter outParameter = new DataParameter();
-        outParameter.addParameter(ProteinMatch.class, false); //JPM.TODO
+        outParameter.addParameter(ProteinMatch.class, false);
         registerOutParameter(outParameter);
     
+        outParameter = new DataParameter();
+        outParameter.addParameter(ResultSummary.class, true);
+        registerOutParameter(outParameter);
+        
     }
     
     @Override
@@ -44,7 +49,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
 
     @Override
     public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
-        final ProteinMatch proteinMatch = (ProteinMatch) srcDataBox.getData(null, ProteinMatch.class);
+        final ProteinMatch proteinMatch = (ProteinMatch) srcDataBox.getData(false, ProteinMatch.class);
 
         if (proteinMatch == null) {
             ((RsetProteinGroupComparePanel)panel).setData(null);
@@ -72,6 +77,24 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadProteinSetsFromProteinTask(callback, proteinMatch));
 
 
+    }
+
+    @Override
+    public Object getData(boolean getArray, Class parameterType) {
+        if (parameterType != null) {
+            if (parameterType.equals(ProteinMatch.class)) {
+                return ((RsetProteinGroupComparePanel) panel).getComparePanel().getSelectedProteinMatch();
+            } else if (parameterType.equals(ResultSummary.class)) {
+                if (getArray) {
+                    return ((RsetProteinGroupComparePanel) panel).getComparePanel().getResultSummaryList();
+                } else {
+                    return ((RsetProteinGroupComparePanel) panel).getComparePanel().getFirstResultSummary();
+                }
+            }
+        }
+
+        //JPM.TODO
+        return super.getData(getArray, parameterType);
     }
     
 }

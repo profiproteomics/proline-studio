@@ -2,6 +2,8 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
+import fr.proline.core.orm.msi.ResultSummary;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.table.AbstractTableModel;
 
@@ -88,6 +90,28 @@ public class ProteinSetCmpTableModel extends AbstractTableModel {
             return STATUS_NOT_ALWAYS_PRESENT; // should not happen
         }
         return status.getStatus(getColumnCount()-1);
+    }
+    
+    public ArrayList<ResultSummary> getResultSummaryList() {
+        if (proteinSetArray == null) {
+            return null;
+        }
+        
+        int size = proteinSetArray.length;
+        ArrayList<ResultSummary> rsmArray = new ArrayList<ResultSummary>(size);
+        for (int i=0;i<size;i++) {
+            rsmArray.add(proteinSetArray[i].getResultSummary());
+        }
+        
+        return rsmArray;
+    }
+    
+    public ResultSummary getFirstResultSummary() {
+        if ((proteinSetArray == null) || (proteinSetArray.length == 0)) {
+            return null;
+        }
+
+        return proteinSetArray[0].getResultSummary();
     }
     
     @Override

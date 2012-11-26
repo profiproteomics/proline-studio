@@ -42,7 +42,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
     @Override
     public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
-        final PeptideMatch peptideMatch = (PeptideMatch) srcDataBox.getData(null, PeptideMatch.class);
+        final PeptideMatch peptideMatch = (PeptideMatch) srcDataBox.getData(false, PeptideMatch.class);
 
         if (peptideMatch == null) {
             ((RsetPeptideSpectrumPanel) panel).setData(null);

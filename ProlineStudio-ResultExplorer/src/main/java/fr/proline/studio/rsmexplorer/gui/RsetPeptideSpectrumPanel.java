@@ -36,7 +36,7 @@ import org.jfree.data.xy.XYDataset;
  *
  * @author JM235353
  */
-public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements DataBoxPanelInterface{
+public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
     

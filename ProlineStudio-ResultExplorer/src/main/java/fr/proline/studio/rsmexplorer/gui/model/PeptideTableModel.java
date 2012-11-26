@@ -67,6 +67,7 @@ public class PeptideTableModel extends AbstractTableModel {
                 // Retrieve typical Peptide Match
                 PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
                 if (peptideMatch == null) {
+                    return null;
                 }
                 return peptideMatch.getTransientData().getPeptide();
             }

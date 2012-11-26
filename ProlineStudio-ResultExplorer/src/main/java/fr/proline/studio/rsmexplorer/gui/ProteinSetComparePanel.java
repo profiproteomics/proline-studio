@@ -1,6 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.studio.gui.SquareColorPanel;
+import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetCmpTableModel;
 import java.awt.*;
 import javax.swing.*;
@@ -8,23 +12,23 @@ import javax.swing.border.CompoundBorder;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 import org.jdesktop.swingx.util.PaintUtils;
 
 /**
  *
  * @author JM235353
  */
-public class ProteinSetComparePanel extends JPanel {
+public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterface {
 
     private ProteinSetCmpTable table;
 
-    private ProteinMatch previouslyProteinSelected = null;
+    //private ProteinMatch previouslyProteinSelected = null;
+    
+    private AbstractDataBox dataBox;
     
     public ProteinSetComparePanel() {
         setLayout(new GridLayout());
@@ -41,9 +45,56 @@ public class ProteinSetComparePanel extends JPanel {
 
     }
 
+    public ArrayList<ResultSummary> getResultSummaryList() {
+        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
+        return tableModel.getResultSummaryList();
+    }
+    
+    public ResultSummary getFirstResultSummary() {
+        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
+        return tableModel.getFirstResultSummary();
+    }
+    
+    public ProteinMatch getSelectedProteinMatch() {
+
+        // Retrieve Selected Row
+        int selectedRow = table.getSelectedRow();
+
+        // nothing selected
+        if (selectedRow == -1) {
+            return null;
+
+        }
+        
+        // convert according to the sorting
+        selectedRow = table.convertRowIndexToModel(selectedRow);
+
+        // Retrieve Selected Column
+        int selectedColumn = table.getSelectedColumn();
+        
+        // nothing selected
+        if (selectedColumn == -1) {
+            return null;
+
+        }
+        
+        // convert according to the sorting of columns
+        selectedColumn = table.convertColumnIndexToModel(selectedColumn);
+
+        if (selectedColumn == ProteinSetCmpTableModel.COLTYPE_SAMESET_SUBSET) {
+            // not a ProteinMatch
+            return null;
+        }
+        
+        // Retrieve ProteinSet selected
+        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
+
+        return (ProteinMatch) tableModel.getValueAt(selectedRow, selectedColumn);
+    }
+    
     public void setData(ProteinMatch proteinMatch) {
         
-        previouslyProteinSelected = null;
+        //previouslyProteinSelected = null;
         
         ProteinSetCmpTableModel tableModel = ((ProteinSetCmpTableModel) table.getModel());
         tableModel.setData(proteinMatch);
@@ -61,6 +112,15 @@ public class ProteinSetComparePanel extends JPanel {
             }
         }
         
+        // select first data
+        if (tableModel.getRowCount()>0) {
+            table.changeSelection(0,1,false,false);
+        }
+    }
+
+    @Override
+    public void setDataBox(AbstractDataBox dataBox) {
+        this.dataBox = dataBox;
     }
 
 
@@ -97,6 +157,21 @@ public class ProteinSetComparePanel extends JPanel {
             });
             
         }
+        
+        /**
+         * Called whenever the value of the selection changes.
+         *
+         * @param e the event that characterizes the change.
+         */
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+
+            super.valueChanged(e);
+
+            dataBox.propagateDataChanged(ProteinMatch.class); //JPM.TODO
+
+        }
+
     }
 
 
@@ -141,10 +216,13 @@ public class ProteinSetComparePanel extends JPanel {
                     if (selectedRow!=-1) {
                         selectedRow = table.convertRowIndexToModel(selectedRow);
                         
-                        ProteinMatch selectedProteinMatch = (ProteinMatch) model.getValueAt(selectedRow, selectedCol);
+                        Object selection = model.getValueAt(selectedRow, selectedCol); //JPM.HACK : possible problem with converted column when a column is being dragged
+                        if (selection instanceof ProteinMatch) {
+                            ProteinMatch selectedProteinMatch = (ProteinMatch) selection;
                         if (selectedProteinMatch != null) { // could really happen == null
-                            if (proteinMatch.getAccession().compareTo(selectedProteinMatch.getAccession() ) == 0) {
-                                isSelected = true;
+                                if (proteinMatch.getAccession().compareTo(selectedProteinMatch.getAccession()) == 0) {
+                                    isSelected = true;
+                                }
                             }
                         }
                     }
@@ -168,7 +246,7 @@ public class ProteinSetComparePanel extends JPanel {
     public class ResultSummaryRenderer extends JPanel implements TableCellRenderer {
 
         private JLabel textLabel;
-        private ColorPanel colorPanel;
+        private SquareColorPanel colorPanel;
         private BlankPanel blankPanel = new BlankPanel();
         
         @Override
@@ -198,7 +276,7 @@ public class ProteinSetComparePanel extends JPanel {
 
             c.gridx++;
             c.weightx = 0;
-            colorPanel = new ColorPanel();
+            colorPanel = new SquareColorPanel(10); // size of color panel is set to 10x10
             add(colorPanel, c);
 
             c.gridx++;
@@ -221,51 +299,7 @@ public class ProteinSetComparePanel extends JPanel {
             setBackground(Color.white);
         }
 
-        public class ColorPanel extends JPanel {
-
-            private static final int PANEL_SIZE = 10;
-            private final Dimension dim = new Dimension(PANEL_SIZE, PANEL_SIZE);
-
-            Color color = Color.red; // default color
-            
-            public ColorPanel() {
-            }
-
-            public void setColor(Color c) {
-                this.color = c;
-            }
-            
-            @Override
-            public Dimension getPreferredSize() {
-                return dim;
-            }
-
-            @Override
-            public void paint(Graphics g) {
-                super.paint(g);
-
-                Graphics2D g2 = (Graphics2D) g;
-
-                int width = getWidth();
-                int height = getHeight();
-
-                // we want a square... (most of the time height is greater than width)
-                int delta = 0;
-                if (height>PANEL_SIZE) {
-                    delta = (height - PANEL_SIZE) / 2;
-                    if (delta < 0) {
-                        delta = 0;
-                    }
-                } 
-                
-                
-                g2.setColor(color);
-                g2.fillRect(0, delta, width - 1, height - 1 -delta);
-                g2.setColor(Color.black);
-                g2.drawRect(0, delta, width - 1, height - 1 -delta);
-
-            }
-        }
+ 
         
         public class BlankPanel extends JPanel {
             public BlankPanel() {

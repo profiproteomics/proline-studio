@@ -53,7 +53,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     @Override
     public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
         
-        final ResultSet _rset = (rset!=null) ? rset : (ResultSet) srcDataBox.getData(null, ResultSet.class);
+        final ResultSet _rset = (rset!=null) ? rset : (ResultSet) srcDataBox.getData(false, ResultSet.class);
 
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -85,7 +85,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(Class arrayParameterType, Class parameterType) {
+    public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(PeptideMatch.class)) {
                 return ((RsetPeptideMatchPanel)panel).getSelectedPeptideMatch();
@@ -96,7 +96,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
                 }
             }
         }
-        return super.getData(arrayParameterType, parameterType);
+        return super.getData(getArray, parameterType);
     }
  
     @Override

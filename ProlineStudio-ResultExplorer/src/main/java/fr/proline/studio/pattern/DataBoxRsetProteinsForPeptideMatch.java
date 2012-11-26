@@ -47,7 +47,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
 
     @Override
     public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
-        final PeptideMatch peptideMatch = (PeptideMatch) srcDataBox.getData(null, PeptideMatch.class);
+        final PeptideMatch peptideMatch = (PeptideMatch) srcDataBox.getData(false, PeptideMatch.class);
 
         if (peptideMatch == null) {
             ((RsetProteinsForPeptideMatchPanel)panel).setData(null);
@@ -78,10 +78,10 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     }
     
     @Override
-    public Object getData(Class arrayParameterType, Class parameterType) {
+    public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null && (parameterType.equals(ProteinMatch.class))) {
             return ((RsetProteinsForPeptideMatchPanel)panel).getSelectedProteinMatch();
         }
-        return super.getData(arrayParameterType, parameterType);
+        return super.getData(getArray, parameterType);
     }
 }

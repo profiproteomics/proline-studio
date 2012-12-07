@@ -35,7 +35,9 @@ public class AccessDatabaseThread extends Thread {
         databaseProperties.put(DatabaseConnector.PROPERTY_USERNAME, "dupierris");
         databaseProperties.put(DatabaseConnector.PROPERTY_PASSWORD, "dupierris");
         databaseProperties.put(DatabaseConnector.PROPERTY_DRIVERCLASSNAME, "org.postgresql.Driver");
-        databaseProperties.put(DatabaseConnector.PROPERTY_URL, "jdbc:postgresql://gre037784:5433/UDS_db");
+        
+        databaseProperties.put(DatabaseConnector.PROPERTY_URL, "jdbc:postgresql://localhost:5432/UDS_db");
+        //databaseProperties.put(DatabaseConnector.PROPERTY_URL, "jdbc:postgresql://gre037784:5433/UDS_db");
 
         DatabaseConnectionTask connection = new DatabaseConnectionTask(null, databaseProperties, getProjectIdTMP());
         addTask(connection);

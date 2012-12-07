@@ -12,4 +12,13 @@ public class RSMTreeParentNode extends RSMNode {
         super(RSMNode.NodeTypes.TREE_PARENT, data);
     }
 
+    /*@Override
+    public RSMNode cloneThis() {
+        RSMTreeParentNode clonedNode = new RSMTreeParentNode((AbstractData) getUserObject());
+        
+        addClonedChildren(clonedNode);
+        
+        return clonedNode;
+    }*/
+    
 }

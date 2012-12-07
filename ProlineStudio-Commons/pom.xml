@@ -133,6 +133,7 @@
                         <publicPackage>fr.proline.studio.dbs</publicPackage>
                         <publicPackage>fr.proline.studio.gui</publicPackage>
                         <publicPackage>fr.proline.studio.utils</publicPackage>
+                        <publicPackage>fr.proline.util</publicPackage>
                         <publicPackage>org.jdesktop.beans</publicPackage>
                         <publicPackage>org.jdesktop.swingx.*</publicPackage>
                     </publicPackages>

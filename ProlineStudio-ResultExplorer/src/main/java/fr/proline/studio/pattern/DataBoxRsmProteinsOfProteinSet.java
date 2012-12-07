@@ -51,9 +51,14 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     }
     
     @Override
-    public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
-        final ProteinSet proteinSet = (ProteinSet) srcDataBox.getData(false, ProteinSet.class);
+    public void dataChanged(Class dataType) {
+        final ProteinSet proteinSet = (ProteinSet) previousDataBox.getData(false, ProteinSet.class);
 
+        if (proteinSet == null) {
+            ((RsmProteinsOfProteinSetPanel)panel).setData(null, null);
+            return;
+        }
+        
         //final String searchedText = searchTextBeingDone; //JPM.TODO
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

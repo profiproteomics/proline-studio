@@ -21,27 +21,38 @@ import javax.persistence.TypedQuery;
 public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
     private ProteinMatch proteinMatch = null;
-    private List<ResultSummary> rsmList = null;
+    private ArrayList<ProteinMatch> proteinMatchArray = null;
+    private ArrayList<ResultSummary> rsmList = null;
 
-    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, ProteinMatch proteinMatch, List<ResultSummary> rsmList) {
+    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, ProteinMatch proteinMatch, ArrayList<ResultSummary> rsmList) {
         super(callback);
         this.proteinMatch = proteinMatch;
+        this.proteinMatchArray = null;
+        this.rsmList = rsmList;
+    }
+    
+    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmList) {
+        super(callback);
+        this.proteinMatch = null;
+        this.proteinMatchArray = proteinMatchArray;
         this.rsmList = rsmList;
     }
 
+
     @Override
     public boolean needToFetch() {
-        Iterator<ResultSummary> rsmListIterator = rsmList.iterator();
-        while (rsmListIterator.hasNext()) {
-            ResultSummary rsm = rsmListIterator.next();
-            if (needToFetch(rsm)) {
+        int size = rsmList.size();
+        for (int i=0;i<size;i++) {
+            ResultSummary rsm = rsmList.get(i);
+            ProteinMatch pm = (proteinMatchArray!=null) ? proteinMatchArray.get(i) : proteinMatch;
+            if (needToFetch(pm, rsm)) {
                 return true;
             }
         }
         return false;
     }
     
-    private boolean needToFetch(ResultSummary rsm) {
+    private boolean needToFetch(ProteinMatch proteinMatch, ResultSummary rsm) {
         PeptideSet peptideSet = proteinMatch.getTransientData().getPeptideSet(rsm.getId());
         if (peptideSet == null) {
             return true;
@@ -60,11 +71,15 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
             entityManagerMSI.getTransaction().begin();
 
+            int size = rsmList.size();
+            for (int i = 0; i < size; i++) {
+                ResultSummary rsm = rsmList.get(i);
+                ProteinMatch pm = (proteinMatchArray != null) ? proteinMatchArray.get(i) : proteinMatch;
+                if (!needToFetch(pm, rsm)) {
+                    continue;
+                }
 
-            Iterator<ResultSummary> rsmListIterator = rsmList.iterator();
-            while (rsmListIterator.hasNext()) {
-                ResultSummary rsm = rsmListIterator.next();
-                fetchPeptideData(entityManagerMSI, rsm, peptideMap);
+                fetchPeptideData(entityManagerMSI, rsm, pm, peptideMap);
             }
             
             entityManagerMSI.getTransaction().commit();
@@ -93,7 +108,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         return true;
     }
     
-    private void fetchPeptideData(EntityManager entityManagerMSI, ResultSummary rsm, HashMap<Integer, Peptide> peptideMap) {
+    private void fetchPeptideData(EntityManager entityManagerMSI, ResultSummary rsm, ProteinMatch proteinMatch, HashMap<Integer, Peptide> peptideMap) {
 
         // Retrieve peptideSet of a proteinMatch
         PeptideSet peptideSet = proteinMatch.getTransientData().getPeptideSet(rsm.getId());

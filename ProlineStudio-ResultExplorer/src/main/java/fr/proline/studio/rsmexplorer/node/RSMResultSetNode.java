@@ -36,4 +36,13 @@ public class RSMResultSetNode extends RSMNode {
     public ResultSet getResultSet() {
         return ((ResultSetData) getData()).getResultSet();
     }
+    
+    /*@Override
+    public RSMNode cloneThis() {
+        RSMResultSetNode clonedNode = new RSMResultSetNode((AbstractData) getUserObject());
+        
+        addClonedChildren(clonedNode);
+        
+        return clonedNode;
+    }*/
 }

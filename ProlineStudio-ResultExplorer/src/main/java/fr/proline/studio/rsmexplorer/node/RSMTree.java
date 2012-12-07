@@ -1,24 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.node;
 
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ParentData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.AbstractDatabaseSlicerTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.actions.*;
 import java.awt.Component;
-import java.awt.Image;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
@@ -42,22 +34,148 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     }
     
     private RSMTree() {
-        
+
         // Model of the tree
         RSMNode top = RSMChildFactory.createNode(new ParentData());
+        /*
+         * model = new DefaultTreeModel(top); setModel(model);
+         *
+         * // rendering of the tree putClientProperty("JTree.lineStyle",
+         * "Horizontal"); setCellRenderer(new RSMTreeRenderer());
+         *
+         * // -- listeners addTreeWillExpandListener(this); // used for lazy
+         * loading addMouseListener(this); // used for popup triggering
+         */
+
+        initTree(top); 
+                
+        startLoading(top); // JPM.TODO
+    }
+
+        private RSMTree(RSMNode top) {
+
+        initTree(top);
+        
+        startLoading(top); // JPM.TODO
+   
+    }
+    
+    private void initTree(RSMNode top) {
         model = new DefaultTreeModel(top);
         setModel(model);
-        
+
         // rendering of the tree
         putClientProperty("JTree.lineStyle", "Horizontal");
         setCellRenderer(new RSMTreeRenderer());
-        
+
         // -- listeners
         addTreeWillExpandListener(this); // used for lazy loading
         addMouseListener(this);         // used for popup triggering
+
+    }
+
+    public RSMTree copyResultSetRootSubTree(ResultSet rset) {
+
+        int rsetId = rset.getId().intValue();
+
+        RSMResultSetNode rsetNode = findResultSetNode((RSMNode) this.getModel().getRoot(), rsetId);
+
+        if (rsetNode == null) {
+            return null;
+        }
         
-        // JPM.TODO
-        startLoading(top);
+        rsetNode = findResultSetNodeRootParent(rsetNode);
+
+        return new RSMTree(rsetNode);
+
+    }
+
+    private RSMResultSetNode findResultSetNode(RSMNode node, int rsetId) {
+
+        int nbChildren = node.getChildCount();
+
+        for (int i = 0; i < nbChildren; i++) {
+            RSMNode childNode = (RSMNode) node.getChildAt(i);
+            if (childNode.getType() == RSMNode.NodeTypes.RESULT_SET) {
+                RSMResultSetNode rsetNode = ((RSMResultSetNode) childNode);
+                if (rsetNode.getResultSet().getId().intValue() == rsetId) {
+                    return rsetNode;
+                }
+            }
+            if (!childNode.isLeaf()) {
+                RSMResultSetNode rsetNode = findResultSetNode(childNode, rsetId);
+                if (rsetNode != null) {
+                    return rsetNode;
+                }
+            }
+
+        }
+
+        return null;
+    }
+
+    private RSMResultSetNode findResultSetNodeRootParent(RSMResultSetNode node) {
+
+        RSMResultSetNode resultSetRootParent = node;
+        RSMNode parentNode = (RSMNode) node.getParent();
+        while (parentNode != null) {
+            if (parentNode.getType() == RSMNode.NodeTypes.RESULT_SET) {
+                resultSetRootParent = (RSMResultSetNode) parentNode;
+            }
+            parentNode = (RSMNode) parentNode.getParent();
+        }
+
+        return resultSetRootParent;
+    }
+    
+    
+    public void setSelection(ArrayList<ResultSummary> rsmArray) {
+
+        if (! loadingMap.isEmpty()) {
+            // Tree is loading, we must postpone the selection
+            selectionFromrsmArray = rsmArray;
+            return;
+        }
+        
+        RSMNode rootNode = (RSMNode) getModel().getRoot();
+        ArrayList<TreePath> selectedPathArray = new ArrayList<TreePath>(rsmArray.size());
+        
+        ArrayList<RSMNode> nodePath = new ArrayList<RSMNode>();
+        nodePath.add(rootNode);
+        setSelectionImpl(rootNode, nodePath, rsmArray, selectedPathArray);
+
+
+        TreePath[] selectedPaths = selectedPathArray.toArray(new TreePath[selectedPathArray.size()]);
+
+        setSelectionPaths(selectedPaths);
+
+    }
+    private ArrayList<ResultSummary> selectionFromrsmArray = null;
+
+    private void setSelectionImpl(RSMNode parentNode, ArrayList<RSMNode> nodePath, ArrayList<ResultSummary> rsmArray, ArrayList<TreePath> selectedPathArray) {
+        Enumeration en = parentNode.children();
+        while (en.hasMoreElements()) {
+            RSMNode node = (RSMNode) en.nextElement();
+            if (node.getType() == RSMNode.NodeTypes.RESULT_SUMMARY) {
+                ResultSummary rsm = ((RSMResultSummaryNode) node).getResultSummary();
+                int size = rsmArray.size();
+                for (int i = 0; i < size; i++) {
+                    ResultSummary rsmItem = rsmArray.get(i);
+                    if (rsmItem.getId().intValue() == rsm.getId().intValue()) {
+                        nodePath.add(node);
+                        TreePath path = new TreePath(nodePath.toArray());
+                        selectedPathArray.add(path);
+                        nodePath.remove(nodePath.size()-1);
+                        break;
+                    }
+                }
+            }
+            if (!node.isLeaf()) {
+                nodePath.add(node);
+                setSelectionImpl(node, nodePath, rsmArray, selectedPathArray);
+            }
+        }
+        nodePath.remove(nodePath.size()-1);
     }
     
     
@@ -78,38 +196,58 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         
     }
     private void startLoading(RSMNode nodeToLoad) {
-                        // register hour glass which is expanded
-                loadingMap.put(nodeToLoad.getData(), nodeToLoad);
-                
-                final ArrayList<AbstractData> childrenList = new ArrayList<AbstractData>();
-                final AbstractData parentData = nodeToLoad.getData();
-                
-                // Callback used only for the synchronization with the AccessDatabaseThread
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+        
+        
+        // check if the loading is necessary :
+        // it is necessary only if we have an hour glass child
+        // which correspond to data not already loaded
+        if (nodeToLoad.getChildCount() != 1) {
+            return;
+        }
+        RSMNode childNode = (RSMNode) nodeToLoad.getChildAt(0);
+        if (childNode.getType() != RSMNode.NodeTypes.HOUR_GLASS) {
+            return;
+        }
+
+
+        // register hour glass which is expanded
+        loadingMap.put(nodeToLoad.getData(), nodeToLoad);
+
+        final ArrayList<AbstractData> childrenList = new ArrayList<AbstractData>();
+        final AbstractData parentData = nodeToLoad.getData();
+
+        // Callback used only for the synchronization with the AccessDatabaseThread
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return false;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask) {
+
+                SwingUtilities.invokeLater(new Runnable() {
 
                     @Override
-                    public boolean mustBeCalledInAWT() {
-                        return false;
+                    public void run() {
+                        dataLoaded(parentData, childrenList);
+
+                        if (loadingMap.isEmpty() && (selectionFromrsmArray != null)) {
+                            // A selection has been postponed, we do it now
+                            setSelection(selectionFromrsmArray);
+                            selectionFromrsmArray = null;
+                        }
                     }
-            
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask) {
+                });
 
-                        SwingUtilities.invokeLater(new Runnable() {
+            }
+        };
 
-                            @Override
-                            public void run() {
-                                dataLoaded(parentData, childrenList);
-                            }
-                
-                        });
 
-                    }
-                };
 
-           
-                
-                parentData.load(callback, childrenList);
+        parentData.load(callback, childrenList);
     }
 
     private static HashMap<AbstractData, RSMNode> loadingMap = new HashMap<AbstractData, RSMNode>();
@@ -118,9 +256,6 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         RSMNode parentNode = loadingMap.remove(data);
 
-        
-        
-        //model.removeNodeFromParent((RSMNode)parentNode.getChildAt(0));
 
         parentNode.removeAllChildren();
         
@@ -132,8 +267,6 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         }
         
         model.nodeStructureChanged(parentNode);
-        
-        //model.insertNodeInto(RSMChildFactory.createNode(dataCur), parentNode, parentNode.getChildCount());
 
 
     }
@@ -211,6 +344,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         public RSMTreeRenderer() {
         }
 
+        @Override
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 

@@ -223,7 +223,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
     }
 
     public void dataUpdated() {
-
+        
         fireTableDataChanged();
     }
 }

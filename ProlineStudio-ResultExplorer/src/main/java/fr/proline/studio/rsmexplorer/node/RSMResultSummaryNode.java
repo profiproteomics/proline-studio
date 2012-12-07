@@ -38,4 +38,14 @@ public class RSMResultSummaryNode extends RSMNode {
     public ResultSummary getResultSummary() {
         return ((ResultSummaryData) getData()).getResultSummary();
     }
+    
+    /*@Override
+    public RSMNode cloneThis() {
+        RSMResultSummaryNode clonedNode = new RSMResultSummaryNode((AbstractData) getUserObject());
+        
+        addClonedChildren(clonedNode);
+        
+        return clonedNode;
+    }*/
+    
 }

@@ -45,4 +45,13 @@ public class RSMHourGlassNode extends RSMNode {
         return false;
     }*/
     
+    /*@Override
+    public RSMNode cloneThis() {
+        RSMHourGlassNode clonedNode = new RSMHourGlassNode((AbstractData) getUserObject());
+        
+        addClonedChildren(clonedNode);
+        
+        return clonedNode;
+    }*/
+    
 }

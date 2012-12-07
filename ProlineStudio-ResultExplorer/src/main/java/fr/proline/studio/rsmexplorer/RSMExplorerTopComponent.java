@@ -4,12 +4,8 @@
  */
 package fr.proline.studio.rsmexplorer;
 
-import fr.proline.studio.dam.data.AbstractData;
-import fr.proline.studio.dam.data.ParentData;
+
 import fr.proline.studio.rsmexplorer.node.RSMTree;
-import javax.swing.JTree;
-import javax.swing.event.TreeWillExpandListener;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;

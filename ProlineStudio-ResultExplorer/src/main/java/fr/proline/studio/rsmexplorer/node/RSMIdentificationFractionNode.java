@@ -30,4 +30,14 @@ public class RSMIdentificationFractionNode extends RSMNode {
     public boolean canRename() {
         return true;
     }*/
+    
+    /*@Override
+    public RSMNode cloneThis() {
+        RSMIdentificationFractionNode clonedNode = new RSMIdentificationFractionNode((AbstractData) getUserObject());
+        
+        addClonedChildren(clonedNode);
+        
+        return clonedNode;
+    }*/
+    
 }

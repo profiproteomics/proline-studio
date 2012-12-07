@@ -12,6 +12,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMResultSetNode;
+import fr.proline.studio.rsmexplorer.node.RSMResultSummaryNode;
 import org.openide.util.NbBundle;
 
 /**
@@ -29,8 +30,12 @@ public class PeptidesAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(RSMNode n) {
         
-
-        final ResultSet rset = ((RSMResultSetNode) n).getResultSet();
+        ResultSet rset = null;
+        if (n.getType() ==  RSMNode.NodeTypes.RESULT_SET) {
+            rset = ((RSMResultSetNode) n).getResultSet();
+        } else if (n.getType() ==  RSMNode.NodeTypes.RESULT_SUMMARY) {
+            rset = ((RSMResultSummaryNode) n).getResultSummary().getResultSet();
+        }
         
         // prepare window box
         WindowBox wbox = WindowBoxFactory.getPeptidesWindowBox();

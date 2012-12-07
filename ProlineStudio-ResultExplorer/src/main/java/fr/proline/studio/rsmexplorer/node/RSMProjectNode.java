@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.studio.dam.data.AbstractData;
+import java.util.Enumeration;
 import javax.swing.ImageIcon;
 import org.openide.util.ImageUtilities;
 
@@ -16,6 +17,8 @@ public class RSMProjectNode extends RSMNode {
         super(RSMNode.NodeTypes.TREE_PARENT, data);
     }
 
+
+    
     /*@Override
     public Image getIcon() {
         return icon;
@@ -29,5 +32,14 @@ public class RSMProjectNode extends RSMNode {
     @Override
     public boolean canRename() {
         return false;
+    }*/
+
+    /*@Override
+    public RSMNode cloneThis() {
+        RSMProjectNode clonedNode = new RSMProjectNode((AbstractData) getUserObject());
+        
+        addClonedChildren(clonedNode);
+        
+        return clonedNode;
     }*/
 }

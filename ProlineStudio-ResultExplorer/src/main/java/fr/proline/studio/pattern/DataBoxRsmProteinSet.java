@@ -52,9 +52,9 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     }
     
     @Override
-    public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
+    public void dataChanged(Class dataType) {
         
-        final ResultSummary _rsm = (rsm!=null) ? rsm : (ResultSummary) srcDataBox.getData(false, ResultSummary.class);
+        final ResultSummary _rsm = (rsm!=null) ? rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
 
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -105,6 +105,6 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         rsm = (ResultSummary) data;
-        dataChanged(null, ResultSummary.class);
+        dataChanged(ResultSummary.class);
     }
 }

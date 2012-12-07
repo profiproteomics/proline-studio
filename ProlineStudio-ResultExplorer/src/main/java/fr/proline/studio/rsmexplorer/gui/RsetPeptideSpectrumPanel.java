@@ -43,6 +43,8 @@ public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements Data
     private DefaultXYDataset dataSet;
     private JFreeChart chart;
     
+    private PeptideMatch previousPeptideMatch = null;
+    
     /**
      * Creates new form RsetPeptideSpectrumPanel
      */
@@ -137,6 +139,11 @@ public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements Data
     
    public void setData(PeptideMatch peptideMatch) {
 
+       if (peptideMatch == previousPeptideMatch) {
+           return;
+       }
+       previousPeptideMatch = peptideMatch;
+       
         constructSpectrumChart(peptideMatch);
         
     }

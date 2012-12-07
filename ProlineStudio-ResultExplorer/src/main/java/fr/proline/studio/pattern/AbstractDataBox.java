@@ -78,7 +78,7 @@ public abstract class AbstractDataBox {
     
     public abstract void createPanel();
     
-    public abstract void dataChanged(AbstractDataBox srcDataBox, Class dataType);
+    public abstract void dataChanged(Class dataType);
     
     public Object getData(boolean getArray, Class parameterType) {
         if (previousDataBox != null) {
@@ -92,14 +92,11 @@ public abstract class AbstractDataBox {
     }
     
     public void propagateDataChanged(Class dataType) {
-        propagateDataChanged(this, dataType);
-    }
-    public void propagateDataChanged(AbstractDataBox srcDataBox, Class dataType) {
         if (nextDataBox != null) {
             if (nextDataBox.isDataDependant(dataType)) {
-                nextDataBox.dataChanged(srcDataBox, dataType);
+                nextDataBox.dataChanged(dataType);
             }
-            nextDataBox.propagateDataChanged(srcDataBox, dataType);
+            nextDataBox.propagateDataChanged(dataType);
         }
         
     }

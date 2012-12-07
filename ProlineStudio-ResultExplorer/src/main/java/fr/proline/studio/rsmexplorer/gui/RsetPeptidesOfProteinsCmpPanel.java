@@ -15,7 +15,6 @@ import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -86,12 +85,12 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
         this.dataBox = dataBox;
     }
 
-    public void setData(ProteinMatch proteinMatch, ResultSummary[] rsmArray) {
-        ((PeptideCmpTableModel) table.getModel()).setData(proteinMatch, rsmArray);
-        if (proteinMatch == null) {
+    public void setData(ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmArray) {
+        ((PeptideCmpTableModel) table.getModel()).setData(proteinMatchArray, rsmArray);
+        if ((proteinMatchArray == null) || (proteinMatchArray.isEmpty())) {
             proteinNameTextField.setText("");
         } else {
-            proteinNameTextField.setText(proteinMatch.getAccession());
+            proteinNameTextField.setText(proteinMatchArray.get(0).getAccession());
         }
     }
 
@@ -151,8 +150,10 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
 
     public static class PeptideCmpTableModel extends AbstractTableModel {
 
-        private ProteinMatch proteinMatch;
-        private ResultSummary[] rsmArray;
+        private HashMap<Integer, ProteinMatch> rsmToProteinMatchMap = null;
+        
+        private ArrayList<ProteinMatch> proteinMatchArray;
+        private ArrayList<ResultSummary> rsmArray;
         private HashMap<Integer, PeptideMatch> peptideMatchMap = new HashMap<Integer, PeptideMatch>();
         private List<PeptideMatch> peptideMatchList = null;
         
@@ -164,22 +165,48 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
         private static final String[] columnNames = {"Peptide", "Rsm"};
     
         
-        public void setData(ProteinMatch proteinMatch, ResultSummary[] rsmArray) {
+        public void setData(ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmArray) {
             
-            this.proteinMatch = proteinMatch;
+            this.proteinMatchArray = proteinMatchArray;
             this.rsmArray = rsmArray;
 
-            if (proteinMatch == null) {
+            if ((proteinMatchArray == null) || (proteinMatchArray.isEmpty())) {
                 peptideMatchList = null;
                 return;
             }
             
-            ProteinMatch.TransientData data = proteinMatch.getTransientData();
+            if (rsmToProteinMatchMap == null) {
+                rsmToProteinMatchMap = new HashMap<Integer, ProteinMatch>();
+            } else {
+                rsmToProteinMatchMap.clear();
+            }
+            
+            for (int i = 0; i < proteinMatchArray.size(); i++) {
+                ProteinMatch pm = proteinMatchArray.get(i);
+                ProteinMatch.TransientData data = pm.getTransientData();
+                Set<Integer> rsmIdSet = data.getRecordedRsmId();
+
+                Iterator<Integer> it = rsmIdSet.iterator();
+                while (it.hasNext()) {
+
+                    rsmToProteinMatchMap.put(it.next(), pm);
+                }
+            }
+            
 
             peptideMatchMap.clear();
-            int rsmSize = rsmArray.length;
+            int rsmSize = rsmArray.size();
             for (int i = 0; i < rsmSize; i++) {
-                PeptideSet pset = data.getPeptideSet(rsmArray[i].getId());
+                
+                Integer rsmId = rsmArray.get(i).getId();
+                ProteinMatch pm = rsmToProteinMatchMap.get(rsmId);
+                
+                if (pm == null) {
+                    continue; // should not happen
+                }
+                
+                PeptideSet pset = pm.getTransientData().getPeptideSet(rsmId);
+
                 if (pset == null) {
                     // no PeptideSet found for this resultSummary
                     continue;
@@ -236,9 +263,11 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
         
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
+            if (peptideMatchList == null) {
+                return null;
+            }
             switch (columnIndex) {
                 case COLTYPE_PEPTIDE_NAME: {
-
                     PeptideMatch peptideMatch = peptideMatchList.get(rowIndex);
                     Peptide p = peptideMatch.getTransientData().getPeptide();
                     return p;
@@ -248,13 +277,17 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
                     
                     PeptideMatch peptideMatchCur = peptideMatchList.get(rowIndex);
 
-                    
-                    ProteinMatch.TransientData data = proteinMatch.getTransientData();
-             
-                    int rsmSize = rsmArray.length;
+
+                    int rsmSize = rsmArray.size();
                     for (int i = 0; i < rsmSize; i++) {
-                        PeptideSet pset = data.getPeptideSet(rsmArray[i].getId());
+                        Integer rsmId = rsmArray.get(i).getId();
+                        ProteinMatch pm = rsmToProteinMatchMap.get(rsmId);
+                        PeptideSet pset = pm.getTransientData().getPeptideSet(rsmArray.get(i).getId());
                         PeptideInstance[] peptideInstanceArray = pset.getTransientPeptideInstances();
+                        if (peptideInstanceArray == null) {
+                            System.out.println("peptideInstanceArray null");
+                            continue;
+                        }
                         int nbPeptides = peptideInstanceArray.length;
                         boolean peptideFound = false;
                         for (int j=0;j<nbPeptides;j++) {

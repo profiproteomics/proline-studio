@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.studio.dam.data.AbstractData;
+import java.util.Enumeration;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -9,7 +10,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  *
  * @author JM235353
  */
-public class RSMNode extends DefaultMutableTreeNode {
+public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneable {
 
     public enum NodeTypes {
 
@@ -21,7 +22,7 @@ public class RSMNode extends DefaultMutableTreeNode {
         HOUR_GLASS
     }
     private static Action[] actionInstance = null;
-    private NodeTypes type;
+    protected NodeTypes type;
     //protected AbstractData data;
 
     public RSMNode(/*Children children,*/ NodeTypes type, AbstractData data) {
@@ -89,4 +90,16 @@ public class RSMNode extends DefaultMutableTreeNode {
 
         return actionInstance;
     }*/
+ 
+    /*public abstract RSMNode cloneThis();
+    
+    protected void addClonedChildren(RSMNode clonedNode) {
+        Enumeration en = clonedNode.children();
+
+        while (en.hasMoreElements()) {
+            RSMNode node = (RSMNode) en.nextElement();
+            clonedNode.add(node.cloneThis());
+        }
+    }*/
+    
 }

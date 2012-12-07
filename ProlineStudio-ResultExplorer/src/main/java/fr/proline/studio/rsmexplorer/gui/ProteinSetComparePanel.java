@@ -1,22 +1,25 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.*;
 import fr.proline.studio.gui.SquareColorPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.model.ProteinSetCmpTableModel;
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.CompoundBorder;
 import fr.proline.studio.utils.CyclicColorPalette;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import fr.proline.studio.utils.DecoratedTable;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import javax.swing.RowSorter.SortKey;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import org.jdesktop.swingx.util.PaintUtils;
+import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 
 /**
  *
@@ -25,21 +28,15 @@ import org.jdesktop.swingx.util.PaintUtils;
 public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterface {
 
     private ProteinSetCmpTable table;
-
-    //private ProteinMatch previouslyProteinSelected = null;
-    
     private AbstractDataBox dataBox;
-    
+
     public ProteinSetComparePanel() {
         setLayout(new GridLayout());
 
-        
+
         table = new ProteinSetCmpTable();
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.getViewport().setBackground(Color.white);
 
- 
-     
 
         add(scrollPane);
 
@@ -49,13 +46,18 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
         ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
         return tableModel.getResultSummaryList();
     }
-    
+
     public ResultSummary getFirstResultSummary() {
         ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
-        return tableModel.getFirstResultSummary();
+        return tableModel.getResultSummary(0);
     }
-    
-    public ProteinMatch getSelectedProteinMatch() {
+
+    public ProteinMatch getProteinMatch(Integer resultSetId) {
+        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
+        return tableModel.getProteinMatch(resultSetId);
+    }
+
+    public ArrayList<ProteinMatch> getSelectedProteinMatchArray() {
 
         // Retrieve Selected Row
         int selectedRow = table.getSelectedRow();
@@ -63,58 +65,37 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
         // nothing selected
         if (selectedRow == -1) {
             return null;
-
         }
-        
+
         // convert according to the sorting
         selectedRow = table.convertRowIndexToModel(selectedRow);
 
-        // Retrieve Selected Column
-        int selectedColumn = table.getSelectedColumn();
-        
-        // nothing selected
-        if (selectedColumn == -1) {
-            return null;
 
-        }
-        
-        // convert according to the sorting of columns
-        selectedColumn = table.convertColumnIndexToModel(selectedColumn);
-
-        if (selectedColumn == ProteinSetCmpTableModel.COLTYPE_SAMESET_SUBSET) {
-            // not a ProteinMatch
-            return null;
-        }
-        
         // Retrieve ProteinSet selected
         ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
 
-        return (ProteinMatch) tableModel.getValueAt(selectedRow, selectedColumn);
+        return tableModel.getProteinMatchArray(selectedRow);
     }
-    
-    public void setData(ProteinMatch proteinMatch) {
-        
-        //previouslyProteinSelected = null;
-        
-        ProteinSetCmpTableModel tableModel = ((ProteinSetCmpTableModel) table.getModel());
-        tableModel.setData(proteinMatch);
-       
-        boolean hasData = (tableModel.getRowCount()>0);
-        
-        if (hasData) {
-            int colCount = tableModel.getColumnCount();
-            
-             TableColumn col = table.getColumnModel().getColumn(0);        
-            col.setPreferredWidth(80);
-            for (int i=1;i<colCount;i++) {
-                col = table.getColumnModel().getColumn(i);        
-                col.setPreferredWidth(200);
-            }
+
+    public ResultSet getFirstResultSet() {
+        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
+        ResultSummary rsm = tableModel.getResultSummary(0);
+        if (rsm == null) {
+            return null;
         }
-        
+        return rsm.getResultSet();
+    }
+
+    public void setData(ArrayList<ProteinMatch> proteinMatchArray, HashMap<Integer, ArrayList<Integer>> rsmIdMap) {
+
+        //previouslyProteinSelected = null;
+
+        ProteinSetCmpTableModel tableModel = ((ProteinSetCmpTableModel) table.getModel());
+        tableModel.setData(proteinMatchArray, rsmIdMap);
+
         // select first data
-        if (tableModel.getRowCount()>0) {
-            table.changeSelection(0,1,false,false);
+        if (tableModel.getRowCount() > 0) {
+            table.getSelectionModel().setSelectionInterval(0, 0);
         }
     }
 
@@ -123,41 +104,30 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
         this.dataBox = dataBox;
     }
 
+    public AbstractDataBox getDataBox() {
+        return dataBox;
+    }
 
-    public class ProteinSetCmpTable extends JTable {
+    public class ProteinSetCmpTable extends DecoratedTable {
 
         public ProteinSetCmpTable() {
             setModel(new ProteinSetCmpTableModel());
 
             setFillsViewportHeight(true);
-            getTableHeader().setBackground(Color.white);
-            
-            setCellSelectionEnabled(true);
+            //getTableHeader().setBackground(Color.white);
+
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            setShowGrid(false);
-            //setShowVerticalLines(true);
-            setDefaultRenderer(ProteinMatch.class, new ProteinMatchCmpRenderer());
-            setDefaultRenderer(Boolean.class, new SameSetSubSetRenderer());
 
+            setDefaultRenderer(ProteinStatus.class, new ProteinStatusRenderer());
 
-            getTableHeader().setDefaultRenderer(new ResultSummaryRenderer());
-
-            setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
-            // JPM.HACK : due to combined selection of cells in different rows/cols,
-            // we need to force a repaint after a selection
-            // (use of ListListener does not work, because it is not triggered
-            // when the user select a different cell in the same row)
-            addMouseListener(new MouseAdapter() {
-
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    table.repaint();
-                }
-            });
+            TableCellRenderer defaultRenderer = getTableHeader().getDefaultRenderer();
             
+            getTableHeader().setDefaultRenderer(new ResultSummaryRenderer(defaultRenderer));
+
+
+
         }
-        
+
         /**
          * Called whenever the value of the selection changes.
          *
@@ -171,378 +141,395 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             dataBox.propagateDataChanged(ProteinMatch.class); //JPM.TODO
 
         }
-
     }
 
+    public class ProteinSetCmpTableModel extends AbstractTableModel {
 
-    public class ProteinMatchCmpRenderer implements TableCellRenderer {
-
-        private ProteinMatchPanel rendererPanel;
-        private JPanel blankPanel;
+        private ArrayList<ProteinSet> proteinSetArray = null;
+        private HashMap<String, ProteinStatus> proteinMatchNameStatusMap = null;
+        private ArrayList<String> proteinNameList = null;
+        private HashMap<Integer, ProteinMatch> srcProteinMatchMap = null;
         
-        public ProteinMatchCmpRenderer() {
-            rendererPanel = new ProteinMatchPanel();
+        private HashMap<ProteinSet, HashMap<String, ProteinMatch>> proteinOfProteinSetsMap = null;
+        
+        // One column for protein name, other columns are for a ResultSummary
+        public static final int COLTYPE_PROTEIN_NAME = 0;
 
-            blankPanel = new JPanel();
-            blankPanel.setOpaque(false);
-        }
+        public void setData(ArrayList<ProteinMatch> proteinMatchSrcArray, HashMap<Integer, ArrayList<Integer>> rsmMap) {
 
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-  
-            ProteinMatch proteinMatch = (ProteinMatch) value;
 
-            if (proteinMatch == null) {
-                return blankPanel;
+            if ((proteinMatchSrcArray == null) || (proteinMatchSrcArray.isEmpty())) {
+                fireTableStructureChanged();
+                return;
             }
 
-            ProteinSetCmpTableModel model = ((ProteinSetCmpTableModel) table.getModel());
-            
-            int status = model.getStatus(proteinMatch);
-            
-            int highlightColor = ProteinMatchPanel.HIGHLIGHT_NO;
-            if (status == ProteinSetCmpTableModel.STATUS_NOT_ALWAYS_PRESENT ) {
-                highlightColor = ProteinMatchPanel.HIGHLIGHT_RED;
-            } else if (status == ProteinSetCmpTableModel.STATUS_SAME_OR_SUB_SET ) {
-                highlightColor = ProteinMatchPanel.HIGHLIGHT_YELLOW;
+            if (proteinMatchNameStatusMap == null) {
+                proteinMatchNameStatusMap = new HashMap<String, ProteinStatus>();
+                proteinNameList = new ArrayList<String>();
+                srcProteinMatchMap = new HashMap<Integer, ProteinMatch>();
+                proteinOfProteinSetsMap = new HashMap<ProteinSet, HashMap<String, ProteinMatch>>();
+            } else {
+                proteinMatchNameStatusMap.clear();
+                proteinNameList.clear();
+                srcProteinMatchMap.clear();
+                proteinOfProteinSetsMap.clear();
             }
-            
-            if (!isSelected) {
-                int selectedCol = table.getSelectedColumn();
-                if (selectedCol >0) { // first column is for SameSet / SubSet
-                    selectedCol = table.convertColumnIndexToModel(selectedCol);
+
+            if (proteinMatchComparator == null) {
+                proteinMatchComparator = new Comparator<String>() {
+
+                    @Override
+                    public int compare(String s1, String s2) {
+                        ProteinStatus status1 = proteinMatchNameStatusMap.get(s1);
+                        ProteinStatus status2 = proteinMatchNameStatusMap.get(s2);
+                        return status2.compareTo(status1);
+                    }
+                };
+            }
+
+            if (proteinSetArray == null) {
+                proteinSetArray = new ArrayList<ProteinSet>();
+            } else {
+                proteinSetArray.clear();
+            }
+
+            int nbProteinMatch = proteinMatchSrcArray.size();
+            for (int protIndex = 0; protIndex < nbProteinMatch; protIndex++) {
+
+                ProteinMatch proteinMatch = proteinMatchSrcArray.get(protIndex);
+
+                srcProteinMatchMap.put(proteinMatch.getResultSet().getId(), proteinMatch);
+
+                ProteinSet[] proteinSetArrayCur = proteinMatch.getTransientData().getProteinSetArray();
+
+                
+                
+                // retrieve all proteins
+                int nbProteinSets = proteinSetArrayCur.length;
+                for (int i = 0; i < nbProteinSets; i++) {
+                    ProteinSet pset = proteinSetArrayCur[i];
+                    ResultSummary rsm = pset.getResultSummary();
                     
-                    int selectedRow = table.getSelectedRow();
-                    if (selectedRow!=-1) {
-                        selectedRow = table.convertRowIndexToModel(selectedRow);
-                        
-                        Object selection = model.getValueAt(selectedRow, selectedCol); //JPM.HACK : possible problem with converted column when a column is being dragged
-                        if (selection instanceof ProteinMatch) {
-                            ProteinMatch selectedProteinMatch = (ProteinMatch) selection;
-                        if (selectedProteinMatch != null) { // could really happen == null
-                                if (proteinMatch.getAccession().compareTo(selectedProteinMatch.getAccession()) == 0) {
-                                    isSelected = true;
-                                }
-                            }
+                    HashMap<String, ProteinMatch> proteinNameToProteinMatchOfProteinSetMap = new HashMap<String, ProteinMatch>();
+                    proteinOfProteinSetsMap.put(pset, proteinNameToProteinMatchOfProteinSetMap);
+                    
+                    // if rsmMap != null, the user has selected resultSummary to display
+                    if (rsmMap != null) {
+                        ArrayList<Integer> acceptedRsmList = rsmMap.get(proteinMatch.getResultSet().getId() );
+
+                        if (!acceptedRsmList.contains(rsm.getId() )) {
+                            continue;
                         }
                     }
+
+                    proteinSetArray.add(pset);
+
+                    ProteinMatch[] sameSet = pset.getTransientData().getSameSet();
+                    ProteinMatch[] subSet = pset.getTransientData().getSubSet();
                     
-                }
-                
-            }
-            
-            rendererPanel.setSelected(isSelected);
-            rendererPanel.setValues(proteinMatch.getAccession(), proteinMatch.getScore(), highlightColor);
 
-            int height = rendererPanel.getPreferredSize().height;
-            if (table.getRowHeight(row) < height) {
-                table.setRowHeight(row, height);
-            }
 
-            return rendererPanel;
-        }
-    }
+                    int sameSetLength = sameSet.length;
+                    for (int j = 0; j < sameSetLength; j++) {
+                        ProteinMatch pm = sameSet[j];
+                        String proteinMatchName = pm.getAccession();
+                        proteinNameToProteinMatchOfProteinSetMap.put(proteinMatchName, pm);
+                        ProteinStatus status = proteinMatchNameStatusMap.get(proteinMatchName);
+                        if (status == null) {
+                            status = new ProteinStatus();
+                            proteinMatchNameStatusMap.put(proteinMatchName, status);
+                            proteinNameList.add(proteinMatchName);
+                        }
+                        status.inSameSet(rsm);
 
-    public class ResultSummaryRenderer extends JPanel implements TableCellRenderer {
-
-        private JLabel textLabel;
-        private SquareColorPanel colorPanel;
-        private BlankPanel blankPanel = new BlankPanel();
-        
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            
-            column = table.convertColumnIndexToModel(column);
-            
-            if (column == 0) {
-                return blankPanel;
-            }
-            textLabel.setText(table.getModel().getColumnName(column));
-            colorPanel.setColor( CyclicColorPalette.getColor(column-1) );
-            return this;
-        }
-
-        public ResultSummaryRenderer() {
-            setLayout(new GridBagLayout());
-
-            GridBagConstraints c = new GridBagConstraints();
-            c.fill = GridBagConstraints.BOTH;
-            c.gridx = 0;
-            c.gridy = 0;
-            c.weightx = 1;
-            c.weighty = 0;
-            c.insets = new Insets(3, 0, 3, 0);
-            add(Box.createHorizontalGlue(), c);
-
-            c.gridx++;
-            c.weightx = 0;
-            colorPanel = new SquareColorPanel(10); // size of color panel is set to 10x10
-            add(colorPanel, c);
-
-            c.gridx++;
-            add(Box.createHorizontalStrut(5), c);
-
-            c.gridx++;
-            textLabel = new JLabel();
-            add(textLabel, c);
-
-            c.gridx++;
-            c.weightx = 1;
-            add(Box.createHorizontalGlue(), c);
-
-            c.gridx++;
-            c.weightx = 0;
-            add(new JSeparator(SwingConstants.VERTICAL), c);
-
-            
-
-            setBackground(Color.white);
-        }
-
- 
-        
-        public class BlankPanel extends JPanel {
-            public BlankPanel() {
-            setLayout(new GridBagLayout());
-            setBackground(Color.white);
-
-            GridBagConstraints c = new GridBagConstraints();
-            c.fill = GridBagConstraints.BOTH;
-            c.gridx = 0;
-            c.gridy = 0;
-            c.weightx = 1;
-            c.weighty = 0;
-            c.insets = new Insets(3, 0, 3, 0);
-            add(Box.createGlue(), c);
-
-            c.gridx++;
-            c.weightx = 0;
-            add(new JLabel(" "), c);
-            
-            c.gridx++;
-            add(new JSeparator(SwingConstants.VERTICAL), c);
-
-            }
-        }
-    }
-
-    public class ProteinMatchPanel extends JPanel {
-
-        public final static int HIGHLIGHT_NO = 0;
-        public final static int HIGHLIGHT_YELLOW = 1;
-        public final static int HIGHLIGHT_RED = 2;
-        private ProteinNameLabel proteinLabel;
-        private ScoreLabel scoreLabel;
-        private boolean selected = false;
-
-        public ProteinMatchPanel() {
-            setBackground(Color.white);
-            setLayout(new GridBagLayout());
-
-            JPanel internalPanel = new JPanel() {
-
-                @Override
-                public void paint(Graphics g) {
-                    super.paint(g);
-
-                    Graphics2D g2 = (Graphics2D) g;
-
-                    int width = getWidth();
-                    int height = getHeight();
-
-                    g2.setColor(Color.black);
-
-                    if (selected) {
-                        g2.setStroke(new BasicStroke(3));
-                        g2.drawRect(1, 1, width - 3, height - 3);
-                    } else {
-                        g2.setStroke(new BasicStroke(1));
-                        g2.drawRect(0, 0, width - 1, height - 1);
                     }
 
-                }
-            };
-
-
-            internalPanel.setLayout(new GridBagLayout());
-            internalPanel.setBackground(Color.white);
-
-            proteinLabel = new ProteinNameLabel();
-            proteinLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-            proteinLabel.setBackground(Color.white);
-
-            scoreLabel = new ScoreLabel();
-            scoreLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-            scoreLabel.setBackground(Color.white);
-
-            GridBagConstraints c = new GridBagConstraints();
-            c.fill = GridBagConstraints.BOTH;
-            c.gridx = 0;
-            c.gridy = 0;
-            c.weightx = 1;
-            c.weighty = 0;
-
-
-
-            internalPanel.add(proteinLabel, c);
-
-            c.gridy++;
-            internalPanel.add(scoreLabel, c);
-
-            c.gridx = 0;
-            c.gridy = 0;
-            c.insets = new Insets(5, 5, 5, 5);
-            add(internalPanel, c);
-
-        }
-
-
-        public void setSelected(boolean selected) {
-            this.selected = selected;
-        }
-
-        public void setValues(String proteinName, double score, int highlight) {
-            proteinLabel.setText(proteinName);
-            proteinLabel.setHighlightState(highlight);
-            scoreLabel.setScore(score);
-        }
-
-        public class ScoreLabel extends JLabel {
-
-            private Color greenHighlight = null;
-            private double score = 0;
-
-            public ScoreLabel() {
-                Color base = PaintUtils.setSaturation(Color.GREEN, .7f);
-                greenHighlight = PaintUtils.setAlpha(base, 125);
-                setOpaque(false);
-            }
-
-            public void setScore(double score) {
-                this.score = score;
-                setText(String.valueOf(score));
-            }
-
-            @Override
-            public void paint(Graphics g) {
-
-
-                g.setColor(greenHighlight);
-
-                int rectWidth = (int) Math.round(((score / 100) * (getWidth() - 1)));
-                g.fillRect(0, 0, rectWidth, getHeight() - 1);
-                super.paint(g);
-
-                g.setColor(Color.black);
-                g.drawLine(0, 0, getWidth() - 1, 0);
-
-
-            }
-        }
-
-        public class ProteinNameLabel extends JLabel {
-
-            private Color yellowHighlight = null;
-            private Color redHighlight = null;
-            private int highlightState = 0;
-
-            public ProteinNameLabel() {
-                yellowHighlight = PaintUtils.setAlpha(PaintUtils.setSaturation(Color.yellow, .7f), 125);
-                redHighlight = PaintUtils.setAlpha(PaintUtils.setSaturation(Color.red, .7f), 125);
-                setOpaque(false);
-            }
-
-            public void setHighlightState(int highlightState) {
-                this.highlightState = highlightState;
-            }
-
-            @Override
-            public void paint(Graphics g) {
-
-                if (highlightState == HIGHLIGHT_YELLOW) {
-                    g.setColor(yellowHighlight);
-
-                    g.fillRect(0, 0, getWidth(), getHeight());
-                } else if (highlightState == HIGHLIGHT_RED) {
-                    g.setColor(redHighlight);
-
-                    g.fillRect(0, 0, getWidth(), getHeight());
+                    int subSetLength = subSet.length;
+                    for (int j = 0; j < subSetLength; j++) {
+                        ProteinMatch pm = subSet[j];
+                        String proteinMatchName = pm.getAccession();
+                        proteinNameToProteinMatchOfProteinSetMap.put(proteinMatchName, pm);
+                        ProteinStatus status = proteinMatchNameStatusMap.get(proteinMatchName);
+                        if (status == null) {
+                            status = new ProteinStatus();
+                            proteinMatchNameStatusMap.put(proteinMatchName, status);
+                            proteinNameList.add(proteinMatchName);
+                        }
+                        status.inSubSet(rsm);
+                    }
                 }
 
-
-                super.paint(g);
-
-
-
+                Collections.sort(proteinNameList, proteinMatchComparator);
             }
+
+
+
+            fireTableStructureChanged();
         }
-    }
+        private Comparator proteinMatchComparator = null;
 
-    public class SameSetSubSetRenderer implements TableCellRenderer {
+        public String getProteinMatchName(int rowIndex) {
+            return proteinNameList.get(rowIndex);
+        }
+        
+        public ArrayList<ProteinMatch> getProteinMatchArray(int rowIndex) {
+            String proteinName = getProteinMatchName(rowIndex);
+            int size = proteinSetArray.size();
+            
+            ArrayList<ProteinMatch> proteinMatchList = new ArrayList<ProteinMatch>(size);
+            
+            
+            for (int i=0;i<size;i++) {
+                ProteinMatch pm = proteinOfProteinSetsMap.get(proteinSetArray.get(i)).get(proteinName);
+                proteinMatchList.add(pm);
+                /*if (!proteinMatchList.contains(pm)) {
+                    proteinMatchList.add(pm);
+                }*/
+            }
+            return proteinMatchList;
+            
+        }
+        
 
-        private SameSetSubSetPanel sameSetPanel;
-        private SameSetSubSetPanel subSetPanel;
-        private JPanel blankPanel;
+        
 
-        public SameSetSubSetRenderer() {
-            sameSetPanel = new SameSetSubSetPanel(true);
-            subSetPanel = new SameSetSubSetPanel(false);
-            blankPanel = new JPanel();
-            blankPanel.setOpaque(false);
+        public ProteinSet getProteinSet(int i) {
+            return proteinSetArray.get(i);
+        }
+        
+        public ProteinMatch getProteinMatch(Integer resultSetId) {
+            return srcProteinMatchMap.get(resultSetId);
+        }
+
+        public ArrayList<ResultSummary> getResultSummaryList() {
+            if (proteinSetArray == null) {
+                return null;
+            }
+
+            int size = proteinSetArray.size();
+            ArrayList<ResultSummary> rsmArray = new ArrayList<ResultSummary>(size);
+            for (int i = 0; i < size; i++) {
+                rsmArray.add(proteinSetArray.get(i).getResultSummary());
+            }
+
+            return rsmArray;
+        }
+
+        public ResultSummary getResultSummary(int index) {
+            if ((proteinSetArray == null) || (proteinSetArray.isEmpty())) {
+                return null;
+            }
+
+            return proteinSetArray.get(index).getResultSummary();
+        }
+
+        @Override
+        public int getRowCount() {
+            if (proteinNameList == null) {
+                return 0;
+            }
+            return proteinNameList.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            if ((proteinSetArray == null) || (proteinSetArray.isEmpty())) {
+                return 0;
+            }
+            return proteinSetArray.size() + 1;
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+
+            // Same Set of Sub Set
+            if (columnIndex == COLTYPE_PROTEIN_NAME) {
+                // Same Set or Sub Set column
+
+                return proteinNameList.get(rowIndex);
+            }
+
+            // other columns correspond to a ProteinSet
+            ProteinSet proteinSet = proteinSetArray.get(columnIndex - 1);
+            String proteinName = proteinNameList.get(rowIndex);
 
 
+            return proteinMatchNameStatusMap.get(proteinName);
 
         }
 
         @Override
+        public Class getColumnClass(int col) {
+            if (col == COLTYPE_PROTEIN_NAME) {
+                return String.class;
+
+            }
+            return ProteinStatus.class;
+        }
+
+        @Override
+        public String getColumnName(int col) {
+            if (col == COLTYPE_PROTEIN_NAME) {
+                return "Protein";
+            }
+            if (proteinSetArray == null) {
+                return "";
+            }
+            return "Rsm"+proteinSetArray.get(col - 1).getResultSummary().getId().toString();
+        }
+    }
+
+    private class ProteinStatus implements Comparable<ProteinStatus> {
+
+        private int sameSetCount = 0;
+        private int subSetCount = 0;
+        public static final int SAME_SET = 0;
+        public static final int SUB_SET = 1;
+        public static final int NOT_PRESENT = 2;
+        HashMap<ResultSummary, Boolean> sameSetSubSetMap = new HashMap<ResultSummary, Boolean>();
+
+        public ProteinStatus() {
+        }
+
+        public int getStatus(ResultSummary rsm) {
+            Boolean b = sameSetSubSetMap.get(rsm);
+            if (b == null) {
+                return NOT_PRESENT;
+            }
+            if (b.booleanValue()) {
+                return SAME_SET;
+            } else {
+                return SUB_SET;
+            }
+        }
+
+        public void inSameSet(ResultSummary rsm) {
+            sameSetCount++;
+            sameSetSubSetMap.put(rsm, Boolean.TRUE);
+        }
+
+        public void inSubSet(ResultSummary rsm) {
+            subSetCount++;
+            sameSetSubSetMap.put(rsm, Boolean.FALSE);
+        }
+
+        private int getScore() {
+            return sameSetCount * 2 + subSetCount;
+        }
+
+        @Override
+        public int compareTo(ProteinStatus o) {
+            return getScore() - o.getScore();
+        }
+    }
+
+    public static class ProteinStatusRenderer extends DefaultTableRenderer {
+
+        @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            Boolean sameSet = (Boolean) value;
 
-            if (sameSet == null) {
-                return blankPanel;
-            }
-            if (sameSet.booleanValue()) {
-                return sameSetPanel;
-            }
-            return subSetPanel;
+            ProteinStatus proteinStatus = (ProteinStatus) value;
 
+            ProteinSetCmpTableModel model = ((ProteinSetCmpTableModel) table.getModel());
+            ResultSummary rsm = model.getResultSummary(column - 1);
+
+            String nbPeptidesString = null;
+
+            
+            String proteinMatchName = model.getProteinMatchName(row);
+            
+            ProteinSet proteinSet = model.getProteinSet(column - 1);
+            
+            ProteinMatch pm = model.proteinOfProteinSetsMap.get(proteinSet).get(proteinMatchName);
+            
+            PeptideSet pset = (pm == null) ? null : pm.getTransientData().getPeptideSet(rsm.getId());
+            
+            if (pset == null) {
+                nbPeptidesString = "";
+            } else {
+                nbPeptidesString = String.valueOf(pset.getPeptideCount());
+            }
+
+            JLabel l = (JLabel) super.getTableCellRendererComponent(table, nbPeptidesString, isSelected, hasFocus, row, column);
+
+            int status = proteinStatus.getStatus(rsm);
+            if (status == ProteinStatus.SAME_SET) {
+                l.setIcon(RsetProteinGroupComparePanel.sameSetIcon);
+            } else if (status == ProteinStatus.SUB_SET) {
+                l.setIcon(RsetProteinGroupComparePanel.subSetIcon);
+            } else {
+                l.setIcon(null);
+            }
+
+            return l;
+        }
+    }
+
+
+    public class ResultSummaryRenderer extends DefaultTableCellRenderer {
+
+        private TableCellRenderer defaultRenderer = null;
+        
+        public ResultSummaryRenderer(TableCellRenderer defaultRenderer) {
+            this.defaultRenderer = defaultRenderer;
+        }
+        
+        
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+            final int SQUARE_SIZE = 10;
+            
+            String columnName = null;
+            ImageIcon icon = null;
+            
+            int colorIndex = column - 1;
+            
+            if  (column == -1) {
+                columnName = "";
+                icon = null;
+            } else {
+                column = table.convertColumnIndexToModel(column);
+                if (column == 0) {
+                    columnName = "";
+                    icon = null;
+                } else {
+                    columnName = table.getModel().getColumnName(column);
+                    icon = CyclicColorPalette.getColoredImageIcon(SQUARE_SIZE, SQUARE_SIZE, colorIndex, true);
+                }
+            }
+            
+            
+            JLabel label = (JLabel) defaultRenderer.getTableCellRendererComponent(table, columnName, isSelected, hasFocus, row, column);
+            
+            
+            
+            if (icon != null) {
+                
+                List<SortKey> sortList = (List<SortKey>) table.getRowSorter().getSortKeys();
+                Icon sortIcon = label.getIcon();
+                
+                if (!sortList.isEmpty() && (sortIcon != null)) {
+
+                    String iconKey = null;
+                    SortKey key = sortList.get(0);
+                    if (key.getSortOrder() == SortOrder.ASCENDING) {
+                        iconKey = SQUARE_SIZE + "x" + colorIndex + "UP";
+
+                    } else if (key.getSortOrder() == SortOrder.DESCENDING) {
+                        iconKey = SQUARE_SIZE + "x" + colorIndex + "DOWN";
+                    }
+                    icon = CyclicColorPalette.getCombinedImageIcon(icon, sortIcon, 3, iconKey);
+                }
+
+                label.setIcon(icon);
+            }
+            
+           
+            return label;
         }
 
-        private class SameSetSubSetPanel extends JPanel {
 
-            //boolean sameSet;
 
-            public SameSetSubSetPanel(boolean sameSet) {
-
-                //this.sameSet = sameSet;
-
-                setLayout(new GridBagLayout());
-                setBackground(Color.white);
-
-                GridBagConstraints c = new GridBagConstraints();
-                c.fill = GridBagConstraints.BOTH;
-                c.gridx = 0;
-                c.gridy = 0;
-                c.insets = new Insets(5, 0, 5, 0);
-
-                c.weightx = 1;
-                add(Box.createGlue(), c);
-
-                c.weightx = 0;
-                c.gridx++;
-                JLabel subSetLabel = new JLabel((sameSet) ? "Same Set" : "Sub Set");
-                subSetLabel.setBorder(new CompoundBorder(BorderFactory.createLineBorder(Color.black), BorderFactory.createEmptyBorder(2, 2, 2, 2)));
-                add(subSetLabel, c);
-
-                c.gridy++;
-                c.gridx = 0;
-                c.weightx = 1;
-                c.weighty = 1;
-                c.gridwidth = 2;
-                add(Box.createGlue(), c);
-
-            }
-
-        }
     }
 }

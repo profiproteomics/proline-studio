@@ -61,9 +61,9 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
     
 
     @Override
-    public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
-        final ProteinMatch proteinMatch = (ProteinMatch) srcDataBox.getData(false, ProteinMatch.class);
-        final ResultSummary rsm = (ResultSummary) srcDataBox.getData(false, ResultSummary.class);
+    public void dataChanged(Class dataType) {
+        final ProteinMatch proteinMatch = (ProteinMatch) previousDataBox.getData(false, ProteinMatch.class);
+        final ResultSummary rsm = (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
 
         if (proteinMatch == null) {
             ((RsmPeptidesOfProteinPanel) panel).setData(null, null);

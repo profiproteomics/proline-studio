@@ -6,6 +6,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchFromRsetTask;
@@ -51,9 +52,9 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     }
     
     @Override
-    public void dataChanged(AbstractDataBox srcDataBox, Class dataType) {
+    public void dataChanged(Class dataType) {
         
-        final ResultSet _rset = (rset!=null) ? rset : (ResultSet) srcDataBox.getData(false, ResultSet.class);
+        final ResultSet _rset = (rset!=null) ? rset : (ResultSet) previousDataBox.getData(false, ResultSet.class);
 
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -101,7 +102,11 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
  
     @Override
     public void setEntryData(Object data) {
-        rset = (ResultSet) data;
-        dataChanged(null, ResultSet.class);
+        if (data instanceof ResultSet) {
+            rset = (ResultSet) data;
+            dataChanged(ResultSet.class);
+        } else if (data instanceof ResultSummary) {
+            rset = ((ResultSummary) data).getResultSet();
+        }
     }
 }

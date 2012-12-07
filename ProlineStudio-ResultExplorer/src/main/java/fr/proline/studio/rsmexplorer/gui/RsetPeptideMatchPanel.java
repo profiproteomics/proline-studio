@@ -124,8 +124,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
             super(scrollPane.getVerticalScrollBar() );
             setDefaultRenderer(Peptide.class, new PeptideRenderer());
         }
-        
-        private int valueChangedCount = 0;
+
         
         /** 
          * Called whenever the value of the selection changes.
@@ -140,13 +139,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
                 return;
             }
 
-            valueChangedCount++;
-            
-            System.out.println("valueChanged "+valueChangedCount); //JPM.REMOVE
-            
-            if (valueChangedCount % 100 == 0 ) {
-                System.out.println("valueChanged "+valueChangedCount); //JPM.REMOVE
-            }
+
             
             dataBox.propagateDataChanged(PeptideMatch.class);
 

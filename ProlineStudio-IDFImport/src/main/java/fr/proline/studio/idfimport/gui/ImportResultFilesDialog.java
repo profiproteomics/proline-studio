@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -26,7 +28,8 @@ import scala.collection.JavaConversions;
  * @author VD225637
  */
 public class ImportResultFilesDialog extends javax.swing.JDialog {
-
+    
+    private static Logger logger =  LoggerFactory.getLogger(ImportResultFilesDialog.class);    
    
     private IResultFileProvider selectedResultFileProvider;
     private Map<String, JTextField> prop2Component = new HashMap<String, JTextField>();
@@ -40,6 +43,8 @@ public class ImportResultFilesDialog extends javax.swing.JDialog {
         initComponents();
         selectedResultFileProvider = rfProvider;
         initRFProviderPanel();
+        this.validate();
+        this.dispose();
     }
 
     /**
@@ -80,6 +85,11 @@ public class ImportResultFilesDialog extends javax.swing.JDialog {
         });
 
         cancelBtn.setText(org.openide.util.NbBundle.getMessage(ImportResultFilesDialog.class, "ImportResultFilesDialog.cancelBtn.text")); // NOI18N
+        cancelBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelBtnActionPerformed(evt);
+            }
+        });
 
         titleLabel.setText(org.openide.util.NbBundle.getMessage(ImportResultFilesDialog.class, "ImportResultFilesDialog.titleLabel.text")); // NOI18N
 
@@ -184,29 +194,26 @@ public class ImportResultFilesDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(titleLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(29, 29, 29)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(projectIdLabel)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(projectIdTF, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(projectIdLabel))))
+                    .addComponent(projectIdTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(instrumIdTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(instrumIdLabel))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(instrumIdLabel)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(instrumIdTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(paramMsgLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(resultFileProviderPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(resultFileProviderPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(OKBtn)
                     .addComponent(cancelBtn))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -214,8 +221,8 @@ public class ImportResultFilesDialog extends javax.swing.JDialog {
 
     private void OKBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OKBtnActionPerformed
       propertiesValue = new HashMap<String, Object>();
-      if(Strings.isNullOrEmpty(projectIdTF.getText()) || (!StringUtils.isNumeric(projectIdTF.getText())) ){
-          JOptionPane.showMessageDialog(this, NbBundle.getMessage(ImportResultFilesDialog.class, "ImportResultFilesDialog.error.title"), NbBundle.getMessage(ImportResultFilesDialog.class, "ImportResultFilesDialog.require.err.msg", projectIdLabel.getText()),JOptionPane.ERROR_MESSAGE);
+      if(Strings.isNullOrEmpty(projectIdTF.getText()) || (!StringUtils.isNumeric(projectIdTF.getText())) ){          
+          JOptionPane.showMessageDialog(this, org.openide.util.NbBundle.getMessage(ImportResultFilesDialog.class, "ImportResultFilesDialog.error.title"), NbBundle.getMessage(ImportResultFilesDialog.class, "ImportResultFilesDialog.require.err.msg", projectIdLabel.getText()),JOptionPane.ERROR_MESSAGE);
           return;
       }
       if(Strings.isNullOrEmpty(instrumIdTF.getText()) || (!StringUtils.isNumeric(instrumIdTF.getText())) ){
@@ -237,6 +244,10 @@ public class ImportResultFilesDialog extends javax.swing.JDialog {
       
     }//GEN-LAST:event_OKBtnActionPerformed
 
+    private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
+       setVisible(false);
+    }//GEN-LAST:event_cancelBtnActionPerformed
+
     public Map<String, Object> getResultFileProperties(){
         return propertiesValue;
     }
@@ -245,8 +256,9 @@ public class ImportResultFilesDialog extends javax.swing.JDialog {
      * Initialize ResultFileProvider Panel
      */
     private void initRFProviderPanel(){    
-        Map<String, Class<?>> rfProperties  = JavaConversions.mapAsJavaMap(selectedResultFileProvider.resultFileProperties());
         
+        Map<String, Class<?>> rfProperties  = JavaConversions.mapAsJavaMap(selectedResultFileProvider.resultFileProperties());
+        logger.info(" ------- > rfProperties  "+rfProperties.keySet());
         GridBagConstraints gbc = new GridBagConstraints();
         int row = 0; //Start row 0;
        
@@ -258,18 +270,21 @@ public class ImportResultFilesDialog extends javax.swing.JDialog {
             gbc.gridy = row;
             gbc.insets = new java.awt.Insets(20, 20, 5, 5);
 	    gbc.anchor = java.awt.GridBagConstraints.WEST;
-	    gbc.gridwidth = 2;
+	    gbc.gridwidth = 1;
 	    gbc.fill = java.awt.GridBagConstraints.NONE;
-            this.add(new JLabel(e.getKey()), gbc);
+            gbc.weightx=0.2;
+            resultFileProviderPanel.add(new JLabel(e.getKey()), gbc);
             
-            col += 2;            
+            col += 1;            
             gbc.gridx = col;
             gbc.insets = new java.awt.Insets(20, 5, 5, 20);
-            gbc.anchor = java.awt.GridBagConstraints.EAST;
+            gbc.anchor = java.awt.GridBagConstraints.WEST;
             gbc.gridwidth = 2;
-            gbc.fill = java.awt.GridBagConstraints.NONE;
+            gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+            gbc.weightx=0.8;
             JTextField c = new JTextField();
-            this.add(c, gbc);
+            c.setColumns(20);
+            resultFileProviderPanel.add(c, gbc);
             prop2Component.put(e.getKey(),c);
             row++;
         }

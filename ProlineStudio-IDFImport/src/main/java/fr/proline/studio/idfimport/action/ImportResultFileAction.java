@@ -4,7 +4,6 @@
  */
 package fr.proline.studio.idfimport.action;
 
-import com.google.common.collect.Lists;
 import fr.proline.core.om.model.msi.IResultFileProvider;
 import fr.proline.core.om.model.msi.ResultFileProviderRegistry;
 import fr.proline.studio.idfimport.ImportResultFile;
@@ -12,7 +11,9 @@ import fr.proline.studio.idfimport.gui.ImportResultFilesDialog;
 import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
@@ -44,7 +45,7 @@ id = "fr.proline.studio.action.ImportResultFileAction")
 })
 public final class ImportResultFileAction extends AbstractAction { // extends AbstractProgressAction {
 
-    private static Logger logger =  LoggerFactory.getLogger(ImportResultFileAction.class);    
+    protected static Logger logger =  LoggerFactory.getLogger(ImportResultFileAction.class);    
     
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -54,7 +55,8 @@ public final class ImportResultFileAction extends AbstractAction { // extends Ab
     // AbstractProgressAction method containing action to execute
 //    @Override
     public void runAction() {
-        
+         logger.debug(" ------- > Start debug ImportResultFileAction ");
+         
         //Verify ProlineDBManagement is initialized
         if(!ProlineDBManagement.isInitilized()){
             JOptionPane.showMessageDialog(null, Bundle.invalid_dbs_managment(),Bundle.error_title(),JOptionPane.ERROR_MESSAGE);
@@ -62,45 +64,57 @@ public final class ImportResultFileAction extends AbstractAction { // extends Ab
         }
         
         // Get all availiable ResultFileProvider types and ask user to choose one. 
-        List rfProviders = Lists.newArrayList(JavaConversions.asJavaIterator(ResultFileProviderRegistry.getAllResultFileProviders()));
-        IResultFileProvider rfProvider  = (IResultFileProvider)JOptionPane.showInputDialog(null, Bundle.resultFileProviders_type_choose_msg(), Bundle.resultFileProviders_type_choose_title(), JOptionPane.INFORMATION_MESSAGE, null, rfProviders.toArray(), rfProviders.get(0));
+        Iterator<IResultFileProvider> it = JavaConversions.asJavaIterator(ResultFileProviderRegistry.getAllResultFileProviders());
+        Map<String,IResultFileProvider> rfTypeMap = new HashMap<>();
+        while(it.hasNext()){
+            IResultFileProvider nextRFP = it.next();            
+            rfTypeMap.put(nextRFP.fileType(), nextRFP);
+            logger.warn(" ------- > ADDED "+nextRFP.fileType());
+        }
+        
+        ArrayList<String> rfpName = new ArrayList(rfTypeMap.keySet());
+        logger.warn(" ------- > LIST  "+rfpName); 
+        String rfProviderName  = (String)JOptionPane.showInputDialog(null, Bundle.resultFileProviders_type_choose_msg(), Bundle.resultFileProviders_type_choose_title(), JOptionPane.INFORMATION_MESSAGE, null, rfpName.toArray(), rfpName.get(0));
+        if(rfProviderName !=null) {            
+        
+            // Show ImportResultFile dialog with specific properties 
+            ImportResultFilesDialog rfpTypeDialog = new ImportResultFilesDialog(null, true, rfTypeMap.get(rfProviderName));
+            rfpTypeDialog.setLocationRelativeTo(WindowManager.getDefault().getMainWindow());
+            rfpTypeDialog.setVisible(true);
 
-        // Show ImportResultFile dialog with specific properties 
-        ImportResultFilesDialog rfpTypeDialog = new ImportResultFilesDialog(null, true, rfProvider);
-        rfpTypeDialog.setLocationRelativeTo(WindowManager.getDefault().getMainWindow());
-        rfpTypeDialog.setVisible(true);
-           
-        Map<String, Object> propertiesValues = rfpTypeDialog.getResultFileProperties(); // Specified values
-        
-        // Open Identification Result File
-        JFileChooser fchooser = new JFileChooser();
-        fchooser.setMultiSelectionEnabled(false);
-//        fchooser.setFileFilter(new FileNameExtensionFilter("Mascot identification result", "dat"));
-        File resultIdfFile;
-        int result =  fchooser.showOpenDialog(null);
-        switch (result) {
-            case JFileChooser.APPROVE_OPTION :
-                resultIdfFile = fchooser.getSelectedFile();   
-                break;
-            case JFileChooser.ERROR_OPTION :
-            case JFileChooser.CANCEL_OPTION :
-            default :
-                return;                         
+            Map<String, Object> propertiesValues = rfpTypeDialog.getResultFileProperties(); // Specified values
+
+            // Open Identification Result File
+            JFileChooser fchooser = new JFileChooser();
+            fchooser.setMultiSelectionEnabled(false);
+    //        fchooser.setFileFilter(new FileNameExtensionFilter("Mascot identification result", "dat"));
+            File resultIdfFile;
+            int result =  fchooser.showOpenDialog(null);
+            switch (result) {
+                case JFileChooser.APPROVE_OPTION :
+                    resultIdfFile = fchooser.getSelectedFile();   
+                    break;
+                case JFileChooser.ERROR_OPTION :
+                case JFileChooser.CANCEL_OPTION :
+                default :
+                    return;                         
+            }
+            logger.debug(" Import Identification Result file {} ", resultIdfFile.getAbsolutePath()); 
+
+            //Create specific importer
+            ImportResultFile importer = new ImportResultFile(rfTypeMap.get(rfProviderName));
+            //parse spciefied file
+            try {
+                importer.parseIdfResultFile(resultIdfFile, propertiesValues);
+            }catch (Exception e){
+                JOptionPane.showMessageDialog(null, Bundle.resultFile_import_error_msg(e.getMessage()),Bundle.error_title(),JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+                return;
+            }
+
+            //Call ResultFileImporter services... 
+            logger.debug(" Foward Result Set ");
         }
-        logger.debug(" Import Identification Result file {} ", resultIdfFile.getAbsolutePath()); 
-        
-        //Create specific importer
-        ImportResultFile importer = new ImportResultFile(rfProvider);
-        //parse spciefied file
-        try {
-            importer.parseIdfResultFile(resultIdfFile, propertiesValues);
-        }catch (Exception e){
-            JOptionPane.showMessageDialog(null, Bundle.resultFile_import_error_msg(e.getMessage()),Bundle.error_title(),JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        
-        //Call ResultFileImporter services... 
-        logger.debug(" Foward Result Set ");
     }
 
 //    @Override

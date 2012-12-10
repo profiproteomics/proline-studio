@@ -10,16 +10,17 @@ import fr.proline.core.om.provider.msi.impl.ORMPTMProvider;
 import fr.proline.core.om.provider.msi.impl.ORMPeptideProvider;
 import fr.proline.core.om.provider.msi.impl.ORMProteinProvider;
 import fr.proline.core.om.provider.msi.impl.ORMSeqDatabaseProvider;
-import fr.proline.core.service.msi.ResultFileImporter;
+import fr.proline.core.service.msi.ResultFileImporterJPAStorer;
 import fr.proline.repository.ProlineRepository;
 import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.io.File;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.Option;
-import scala.collection.JavaConversions;
+import scala.Tuple2;
+import scala.collection.mutable.Builder;
 
 /**
  *
@@ -36,8 +37,9 @@ public class ImportResultFile {
     protected  IResultFileProvider rfProvider;
     
     public ImportResultFile(IResultFileProvider rfProvider) {
-        initializeOMProviders();
         this.rfProvider = rfProvider;
+        initializeOMProviders();
+
         //VD TODO FIXME : 
         logger.debug(" VALUE JavaLibPath ",System.getProperty("java.library.path") );
         System.setProperty("java.library.path", "./");
@@ -64,22 +66,24 @@ public class ImportResultFile {
     
     public boolean parseIdfResultFile(File idfResultFile, Map<String, Object> parseProperties){
         
-        scala.collection.immutable.Map propScalaMap ;
-        scala.collection.mutable.Map propScalaMap2 = JavaConversions.mapAsScalaMap(parseProperties);
-        propScalaMap = propScalaMap2.toMap(null);
-
-        
-        
-        Option<scala.util.matching.Regex> noneRegex = Option.apply(null);
-
-        ResultFileImporter importer = new ResultFileImporter( ProlineDBManagement.getProlineDBManagement().getAssociatedDBManagement(),
+        Builder builder = scala.collection.immutable.Map$.MODULE$.newBuilder();
+//        scala.collection.mutable.Map propScalaMap2 = JavaConversions.mapAsScalaMap(parseProperties);
+        for(Entry<String, Object> e: parseProperties.entrySet()){
+            if(e.getKey() != IMPORT_RF_INSTRUMNET_ID && e.getKey() != IMPORT_RF_PROJECT_ID){
+                Tuple2<String, Object> t2 = new Tuple2<>(e.getKey(), e.getValue());                    
+                builder.$plus$eq(t2);
+            }            
+        }
+//        builder.$plus$plus$eq(propScalaMap2);
+        scala.collection.immutable.Map<String, Object> propScalaMap = (scala.collection.immutable.Map<String, Object>) builder.result();
+       
+        ResultFileImporterJPAStorer importer = new ResultFileImporterJPAStorer( ProlineDBManagement.getProlineDBManagement().getAssociatedDBManagement(),
                                                               ((Integer)parseProperties.get(IMPORT_RF_PROJECT_ID)),                                                                
                                                               idfResultFile,
                                                               rfProvider.fileType(), 
                                                               getProviderKey(),
                                                               ((Integer)parseProperties.get(IMPORT_RF_INSTRUMNET_ID)),
-                                                              propScalaMap,
-                                                              noneRegex);
+                                                              propScalaMap,null);
         importer.runService();
         targetResultSetId = importer.getTargetResultSetId();
         return true;

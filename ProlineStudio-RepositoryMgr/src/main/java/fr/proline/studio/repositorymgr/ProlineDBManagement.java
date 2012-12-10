@@ -8,6 +8,7 @@ import fr.proline.core.dal.DatabaseManagement;
 import fr.proline.core.orm.utils.JPAUtil;
 import fr.proline.repository.DatabaseConnector;
 import fr.proline.repository.ProlineRepository;
+import fr.proline.repository.ProlineRepository.Databases;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.EntityManager;
@@ -71,7 +72,7 @@ public class ProlineDBManagement {
      */
     public static ProlineDBManagement getProlineDBManagement() {
         if(instance == null)
-            throw new UnsupportedOperationException("noneInitDBManagment_error()");
+            throw new UnsupportedOperationException(noneInitDBManagment_error());
         return instance;
     }
     
@@ -91,9 +92,10 @@ public class ProlineDBManagement {
      * @return the DatabaseConnector for specified Database
      * @exception if specified database is not a singleton database.
      */
-    public DatabaseConnector getDatabaseConnector(ProlineRepository.Databases db) throws IllegalArgumentException{
+    public DatabaseConnector getDatabaseConnector(Databases db) throws IllegalArgumentException{
         switch(db){
-            case PS: return dbMgmt.psDBConnector();
+            case PS: 
+                return dbMgmt.psDBConnector();               
             case PDI : return dbMgmt.pdiDBConnector();
             case UDS : return dbMgmt.udsDBConnector();
             case LCMS : 
@@ -110,7 +112,7 @@ public class ProlineDBManagement {
      * @param projectId the related Project ID to get databaeConnector for
      * @return the DatabaseConnector for specified Database and project
      */
-    public DatabaseConnector getProjectDatabaseConnector(ProlineRepository.Databases db, int projectId ) {
+    public DatabaseConnector getProjectDatabaseConnector(Databases db, int projectId ) {
         switch(db){
             case LCMS : 
                  throw new IllegalArgumentException(not_supported_db_error());   
@@ -144,7 +146,7 @@ public class ProlineDBManagement {
      * @return a EntityManager for specified Database
      * @exception if specified database is not a singleton database.
      */    
-    public EntityManager getProjectEntityManager(ProlineRepository.Databases db, boolean newEM, int projectId){
+    public EntityManager getProjectEntityManager(Databases db, boolean newEM, int projectId){
         switch(db){
             case LCMS:
                 throw new IllegalArgumentException(not_supported_db_error());
@@ -172,7 +174,7 @@ public class ProlineDBManagement {
      * @return a EntityManager for specified Database
      * @exception if specified database is not a singleton database.
      */    
-    public EntityManager getEntityManager(ProlineRepository.Databases db, boolean newEM){
+    public EntityManager getEntityManager(Databases db, boolean newEM){
         switch(db){
             case UDS:
                 if(newEM || udsEM == null || !udsEM.isOpen())
@@ -195,7 +197,7 @@ public class ProlineDBManagement {
         }  
     }
     
-    private EntityManager createEM(ProlineRepository.Databases db, int projectID){
+    private EntityManager createEM(Databases db, int projectID){
         switch(db){
             case UDS: return dbMgmt.udsEMF().createEntityManager();
             case PS:  return dbMgmt.psEMF().createEntityManager();

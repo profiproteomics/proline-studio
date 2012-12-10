@@ -119,12 +119,7 @@
                         <publicPackage>org.xml.sax</publicPackage>
                         <publicPackage>org.xml.sax.ext</publicPackage>
                         <publicPackage>org.xml.sax.helpers</publicPackage>
-                        <publicPackage>scala</publicPackage>
-                        <publicPackage>scala.collection.*</publicPackage>
-                        <publicPackage>scala.reflect</publicPackage>
-                        <publicPackage>scala.runtime</publicPackage>
-                        <publicPackage>scala.util</publicPackage>
-                        <publicPackage>scala.util.matching</publicPackage>
+                        <publicPackage>scala.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
@@ -135,8 +130,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
 

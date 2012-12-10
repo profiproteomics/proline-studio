@@ -16,7 +16,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.run.params.ide/>
-        <netbeans.run.params>${netbeans.run.params.ide} -J-Xmx800m</netbeans.run.params> <!-- -J-Dnetbeans.preresolve.classes=true -->
+        <netbeans.run.params>${netbeans.run.params.ide} -J-Xmx1024m  -J-Dfr.proline.level=1000 </netbeans.run.params> <!-- -J-Dnetbeans.preresolve.classes=true -->
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
     </properties>
 
@@ -99,6 +99,15 @@
                         <all.clusters>${all.clusters}</all.clusters>
                         <branding.token>${brandingToken}</branding.token>
                     </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
         </plugins>

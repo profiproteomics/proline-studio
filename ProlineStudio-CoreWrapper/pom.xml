@@ -115,6 +115,8 @@
                         <publicPackage>javax.xml.parsers</publicPackage>
                         <publicPackage>org.apache.commons.collections</publicPackage>
                         <publicPackage>org.apache.commons.lang3</publicPackage>
+                        <publicPackage>org.joda.time</publicPackage>
+                        <publicPackage>org.joda.time.format</publicPackage>
                         <publicPackage>org.postgresql.*</publicPackage>
                         <publicPackage>org.xml.sax</publicPackage>
                         <publicPackage>org.xml.sax.ext</publicPackage>

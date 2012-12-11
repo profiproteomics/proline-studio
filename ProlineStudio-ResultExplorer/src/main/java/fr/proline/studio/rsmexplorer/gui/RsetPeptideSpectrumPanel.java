@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui;
 
 
@@ -33,7 +29,7 @@ import org.jfree.chart.renderer.xy.XYItemRendererState;
 import org.jfree.data.xy.XYDataset;
 
 /**
- *
+ * Panel used to display a Spectrum of a PeptideMatch
  * @author JM235353
  */
 public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
@@ -195,7 +191,7 @@ public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements Data
 
 
         // Set title
-        String title = "Query " + pm.getMsQuery().getId() + " - " + pm.getTransientData().getPeptide().getSequence();
+        String title = "Query " + pm.getMsQuery().getInitialId() + " - " + pm.getTransientData().getPeptide().getSequence();
         chart.setTitle(title);
 
         // reset X/Y zooming

@@ -183,6 +183,9 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
             
             for (int i = 0; i < proteinMatchArray.size(); i++) {
                 ProteinMatch pm = proteinMatchArray.get(i);
+                if (pm == null) {
+                    continue;
+                }
                 ProteinMatch.TransientData data = pm.getTransientData();
                 Set<Integer> rsmIdSet = data.getRecordedRsmId();
 
@@ -347,6 +350,10 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
+            if (value == null) {
+                return super.getTableCellRendererComponent(table, "", isSelected, hasFocus, row, column);
+            }
+            
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             
             PeptideCompare peptideCompare = (PeptideCompare) value;

@@ -15,6 +15,8 @@ import org.jdesktop.swingx.util.PaintUtils;
  */
 public class DecoratedTable extends JXTable {
 
+    RelativePainterHighlighter.NumberRelativizer relativizer = null;
+    
     public DecoratedTable() {
 
         // allow user to hide/show columns
@@ -30,9 +32,14 @@ public class DecoratedTable extends JXTable {
         Color base = PaintUtils.setSaturation(Color.GREEN, .7f);
         MattePainter matte = new MattePainter(PaintUtils.setAlpha(base, 125));
         RelativePainterHighlighter highlighter = new RelativePainterHighlighter(matte);
-        highlighter.setRelativizer(new RelativePainterHighlighter.NumberRelativizer(column, 0, 100));
+        relativizer = new RelativePainterHighlighter.NumberRelativizer(column, 0, 100);
+        highlighter.setRelativizer(relativizer);
         highlighter.setHighlightPredicate(new HighlightPredicate.ColumnHighlightPredicate(column));
         addHighlighter(highlighter);
 
+    }
+    
+    public RelativePainterHighlighter.NumberRelativizer getRelativizer() {
+        return relativizer;
     }
 }

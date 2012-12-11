@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.PeptideSet;
@@ -38,9 +34,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
         super(table);
     }
     
-    public Long getTaskId() {
-        return taskId;
-    }
+ 
     
     @Override
     public int getColumnCount() {

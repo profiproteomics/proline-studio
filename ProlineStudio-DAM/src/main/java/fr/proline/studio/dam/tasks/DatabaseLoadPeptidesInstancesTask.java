@@ -53,6 +53,9 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     }
     
     private boolean needToFetch(ProteinMatch proteinMatch, ResultSummary rsm) {
+        if (proteinMatch == null) {
+            return false;
+        }
         PeptideSet peptideSet = proteinMatch.getTransientData().getPeptideSet(rsm.getId());
         if (peptideSet == null) {
             return true;

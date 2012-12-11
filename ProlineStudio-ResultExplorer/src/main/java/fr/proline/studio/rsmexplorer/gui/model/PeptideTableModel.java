@@ -1,14 +1,12 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.*;
-import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.studio.utils.DataFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import javax.swing.table.AbstractTableModel;
 
 /**
- *
+ * Table Model for PeptideInstance (peptides of a ProteinMatch in a Rsm)
  * @author JM235353
  */
 public class PeptideTableModel extends AbstractTableModel {

@@ -24,6 +24,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     
     private DefaultTreeModel model;
     
+    private boolean isMainTree;
+    
     private static RSMTree instance = null;
     
     public static RSMTree getTree() {
@@ -35,6 +37,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     
     private RSMTree() {
 
+        isMainTree = true;
+        
         // Model of the tree
         RSMNode top = RSMChildFactory.createNode(new ParentData());
         /*
@@ -49,15 +53,17 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         initTree(top); 
                 
-        startLoading(top); // JPM.TODO
+        startLoading(top);
     }
 
-        private RSMTree(RSMNode top) {
+    private RSMTree(RSMNode top) {
+
+        isMainTree = false;
 
         initTree(top);
-        
+
         startLoading(top); // JPM.TODO
-   
+
     }
     
     private void initTree(RSMNode top) {
@@ -327,7 +333,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (e.isPopupTrigger()) {
+        if (isMainTree && e.isPopupTrigger()) {
             triggerPopup(e);
         }
     }

@@ -25,7 +25,7 @@ public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel impleme
     public RsetProteinsForPeptideMatchPanel() {
         initComponents();
         
-        ((DecoratedTable)proteinTable).displayColumnAsPercentage(ProteinTableModel.COLTYPE_PROTEIN_SCORE);
+        
     }
 
     public ProteinMatch getSelectedProteinMatch() {
@@ -129,6 +129,10 @@ public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel impleme
 
 
     private class ProteinTable extends DecoratedTable  {
+        
+        public ProteinTable() {
+            displayColumnAsPercentage(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_SCORE);
+        }
         
         /** 
          * Called whenever the value of the selection changes.

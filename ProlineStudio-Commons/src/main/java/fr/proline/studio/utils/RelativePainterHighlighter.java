@@ -130,6 +130,13 @@ public class RelativePainterHighlighter extends PainterHighlighter {
             this.valueColumn = column;
         }
 
+        public void setMin(Number min) {
+            this.min = min;
+        }
+        
+        public void setMax(Number max) {
+            this.max = max;
+        }
         
         @Override
         public float getRelativeValue(ComponentAdapter adapter) {

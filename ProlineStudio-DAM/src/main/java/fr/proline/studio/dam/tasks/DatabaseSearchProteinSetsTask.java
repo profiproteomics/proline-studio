@@ -25,7 +25,7 @@ public class DatabaseSearchProteinSetsTask extends AbstractDatabaseTask {
 
     private ResultSummary rsm = null;
     private String        searchAccession = null;
-    private ArrayList     searchResult = null;
+    private ArrayList<Integer>     searchResult = null;
     
     public DatabaseSearchProteinSetsTask(AbstractDatabaseCallback callback, ResultSummary rsm, String searchAccession, ArrayList<Integer> searchResult) {
         super(callback, Priority.HIGH_1);

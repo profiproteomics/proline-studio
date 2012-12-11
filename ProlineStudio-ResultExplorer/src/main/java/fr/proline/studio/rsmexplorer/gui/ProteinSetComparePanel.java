@@ -431,14 +431,25 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             ProteinStatus proteinStatus = (ProteinStatus) value;
 
             ProteinSetCmpTableModel model = ((ProteinSetCmpTableModel) table.getModel());
-            ResultSummary rsm = model.getResultSummary(column - 1);
+            
+            int columnConverted = -1;
+            if  (column != -1) {
+                columnConverted = table.convertColumnIndexToModel(column);
+            }
+            
+            ResultSummary rsm = model.getResultSummary(columnConverted - 1);
 
             String nbPeptidesString = null;
 
             
-            String proteinMatchName = model.getProteinMatchName(row);
+            int rowConverted = -1;
+            if (row != -1) {
+                rowConverted = table.convertRowIndexToModel(row);
+            }
             
-            ProteinSet proteinSet = model.getProteinSet(column - 1);
+            String proteinMatchName = model.getProteinMatchName(rowConverted);
+            
+            ProteinSet proteinSet = model.getProteinSet(columnConverted - 1);
             
             ProteinMatch pm = model.proteinOfProteinSetsMap.get(proteinSet).get(proteinMatchName);
             
@@ -483,18 +494,22 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             String columnName = null;
             ImageIcon icon = null;
             
-            int colorIndex = column - 1;
+            int columnConverted = -1;
+            if  (column != -1) {
+                columnConverted = table.convertColumnIndexToModel(column);
+            }
             
-            if  (column == -1) {
+            int colorIndex = columnConverted - 1;
+            
+            if  (columnConverted == -1) {
                 columnName = "";
                 icon = null;
             } else {
-                column = table.convertColumnIndexToModel(column);
-                if (column == 0) {
+                if (columnConverted == 0) {
                     columnName = "";
                     icon = null;
                 } else {
-                    columnName = table.getModel().getColumnName(column);
+                    columnName = table.getModel().getColumnName(columnConverted);
                     icon = CyclicColorPalette.getColoredImageIcon(SQUARE_SIZE, SQUARE_SIZE, colorIndex, true);
                 }
             }

@@ -9,10 +9,12 @@ import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
+import scala.actors.scheduler.ExecutorScheduler;
 
 
 /**
@@ -107,8 +109,7 @@ public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implem
         
         if ((pm == null) || (pm.getTransientData().getBioSequence() == null)) {
             editorPane.setText("");
-            
-            //dataBox.propagateDataChanged(); //JPM.TODO ???
+
             return;
         }
         
@@ -139,9 +140,10 @@ public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implem
 
        
         editorPane.setText(constructDisplayedSequence(sequence, highlights));
-        sequenceScrollPane.scrollRectToVisible(new Rectangle(0,0,1,1));
         
-        //dataBox.propagateDataChanged(); //JPM.TODO ???
+        editorPane.setCaretPosition(0);
+
+
     }
     private void hightlight(Peptide p, boolean selectedPeptide, int[] highlights) {
                    

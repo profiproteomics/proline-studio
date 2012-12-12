@@ -1,14 +1,12 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
-import fr.proline.studio.gui.SquareColorPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.*;
 import javax.swing.*;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.DecoratedTable;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -114,7 +112,6 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             setModel(new ProteinSetCmpTableModel());
 
             setFillsViewportHeight(true);
-            //getTableHeader().setBackground(Color.white);
 
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -122,8 +119,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
 
             TableCellRenderer defaultRenderer = getTableHeader().getDefaultRenderer();
             
-            getTableHeader().setDefaultRenderer(new ResultSummaryRenderer(defaultRenderer));
-
+            getTableHeader().setDefaultRenderer(new RsmOrProteinHeaderRenderer(defaultRenderer));
 
 
         }
@@ -282,9 +278,6 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             for (int i=0;i<size;i++) {
                 ProteinMatch pm = proteinOfProteinSetsMap.get(proteinSetArray.get(i)).get(proteinName);
                 proteinMatchList.add(pm);
-                /*if (!proteinMatchList.contains(pm)) {
-                    proteinMatchList.add(pm);
-                }*/
             }
             return proteinMatchList;
             
@@ -334,7 +327,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
         @Override
         public int getColumnCount() {
             if ((proteinSetArray == null) || (proteinSetArray.isEmpty())) {
-                return 0;
+                return 1;
             }
             return proteinSetArray.size() + 1;
         }
@@ -342,18 +335,12 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
 
-            // Same Set of Sub Set
             if (columnIndex == COLTYPE_PROTEIN_NAME) {
-                // Same Set or Sub Set column
-
                 return proteinNameList.get(rowIndex);
             }
 
             // other columns correspond to a ProteinSet
-            ProteinSet proteinSet = proteinSetArray.get(columnIndex - 1);
             String proteinName = proteinNameList.get(rowIndex);
-
-
             return proteinMatchNameStatusMap.get(proteinName);
 
         }
@@ -423,6 +410,9 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
         }
     }
 
+    /**
+     * Renderer to display if a protein is in the sameset or subset of a ProteinSet
+     */
     public static class ProteinStatusRenderer extends DefaultTableRenderer {
 
         @Override
@@ -476,12 +466,16 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
         }
     }
 
-
-    public class ResultSummaryRenderer extends DefaultTableCellRenderer {
+    /**
+     * Renderer used for the header of the columns.
+     * It manages the first column which is a Protein or the other columns
+     * which are Result Summaries
+     */
+    public class RsmOrProteinHeaderRenderer extends DefaultTableCellRenderer {
 
         private TableCellRenderer defaultRenderer = null;
         
-        public ResultSummaryRenderer(TableCellRenderer defaultRenderer) {
+        public RsmOrProteinHeaderRenderer(TableCellRenderer defaultRenderer) {
             this.defaultRenderer = defaultRenderer;
         }
         
@@ -489,15 +483,21 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-            final int SQUARE_SIZE = 10;
-            
-            String columnName = null;
-            ImageIcon icon = null;
-            
             int columnConverted = -1;
             if  (column != -1) {
                 columnConverted = table.convertColumnIndexToModel(column);
             }
+
+            // Specific case for the first column which is not a ResultSummary but a Protein Name
+            if (columnConverted == ProteinSetCmpTableModel.COLTYPE_PROTEIN_NAME ) {
+                return defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            }
+            
+            
+            final int SQUARE_SIZE = 10;
+            
+            String columnName = null;
+            ImageIcon icon = null;
             
             int colorIndex = columnConverted - 1;
             

@@ -95,7 +95,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
 
     @Override
     public Object getValueAt(int row, int col) {
-        // Retrieve Protein Group
+        // Retrieve Protein Set
         PeptideMatch peptideMatch = peptideMatches[row];
 
         switch (col) {

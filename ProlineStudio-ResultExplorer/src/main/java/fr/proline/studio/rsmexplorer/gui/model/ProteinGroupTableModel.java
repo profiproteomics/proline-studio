@@ -5,10 +5,7 @@ import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
-import fr.proline.studio.utils.DataFormat;
-import fr.proline.studio.utils.LazyData;
-import fr.proline.studio.utils.LazyTable;
-import fr.proline.studio.utils.LazyTableModel;
+import fr.proline.studio.utils.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -24,7 +21,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDES_COUNT = 3;
     public static final int COLTYPE_SPECTRAL_COUNT = 4;
     public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 5;
-    private static final String[] columnNames = {"Protein Group", "Score", "Proteins", "Peptides", "Spectral Count", "Specific Spectral Count"};
+    private static final String[] columnNames = {"Protein Set", "Score", "Proteins", "Peptides", "Spectral Count", "Specific Spectral Count"};
     private ProteinSet[] proteinSets = null;
     
 
@@ -49,7 +46,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
     @Override
     public Class getColumnClass(int col) {
         if (col == COLTYPE_PROTEIN_SCORE) {
-            return String.class;
+            return Float.class;
         }
         return LazyData.class;
     }
@@ -83,7 +80,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
 
     @Override
     public Object getValueAt(int row, int col) {
-        // Retrieve Protein Group
+        // Retrieve Protein Set
         ProteinSet proteinSet = proteinSets[row];
         Integer rsmId = proteinSet.getResultSummary().getId();
 
@@ -106,7 +103,8 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 return lazyData;
             }
             case COLTYPE_PROTEIN_SCORE:
-                return DataFormat.format(proteinSet.getScore(), 2);
+                Float score = Float.valueOf(proteinSet.getScore());
+                return score;
             case COLTYPE_PROTEINS_COUNT: {
                 
                 
@@ -182,10 +180,34 @@ public class ProteinGroupTableModel extends LazyTableModel {
     public void setData(Long taskId, ProteinSet[] proteinSets) {
         this.proteinSets = proteinSets;
         this.taskId = taskId;
+        
+        updateMinMax();
+        
         fireTableDataChanged();
     }
     
+    private void updateMinMax() {
+        RelativePainterHighlighter.NumberRelativizer relativizer = table.getRelativizer();
+        if (relativizer == null) {
+            return;
+        }
+
+        double maxScore = 0;
+        int size = getRowCount();
+        for (int i = 0; i < size; i++) {
+            ProteinSet proteinSet = proteinSets[i];
+            double score = proteinSet.getScore();
+            if (score > maxScore) {
+                maxScore = score;
+            }
+        }
+        relativizer.setMax(maxScore);
+
+    }
+    
     public void dataUpdated() {
+    
+        // no need to do an updateMinMax : scores are known at once
         
         fireTableDataChanged();
     }

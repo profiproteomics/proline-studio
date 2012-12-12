@@ -421,7 +421,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             proteinSet.getTransientData().setSameSetCount(sameSetCount);
         }
 
-        // All proteins in Protein Group count query
+        // All proteins in Protein Set count query
         // -> used to know number of proteins in Sub set
         /**
          * SELECT ps, count(pm) FROM ProteinMatch pm, ProteinSetProteinMatchItem

@@ -172,6 +172,9 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
 
             if ((proteinMatchArray == null) || (proteinMatchArray.isEmpty())) {
                 peptideMatchList = null;
+                peptideMatchMap.clear();
+                
+                fireTableStructureChanged();
                 return;
             }
             
@@ -230,7 +233,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
             Collections.sort(peptideMatchList, PeptideComparator.getInstance() );
             
             peptideCompare = new PeptideCompare(peptideMatchList.size());
-            
+
             fireTableStructureChanged();
             
         }

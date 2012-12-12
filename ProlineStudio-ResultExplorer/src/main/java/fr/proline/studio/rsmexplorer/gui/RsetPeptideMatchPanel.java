@@ -11,10 +11,10 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.utils.LazyTable;
-import fr.proline.studio.utils.RelativePainterHighlighter;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.event.ListSelectionEvent;
@@ -126,11 +126,11 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(searchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE)
-                    .addComponent(searchTextField))
+                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 252, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(searchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -235,7 +235,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
             super(scrollPane.getVerticalScrollBar());
             setDefaultRenderer(Peptide.class, new PeptideRenderer());
             setDefaultRenderer(MsQuery.class, new MsQueryRenderer());
-            setDefaultRenderer(Float.class, getDefaultRenderer(String.class) );
+            setDefaultRenderer(Float.class, new FloatRenderer( getDefaultRenderer(String.class) ) );
             
             displayColumnAsPercentage(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE);
         }
@@ -269,7 +269,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
             
             // JPM.hack we need to keep the search text
             // to be able to give it if needed to the panel
-            // which display proteins of a protein group
+            // which display proteins of a protein set
             searchTextBeingDone = searchText;
             
             // must convert row index if there is a sorting
@@ -298,7 +298,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
                 int rowSelected = getSelectionModel().getMinSelectionIndex();
                 int rowSelectedInModel = (rowSelected == -1) ? -1 : convertRowIndexToModel(rowSelected);
 
-                // Update Model (but protein group table must not react to the model update)
+                // Update Model (but protein set table must not react to the model update)
 
                 selectionWillBeRestored(true);
                 try {

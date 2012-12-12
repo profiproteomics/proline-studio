@@ -8,6 +8,7 @@ import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.utils.LazyTable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,8 +18,8 @@ import javax.swing.event.ListSelectionEvent;
 import org.openide.util.ImageUtilities;
 
 /**
- * In : Window which display Protein Groups of a Result Summary
- * - Panel used to display Protein Groups (at the top)
+ * In : Window which display Protein Sets of a Result Summary
+ * - Panel used to display Protein Sets (at the top)
  * 
  * @author JM235353
  */
@@ -250,6 +251,8 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
         
         public ProteinGroupTable() {
             super(proteinGroupScrollPane.getVerticalScrollBar() );
+            
+            setDefaultRenderer(Float.class, new FloatRenderer( getDefaultRenderer(String.class) ) );
         }
         
         /** 
@@ -278,7 +281,7 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
             
             // JPM.hack we need to keep the search text
             // to be able to give it if needed to the panel
-            // which display proteins of a protein group
+            // which display proteins of a protein set
             searchTextBeingDone = searchText;
             
             // must convert row index if there is a sorting
@@ -305,7 +308,7 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
             int rowSelected = getSelectionModel().getMinSelectionIndex();
             int rowSelectedInModel = (rowSelected == -1) ? -1 : convertRowIndexToModel(rowSelected);
 
-            // Update Model (but protein group table must not react to the model update)
+            // Update Model (but protein set table must not react to the model update)
             
             selectionWillBeRestored(true);
             try {

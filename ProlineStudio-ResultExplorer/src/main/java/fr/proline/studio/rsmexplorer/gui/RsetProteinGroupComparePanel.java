@@ -89,9 +89,7 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
     private class LegendPanel extends JPanel {
         
         public LegendPanel() {
-            
-            //setBackground(Color.white);
-            
+
             setLayout(new GridBagLayout());
             
             GridBagConstraints c = new GridBagConstraints();

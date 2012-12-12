@@ -13,8 +13,8 @@ import javax.swing.event.ListSelectionEvent;
 
 
 /**
- * In : Window which display Protein Groups of a Result Summary
- * - Panel used to display Proteins of a Protein Group (at the center of the window)
+ * In : Window which display Protein Sets of a Result Summary
+ * - Panel used to display Proteins of a Protein Set (at the center of the window)
  * 
  * @author JM235353
  */

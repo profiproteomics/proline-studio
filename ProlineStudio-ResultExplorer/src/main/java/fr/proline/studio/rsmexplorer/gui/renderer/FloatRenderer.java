@@ -12,9 +12,9 @@ import javax.swing.table.TableCellRenderer;
  */
 public class FloatRenderer implements TableCellRenderer {
     
-    DefaultTableCellRenderer defaultRenderer;
+    TableCellRenderer defaultRenderer;
     
-    public FloatRenderer(DefaultTableCellRenderer defaultRenderer) {
+    public FloatRenderer(TableCellRenderer defaultRenderer) {
         this.defaultRenderer = defaultRenderer;
     }
     

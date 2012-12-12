@@ -57,7 +57,7 @@ public class PeptideTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int col) {
-        // Retrieve Protein Group
+        // Retrieve Protein Set
         PeptideInstance peptideInstance = peptideInstances[row];
 
         switch (col) {

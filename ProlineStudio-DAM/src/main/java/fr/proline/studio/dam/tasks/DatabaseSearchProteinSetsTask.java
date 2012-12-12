@@ -17,7 +17,7 @@ import javax.persistence.TypedQuery;
 /**
  *
  * Used to Search a ProteinName (accession) among the Typical Protein Match
- * or in the SameSet/SubSet of Protein Groups.
+ * or in the SameSet/SubSet of Protein Set.
  * 
  * @author JM235353
  */

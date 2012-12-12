@@ -40,7 +40,7 @@ public class WindowBoxFactory {
         boxes[4] = new DataBoxRsetPeptideSpectrum();
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         
-        return new WindowBox( "Protein Groups", generatePanel(boxes), boxes[0] );
+        return new WindowBox( "Protein Sets", generatePanel(boxes), boxes[0] );
     }
     
     
@@ -75,8 +75,11 @@ public class WindowBoxFactory {
                 panels[panelIdx++] = (JPanel) boxes[i].getPanel();
             } else if ( layout == AbstractDataBox.DataBoxLayout.HORIZONTAL) {
                 JSplitPane sp = new JSplitPane();
-                sp.setLeftComponent(panels[--panelIdx]);
-                sp.setRightComponent((JPanel) boxes[i].getPanel());
+                JComponent leftComponent = panels[--panelIdx];
+                sp.setLeftComponent(leftComponent);
+                JComponent rightComponent = (JComponent) boxes[i].getPanel();
+                sp.setRightComponent(rightComponent);
+                sp.setName(leftComponent.getName()+" / "+rightComponent.getName()); 
                 panels[panelIdx++] = sp;
             } else if ( layout == AbstractDataBox.DataBoxLayout.TABBED) {
                 if (prevLayout == AbstractDataBox.DataBoxLayout.TABBED) {

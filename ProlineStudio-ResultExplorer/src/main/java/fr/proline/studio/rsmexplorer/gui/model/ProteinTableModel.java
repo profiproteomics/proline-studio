@@ -64,7 +64,7 @@ public class ProteinTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int col) {
-        // Retrieve Protein Group
+        // Retrieve Protein Match
         ProteinMatch proteinMatch = getProteinMatch(row);
 
         switch (col) {

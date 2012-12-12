@@ -23,7 +23,7 @@ import javax.persistence.TypedQuery;
 public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicerTask {
     
     // used to slice the task in sub tasks
-    private static final int SLICE_SIZE = 500;
+    private static final int SLICE_SIZE = 100;
     // different possible subtasks
     public static final int SUB_TASK_PEPTIDE = 0;
     public static final int SUB_TASK_MSQUERY = 1;

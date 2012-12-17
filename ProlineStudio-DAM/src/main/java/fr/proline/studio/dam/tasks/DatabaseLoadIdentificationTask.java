@@ -3,7 +3,7 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.uds.Identification;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.repository.IdentificationRepository;
-import fr.proline.repository.ProlineRepository;
+import fr.proline.repository.Database;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.IdentificationData;
 import fr.proline.studio.repositorymgr.ProlineDBManagement;
@@ -39,7 +39,7 @@ public class DatabaseLoadIdentificationTask extends AbstractDatabaseTask {
 
         Integer projectId = project.getId();
 
-        EntityManager entityManagerUDS = ProlineDBManagement.getProlineDBManagement().getEntityManager(ProlineRepository.Databases.UDS, true);
+        EntityManager entityManagerUDS = ProlineDBManagement.getProlineDBManagement().getEntityManager(Database.UDS, true);
         try {
             entityManagerUDS.getTransaction().begin();
 

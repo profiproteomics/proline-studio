@@ -1,8 +1,7 @@
 package fr.proline.studio.dam;
 
+import fr.proline.repository.AbstractDatabaseConnector;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
-import fr.proline.repository.DatabaseConnector;
-import fr.proline.studio.dam.tasks.CreateDatabaseTestTask;
 import fr.proline.studio.dam.tasks.DatabaseConnectionTask;
 import fr.proline.studio.dam.tasks.PriorityChangement;
 import java.util.HashMap;
@@ -31,13 +30,13 @@ public class AccessDatabaseThread extends Thread {
 
         //JPM.TODO : remove it code for test
         // UDS DB properties
-        HashMap<String, String> databaseProperties = new HashMap<String, String>();
-        databaseProperties.put(DatabaseConnector.PROPERTY_USERNAME, "dupierris");
-        databaseProperties.put(DatabaseConnector.PROPERTY_PASSWORD, "dupierris");
-        databaseProperties.put(DatabaseConnector.PROPERTY_DRIVERCLASSNAME, "org.postgresql.Driver");
+        HashMap<Object, Object> databaseProperties = new HashMap<Object, Object>();
+        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY, "dupierris");
+        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, "dupierris");
+        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, "org.postgresql.Driver");
         
 //        databaseProperties.put(DatabaseConnector.PROPERTY_URL, "jdbc:postgresql://localhost:5432/UDS_db");
-        databaseProperties.put(DatabaseConnector.PROPERTY_URL, "jdbc:postgresql://gre037784:5433/UDS_db");
+        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, "jdbc:postgresql://localhost/UDS_db");
 
         DatabaseConnectionTask connection = new DatabaseConnectionTask(null, databaseProperties, getProjectIdTMP());
         addTask(connection);

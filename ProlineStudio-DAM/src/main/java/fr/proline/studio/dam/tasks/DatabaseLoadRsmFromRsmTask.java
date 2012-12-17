@@ -1,7 +1,7 @@
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.repository.ProlineRepository;
+import fr.proline.repository.Database;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ResultSummaryData;
@@ -38,7 +38,7 @@ public class DatabaseLoadRsmFromRsmTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
 
-        EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(ProlineRepository.Databases.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
+        EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
         try {
 
             entityManagerMSI.getTransaction().begin();

@@ -10,9 +10,8 @@ import fr.proline.core.om.provider.msi.impl.ORMPTMProvider;
 import fr.proline.core.om.provider.msi.impl.ORMPeptideProvider;
 import fr.proline.core.om.provider.msi.impl.ORMProteinProvider;
 import fr.proline.core.om.provider.msi.impl.ORMSeqDatabaseProvider;
+import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.core.service.msi.ResultFileImporterJPAStorer;
-import fr.proline.repository.ProlineRepository;
-import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.io.File;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,7 +30,7 @@ public class ImportResultFile {
     public final static String IMPORT_RF_PROJECT_ID="resultfile.project.id";
     public final static String IMPORT_RF_INSTRUMNET_ID="resultfile.instrument.id";
     
-    protected static Logger logger = LoggerFactory.getLogger(ImportResultFile.class);
+    protected static Logger logger = LoggerFactory.getLogger("Proline Studio");//etLogger(ImportResultFile.class);
     private String finalProviderKey ;
     protected Integer targetResultSetId;
     protected  IResultFileProvider rfProvider;
@@ -42,7 +41,7 @@ public class ImportResultFile {
 
         //VD TODO FIXME : 
         logger.debug(" VALUE JavaLibPath ",System.getProperty("java.library.path") );
-        System.setProperty("java.library.path", "./");
+//        System.setProperty("java.library.path", "./");
     }
    
     private String getProviderKey (){
@@ -52,10 +51,10 @@ public class ImportResultFile {
     }
             
      private void initializeOMProviders() {            
-	ProlineDBManagement dbMngt = ProlineDBManagement.getProlineDBManagement();
+	
         // TODO Init PDI db connexion	  
-        EntityManager pdiEM = dbMngt.getEntityManager(ProlineRepository.Databases.PDI, false);
-        EntityManager psEM = dbMngt.getEntityManager(ProlineRepository.Databases.PS, false);
+        EntityManager pdiEM = DatabaseManager.getInstance().getPdiDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager psEM = DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
         
         ProvidersFactory.registerPeptideProvider(getProviderKey(), new ORMPeptideProvider(psEM));
         ProvidersFactory.registerPTMProvider(getProviderKey(), new ORMPTMProvider(psEM));
@@ -77,7 +76,7 @@ public class ImportResultFile {
 //        builder.$plus$plus$eq(propScalaMap2);
         scala.collection.immutable.Map<String, Object> propScalaMap = (scala.collection.immutable.Map<String, Object>) builder.result();
        
-        ResultFileImporterJPAStorer importer = new ResultFileImporterJPAStorer( ProlineDBManagement.getProlineDBManagement().getAssociatedDBManagement(),
+        ResultFileImporterJPAStorer importer = new ResultFileImporterJPAStorer( DatabaseManager.getInstance(),
                                                               ((Integer)parseProperties.get(IMPORT_RF_PROJECT_ID)),                                                                
                                                               idfResultFile,
                                                               rfProvider.fileType(), 

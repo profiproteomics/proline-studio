@@ -2,9 +2,8 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
-import fr.proline.repository.Database;
+import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -68,8 +67,8 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     public boolean fetchData() {
 
         HashMap<Integer, Peptide> peptideMap = new HashMap<Integer, Peptide>();
-        
-        EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -93,7 +92,8 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             entityManagerMSI.close();
         }
 
-        EntityManager entityManagerPS = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.PS, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
+        EntityManager entityManagerPS = DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
+
         try {
 
             entityManagerPS.getTransaction().begin();

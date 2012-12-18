@@ -3,9 +3,8 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
-import fr.proline.repository.Database;
+import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.util.List;
 import javax.persistence.EntityManager;
 
@@ -35,8 +34,7 @@ public class DatabaseLoadProjectTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
 
-
-        EntityManager entityManagerUDS = ProlineDBManagement.getProlineDBManagement().getEntityManager(Database.UDS, true);
+        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 

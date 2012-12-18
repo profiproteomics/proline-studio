@@ -6,9 +6,9 @@ package fr.proline.studio.idfimport.action;
 
 import fr.proline.core.om.model.msi.IResultFileProvider;
 import fr.proline.core.om.model.msi.ResultFileProviderRegistry;
+import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.studio.idfimport.ImportResultFile;
 import fr.proline.studio.idfimport.gui.ImportResultFilesDialog;
-import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ id = "fr.proline.studio.action.ImportResultFileAction")
 })
 @Messages({"CTL_ImportResultFile=Import Identification Result",
            "error.title=Import Result Error",
-           "invalid.dbs.managment=The Databases managment system has not been initialized. Initialize it before running import",
+           "invalid.dbs.managment=The Databases managment system has not been initialized ! ",
            "mascot.parse.error=An error occured while parsing Mascot result file",
            "resultFileProviders.type.choose.msg= Choose the type of identification file to import :",
            "resultFileProviders.type.choose.title=Import Result File",
@@ -58,7 +58,7 @@ public final class ImportResultFileAction extends AbstractAction { // extends Ab
          logger.debug(" ------- > Start debug ImportResultFileAction ");
          
         //Verify ProlineDBManagement is initialized
-        if(!ProlineDBManagement.isInitilized()){
+        if(!DatabaseManager.getInstance().isInitialized()){
             JOptionPane.showMessageDialog(null, Bundle.invalid_dbs_managment(),Bundle.error_title(),JOptionPane.ERROR_MESSAGE);
             return;
         }

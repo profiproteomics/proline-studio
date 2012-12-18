@@ -4,8 +4,8 @@
  */
 package fr.proline.studio.repositorymgr;
 
-import fr.proline.repository.DatabaseConnector;
-import fr.proline.repository.ProlineRepository;
+//import fr.proline.repository.DatabaseConnector;
+//import fr.proline.repository.ProlineRepository;
 import java.io.*;
 import java.net.URL;
 import java.util.HashMap;

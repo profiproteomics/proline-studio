@@ -2,10 +2,10 @@ package fr.proline.studio.dam.tasks;
 
 
 
+import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.repository.Database;
 import fr.proline.repository.DatabaseConnectorFactory;
 import fr.proline.repository.IDatabaseConnector;
-import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.util.Map;
 import javax.persistence.EntityManager;
 
@@ -64,14 +64,14 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             if (databaseProperties != null) {
                 // UDS Connection
                 IDatabaseConnector udsConn = DatabaseConnectorFactory.createDatabaseConnectorInstance(Database.UDS, databaseProperties);
-                ProlineDBManagement.initProlineDBManagment(udsConn);
+                DatabaseManager.getInstance().initialize(udsConn);
             } else {
                 // MSI Connection
-                EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.MSI, true, projectId);
+                EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
                 entityManagerMSI.close();
                 
                 // PS Connection
-                EntityManager entityManagerPS = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.PS, true, projectId);
+                EntityManager entityManagerPS = DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
                 entityManagerPS.close();
             }
         } catch (Exception e) {

@@ -6,10 +6,9 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Identification;
 import fr.proline.core.orm.uds.IdentificationFraction;
 import fr.proline.core.orm.uds.IdentificationSummary;
-import fr.proline.repository.Database;
+import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.studio.dam.*;
 import fr.proline.studio.dam.data.ResultSummaryData;
-import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -41,8 +40,7 @@ public class DatabaseLoadIdentificationFractionTask extends AbstractDatabaseTask
     @Override
     public boolean fetchData() {
 
-        
-        EntityManager entityManagerUDS = ProlineDBManagement.getProlineDBManagement().getEntityManager(Database.UDS, true);
+        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -63,8 +61,7 @@ public class DatabaseLoadIdentificationFractionTask extends AbstractDatabaseTask
             IdentificationSummary identificationSummary = identificationMerged.getActiveSummary();
             if (identificationSummary != null) {
                 Integer resultSummaryId = identificationSummary.getResultSummaryId();
-                
-                EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
+                EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
                 try {
                     
                     entityManagerMSI.getTransaction().begin();

@@ -3,10 +3,9 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.IdentificationFraction;
-import fr.proline.repository.Database;
+import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.studio.dam.*;
 import fr.proline.studio.dam.data.ResultSetData;
-import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -44,8 +43,7 @@ public class DatabaseLoadResultSetTask extends AbstractDatabaseTask {
             return false;
         }
 
-
-        EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
         try {
 
             entityManagerMSI.getTransaction().begin();

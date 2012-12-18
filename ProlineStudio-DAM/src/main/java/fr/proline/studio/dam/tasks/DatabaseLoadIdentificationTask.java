@@ -3,10 +3,9 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.uds.Identification;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.repository.IdentificationRepository;
-import fr.proline.repository.Database;
+import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.IdentificationData;
-import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -39,7 +38,8 @@ public class DatabaseLoadIdentificationTask extends AbstractDatabaseTask {
 
         Integer projectId = project.getId();
 
-        EntityManager entityManagerUDS = ProlineDBManagement.getProlineDBManagement().getEntityManager(Database.UDS, true);
+        
+        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 

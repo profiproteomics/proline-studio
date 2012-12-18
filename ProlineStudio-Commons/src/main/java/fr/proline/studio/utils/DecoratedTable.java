@@ -8,7 +8,7 @@ import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.util.PaintUtils;
 
 /**
- * Table which has a bi-color striping, an hability to select columns viewed and
+ * Table which has a bi-color striping, an ability to select columns viewed and
  * the possibility to display an "histogram" on a column
  *
  * @author JM235353

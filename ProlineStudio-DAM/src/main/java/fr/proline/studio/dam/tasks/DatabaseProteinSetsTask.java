@@ -4,9 +4,8 @@ import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.repository.Database;
+import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.studio.dam.*;
-import fr.proline.studio.repositorymgr.ProlineDBManagement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -67,8 +66,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTask() {
-
-        EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -221,8 +219,8 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         if (slice == null) {
             return true; // nothing to do : should not happen
         }
-
-        EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        
         try {
 
             entityManagerMSI.getTransaction().begin();

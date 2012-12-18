@@ -4,8 +4,8 @@
  */
 package fr.proline.studio.idfimport;
 
-import fr.proline.repository.DatabaseConnector;
-import fr.proline.studio.repositorymgr.ProlineDBManagement;
+import fr.proline.core.orm.util.DatabaseManager;
+import fr.proline.repository.IDatabaseConnector;
 import java.io.File;
 import java.net.URISyntaxException;
 import org.junit.*;
@@ -24,7 +24,7 @@ public class ParseMascotIdentTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {       
-        getOrInitDbManagment();
+        getOrInitDbManager();
     }
 
     @AfterClass
@@ -56,21 +56,16 @@ public class ParseMascotIdentTest {
 //       Assert.assertThat(rf, CoreMatchers.notNullValue());
     }
         
-    private static ProlineDBManagement getOrInitDbManagment()  {        
+    private static DatabaseManager getOrInitDbManager()  {        
         try {
-             ProlineDBManagement.getProlineDBManagement();
-        } catch(UnsupportedOperationException uoe){
-            try {
-                //Should be initialized                
-                DatabaseConnector udsC = new DatabaseConnector(DB_CONFIG_PROP);
-                ProlineDBManagement.initProlineDBManagment(udsC);
-
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);                  
-                return null;
-            }        
-        }
-        return ProlineDBManagement.getProlineDBManagement();
+            if(!DatabaseManager.getInstance().isInitialized())
+            DatabaseManager.getInstance().initialize(DB_CONFIG_PROP);
+        } catch(Exception e){
+            Exceptions.printStackTrace(e);    
+            return null;
+        }        
+    
+        return DatabaseManager.getInstance();
     }
     
 }

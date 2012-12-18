@@ -9,8 +9,8 @@ import fr.proline.core.om.model.msi.SeqDatabase;
 import fr.proline.core.om.provider.msi.impl.ORMPTMProvider;
 import fr.proline.core.om.provider.msi.impl.ORMSeqDatabaseProvider;
 import fr.proline.core.orm.pdi.ProteinIdentifier;
-import fr.proline.repository.DatabaseConnector;
-import fr.proline.repository.ProlineRepository;
+import fr.proline.core.orm.util.DatabaseManager;
+import fr.proline.repository.IDatabaseConnector;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,13 +39,13 @@ public class ProlineDBManagementTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        ProlineDBManagementUtil.getOrInitDbManagment();
+        ProlineDatabaseManagerUtil.getOrInitDbManagment();
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
         try {
-            ProlineDBManagement.getProlineDBManagement().closeAll();            
+            DatabaseManager.getInstance().closeAll(); 
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -59,17 +59,17 @@ public class ProlineDBManagementTest {
     public void tearDown() {
     }
     
-     @Test
+//     @Test
     public void readPSDBInfo(){
         EntityManager psEM = null;
         try {
             
             //Test JDBC Connection 
-            DatabaseConnector dc = ProlineDBManagement.getProlineDBManagement().getDatabaseConnector(ProlineRepository.Databases.PS);
-            Assert.assertThat(dc.getConnection().getMetaData().getURL(), CoreMatchers.equalTo("jdbc:h2:file:target/test-classes/test_ps"));
+            IDatabaseConnector dc = DatabaseManager.getInstance().getPsDbConnector();
+            Assert.assertThat(dc.getDataSource().getConnection().getMetaData().getURL(), CoreMatchers.equalTo("jdbc:h2:file:target/test-classes/test_ps"));
             
             //Test EntityManager Connection 
-            psEM = ProlineDBManagement.getProlineDBManagement().getEntityManager(ProlineRepository.Databases.PS, false);
+            psEM = dc.getEntityManagerFactory().createEntityManager();
             fr.proline.core.orm.ps.PtmSpecificity  ptmORMSpecif = psEM.find(fr.proline.core.orm.ps.PtmSpecificity.class, 100);
             Assert.assertNotNull(ptmORMSpecif);
             logger.debug("PTM Def 100 = "+ptmORMSpecif.getLocation()+" - "+ptmORMSpecif.getResidue()+" - "+ptmORMSpecif.getPtm().getShortName());
@@ -90,17 +90,17 @@ public class ProlineDBManagementTest {
         }
     }
     
-    @Test
+//    @Test
     public void readPDIDBInfo(){
         EntityManager pdiEM = null;
         try {
             
             //Test JDBC Connection 
-            DatabaseConnector dc = ProlineDBManagement.getProlineDBManagement().getDatabaseConnector(ProlineRepository.Databases.PDI);
-            Assert.assertThat(dc.getConnection().getMetaData().getURL(), CoreMatchers.equalTo("jdbc:h2:file:target/test-classes/test_pdi"));
+            IDatabaseConnector dc = DatabaseManager.getInstance().getPdiDbConnector();            
+            Assert.assertThat(dc.getDataSource().getConnection().getMetaData().getURL(), CoreMatchers.equalTo("jdbc:h2:file:target/test-classes/test_pdi"));
             
             //Test EntityManager Connection 
-            pdiEM = ProlineDBManagement.getProlineDBManagement().getEntityManager(ProlineRepository.Databases.PDI, false);
+            pdiEM = dc.getEntityManagerFactory().createEntityManager();
             //Debug purpose
             Map<String,Object> pdiProp = pdiEM.getProperties();
             for(Entry<String, Object> e: pdiProp.entrySet()){
@@ -131,14 +131,13 @@ public class ProlineDBManagementTest {
         }
     }
          
-    @Test
+//    @Test
     public void testGetUDSConnection(){
-        try {
-            
-            DatabaseConnector udsDbConn1= ProlineDBManagement.getProlineDBManagement().getDatabaseConnector(ProlineRepository.Databases.UDS);
+        try {            
+            IDatabaseConnector udsDbConn1 = DatabaseManager.getInstance().getUdsDbConnector();            
             Assert.assertNotNull(udsDbConn1); 
             
-            Connection conn = udsDbConn1.getConnection();
+            Connection conn = udsDbConn1.getDataSource().getConnection();
             String URL = conn.getMetaData().getURL();                        
             Assert.assertThat(URL, CoreMatchers.equalTo("jdbc:h2:file:./target/test-classes/test_uds"));
             

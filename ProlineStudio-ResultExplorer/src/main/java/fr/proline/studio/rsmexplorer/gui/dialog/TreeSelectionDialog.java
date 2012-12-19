@@ -1,17 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.studio.gui.AbstractDialog;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMResultSummaryNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.awt.Dialog;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Window;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
@@ -19,10 +13,10 @@ import javax.swing.JScrollPane;
 import javax.swing.tree.TreePath;
 
 /**
- *
+ * Dialog used to display a subtree and select some of the nodes
  * @author JM235353
  */
-public class TreeSelectionDialog extends AbstractDialog {
+public class TreeSelectionDialog extends DefaultDialog {
     
     private RSMTree tree = null;
     private ArrayList<ResultSummary> selectedRsmList = null;
@@ -30,23 +24,17 @@ public class TreeSelectionDialog extends AbstractDialog {
     public TreeSelectionDialog(Window parent, RSMTree tree, String title) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
      
+        // hide default button
+        setButtonVisible(BUTTON_DEFAULT, false);
+        
         this.tree = tree;
         
         setTitle(title);
         
-        internalPanel.setLayout(new GridBagLayout());
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = 0;
-        c.fill = GridBagConstraints.BOTH;
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.weightx = 1;
-        c.weighty = 1;
 
         JScrollPane scrollPane = new JScrollPane(tree);
         
-        internalPanel.add(scrollPane, c);
+        setInternalComponent(scrollPane);
  
     }
     
@@ -92,6 +80,7 @@ public class TreeSelectionDialog extends AbstractDialog {
         return true;
     }
     
+    @Override
     protected boolean cancelCalled() {
         if (selectedRsmList != null) {
             selectedRsmList.clear();

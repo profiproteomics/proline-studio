@@ -140,7 +140,7 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
                     RSMTree tree = RSMTree.getTree().copyResultSetRootSubTree(rset);
                     
                     Window window = SwingUtilities.getWindowAncestor(legendPanel);
-                    
+                  
                     TreeSelectionDialog treeSelectionDialog = new TreeSelectionDialog(window, tree, "Select Result Summaries");
                     treeSelectionDialog.setLocationRelativeTo(proteinSetComparePanel);
                     treeSelectionDialog.setSelection(proteinSetComparePanel.getResultSummaryList());

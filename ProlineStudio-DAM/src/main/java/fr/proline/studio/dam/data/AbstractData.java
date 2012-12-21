@@ -15,6 +15,7 @@ public abstract class AbstractData {
 
         MAIN,
         PROJECT,
+        DATA_SET,
         IDENTIFICATION,
         IDENTIFICATION_FRACTION,
         RESULT_SET,

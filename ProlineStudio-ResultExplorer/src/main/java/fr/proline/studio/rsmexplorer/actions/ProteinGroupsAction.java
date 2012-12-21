@@ -7,9 +7,16 @@ package fr.proline.studio.rsmexplorer.actions;
 
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.DataSetTMP;
+import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseLoadDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMResultSummaryNode;
 import org.openide.util.NbBundle;
@@ -29,49 +36,59 @@ public class ProteinGroupsAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(RSMNode n) {
         
+        RSMDataSetNode dataSetNode = (RSMDataSetNode) n;
 
-        final ResultSummary rsm = ((RSMResultSummaryNode) n).getResultSummary();
+        final DataSetTMP dataSet = ((DataSetData) dataSetNode.getData()).getDataSet();
+                
+        if (! dataSetNode.hasResultSummary()) {
+            return; // should not happen
+        }
         
-        // prepare window box
-        WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox();
-        wbox.setEntryData(rsm);
-        
-        
-        // open a window to display the window box
-        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-        win.open();
-        win.requestActive(); 
-        
-/*
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-            
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
+        ResultSummary rsm = dataSetNode.getResultSummary();
+        if (rsm != null) {
 
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
-                
-                ViewTopComponent viewer = (ViewTopComponent) WindowManager.getDefault().findTopComponent("ViewTopComponent");
-                
-                
-                if (subTask == null) {
-                    viewer.open();
-                    viewer.requestActive();
+            // prepare window box
+            WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox();
+            wbox.setEntryData(rsm);
 
-                    ProteinSet[] proteinSetArray = rsm.getTransientProteinSets();
-                    viewer.setSelectedResultSummary(taskId, proteinSetArray);
-                } else {
-                    viewer.dataUpdated(subTask);
+
+            // open a window to display the window box
+            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+            win.open();
+            win.requestActive();
+        } else {
+            // we have to load the result summary
+
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
                 }
-            }
-        };
-        
 
-        // ask asynchronous loading of data
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinSetsTask(callback, rsm));
-*/
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask) {
+                    // prepare window box
+                    WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox();
+                    wbox.setEntryData(dataSet.getTransientData().getResultSummary() );
+
+
+                    // open a window to display the window box
+                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                    win.open();
+                    win.requestActive();
+                }
+            };
+
+
+            // ask asynchronous loading of data
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadDataSetTask(callback, dataSet));
+
+
+        }
+        
+  
+
     }
    
    /*public static ProteinGroupsAction getInstance() {

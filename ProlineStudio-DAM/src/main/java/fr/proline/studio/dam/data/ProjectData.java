@@ -4,7 +4,7 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadIdentificationTask;
+import fr.proline.studio.dam.tasks.DatabaseLoadDataSetTask;
 import java.util.List;
 
 /**
@@ -33,7 +33,7 @@ public class ProjectData extends AbstractData {
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
 
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadIdentificationTask(callback, project, list));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadDataSetTask(callback, project, list));
 
     }
 }

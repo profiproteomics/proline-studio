@@ -15,6 +15,7 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
     public enum NodeTypes {
 
         TREE_PARENT,
+        DATA_SET,
         RESULT_SET,
         RESULT_SUMMARY,
         IDENTIFICATION,

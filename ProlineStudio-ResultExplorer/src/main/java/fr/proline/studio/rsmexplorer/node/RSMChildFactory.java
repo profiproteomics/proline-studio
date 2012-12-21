@@ -30,6 +30,9 @@ public class RSMChildFactory  {
             case RESULT_SUMMARY:
                 result = new RSMResultSummaryNode(key);
                 break;
+            case DATA_SET:
+                result = new RSMDataSetNode(key);
+                break;
             case IDENTIFICATION:
                 result = new RSMIdentificationNode(key);
                 break;

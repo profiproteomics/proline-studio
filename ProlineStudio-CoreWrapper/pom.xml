@@ -107,6 +107,9 @@
                         <publicPackage>fr.proline.module.parser.mascot</publicPackage>
                         <publicPackage>fr.proline.repository</publicPackage>
                         <publicPackage>fr.proline.util</publicPackage>
+                        <publicPackage>fr.proline.util.io</publicPackage>
+                        <publicPackage>fr.proline.util.misc</publicPackage>
+                        <publicPackage>fr.proline.util.regex</publicPackage>
                         <publicPackage>javax.annotation</publicPackage>
                         <publicPackage>javax.annotation.meta</publicPackage>
                         <publicPackage>javax.persistence.*</publicPackage>

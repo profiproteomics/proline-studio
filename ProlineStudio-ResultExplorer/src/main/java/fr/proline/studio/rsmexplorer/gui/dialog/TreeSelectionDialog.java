@@ -1,9 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMResultSummaryNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.awt.Dialog;
 import java.awt.Window;
@@ -19,7 +20,7 @@ import javax.swing.tree.TreePath;
 public class TreeSelectionDialog extends DefaultDialog {
     
     private RSMTree tree = null;
-    private ArrayList<ResultSummary> selectedRsmList = null;
+    private ArrayList<DataSetTMP> selectedDataSetList = null;
     
     public TreeSelectionDialog(Window parent, RSMTree tree, String title) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
@@ -42,8 +43,11 @@ public class TreeSelectionDialog extends DefaultDialog {
         tree.setSelection(rsmArray);
     }
     
-    public ArrayList<ResultSummary> getSelectedRsmList() {
-        return selectedRsmList;
+    public ArrayList<DataSetTMP> getSelectedDataSetList() {
+        ArrayList<DataSetTMP> returnedList = selectedDataSetList;
+        selectedDataSetList = null; // avoid a potential memory leak
+        
+        return returnedList;
     }
     
     @Override
@@ -56,21 +60,19 @@ public class TreeSelectionDialog extends DefaultDialog {
             return false;
         }
 
-        if (selectedRsmList == null) {
-            selectedRsmList = new ArrayList<ResultSummary>();
-        } else {
-            selectedRsmList.clear();
-        }
+        selectedDataSetList = new ArrayList<DataSetTMP>();
+
         
         int size = paths.length;
         for (int i=0;i<size;i++) {
             RSMNode node = (RSMNode) paths[i].getLastPathComponent();
-            if (node.getType() == RSMNode.NodeTypes.RESULT_SUMMARY) {
-                ResultSummary rsm = ((RSMResultSummaryNode) node).getResultSummary();
-                selectedRsmList.add(rsm);
+            if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
+                RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
+
+                selectedDataSetList.add(dataSetNode.getDataSet());
             }
         }
-        if (selectedRsmList.isEmpty()) {
+        if (selectedDataSetList.isEmpty()) {
             showSelectionError();
             return false;
         }
@@ -82,9 +84,8 @@ public class TreeSelectionDialog extends DefaultDialog {
     
     @Override
     protected boolean cancelCalled() {
-        if (selectedRsmList != null) {
-            selectedRsmList.clear();
-        }
+        selectedDataSetList = null;
+
         return true;
     }
     

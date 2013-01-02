@@ -4,6 +4,7 @@
  */
 package fr.proline.studio.rsmexplorer.node;
 
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.data.AbstractData;
@@ -44,6 +45,10 @@ public class RSMDataSetNode extends RSMNode {
 
     }
     
+    public DataSetTMP getDataSet() {
+        return ((DataSetData) getData()).getDataSet();
+    }
+    
     public boolean hasResultSummary() {
         DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
         return (dataSet.getResultSummaryId() != null);
@@ -55,12 +60,42 @@ public class RSMDataSetNode extends RSMNode {
     }
     
     public ResultSummary getResultSummary() {
-        return null; //JPM.TODO
+        // getResultSummary() can return null if the resultSummary has not been loaded previously
+        DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
+        return dataSet.getTransientData().getResultSummary();
+    }
+    
+    
+    public boolean hasResultSet() {
+        DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
+        return (dataSet.getResultSetId() != null);
     }
     
     public Integer getResultSetId() {
         return ((DataSetData) getData()).getDataSet().getResultSetId();
     }
+    
+    public ResultSet getResultSet() {
+        // getResultSet() can return null if the resultSet has not been loaded previously
+        DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
+        return dataSet.getTransientData().getResultSet();
+    }
+    
+    @Override
+    public boolean canBeDeleted() {
+        
+        // for the moment, we can delete only empty DataSet with no leaf
+        if (hasResultSet()) {
+            return false;
+        }
+        if (hasResultSummary()) {
+            return false;
+        }
+        
+        return isLeaf();
+        
+    }
+    
     
     /*@Override
     public Image getOpenedIcon(int i) {

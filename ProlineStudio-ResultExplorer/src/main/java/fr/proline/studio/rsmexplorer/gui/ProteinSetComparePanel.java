@@ -362,7 +362,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             if (proteinSetArray == null) {
                 return "";
             }
-            return "Rsm"+proteinSetArray.get(col - 1).getResultSummary().getId().toString();
+            return "Rsm"+proteinSetArray.get( col - 1).getResultSummary().getId().toString(); //JPM.TODO
         }
     }
 

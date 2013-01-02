@@ -36,5 +36,7 @@ public abstract class AbstractRSMAction extends AbstractAction {
         return new JMenuItem(this);
     }
     
+    public abstract void updateEnabled(RSMNode[] selectedNodes);
+
     
 }

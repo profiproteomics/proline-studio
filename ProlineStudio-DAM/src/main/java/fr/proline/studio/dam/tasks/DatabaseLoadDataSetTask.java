@@ -8,12 +8,9 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.dam.data.ResultSummaryData;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 
 /**
  * Used to load dataset in two cases :
@@ -25,6 +22,7 @@ public class DatabaseLoadDataSetTask extends AbstractDatabaseTask {
     
     private Project project = null;
     private DataSetTMP dataSet = null;
+    private ArrayList<DataSetTMP> dataSetList = null;
     private List<AbstractData> list = null;
 
     private int action;
@@ -58,12 +56,52 @@ public class DatabaseLoadDataSetTask extends AbstractDatabaseTask {
         action = LOAD_RSET_AND_RSM_OF_DATA_SET; 
     }
     
+    public DatabaseLoadDataSetTask(AbstractDatabaseCallback callback, ArrayList<DataSetTMP> dataSetList) {
+        super(callback);
+        this.dataSetList = dataSetList;
+
+        action = LOAD_RSET_AND_RSM_OF_DATA_SET;
+    }
+    
     
     @Override
     public boolean needToFetch() {
-        return true; // this task is used only one time for each node
+        //JPM.TODO
+        switch (action) {
 
+            case LOAD_PARENT_DATA_SET:
+            case LOAD_CHILDREN_DATA_SET:
+                // this task is used only one time for each node
+                return true;
+            case LOAD_RSET_AND_RSM_OF_DATA_SET:
+                if (dataSetList != null) {
+                    int nbDataSet = dataSetList.size();
+                    for (int i=0;i<nbDataSet;i++) {
+                        DataSetTMP d = dataSetList.get(i);
+                        if (needToFetchRsetAndRsm(d)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                } else {
+                    return needToFetchRsetAndRsm(dataSet);
+                }
+        }
+
+        return true; // should never be called
     }
+    private boolean needToFetchRsetAndRsm(DataSetTMP dataSet) {
+       if ((dataSet.getResultSetId() != null) && (dataSet.getTransientData().getResultSet() == null)) {
+           // need to fetch a result set
+           return true;
+       }
+       if ((dataSet.getResultSummaryId() != null) && (dataSet.getTransientData().getResultSummary() == null)) {
+           // need to fetch a result summary
+           return true;
+       }
+       return false;
+    }
+    
     
     @Override
     public boolean fetchData() {
@@ -208,20 +246,15 @@ public class DatabaseLoadDataSetTask extends AbstractDatabaseTask {
 
             entityManagerMSI.getTransaction().begin();
 
-            Integer resultSetId = dataSet.getResultSetId();
-            if (resultSetId != null) {
-                ResultSet rset = entityManagerMSI.find(ResultSet.class, resultSetId);
-            
-                dataSet.getTransientData().setResultSet(rset);
+            if (dataSetList != null) {
+                int nbDataSet = dataSetList.size();
+                for (int i=0; i<nbDataSet;i++) {
+                    fetchRsetAndRsmForOneDataSet(entityManagerMSI, dataSetList.get(i));
+                }
+                
+            } else if (dataSet != null) {
+                fetchRsetAndRsmForOneDataSet(entityManagerMSI, dataSet);
             }
-            
-            Integer resultSummaryId = dataSet.getResultSummaryId();
-            if (resultSummaryId != null) {
-                ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, resultSummaryId);
-            
-                dataSet.getTransientData().setResultSummary(rsm);
-            }
-
             entityManagerMSI.getTransaction().commit();
 
         } catch (RuntimeException e) {
@@ -233,5 +266,23 @@ public class DatabaseLoadDataSetTask extends AbstractDatabaseTask {
 
         return true;
     }
+    
+    private void fetchRsetAndRsmForOneDataSet(EntityManager entityManagerMSI, DataSetTMP d) {
+
+        Integer resultSetId = d.getResultSetId();
+        if (resultSetId != null) {
+            ResultSet rset = entityManagerMSI.find(ResultSet.class, resultSetId);
+
+            d.getTransientData().setResultSet(rset);
+        }
+
+        Integer resultSummaryId = d.getResultSummaryId();
+        if (resultSummaryId != null) {
+            ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, resultSummaryId);
+
+            d.getTransientData().setResultSummary(rsm);
+        }
+    }
+    
     
 }

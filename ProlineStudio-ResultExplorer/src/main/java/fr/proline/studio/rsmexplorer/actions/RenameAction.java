@@ -1,10 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.actions;
 
-
+import fr.proline.studio.rsmexplorer.gui.dialog.ValidationDialog;
+import fr.proline.studio.rsmexplorer.node.RSMNode;
+import java.awt.Window;
+import javax.swing.SwingUtilities;
 import org.openide.util.NbBundle;
 
 /**
@@ -14,17 +13,35 @@ import org.openide.util.NbBundle;
 public class RenameAction extends AbstractRSMAction {
 
     //private static RenameAction instance = null;
-
     public RenameAction() {
         super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"));
     }
 
-    /*public static RenameAction getInstance() {
-        if (instance == null) {
-            instance = new RenameAction();
-        }
-        return instance;
+    @Override
+    public void actionPerformed(RSMNode n) {
+
+
+        ValidationDialog dialog = new ValidationDialog(null);
+        dialog.setVisible(true);  //JPM.TODO : remove it : not to be put here
+
+        /*
+         * DatabaseConnection connection = null;
+         * ConnectionManager.getDefault().showConnectionDialog(connection);
+         */
+
     }
+        
+    
+    @Override
+    public void updateEnabled(RSMNode[] selectedNodes) {
+
+        // always disabled for the moment
+        setEnabled(false);
+
+    }
+    
+    
+    /*
 
     @Override
     protected void performAction(Node[] nodes) {
@@ -74,13 +91,5 @@ public class RenameAction extends AbstractRSMAction {
         return true;*/
   /*  }
 
-    @Override
-    public String getName() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public HelpCtx getHelpCtx() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }*/
+*/
 }

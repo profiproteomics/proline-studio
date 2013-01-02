@@ -78,6 +78,12 @@ public abstract class AbstractDatabaseTask implements Comparable<AbstractDatabas
         return currentPriority;
     }
 
+    public void setPriority(Priority priority) {
+        defaultPriority = priority;
+        currentPriority = priority;
+    }
+    
+    
     public void applyPriorityChangement(PriorityChangement priorityChangement) {
         incrementPriority();
     }

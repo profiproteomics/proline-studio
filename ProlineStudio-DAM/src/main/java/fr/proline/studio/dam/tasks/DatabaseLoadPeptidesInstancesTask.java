@@ -91,9 +91,19 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         } finally {
             entityManagerMSI.close();
         }
-
-        EntityManager entityManagerPS = DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
-
+        EntityManager entityManagerPS = null;
+        try {
+        
+            DatabaseManager.getInstance();
+            DatabaseManager.getInstance().getPsDbConnector();
+            DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory();
+            
+        entityManagerPS = DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        
         try {
 
             entityManagerPS.getTransaction().begin();

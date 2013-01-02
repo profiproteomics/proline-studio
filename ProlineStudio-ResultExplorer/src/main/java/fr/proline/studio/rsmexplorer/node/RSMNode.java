@@ -16,10 +16,10 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
 
         TREE_PARENT,
         DATA_SET,
-        RESULT_SET,
-        RESULT_SUMMARY,
-        IDENTIFICATION,
-        IDENTIFICATION_FRACTION,
+        //RESULT_SET,
+        //RESULT_SUMMARY,
+        //IDENTIFICATION,
+        //IDENTIFICATION_FRACTION,
         HOUR_GLASS
     }
     private static Action[] actionInstance = null;
@@ -77,6 +77,11 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
      //   super.setName(name);
     }
 
+    public boolean canBeDeleted() {
+        return false;
+    }
+    
+    
     /*@Override
     public Action[] getActions(boolean arg0) {
 

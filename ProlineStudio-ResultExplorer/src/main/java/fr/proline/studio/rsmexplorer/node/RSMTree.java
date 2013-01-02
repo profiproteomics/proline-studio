@@ -21,24 +21,22 @@ import javax.swing.tree.*;
  * @author JM235353
  */
 public class RSMTree extends JTree implements TreeWillExpandListener, MouseListener {
-    
+
     private DefaultTreeModel model;
-    
     private boolean isMainTree;
-    
     private static RSMTree instance = null;
-    
+
     public static RSMTree getTree() {
         if (instance == null) {
             instance = new RSMTree();
         }
         return instance;
     }
-    
+
     private RSMTree() {
 
         isMainTree = true;
-        
+
         // Model of the tree
         RSMNode top = RSMChildFactory.createNode(new ParentData());
         /*
@@ -51,8 +49,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
          * loading addMouseListener(this); // used for popup triggering
          */
 
-        initTree(top); 
-                
+        initTree(top);
+
         startLoading(top);
     }
 
@@ -65,7 +63,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         startLoading(top); // JPM.TODO
 
     }
-    
+
     private void initTree(RSMNode top) {
         model = new DefaultTreeModel(top);
         setModel(model);
@@ -84,34 +82,36 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         int rsetId = rset.getId().intValue();
 
-        RSMResultSetNode rsetNode = findResultSetNode((RSMNode) this.getModel().getRoot(), rsetId);
+        RSMDataSetNode rsetNode = findResultSetNode((RSMNode) this.getModel().getRoot(), rsetId);
 
         if (rsetNode == null) {
             return null;
         }
-        
+
         rsetNode = findResultSetNodeRootParent(rsetNode);
 
         return new RSMTree(rsetNode);
 
     }
 
-    private RSMResultSetNode findResultSetNode(RSMNode node, int rsetId) {
+    private RSMDataSetNode findResultSetNode(RSMNode node, int rsetId) {
 
         int nbChildren = node.getChildCount();
 
         for (int i = 0; i < nbChildren; i++) {
             RSMNode childNode = (RSMNode) node.getChildAt(i);
-            if (childNode.getType() == RSMNode.NodeTypes.RESULT_SET) {
-                RSMResultSetNode rsetNode = ((RSMResultSetNode) childNode);
-                if (rsetNode.getResultSet().getId().intValue() == rsetId) {
-                    return rsetNode;
+            if (childNode.getType() == RSMNode.NodeTypes.DATA_SET) {
+                RSMDataSetNode dataSetNode = ((RSMDataSetNode) childNode);
+                Integer resultSetId = dataSetNode.getResultSetId();
+
+                if ((resultSetId != null) && (resultSetId.intValue() == rsetId)) {
+                    return dataSetNode;
                 }
             }
             if (!childNode.isLeaf()) {
-                RSMResultSetNode rsetNode = findResultSetNode(childNode, rsetId);
-                if (rsetNode != null) {
-                    return rsetNode;
+                RSMDataSetNode dataSetNode = findResultSetNode(childNode, rsetId);
+                if (dataSetNode != null) {
+                    return dataSetNode;
                 }
             }
 
@@ -120,32 +120,31 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         return null;
     }
 
-    private RSMResultSetNode findResultSetNodeRootParent(RSMResultSetNode node) {
+    private RSMDataSetNode findResultSetNodeRootParent(RSMDataSetNode node) {
 
-        RSMResultSetNode resultSetRootParent = node;
+        RSMDataSetNode resultSetRootParent = node;
         RSMNode parentNode = (RSMNode) node.getParent();
         while (parentNode != null) {
-            if (parentNode.getType() == RSMNode.NodeTypes.RESULT_SET) {
-                resultSetRootParent = (RSMResultSetNode) parentNode;
+            if (parentNode.getType() == RSMNode.NodeTypes.DATA_SET) {
+                resultSetRootParent = (RSMDataSetNode) parentNode;
             }
             parentNode = (RSMNode) parentNode.getParent();
         }
 
         return resultSetRootParent;
     }
-    
-    
+
     public void setSelection(ArrayList<ResultSummary> rsmArray) {
 
-        if (! loadingMap.isEmpty()) {
+        if (!loadingMap.isEmpty()) {
             // Tree is loading, we must postpone the selection
             selectionFromrsmArray = rsmArray;
             return;
         }
-        
+
         RSMNode rootNode = (RSMNode) getModel().getRoot();
         ArrayList<TreePath> selectedPathArray = new ArrayList<TreePath>(rsmArray.size());
-        
+
         ArrayList<RSMNode> nodePath = new ArrayList<RSMNode>();
         nodePath.add(rootNode);
         setSelectionImpl(rootNode, nodePath, rsmArray, selectedPathArray);
@@ -162,17 +161,23 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         Enumeration en = parentNode.children();
         while (en.hasMoreElements()) {
             RSMNode node = (RSMNode) en.nextElement();
-            if (node.getType() == RSMNode.NodeTypes.RESULT_SUMMARY) {
-                ResultSummary rsm = ((RSMResultSummaryNode) node).getResultSummary();
-                int size = rsmArray.size();
-                for (int i = 0; i < size; i++) {
-                    ResultSummary rsmItem = rsmArray.get(i);
-                    if (rsmItem.getId().intValue() == rsm.getId().intValue()) {
-                        nodePath.add(node);
-                        TreePath path = new TreePath(nodePath.toArray());
-                        selectedPathArray.add(path);
-                        nodePath.remove(nodePath.size()-1);
-                        break;
+            if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
+
+                RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
+                Integer rsmId = dataSetNode.getResultSummaryId();
+                if (rsmId != null) {
+
+
+                    int size = rsmArray.size();
+                    for (int i = 0; i < size; i++) {
+                        ResultSummary rsmItem = rsmArray.get(i);
+                        if (rsmItem.getId().intValue() == rsmId.intValue()) {
+                            nodePath.add(node);
+                            TreePath path = new TreePath(nodePath.toArray());
+                            selectedPathArray.add(path);
+                            nodePath.remove(nodePath.size() - 1);
+                            break;
+                        }
                     }
                 }
             }
@@ -181,9 +186,9 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 setSelectionImpl(node, nodePath, rsmArray, selectedPathArray);
             }
         }
-        nodePath.remove(nodePath.size()-1);
+        nodePath.remove(nodePath.size() - 1);
     }
-    
+
     
     @Override
     public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
@@ -277,19 +282,42 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     }
     
+    /**
+     * Return an array of all selected nodes of the tree
+     * @return 
+     */
+    public RSMNode[] getSelectedNodes() {
+        TreePath[] paths = getSelectionModel().getSelectionPaths();
+        
+        int nbPath = paths.length;
+        
+        RSMNode[] nodes = new RSMNode[nbPath];
+        
+        for (int i=0;i<nbPath;i++) {
+            nodes[i] = (RSMNode) paths[i].getLastPathComponent();
+        }
+
+        return nodes;
+    }
+    
     private void triggerPopup(MouseEvent e) {
         
         // creation of the popup if needed
         if (popup == null) {
             
             // create the actions
-            actions = new ArrayList<AbstractRSMAction>(5);  // <--- get in sync
+            actions = new ArrayList<AbstractRSMAction>(7);  // <--- get in sync
             
-            DisplayAction displayAction = new DisplayAction();
-            actions.add(displayAction);
+            DisplayPeptidesAction displayPeptidesAction = new DisplayPeptidesAction();
+            actions.add(displayPeptidesAction);
             
-            ChildParentAction childParentAction = new ChildParentAction();
-            actions.add(childParentAction);
+            DisplayProteinSetsAction displayProteinSetsAction = new DisplayProteinSetsAction();
+            actions.add(displayProteinSetsAction);
+            
+            actions.add(null);  // separator
+            
+            AddAction addAction = new AddAction();
+            actions.add(addAction);
             
             actions.add(null);  // separator
             
@@ -298,6 +326,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             
             DeleteAction deleteAction = new DeleteAction();
             actions.add(deleteAction);
+            
             
             // add actions to popup
             popup = new JPopupMenu();
@@ -312,8 +341,19 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         }
         
+        // retrieve selected nodes
+        RSMNode[] selectedNodes = getSelectedNodes();
+        
         // update of the enable/disable state
-        //popup.setE
+        for (int i=0;i<actions.size();i++) {
+            AbstractRSMAction action = actions.get(i);
+            
+            if (action == null) {
+                continue;
+            }
+            
+            action.updateEnabled(selectedNodes);
+        }
         
         popup.show( (JComponent)e.getSource(), e.getX(), e.getY() );
     }

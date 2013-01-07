@@ -53,17 +53,17 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Proline-DAL</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Proline-OMP</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Proline-OM</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>commons-collections</artifactId>
@@ -74,19 +74,19 @@
         <dependency>
             <groupId>fr.proline</groupId>
             <artifactId>Proline-OM</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>compile</scope>
         </dependency> <!-- JPM.TODO : to remove when we no longer use ResultSet Generator -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Proline-Databases</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Proline-ORM</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>0.0.4-SNAPSHOT</version>
         </dependency>        
     </dependencies>
 

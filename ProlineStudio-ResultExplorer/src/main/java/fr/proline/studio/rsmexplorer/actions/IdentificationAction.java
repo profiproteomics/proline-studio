@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 
-import fr.proline.studio.dam.data.IdentificationFractionData;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import java.awt.Component;

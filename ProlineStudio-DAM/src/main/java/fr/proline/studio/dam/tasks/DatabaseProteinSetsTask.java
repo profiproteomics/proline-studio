@@ -45,7 +45,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
     @Override
     public boolean needToFetch() {
-        return (rsm.getTransientProteinSets() == null);
+        return (rsm.getTransientData().getProteinSetArray() == null);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
 
             ProteinSet[] proteinSetArray = proteinSets.toArray(new ProteinSet[proteinSets.size()]);
-            rsm.setTransientProteinSets(proteinSetArray);
+            rsm.getTransientData().setProteinSetArray(proteinSetArray);
 
             proteinSetMap = new HashMap<Integer, ProteinSet>();
             for (int i = 0; i < proteinSetArray.length; i++) {
@@ -261,7 +261,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      */
     private void typicalProteinMatch(EntityManager entityManagerMSI, SubTask subTask) {
 
-        ProteinSet[] proteinSetArray = rsm.getTransientProteinSets();
+        ProteinSet[] proteinSetArray = rsm.getTransientData().getProteinSetArray();
         List sliceOfProteinMatchIds = subTask.getSubList(proteinMatchIds);
 
         Query typicalProteinQuery = entityManagerMSI.createQuery("SELECT pm, pepset FROM ProteinMatch pm, PeptideSet pepset, PeptideSetProteinMatchMap pset_to_pm  WHERE pm.id IN (:listId) AND pset_to_pm.id.proteinMatchId=pm.id AND pset_to_pm.id.peptideSetId=pepset.id AND pset_to_pm.resultSummary.id=:rsmId");
@@ -297,7 +297,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      */
     private void spectralCount(EntityManager entityManagerMSI, SubTask subTask) {
 
-        ProteinSet[] proteinSetArray = rsm.getTransientProteinSets();
+        ProteinSet[] proteinSetArray = rsm.getTransientData().getProteinSetArray();
         List sliceOfProteinMatchIds = subTask.getSubList(proteinMatchIds);
 
 
@@ -341,7 +341,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      */
     private void specificSpectralCount(EntityManager entityManagerMSI, SubTask subTask) {
 
-        ProteinSet[] proteinSetArray = rsm.getTransientProteinSets();
+        ProteinSet[] proteinSetArray = rsm.getTransientData().getProteinSetArray();
         List sliceOfProteinMatchIds = subTask.getSubList(proteinMatchIds);
 
 

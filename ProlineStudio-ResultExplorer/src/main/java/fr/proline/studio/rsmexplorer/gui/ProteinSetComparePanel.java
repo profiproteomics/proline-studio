@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
+import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.*;
@@ -362,7 +363,17 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             if (proteinSetArray == null) {
                 return "";
             }
-            return "Rsm"+proteinSetArray.get( col - 1).getResultSummary().getId().toString(); //JPM.TODO
+
+            
+            DataSetTMP dataSet = (DataSetTMP) proteinSetArray.get( col - 1).getResultSummary().getTransientData().getDataSet();
+            
+            if (dataSet != null) {
+                return dataSet.getName();
+            } else {
+                // should not happen
+                //JPM.TODO : remove this code later
+                return "Rsm"+proteinSetArray.get( col - 1).getResultSummary().getId().toString(); 
+            }
         }
     }
 

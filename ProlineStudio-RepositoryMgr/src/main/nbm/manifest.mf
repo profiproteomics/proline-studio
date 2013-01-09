@@ -1,3 +1,4 @@
 Manifest-Version: 1.0
 OpenIDE-Module-Install: fr/proline/studio/repositorymgr/Installer.class
+OpenIDE-Module-Layer: fr/proline/studio/repositorymgr/layer.xml
 OpenIDE-Module-Localizing-Bundle: fr/proline/studio/repositorymgr/Bundle.properties

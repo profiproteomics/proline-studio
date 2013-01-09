@@ -6,6 +6,7 @@ package fr.proline.studio.repositorymgr;
 
 //import fr.proline.repository.DatabaseConnector;
 //import fr.proline.repository.ProlineRepository;
+import fr.proline.core.orm.util.DatabaseManager;
 import java.io.*;
 import java.net.URL;
 import java.util.HashMap;
@@ -17,6 +18,10 @@ import org.openide.modules.ModuleInstall;
 import org.openide.util.NbBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
+import org.netbeans.api.db.explorer.JDBCDriver;
+import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 @NbBundle.Messages({"initRepositity.error=Unable to initialize repository access ({0})",
     "initRepositity.title=Initialization of repository access",
@@ -29,27 +34,17 @@ public class Installer extends ModuleInstall {
     public void restored() {        
         try {         
             
-            logger.debug("Read URL {}",Bundle.default_UDS_configuration_file());                
-                    
-            //VD TODO 
-//            DatabaseConnector udsConn = new DatabaseConnector(Bundle.default_UDS_configuration_file());
-//            ProlineDBManagement.initProlineDBManagment(udsConn);
-//        }catch (IOException ioe){
-//            String msg = ioe.getMessage();           
-//            logger.warn(Bundle.initRepositity_error(msg));
+            logger.info("Read URL {}",Bundle.default_UDS_configuration_file());                
+            ConnectionManager cm = ConnectionManager.getDefault();
+            JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers("org.postgresql.Driver")[0];
+            DatabaseConnection dbconn = DatabaseConnection.create(driver, "jdbc:postgresql://host/database", "sa", "public", "pass", true);
+            cm.addConnection(dbconn);       
         } catch (Exception ex) {
             String msg = ex.getMessage();
             logger.warn(Bundle.initRepositity_error(msg));
             JOptionPane.showMessageDialog(null, Bundle.initRepositity_error(msg), Bundle.initRepositity_title(), JOptionPane.ERROR_MESSAGE);            
         }
           
-//        try {
-//            logger.debug(" Used UDS Database connection = {}", ProlineDBManagement.getProlineDBManagement().getDatabaseConnector(ProlineRepository.Databases.UDS).getConnection().getMetaData().getURL());
-//        } catch (Exception ex) {
-//            String msg = ex.getMessage();
-//            JOptionPane.showMessageDialog(null, Bundle.initRepositity_error(msg), Bundle.initRepositity_title(), JOptionPane.ERROR_MESSAGE);                                    
-//            logger.warn(Bundle.initRepositity_error(msg));
-//        }
     }
 
     @Override

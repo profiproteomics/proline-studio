@@ -44,27 +44,27 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-windows</artifactId>
-            <version>RELEASE711</version>
+            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util</artifactId>
-            <version>RELEASE711</version>
+            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util-lookup</artifactId>
-            <version>RELEASE711</version>
+            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-awt</artifactId>
-            <version>RELEASE711</version>
+            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-settings</artifactId>
-            <version>RELEASE711</version>
+            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -93,20 +93,14 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>ProlineStudio-DAM</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-CoreWrapper</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency> <!-- CAM: utile ? -->
-            <groupId>fr.proline</groupId>
-            <artifactId>Proline-OM</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency> 
-        <dependency> <!-- CAM: utile ? -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-DAM</artifactId>
-            <version>${project.version}</version>
-        </dependency>   
         
         <!-- Other dependencies -->
         <!-- <dependency>

@@ -41,6 +41,7 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+ 
         <!-- NetBeans depencies -->
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -241,6 +242,12 @@
             <artifactId>ProlineStudio-CoreWrapper</artifactId>            
             <version>${project.version}</version>            
         </dependency>
+        <dependency>
+            <groupId>fr.proline</groupId>
+            <artifactId>ProlineStudio-Logger</artifactId>            
+            <version>${project.version}</version>            
+        </dependency>
+
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-modules</artifactId>

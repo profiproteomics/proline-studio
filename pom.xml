@@ -47,21 +47,11 @@
 
     </repositories>
     <dependencies>
-        <dependency>
+       <!-- <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.5</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.0.6</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.0.6</version>
-        </dependency>
+            <version>1.6.4</version>
+        </dependency> -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -151,7 +141,8 @@
       <module>ProlineStudio-IDFImport</module>
       <module>ProlineStudio-RepositoryMgr</module>
       <module>ProlineStudio-CoreWrapper</module>
-    </modules>
+    <module>ProlineStudio-Logger</module>
+  </modules>
 
   <dependencyManagement>
     <dependencies>

@@ -77,9 +77,9 @@ public class ProlineDBManagementTest {
             Assert.assertEquals("Oxidation",ptmORMSpecif.getPtm().getShortName());
             
             //Test ORMPTMProvider Connection 
-            ORMPTMProvider ptmPro=    new ORMPTMProvider(psEM);
-            Option<PtmDefinition> ptmDef = ptmPro.getPtmDefinition(100);
-            Assert.assertNotNull(ptmDef.get());
+//            ORMPTMProvider ptmPro=    new ORMPTMProvider(psEM);
+//            Option<PtmDefinition> ptmDef = ptmPro.getPtmDefinition(100);
+//            Assert.assertNotNull(ptmDef.get());
             
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
@@ -118,9 +118,9 @@ public class ProlineDBManagementTest {
             Assert.assertThat(protId.getBioSequence().getLength(), CoreMatchers.equalTo(338));
             
             //Test ORMPTMProvider Connection 
-            ORMSeqDatabaseProvider seqDbPro=    new ORMSeqDatabaseProvider(pdiEM);
-            Option<SeqDatabase> seqDB = seqDbPro.getSeqDatabase(33);
-            Assert.assertNotNull(seqDB.get());
+//            ORMSeqDatabaseProvider seqDbPro=    new ORMSeqDatabaseProvider(pdiEM);
+//            Option<SeqDatabase> seqDB = seqDbPro.getSeqDatabase(33);
+//            Assert.assertNotNull(seqDB.get());
             
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);

@@ -18,10 +18,6 @@ import org.openide.modules.ModuleInstall;
 import org.openide.util.NbBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.netbeans.api.db.explorer.ConnectionManager;
-import org.netbeans.api.db.explorer.DatabaseConnection;
-import org.netbeans.api.db.explorer.JDBCDriver;
-import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 @NbBundle.Messages({"initRepositity.error=Unable to initialize repository access ({0})",
     "initRepositity.title=Initialization of repository access",
@@ -29,16 +25,13 @@ import org.netbeans.api.db.explorer.JDBCDriverManager;
 })
 public class Installer extends ModuleInstall {
    protected static Logger logger = LoggerFactory.getLogger(Installer.class);
-   
-    @Override
+
+   @Override
     public void restored() {        
         try {         
             
-            logger.info("Read URL {}",Bundle.default_UDS_configuration_file());                
-            ConnectionManager cm = ConnectionManager.getDefault();
-            JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers("org.postgresql.Driver")[0];
-            DatabaseConnection dbconn = DatabaseConnection.create(driver, "jdbc:postgresql://host/database", "sa", "public", "pass", true);
-            cm.addConnection(dbconn);       
+            logger.info("Read URL {}",Bundle.default_UDS_configuration_file());  
+
         } catch (Exception ex) {
             String msg = ex.getMessage();
             logger.warn(Bundle.initRepositity_error(msg));

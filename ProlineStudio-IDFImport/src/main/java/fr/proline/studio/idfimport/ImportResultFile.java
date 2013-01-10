@@ -56,10 +56,10 @@ public class ImportResultFile {
         EntityManager pdiEM = DatabaseManager.getInstance().getPdiDbConnector().getEntityManagerFactory().createEntityManager();
         EntityManager psEM = DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
         
-        ProvidersFactory.registerPeptideProvider(getProviderKey(), new ORMPeptideProvider(psEM));
-        ProvidersFactory.registerPTMProvider(getProviderKey(), new ORMPTMProvider(psEM));
-        ProvidersFactory.registerProteinProvider(getProviderKey(), new ORMProteinProvider(pdiEM));
-        ProvidersFactory.registerSeqDatabaseProvider(getProviderKey(), new ORMSeqDatabaseProvider(pdiEM));
+//        ProvidersFactory.registerPeptideProvider(getProviderKey(), new ORMPeptideProvider(psEM));
+//        ProvidersFactory.registerPTMProvider(getProviderKey(), new ORMPTMProvider(psEM));
+//        ProvidersFactory.registerProteinProvider(getProviderKey(), new ORMProteinProvider(pdiEM));
+//        ProvidersFactory.registerSeqDatabaseProvider(getProviderKey(), new ORMSeqDatabaseProvider(pdiEM));
         
     }
     
@@ -83,7 +83,7 @@ public class ImportResultFile {
                                                               getProviderKey(),
                                                               ((Integer)parseProperties.get(IMPORT_RF_INSTRUMNET_ID)),
                                                               propScalaMap,null);
-        importer.runService();
+        //importer.runService();
         targetResultSetId = importer.getTargetResultSetId();
         return true;
     }

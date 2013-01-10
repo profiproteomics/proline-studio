@@ -7,7 +7,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
-import fr.proline.studio.dam.tasks.DatabaseLoadDataSetTask;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -15,6 +15,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataBoxProteinSetsCmp;
 import fr.proline.studio.rsmexplorer.gui.dialog.TreeSelectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,9 +30,6 @@ import org.openide.util.ImageUtilities;
  */
 public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanelInterface {
 
-    public static ImageIcon sameSetIcon = ImageUtilities.loadImageIcon("fr/proline/studio/images/sameset.png", false);
-    public static ImageIcon subSetIcon = ImageUtilities.loadImageIcon("fr/proline/studio/images/subset.png", false);
-    public static ImageIcon addRemoveIcon = ImageUtilities.loadImageIcon("fr/proline/studio/images/addremove.png", false);
     private JPanel internalPanel;
     private ProteinSetComparePanel proteinSetComparePanel;
     private LegendPanel legendPanel;
@@ -103,7 +101,7 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
             c.weighty = 1;
 
             JLabel sameSetLabel = new JLabel("Same Set");
-            sameSetLabel.setIcon(sameSetIcon);
+            sameSetLabel.setIcon(IconManager.getIcon(IconManager.IconType.SAME_SET));
             add(sameSetLabel, c);
 
             c.gridx++;
@@ -113,7 +111,7 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
             c.gridx++;
 
             JLabel subSetLabel = new JLabel("Sub Set");
-            subSetLabel.setIcon(subSetIcon);
+            subSetLabel.setIcon(IconManager.getIcon(IconManager.IconType.SUB_SET));
             add(subSetLabel, c);
 
             c.gridx++;
@@ -123,7 +121,7 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
             c.gridx++;
             c.weightx = 0;
             c.anchor = GridBagConstraints.NORTHEAST;
-            final JButton rsmButton = new JButton("RSM", addRemoveIcon);
+            final JButton rsmButton = new JButton("RSM", IconManager.getIcon(IconManager.IconType.ADD_REMOVE));
             add(rsmButton, c);
 
 
@@ -171,7 +169,9 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
 
 
                         // ask asynchronous loading of data
-                        DatabaseLoadDataSetTask task = new DatabaseLoadDataSetTask(callback, selectedDataSetList);
+                        
+                        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+                        task.initLoadRsetAndRsm(selectedDataSetList);
 
                         if (task.needToFetch()) {
                             task.setPriority(AbstractDatabaseTask.Priority.HIGH_3); // must be done as fast as possible to avoid to let the use wait

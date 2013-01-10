@@ -9,8 +9,8 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
-import org.openide.util.ImageUtilities;
 
 /**
  *
@@ -18,11 +18,8 @@ import org.openide.util.ImageUtilities;
  */
 public class RSMDataSetNode extends RSMNode {
 
-    private static ImageIcon vial = ImageUtilities.loadImageIcon("fr/proline/studio/rsmexplorer/images/identification.png", false);
-    private static ImageIcon gel = ImageUtilities.loadImageIcon("fr/proline/studio/rsmexplorer/images/identificationFraction.png", false);
-    private static ImageIcon rsmIcon = ImageUtilities.loadImageIcon("fr/proline/studio/rsmexplorer/images/resultSummary.png", false);
-    private static ImageIcon rsetIcon = ImageUtilities.loadImageIcon("fr/proline/studio/rsmexplorer/images/resultSet.png", false);
-
+   
+    boolean isChanging = false;
     
     public RSMDataSetNode(AbstractData data) {
         super(NodeTypes.DATA_SET, data);
@@ -31,18 +28,37 @@ public class RSMDataSetNode extends RSMNode {
     @Override
     public ImageIcon getIcon() {
 
+        if (isChanging) {
+            return IconManager.getIcon(IconManager.IconType.HOUR_GLASS);
+        }
+        
+        
+        //JPM.TODO : icon management of Dataset
         DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
         
-        if (dataSet.getResultSummaryId() != null) {
-            return rsmIcon;
-        } else if (dataSet.getResultSetId() != null) {
-            return rsetIcon;
+        int aggreagateType = dataSet.aggregateType;
+        switch (aggreagateType) {
+            case DataSetTMP.BIOLOGICAL_GROUP:
+                return IconManager.getIcon(IconManager.IconType.VIAL);
+            case DataSetTMP.BIOLOGICAL_SAMPLE:
+                return IconManager.getIcon(IconManager.IconType.GEL);
+            case DataSetTMP.SAMPLE_ANALYSIS:
+                return IconManager.getIcon(IconManager.IconType.GEL);
         }
 
-        //JPM.TODO : vial icon vs gel icon
-        
-        return gel;
+        if (dataSet.getResultSummaryId() != null) {
+            return IconManager.getIcon(IconManager.IconType.RSM);
+        } else if (dataSet.getResultSetId() != null) {
+            return IconManager.getIcon(IconManager.IconType.RSET);
+        }
 
+        //JPM.TODO : return another icon for OTHER ???
+        return IconManager.getIcon(IconManager.IconType.GEL);
+
+    }
+    
+    public void setIsChanging(boolean isChanging) {
+        this.isChanging = isChanging;
     }
     
     public DataSetTMP getDataSet() {
@@ -96,24 +112,5 @@ public class RSMDataSetNode extends RSMNode {
         
     }
     
-    
-    /*@Override
-    public Image getOpenedIcon(int i) {
-        return icon;
-    }
-
-    @Override
-    public boolean canRename() {
-        return true;
-    }*/
-    
-    /*@Override
-    public RSMNode cloneThis() {
-        RSMIdentificationNode clonedNode = new RSMIdentificationNode((AbstractData) getUserObject());
-        
-        addClonedChildren(clonedNode);
-        
-        return clonedNode;
-    }*/
     
 }

@@ -6,7 +6,7 @@ package fr.proline.studio.dam.data;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadProjectTask;
+import fr.proline.studio.dam.tasks.DatabaseProjectTask;
 import java.util.List;
 
 /**
@@ -22,7 +22,9 @@ public class ParentData extends AbstractData {
 
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadProjectTask(callback, AccessDatabaseThread.getProjectIdTMP(), list));  //JPM.TODO
+        DatabaseProjectTask task = new DatabaseProjectTask(callback);
+        task.initLoadProject(AccessDatabaseThread.getProjectIdTMP(), list);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);  //JPM.TODO
 
     }
 

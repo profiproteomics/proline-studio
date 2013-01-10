@@ -1,10 +1,21 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.studio.rsmexplorer.gui.dialog.ValidationDialog;
+import fr.proline.core.orm.uds.Project;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.DataSetTMP;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.DatabaseProjectTask;
+import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import java.awt.Window;
-import javax.swing.SwingUtilities;
+import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
+import java.awt.Component;
+import javax.swing.JOptionPane;
+import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
+import org.openide.windows.WindowManager;
 
 /**
  *
@@ -18,12 +29,93 @@ public class RenameAction extends AbstractRSMAction {
     }
 
     @Override
-    public void actionPerformed(RSMNode n) {
+    public void actionPerformed(RSMNode n, int x, int y) {
+
+        
+        String name = null;
+        
+        RSMNode.NodeTypes nodeType = n.getType();
+        if (nodeType == RSMNode.NodeTypes.DATA_SET) {
+            final RSMDataSetNode datasetNode = (RSMDataSetNode) n;
+            final DataSetTMP dataset = datasetNode.getDataSet();
+            name = dataset.getName();
+
+            final String newName = showRenameDialog(name);
+
+            if (newName != null) {
+                datasetNode.setIsChanging(true);
+                dataset.setName(newName+"...");
+                ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(datasetNode);
 
 
+                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success, long taskId, SubTask subTask) {
+                        datasetNode.setIsChanging(false);
+                        dataset.setName(newName);
+                        ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(datasetNode);
+                    }
+                };
+
+
+                // ask asynchronous loading of data
+                DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+                task.initRenameDataset(dataset, newName);
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+            }
+            
+        } else if (nodeType == RSMNode.NodeTypes.PROJECT) {
+            final RSMProjectNode projectNode = (RSMProjectNode) n;
+            final Project project = projectNode.getProject();
+            name = project.getName();
+
+            final String newName = showRenameDialog(name);
+
+            if (newName != null) {
+                projectNode.setIsChanging(true);
+                project.setName(newName+"...");
+                ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(projectNode);
+
+                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success, long taskId, SubTask subTask) {
+                        projectNode.setIsChanging(false);
+                        project.setName(newName);
+                        ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(projectNode);
+                    }
+                };
+
+
+                // ask asynchronous loading of data
+                DatabaseProjectTask task = new DatabaseProjectTask(callback);
+                task.initRenameProject(project.getId(), newName);
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+            }
+        }
+        
+        
+        
+        
+
+
+        
+        
+        /**
         ValidationDialog dialog = new ValidationDialog(null);
         dialog.setVisible(true);  //JPM.TODO : remove it : not to be put here
-
+        */
         /*
          * DatabaseConnection connection = null;
          * ConnectionManager.getDefault().showConnectionDialog(connection);
@@ -31,65 +123,47 @@ public class RenameAction extends AbstractRSMAction {
 
     }
         
-    
-    @Override
-    public void updateEnabled(RSMNode[] selectedNodes) {
-
-        // always disabled for the moment
-        setEnabled(false);
-
-    }
-    
-    
-    /*
-
-    @Override
-    protected void performAction(Node[] nodes) {
-/*
-        final RSMNode node = (RSMNode) nodes[0];
-
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-
-                public void run() {
-
-                    Component parentComponent = WindowManager.getDefault().findTopComponent("RSMExplorerTopComponent");
-                    String newName = (String) JOptionPane.showInputDialog(
+    private String showRenameDialog(String name) {
+        
+        
+        Component parentComponent = WindowManager.getDefault().findTopComponent("RSMExplorerTopComponent");
+        String newName = (String) JOptionPane.showInputDialog(
                             parentComponent,
                             "New Name:",
                             "Rename",
                             JOptionPane.PLAIN_MESSAGE,
                             null,
                             null,
-                            node.getDisplayName());
-                    if ((newName != null) && (newName.length() > 0)) {
-                        node.setName(newName);
-                    }
-
-                }
-            });
-        } catch (InterruptedException e1) {
-        } catch (InvocationTargetException e2) {
+                            name);
+        if ((newName != null) && (newName.length() > 0)) {
+            return newName;
         }
-*/ //JPM.TODO
-
-  /*  }
-
+        return null;
+    }
+    
     @Override
-    protected boolean enable(Node[] nodes) {*/
-/*
-        // a node must be selected
-        boolean actionEnabled = ((nodes != null) && (nodes.length == 1));
+    public void updateEnabled(RSMNode[] selectedNodes) {
 
-        if (actionEnabled) {
-            RSMNode node = (RSMNode) nodes[0];
-            actionEnabled = (node.getType() != RSMNode.NodeTypes.TREE_PARENT); // can not rename tree parent node
+        int nbSelectedNodes = selectedNodes.length;
 
+        // we rename multiple nodes
+        if (nbSelectedNodes != 1) {
+            setEnabled(false);
+            return;
         }
 
-        return actionEnabled;
-        return true;*/
-  /*  }
+        RSMNode node = selectedNodes[0];
+        RSMNode.NodeTypes nodeType = node.getType();
+        if ((nodeType != RSMNode.NodeTypes.DATA_SET) && (nodeType != RSMNode.NodeTypes.PROJECT )) {
+            setEnabled(false);
+            return;
+        }
 
-*/
+        setEnabled(true);
+
+    }
+    
+    
+
+
 }

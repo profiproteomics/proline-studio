@@ -5,6 +5,7 @@ import java.util.Enumeration;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
+import org.openide.util.ImageUtilities;
 
 /**
  *
@@ -12,24 +13,22 @@ import javax.swing.tree.DefaultMutableTreeNode;
  */
 public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneable {
 
+   
+    
     public enum NodeTypes {
 
         TREE_PARENT,
+        PROJECT,
         DATA_SET,
-        //RESULT_SET,
-        //RESULT_SUMMARY,
-        //IDENTIFICATION,
-        //IDENTIFICATION_FRACTION,
         HOUR_GLASS
     }
     private static Action[] actionInstance = null;
     protected NodeTypes type;
-    //protected AbstractData data;
+
 
     public RSMNode(/*Children children,*/ NodeTypes type, AbstractData data) {
         super(data);
         this.type = type;
-        //this.data = data;
     }
 
     public NodeTypes getType() {
@@ -71,41 +70,11 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
         return data.getName();
     }
 
-    /*@Override */
-    public void setName(String name) {
-        //data.setName(name); //JPM.TODO
-     //   super.setName(name);
-    }
 
     public boolean canBeDeleted() {
         return false;
     }
     
-    
-    /*@Override
-    public Action[] getActions(boolean arg0) {
 
-        if (actionInstance == null) {
-            actionInstance = new Action[]{  DisplayAction.getInstance(),     // Display >
-                                            null,                            // --------------
-                                            ChildParentAction.getInstance(), // Child/Parent >
-                                            RenameAction.getInstance(),      // Rename...
-                                            DeleteAction.getInstance()};     // Delete...
-
-        }
-
-        return actionInstance;
-    }*/
- 
-    /*public abstract RSMNode cloneThis();
-    
-    protected void addClonedChildren(RSMNode clonedNode) {
-        Enumeration en = clonedNode.children();
-
-        while (en.hasMoreElements()) {
-            RSMNode node = (RSMNode) en.nextElement();
-            clonedNode.add(node.cloneThis());
-        }
-    }*/
     
 }

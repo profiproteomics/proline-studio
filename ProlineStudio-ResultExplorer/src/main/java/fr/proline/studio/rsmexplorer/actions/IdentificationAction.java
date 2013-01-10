@@ -21,7 +21,7 @@ public class IdentificationAction extends AbstractRSMAction {
     }
 
     @Override
-    public void actionPerformed(RSMNode n) { 
+    public void actionPerformed(RSMNode n, int x, int y) { 
         
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
@@ -68,7 +68,7 @@ public class IdentificationAction extends AbstractRSMAction {
         
         // we can always add an identification directly to a project
         RSMNode node = selectedNodes[0];
-        if (node.getType() == RSMNode.NodeTypes.TREE_PARENT) {
+        if (node.getType() == RSMNode.NodeTypes.PROJECT) {
             setEnabled(true);
             return;
         }

@@ -1,13 +1,18 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DataSetTMP;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.*;
 import javax.swing.*;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.DecoratedTable;
+import fr.proline.studio.utils.IconManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,6 +22,7 @@ import javax.swing.RowSorter.SortKey;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 
@@ -256,7 +262,44 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
                     }
                 }
 
+
+
+                
                 Collections.sort(proteinNameList, proteinMatchComparator);
+            }
+            
+            // We check for each result summary if we need to load its DataSet
+            // because it is used to display the name of the resultSummary
+            int nbProteinSets = proteinSetArray.size();
+            for (int i = 0; i < nbProteinSets; i++) {
+                ProteinSet pset = proteinSetArray.get(i);
+                ResultSummary rsm = pset.getResultSummary();
+                if (rsm.getTransientData().getDataSet() == null) {
+                    // we need to read the dataset of the resultSummary
+                    
+                    
+                        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return true;
+                            }
+
+                            @Override
+                            public void run(boolean success, long taskId, SubTask subTask) {
+                                JTableHeader th = table.getTableHeader();
+                                th.repaint();
+                            }
+                        };
+
+
+                        // ask asynchronous loading of data
+                        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+                        task.initLoadDatasetForRsm(rsm);
+                        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+                        
+
+                }
             }
 
 
@@ -370,9 +413,8 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             if (dataSet != null) {
                 return dataSet.getName();
             } else {
-                // should not happen
-                //JPM.TODO : remove this code later
-                return "Rsm"+proteinSetArray.get( col - 1).getResultSummary().getId().toString(); 
+               // not already loaded
+                return "";
             }
         }
     }
@@ -466,9 +508,9 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
 
             int status = proteinStatus.getStatus(rsm);
             if (status == ProteinStatus.SAME_SET) {
-                l.setIcon(RsetProteinGroupComparePanel.sameSetIcon);
+                l.setIcon(IconManager.getIcon(IconManager.IconType.SAME_SET));
             } else if (status == ProteinStatus.SUB_SET) {
-                l.setIcon(RsetProteinGroupComparePanel.subSetIcon);
+                l.setIcon(IconManager.getIcon(IconManager.IconType.SUB_SET));
             } else {
                 l.setIcon(null);
             }

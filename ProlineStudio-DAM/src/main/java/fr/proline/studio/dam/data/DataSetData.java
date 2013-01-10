@@ -3,7 +3,7 @@ package fr.proline.studio.dam.data;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadDataSetTask;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import java.util.List;
 
 /**
@@ -13,6 +13,7 @@ import java.util.List;
 public class DataSetData extends AbstractData {
     
     private DataSetTMP dataSet;
+    private String temporaryName;
 
     public DataSetData(DataSetTMP dataSet) {
         dataType = DataTypes.DATA_SET;
@@ -20,15 +21,30 @@ public class DataSetData extends AbstractData {
         this.dataSet = dataSet;
 
     }
+    public DataSetData(String temporaryName) {
+        dataType = DataTypes.DATA_SET;
+
+        this.temporaryName = temporaryName;
+
+    }
 
     public DataSetTMP getDataSet() {
         return dataSet;
     }
     
+    public void setDataSet(DataSetTMP dataSet) {
+        this.dataSet = dataSet;
+        temporaryName = null;
+    }
+    
     @Override
     public String getName() {
         if (dataSet == null) {
-            return "";
+            if (temporaryName != null) {
+                return temporaryName;
+            } else {
+                return "";
+            }
         } else {
             return dataSet.getName();
         }
@@ -36,7 +52,9 @@ public class DataSetData extends AbstractData {
 
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadDataSetTask(callback, dataSet, list));
+        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+        task.initLoadChildrenDataset(dataSet, list);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
 
 

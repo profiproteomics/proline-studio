@@ -7,7 +7,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadDataSetTask;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
@@ -29,7 +29,7 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
    }
 
     @Override
-    public void actionPerformed(RSMNode n) {
+    public void actionPerformed(RSMNode n, int x, int y) {
         
         RSMDataSetNode dataSetNode = (RSMDataSetNode) n;
         
@@ -80,7 +80,9 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
 
 
             // ask asynchronous loading of data
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadDataSetTask(callback, dataSet));
+            DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+            task.initLoadRsetAndRsm(dataSet);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
         }
 

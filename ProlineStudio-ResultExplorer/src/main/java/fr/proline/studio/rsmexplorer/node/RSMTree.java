@@ -197,7 +197,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         RSMNode nodeExpanded = (RSMNode) path.getLastPathComponent();
         
         // check if the node contains a GlassHourNode (ie : children are not loaded)
-        if (nodeExpanded.getChildCount() == 1) {
+        if (nodeExpanded.getChildCount() > 0) {
             RSMNode childNode = (RSMNode) nodeExpanded.getChildAt(0);
             if (childNode.getType() == RSMNode.NodeTypes.HOUR_GLASS) {
                 
@@ -213,7 +213,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         // check if the loading is necessary :
         // it is necessary only if we have an hour glass child
         // which correspond to data not already loaded
-        if (nodeToLoad.getChildCount() != 1) {
+        if (nodeToLoad.getChildCount() == 0) {
             return;
         }
         RSMNode childNode = (RSMNode) nodeToLoad.getChildAt(0);
@@ -268,13 +268,14 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         RSMNode parentNode = loadingMap.remove(data);
 
 
-        parentNode.removeAllChildren();
+        parentNode.remove(0); // remove the first child which correspond to the hour glass
         
-
+        int indexToInsert = 0;
         Iterator<AbstractData> it = list.iterator();
         while (it.hasNext()) {
             AbstractData dataCur = it.next();
-            parentNode.add(RSMChildFactory.createNode(dataCur));
+            parentNode.insert(RSMChildFactory.createNode(dataCur), indexToInsert);
+            indexToInsert++;
         }
         
         model.nodeStructureChanged(parentNode);

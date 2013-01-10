@@ -6,6 +6,7 @@ package fr.proline.studio.rsmexplorer.node;
 
 
 import fr.proline.studio.dam.data.AbstractData;
+import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 import org.openide.util.ImageUtilities;
 
@@ -15,9 +16,7 @@ import org.openide.util.ImageUtilities;
  */
 public class RSMHourGlassNode extends RSMNode {
     
-    
-    private static ImageIcon icon = ImageUtilities.loadImageIcon("fr/proline/studio/rsmexplorer/images/hourGlass.png", false);
-
+ 
     
     public RSMHourGlassNode(/*Children children,*/ AbstractData data) {
         super(RSMNode.NodeTypes.HOUR_GLASS, data);
@@ -32,7 +31,7 @@ public class RSMHourGlassNode extends RSMNode {
     
     @Override
     public ImageIcon getIcon() {
-        return icon;
+        return IconManager.getIcon(IconManager.IconType.HOUR_GLASS);
     }
 
     /*@Override

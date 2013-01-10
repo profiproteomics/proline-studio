@@ -20,10 +20,8 @@ import org.openide.util.ImageUtilities;
  */
 public class LazyTableCellRenderer extends DefaultTableCellRenderer {
 
-    private static ImageIcon hourGlassIcon = ImageUtilities.loadImageIcon("fr/proline/studio/images/hourGlass.png", false);
-
     public LazyTableCellRenderer() {
-        setIcon(hourGlassIcon);
+        setIcon(IconManager.getIcon(IconManager.IconType.HOUR_GLASS));
     }
 
     @Override

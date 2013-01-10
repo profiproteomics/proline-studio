@@ -14,6 +14,12 @@ public class DataSetTMP {
     // Transient Variables not saved in database
     /*@Transient*/ private TransientData transientData = null;
     
+    public static final int SAMPLE_ANALYSIS = 0;
+    public static final int QUANTITATION_FRACTION = 1;
+    public static final int BIOLOGICAL_SAMPLE = 2;
+    public static final int BIOLOGICAL_GROUP = 3;
+    public static final int OTHER = 4;
+
     
     public Integer id;
     
@@ -28,6 +34,8 @@ public class DataSetTMP {
     public Integer resultSummaryId;
     
     public Integer parentDataSetId;
+    
+    public int aggregateType;
     
     public String getName() {
         return name;
@@ -45,6 +53,18 @@ public class DataSetTMP {
         return resultSetId;
     }
     
+    
+    public Integer getProjectId() {
+        return project.getId();
+    }
+    
+    public Integer getParentDatasetId() {
+        return parentDataSetId;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
     
     public TransientData getTransientData() {
     	if (transientData == null) {

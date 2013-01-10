@@ -1,5 +1,7 @@
 package fr.proline.studio.gui;
 
+import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import javax.swing.*;
 import org.openide.util.ImageUtilities;
@@ -25,10 +27,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     
     protected int buttonClicked = -1;
     
-    private static final ImageIcon okIcon = ImageUtilities.loadImageIcon("fr/proline/studio/images/tick.png", false);
-    private static final ImageIcon cancelIcon = ImageUtilities.loadImageIcon("fr/proline/studio/images/tick-red.png", false);
-    private static final ImageIcon defaultIcon = ImageUtilities.loadImageIcon("fr/proline/studio/images/arrow-circle.png", false);
-    
+     
     /**
      * Creates new form AbstractDialog
      */
@@ -170,9 +169,9 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.weightx = 0;
         c.weighty = 0;
         
-        okButton = new JButton(okIcon);
-        cancelButton = new JButton(cancelIcon);
-        defaultButton = new JButton(defaultIcon);
+        okButton = new JButton(IconManager.getIcon(IconManager.IconType.OK));
+        cancelButton = new JButton(IconManager.getIcon(IconManager.IconType.CANCEL));
+        defaultButton = new JButton(IconManager.getIcon(IconManager.IconType.DEFAULT));
         
         buttonPanel.add(defaultButton, c);
         
@@ -236,5 +235,32 @@ public class DefaultDialog extends javax.swing.JDialog {
         }
     } 
 
+    @Override
+    public void setLocation(int x, int y) {
+        
+        // we do not allow the dialog to be partially out of the screen
+        
+        // top left corner check
+        if (x<0) {
+            x = 0;
+        }
+        if (y<0) {
+            y = 0;
+        }
+        
+        // bottom right corner check
+        int width = getWidth();
+        int height = getHeight();
+        
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        if (x+width>screenSize.width) {
+            x = screenSize.width-width;
+        }
+        if (y+height>screenSize.height) {
+            y = screenSize.height-height;
+        }
+
+        super.setLocation(x, y);
+    }
 
 }

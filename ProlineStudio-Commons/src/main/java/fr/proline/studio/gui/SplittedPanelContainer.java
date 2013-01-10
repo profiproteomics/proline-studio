@@ -1,5 +1,6 @@
 package fr.proline.studio.gui;
 
+import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -522,7 +523,7 @@ public class SplittedPanelContainer extends JPanel {
             buttonPanel = new JPanel();
             buttonPanel.setLayout(new GridBagLayout());
 
-            ImageIcon maximizeIcon = ImageUtilities.loadImageIcon("fr/proline/studio/images/maximize.png", false);
+            ImageIcon maximizeIcon = IconManager.getIcon(IconManager.IconType.MAXIMIZE);
             
             maximizeButton = new JButton(maximizeIcon);
             maximizeButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
@@ -540,7 +541,7 @@ public class SplittedPanelContainer extends JPanel {
                 }
             });
             
-            ImageIcon minimizeIcon = ImageUtilities.loadImageIcon("fr/proline/studio/images/minimize.png", false);
+            ImageIcon minimizeIcon = IconManager.getIcon(IconManager.IconType.MINIMIZE);
             
             reduceButton = new JButton(minimizeIcon);
             reduceButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
@@ -559,7 +560,7 @@ public class SplittedPanelContainer extends JPanel {
             });
             reduceButton.setVisible(false);
             
-            ImageIcon deleteIcon = ImageUtilities.loadImageIcon("fr/proline/studio/images/deleteBlue.png", false);
+            ImageIcon deleteIcon = IconManager.getIcon(IconManager.IconType.DELETE);
             
             
             minimizeButton = new JButton(deleteIcon);

@@ -204,11 +204,10 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         RSMNode root = (RSMNode) model.getRoot(); 
         model.insertNodeInto(new RSMHourGlassNode(null), root, 0);
         
-        // show loading
+        // show loading and start the loading
         expandRow(0);
         
-        // start to load projects
-        startLoading(root);
+
     }
     private void startLoading(RSMNode nodeToLoad) {
 

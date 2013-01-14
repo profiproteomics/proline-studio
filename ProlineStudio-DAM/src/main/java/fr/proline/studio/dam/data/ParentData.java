@@ -18,6 +18,8 @@ public class ParentData extends AbstractData {
 
     public ParentData() {
         dataType = DataTypes.MAIN;
+        
+        hasChildren = false;
     }
 
     @Override

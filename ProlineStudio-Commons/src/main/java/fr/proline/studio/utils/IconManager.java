@@ -30,7 +30,8 @@ public class IconManager {
         USER,
         MAXIMIZE,
         MINIMIZE,
-        DELETE
+        DELETE,
+        QUESTION
     }
     
     private static HashMap<IconType, ImageIcon> iconMap = new HashMap<>();
@@ -82,6 +83,8 @@ public class IconManager {
                 return "fr/proline/studio/images/minimize.png";
             case DELETE:
                 return "fr/proline/studio/images/deleteBlue.png";
+            case QUESTION:
+                return "fr/proline/studio/images/question.png";
         }
         
 

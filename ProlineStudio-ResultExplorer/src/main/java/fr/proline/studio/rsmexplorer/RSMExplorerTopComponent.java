@@ -5,7 +5,10 @@
 package fr.proline.studio.rsmexplorer;
 
 
+import fr.proline.studio.dam.UDSConnectionManager;
+import fr.proline.studio.rsmexplorer.gui.dialog.DatabaseConnectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
+import javax.swing.SwingUtilities;
 
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
@@ -13,6 +16,7 @@ import org.openide.awt.ActionReference;
 
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.openide.windows.WindowManager;
 
 
 /**
@@ -84,7 +88,50 @@ public final class RSMExplorerTopComponent extends TopComponent  {
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
-        // TODO add custom code on component opening
+        
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                
+                UDSConnectionManager udsMgr = UDSConnectionManager.getUDSConnectionManager();
+                while (udsMgr.getConnectionStep() == UDSConnectionManager.CONNECTION_ASKED) {
+                    // wait for the connection to have succedeed or failed
+                    try {
+                        Thread.sleep(100); // JPM.TODO : one day remove the polling and write blocking code instead
+                    } catch (InterruptedException ex) {
+                    }
+                }
+                int connectionStep = udsMgr.getConnectionStep();
+                if ((connectionStep == UDSConnectionManager.CONNECTION_FAILED) || (connectionStep == UDSConnectionManager.NOT_CONNECTED)) {
+                    // the user need to enter connection parameters
+
+                    SwingUtilities.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            DatabaseConnectionDialog databaseConnectionDialog = DatabaseConnectionDialog.getDialog(WindowManager.getDefault().getMainWindow());
+                            databaseConnectionDialog.centerToFrame(WindowManager.getDefault().getMainWindow());
+                            databaseConnectionDialog.setVisible(true);
+                            
+                            UDSConnectionManager udsMgr = UDSConnectionManager.getUDSConnectionManager();
+                            if (udsMgr.getConnectionStep() == UDSConnectionManager.CONNECTION_DONE) {
+                                RSMTree.getTree().startLoading();
+                            }
+                        }
+                    });
+
+                } else if (connectionStep == UDSConnectionManager.CONNECTION_DONE) {
+                    RSMTree.getTree().startLoading();
+                }
+   
+            }
+        };
+        t.start();
+        
+        
+        // check if the connection to the UDS is done
+        
+        
     }
 
     @Override

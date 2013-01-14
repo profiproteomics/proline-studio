@@ -39,19 +39,10 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         // Model of the tree
         RSMNode top = RSMChildFactory.createNode(new ParentData());
-        /*
-         * model = new DefaultTreeModel(top); setModel(model);
-         *
-         * // rendering of the tree putClientProperty("JTree.lineStyle",
-         * "Horizontal"); setCellRenderer(new RSMTreeRenderer());
-         *
-         * // -- listeners addTreeWillExpandListener(this); // used for lazy
-         * loading addMouseListener(this); // used for popup triggering
-         */
 
         initTree(top);
 
-        startLoading(top);
+        //startLoading(top); //JPM.TODO TOTOCHE
     }
 
     private RSMTree(RSMNode top) {
@@ -82,7 +73,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         int rsetId = rset.getId().intValue();
 
-        RSMDataSetNode rsetNode = findResultSetNode((RSMNode) this.getModel().getRoot(), rsetId);
+        RSMDataSetNode rsetNode = findResultSetNode((RSMNode) model.getRoot(), rsetId);
 
         if (rsetNode == null) {
             return null;
@@ -142,7 +133,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             return;
         }
 
-        RSMNode rootNode = (RSMNode) getModel().getRoot();
+        RSMNode rootNode = (RSMNode) model.getRoot();
         ArrayList<TreePath> selectedPathArray = new ArrayList<TreePath>(rsmArray.size());
 
         ArrayList<RSMNode> nodePath = new ArrayList<RSMNode>();
@@ -206,6 +197,19 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         }
         
     }
+    
+    public void startLoading() {
+        
+        // add hourglass node
+        RSMNode root = (RSMNode) model.getRoot(); 
+        model.insertNodeInto(new RSMHourGlassNode(null), root, 0);
+        
+        // show loading
+        expandRow(0);
+        
+        // start to load projects
+        startLoading(root);
+    }
     private void startLoading(RSMNode nodeToLoad) {
 
         
@@ -220,7 +224,6 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         if (childNode.getType() != RSMNode.NodeTypes.HOUR_GLASS) {
             return;
         }
-
 
         // register hour glass which is expanded
         loadingMap.put(nodeToLoad.getData(), nodeToLoad);

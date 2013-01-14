@@ -21,6 +21,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
     // used for MSI and PS Connection
     private int projectId;
 
+
     /**
      * Constructor used for UDS database
      *
@@ -28,11 +29,10 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * @param databaseProperties
      * @param projectId
      */
-    public DatabaseConnectionTask(AbstractDatabaseCallback callback, Map<Object, Object> databaseProperties, int projectId) {
+    public DatabaseConnectionTask(AbstractDatabaseCallback callback, Map<Object, Object> databaseProperties) {
         super(callback, Priority.TOP);
 
         this.databaseProperties = databaseProperties;
-        this.projectId = projectId;
 
 
     }
@@ -60,26 +60,38 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
     @Override
     public boolean fetchData() {
-        try {
+        
             if (databaseProperties != null) {
-                // UDS Connection
-                IDatabaseConnector udsConn = DatabaseConnectorFactory.createDatabaseConnectorInstance(Database.UDS, databaseProperties);
-                DatabaseManager.getInstance().initialize(udsConn);
-            } else {
-                // MSI Connection
-                EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
-                entityManagerMSI.close();
                 
-                // PS Connection
-                EntityManager entityManagerPS = DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
-                entityManagerPS.close();
+                try {
+                    // UDS Connection
+                    IDatabaseConnector udsConn = DatabaseConnectorFactory.createDatabaseConnectorInstance(Database.UDS, databaseProperties);
+                    DatabaseManager.getInstance().initialize(udsConn);
+                } catch (Exception e) {
+                    logger.error(getClass().getSimpleName() + " failed", e);
+                    errorMessage = e.getMessage();
+                    DatabaseManager.getInstance().closeAll();
+                    return false;
+                }
+            } else {
+                try {
+                    // MSI Connection
+                    EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+                    entityManagerMSI.close();
+
+                    // PS Connection
+                    EntityManager entityManagerPS = DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
+                    entityManagerPS.close();
+                } catch (Exception e) {
+                    logger.error(getClass().getSimpleName() + " failed", e);
+                    errorMessage = e.getMessage();
+                    return false;
+                }
             }
-        } catch (Exception e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
-            return false;
-        }
+        
         return true;
     }
+
     
     /*
     public static void testInsert(byte[] testByteDouble, byte[] testByteFloat) {

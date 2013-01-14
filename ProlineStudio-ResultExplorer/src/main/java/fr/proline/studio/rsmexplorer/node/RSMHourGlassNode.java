@@ -18,7 +18,7 @@ public class RSMHourGlassNode extends RSMNode {
     
  
     
-    public RSMHourGlassNode(/*Children children,*/ AbstractData data) {
+    public RSMHourGlassNode(AbstractData data) {
         super(RSMNode.NodeTypes.HOUR_GLASS, data);
     }
  

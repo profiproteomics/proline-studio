@@ -7,6 +7,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddAggregateDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.DatabaseConnectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
@@ -31,6 +32,8 @@ public class AggregateAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(RSMNode n, int x, int y) {
 
+
+        
         AddAggregateDialog dialog = AddAggregateDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);

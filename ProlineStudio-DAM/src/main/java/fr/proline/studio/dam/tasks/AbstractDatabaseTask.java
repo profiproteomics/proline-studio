@@ -37,6 +37,8 @@ public abstract class AbstractDatabaseTask implements Comparable<AbstractDatabas
     protected Long id;
     private static long idIncrement = 0;
 
+    protected String errorMessage = null;
+    
     /**
      * Contructor
      *
@@ -182,6 +184,8 @@ public abstract class AbstractDatabaseTask implements Comparable<AbstractDatabas
             return;
         }
 
+        callback.setErrorMessage(errorMessage);
+        
         if (callback.mustBeCalledInAWT()) {
             // Callback must be executed in the Graphical thread (AWT)
             SwingUtilities.invokeLater(new Runnable() {
@@ -221,5 +225,9 @@ public abstract class AbstractDatabaseTask implements Comparable<AbstractDatabas
             return 0;
         }
         return (diff) > 0 ? 1 : -1;
+    }
+    
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }

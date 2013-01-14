@@ -3,6 +3,7 @@ package fr.proline.studio.gui;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import javax.swing.*;
 import org.openide.util.ImageUtilities;
 
@@ -22,6 +23,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     private JButton cancelButton;
     private JButton defaultButton;
 
+    private BusyGlassPane busyGlassPane = null;
     
     private boolean firstDisplay = true;
     
@@ -44,12 +46,19 @@ public class DefaultDialog extends javax.swing.JDialog {
 
     @Override
     public void setVisible(boolean v) {
-        if (firstDisplay) {
-            pack();
-            firstDisplay = false;
-        }
+        pack();
+
         super.setVisible(v);
     }
+    
+     public void pack() {
+         if (firstDisplay) {
+            super.pack();
+            firstDisplay = false;
+         }
+     }
+    
+    
 
     public int getButtonClicked() {
         return buttonClicked;
@@ -238,6 +247,9 @@ public class DefaultDialog extends javax.swing.JDialog {
     @Override
     public void setLocation(int x, int y) {
         
+        // pack must have been done beforehand
+        pack();
+        
         // we do not allow the dialog to be partially out of the screen
         
         // top left corner check
@@ -262,5 +274,65 @@ public class DefaultDialog extends javax.swing.JDialog {
 
         super.setLocation(x, y);
     }
+    
+    
+    public void centerToFrame(Frame f) {
+        
+        // pack must have been done beforehand
+        pack();
+        
+        int width = getWidth();
+        int height = getHeight();
+        
+        int frameX = f.getX();
+        int frameY = f.getX();
+        int frameWidth = f.getWidth();
+        int frameHeight = f.getHeight();
+      
+        int x = frameX+(frameWidth-width)/2;
+        int y = frameY+(frameHeight-height)/2;
+        
+        setLocation(x, y);
+         
+    }
 
+    public void setBusy(boolean busy) {
+        
+        if (busyGlassPane == null) {
+            busyGlassPane = new BusyGlassPane();
+            setGlassPane(busyGlassPane);
+        }
+        
+        if (busy) {
+            busyGlassPane.setVisible(true);
+            
+        } else {
+            busyGlassPane.setVisible(false);
+        }
+    }
+    
+    
+    /**
+     * Glass Pane to set the dialog as busy
+     */
+    private class BusyGlassPane extends JComponent {
+
+        protected void paintComponent(Graphics g) {
+        }
+
+        public BusyGlassPane() {
+
+            // get rid of all mouse events
+            MouseAdapter mouseAdapter = new MouseAdapter() {
+            };
+            addMouseListener(mouseAdapter);
+            addMouseMotionListener(mouseAdapter);
+
+            // set wait mouse cursor
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        }
+    }
+    
+    
+    
 }

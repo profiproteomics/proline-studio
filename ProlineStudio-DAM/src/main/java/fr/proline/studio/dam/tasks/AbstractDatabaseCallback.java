@@ -7,6 +7,7 @@ package fr.proline.studio.dam.tasks;
  */
 public abstract class AbstractDatabaseCallback {
     
+    private String errorMessage = null;
     
     /**
      * Returns if the callback must be called 
@@ -24,4 +25,10 @@ public abstract class AbstractDatabaseCallback {
      */
     public abstract void run(boolean success, long taskId, SubTask subTask);
     
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 }

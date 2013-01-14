@@ -35,11 +35,12 @@ public class AccessDatabaseThread extends Thread {
         databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, "dupierris");
         databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, "org.postgresql.Driver");
         
-//        databaseProperties.put(DatabaseConnector.PROPERTY_URL, "jdbc:postgresql://localhost:5432/UDS_db");
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, "jdbc:postgresql://localhost/UDS_db");
 
-        DatabaseConnectionTask connection = new DatabaseConnectionTask(null, databaseProperties, getProjectIdTMP());
-        addTask(connection);
+        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, "jdbc:postgresql://localhost:5432/UDS_db");
+        //databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, "jdbc:postgresql://gre037784:5433/UDS_db");
+
+        //DatabaseConnectionTask connection = new DatabaseConnectionTask(null, databaseProperties, getProjectIdTMP());
+        //addTask(connection);
 
         //CreateDatabaseTestTask createDatabase = new CreateDatabaseTestTask(null);
         //addTask(createDatabase);

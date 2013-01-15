@@ -11,8 +11,8 @@ import java.util.List;
  *
  * @author JM235353
  */
-public class ResultSummaryData extends AbstractData {
-
+public class ResultSummaryData /*extends AbstractData*/ {
+/*
     private ResultSummary resultSummary = null;
 
     public ResultSummaryData(ResultSummary resultSummary, boolean hasChildren) {
@@ -38,5 +38,5 @@ public class ResultSummaryData extends AbstractData {
 
     public ResultSummary getResultSummary() {
         return resultSummary;
-    }
+    }*/
 }

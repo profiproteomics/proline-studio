@@ -17,9 +17,11 @@ import javax.persistence.TypedQuery;
  */
 public class CreateDatabaseTestTask extends AbstractDatabaseTask {
 
-    public CreateDatabaseTestTask(AbstractDatabaseCallback callback) {
+    private Integer projectId = null;
+    
+    public CreateDatabaseTestTask(AbstractDatabaseCallback callback,Integer projectId) {
         super(callback);
-
+        this.projectId = projectId;
 
     }
 
@@ -33,7 +35,7 @@ public class CreateDatabaseTestTask extends AbstractDatabaseTask {
     public boolean fetchData() {
 
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();

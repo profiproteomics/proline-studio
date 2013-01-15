@@ -41,7 +41,7 @@ public class DisplayProteinSetsAction extends AbstractRSMAction {
 
             // prepare window box
             WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox();
-            wbox.setEntryData(rsm);
+            wbox.setEntryData(dataSet.getProjectId(), rsm);
 
 
             // open a window to display the window box
@@ -62,7 +62,7 @@ public class DisplayProteinSetsAction extends AbstractRSMAction {
                 public void run(boolean success, long taskId, SubTask subTask) {
                     // prepare window box
                     WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox();
-                    wbox.setEntryData(dataSet.getTransientData().getResultSummary());
+                    wbox.setEntryData(dataSet.getProjectId(), dataSet.getTransientData().getResultSummary());
 
 
                     // open a window to display the window box

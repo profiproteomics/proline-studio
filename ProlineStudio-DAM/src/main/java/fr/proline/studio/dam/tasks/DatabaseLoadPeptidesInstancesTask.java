@@ -19,19 +19,23 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
+    private Integer projectId = null;
     private ProteinMatch proteinMatch = null;
     private ArrayList<ProteinMatch> proteinMatchArray = null;
     private ArrayList<ResultSummary> rsmList = null;
 
-    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, ProteinMatch proteinMatch, ArrayList<ResultSummary> rsmList) {
+    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, Integer projectId, ProteinMatch proteinMatch, ArrayList<ResultSummary> rsmList) {
         super(callback);
+        this.projectId = projectId;
         this.proteinMatch = proteinMatch;
         this.proteinMatchArray = null;
         this.rsmList = rsmList;
+        
     }
     
-    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmList) {
+    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, Integer projectId, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmList) {
         super(callback);
+        this.projectId = projectId;
         this.proteinMatch = null;
         this.proteinMatchArray = proteinMatchArray;
         this.rsmList = rsmList;
@@ -67,7 +71,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     public boolean fetchData() {
 
         HashMap<Integer, Peptide> peptideMap = new HashMap<Integer, Peptide>();
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
 
         try {
 

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
 import java.util.ArrayList;
@@ -10,6 +6,11 @@ import java.util.Iterator;
 
 /**
  *
+ * A Box receive IN-parameters. According to them, it loads data from the database.
+ * These data are displayed to the user in an associated Graphical Panel.
+ * If the user select data in the panel, the box offers the selected data as OUT-parameters
+ * for the next dataBox.
+ * 
  * @author JM235353
  */
 public abstract class AbstractDataBox {
@@ -23,9 +24,12 @@ public abstract class AbstractDataBox {
     // Panel corresponding to this box
     protected DataBoxPanelInterface panel;
     
-    // In and out Parameters Registration
+    // In and out Parameters Registered
     private HashSet<DataParameter> inParameters = new HashSet<DataParameter>();
     private ArrayList<DataParameter> outParameters = new ArrayList<DataParameter>();
+    
+    
+    private Integer projectId = null;
     
     protected String name;
     
@@ -98,6 +102,21 @@ public abstract class AbstractDataBox {
             }
             nextDataBox.propagateDataChanged(dataType);
         }
+        
+    }
+    
+    public void setProjectId(Integer projectId) {
+        this.projectId = projectId;
+    }
+    
+    public Integer getProjectId() {
+        if (projectId!=null) {
+            return projectId;
+        }
+        if (previousDataBox != null) {
+            return previousDataBox.getProjectId();
+        }
+        return null; // should not happen
         
     }
     

@@ -71,7 +71,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         };
 
         // Load data if needed asynchronously
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadSpectrumsTask(callback, peptideMatch));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadSpectrumsTask(callback, getProjectId(), peptideMatch));
 
                  
                  

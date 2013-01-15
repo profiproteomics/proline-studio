@@ -16,8 +16,8 @@ import javax.persistence.TypedQuery;
  *
  * @author JM235353
  */
-public class DatabaseLoadRsmFromRsmTask extends AbstractDatabaseTask {
-
+public class DatabaseLoadRsmFromRsmTask /*extends AbstractDatabaseTask*/ {
+/*
     private ResultSummary resultSummary = null;
     private List<AbstractData> list = null;
 
@@ -68,5 +68,5 @@ public class DatabaseLoadRsmFromRsmTask extends AbstractDatabaseTask {
         }
 
         return true;
-    }
+    }*/
 }

@@ -78,7 +78,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         };
 
         // Load data if needed asynchronously
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromProteinSetTask(callback, proteinSet));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromProteinSetTask(callback, getProjectId(), proteinSet));
 
 
     }

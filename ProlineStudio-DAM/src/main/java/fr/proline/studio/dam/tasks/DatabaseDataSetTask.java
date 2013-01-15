@@ -29,7 +29,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private ResultSummary rsm = null;
     private String name = null;
     private Integer projectId = null;
-    private Integer parentDatasetId = null;  //TOTOCHE
+    private Integer parentDatasetId = null;
     private int datasetType;
     private String aggregateName;
     private boolean hasSuffix;
@@ -68,6 +68,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param list 
      */
     public void initLoadChildrenDataset(DataSetTMP parentDataSet, List<AbstractData> list) {
+        this.project = parentDataSet.project;
         this.dataSet = parentDataSet;
         this.list = list;
         action = LOAD_CHILDREN_DATASET;
@@ -214,18 +215,19 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             DataSetTMP dataSet = dataSetQuery.getSingleResult();*/
 
             //JPM.TODO
-            DataSetTMP dataSet = new DataSetTMP();
-            dataSet.description = "";
-            dataSet.id = 1;
-            dataSet.name = "CB_342";
-            dataSet.parentDataSetId = null;
-            dataSet.project = project;
-            dataSet.resultSetId = null;
-            dataSet.resultSummaryId = null;
-            dataSet.aggregateType = DataSetTMP.BIOLOGICAL_SAMPLE;
-            
-            list.add(new DataSetData(dataSet));
-            
+            if (project.getId() == 1) {
+                DataSetTMP dataSetCur = new DataSetTMP();
+                dataSetCur.description = "";
+                dataSetCur.id = 1;
+                dataSetCur.name = "CB_342";
+                dataSetCur.parentDataSetId = null;
+                dataSetCur.project = project;
+                dataSetCur.resultSetId = null;
+                dataSetCur.resultSummaryId = null;
+                dataSetCur.aggregateType = DataSetTMP.BIOLOGICAL_SAMPLE;
+
+                list.add(new DataSetData(dataSetCur));
+            }
             
             
             entityManagerUDS.getTransaction().commit();
@@ -332,7 +334,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     public boolean fetchRsetAndRsm() {
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id        
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(dataSet.getProjectId()).getEntityManagerFactory().createEntityManager();       
         try {
 
             entityManagerMSI.getTransaction().begin();

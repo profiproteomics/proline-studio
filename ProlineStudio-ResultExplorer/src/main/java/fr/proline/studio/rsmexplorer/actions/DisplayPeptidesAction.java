@@ -47,7 +47,8 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
         
             // prepare window box
             WindowBox wbox = WindowBoxFactory.getPeptidesWindowBox();
-            wbox.setEntryData(rset);
+            wbox.setEntryData(dataSet.getProjectId(), rset);
+            
 
 
             // open a window to display the window box
@@ -68,7 +69,7 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
                 public void run(boolean success, long taskId, SubTask subTask) {
                     // prepare window box
                     WindowBox wbox = WindowBoxFactory.getPeptidesWindowBox();
-                    wbox.setEntryData(dataSet.getTransientData().getResultSet() );
+                    wbox.setEntryData(dataSet.getProjectId(), dataSet.getTransientData().getResultSet());
 
 
                     // open a window to display the window box

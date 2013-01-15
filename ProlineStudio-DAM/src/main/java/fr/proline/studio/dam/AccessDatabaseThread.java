@@ -256,9 +256,4 @@ public class AccessDatabaseThread extends Thread {
         }
     }
 
-    public static Integer getProjectIdTMP() {
-        // JPM.TODO : remove this method
-        return projectId;
-    }
-    private static Integer projectId = new Integer(1);
 }

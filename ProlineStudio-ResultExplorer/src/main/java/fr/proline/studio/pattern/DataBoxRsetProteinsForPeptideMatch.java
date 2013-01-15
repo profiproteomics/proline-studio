@@ -72,7 +72,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
         };
 
         // Load data if needed asynchronously
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromPeptideMatchTask(callback, peptideMatch));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromPeptideMatchTask(callback, getProjectId(), peptideMatch));
 
 
     }

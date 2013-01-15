@@ -15,10 +15,12 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
 
+    private Integer projectId = null;
     private PeptideMatch peptideMatch = null;
 
-    public DatabaseLoadSpectrumsTask(AbstractDatabaseCallback callback, PeptideMatch peptideMatch) {
+    public DatabaseLoadSpectrumsTask(AbstractDatabaseCallback callback, Integer projectId, PeptideMatch peptideMatch) {
         super(callback);
+        this.projectId = projectId;
         this.peptideMatch = peptideMatch;
     }
 
@@ -31,7 +33,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();

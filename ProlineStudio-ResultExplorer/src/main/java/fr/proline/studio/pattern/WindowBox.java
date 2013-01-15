@@ -24,6 +24,10 @@ public class WindowBox {
         this.entryBox = entryBox;
     }
     
+    public void setProjectId(Integer projectId) {
+        entryBox.setProjectId(projectId);
+    }
+    
     public String getName() {
         return name;
     }
@@ -36,7 +40,8 @@ public class WindowBox {
         return entryBox;
     }
     
-    public void setEntryData(Object data) {
+    public void setEntryData(Integer projectId, Object data) {
+        entryBox.setProjectId(projectId);
         entryBox.setEntryData(data);
     }
     

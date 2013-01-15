@@ -16,12 +16,14 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseSearchPeptideMatchTask extends AbstractDatabaseTask {
   
+    private Integer projectId = null;
     private ResultSet rset = null;
     private String        searchString = null;
     private ArrayList<Integer>     searchResult = null;
     
-    public DatabaseSearchPeptideMatchTask(AbstractDatabaseCallback callback, ResultSet rset, String searchString, ArrayList<Integer> searchResult) {
+    public DatabaseSearchPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, ResultSet rset, String searchString, ArrayList<Integer> searchResult) {
         super(callback, Priority.HIGH_1);
+        this.projectId = projectId;
         this.rset = rset;       
         this.searchString = searchString;
         this.searchResult = searchResult;
@@ -29,7 +31,7 @@ public class DatabaseSearchPeptideMatchTask extends AbstractDatabaseTask {
     
     @Override
     public boolean fetchData() {
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
             

@@ -21,10 +21,12 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
     
+    private Integer projectId = null;
     private PeptideMatch peptideMatch = null;
 
-    public DatabaseProteinsFromPeptideMatchTask(AbstractDatabaseCallback callback, PeptideMatch peptideMatch) {
+    public DatabaseProteinsFromPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, PeptideMatch peptideMatch) {
         super(callback, Priority.NORMAL_3);
+        this.projectId = projectId;
         this.peptideMatch = peptideMatch;        
     }
 
@@ -37,7 +39,7 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
             
             entityManagerMSI.getTransaction().begin();

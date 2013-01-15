@@ -232,7 +232,7 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
 
 
                 // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchProteinSetsTask(callback, rsm, searchText, proteinSetIds));
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchProteinSetsTask(callback, dataBox.getProjectId() ,rsm, searchText, proteinSetIds));
 
                 searchButton.setEnabled(false);
             }

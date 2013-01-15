@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.PeptideMatch;
@@ -79,7 +75,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
         
 
         // ask asynchronous loading of data
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptideMatchFromRsetTask(callback, _rset));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptideMatchFromRsetTask(callback, getProjectId(), _rset));
 
        
         

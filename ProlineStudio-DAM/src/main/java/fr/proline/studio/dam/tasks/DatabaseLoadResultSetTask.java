@@ -15,8 +15,8 @@ import javax.persistence.TypedQuery;
  *
  * @author JM235353
  */
-public class DatabaseLoadResultSetTask extends AbstractDatabaseTask {
-
+public class DatabaseLoadResultSetTask /*extends AbstractDatabaseTask*/ {
+/*
     private IdentificationFraction identificationFraction = null;
     private List<AbstractData> list = null;
 
@@ -72,5 +72,5 @@ public class DatabaseLoadResultSetTask extends AbstractDatabaseTask {
         }
 
         return true;
-    }
+    }*/
 }

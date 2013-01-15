@@ -19,10 +19,12 @@ import javax.persistence.Query;
  */
 public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
     
+    private Integer projectId = null;
     private ProteinSet proteinSet = null;
 
-    public DatabaseProteinsFromProteinSetTask(AbstractDatabaseCallback callback, ProteinSet proteinSet) {
+    public DatabaseProteinsFromProteinSetTask(AbstractDatabaseCallback callback, Integer projectId, ProteinSet proteinSet) {
         super(callback, Priority.NORMAL_3);
+        this.projectId = projectId;
         this.proteinSet = proteinSet;        
     }
 
@@ -35,7 +37,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
             
             entityManagerMSI.getTransaction().begin();

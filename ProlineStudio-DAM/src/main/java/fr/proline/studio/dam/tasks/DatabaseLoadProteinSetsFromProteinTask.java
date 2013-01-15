@@ -17,23 +17,27 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask {
 
+    private Integer projectId = null;
     private ArrayList<ProteinMatch> proteinMatchArray = null;
     private ArrayList<Integer> resultSetIdArray = null;
     private String proteinMatchName = null;
     
-    public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, ProteinMatch proteinMatch) {
+    public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, Integer projectId, ProteinMatch proteinMatch) {
         super(callback, Priority.NORMAL_3);
+        this.projectId = projectId;
         this.proteinMatchArray = new ArrayList<ProteinMatch>(1);
         this.proteinMatchArray.add(proteinMatch);        
     }
     
-    public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, ArrayList<ProteinMatch> proteinMatchArray) {
+    public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, Integer projectId, ArrayList<ProteinMatch> proteinMatchArray) {
         super(callback, Priority.NORMAL_3);
+        this.projectId = projectId;
         this.proteinMatchArray = proteinMatchArray;        
     }
     
-    public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<Integer> resultSetIdArray, String proteinMatchName ) {
+    public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, Integer projectId, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<Integer> resultSetIdArray, String proteinMatchName ) {
         super(callback, Priority.NORMAL_3);
+        this.projectId = projectId;
         this.proteinMatchArray = proteinMatchArray;   
         this.resultSetIdArray = resultSetIdArray;
         this.proteinMatchName = proteinMatchName;
@@ -55,7 +59,7 @@ public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask
     @Override
     public boolean fetchData() {
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();

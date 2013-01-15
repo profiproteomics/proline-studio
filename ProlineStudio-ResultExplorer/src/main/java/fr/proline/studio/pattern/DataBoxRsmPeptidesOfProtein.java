@@ -92,7 +92,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         // Load data if needed asynchronously
         ArrayList<ResultSummary> rsmList = new ArrayList<ResultSummary>(1);
         rsmList.add(rsm);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, proteinMatch, rsmList));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, getProjectId(), proteinMatch, rsmList));
 
 
     }

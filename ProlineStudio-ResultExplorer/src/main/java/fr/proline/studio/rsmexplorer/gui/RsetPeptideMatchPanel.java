@@ -216,7 +216,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
 
                 
                 // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideMatchTask(callback, rset, searchText, peptideMatchIds));
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideMatchTask(callback, dataBox.getProjectId(), rset, searchText, peptideMatchIds));
 
                 searchButton.setEnabled(false);
             }

@@ -32,14 +32,19 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     public static final int SUB_TASK_SPECIFIC_SPECTRAL_COUNT = 2;
     public static final int SUB_TASK_SAMESET_SUBSET_COUNT = 3;
     public static final int SUB_TASK_COUNT = 4; // <<----- get in sync
+    
+    private Integer projectId = null;
     private ResultSummary rsm = null;
+    
+    
     // data kept for sub tasks
-    ArrayList<Integer> proteinMatchIds = null;
-    HashMap<Integer, ProteinSet> proteinSetMap = null;
-    ArrayList<Integer> proteinSetIds = null;
+    private ArrayList<Integer> proteinMatchIds = null;
+    private HashMap<Integer, ProteinSet> proteinSetMap = null;
+    private ArrayList<Integer> proteinSetIds = null;
 
-    public DatabaseProteinSetsTask(AbstractDatabaseCallback callback, ResultSummary rsm) {
+    public DatabaseProteinSetsTask(AbstractDatabaseCallback callback, Integer projectId, ResultSummary rsm) {
         super(callback, SUB_TASK_COUNT);
+        this.projectId = projectId;
         this.rsm = rsm;
     }
 
@@ -66,7 +71,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTask() {
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -219,7 +224,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         if (slice == null) {
             return true; // nothing to do : should not happen
         }
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         
         try {
 

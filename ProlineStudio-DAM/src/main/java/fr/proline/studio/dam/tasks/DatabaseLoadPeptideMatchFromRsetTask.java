@@ -31,15 +31,18 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
     public static final int SUB_TASK_COUNT = 3; // <<----- get in sync
 
     
+    private Integer projectId = null;
     private ResultSet rset = null;
     // data kept for sub tasks
     private ArrayList<Integer> peptideMatchIds = null;
     private HashMap<Integer, PeptideMatch> peptideMatchMap = null;
     
 
-    public DatabaseLoadPeptideMatchFromRsetTask(AbstractDatabaseCallback callback, ResultSet rset) {
+    public DatabaseLoadPeptideMatchFromRsetTask(AbstractDatabaseCallback callback, Integer projectId, ResultSet rset) {
         super(callback, SUB_TASK_COUNT);
+        this.projectId = projectId;
         this.rset = rset;
+        
     }
 
     @Override
@@ -60,7 +63,7 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
 
     public boolean fetchDataMainTask() {
         
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -150,7 +153,7 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
             return true; // nothing to do : should not happen
         }
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( AccessDatabaseThread.getProjectIdTMP()).getEntityManagerFactory().createEntityManager();  //JPM.TODO : project id
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();

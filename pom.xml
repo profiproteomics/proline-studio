@@ -142,6 +142,7 @@
       <module>ProlineStudio-RepositoryMgr</module>
       <module>ProlineStudio-CoreWrapper</module>
     <module>ProlineStudio-Logger</module>
+    <module>ProlineStudio-DPM</module>
   </modules>
 
   <dependencyManagement>

@@ -17,11 +17,9 @@ public class AddAggregateDialog extends DefaultDialog {
     private AddAggregatePanel aggregatePanel = null;
    
     public static AddAggregateDialog getDialog(Window parent) {
-        if (singletonDialog != null) {
-            return singletonDialog;
+        if (singletonDialog == null) {
+            singletonDialog = new AddAggregateDialog(parent);
         }
-        
-        singletonDialog = new AddAggregateDialog(parent);
 
         return singletonDialog;
     }

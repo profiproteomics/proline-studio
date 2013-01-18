@@ -5,7 +5,6 @@ import fr.proline.studio.dam.UDSConnectionManager;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dialog;
 import java.awt.Window;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -19,12 +18,9 @@ public class DatabaseConnectionDialog extends DefaultDialog {
     private DatabaseConnectionPanel databaseConnectionPanel = null;
    
     public static DatabaseConnectionDialog getDialog(Window parent) {
-        if (singletonDialog != null) {
-            return singletonDialog;
+        if (singletonDialog == null) {
+            singletonDialog = new DatabaseConnectionDialog(parent);
         }
-        
-        singletonDialog = new DatabaseConnectionDialog(parent);
-
         return singletonDialog;
     }
     
@@ -78,16 +74,6 @@ public class DatabaseConnectionDialog extends DefaultDialog {
         return false;
     }
     
-    /*public String getAggregateName() {
-        return aggregatePanel.getAggregateName();
-    }
-    
-    public int getNbAggregates() {
-       return aggregatePanel.getNbAggregates();
-    }
-    
-    public int getAggregateType() {
-        return aggregatePanel.getAggregateType();
-    }*/
+
     
 }

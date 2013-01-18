@@ -2,12 +2,16 @@ package fr.proline.studio.dam.tasks;
 
 
 
+import fr.proline.core.orm.uds.Instrument;
 import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.repository.Database;
 import fr.proline.repository.DatabaseConnectorFactory;
 import fr.proline.repository.IDatabaseConnector;
+import fr.proline.studio.dam.InstrumentList;
+import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 /**
  * Used to connect to a UDS DB or MSI DB
@@ -63,8 +67,9 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         
             if (databaseProperties != null) {
                 
+                // UDS Connection
                 try {
-                    // UDS Connection
+                    
                     IDatabaseConnector udsConn = DatabaseConnectorFactory.createDatabaseConnectorInstance(Database.UDS, databaseProperties);
                     DatabaseManager.getInstance().initialize(udsConn);
                 } catch (Exception e) {
@@ -73,6 +78,25 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     DatabaseManager.getInstance().closeAll();
                     return false;
                 }
+                
+                // Load needed static data from UDS
+                EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+                try {
+                    entityManagerUDS.getTransaction().begin();
+
+                    TypedQuery<Instrument> instrumentQuery = entityManagerUDS.createQuery("SELECT i FROM fr.proline.core.orm.uds.Instrument i ORDER BY i.name ASC", Instrument.class);
+                    List<Instrument> instrumentList = instrumentQuery.getResultList();
+                    InstrumentList.getInstrumentList().setIntruments(instrumentList);
+
+                    entityManagerUDS.getTransaction().commit();
+
+                } catch (RuntimeException e) {
+                    errorMessage = "Unable to load Instruments from UDS";
+                    logger.error(getClass().getSimpleName() + " failed", e);
+                    entityManagerUDS.getTransaction().rollback();
+                }
+
+                entityManagerUDS.close();
             } else {
                 try {
                     // MSI Connection

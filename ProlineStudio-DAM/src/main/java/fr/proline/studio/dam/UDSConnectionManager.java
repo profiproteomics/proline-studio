@@ -12,7 +12,8 @@ import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Used to manage the parameters to connect to the UDS, and keep
+ * the state of the connection.
  * @author JM235353
  */
 public class UDSConnectionManager {

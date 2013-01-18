@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 
+import fr.proline.studio.rsmexplorer.gui.dialog.ImportIdentificationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import java.awt.Component;
@@ -22,37 +23,12 @@ public class IdentificationAction extends AbstractRSMAction {
 
     @Override
     public void actionPerformed(RSMNode n, int x, int y) { 
+
         
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-
-
-                    Component parentComponent = WindowManager.getDefault().findTopComponent("RSMExplorerTopComponent");
-                    String name = (String) JOptionPane.showInputDialog(
-                            parentComponent,
-                            "Name:",
-                            "New Context Name",
-                            JOptionPane.PLAIN_MESSAGE,
-                            null,
-                            null,
-                            "");
-                    if ((name != null) && (name.length() > 0)) {
-                        
-                        //JPM.TODO
-                        
-/*
-                        IdentificationFractionData data = new IdentificationFractionData(null);
-                        //data.setName(name);  //JPM.TODO
-                        RSMIdentificationFractionNode identificationFractionNode = new RSMIdentificationFractionNode(data);
-                        // JPM.TODO node.getChildren().add(new Node[]{identificationFractionNode});*/
-                    }
-
-                }
-            });
-        } catch (InterruptedException|InvocationTargetException excp) {
-        }
+        ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        dialog.setLocation(x, y);
+        dialog.setVisible(true);
+        
     }
 
     @Override

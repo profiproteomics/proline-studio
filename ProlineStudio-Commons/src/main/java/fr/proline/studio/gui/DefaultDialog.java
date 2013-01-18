@@ -1,11 +1,9 @@
 package fr.proline.studio.gui;
 
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import javax.swing.*;
-import org.openide.util.ImageUtilities;
 
 /**
  * All Dialogs of this application must extend this class
@@ -58,7 +56,9 @@ public class DefaultDialog extends javax.swing.JDialog {
          }
      }
     
-    
+    public void repack() {
+        super.pack();
+    }
 
     public int getButtonClicked() {
         return buttonClicked;

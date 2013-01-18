@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.utils;
 
 import java.util.HashMap;
@@ -9,7 +5,8 @@ import javax.swing.ImageIcon;
 import org.openide.util.ImageUtilities;
 
 /**
- *
+ * Manage all icons needed by the application.
+ * Each icon is loaded only one time when it is first needed
  * @author JM235353
  */
 public class IconManager {
@@ -31,7 +28,9 @@ public class IconManager {
         MAXIMIZE,
         MINIMIZE,
         DELETE,
-        QUESTION
+        QUESTION,
+        ERASER,
+        OPEN_FILE
     }
     
     private static HashMap<IconType, ImageIcon> iconMap = new HashMap<>();
@@ -85,6 +84,10 @@ public class IconManager {
                 return "fr/proline/studio/images/deleteBlue.png";
             case QUESTION:
                 return "fr/proline/studio/images/question.png";
+            case ERASER:
+                return "fr/proline/studio/images/eraser.png";
+            case OPEN_FILE:
+                return "fr/proline/studio/images/folder-open-document.png";
         }
         
 

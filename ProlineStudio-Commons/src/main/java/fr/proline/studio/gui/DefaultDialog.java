@@ -296,6 +296,24 @@ public class DefaultDialog extends javax.swing.JDialog {
          
     }
 
+    public void centerToScreen() {
+        
+        // pack must have been done beforehand
+        pack();
+        
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        int width = getWidth();
+        int height = getHeight();
+
+        int x = (screenSize.width-width)/2;
+        int y = (screenSize.height-height)/2;
+        
+        super.setLocation(x, y);
+         
+        
+    }
+    
     public void setBusy(boolean busy) {
         
         if (busyGlassPane == null) {

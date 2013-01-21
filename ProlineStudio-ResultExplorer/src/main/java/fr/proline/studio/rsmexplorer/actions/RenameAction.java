@@ -7,6 +7,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabaseProjectTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.RenameDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
@@ -40,9 +42,9 @@ public class RenameAction extends AbstractRSMAction {
             final DataSetTMP dataset = datasetNode.getDataSet();
             name = dataset.getName();
 
-            final String newName = showRenameDialog(name);
+            final String newName = showRenameDialog(name, x, y);
 
-            if (newName != null) {
+            if ((newName != null) && (newName.compareTo(name) != 0)) {
                 datasetNode.setIsChanging(true);
                 dataset.setName(newName+"...");
                 ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(datasetNode);
@@ -75,9 +77,9 @@ public class RenameAction extends AbstractRSMAction {
             final Project project = projectNode.getProject();
             name = project.getName();
 
-            final String newName = showRenameDialog(name);
+            final String newName = showRenameDialog(name,  x, y);
 
-            if (newName != null) {
+            if ((newName != null) && (newName.compareTo(name) != 0)) {
                 projectNode.setIsChanging(true);
                 project.setName(newName+"...");
                 ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(projectNode);
@@ -104,40 +106,25 @@ public class RenameAction extends AbstractRSMAction {
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
             }
         }
-        
-        
-        
-        
 
-
-        
-        
-        /**
-        ValidationDialog dialog = new ValidationDialog(null);
-        dialog.setVisible(true);  //JPM.TODO : remove it : not to be put here
-        */
-        /*
-         * DatabaseConnection connection = null;
-         * ConnectionManager.getDefault().showConnectionDialog(connection);
-         */
 
     }
         
-    private String showRenameDialog(String name) {
+    private String showRenameDialog(String name, int x, int y) {
         
+        RenameDialog dialog = RenameDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        dialog.setNameField(name);
+        dialog.setLocation(x, y);
+        dialog.setVisible(true);
+        String newName = null;
+        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            newName = dialog.getNameField();
+        }
         
-        Component parentComponent = WindowManager.getDefault().findTopComponent("RSMExplorerTopComponent");
-        String newName = (String) JOptionPane.showInputDialog(
-                            parentComponent,
-                            "New Name:",
-                            "Rename",
-                            JOptionPane.PLAIN_MESSAGE,
-                            null,
-                            null,
-                            name);
         if ((newName != null) && (newName.length() > 0)) {
             return newName;
         }
+        
         return null;
     }
     

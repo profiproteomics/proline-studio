@@ -94,14 +94,14 @@ public final class RSMExplorerTopComponent extends TopComponent  {
             public void run() {
                 
                 UDSConnectionManager udsMgr = UDSConnectionManager.getUDSConnectionManager();
-                while (udsMgr.getConnectionStep() == UDSConnectionManager.CONNECTION_ASKED) {
+                while (udsMgr.getConnectionState() == UDSConnectionManager.CONNECTION_ASKED) {
                     // wait for the connection to have succedeed or failed
                     try {
                         Thread.sleep(100); // JPM.TODO : one day remove the polling and write blocking code instead
                     } catch (InterruptedException ex) {
                     }
                 }
-                int connectionStep = udsMgr.getConnectionStep();
+                int connectionStep = udsMgr.getConnectionState();
                 if ((connectionStep == UDSConnectionManager.CONNECTION_FAILED) || (connectionStep == UDSConnectionManager.NOT_CONNECTED)) {
                     // the user need to enter connection parameters
 
@@ -110,11 +110,12 @@ public final class RSMExplorerTopComponent extends TopComponent  {
                         @Override
                         public void run() {
                             DatabaseConnectionDialog databaseConnectionDialog = DatabaseConnectionDialog.getDialog(WindowManager.getDefault().getMainWindow());
-                            databaseConnectionDialog.centerToFrame(WindowManager.getDefault().getMainWindow());
+                            databaseConnectionDialog.centerToScreen();
+                            //databaseConnectionDialog.centerToFrame(WindowManager.getDefault().getMainWindow()); // does not work : main window has not its size most of the time at this point
                             databaseConnectionDialog.setVisible(true);
                             
                             UDSConnectionManager udsMgr = UDSConnectionManager.getUDSConnectionManager();
-                            if (udsMgr.getConnectionStep() == UDSConnectionManager.CONNECTION_DONE) {
+                            if (udsMgr.getConnectionState() == UDSConnectionManager.CONNECTION_DONE) {
                                 RSMTree.getTree().startLoading();
                             }
                         }

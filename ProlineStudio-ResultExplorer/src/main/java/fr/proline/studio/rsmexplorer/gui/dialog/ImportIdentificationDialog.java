@@ -50,15 +50,15 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private final static String[] FILE_EXTENSIONS = {"dat", "test"};
     private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Test Identification"};
     private final static String[][] SPECIFIC_PARAMETERS_KEY = {
-        {"ion.score.cutoff", "subset.threshold", "protein.cutoff.pvalue"},
+        {"ion.score.cutoff", "subset.threshold"/*, "protein.cutoff.pvalue"*/},
         {"test"}
     };
     private final static String[][] SPECIFIC_PARAMETERS_NAME = {
-        {"Ion Score Cutoff", "Subset Threshold", "Protein Cutoff Pvalue"},
+        {"Ion Score Cutoff", "Subset Threshold"/*, "Protein Cutoff Pvalue"*/},
         {"Test"}
     };
     private final static String[][] SEPECIFIC_PARAMETERS_DEFAULT = {
-        {"0", "1", "????"},
+        {"0", "1.0"/*, ""*/},
         {"4"}
     };
 

@@ -268,7 +268,7 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
                 dialog.setBusy(false);
                 
                 UDSConnectionManager udsManager = UDSConnectionManager.getUDSConnectionManager();
-                int step = udsManager.getConnectionStep();
+                int step = udsManager.getConnectionState();
                 if (step == UDSConnectionManager.CONNECTION_FAILED) {
                     JOptionPane.showMessageDialog(thisReference, udsManager.getConnectionError(), "Database Connection Error", JOptionPane.ERROR_MESSAGE);
                 } else if (step == UDSConnectionManager.CONNECTION_DONE) {

@@ -32,7 +32,7 @@ public class UDSConnectionManager {
     public static final int CONNECTION_ASKED = 1;
     public static final int CONNECTION_FAILED = 2;
     public static final int CONNECTION_DONE = 3;
-    private int connectionStep = NOT_CONNECTED;
+    private int connectionState = NOT_CONNECTED;
     private String connectionError = null;
     private String m_driverName;
     private String m_driverClass;
@@ -56,12 +56,12 @@ public class UDSConnectionManager {
         tryToConnect();
     }
 
-    public synchronized int getConnectionStep() {
-        return connectionStep;
+    public synchronized int getConnectionState() {
+        return connectionState;
     }
 
-    public synchronized void setConnectionStep(int connectionStep) {
-        this.connectionStep = connectionStep;
+    public synchronized void setConnectionState(int connectionState) {
+        this.connectionState = connectionState;
     }
 
     public String getConnectionError() {
@@ -189,7 +189,7 @@ public class UDSConnectionManager {
         tryToConnect(null, m_jdbcUrl, m_driverClass, m_dbName, m_host, m_port, m_userName, m_password);
     }
     public void tryToConnect(final Runnable connectionCallback, String jdbcUrl, String driverClass, String dbName, String host, String port, String userName, String password) {
-        setConnectionStep(CONNECTION_ASKED);
+        setConnectionState(CONNECTION_ASKED);
 
         // first check on parameters
         if (driverClass.isEmpty()) {
@@ -241,13 +241,12 @@ public class UDSConnectionManager {
             public void run(boolean success, long taskId, SubTask subTask) {
 
                 if (!success) {
-                    //JPM.TODO
-                    setConnectionStep(CONNECTION_FAILED);
+                    setConnectionState(CONNECTION_FAILED);
                     connectionError = getErrorMessage();
                 } else {
                     // save connection parameters
                     saveParameters();
-                    setConnectionStep(CONNECTION_DONE);
+                    setConnectionState(CONNECTION_DONE);
                 }
                 
                 if (connectionCallback != null) {
@@ -264,7 +263,7 @@ public class UDSConnectionManager {
 
     }
     private void connectFailed(Runnable connectionCallback) {
-        setConnectionStep(CONNECTION_FAILED);
+        setConnectionState(CONNECTION_FAILED);
         if (connectionCallback != null) {
             connectionCallback.run();
         }

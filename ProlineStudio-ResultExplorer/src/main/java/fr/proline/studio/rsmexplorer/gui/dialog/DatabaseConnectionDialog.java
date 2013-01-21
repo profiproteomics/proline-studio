@@ -41,7 +41,7 @@ public class DatabaseConnectionDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
         
-        if (UDSConnectionManager.getUDSConnectionManager().getConnectionStep() == UDSConnectionManager.CONNECTION_DONE) {
+        if (UDSConnectionManager.getUDSConnectionManager().getConnectionState() == UDSConnectionManager.CONNECTION_DONE) {
             // we are already connected
             // check if the parameters have changed
             if (! databaseConnectionPanel.checkParametersHaveChanged()) {

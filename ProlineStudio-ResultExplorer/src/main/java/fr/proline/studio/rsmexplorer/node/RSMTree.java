@@ -305,47 +305,98 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     
     private void triggerPopup(MouseEvent e) {
         
-        // creation of the popup if needed
-        if (popup == null) {
-            
-            // create the actions
-            actions = new ArrayList<AbstractRSMAction>(7);  // <--- get in sync
-            
-            DisplayPeptidesAction displayPeptidesAction = new DisplayPeptidesAction();
-            actions.add(displayPeptidesAction);
-            
-            DisplayProteinSetsAction displayProteinSetsAction = new DisplayProteinSetsAction();
-            actions.add(displayProteinSetsAction);
-            
-            actions.add(null);  // separator
-            
-            AddAction addAction = new AddAction();
-            actions.add(addAction);
-            
-            actions.add(null);  // separator
-            
-            RenameAction renameAction = new RenameAction();
-            actions.add(renameAction);
-            
-            DeleteAction deleteAction = new DeleteAction();
-            actions.add(deleteAction);
-            
-            
-            // add actions to popup
-            popup = new JPopupMenu();
-            for (int i=0;i<actions.size();i++) {
-                AbstractRSMAction action = actions.get(i);
-                if (action == null) {
-                    popup.addSeparator();
-                } else {
-                    popup.add(action.getPopupPresenter());
-                }
-            }
-
-        }
-        
         // retrieve selected nodes
         RSMNode[] selectedNodes = getSelectedNodes();
+        
+        // check if the Root node is selected
+        boolean rootNodeSelected = false;
+        int nbNodes = selectedNodes.length;
+        for (int i=0;i<nbNodes;i++) {
+            RSMNode n = selectedNodes[i];
+            if (n.isRoot()) {
+                rootNodeSelected = true;
+                break;
+            }
+        }
+        
+        JPopupMenu popup = null;
+        ArrayList<AbstractRSMAction> actions = null;
+        
+        if (rootNodeSelected && (nbNodes >= 1)) {
+            if (nbNodes > 1) {
+                // the root node is selected and multiple nodes are
+                // selected : we do not show the popup
+                return;
+            }
+
+            // we show the popup to connect or disconnect
+            if (rootPopup == null) {
+                // create the actions
+                rootActions = new ArrayList<AbstractRSMAction>(2);  // <--- get in sync
+
+                ConnectAction connectAction = new ConnectAction();
+                rootActions.add(connectAction);
+
+                /*DisconnectAction disconnectAction = new DisconnectAction();
+                rootActions.add(disconnectAction);*/ //JPM.TODO
+
+                // add actions to popup
+                rootPopup = new JPopupMenu();
+                for (int i = 0; i < rootActions.size(); i++) {
+                    AbstractRSMAction action = rootActions.get(i);
+                    rootPopup.add(action.getPopupPresenter());
+                }
+            }
+            
+            popup = rootPopup;
+            actions = rootActions;
+            
+        } else {
+
+
+            // creation of the popup if needed
+            if (mainPopup == null) {
+
+                // create the actions
+                mainActions = new ArrayList<AbstractRSMAction>(7);  // <--- get in sync
+
+                DisplayPeptidesAction displayPeptidesAction = new DisplayPeptidesAction();
+                mainActions.add(displayPeptidesAction);
+
+                DisplayProteinSetsAction displayProteinSetsAction = new DisplayProteinSetsAction();
+                mainActions.add(displayProteinSetsAction);
+
+                mainActions.add(null);  // separator
+
+                AddAction addAction = new AddAction();
+                mainActions.add(addAction);
+
+                mainActions.add(null);  // separator
+
+                RenameAction renameAction = new RenameAction();
+                mainActions.add(renameAction);
+
+                DeleteAction deleteAction = new DeleteAction();
+                mainActions.add(deleteAction);
+
+
+                // add actions to popup
+                mainPopup = new JPopupMenu();
+                for (int i = 0; i < mainActions.size(); i++) {
+                    AbstractRSMAction action = mainActions.get(i);
+                    if (action == null) {
+                        mainPopup.addSeparator();
+                    } else {
+                        mainPopup.add(action.getPopupPresenter());
+                    }
+                }
+
+            }
+            
+            popup = mainPopup;
+            actions = mainActions;
+        }
+
         
         // update of the enable/disable state
         for (int i=0;i<actions.size();i++) {
@@ -360,8 +411,10 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         
         popup.show( (JComponent)e.getSource(), e.getX(), e.getY() );
     }
-    private JPopupMenu popup;
-    private ArrayList<AbstractRSMAction> actions;
+    private JPopupMenu mainPopup;
+    private ArrayList<AbstractRSMAction> mainActions;
+    private JPopupMenu rootPopup;
+    private ArrayList<AbstractRSMAction> rootActions;
     
     @Override
     public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {

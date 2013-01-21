@@ -58,9 +58,15 @@ public class ImportIdentificationDialog extends DefaultDialog {
         {"Test"}
     };
     private final static String[][] SEPECIFIC_PARAMETERS_DEFAULT = {
-        {"0", "1.0"/*, ""*/},
+        {"0.0", "1.0"/*, ""*/},
         {"4"}
     };
+    private final static Double[][][] SEPECIFIC_PARAMETERS_ACCEPTED_VALUES = {
+        {{new Double(0), null}, {new Double(0), new Double(1)}}, // {new Double(0), new Double(1)} means value between 0 and 1; null means no limit
+        {{null, null}}
+    };
+    
+    
 
     public static ImportIdentificationDialog getDialog(Window parent) {
         if (singletonDialog == null) {
@@ -381,7 +387,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
         int parserIndex = parserComboBox.getSelectedIndex();
 
         // check parameters
-        // JPM.TODO
+        if (!checkParameters()) {
+            return false;
+        }
 
         // save parameters
         saveParserAndParameters(parserIndex);
@@ -407,6 +415,58 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return false;
     }
 
+    private boolean checkParameters() {
+        
+        // check files selected
+        int nbFiles = fileList.getModel().getSize();
+        if (nbFiles == 0) {
+            JOptionPane.showMessageDialog(singletonDialog, "You must select a file to import.", "Warning", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
+        // check specific import parameters
+        int parserIndex = parserComboBox.getSelectedIndex();
+
+        String[] parameterKeys = SPECIFIC_PARAMETERS_KEY[parserIndex];
+        Double[][] limitValues = SEPECIFIC_PARAMETERS_ACCEPTED_VALUES[parserIndex];
+        int nbParameters = parameterKeys.length;
+        for (int i = 0; i < nbParameters; i++) {
+            String parameterInParserKey = parserIndex + parameterKeys[i];
+            JTextField f = specificParametersMap.get(parameterInParserKey);
+            String value = f.getText();
+            if (value.isEmpty()) {
+                JOptionPane.showMessageDialog(singletonDialog, "You must fill the "+SPECIFIC_PARAMETERS_NAME[i][parserIndex]+" field.", "Warning", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            try {
+                double valueD = Double.parseDouble(value);
+                
+                Double minValue = limitValues[i][0];
+                if (minValue != null) {
+                    if (valueD<minValue.doubleValue()) {
+                        JOptionPane.showMessageDialog(singletonDialog, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be greater than "+minValue+" .", "Warning", JOptionPane.ERROR_MESSAGE);
+                        return false;
+                    }
+                }
+                
+                Double maxValue = limitValues[i][1];
+                if (maxValue != null) {
+                    if (valueD>maxValue.doubleValue()) {
+                        JOptionPane.showMessageDialog(singletonDialog, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be lesser than "+maxValue+" .", "Warning", JOptionPane.ERROR_MESSAGE);
+                        return false;
+                    }
+                }
+                
+            } catch (NumberFormatException nfe) {
+                JOptionPane.showMessageDialog(singletonDialog, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be a Real.", "Warning", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            
+        }
+        
+        return true;
+    }
+    
     private void restoreDefaults(int parserIndex) {
         String[] defaultParameters = SEPECIFIC_PARAMETERS_DEFAULT[parserIndex];
         String[] parameterKeys = SPECIFIC_PARAMETERS_KEY[parserIndex];

@@ -10,7 +10,9 @@ import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,4 +70,27 @@ public class SampleCode {
 
         return request;
     }
+    
+    	
+	private static JsonRpcRequest createImportRequest() {
+
+		JsonRpcRequest request = new JsonRpcRequest();
+		request.setId(12356);
+		request.setMethod("run_job");
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("project_id", 1);
+		List args = new ArrayList();
+		Map<String, Object> resultfile = new HashMap<String, Object>();
+		resultfile.put("path", "D:/bruley/Data/Mascot/F065770.dat");
+		resultfile.put("format", "mascot.dat");
+		args.add(resultfile);
+		params.put("result_files", args);
+		params.put("instrument_config_id", 15);
+		params.put("peaklist_software_id", 3);
+		
+		request.setParameters(params);
+		
+		return request;
+}
+
 }

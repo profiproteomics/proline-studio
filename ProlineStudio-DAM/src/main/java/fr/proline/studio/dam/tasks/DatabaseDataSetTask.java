@@ -348,7 +348,14 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     public boolean fetchRsetAndRsm() {
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(dataSet.getProjectId()).getEntityManagerFactory().createEntityManager();       
+        Integer projectId = null;
+        if (dataSet != null) {
+            projectId = dataSet.getProjectId();
+        } else if (dataSetList != null) {
+            projectId = dataSetList.get(0).getProjectId();
+        }
+        
+        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();       
         try {
 
             entityManagerMSI.getTransaction().begin();

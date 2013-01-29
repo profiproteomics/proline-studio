@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.node;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
-import org.openide.util.ImageUtilities;
 
 /**
  * Node used a the Tree Parent
@@ -22,7 +21,7 @@ public class RSMTreeParentNode extends RSMNode {
     
     @Override
     public ImageIcon getIcon() {
-        return IconManager.getIcon(IconManager.IconType.USER);
+        return getIcon(IconManager.IconType.USER);
     }
     
 }

@@ -7,7 +7,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddAggregateDialog;
-import fr.proline.studio.rsmexplorer.gui.dialog.DatabaseConnectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
@@ -82,7 +81,7 @@ public class AggregateAction extends AbstractRSMAction {
                     aggregateName += suffixNumber;
                     suffixNumber++;
                 }
-                RSMDataSetNode datasetNode = new RSMDataSetNode(new DataSetData(aggregateName));
+                RSMDataSetNode datasetNode = new RSMDataSetNode(new DataSetData(aggregateName, aggregateType));
                 nodesCreated.add(datasetNode);
                 datasetNode.setIsChanging(true);
                 n.add(datasetNode);
@@ -143,8 +142,39 @@ public class AggregateAction extends AbstractRSMAction {
     
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
+        
+        int nbSelectedNodes = selectedNodes.length;
+        
+        // aggregate must be added in one parent node (for the moment)
+        if (nbSelectedNodes != 1) {
+            setEnabled(false);
+            return;
+        }
+        
+        RSMNode node = selectedNodes[0];
+        
+        // parent node is being created, we can not add an identification
+        if (node.isChanging()) {
+            setEnabled(false);
+            return;
+        }
 
-        setEnabled(true);  //JPM.TODO
+        // we can always add an aggregate directly to a project
+        if (node.getType() == RSMNode.NodeTypes.PROJECT) {
+            setEnabled(true);
+            return;
+        }
+        
+        // we can add an aggregate only to a data set without a ResultSet or a ResultSummary
+        if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
+            RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
+        
+            setEnabled(!dataSetNode.hasResultSet() && !dataSetNode.hasResultSummary());
+            return;  
+        }
 
+        setEnabled(false);
+        
+        
     }
 }

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.core.orm.msi.ResultSet;
@@ -13,13 +9,13 @@ import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 
 /**
- *
+ * Node for Dataset
  * @author JM235353
  */
 public class RSMDataSetNode extends RSMNode {
 
    
-    boolean isChanging = false;
+    
     
     public RSMDataSetNode(AbstractData data) {
         super(NodeTypes.DATA_SET, data);
@@ -28,38 +24,55 @@ public class RSMDataSetNode extends RSMNode {
     @Override
     public ImageIcon getIcon() {
 
-        if (isChanging) {
-            return IconManager.getIcon(IconManager.IconType.HOUR_GLASS);
-        }
-        
+
         
         //JPM.TODO : icon management of Dataset
-        DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
-        
-        int aggreagateType = dataSet.aggregateType;
-        switch (aggreagateType) {
-            case DataSetTMP.BIOLOGICAL_GROUP:
-                return IconManager.getIcon(IconManager.IconType.VIAL);
-            case DataSetTMP.BIOLOGICAL_SAMPLE:
-                return IconManager.getIcon(IconManager.IconType.GEL);
-            case DataSetTMP.SAMPLE_ANALYSIS:
-                return IconManager.getIcon(IconManager.IconType.GEL);
-        }
+        int aggreagateType;
+        if (isChanging()) {
+            aggreagateType = ((DataSetData) getData()).getAggregateType();
+            
+            switch (aggreagateType) {
+                case DataSetTMP.BIOLOGICAL_GROUP:
+                    return getIcon(IconManager.IconType.VIAL);
+                case DataSetTMP.BIOLOGICAL_SAMPLE:
+                    return getIcon(IconManager.IconType.GEL);
+                case DataSetTMP.SAMPLE_ANALYSIS:
+                    return getIcon(IconManager.IconType.GEL);
+            }
 
-        if (dataSet.getResultSummaryId() != null) {
-            return IconManager.getIcon(IconManager.IconType.RSM);
-        } else if (dataSet.getResultSetId() != null) {
-            return IconManager.getIcon(IconManager.IconType.RSET);
+            return getIcon(IconManager.IconType.RSET);
+            
+            
+        } else {
+            DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
+            aggreagateType = dataSet.aggregateType;
+
+            switch (aggreagateType) {
+                case DataSetTMP.BIOLOGICAL_GROUP:
+                    return getIcon(IconManager.IconType.VIAL);
+                case DataSetTMP.BIOLOGICAL_SAMPLE:
+                    return getIcon(IconManager.IconType.GEL);
+                case DataSetTMP.SAMPLE_ANALYSIS:
+                    return getIcon(IconManager.IconType.GEL);
+            }
+
+            if (dataSet.getResultSummaryId() != null) {
+                return getIcon(IconManager.IconType.RSM);
+            } else if (dataSet.getResultSetId() != null) {
+                return getIcon(IconManager.IconType.RSET);
+            }
+            
         }
+        
+        
+        
 
         //JPM.TODO : return another icon for OTHER ???
-        return IconManager.getIcon(IconManager.IconType.GEL);
+        return getIcon(IconManager.IconType.GEL);
 
     }
     
-    public void setIsChanging(boolean isChanging) {
-        this.isChanging = isChanging;
-    }
+
     
     public DataSetTMP getDataSet() {
         return ((DataSetData) getData()).getDataSet();

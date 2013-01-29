@@ -25,6 +25,7 @@ public class UDSConnectionManager {
     private static final String KEY_DB_NAME = "databaseName";
     private static final String KEY_DB_USER = "databaseUserName";
     private static final String KEY_DB_PASSWORD = "databasePassword";
+    private static final String KEY_PROJECT_USER = "projectUserName";
     private static final String[] PREDEFINED_DRIVERS_NAMES = {"PostgreSQL"};
     private static final String[] PREDEFINED_DRIVERS_CLASSES = {"org.postgresql.Driver"};
     private static final String[] PREDEFINED_JDBC_DRIVERS = {"jdbc:postgresql:"};
@@ -40,8 +41,9 @@ public class UDSConnectionManager {
     private String m_host;
     private String m_port;
     private String m_dbName;
-    private String m_userName;
+    private String m_databaseUser;
     private String m_password;
+    private String m_projectUserName;
     private static UDSConnectionManager databaseConnectionManager = null;
 
     public static synchronized UDSConnectionManager getUDSConnectionManager() {
@@ -92,14 +94,18 @@ public class UDSConnectionManager {
         return m_dbName;
     }
 
-    public String getUserName() {
-        return m_userName;
+    public String getDatabaseUser() {
+        return m_databaseUser;
     }
 
     public String getPassword() {
         return m_password;
     }
 
+    public String getProjectUserName() {
+        return m_projectUserName;
+    }
+    
 
     public void setDriverName(String driverName) {
         m_driverName = driverName;
@@ -125,13 +131,19 @@ public class UDSConnectionManager {
         m_dbName = dbName;
     }
 
-    public void setUserName(String userName) {
-        m_userName = userName;
+    public void setDatabaseUser(String databaseUser) {
+        m_databaseUser = databaseUser;
     }
 
     public void setPassword(String password) {
         m_password = password;
     }
+    
+    public void setProjectUserName(String projectUserName) {
+        m_projectUserName = projectUserName;
+    }
+    
+    
     
     private void restoreParameters() {
         Preferences preferences = NbPreferences.forModule(UDSConnectionManager.class);
@@ -159,10 +171,10 @@ public class UDSConnectionManager {
         m_host = preferences.get(KEY_HOST, "");
         m_port = preferences.get(KEY_PORT, "");
         m_dbName = preferences.get(KEY_DB_NAME, "");
-        m_userName = preferences.get(KEY_DB_USER, "");
+        m_databaseUser = preferences.get(KEY_DB_USER, "");
         m_password = preferences.get(KEY_DB_PASSWORD, "");
 
-
+        m_projectUserName = preferences.get(KEY_PROJECT_USER, "");;
     }
 
     public void saveParameters() {
@@ -174,9 +186,11 @@ public class UDSConnectionManager {
         preferences.put(KEY_PORT, m_port);
         
         preferences.put(KEY_DB_NAME, m_dbName);
-        preferences.put(KEY_DB_USER, m_userName);
+        preferences.put(KEY_DB_USER, m_databaseUser);
         
         preferences.put(KEY_DB_PASSWORD, m_password);
+        
+        preferences.put(KEY_PROJECT_USER, m_projectUserName);
         
         try {
             preferences.flush();
@@ -186,9 +200,9 @@ public class UDSConnectionManager {
     }
     
     private void tryToConnect() {
-        tryToConnect(null, m_jdbcUrl, m_driverClass, m_dbName, m_host, m_port, m_userName, m_password);
+        tryToConnect(null, m_jdbcUrl, m_driverClass, m_dbName, m_host, m_port, m_databaseUser, m_password, m_projectUserName, m_port.isEmpty());
     }
-    public void tryToConnect(final Runnable connectionCallback, String jdbcUrl, String driverClass, String dbName, String host, String port, String userName, String password) {
+    public void tryToConnect(final Runnable connectionCallback, String jdbcUrl, String driverClass, String dbName, String host, String port, String databaseUserName, String password, String projectUSer, boolean inFile) {
         setConnectionState(CONNECTION_ASKED);
 
         // first check on parameters
@@ -203,10 +217,12 @@ public class UDSConnectionManager {
             connectFailed(connectionCallback);
             return;
         }
-        if (port.isEmpty()) {
-            connectionError = "Port is not set";
-            connectFailed(connectionCallback);
-            return;
+        if (!inFile) {
+            if (port.isEmpty()) {
+                connectionError = "Port is not set";
+                connectFailed(connectionCallback);
+                return;
+            }
         }
         if (jdbcUrl.isEmpty()) {
             connectionError = "JDBC URL is not set";
@@ -218,15 +234,28 @@ public class UDSConnectionManager {
             connectFailed(connectionCallback);
             return;
         }
-
+        if (databaseUserName.isEmpty()) {
+            connectionError = "Database User Name is not set";
+            connectFailed(connectionCallback);
+            return;
+        }
+        
         // Prepare Connection Parameters
         HashMap<Object, Object> databaseProperties = new HashMap<Object, Object>();
 
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY, userName);
+        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY, databaseUserName);
         databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, password);
         databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, driverClass);
 
-        String jdbcURL = jdbcUrl + "//" + host + ":" + port + "/" + dbName;
+        String jdbcURL = "";
+        if (inFile) {
+            // specific for H2 (from file)
+            jdbcURL = jdbcUrl + host + "/" +dbName;
+         
+        } else {
+           jdbcURL = jdbcUrl + "//" + host + ":" + port + "/" + dbName;
+         
+        }
         databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, jdbcURL);
 
         // ask for the connection
@@ -257,7 +286,7 @@ public class UDSConnectionManager {
         };
 
         // ask asynchronous loading of data
-        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback, databaseProperties);
+        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback, databaseProperties, projectUSer);
 
         AccessDatabaseThread.getAccessDatabaseThread().addTask(connectionTask);
 

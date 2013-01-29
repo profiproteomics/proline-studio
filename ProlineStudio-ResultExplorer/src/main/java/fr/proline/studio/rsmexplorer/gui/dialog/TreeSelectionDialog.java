@@ -28,6 +28,8 @@ public class TreeSelectionDialog extends DefaultDialog {
         // hide default button
         setButtonVisible(BUTTON_DEFAULT, false);
         
+        setStatusVisible(false);
+        
         this.tree = tree;
         
         setTitle(title);

@@ -229,7 +229,7 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
         }
         
 
-        EntityManager entityManagerPS = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.PS, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
+        EntityManager entityManagerPS = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.PS, true, AccessDatabaseThread.getProjectIdTMP()); 
         try {
 
             entityManagerPS.getTransaction().begin();

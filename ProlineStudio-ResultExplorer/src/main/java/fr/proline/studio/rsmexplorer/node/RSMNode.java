@@ -1,14 +1,13 @@
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.studio.dam.data.AbstractData;
-import java.util.Enumeration;
+import fr.proline.studio.utils.IconManager;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
-import org.openide.util.ImageUtilities;
 
 /**
- *
+ * Super class for all nodes
  * @author JM235353
  */
 public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneable {
@@ -25,6 +24,7 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
     private static Action[] actionInstance = null;
     protected NodeTypes type;
 
+    protected boolean isChanging = false;
 
     public RSMNode(/*Children children,*/ NodeTypes type, AbstractData data) {
         super(data);
@@ -39,8 +39,13 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
         return (AbstractData) getUserObject();
     }
 
-    public ImageIcon getIcon() {
-        return null;
+    public abstract ImageIcon getIcon();
+    
+    public ImageIcon getIcon(IconManager.IconType iconType) {
+        if (isChanging) {
+            return IconManager.getIconWithHourGlass(iconType);
+        }
+        return IconManager.getIcon(iconType);
     }
     
     public boolean searchChildNodeOfAType(NodeTypes type) {
@@ -75,6 +80,13 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
         return false;
     }
     
-
+    public void setIsChanging(boolean isChanging) {
+        this.isChanging = isChanging;
+    }
+    
+    public boolean isChanging() {
+        return isChanging;
+    }
+    
     
 }

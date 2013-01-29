@@ -26,8 +26,8 @@ public class ParentData extends AbstractData {
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
         DatabaseProjectTask task = new DatabaseProjectTask(callback);
-        task.initLoadProject(UDSConnectionManager.getUDSConnectionManager().getUserName(), list);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);  //JPM.TODO
+        task.initLoadProject(UDSConnectionManager.getUDSConnectionManager().getProjectUserName(), list);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
 

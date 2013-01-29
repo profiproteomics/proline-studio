@@ -11,10 +11,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
+import javax.swing.*;
 
 /**
  *
@@ -150,6 +147,9 @@ public class AddAggregatePanel extends javax.swing.JPanel {
 
     protected String getAggregateName() {
         return nameTextfield.getText();
+    }
+    protected JTextField getNameTextfield() {
+        return nameTextfield;
     }
     
     protected int getNbAggregates() {

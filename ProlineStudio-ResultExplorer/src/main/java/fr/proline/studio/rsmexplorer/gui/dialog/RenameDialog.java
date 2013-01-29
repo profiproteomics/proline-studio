@@ -3,7 +3,9 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Window;
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -29,9 +31,9 @@ public class RenameDialog extends DefaultDialog {
     private RenameDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-
-        setTitle("Rename");
         
+        setTitle("Rename");
+
         setButtonVisible(BUTTON_DEFAULT, false);
 
         initInternalPanel();
@@ -42,10 +44,7 @@ public class RenameDialog extends DefaultDialog {
     private void initInternalPanel() {
 
         JPanel internalPanel = new JPanel();
-        internalPanel.setLayout(new java.awt.GridBagLayout());
-
-        JLabel renameLabel = new JLabel("New Name :");
-        renameTextfield = new JTextField(30);
+        internalPanel.setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -54,17 +53,55 @@ public class RenameDialog extends DefaultDialog {
 
         c.gridx = 0;
         c.gridy = 0;
-        internalPanel.add(renameLabel, c);
-
-
-        c.gridx++;
         c.weightx = 1.0;
-        internalPanel.add(renameTextfield, c);
+        c.weighty = 1.0;
+        internalPanel.add(getRenamePanel(), c);
+
 
         setInternalComponent(internalPanel);
     }
     
+    private JPanel getRenamePanel() {
+        JPanel renamePanel = new JPanel();
+        renamePanel.setLayout(new GridBagLayout());
+        renamePanel.setBorder(BorderFactory.createTitledBorder(""));
 
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        JLabel renameLabel = new JLabel("New Name :");
+        renameTextfield = new JTextField(30);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        renamePanel.add(renameLabel, c);
+
+
+        c.gridx++;
+        c.weightx = 1.0;
+        renamePanel.add(renameTextfield, c);
+
+        return renamePanel;
+    }
+    
+    
+    @Override
+    protected boolean okCalled() {
+        
+        String name = renameTextfield.getText();
+       
+        if (name.isEmpty()) {
+            setStatus(true, "You must fill the new name.");
+            highlight(renameTextfield);
+            return false;
+        }
+
+        return true;
+    }
+    
+    
     public void setNameField(String name) {
         renameTextfield.setText(name);
     }

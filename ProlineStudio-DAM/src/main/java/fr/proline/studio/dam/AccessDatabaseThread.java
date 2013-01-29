@@ -19,24 +19,24 @@ import org.slf4j.LoggerFactory;
 public class AccessDatabaseThread extends Thread {
 
     private static AccessDatabaseThread instance;
-    private static PriorityQueue<AbstractDatabaseTask> actions;
-    private static HashMap<Long, AbstractDatabaseTask> actionMap;
-    private static HashMap<Long, PriorityChangement> priorityChangements;
+    private PriorityQueue<AbstractDatabaseTask> actions;
+    private HashMap<Long, AbstractDatabaseTask> actionMap;
+    private HashMap<Long, PriorityChangement> priorityChangements;
 
     private AccessDatabaseThread() {
         actions = new PriorityQueue<AbstractDatabaseTask>();
         actionMap = new HashMap<Long, AbstractDatabaseTask>();
         priorityChangements = new HashMap<Long, PriorityChangement>();
 
-        //JPM.TODO : remove it code for test
+        //JPM.CLEAN : remove it code for test
         // UDS DB properties
-        HashMap<Object, Object> databaseProperties = new HashMap<Object, Object>();
+        /*HashMap<Object, Object> databaseProperties = new HashMap<Object, Object>();
         databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY, "dupierris");
         databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, "dupierris");
         databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, "org.postgresql.Driver");
         
 
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, "jdbc:postgresql://localhost:5432/UDS_db");
+        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, "jdbc:postgresql://localhost:5432/UDS_db");*/
         //databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, "jdbc:postgresql://gre037784:5433/UDS_db");
 
         //DatabaseConnectionTask connection = new DatabaseConnectionTask(null, databaseProperties, getProjectIdTMP());

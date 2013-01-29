@@ -12,8 +12,9 @@ import java.util.List;
  */
 public class DataSetData extends AbstractData {
     
-    private DataSetTMP dataSet;
-    private String temporaryName;
+    private DataSetTMP dataSet = null;
+    private String temporaryName = null;
+    private int temporaryAggregateType;
 
     public DataSetData(DataSetTMP dataSet) {
         dataType = DataTypes.DATA_SET;
@@ -21,10 +22,11 @@ public class DataSetData extends AbstractData {
         this.dataSet = dataSet;
 
     }
-    public DataSetData(String temporaryName) {
+    public DataSetData(String temporaryName, int temporaryAggregateType) {
         dataType = DataTypes.DATA_SET;
 
         this.temporaryName = temporaryName;
+        this.temporaryAggregateType = temporaryAggregateType;
 
     }
 
@@ -50,6 +52,13 @@ public class DataSetData extends AbstractData {
         }
     }
 
+    public int getAggregateType() {
+        if (dataSet == null) {
+            return temporaryAggregateType;
+        }
+        return dataSet.aggregateType;
+    }
+    
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);

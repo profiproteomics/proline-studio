@@ -15,19 +15,35 @@ import java.util.List;
 public class ProjectData extends AbstractData {
 
     private Project project = null;
+    private String temporaryName = null;
 
     public ProjectData(Project project) {
         dataType = AbstractData.DataTypes.PROJECT;
         this.project = project;
     }
+    
+    public ProjectData(String temporaryName) {
+        dataType = AbstractData.DataTypes.PROJECT;
+        this.temporaryName = temporaryName;
+    }
+    
+    
 
     @Override
     public String getName() {
         if (project != null) {
             return project.getName();
         }
-
+        if (temporaryName != null) {
+            return temporaryName;
+        }
+        
         return "";
+    }
+    
+    public void setProject(Project project) {
+        this.project = project;
+        temporaryName = null;
     }
     
     public Project getProject() {

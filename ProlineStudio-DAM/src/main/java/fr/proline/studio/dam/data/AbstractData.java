@@ -52,10 +52,7 @@ public abstract class AbstractData {
      */
     public abstract String getName();
 
-    /*
-     * public void setName(String name) { //JPM.TODO
-    }
-     */
+
     public DataTypes getDataType() {
         return dataType;
     }

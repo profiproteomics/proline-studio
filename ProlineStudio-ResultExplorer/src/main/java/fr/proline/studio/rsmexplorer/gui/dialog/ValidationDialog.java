@@ -18,9 +18,8 @@ public class ValidationDialog extends DefaultDialog {
     public ValidationDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-
         setTitle("Identification Validation");
-
+        setStatusVisible(false);
 
         validationPanel = new ValidationPanel();
 

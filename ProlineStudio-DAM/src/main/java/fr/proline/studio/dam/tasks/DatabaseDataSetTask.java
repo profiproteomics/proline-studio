@@ -30,11 +30,13 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private String name = null;
     private Integer projectId = null;
     private Integer parentDatasetId = null;
+    private Integer resultSetId = null;
+    private Integer resultSummaryId = null;
     private int datasetType;
     private String aggregateName;
-    private boolean hasSuffix;
-    private int suffixStart;
-    private int suffixStop;
+    private boolean hasSuffix = false;
+    private int suffixStart = 0;
+    private int suffixStop = 0;
     
     
     
@@ -115,7 +117,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         this.dataSet = dataSet;
         action = RENAME_DATASET;
     }
-   
+
+    
     public void initCreateDatasetAggregate(Integer projectId, Integer parentDatasetId, int datasetType, String aggregateName, ArrayList<DataSetTMP> dataSetList) {
         initCreateDatasetAggregate(projectId, parentDatasetId, datasetType, aggregateName, false, 0, 0, dataSetList);
     }
@@ -126,7 +129,18 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         this.aggregateName = aggregateName;
         this.hasSuffix = hasSuffix;
         this.suffixStart = suffixStart;
-        this.suffixStop =suffixStop;
+        this.suffixStop = suffixStop;
+        this.dataSetList = dataSetList;
+        action = CREATE_DATASET;
+    }
+    
+    public void initCreateDatasetForIdentification(Integer projectId, Integer parentDatasetId, int datasetType, String aggregateName, Integer resultSetId, Integer resultSummaryId, ArrayList<DataSetTMP> dataSetList) {
+        this.projectId = projectId;
+        this.parentDatasetId = parentDatasetId;
+        this.datasetType = datasetType;
+        this.aggregateName = aggregateName;
+        this.resultSetId = resultSetId;
+        this.resultSummaryId = resultSummaryId;
         this.dataSetList = dataSetList;
         action = CREATE_DATASET;
     }
@@ -506,6 +520,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         datasetCur.name = datasetName;
         datasetCur.aggregateType = datasetType;
         datasetCur.parentDataSetId = parentDatasetId;
+        datasetCur.resultSetId = resultSetId;
+        datasetCur.resultSummaryId = resultSummaryId;
         
         dataSetList.add(datasetCur);
     }

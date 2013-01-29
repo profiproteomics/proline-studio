@@ -1,18 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.core.orm.util.DatabaseManager;
-import fr.proline.repository.AbstractDatabaseConnector;
-import fr.proline.repository.Database;
-import fr.proline.repository.DatabaseConnectorFactory;
-import fr.proline.repository.IDatabaseConnector;
+
 import fr.proline.studio.dam.UDSConnectionManager;
 import fr.proline.studio.utils.IconManager;
-import java.util.HashMap;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
-import org.openide.util.NbPreferences;
 
 /**
  *
@@ -28,9 +20,9 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
     private static final String KEY_DB_USER = "databaseUserName";
     private static final String KEY_DB_PASSWORD = "databasePassword";
 
-    private static final String[] PREDEFINED_DRIVERS_NAMES = { "PostgreSQL" };
-    private static final String[] PREDEFINED_DRIVERS_CLASSES = { "org.postgresql.Driver" };
-    private static final String[] PREDEFINED_JDBC_DRIVERS = { "jdbc:postgresql:" };
+    private static final String[] PREDEFINED_DRIVERS_NAMES = { "PostgreSQL", "H2 File" };
+    private static final String[] PREDEFINED_DRIVERS_CLASSES = { "org.postgresql.Driver", "org.h2.Driver" };
+    private static final String[] PREDEFINED_JDBC_DRIVERS = { "jdbc:postgresql:", "jdbc:h2:file:" };
     
     
     private DatabaseConnectionDialog dialog = null;
@@ -72,11 +64,14 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
         databaseLabel = new javax.swing.JLabel();
         databaseTextField = new javax.swing.JTextField();
         userNameLabel = new javax.swing.JLabel();
-        userNameTextField = new javax.swing.JTextField();
+        databaseUserTextField = new javax.swing.JTextField();
         passwordLabel = new javax.swing.JLabel();
         passwordField = new javax.swing.JPasswordField();
         rememberPasswordCheckBox = new javax.swing.JCheckBox();
         testConnectionButton = new javax.swing.JButton();
+        userPanel = new javax.swing.JPanel();
+        projectUserLabel = new javax.swing.JLabel();
+        projectUserTextField = new javax.swing.JTextField();
 
         serverParametersPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(DatabaseConnectionPanel.class, "DatabaseConnectionPanel.serverParametersPanel.border.title"))); // NOI18N
 
@@ -110,16 +105,16 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
                     .addComponent(jdbcUrlLabel)
                     .addComponent(hostLabel)
                     .addComponent(driverNameLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(serverParametersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(driverNameComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(serverParametersPanelLayout.createSequentialGroup()
+                    .addComponent(jdbcUrlTextField)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, serverParametersPanelLayout.createSequentialGroup()
                         .addComponent(hostTextField)
                         .addGap(18, 18, 18)
                         .addComponent(portLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(portTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jdbcUrlTextField))
+                    .addComponent(driverNameComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         serverParametersPanelLayout.setVerticalGroup(
@@ -150,7 +145,7 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
 
         userNameLabel.setText(org.openide.util.NbBundle.getMessage(DatabaseConnectionPanel.class, "DatabaseConnectionPanel.userNameLabel.text")); // NOI18N
 
-        userNameTextField.setText(org.openide.util.NbBundle.getMessage(DatabaseConnectionPanel.class, "DatabaseConnectionPanel.userNameTextField.text")); // NOI18N
+        databaseUserTextField.setText(org.openide.util.NbBundle.getMessage(DatabaseConnectionPanel.class, "DatabaseConnectionPanel.databaseUserTextField.text")); // NOI18N
 
         passwordLabel.setText(org.openide.util.NbBundle.getMessage(DatabaseConnectionPanel.class, "DatabaseConnectionPanel.passwordLabel.text")); // NOI18N
 
@@ -173,19 +168,18 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
             .addGroup(databaseParametersPanelLayout.createSequentialGroup()
                 .addGroup(databaseParametersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(databaseParametersPanelLayout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addGroup(databaseParametersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(passwordLabel)
+                        .addGroup(databaseParametersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(userNameLabel)
-                            .addComponent(databaseLabel))
+                            .addComponent(passwordLabel, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(databaseLabel, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(databaseParametersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(databaseParametersPanelLayout.createSequentialGroup()
                                 .addComponent(rememberPasswordCheckBox)
-                                .addGap(0, 242, Short.MAX_VALUE))
-                            .addComponent(databaseTextField)
-                            .addComponent(userNameTextField)
-                            .addComponent(passwordField)))
+                                .addGap(0, 241, Short.MAX_VALUE))
+                            .addComponent(passwordField)
+                            .addComponent(databaseTextField, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(databaseUserTextField, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, databaseParametersPanelLayout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(testConnectionButton)))
@@ -198,8 +192,8 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
                     .addComponent(databaseLabel)
                     .addComponent(databaseTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(databaseParametersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(userNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(databaseParametersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(databaseUserTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(userNameLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(databaseParametersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -215,15 +209,42 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
                         .addComponent(testConnectionButton))))
         );
 
+        userPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(DatabaseConnectionPanel.class, "DatabaseConnectionPanel.userPanel.border.title"))); // NOI18N
+
+        projectUserLabel.setText(org.openide.util.NbBundle.getMessage(DatabaseConnectionPanel.class, "DatabaseConnectionPanel.projectUserLabel.text")); // NOI18N
+
+        projectUserTextField.setText(org.openide.util.NbBundle.getMessage(DatabaseConnectionPanel.class, "DatabaseConnectionPanel.projectUserTextField.text")); // NOI18N
+
+        javax.swing.GroupLayout userPanelLayout = new javax.swing.GroupLayout(userPanel);
+        userPanel.setLayout(userPanelLayout);
+        userPanelLayout.setHorizontalGroup(
+            userPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(userPanelLayout.createSequentialGroup()
+                .addGap(38, 38, 38)
+                .addComponent(projectUserLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(projectUserTextField)
+                .addContainerGap())
+        );
+        userPanelLayout.setVerticalGroup(
+            userPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(userPanelLayout.createSequentialGroup()
+                .addGroup(userPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(projectUserLabel)
+                    .addComponent(projectUserTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(databaseParametersPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(serverParametersPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(databaseParametersPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(serverParametersPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(userPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -233,6 +254,8 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
                 .addComponent(serverParametersPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(databaseParametersPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(userPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -243,10 +266,41 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_driverNameComboBoxActionPerformed
 
     private void testConnectionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testConnectionButtonActionPerformed
+        
+        if (!checkParameters()) {
+            return;
+        }
         connect(false);
     }//GEN-LAST:event_testConnectionButtonActionPerformed
 
-    public void connect(final boolean okButton) {
+
+    
+    
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel databaseLabel;
+    private javax.swing.JPanel databaseParametersPanel;
+    private javax.swing.JTextField databaseTextField;
+    private javax.swing.JTextField databaseUserTextField;
+    private javax.swing.JComboBox driverNameComboBox;
+    private javax.swing.JLabel driverNameLabel;
+    private javax.swing.JLabel hostLabel;
+    private javax.swing.JTextField hostTextField;
+    private javax.swing.JLabel jdbcUrlLabel;
+    private javax.swing.JTextField jdbcUrlTextField;
+    private javax.swing.JPasswordField passwordField;
+    private javax.swing.JLabel passwordLabel;
+    private javax.swing.JLabel portLabel;
+    private javax.swing.JTextField portTextField;
+    private javax.swing.JLabel projectUserLabel;
+    private javax.swing.JTextField projectUserTextField;
+    private javax.swing.JCheckBox rememberPasswordCheckBox;
+    private javax.swing.JPanel serverParametersPanel;
+    private javax.swing.JButton testConnectionButton;
+    private javax.swing.JLabel userNameLabel;
+    private javax.swing.JPanel userPanel;
+    // End of variables declaration//GEN-END:variables
+
+        public void connect(final boolean okButton) {
         
         dialog.setBusy(true);
         
@@ -258,8 +312,10 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
         String host = hostTextField.getText();
         String port = portTextField.getText();
         String dbName = databaseTextField.getText();
-        String userName = userNameTextField.getText();
+        String databaseUser = databaseUserTextField.getText();
         String password = new String(passwordField.getPassword());
+        
+        String projectUser = projectUserTextField.getText();
         
         Runnable callback = new Runnable() {
 
@@ -270,10 +326,12 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
                 UDSConnectionManager udsManager = UDSConnectionManager.getUDSConnectionManager();
                 int step = udsManager.getConnectionState();
                 if (step == UDSConnectionManager.CONNECTION_FAILED) {
+                    dialog.setStatus(true, udsManager.getConnectionError());
                     JOptionPane.showMessageDialog(thisReference, udsManager.getConnectionError(), "Database Connection Error", JOptionPane.ERROR_MESSAGE);
                 } else if (step == UDSConnectionManager.CONNECTION_DONE) {
                     storeDefaults();
                     if (!okButton) {
+                        dialog.setStatus(false, "");
                         JOptionPane.showMessageDialog(thisReference, "Database is Connected", "Information", JOptionPane.INFORMATION_MESSAGE);
                     } else {
                         
@@ -288,31 +346,69 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
         
         
         UDSConnectionManager udsManager = UDSConnectionManager.getUDSConnectionManager();
-        udsManager.tryToConnect(callback, jdbcURL, driverClass, dbName, host, port, userName, password);
+        boolean inFile = (((String)driverNameComboBox.getSelectedItem()).compareTo("H2 File") == 0);
+        udsManager.tryToConnect(callback, jdbcURL, driverClass, dbName, host, port, databaseUser, password, projectUser, inFile);
         
     }
     
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel databaseLabel;
-    private javax.swing.JPanel databaseParametersPanel;
-    private javax.swing.JTextField databaseTextField;
-    private javax.swing.JComboBox driverNameComboBox;
-    private javax.swing.JLabel driverNameLabel;
-    private javax.swing.JLabel hostLabel;
-    private javax.swing.JTextField hostTextField;
-    private javax.swing.JLabel jdbcUrlLabel;
-    private javax.swing.JTextField jdbcUrlTextField;
-    private javax.swing.JPasswordField passwordField;
-    private javax.swing.JLabel passwordLabel;
-    private javax.swing.JLabel portLabel;
-    private javax.swing.JTextField portTextField;
-    private javax.swing.JCheckBox rememberPasswordCheckBox;
-    private javax.swing.JPanel serverParametersPanel;
-    private javax.swing.JButton testConnectionButton;
-    private javax.swing.JLabel userNameLabel;
-    private javax.swing.JTextField userNameTextField;
-    // End of variables declaration//GEN-END:variables
+    
 
+    protected boolean checkParameters() {
+
+
+        
+        String host = hostTextField.getText();
+        if (host.isEmpty()) {
+            dialog.setStatus(true, "You must fill the Host");
+            dialog.highlight(hostTextField);
+            return false;
+        }
+        
+
+        if (((String)driverNameComboBox.getSelectedItem()).compareTo("H2 File") != 0) {
+
+            String port = portTextField.getText();
+            if (port.isEmpty()) {
+                dialog.setStatus(true, "You must fill the Port");
+                dialog.highlight(portTextField);
+                return false;
+            }
+        }
+        
+        String jdbcUrl = jdbcUrlTextField.getText();
+        if (jdbcUrl.isEmpty()) {
+            dialog.setStatus(true, "You must fill the JDBC URL");
+            dialog.highlight(jdbcUrlTextField);
+            return false;
+        }
+        
+        String dbName = databaseTextField.getText();
+        if (dbName.isEmpty()) {
+            dialog.setStatus(true, "You must fill the Database Name");
+            dialog.highlight(databaseTextField);
+            return false;
+        }
+        
+        String databaseUserName = databaseUserTextField.getText();
+        if (databaseUserName.isEmpty()) {
+            dialog.setStatus(true, "You must fill the Database User Name");
+            dialog.highlight(databaseUserTextField);
+            return false;
+        }
+        
+        String projectUserName = projectUserTextField.getText();
+        if (projectUserName.isEmpty()) {
+            dialog.setStatus(true, "You must fill the Project User Name");
+            dialog.highlight(projectUserTextField);
+            return false;
+        }
+        
+        return true;
+        
+    }
+    
+
+    
     protected final void initDefaults() {
 
         UDSConnectionManager udsConnectionManager = UDSConnectionManager.getUDSConnectionManager();
@@ -334,12 +430,14 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
         
         
         databaseTextField.setText(udsConnectionManager.getDBName());
-        userNameTextField.setText(udsConnectionManager.getUserName());
+        databaseUserTextField.setText(udsConnectionManager.getDatabaseUser() );
         String password = udsConnectionManager.getPassword();
         passwordField.setText(password);
         
         rememberPasswordCheckBox.setSelected(!password.isEmpty());
         
+        
+        projectUserTextField.setText(udsConnectionManager.getProjectUserName() );
     }
     
     protected void storeDefaults() {
@@ -361,11 +459,13 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
 
         udsConnectionManager.setDBName(databaseTextField.getText());
 
-        udsConnectionManager.setUserName(userNameTextField.getText());
+        udsConnectionManager.setDatabaseUser(databaseUserTextField.getText());
 
         if (rememberPasswordCheckBox.isSelected()) {
             udsConnectionManager.setPassword(new String(passwordField.getPassword()));
         }
+        
+        udsConnectionManager.setProjectUserName(projectUserTextField.getText() );
         
         udsConnectionManager.saveParameters();
     }
@@ -405,9 +505,9 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
             return true;
         }
 
-        String userName = udsConnectionManager.getUserName();
-        String userNameCur = userNameTextField.getText();
-        if (userName.compareTo(userNameCur) != 0) {
+        String databaseUser = udsConnectionManager.getDatabaseUser();
+        String databseUserCur = databaseUserTextField.getText();
+        if (databaseUser.compareTo(databseUserCur) != 0) {
             return true;
         }
 

@@ -4,7 +4,6 @@ import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DatabaseManager;
-import fr.proline.studio.dam.AccessDatabaseThread;
 import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;

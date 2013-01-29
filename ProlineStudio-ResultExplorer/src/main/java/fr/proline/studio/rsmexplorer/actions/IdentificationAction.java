@@ -1,13 +1,25 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.DataSetTMP;
+import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.task.AbstractServiceCallback;
+import fr.proline.studio.dpm.task.ImportIdentificationTask;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ImportIdentificationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import java.awt.Component;
-import java.lang.reflect.InvocationTargetException;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -29,21 +41,147 @@ public class IdentificationAction extends AbstractRSMAction {
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         
+        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            
+            // retrieve parameters
+            File[] filePaths = dialog.getFilePaths();
+            HashMap<String, String> parserArguments = dialog.getParserArguments();
+            
+            Integer projectId = null;
+            Integer parentDatasetId = null;
+            if (n.getType() == RSMNode.NodeTypes.PROJECT) {
+                RSMProjectNode projectNode = (RSMProjectNode) n;
+                projectId = projectNode.getProject().getId();
+            } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
+                RSMDataSetNode dataSetNode = (RSMDataSetNode) n;
+                projectId = dataSetNode.getDataSet().getProjectId();
+                parentDatasetId = dataSetNode.getDataSet().getId();
+            } 
+            final Integer _projectId = projectId;
+            final Integer _parentDatasetId = parentDatasetId;
+                    
+            Integer instrumentId = dialog.getInstrumentId();
+            Integer peaklistSoftwareId = dialog.getPeaklistSoftwareId();
+            
+            
+            // Start identification for each file
+            int nbFiles = filePaths.length;
+            for (int i=0;i<nbFiles;i++) {
+                File f = filePaths[i];
+
+                // Create temporary nodes for the identifications
+                String datasetName = f.getName();
+                int indexOfDot = datasetName.lastIndexOf('.');
+                if (indexOfDot != -1) {
+                    datasetName = datasetName.substring(0, indexOfDot);
+                }
+                final String _datasetName = datasetName;
+                DataSetData identificationData = new DataSetData(datasetName, DataSetTMP.SAMPLE_ANALYSIS );  //JPM.TODO
+                
+                final RSMDataSetNode identificationNode = new RSMDataSetNode(identificationData);
+                identificationNode.setIsChanging(true);
+                RSMTree tree = RSMTree.getTree();
+                final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                treeModel.insertNodeInto(identificationNode, n, n.getChildCount());
+                
+                AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success) {
+                        if (success) {
+                            
+                            Integer resultSetId = null; //JPM.TODO !!!! : it must be a result of the service
+                            
+                            createDataset(identificationNode, _projectId, _parentDatasetId, _datasetName, resultSetId);
+                            
+                            
+                        } else {
+                            //JPM.TODO : manage error with errorMessage
+                            treeModel.removeNodeFromParent(identificationNode);
+                        }
+                    }
+                };
+
+
+                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, projectId);
+                AccessServiceThread.getAccessServiceThread().addTask(task);
+                
+            }
+            
+
+        }
     }
+    
+    private void createDataset(final RSMDataSetNode identificationNode, Integer projectId, Integer parentDatasetId, String name, Integer resultSetId) {
+                                    
+
+        identificationNode.setIsChanging(false);
+
+        RSMTree tree = RSMTree.getTree();
+        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+        treeModel.nodeChanged(identificationNode);
+
+        final ArrayList<DataSetTMP> createdDatasetList = new ArrayList<>();
+
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask) {
+
+                if (success) {
+
+                    DataSetTMP dataset = createdDatasetList.get(0);
+                    identificationNode.setIsChanging(false);
+                    ((DataSetData) identificationNode.getData()).setDataSet(dataset);
+                    treeModel.nodeChanged(identificationNode);
+                } else {
+                    // should not happen
+                    treeModel.removeNodeFromParent(identificationNode);
+                }
+            }
+        };
+
+        // ask asynchronous loading of data
+
+
+
+        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+        task.initCreateDatasetForIdentification(projectId, parentDatasetId, DataSetTMP.SAMPLE_ANALYSIS, name, resultSetId, null, createdDatasetList);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+    }
+    
 
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
 
         int nbSelectedNodes = selectedNodes.length;
         
-        // we disallow to add multiple identification for the moment
+        // identification must be added in one parent node (for the moment)
         if (nbSelectedNodes != 1) {
             setEnabled(false);
             return;
         }
         
-        // we can always add an identification directly to a project
         RSMNode node = selectedNodes[0];
+        
+        // parent node is being created, we can not add an identification
+        if (node.isChanging()) {
+            setEnabled(false);
+            return;
+        }
+
+        // we can always add an identification directly to a project
         if (node.getType() == RSMNode.NodeTypes.PROJECT) {
             setEnabled(true);
             return;

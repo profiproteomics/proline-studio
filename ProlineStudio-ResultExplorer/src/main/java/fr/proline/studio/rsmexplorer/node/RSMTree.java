@@ -17,7 +17,7 @@ import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.*;
 
 /**
- *
+ * Tree of projects and datasets
  * @author JM235353
  */
 public class RSMTree extends JTree implements TreeWillExpandListener, MouseListener {
@@ -42,7 +42,6 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         initTree(top);
 
-        //startLoading(top); //JPM.TODO TOTOCHE
     }
 
     private RSMTree(RSMNode top) {
@@ -51,7 +50,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         initTree(top);
 
-        startLoading(top); // JPM.TODO
+        startLoading(top);
 
     }
 
@@ -334,6 +333,11 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 // create the actions
                 rootActions = new ArrayList<AbstractRSMAction>(2);  // <--- get in sync
 
+                AddProjectAction addProjectAction = new AddProjectAction();
+                rootActions.add(addProjectAction);
+                
+                rootActions.add(null);  // separator
+                
                 ConnectAction connectAction = new ConnectAction();
                 rootActions.add(connectAction);
 
@@ -344,7 +348,11 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 rootPopup = new JPopupMenu();
                 for (int i = 0; i < rootActions.size(); i++) {
                     AbstractRSMAction action = rootActions.get(i);
-                    rootPopup.add(action.getPopupPresenter());
+                    if (action == null) {
+                        rootPopup.addSeparator();
+                    } else {
+                        rootPopup.add(action.getPopupPresenter());
+                    }
                 }
             }
             

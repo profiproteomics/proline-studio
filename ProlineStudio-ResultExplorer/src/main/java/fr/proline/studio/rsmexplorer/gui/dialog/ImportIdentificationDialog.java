@@ -1,7 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.uds.Instrument;
-import fr.proline.studio.dam.InstrumentList;
+import fr.proline.core.orm.uds.PeaklistSoftware;
+import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.UDSConnectionManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
@@ -38,6 +39,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private JScrollPane fileListScrollPane;
     private JPanel fileSelectionPanel;
     private JComboBox instrumentComboBox;
+    private JComboBox peaklistSoftwareComboBox;
     private JComboBox parserComboBox;
     private JPanel parserPanel;
     private JButton addFileButton;
@@ -263,11 +265,20 @@ public class ImportIdentificationDialog extends DefaultDialog {
         JLabel parserLabel = new JLabel("Parser :");
         parserLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         parserComboBox = new JComboBox(PARSER_NAMES);
+        
         JLabel instrumentLabel = new JLabel("Instrument :");
         instrumentLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        instrumentComboBox = new JComboBox(InstrumentList.getInstrumentList().getArray());
+        instrumentComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getInstrumentsArray() );
         instrumentComboBox.setRenderer(new InstrumentComboboxRenderer());
 
+        JLabel peaklistSoftwareLabel = new JLabel("Peaklist Software :");
+        peaklistSoftwareLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        peaklistSoftwareComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getPeaklistSoftwaresArray() );
+        peaklistSoftwareComboBox.setRenderer(new PeakListSoftwareComboboxRenderer());
+        
+        
+        
+        
         // Placement of Objects for Parser Panel
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -290,6 +301,15 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.gridx++;
         c.weightx = 1;
         parserPanel.add(instrumentComboBox, c);
+        
+        c.gridx = 0;
+        c.gridy++;
+        c.weightx = 0;
+        parserPanel.add(peaklistSoftwareLabel, c);
+        
+        c.gridx++;
+        c.weightx = 1;
+        parserPanel.add(peaklistSoftwareComboBox, c);
 
         specificParametersGridy = c.gridy + 1;
 
@@ -420,7 +440,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
         // check files selected
         int nbFiles = fileList.getModel().getSize();
         if (nbFiles == 0) {
-            JOptionPane.showMessageDialog(singletonDialog, "You must select a file to import.", "Warning", JOptionPane.ERROR_MESSAGE);
+            setStatus(true, "You must select a file to import.");
+            highlight(fileList);
             return false;
         }
         
@@ -435,7 +456,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
             JTextField f = specificParametersMap.get(parameterInParserKey);
             String value = f.getText();
             if (value.isEmpty()) {
-                JOptionPane.showMessageDialog(singletonDialog, "You must fill the "+SPECIFIC_PARAMETERS_NAME[i][parserIndex]+" field.", "Warning", JOptionPane.ERROR_MESSAGE);
+                setStatus(true, "You must fill the "+SPECIFIC_PARAMETERS_NAME[i][parserIndex]+" field.");
+                highlight(f);
                 return false;
             }
             try {
@@ -444,7 +466,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
                 Double minValue = limitValues[i][0];
                 if (minValue != null) {
                     if (valueD<minValue.doubleValue()) {
-                        JOptionPane.showMessageDialog(singletonDialog, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be greater than "+minValue+" .", "Warning", JOptionPane.ERROR_MESSAGE);
+                        setStatus(true, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be greater than "+minValue+" .");
+                        highlight(f);
                         return false;
                     }
                 }
@@ -452,13 +475,16 @@ public class ImportIdentificationDialog extends DefaultDialog {
                 Double maxValue = limitValues[i][1];
                 if (maxValue != null) {
                     if (valueD>maxValue.doubleValue()) {
-                        JOptionPane.showMessageDialog(singletonDialog, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be lesser than "+maxValue+" .", "Warning", JOptionPane.ERROR_MESSAGE);
+                        setStatus(true, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be lesser than "+maxValue+" .");
+                        highlight(f);
                         return false;
                     }
                 }
                 
             } catch (NumberFormatException nfe) {
-                JOptionPane.showMessageDialog(singletonDialog, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be a Real.", "Warning", JOptionPane.ERROR_MESSAGE);
+                setStatus(true, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be a Real.");
+                
+                highlight(f);
                 return false;
             }
             
@@ -582,8 +608,51 @@ public class ImportIdentificationDialog extends DefaultDialog {
             LoggerFactory.getLogger(UDSConnectionManager.class).error("Saving UDS Connection Parameters Failed", e);
         }
     }
+    
+    public File[] getFilePaths() {
+        
+        DefaultListModel model = ((DefaultListModel) fileList.getModel());
+        int nbFiles = model.getSize();
+        File[] filePaths = new File[nbFiles];
+        for (int i=0;i<nbFiles;i++) {
+            filePaths[i] =  ((File)model.getElementAt(i));
+        }
 
-    public class InstrumentComboboxRenderer extends DefaultListCellRenderer {
+        return filePaths;
+    }
+    
+    public HashMap<String, String> getParserArguments() {
+        
+        HashMap<String, String> parserArguments = new HashMap<>();
+        
+        int parserIndex = parserComboBox.getSelectedIndex();
+        
+        String[] parameterKeys = SPECIFIC_PARAMETERS_KEY[parserIndex];
+
+        int nbParameters = parameterKeys.length;
+        for (int i = 0; i < nbParameters; i++) {
+            String key = parameterKeys[i];
+            String parameterInParserKey = parserIndex + key;
+            JTextField f = specificParametersMap.get(parameterInParserKey);
+            String value = f.getText();
+            parserArguments.put(key, value);
+        }
+
+        
+        return parserArguments;
+    }
+
+    public Integer getInstrumentId() {
+        Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();    
+        return instrument.getId();
+    }
+    
+    public Integer getPeaklistSoftwareId() {
+        PeaklistSoftware peaklistSoftware = (PeaklistSoftware) peaklistSoftwareComboBox.getSelectedItem();    
+        return peaklistSoftware.getId();
+    }
+    
+    private class InstrumentComboboxRenderer extends DefaultListCellRenderer {
 
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -595,4 +664,18 @@ public class ImportIdentificationDialog extends DefaultDialog {
             return l;
         }
     }
+    
+    private class PeakListSoftwareComboboxRenderer extends DefaultListCellRenderer {
+
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            JLabel l = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+            PeaklistSoftware peaklistSoftware = (PeaklistSoftware) value;
+            l.setText(peaklistSoftware.getName());
+
+            return l;
+        }
+    }
+    
 }

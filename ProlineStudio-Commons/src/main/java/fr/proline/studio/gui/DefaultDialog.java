@@ -2,7 +2,7 @@ package fr.proline.studio.gui;
 
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
+import java.awt.event.*;
 import javax.swing.*;
 
 /**
@@ -17,11 +17,17 @@ public class DefaultDialog extends javax.swing.JDialog {
     public static final int BUTTON_DEFAULT = 2;
     
     private JPanel internalPanel;
+    
     private JButton okButton;
     private JButton cancelButton;
     private JButton defaultButton;
 
+    private JPanel statusPanel;
+    private JLabel statusLabel;
+    
     private BusyGlassPane busyGlassPane = null;
+    private HighlightGlassPane highlightGlassPane = null;
+    
     
     private boolean firstDisplay = true;
     
@@ -40,6 +46,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     public DefaultDialog(Window parent, Dialog.ModalityType modalityType) {
         super(parent, modalityType);
         initComponents(); 
+
     }
 
     @Override
@@ -122,6 +129,46 @@ public class DefaultDialog extends javax.swing.JDialog {
         }
     }
     
+    protected void setStatusVisible(boolean visible) {
+        statusPanel.setVisible(visible);
+    }
+    
+    
+    public void setStatus(boolean error, String text) {
+        if (error) {
+            statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EXCLAMATION));
+            
+            if (statusStimer == null) {
+                final int DELAY_TO_ERASE_STATUS = 7000;
+                statusStimer = new Timer(DELAY_TO_ERASE_STATUS, new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
+                        statusLabel.setText("");
+                    }
+                    
+                });
+                statusStimer.setRepeats(false);
+            }
+            if (!statusStimer.isRunning()) {
+                statusStimer.start();
+            } else {
+                statusStimer.restart();
+            }
+            
+        } else {
+            statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
+        }
+        statusLabel.setText(text);
+        
+
+    }
+    private Timer statusStimer = null;
+    
+    
+    
+    
     protected boolean cancelCalled() {
         return true;
     }
@@ -162,6 +209,10 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.weighty = 0;
         add(buttonPanel, c);
         
+        statusPanel = createStatusPanel();
+        c.gridy++;
+        c.weightx = 1;
+        add(statusPanel, c);
     }
   
     private JPanel createButtonPanel() {
@@ -244,6 +295,30 @@ public class DefaultDialog extends javax.swing.JDialog {
         }
     } 
 
+    private JPanel createStatusPanel() {
+        
+        JPanel statusPanel = new JPanel();
+        statusPanel.setLayout(new GridBagLayout());
+        statusPanel.setBorder(BorderFactory.createLoweredSoftBevelBorder());
+        
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(1,1,1,1);
+        c.gridx = 0;
+        c.gridy = 0;
+        c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.weightx = 1;
+        c.weighty = 0;
+        
+        statusLabel = new JLabel(" ");
+        statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
+        
+        statusPanel.add(statusLabel, c);
+        
+        
+        return statusPanel;
+    }
+    
     @Override
     public void setLocation(int x, int y) {
         
@@ -318,8 +393,9 @@ public class DefaultDialog extends javax.swing.JDialog {
         
         if (busyGlassPane == null) {
             busyGlassPane = new BusyGlassPane();
-            setGlassPane(busyGlassPane);
         }
+        
+        setGlassPane(busyGlassPane);
         
         if (busy) {
             busyGlassPane.setVisible(true);
@@ -329,14 +405,27 @@ public class DefaultDialog extends javax.swing.JDialog {
         }
     }
     
+    public void highlight(Component c) {
+        
+        if (highlightGlassPane == null) {
+            highlightGlassPane = new HighlightGlassPane();
+        }
+        highlightGlassPane.setComponent(c);
+                
+        setGlassPane(highlightGlassPane);
+        
+        
+        highlightGlassPane.highlight();
+        
+
+    }
+    
+    
     
     /**
      * Glass Pane to set the dialog as busy
      */
     private class BusyGlassPane extends JComponent {
-
-        protected void paintComponent(Graphics g) {
-        }
 
         public BusyGlassPane() {
 
@@ -349,8 +438,109 @@ public class DefaultDialog extends javax.swing.JDialog {
             // set wait mouse cursor
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+        }
     }
     
-    
+    /**
+     * Glass Pane to highlight a component of the dialog
+     */
+    private class HighlightGlassPane extends JComponent {
+
+        private final int ANIMATION_DELAY = 400;
+        private final int DISPLAY_DELAY = 1300;
+        
+        private long timeStart = 0;
+        private Component comp;
+        private int x,y,width,height;
+        
+        public HighlightGlassPane() {
+        }
+        
+        @Override
+        protected void paintComponent(Graphics g) {
+            
+            Point p = SwingUtilities.convertPoint(comp, 0, 0, this); 
+            
+            
+            g.setColor(new Color(240,0,0));
+            ((Graphics2D)g).setStroke(new BasicStroke(2));
+            
+            long timeCur = System.currentTimeMillis();
+            
+            
+            final int START_ANGLE = 30;
+            final int DELTA_ANGLE = 380;
+            int deltaAngle;
+            if (timeCur-timeStart<=ANIMATION_DELAY) {
+                deltaAngle = START_ANGLE + (int) ((DELTA_ANGLE-START_ANGLE)*(((double)(timeCur-timeStart))/ANIMATION_DELAY));
+            } else {
+                deltaAngle = DELTA_ANGLE;
+            }
+            for (int angle=START_ANGLE;angle<=deltaAngle+START_ANGLE;angle+=3) {
+                int delta =  (int) (((double)(angle-START_ANGLE)/((double)DELTA_ANGLE))*10.0); //(DELTA_ANGLE-angle-START_ANGLE)/20;
+
+                g.drawArc(p.x+x-delta, p.y+y-delta, width+delta*2, height+delta*2,angle, 3);
+            }
+            
+
+        }
+
+        public void setComponent(Component c) {
+            
+            final int PAD = 10;
+            
+            comp = c;
+            
+            x = -PAD;
+            y = -PAD;
+            width = c.getWidth()+PAD*2;
+            height = c.getHeight()+PAD*2;
+        }
+        
+        public void highlight() {
+            
+            highlightGlassPane.setVisible(true);
+            
+            timeStart = System.currentTimeMillis();
+
+            
+            ActionListener timerAction = new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    
+                    long timeCur = System.currentTimeMillis();
+                    if ((timeCur-timeStart)>ANIMATION_DELAY+DISPLAY_DELAY) {
+                        highlightGlassPane.setVisible(false);
+                        animationTimer.setRepeats(false);
+                    } else {
+                        repaint();
+                    }
+                }
+            };
+            
+            animationTimer = new Timer(20, timerAction);
+            animationTimer.setRepeats(true);
+            animationTimer.start();
+            
+        }
+        private Timer animationTimer = null;
+        
+        
+        
+        @Override
+        protected void processMouseEvent(MouseEvent e) {
+            if (e.getID() == MouseEvent.MOUSE_CLICKED) {
+                statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
+                statusLabel.setText("");
+            }
+            super.processMouseEvent(e);
+
+        }
+    }
+
     
 }

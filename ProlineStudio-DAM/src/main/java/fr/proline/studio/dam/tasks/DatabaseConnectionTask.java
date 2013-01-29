@@ -3,11 +3,13 @@ package fr.proline.studio.dam.tasks;
 
 
 import fr.proline.core.orm.uds.Instrument;
+import fr.proline.core.orm.uds.PeaklistSoftware;
+import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.core.orm.util.DatabaseManager;
 import fr.proline.repository.Database;
 import fr.proline.repository.DatabaseConnectorFactory;
 import fr.proline.repository.IDatabaseConnector;
-import fr.proline.studio.dam.InstrumentList;
+import fr.proline.studio.dam.UDSDataManager;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
@@ -22,6 +24,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
     // used for UDS Connection
     private Map<Object, Object> databaseProperties;
+    private String projectUser;
+    
     // used for MSI and PS Connection
     private int projectId;
 
@@ -33,10 +37,11 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * @param databaseProperties
      * @param projectId
      */
-    public DatabaseConnectionTask(AbstractDatabaseCallback callback, Map<Object, Object> databaseProperties) {
+    public DatabaseConnectionTask(AbstractDatabaseCallback callback, Map<Object, Object> databaseProperties, String projectUser) {
         super(callback, Priority.TOP);
 
         this.databaseProperties = databaseProperties;
+        this.projectUser = projectUser;
 
 
     }
@@ -80,13 +85,53 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 }
                 
                 // Load needed static data from UDS
+                
                 EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+
+                // Load all users
+                try {
+                    entityManagerUDS.getTransaction().begin();
+
+                    TypedQuery<UserAccount> userQuery = entityManagerUDS.createQuery("SELECT user FROM fr.proline.core.orm.uds.UserAccount user ORDER BY user.login ASC", UserAccount.class);
+                    List<UserAccount> userList = userQuery.getResultList();
+                    UDSDataManager.getUDSDataManager().setProjectUsers(userList);
+
+                    entityManagerUDS.getTransaction().commit();
+
+                } catch (RuntimeException e) {
+                    errorMessage = "Unable to load UserAccount from UDS";
+                    logger.error(getClass().getSimpleName() + " failed", e);
+                    entityManagerUDS.getTransaction().rollback();
+                    DatabaseManager.getInstance().closeAll();
+                    return false;
+                }
+                
+                // check if the projectUser asked is known
+                UDSDataManager udsMgr = UDSDataManager.getUDSDataManager();
+                boolean foundUser = false;
+                UserAccount[] projectUsers = udsMgr.getProjectUsersArray();
+                int nb = projectUsers.length;
+                for (int i=0;i<nb;i++) {
+                    UserAccount account = projectUsers[i];
+                    if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
+                        udsMgr.setProjectUser(account);
+                        foundUser = true;
+                        break;
+                    }
+                }
+                if (!foundUser) {
+                    errorMessage = "Project User "+projectUser+" is unknown";
+                    DatabaseManager.getInstance().closeAll();
+                    return false;
+                }
+                
+                // Load All instruments
                 try {
                     entityManagerUDS.getTransaction().begin();
 
                     TypedQuery<Instrument> instrumentQuery = entityManagerUDS.createQuery("SELECT i FROM fr.proline.core.orm.uds.Instrument i ORDER BY i.name ASC", Instrument.class);
                     List<Instrument> instrumentList = instrumentQuery.getResultList();
-                    InstrumentList.getInstrumentList().setIntruments(instrumentList);
+                    UDSDataManager.getUDSDataManager().setIntruments(instrumentList);
 
                     entityManagerUDS.getTransaction().commit();
 
@@ -94,8 +139,28 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     errorMessage = "Unable to load Instruments from UDS";
                     logger.error(getClass().getSimpleName() + " failed", e);
                     entityManagerUDS.getTransaction().rollback();
+                    DatabaseManager.getInstance().closeAll();
+                    return false;
                 }
 
+                // Load All peaklist softwares
+                try {
+                    entityManagerUDS.getTransaction().begin();
+
+                    TypedQuery<PeaklistSoftware> instrumentQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.PeaklistSoftware p ORDER BY p.name ASC", PeaklistSoftware.class);
+                    List<PeaklistSoftware> peaklistSoftwareList = instrumentQuery.getResultList();
+                    UDSDataManager.getUDSDataManager().setPeaklistSofwares(peaklistSoftwareList);
+
+                    entityManagerUDS.getTransaction().commit();
+
+                } catch (RuntimeException e) {
+                    errorMessage = "Unable to load Peaklist Softwares from UDS";
+                    logger.error(getClass().getSimpleName() + " failed", e);
+                    entityManagerUDS.getTransaction().rollback();
+                    DatabaseManager.getInstance().closeAll();
+                    return false;
+                }
+                
                 entityManagerUDS.close();
             } else {
                 try {
@@ -125,7 +190,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         int lIndex = 0;
         
         long timeStart5 = System.currentTimeMillis();
-         EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.MSI, true, AccessDatabaseThread.getProjectIdTMP());  //JPM.TODO : project id
+         EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.MSI, true, AccessDatabaseThread.getProjectIdTMP()); 
         try {
 
             entityManagerMSI.getTransaction().begin();

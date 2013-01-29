@@ -43,7 +43,8 @@ public class AddAggregateDialog extends DefaultDialog {
         String name = aggregatePanel.getAggregateName();
        
         if (name.isEmpty()) {
-            JOptionPane.showMessageDialog(aggregatePanel, "You must fill the aggregate name.", "Warning", JOptionPane.ERROR_MESSAGE);
+            setStatus(true, "You must fill the aggregate name.");
+            highlight(aggregatePanel.getNameTextfield());
             return false;
         }
 

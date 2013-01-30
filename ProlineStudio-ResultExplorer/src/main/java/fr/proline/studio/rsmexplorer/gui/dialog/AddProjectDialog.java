@@ -155,5 +155,14 @@ public class AddProjectDialog extends DefaultDialog {
         
         return true;
     }
+ 
+    public String getProjectName() {
+        return nameTextField.getText();
+    }
+    
+    public String getProjectDescription() {
+        return descriptionTextArea.getText();
+    }
+    
     
 }

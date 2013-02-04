@@ -161,7 +161,7 @@ public class IntegerParameter extends AbstractParameter {
             try {
                 value = Integer.parseInt(textField.getText());
             } catch (NumberFormatException nfe) {
-                return new ParameterError(name+" is  not a Integer.", parameterComponent);
+                return new ParameterError(name+" is  not a Integer", parameterComponent);
             }
         } else if (graphicalType.equals(JSlider.class)) {
             // with a slider, there can be no error
@@ -173,13 +173,13 @@ public class IntegerParameter extends AbstractParameter {
         
         if (minValue != null) {
             if (value < minValue) {
-                return new ParameterError(name+" must be greater than "+minValue.toString()+".", parameterComponent);
+                return new ParameterError(name+" must be greater than "+minValue.toString(), parameterComponent);
             }
         }
         
         if (maxValue != null) {
             if (value > maxValue) {
-                return new ParameterError(name+" must be lesser than "+maxValue.toString()+".", parameterComponent);
+                return new ParameterError(name+" must be lesser than "+maxValue.toString(), parameterComponent);
             }
         }
         

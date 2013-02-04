@@ -37,13 +37,13 @@ public abstract class AbstractParameter {
     public abstract ParameterError checkParameter();
     
     public String getValue() {
-        if (parameterComponent instanceof JTextField) {
+        if (graphicalType.equals(JTextField.class)) {
            return ((JTextField) parameterComponent).getText();
         }
-        if (parameterComponent instanceof JSlider) {
+        if (graphicalType.equals(JSlider.class)) {
            return String.valueOf(((JSlider) parameterComponent).getValue());
         }
-        if (parameterComponent instanceof JSpinner) {
+        if (graphicalType.equals(JSpinner.class)) {
            return String.valueOf(((JSpinner) parameterComponent).getValue());
         }
         return ""; // should not happen

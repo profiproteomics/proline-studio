@@ -336,10 +336,10 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 AddProjectAction addProjectAction = new AddProjectAction();
                 rootActions.add(addProjectAction);
                 
-                rootActions.add(null);  // separator
+                /*rootActions.add(null);  // separator
                 
                 ConnectAction connectAction = new ConnectAction();
-                rootActions.add(connectAction);
+                rootActions.add(connectAction);*/
 
                 /*DisconnectAction disconnectAction = new DisconnectAction();
                 rootActions.add(disconnectAction);*/ //JPM.TODO
@@ -378,6 +378,9 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
                 AddAction addAction = new AddAction();
                 mainActions.add(addAction);
+                
+                ValidateAction validateAction = new ValidateAction();
+                mainActions.add(validateAction);
 
                 mainActions.add(null);  // separator
 

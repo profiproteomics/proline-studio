@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 
-import fr.proline.studio.dam.UDSConnectionManager;
+import fr.proline.studio.dam.UDSConnectionManagerOLD;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -300,8 +300,8 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
     private javax.swing.JPanel userPanel;
     // End of variables declaration//GEN-END:variables
 
-        public void connect(final boolean okButton) {
-        
+    public void connect(final boolean okButton) {
+        /*
         dialog.setBusy(true);
         
         int driverSelected = driverNameComboBox.getSelectedIndex();
@@ -323,12 +323,12 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
             public void run() {
                 dialog.setBusy(false);
                 
-                UDSConnectionManager udsManager = UDSConnectionManager.getUDSConnectionManager();
+                UDSConnectionManagerOLD udsManager = UDSConnectionManagerOLD.getUDSConnectionManager();
                 int step = udsManager.getConnectionState();
-                if (step == UDSConnectionManager.CONNECTION_FAILED) {
+                if (step == UDSConnectionManagerOLD.CONNECTION_FAILED) {
                     dialog.setStatus(true, udsManager.getConnectionError());
                     JOptionPane.showMessageDialog(thisReference, udsManager.getConnectionError(), "Database Connection Error", JOptionPane.ERROR_MESSAGE);
-                } else if (step == UDSConnectionManager.CONNECTION_DONE) {
+                } else if (step == UDSConnectionManagerOLD.CONNECTION_DONE) {
                     storeDefaults();
                     if (!okButton) {
                         dialog.setStatus(false, "");
@@ -345,10 +345,10 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
         };
         
         
-        UDSConnectionManager udsManager = UDSConnectionManager.getUDSConnectionManager();
+        UDSConnectionManagerOLD udsManager = UDSConnectionManagerOLD.getUDSConnectionManager();
         boolean inFile = (((String)driverNameComboBox.getSelectedItem()).compareTo("H2 File") == 0);
         udsManager.tryToConnect(callback, jdbcURL, driverClass, dbName, host, port, databaseUser, password, projectUser, inFile);
-        
+        */
     }
     
     
@@ -410,8 +410,8 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
 
     
     protected final void initDefaults() {
-
-        UDSConnectionManager udsConnectionManager = UDSConnectionManager.getUDSConnectionManager();
+/*
+        UDSConnectionManagerOLD udsConnectionManager = UDSConnectionManagerOLD.getUDSConnectionManager();
 
         String driverName = udsConnectionManager.getDriverName();
         if (!driverName.isEmpty()) {
@@ -437,11 +437,11 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
         rememberPasswordCheckBox.setSelected(!password.isEmpty());
         
         
-        projectUserTextField.setText(udsConnectionManager.getProjectUserName() );
+        projectUserTextField.setText(udsConnectionManager.getProjectUserName() );*/
     }
     
-    protected void storeDefaults() {
-        UDSConnectionManager udsConnectionManager = UDSConnectionManager.getUDSConnectionManager();
+    protected void storeDefaults() { /*
+        UDSConnectionManagerOLD udsConnectionManager = UDSConnectionManagerOLD.getUDSConnectionManager();
 
 
 
@@ -467,13 +467,13 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
         
         udsConnectionManager.setProjectUserName(projectUserTextField.getText() );
         
-        udsConnectionManager.saveParameters();
+        udsConnectionManager.saveParameters(); */
     }
 
     protected boolean checkParametersHaveChanged() {
 
-
-        UDSConnectionManager udsConnectionManager = UDSConnectionManager.getUDSConnectionManager();
+/*
+        UDSConnectionManagerOLD udsConnectionManager = UDSConnectionManagerOLD.getUDSConnectionManager();
 
         String driverName = udsConnectionManager.getDriverName();
         String driverNameCur = (String) driverNameComboBox.getSelectedItem();
@@ -510,7 +510,7 @@ public class DatabaseConnectionPanel extends javax.swing.JPanel {
         if (databaseUser.compareTo(databseUserCur) != 0) {
             return true;
         }
-
+*/
         return false;
 
 

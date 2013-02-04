@@ -26,9 +26,10 @@ public class DisplayProteinSetsAction extends AbstractRSMAction {
     }
 
     @Override
-    public void actionPerformed(RSMNode n, int x, int y) {
+    public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
 
-        RSMDataSetNode dataSetNode = (RSMDataSetNode) n;
+        // only one node selected for this action
+        RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[0];
 
         final DataSetTMP dataSet = ((DataSetData) dataSetNode.getData()).getDataSet();
 

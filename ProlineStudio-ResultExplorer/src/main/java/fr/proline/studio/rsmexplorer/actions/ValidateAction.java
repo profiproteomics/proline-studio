@@ -1,77 +1,50 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package fr.proline.studio.rsmexplorer.actions;
 
-
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DataSetTMP;
-import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
-import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dpm.AccessServiceThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.ImportIdentificationTask;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.gui.dialog.ImportIdentificationDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.ValidationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
 /**
  *
- * @author JM235353
+ * @author jm235353
  */
-public class IdentificationAction extends AbstractRSMAction {
+public class ValidateAction extends AbstractRSMAction {
 
-    public IdentificationAction() {
-        super(NbBundle.getMessage(IdentificationAction.class, "CTL_IdentificationAction"));
+    public ValidateAction() {
+        super(NbBundle.getMessage(ValidateAction.class, "CTL_ValidateAction"));
     }
 
     @Override
-    public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
+    public void actionPerformed(RSMNode[] selectedNodes, int x, int y) { 
 
-        // only one node selected for this action
-        final RSMNode n = selectedNodes[0];
         
-        ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        ValidationDialog dialog = ValidationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             
             // retrieve parameters
-            File[] filePaths = dialog.getFilePaths();
-            HashMap<String, String> parserArguments = dialog.getParserArguments();
-            
-            Integer projectId = null;
-            Integer parentDatasetId = null;
-            if (n.getType() == RSMNode.NodeTypes.PROJECT) {
-                RSMProjectNode projectNode = (RSMProjectNode) n;
-                projectId = projectNode.getProject().getId();
-            } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
-                RSMDataSetNode dataSetNode = (RSMDataSetNode) n;
-                projectId = dataSetNode.getDataSet().getProjectId();
-                parentDatasetId = dataSetNode.getDataSet().getId();
-            } 
-            final Integer _projectId = projectId;
-            final Integer _parentDatasetId = parentDatasetId;
-                    
-            Integer instrumentId = dialog.getInstrumentId();
-            Integer peaklistSoftwareId = dialog.getPeaklistSoftwareId();
-            
-            
-            // Start identification for each file
-            int nbFiles = filePaths.length;
-            for (int i=0;i<nbFiles;i++) {
-                File f = filePaths[i];
+            /*String description = dialog.getDescription();
+            int peptideFDR = dialog.getPeptideFDR();
+            int peptideMinPepSequence = dialog.getPeptideMinPepSequence();
+            int proteinFDR = dialog.getProteinFDR();
+            int proteinMinPepSequence = dialog.getProteinMinPepSequence();*/
 
-                // Create temporary nodes for the identifications
+            // start validation for each selected Dataset
+            int nbNodes = selectedNodes.length;
+            for (int i=0;i<nbNodes;i++) {
+                RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[i];
+
+                /*
+                // Create temporary nodes for the validation
                 String datasetName = f.getName();
                 int indexOfDot = datasetName.lastIndexOf('.');
                 if (indexOfDot != -1) {
@@ -111,7 +84,7 @@ public class IdentificationAction extends AbstractRSMAction {
 
 
                 ImportIdentificationTask task = new ImportIdentificationTask(callback, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, projectId);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
+                AccessServiceThread.getAccessServiceThread().addTask(task);*/
                 
             }
             
@@ -119,7 +92,7 @@ public class IdentificationAction extends AbstractRSMAction {
         }
     }
     
-    private void createDataset(final RSMDataSetNode identificationNode, Integer projectId, Integer parentDatasetId, String name, Integer resultSetId) {
+    /*private void createDataset(final RSMDataSetNode identificationNode, Integer projectId, Integer parentDatasetId, String name, Integer resultSetId) {
                                     
 
         identificationNode.setIsChanging(false);
@@ -161,43 +134,39 @@ public class IdentificationAction extends AbstractRSMAction {
         task.initCreateDatasetForIdentification(projectId, parentDatasetId, DataSetTMP.SAMPLE_ANALYSIS, name, resultSetId, null, createdDatasetList);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
-    }
+    }*/
     
 
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
 
+        // note : we can ask for the validation of multiple ResultSet in one time
+        
         int nbSelectedNodes = selectedNodes.length;
-        
-        // identification must be added in one parent node (for the moment)
-        if (nbSelectedNodes != 1) {
-            setEnabled(false);
-            return;
-        }
-        
-        RSMNode node = selectedNodes[0];
-        
-        // parent node is being created, we can not add an identification
-        if (node.isChanging()) {
-            setEnabled(false);
-            return;
-        }
-
-        // we can always add an identification directly to a project
-        if (node.getType() == RSMNode.NodeTypes.PROJECT) {
-            setEnabled(true);
-            return;
-        }
-        
-        // we can add an identification only to a data set without a ResultSet or a ResultSummary
-        if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
+        for (int i=0;i<nbSelectedNodes;i++) {
+            RSMNode node = selectedNodes[i];
+            
+            // parent node is being created, we can not validate it (for the moment)
+            if (node.isChanging()) {
+                setEnabled(false);
+                return;
+            }
+            
+            // parent node must be a dataset
+            if (node.getType() != RSMNode.NodeTypes.DATA_SET) {
+                setEnabled(false);
+                return;
+            }
+            
+            // parent node must have a ResultSet and no ResultSummary (for the moment ?)
             RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
-        
-            setEnabled(!dataSetNode.hasResultSet() && !dataSetNode.hasResultSummary());
-            return;  
+            if (!dataSetNode.hasResultSet() || dataSetNode.hasResultSummary()) {
+                setEnabled(false);
+                return;
+            }
         }
 
-        setEnabled(false);
+        setEnabled(true);
 
     }
     

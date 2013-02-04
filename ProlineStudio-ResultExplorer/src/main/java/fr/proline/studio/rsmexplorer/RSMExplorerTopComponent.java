@@ -5,8 +5,9 @@
 package fr.proline.studio.rsmexplorer;
 
 
-import fr.proline.studio.dam.UDSConnectionManager;
-import fr.proline.studio.rsmexplorer.gui.dialog.DatabaseConnectionDialog;
+
+import fr.proline.studio.dpm.ServerConnectionManager;
+import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import javax.swing.SwingUtilities;
 
@@ -92,36 +93,36 @@ public final class RSMExplorerTopComponent extends TopComponent  {
         Thread t = new Thread() {
             @Override
             public void run() {
-                
-                UDSConnectionManager udsMgr = UDSConnectionManager.getUDSConnectionManager();
-                while (udsMgr.getConnectionState() == UDSConnectionManager.CONNECTION_ASKED) {
+
+                ServerConnectionManager serciceConnectionMgr = ServerConnectionManager.getServerConnectionManager();
+                while (serciceConnectionMgr.isConnectionAsked()) {
                     // wait for the connection to have succedeed or failed
                     try {
                         Thread.sleep(100); // JPM.TODO : one day remove the polling and write blocking code instead
                     } catch (InterruptedException ex) {
                     }
                 }
-                int connectionStep = udsMgr.getConnectionState();
-                if ((connectionStep == UDSConnectionManager.CONNECTION_FAILED) || (connectionStep == UDSConnectionManager.NOT_CONNECTED)) {
+
+                if ((serciceConnectionMgr.isNotConnected()) || (serciceConnectionMgr.isConnectionFailed())) {
                     // the user need to enter connection parameters
 
                     SwingUtilities.invokeLater(new Runnable() {
 
                         @Override
                         public void run() {
-                            DatabaseConnectionDialog databaseConnectionDialog = DatabaseConnectionDialog.getDialog(WindowManager.getDefault().getMainWindow());
-                            databaseConnectionDialog.centerToScreen();
+                            ServerConnectionDialog serverConnectionDialog = ServerConnectionDialog.getDialog(WindowManager.getDefault().getMainWindow());
+                            serverConnectionDialog.centerToScreen();
                             //databaseConnectionDialog.centerToFrame(WindowManager.getDefault().getMainWindow()); // does not work : main window has not its size most of the time at this point
-                            databaseConnectionDialog.setVisible(true);
+                            serverConnectionDialog.setVisible(true);
                             
-                            UDSConnectionManager udsMgr = UDSConnectionManager.getUDSConnectionManager();
-                            if (udsMgr.getConnectionState() == UDSConnectionManager.CONNECTION_DONE) {
+                            ServerConnectionManager serciceConnectionMgr = ServerConnectionManager.getServerConnectionManager();
+                            if (serciceConnectionMgr.isConnectionDone()) {
                                 RSMTree.getTree().startLoading();
                             }
                         }
                     });
 
-                } else if (connectionStep == UDSConnectionManager.CONNECTION_DONE) {
+                } else if (serciceConnectionMgr.isConnectionDone()) {
                     RSMTree.getTree().startLoading();
                 }
    

@@ -3,7 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.core.orm.uds.Instrument;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.studio.dam.UDSDataManager;
-import fr.proline.studio.dam.UDSConnectionManager;
+import fr.proline.studio.dam.UDSConnectionManagerOLD;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
@@ -605,7 +605,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         try {
             preferences.flush();
         } catch (BackingStoreException e) {
-            LoggerFactory.getLogger(UDSConnectionManager.class).error("Saving UDS Connection Parameters Failed", e);
+            LoggerFactory.getLogger(ImportIdentificationDialog.class).error("Saving Import Identification Parameters Failed", e);
         }
     }
     

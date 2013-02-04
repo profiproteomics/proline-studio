@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.studio.dam.UDSConnectionManager;
+//import fr.proline.studio.dam.UDSConnectionManagerOLD;
 import fr.proline.studio.rsmexplorer.gui.dialog.DatabaseConnectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
@@ -18,22 +18,22 @@ public class ConnectAction extends AbstractRSMAction {
     }
     
     @Override
-    public void actionPerformed(RSMNode n, int x, int y) {
-            DatabaseConnectionDialog databaseConnectionDialog = DatabaseConnectionDialog.getDialog(WindowManager.getDefault().getMainWindow());
+    public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
+     /*       DatabaseConnectionDialog databaseConnectionDialog = DatabaseConnectionDialog.getDialog(WindowManager.getDefault().getMainWindow());
             databaseConnectionDialog.centerToFrame(WindowManager.getDefault().getMainWindow());
             databaseConnectionDialog.setVisible(true);
 
-            UDSConnectionManager udsMgr = UDSConnectionManager.getUDSConnectionManager();
-            if (udsMgr.getConnectionState() == UDSConnectionManager.CONNECTION_DONE) {
+            UDSConnectionManagerOLD udsMgr = UDSConnectionManagerOLD.getUDSConnectionManager();
+            if (udsMgr.getConnectionState() == UDSConnectionManagerOLD.CONNECTION_DONE) {
                 RSMTree.getTree().startLoading();
-            }
+            }*/
     }
     
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
-        int connectionState = UDSConnectionManager.getUDSConnectionManager().getConnectionState();
-        boolean b = (connectionState == UDSConnectionManager.NOT_CONNECTED) || (connectionState == UDSConnectionManager.CONNECTION_FAILED);
-        setEnabled(b);
+       /* int connectionState = UDSConnectionManagerOLD.getUDSConnectionManager().getConnectionState();
+        boolean b = (connectionState == UDSConnectionManagerOLD.NOT_CONNECTED) || (connectionState == UDSConnectionManagerOLD.CONNECTION_FAILED);
+        setEnabled(b);*/
     }
     
 }

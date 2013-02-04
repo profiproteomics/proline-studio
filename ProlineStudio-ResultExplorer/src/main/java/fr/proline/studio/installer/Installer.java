@@ -1,21 +1,22 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.installer;
 
-import fr.proline.studio.dam.UDSConnectionManager;
+
+
+import fr.proline.studio.dpm.ServerConnectionManager;
 import org.openide.modules.ModuleInstall;
 
-
+/**
+ * Used to connect to web-core and UDS database as soon as possible
+ * @author jm235353
+ */
 public class Installer extends ModuleInstall {
 
     @Override
     public void restored() {
 
-        // initialize the connection with the UDS if it is possible
-        UDSConnectionManager.getUDSConnectionManager();
- 
+        // initialize the connection to the server as soon as possible
+        //UDSConnectionManagerOLD.getUDSConnectionManager();
+        ServerConnectionManager.getServerConnectionManager();
 
     }
 }

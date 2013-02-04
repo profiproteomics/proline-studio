@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.util.DatabaseManager;
-import fr.proline.studio.dam.UDSConnectionManager;
+import fr.proline.studio.dam.UDSConnectionManagerOLD;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
@@ -65,8 +65,8 @@ public class DatabaseConnectionDialog extends DefaultDialog {
     
     @Override
     protected boolean okCalled() {
-        
-        if (UDSConnectionManager.getUDSConnectionManager().getConnectionState() == UDSConnectionManager.CONNECTION_DONE) {
+        /*
+        if (UDSConnectionManagerOLD.getUDSConnectionManager().getConnectionState() == UDSConnectionManagerOLD.CONNECTION_DONE) {
             // we are already connected
             // check if the parameters have changed
             if (! databaseConnectionPanel.checkParametersHaveChanged()) {
@@ -89,7 +89,7 @@ public class DatabaseConnectionDialog extends DefaultDialog {
         databaseConnectionPanel.connect(true);
 
         // dialog will be closed by the databaseConnectionPanel
-        // when the connection is established
+        // when the connection is established*/
         return false; 
     }
     

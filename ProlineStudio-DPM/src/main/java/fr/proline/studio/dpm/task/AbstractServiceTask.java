@@ -13,7 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Superclass for all Task which wants to access to a web-core service and looks for
+ * the result.
  * @author jm235353
  */
 public abstract class AbstractServiceTask {
@@ -65,8 +66,10 @@ public abstract class AbstractServiceTask {
         return synchronous;
     }
     
-    
     protected HttpResponse postRequest(String serviceURL, JsonRpcRequest rpcRequest) throws IOException {
+        return postRequest(BASE_URL, serviceURL, rpcRequest);
+    }
+    protected HttpResponse postRequest(String serverURL, String serviceURL, JsonRpcRequest rpcRequest) throws IOException {
        
         //JPM.TODO : create some of the following classes only the first time
         // -> transport, factory, JacksonFactory, JsonObjectParser
@@ -75,13 +78,13 @@ public abstract class AbstractServiceTask {
 
 
         JsonHttpContent content = new JsonHttpContent(new JacksonFactory(), rpcRequest.getParameters());
-        HttpRequest httpRequest = factory.buildPostRequest(new GenericUrl(BASE_URL + serviceURL), content);
+        HttpRequest httpRequest = factory.buildPostRequest(new GenericUrl(serverURL + serviceURL), content);
 
         JsonObjectParser parser = new JsonObjectParser(new GsonFactory());
         httpRequest.setParser(parser);
         
 
-        System.out.println(content.getData().toString());
+        //System.out.println(content.getData().toString());
         HttpResponse response = httpRequest.execute();
         //System.out.println(response.parseAsString());
 

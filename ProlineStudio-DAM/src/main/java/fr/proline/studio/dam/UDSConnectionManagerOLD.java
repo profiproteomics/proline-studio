@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
  * the state of the connection.
  * @author JM235353
  */
-public class UDSConnectionManager {
-
+public class UDSConnectionManagerOLD {
+/*
     private static final String KEY_DRIVER_NAME = "driverNameDBServer";
     private static final String KEY_JDBC_URL = "jdbcUrlDBServer";
     private static final String KEY_HOST = "hostDBServer";
@@ -44,16 +44,16 @@ public class UDSConnectionManager {
     private String m_databaseUser;
     private String m_password;
     private String m_projectUserName;
-    private static UDSConnectionManager databaseConnectionManager = null;
+    private static UDSConnectionManagerOLD databaseConnectionManager = null;
 
-    public static synchronized UDSConnectionManager getUDSConnectionManager() {
+    public static synchronized UDSConnectionManagerOLD getUDSConnectionManager() {
         if (databaseConnectionManager == null) {
-            databaseConnectionManager = new UDSConnectionManager();
+            databaseConnectionManager = new UDSConnectionManagerOLD();
         }
         return databaseConnectionManager;
     }
 
-    public UDSConnectionManager() {
+    public UDSConnectionManagerOLD() {
         restoreParameters();
         tryToConnect();
     }
@@ -146,7 +146,7 @@ public class UDSConnectionManager {
     
     
     private void restoreParameters() {
-        Preferences preferences = NbPreferences.forModule(UDSConnectionManager.class);
+        Preferences preferences = NbPreferences.forModule(UDSConnectionManagerOLD.class);
 
         m_driverName = preferences.get(KEY_DRIVER_NAME, "");
         int driverIndex = -1;
@@ -178,7 +178,7 @@ public class UDSConnectionManager {
     }
 
     public void saveParameters() {
-        Preferences preferences = NbPreferences.forModule(UDSConnectionManager.class);
+        Preferences preferences = NbPreferences.forModule(UDSConnectionManagerOLD.class);
         
         preferences.put(KEY_DRIVER_NAME, m_driverName);
         preferences.put(KEY_JDBC_URL, m_jdbcUrl);
@@ -195,7 +195,7 @@ public class UDSConnectionManager {
         try {
             preferences.flush();
         } catch (BackingStoreException e) {
-            LoggerFactory.getLogger(UDSConnectionManager.class).error("Saving UDS Connection Parameters Failed", e);
+            LoggerFactory.getLogger(UDSConnectionManagerOLD.class).error("Saving UDS Connection Parameters Failed", e);
         }
     }
     
@@ -296,5 +296,5 @@ public class UDSConnectionManager {
         if (connectionCallback != null) {
             connectionCallback.run();
         }
-    }
+    }*/
 }

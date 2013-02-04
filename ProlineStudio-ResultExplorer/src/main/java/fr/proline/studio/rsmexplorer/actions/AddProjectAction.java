@@ -1,10 +1,10 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.uds.UserAccount;
-import fr.proline.studio.dam.UDSConnectionManager;
 import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.CreateProjectTask;
 import fr.proline.studio.gui.DefaultDialog;
@@ -27,8 +27,10 @@ public class AddProjectAction  extends AbstractRSMAction {
     }
     
     @Override
-    public void actionPerformed(final RSMNode n, int x, int y) {
+    public void actionPerformed(final RSMNode[] selectedNodes, int x, int y) {
         
+        // only one node selected for this action
+        final RSMNode n = selectedNodes[0];
 
         AddProjectDialog dialog = AddProjectDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
@@ -95,8 +97,7 @@ public class AddProjectAction  extends AbstractRSMAction {
     
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
-        int connectionState = UDSConnectionManager.getUDSConnectionManager().getConnectionState();
-        boolean b = (connectionState == UDSConnectionManager.CONNECTION_DONE);
+        boolean b = ServerConnectionManager.getServerConnectionManager().isConnectionDone();
         setEnabled(b);
     }
     

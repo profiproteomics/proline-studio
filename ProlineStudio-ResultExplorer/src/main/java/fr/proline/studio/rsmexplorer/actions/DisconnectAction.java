@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.util.DatabaseManager;
-import fr.proline.studio.dam.UDSConnectionManager;
+import fr.proline.studio.dam.UDSConnectionManagerOLD;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import org.openide.util.NbBundle;
 
@@ -16,7 +16,7 @@ public class DisconnectAction extends AbstractRSMAction {
     }
     
     @Override
-    public void actionPerformed(RSMNode n, int x, int y) {
+    public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
         
         //JPM.TODO
         // must remove all nodes
@@ -30,9 +30,9 @@ public class DisconnectAction extends AbstractRSMAction {
     
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
-        int connectionState = UDSConnectionManager.getUDSConnectionManager().getConnectionState();
-        boolean b = (connectionState == UDSConnectionManager.CONNECTION_DONE);
-        setEnabled(b);
+       /* int connectionState = UDSConnectionManagerOLD.getUDSConnectionManager().getConnectionState();
+        boolean b = (connectionState == UDSConnectionManagerOLD.CONNECTION_DONE);
+        setEnabled(b);*/
     }
     
 }

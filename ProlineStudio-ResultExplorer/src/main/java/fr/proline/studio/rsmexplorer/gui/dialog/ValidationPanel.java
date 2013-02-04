@@ -300,5 +300,25 @@ public class ValidationPanel extends javax.swing.JPanel {
         
         
     }
+    
+    public String getDescription() {
+        return descriptionTextField.getText();
+    }
+    
+    public int getPeptideFDR() {
+        return peptideFdrSlider.getValue();
+    }
+    
+    public int getPeptideMinPepSequence() {
+        return ((Integer)minPeptideLengthInPeptideParamSpinner.getValue()).intValue();
+    }
+    
+    public int getProteinFDR() {
+        return proteinFdrSlider.getValue();
+    }
+    
+    public int getProteinMinPepSequence() {
+        return ((Integer)minPeptideLengthInProteinParamSpinner.getValue()).intValue();
+    }
 
 }

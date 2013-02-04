@@ -33,10 +33,12 @@ public abstract class AbstractRSMAction extends AbstractAction {
         Rectangle r = tree.getPathBounds(treePath);
         Point p = tree.getLocationOnScreen();
         
-        actionPerformed(n, p.x+r.x+r.width/2, p.y+r.y+r.height/2);
+        
+        
+        actionPerformed(tree.getSelectedNodes(), p.x+r.x+r.width/2, p.y+r.y+r.height/2);
     }
     
-    public void actionPerformed(RSMNode n, int x, int y) { 
+    public void actionPerformed(RSMNode[] selectedNodes, int x, int y) { 
     }
     
     public JMenuItem getPopupPresenter() {

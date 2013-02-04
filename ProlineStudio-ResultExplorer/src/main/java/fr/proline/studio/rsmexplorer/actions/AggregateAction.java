@@ -29,9 +29,10 @@ public class AggregateAction extends AbstractRSMAction {
 
     
     @Override
-    public void actionPerformed(RSMNode n, int x, int y) {
+    public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
 
-
+        // only one node selected for this action
+        final RSMNode n = selectedNodes[0];
         
         AddAggregateDialog dialog = AddAggregateDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);

@@ -80,6 +80,7 @@
                         <publicPackage>fr.proline.studio.dam.tasks</publicPackage>
                         <publicPackage>fr.proline.studio.repositorymgr</publicPackage>
                         <publicPackage>fr.proline.studio.repositorymgr.action</publicPackage>
+                        <publicPackage>org.openide.util.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

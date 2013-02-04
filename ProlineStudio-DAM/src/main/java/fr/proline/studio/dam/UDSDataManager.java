@@ -63,6 +63,9 @@ public class UDSDataManager  {
         return projectUser;
     }
     
+    public String getProjectUserName() {
+        return projectUser.getLogin();
+    }
 
     
 }

@@ -1,7 +1,7 @@
 package fr.proline.studio.dpm.task;
 
 /**
- *
+ * Superclass for all Callback which are called when a service is done
  * @author jm235353
  */
 public abstract class AbstractServiceCallback {

@@ -88,6 +88,12 @@
             <artifactId>ProlineStudio-DAM</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>RELEASE711</version>
+            <type>nbm</type>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

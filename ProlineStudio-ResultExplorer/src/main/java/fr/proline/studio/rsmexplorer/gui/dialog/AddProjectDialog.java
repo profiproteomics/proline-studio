@@ -110,7 +110,7 @@ public class AddProjectDialog extends DefaultDialog {
         return projectParametersPanel;
     }
     
-        @Override
+    @Override
     protected boolean okCalled() {
 
 

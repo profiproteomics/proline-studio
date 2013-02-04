@@ -8,8 +8,6 @@ import java.awt.GridBagLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.JComponent;
-import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
 
@@ -41,7 +39,7 @@ public class ValidationDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Identification Validation");
-        setStatusVisible(false);
+        //setStatusVisible(false);
 
         JPanel internalPanel = new JPanel(new GridBagLayout());
 
@@ -130,6 +128,7 @@ public class ValidationDialog extends DefaultDialog {
         if (error != null) {
             setStatus(true, error.getErrorMessage());
             highlight(error.getParameterComponent());
+            return false;
         }
         
         // retrieve values

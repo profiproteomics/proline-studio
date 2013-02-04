@@ -1,7 +1,10 @@
 package fr.proline.studio.parameter;
 
+
 import java.awt.FlowLayout;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  *
@@ -71,18 +74,42 @@ public class IntegerParameter extends AbstractParameter {
                 }
             });
 
-            textField.addActionListener(new java.awt.event.ActionListener() {
+
+            textField.getDocument().addDocumentListener(new DocumentListener() {
 
                 @Override
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    try {
-                        int value = Integer.parseInt(textField.getText());
-                        slider.setValue(value);
-                    } catch (NumberFormatException e) {
-                    }
+                public void changedUpdate(DocumentEvent e) {
+                    modifySlider();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    modifySlider();
+                }
+
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    modifySlider();
+                }
+
+                private void modifySlider() {
+                    SwingUtilities.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                int value = Integer.parseInt(textField.getText());
+                                slider.setValue(value);
+                            } catch (NumberFormatException e) {
+                            }
+                        }
+                    });
+
                 }
             });
 
+
+            
             sliderPanel.add(slider);
             sliderPanel.add(textField);
 

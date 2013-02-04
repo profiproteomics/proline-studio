@@ -25,12 +25,12 @@ public class IntegerParameter extends AbstractParameter {
     }
 
     @Override
-    public JComponent getComponent(String value) {
+    public JComponent getComponent(Object value) {
 
         Integer startValue = null;
         if (value != null) {
             try {
-                int valueParsed = Integer.parseInt(value);
+                int valueParsed = Integer.parseInt(value.toString());
                 startValue = new Integer(valueParsed);
             } catch (NumberFormatException nfe) {
             }

@@ -32,7 +32,7 @@ public abstract class AbstractParameter {
         return key;
     }
 
-    public abstract JComponent getComponent(String value);
+    public abstract JComponent getComponent(Object value);
     public abstract void initDefault();
     public abstract ParameterError checkParameter();
     

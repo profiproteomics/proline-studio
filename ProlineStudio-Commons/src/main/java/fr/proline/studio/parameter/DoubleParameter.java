@@ -22,12 +22,12 @@ public class DoubleParameter extends AbstractParameter {
     }
 
     @Override
-    public JComponent getComponent(String value) {
+    public JComponent getComponent(Object value) {
 
         if (graphicalType.equals(JTextField.class)) {
             JTextField textField = new JTextField(3);
             if (value != null) {
-                textField.setText(value);
+                textField.setText(value.toString());
             } else if (defaultValue != null) {
                 textField.setText(defaultValue.toString());
             }

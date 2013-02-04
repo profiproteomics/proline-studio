@@ -22,11 +22,13 @@ public class DoubleParameter extends AbstractParameter {
     }
 
     @Override
-    public JComponent getComponent() {
+    public JComponent getComponent(String value) {
 
         if (graphicalType.equals(JTextField.class)) {
             JTextField textField = new JTextField(3);
-            if (defaultValue != null) {
+            if (value != null) {
+                textField.setText(value);
+            } else if (defaultValue != null) {
                 textField.setText(defaultValue.toString());
             }
             parameterComponent = textField;
@@ -35,4 +37,46 @@ public class DoubleParameter extends AbstractParameter {
 
         return null;
     }
+    
+    @Override
+    public void initDefault() {
+        if (defaultValue == null) {
+            return; // should not happen
+        }
+        
+        if (graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) parameterComponent;
+            textField.setText(defaultValue.toString());
+        }
+    }
+
+    @Override
+    public ParameterError checkParameter() {
+        
+        Double value = null;
+        
+        if (graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) parameterComponent;
+            try {
+                value = Double.parseDouble(textField.getText());
+            } catch (NumberFormatException nfe) {
+                return new ParameterError(name+" is  not a Number.", parameterComponent);
+            }
+        }
+        
+        if (minValue != null) {
+            if (value < minValue) {
+                return new ParameterError(name+" must be greater than "+minValue.toString()+".", parameterComponent);
+            }
+        }
+        
+        if (maxValue != null) {
+            if (value > maxValue) {
+                return new ParameterError(name+" must be lesser than "+maxValue.toString()+".", parameterComponent);
+            }
+        }
+        
+        return null;
+    }
+    
 }

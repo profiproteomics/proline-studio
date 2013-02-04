@@ -3,8 +3,11 @@ package fr.proline.studio.parameter;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.prefs.Preferences;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.openide.util.NbPreferences;
 
 /**
  *
@@ -29,6 +32,10 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             return parametersPanel;
         }
 
+        Preferences preferences = NbPreferences.forModule(ParameterList.class);
+        String prefixKey = name.replaceAll(" ", "_")+".";
+        
+        
         parametersPanel = new JPanel();
         parametersPanel.setLayout(new GridBagLayout());
 
@@ -47,13 +54,19 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
 
+            String parameterName = parameter.getName();
+            String suffixKey = parameterName.replaceAll(" ", "_")+".";
+            
             c.gridx = 0;
             c.weightx = 0;
             parametersPanel.add(new JLabel(parameter.getName()), c);
 
+            String parameterValue = preferences.get(prefixKey+suffixKey, null);
+            
+            
             c.gridx = 1;
             c.weightx = 1;
-            parametersPanel.add(parameter.getComponent(), c);
+            parametersPanel.add(parameter.getComponent(parameterValue), c);
 
             c.gridy++;
 
@@ -61,4 +74,60 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
         return parametersPanel;
     }
+    
+    public void initDefaults() {
+
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+
+            parameter.initDefault();
+        }
+    }
+    
+    public void saveParameters() {
+        Preferences preferences = NbPreferences.forModule(ParameterList.class);
+        String prefixKey = name.replaceAll(" ", "_")+".";
+        
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+
+            String parameterName = parameter.getName();
+            String suffixKey = parameterName.replaceAll(" ", "_")+".";
+        
+            String key = prefixKey+suffixKey;
+            String value = parameter.getValue();
+            preferences.put(key, value);
+        }
+    }
+    
+    public HashMap<String, String> getValues() {
+        HashMap<String, String> valuesMap = new HashMap<String, String>();
+        
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+            String key = parameter.getKey();
+            String value = parameter.getValue();
+            valuesMap.put(key, value);
+        }
+        
+        return valuesMap;
+        
+    }
+    
+    public ParameterError checkParameters() {
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+            ParameterError error = parameter.checkParameter();
+            if (error != null) {
+                return error;
+            }
+        }
+        return null;
+    }
+    
+    
 }

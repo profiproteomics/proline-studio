@@ -1,10 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.parameter.AbstractParameter;
-import fr.proline.studio.parameter.DoubleParameter;
-import fr.proline.studio.parameter.IntegerParameter;
-import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.parameter.*;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -13,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JComponent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.*;
 
 /**
@@ -125,17 +123,36 @@ public class ValidationDialog extends DefaultDialog {
 
     @Override
     protected boolean okCalled() {
+        
+        // Check values
+        ParameterList parameterList = (ParameterList) validationCombobox.getSelectedItem();
+        ParameterError error = parameterList.checkParameters();
+        if (error != null) {
+            setStatus(true, error.getErrorMessage());
+            highlight(error.getParameterComponent());
+        }
+        
+        // retrieve values
+        HashMap<String, String> values = parameterList.getValues();
+
+        // Save Parameters
+        parameterList.saveParameters();
+        
         //JPM.TODO
+        
         return true;
     }
 
-    /*
-     * @Override protected boolean defaultCalled() {
-     * validationPanel.initDefaults();
-     *
-     * return false;
+
+    @Override
+    protected boolean defaultCalled() {
+        
+        ParameterList parameterList = (ParameterList) validationCombobox.getSelectedItem();
+        parameterList.initDefaults();
+        
+        return false;
     }
-     */
+
     
     
     

@@ -1,9 +1,6 @@
 package fr.proline.studio.parameter;
 
-import javax.swing.JComponent;
-import javax.swing.JSlider;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 /**
  *
@@ -36,16 +33,9 @@ public abstract class AbstractParameter {
     public abstract void initDefault();
     public abstract ParameterError checkParameter();
     
-    public String getValue() {
-        if (graphicalType.equals(JTextField.class)) {
-           return ((JTextField) parameterComponent).getText();
-        }
-        if (graphicalType.equals(JSlider.class)) {
-           return String.valueOf(((JSlider) parameterComponent).getValue());
-        }
-        if (graphicalType.equals(JSpinner.class)) {
-           return String.valueOf(((JSpinner) parameterComponent).getValue());
-        }
-        return ""; // should not happen
-    }
+    
+    public abstract String getStringValue();
+    public abstract Object getObjectValue();
+    
+
 }

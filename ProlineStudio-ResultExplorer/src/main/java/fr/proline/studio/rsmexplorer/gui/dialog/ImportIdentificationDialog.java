@@ -3,25 +3,22 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.core.orm.uds.Instrument;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.studio.dam.UDSDataManager;
-import fr.proline.studio.dam.UDSConnectionManagerOLD;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.parameter.*;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.util.List;
-import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openide.util.NbPreferences;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -35,39 +32,30 @@ import org.slf4j.LoggerFactory;
 public class ImportIdentificationDialog extends DefaultDialog {
 
     private static ImportIdentificationDialog singletonDialog = null;
-    private JList<File> fileList;
-    private JScrollPane fileListScrollPane;
-    private JPanel fileSelectionPanel;
-    private JComboBox instrumentComboBox;
-    private JComboBox peaklistSoftwareComboBox;
-    private JComboBox parserComboBox;
-    private JPanel parserPanel;
-    private JButton addFileButton;
-    private JButton removeFileButton;
-    private int specificParametersGridy;
-    private HashMap<String, JTextField> specificParametersMap = new HashMap<>();
-    private ArrayList<JComponent> specificParametersComponentList = new ArrayList<>();
-    private int previousParserIndex = -1;
+    
     private final static String[] PARSER_NAMES = {"Mascot", "Test"};
     private final static String[] FILE_EXTENSIONS = {"dat", "test"};
     private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Test Identification"};
-    private final static String[][] SPECIFIC_PARAMETERS_KEY = {
-        {"ion.score.cutoff", "subset.threshold"/*, "protein.cutoff.pvalue"*/},
-        {"test"}
-    };
-    private final static String[][] SPECIFIC_PARAMETERS_NAME = {
-        {"Ion Score Cutoff", "Subset Threshold"/*, "Protein Cutoff Pvalue"*/},
-        {"Test"}
-    };
-    private final static String[][] SEPECIFIC_PARAMETERS_DEFAULT = {
-        {"0.0", "1.0"/*, ""*/},
-        {"4"}
-    };
-    private final static Double[][][] SEPECIFIC_PARAMETERS_ACCEPTED_VALUES = {
-        {{new Double(0), null}, {new Double(0), new Double(1)}}, // {new Double(0), new Double(1)} means value between 0 and 1; null means no limit
-        {{null, null}}
-    };
     
+    
+    
+    private JList<File> fileList;
+    private JScrollPane fileListScrollPane;
+
+    private JButton addFileButton;
+    private JButton removeFileButton;
+    
+
+    private JComboBox parserComboBox;
+    private int previousParserIndex = -1;
+    private ParameterList sourceParameterList;
+    
+    //private JPanel sourcePanel = null;
+    
+    private JPanel parserParametersPanel = null;
+
+
+
     
 
     public static ImportIdentificationDialog getDialog(Window parent) {
@@ -90,7 +78,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
         initInternalPanel();
 
-
+        restoreParser();
     }
 
     private void initInternalPanel() {
@@ -99,10 +87,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
         internalPanel.setLayout(new java.awt.GridBagLayout());
 
         // create fileSelectionPanel
-        createFileSelectionPanel();
+        JPanel fileSelectionPanel = createFileSelectionPanel();
 
-        // create parserPanel
-        createParserPanel();
+        // create all other parameters panel
+        JPanel allParametersPanel = createAllParametersPanel();
 
 
         GridBagConstraints c = new GridBagConstraints();
@@ -116,20 +104,49 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.weighty = 1.0;
         internalPanel.add(fileSelectionPanel, c);
 
-
         c.gridy++;
         c.weighty = 0;
-        internalPanel.add(parserPanel, c);
-
-        restoreParser();
+        internalPanel.add(allParametersPanel, c);
 
         setInternalComponent(internalPanel);
+        
+
     }
 
-    private void createFileSelectionPanel() {
+    private JPanel createAllParametersPanel() {
+        JPanel allParametersPanel = new JPanel(new GridBagLayout());
+        allParametersPanel.setBorder(BorderFactory.createTitledBorder(" Parameters "));
+        
+        // create parserPanel
+        JPanel parserPanel = createParserPanel();
+        
+        // create parameter panel
+        parserParametersPanel = createParametersPanel();
+        
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0;
+        allParametersPanel.add(parserPanel, c);
+        
+        c.gridy++;
+        allParametersPanel.add(parserParametersPanel, c);
+
+        
+        // init the first parser parameters panel selected
+        parserComboBox.setSelectedIndex(0);
+        
+        return allParametersPanel;
+    }
+    
+    private JPanel createFileSelectionPanel() {
 
         // Creation of Objects for File Selection Panel
-        fileSelectionPanel = new JPanel(new GridBagLayout());
+        JPanel fileSelectionPanel = new JPanel(new GridBagLayout());
         fileSelectionPanel.setBorder(BorderFactory.createTitledBorder(" Files Selection "));
 
         fileList = new JList<File>(new DefaultListModel());
@@ -253,31 +270,19 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }
         });
 
-
+        return fileSelectionPanel;
 
     }
 
-    private void createParserPanel() {
+    private JPanel createParserPanel() {
         // Creation of Objects for the Parser Panel
-        parserPanel = new JPanel(new GridBagLayout());
-        parserPanel.setBorder(BorderFactory.createTitledBorder(" Parser Parameters "));
+        JPanel parserPanel = new JPanel(new GridBagLayout());
 
         JLabel parserLabel = new JLabel("Parser :");
         parserLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        parserComboBox = new JComboBox(PARSER_NAMES);
+        parserComboBox = new JComboBox(createParameters());
         
-        JLabel instrumentLabel = new JLabel("Instrument :");
-        instrumentLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        instrumentComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getInstrumentsArray() );
-        instrumentComboBox.setRenderer(new InstrumentComboboxRenderer());
 
-        JLabel peaklistSoftwareLabel = new JLabel("Peaklist Software :");
-        peaklistSoftwareLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        peaklistSoftwareComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getPeaklistSoftwaresArray() );
-        peaklistSoftwareComboBox.setRenderer(new PeakListSoftwareComboboxRenderer());
-        
-        
-        
         
         // Placement of Objects for Parser Panel
         GridBagConstraints c = new GridBagConstraints();
@@ -293,25 +298,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.weightx = 1;
         parserPanel.add(parserComboBox, c);
 
-        c.gridx = 0;
-        c.gridy++;
-        c.weightx = 0;
-        parserPanel.add(instrumentLabel, c);
-
-        c.gridx++;
-        c.weightx = 1;
-        parserPanel.add(instrumentComboBox, c);
-        
-        c.gridx = 0;
-        c.gridy++;
-        c.weightx = 0;
-        parserPanel.add(peaklistSoftwareLabel, c);
-        
-        c.gridx++;
-        c.weightx = 1;
-        parserPanel.add(peaklistSoftwareComboBox, c);
-
-        specificParametersGridy = c.gridy + 1;
+        sourceParameterList = createSourceParameters();
+        sourceParameterList.completePanel(parserPanel, c);
 
         parserComboBox.addActionListener(new ActionListener() {
 
@@ -324,77 +312,49 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
                 previousParserIndex = parserIndex;
 
-                initParserParameters(parserIndex);
+                initParameters();
 
                 // resize the dialog
                 repack();
-                //parserPanel.revalidate();
             }
         });
+        
+        return parserPanel;
     }
 
-    private void initParserParameters(int parserIndex) {
 
-        // --- Add graphical components for the parameters of the selected parser
-        String[] keys = SPECIFIC_PARAMETERS_KEY[parserIndex];
-        String[] names = SPECIFIC_PARAMETERS_NAME[parserIndex];
+    
+    
+    private JPanel createParametersPanel() {
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(" Parser Parameters "));
+        return panel;
+    }
+    
+    private void initParameters() {
+
 
         // remove all parameters
-        removeParameters();
-
-
-        int nbKeys = keys.length;
-
-        // check if the parameters have been already restored
-        boolean needToRestore = false;
-        if (nbKeys > 0) {
-            String paramInParserKey = parserIndex + keys[0];
-            needToRestore = (specificParametersMap.get(paramInParserKey) == null);
-        }
-
-
-        // add new parameters
-        for (int i = 0; i < nbKeys; i++) {
-            String paramInParserKey = parserIndex + keys[i];
-            addParameter(i, names[i], paramInParserKey);
-        }
-
-        if (needToRestore) {
-            restoreParameters(parserIndex);
-        }
-    }
-
-    private void addParameter(int paramIndex, String labelName, String paramInParserKey) {
+        parserParametersPanel.removeAll();
+        
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
+
         c.gridx = 0;
-        c.gridy = specificParametersGridy + paramIndex;
+        c.gridy = 0;
+        c.weightx = 1;
+        c.weighty = 1;
+        
+        ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
+        parserParametersPanel.add(parameterList.getPanel(), c);
 
-
-        JLabel label = new JLabel(labelName + " :");
-        label.setHorizontalAlignment(SwingConstants.RIGHT);
-        parserPanel.add(label, c);
-        specificParametersComponentList.add(label);
-
-        JTextField textField = specificParametersMap.get(paramInParserKey);
-        if (textField == null) {
-            textField = new JTextField();
-            specificParametersMap.put(paramInParserKey, textField);
-        }
-        c.gridx++;
-        parserPanel.add(textField, c);
-        specificParametersComponentList.add(textField);
+      
     }
+    
 
-    private void removeParameters() {
-        int nb = specificParametersComponentList.size();
-        for (int i = 0; i < nb; i++) {
-            parserPanel.remove(specificParametersComponentList.get(i));
-        }
-        specificParametersComponentList.clear();
-    }
 
     private void reinitialize() {
         ((DefaultListModel) fileList.getModel()).removeAllElements();
@@ -404,21 +364,32 @@ public class ImportIdentificationDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
 
-        int parserIndex = parserComboBox.getSelectedIndex();
 
-        // check parameters
+        ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
+        
+        // check global parameters
         if (!checkParameters()) {
             return false;
         }
+        
+        // check specific parameters
+        ParameterError error = parameterList.checkParameters();
+        if (error != null) {
+            setStatus(true, error.getErrorMessage());
+            highlight(error.getParameterComponent());
+            return false;
+        }
+               
+        // retrieve values
+        //HashMap<String, String> values = parameterList.getValues();
 
-        // save parameters
-        saveParserAndParameters(parserIndex);
-
-        // do action
+        // Save Parameters
+        parameterList.saveParameters();
+        
         //JPM.TODO
-
-
+        
         return true;
+
     }
 
     @Override
@@ -428,9 +399,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
     @Override
     protected boolean defaultCalled() {
-        int parserIndex = parserComboBox.getSelectedIndex();
-
-        restoreDefaults(parserIndex);
+        ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
+        parameterList.initDefaults();
 
         return false;
     }
@@ -445,64 +415,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
             return false;
         }
         
-        // check specific import parameters
-        int parserIndex = parserComboBox.getSelectedIndex();
-
-        String[] parameterKeys = SPECIFIC_PARAMETERS_KEY[parserIndex];
-        Double[][] limitValues = SEPECIFIC_PARAMETERS_ACCEPTED_VALUES[parserIndex];
-        int nbParameters = parameterKeys.length;
-        for (int i = 0; i < nbParameters; i++) {
-            String parameterInParserKey = parserIndex + parameterKeys[i];
-            JTextField f = specificParametersMap.get(parameterInParserKey);
-            String value = f.getText();
-            if (value.isEmpty()) {
-                setStatus(true, "You must fill the "+SPECIFIC_PARAMETERS_NAME[i][parserIndex]+" field.");
-                highlight(f);
-                return false;
-            }
-            try {
-                double valueD = Double.parseDouble(value);
-                
-                Double minValue = limitValues[i][0];
-                if (minValue != null) {
-                    if (valueD<minValue.doubleValue()) {
-                        setStatus(true, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be greater than "+minValue+" .");
-                        highlight(f);
-                        return false;
-                    }
-                }
-                
-                Double maxValue = limitValues[i][1];
-                if (maxValue != null) {
-                    if (valueD>maxValue.doubleValue()) {
-                        setStatus(true, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be lesser than "+maxValue+" .");
-                        highlight(f);
-                        return false;
-                    }
-                }
-                
-            } catch (NumberFormatException nfe) {
-                setStatus(true, SPECIFIC_PARAMETERS_NAME[parserIndex][i]+" must be a Real.");
-                
-                highlight(f);
-                return false;
-            }
-            
-        }
-        
         return true;
     }
     
-    private void restoreDefaults(int parserIndex) {
-        String[] defaultParameters = SEPECIFIC_PARAMETERS_DEFAULT[parserIndex];
-        String[] parameterKeys = SPECIFIC_PARAMETERS_KEY[parserIndex];
-        int nbParameters = parameterKeys.length;
-        for (int i = 0; i < nbParameters; i++) {
-            String parameterInParserKey = parserIndex + parameterKeys[i];
-            JTextField f = specificParametersMap.get(parameterInParserKey);
-            f.setText(defaultParameters[i]);
-        }
-    }
+
 
     private void restoreParser() {
         Preferences preferences = NbPreferences.forModule(ImportIdentificationDialog.class);
@@ -528,86 +444,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
         // select the parser
         parserComboBox.setSelectedIndex(parserIndex);
 
-        // restore its parameters
-        restoreParameters(parserIndex);
-
     }
 
-    private void restoreParameters(int parserIndex) {
 
-        Preferences preferences = NbPreferences.forModule(ImportIdentificationDialog.class);
-
-        String parserName = PARSER_NAMES[parserIndex];
-        String[] parametersName = SPECIFIC_PARAMETERS_NAME[parserIndex];
-
-
-        String parserKey = parserName.replaceAll(" ", "_");
-
-
-
-        boolean aParameterFound = false;
-        int nbParameters = parametersName.length;
-        String[] parameterValues = new String[nbParameters];
-        for (int i = 0; i < nbParameters; i++) {
-            String parameter = parametersName[i];
-            String parameterKey = parserKey + "." + parameter.replaceAll(" ", "_");
-
-            parameterValues[i] = preferences.get(parameterKey, null);
-            if (parameterValues[i] != null) {
-                aParameterFound = true;
-            } else {
-                parameterValues[i] = "";
-            }
-        }
-
-        if (!aParameterFound) {
-            // we retrieve default values
-            restoreDefaults(parserIndex);
-        } else {
-
-            String[] parameterKeys = SPECIFIC_PARAMETERS_KEY[parserIndex];
-            for (int i = 0; i < nbParameters; i++) {
-                String parameterKey = parameterKeys[i];
-                String parameterInParserKey = parserIndex + parameterKey;
-                JTextField f = specificParametersMap.get(parameterInParserKey);
-                f.setText(parameterValues[i]);
-            }
-        }
-
-    }
-
-    private void saveParserAndParameters(int parserIndex) {
-        Preferences preferences = NbPreferences.forModule(ImportIdentificationDialog.class);
-
-        // save the last user parser
-        String parserName = PARSER_NAMES[parserIndex];
-        preferences.put("IdentificationParser", parserName);
-
-        // save the parameters of this parser
-        String[] parametersName = SPECIFIC_PARAMETERS_NAME[parserIndex];
-
-        String[] parameterKeys = SPECIFIC_PARAMETERS_KEY[parserIndex];
-        String parserKey = parserName.replaceAll(" ", "_");
-        int nbParameters = parametersName.length;
-        for (int i = 0; i < nbParameters; i++) {
-            String parameter = parametersName[i];
-            String parameterKey = parserKey + "." + parameter.replaceAll(" ", "_");
-
-
-            String parameterInParserKey = parserIndex + parameterKeys[i];
-            JTextField f = specificParametersMap.get(parameterInParserKey);
-
-            String parameterValue = f.getText();
-            preferences.put(parameterKey, parameterValue);
-
-        }
-
-        try {
-            preferences.flush();
-        } catch (BackingStoreException e) {
-            LoggerFactory.getLogger(ImportIdentificationDialog.class).error("Saving Import Identification Parameters Failed", e);
-        }
-    }
     
     public File[] getFilePaths() {
         
@@ -622,60 +461,71 @@ public class ImportIdentificationDialog extends DefaultDialog {
     }
     
     public HashMap<String, String> getParserArguments() {
-        
-        HashMap<String, String> parserArguments = new HashMap<>();
-        
-        int parserIndex = parserComboBox.getSelectedIndex();
-        
-        String[] parameterKeys = SPECIFIC_PARAMETERS_KEY[parserIndex];
-
-        int nbParameters = parameterKeys.length;
-        for (int i = 0; i < nbParameters; i++) {
-            String key = parameterKeys[i];
-            String parameterInParserKey = parserIndex + key;
-            JTextField f = specificParametersMap.get(parameterInParserKey);
-            String value = f.getText();
-            parserArguments.put(key, value);
-        }
-
-        
-        return parserArguments;
+        ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
+        return parameterList.getValues();
     }
 
     public Integer getInstrumentId() {
-        Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();    
+        
+        Instrument instrument = (Instrument) sourceParameterList.getParameter("instrument").getObjectValue(); 
         return instrument.getId();
     }
     
     public Integer getPeaklistSoftwareId() {
-        PeaklistSoftware peaklistSoftware = (PeaklistSoftware) peaklistSoftwareComboBox.getSelectedItem();    
+        PeaklistSoftware peaklistSoftware = (PeaklistSoftware) sourceParameterList.getParameter("peaklist_software").getObjectValue();  
         return peaklistSoftware.getId();
     }
     
-    private class InstrumentComboboxRenderer extends DefaultListCellRenderer {
 
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            JLabel l = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
-            Instrument instrument = (Instrument) value;
-            l.setText(instrument.getName());
-
-            return l;
-        }
+    
+    
+    private ParameterList[] createParameters() {
+        ParameterList[] plArray = new ParameterList[2];
+        plArray[0] = createMascotParser();
+        plArray[1] = createTestParser();
+        return plArray;
     }
     
-    private class PeakListSoftwareComboboxRenderer extends DefaultListCellRenderer {
-
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            JLabel l = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            PeaklistSoftware peaklistSoftware = (PeaklistSoftware) value;
-            l.setText(peaklistSoftware.getName());
-
-            return l;
-        }
+    private ParameterList createMascotParser() {
+        ParameterList parameterList = new ParameterList("FDR Validation");
+        parameterList.add(new DoubleParameter("ion.score.cutoff", "Ion Score Cutoff", JTextField.class, new Double(0.0), new Double(0), null));
+        parameterList.add(new DoubleParameter("subset.threshold", "Subset Threshold", JTextField.class, new Double(1.0), new Double(0), new Double(1)));
+        
+        return parameterList;
     }
+    
+    private ParameterList createTestParser() {
+        ParameterList parameterList = new ParameterList("Test Validation");
+        parameterList.add(new DoubleParameter("test", "Test", JTextField.class, new Double(4), null, null));
+    
+        return parameterList;
+    }
+    
+    private ParameterList createSourceParameters() {
+        
+        ParameterList parameterList = new ParameterList("Parameter Source");
+        
+        AbstractParameterToString<Instrument> instrumentToString = new AbstractParameterToString<Instrument>() {
+            @Override
+            public String toString(Instrument o) {
+                return o.getName();
+            }  
+        };
+        
+        AbstractParameterToString<PeaklistSoftware> softwareToString = new AbstractParameterToString<PeaklistSoftware>() {
+            @Override
+            public String toString(PeaklistSoftware o) {
+                return o.getName();
+            }  
+        };
+        
+        parameterList.add(new ObjectParameter("instrument", "Instrument", UDSDataManager.getUDSDataManager().getInstrumentsArray(), -1, instrumentToString));
+        parameterList.add(new ObjectParameter("peaklist_software", "Peaklist Software", UDSDataManager.getUDSDataManager().getPeaklistSoftwaresArray(), -1, softwareToString));
+
+        return parameterList;
+        
+    }
+    
     
 }

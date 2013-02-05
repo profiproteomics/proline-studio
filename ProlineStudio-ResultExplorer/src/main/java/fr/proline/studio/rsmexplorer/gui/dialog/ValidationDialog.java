@@ -22,7 +22,7 @@ public class ValidationDialog extends DefaultDialog {
     private static ValidationDialog singletonDialog = null;
     private final static String[] VALIDATION_NAMES = {"FDR Validation", "Irma Validation"};
 
-    JPanel parametersPanel = null;
+    private JPanel parametersPanel = null;
     private JComboBox validationCombobox = null;
     private int previousValidationIndex = -1;
     

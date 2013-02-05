@@ -78,5 +78,15 @@ public class DoubleParameter extends AbstractParameter {
         
         return null;
     }
+
+    @Override
+    public String getStringValue() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Object getObjectValue() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
 }

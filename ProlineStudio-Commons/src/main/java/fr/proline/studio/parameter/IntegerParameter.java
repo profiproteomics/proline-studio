@@ -185,6 +185,24 @@ public class IntegerParameter extends AbstractParameter {
         
         return null;
     }
-    
+
+    @Override
+    public String getStringValue() {
+        return getObjectValue().toString();
+    }
+
+    @Override
+    public Object getObjectValue() {
+        if (graphicalType.equals(JTextField.class)) {
+           return ((JTextField) parameterComponent).getText();
+        }
+        if (graphicalType.equals(JSlider.class)) {
+           return ((JSlider) parameterComponent).getValue();
+        }
+        if (graphicalType.equals(JSpinner.class)) {
+           return ((JSpinner) parameterComponent).getValue();
+        }
+        return ""; // should not happen
+    }
     
 }

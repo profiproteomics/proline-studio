@@ -22,6 +22,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         this.name = name;
     }
 
+    @Override
     public String toString() {
         return name;
     }
@@ -59,7 +60,9 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             
             c.gridx = 0;
             c.weightx = 0;
-            parametersPanel.add(new JLabel(parameter.getName()), c);
+            JLabel l = new JLabel(parameter.getName()+" :");
+            l.setHorizontalAlignment(JLabel.RIGHT);
+            parametersPanel.add(l, c);
 
             String parameterValue = preferences.get(prefixKey+suffixKey, null);
             
@@ -74,6 +77,38 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
         return parametersPanel;
     }
+    
+    public void completePanel(JPanel p, GridBagConstraints c) {
+        Preferences preferences = NbPreferences.forModule(ParameterList.class);
+        String prefixKey = name.replaceAll(" ", "_")+".";
+        
+         int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+            
+            String parameterName = parameter.getName();
+            String suffixKey = parameterName.replaceAll(" ", "_")+".";
+            
+            c.gridy++;
+            
+            c.gridx = 0;
+            c.weightx = 0;
+            JLabel l = new JLabel(parameter.getName()+" :");
+            l.setHorizontalAlignment(JLabel.RIGHT);
+            p.add(l, c);
+
+            String parameterValue = preferences.get(prefixKey+suffixKey, null);
+            
+            
+            c.gridx = 1;
+            c.weightx = 1;
+            p.add(parameter.getComponent(parameterValue), c);
+
+            
+
+        }
+    }
+    
     
     public void initDefaults() {
 
@@ -97,7 +132,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             String suffixKey = parameterName.replaceAll(" ", "_")+".";
         
             String key = prefixKey+suffixKey;
-            String value = parameter.getValue();
+            String value = parameter.getStringValue();
             preferences.put(key, value);
         }
     }
@@ -109,13 +144,25 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
             String key = parameter.getKey();
-            String value = parameter.getValue();
+            String value = parameter.getStringValue();
             valuesMap.put(key, value);
         }
         
         return valuesMap;
         
     }
+    
+    public AbstractParameter getParameter(String key) {
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+            if (parameter.getKey().compareTo(key) ==0) {
+                return parameter;
+            }
+        }
+        return null;
+    }
+    
     
     public ParameterError checkParameters() {
         int nbParameters = size();

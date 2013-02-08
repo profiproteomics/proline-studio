@@ -488,7 +488,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     }
     
     private ParameterList createMascotParser() {
-        ParameterList parameterList = new ParameterList("FDR Validation");
+        ParameterList parameterList = new ParameterList("Mascot");
         parameterList.add(new DoubleParameter("ion.score.cutoff", "Ion Score Cutoff", JTextField.class, new Double(0.0), new Double(0), null));
         parameterList.add(new DoubleParameter("subset.threshold", "Subset Threshold", JTextField.class, new Double(1.0), new Double(0), new Double(1)));
         
@@ -496,7 +496,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     }
     
     private ParameterList createTestParser() {
-        ParameterList parameterList = new ParameterList("Test Validation");
+        ParameterList parameterList = new ParameterList("TEST Parser");
         parameterList.add(new DoubleParameter("test", "Test", JTextField.class, new Double(4), null, null));
     
         return parameterList;

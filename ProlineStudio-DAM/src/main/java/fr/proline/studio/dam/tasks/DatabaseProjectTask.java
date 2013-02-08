@@ -3,7 +3,8 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
-import fr.proline.core.orm.util.DatabaseManager;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -76,25 +77,45 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
 
     private boolean loadProject() {
 
-        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 
-            TypedQuery<Project> projectQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.Project p, fr.proline.core.orm.uds.UserAccount user WHERE p.owner.id=user.id AND user.login=:user", Project.class);
+            TypedQuery<Project> projectQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.Project p, fr.proline.core.orm.uds.UserAccount user WHERE p.owner.id=user.id AND user.login=:user ORDER BY p.name ASC", Project.class);
             projectQuery.setParameter("user", user);
             List<Project> projectList = projectQuery.getResultList();
 
+
+            HashMap<Integer, ProjectData> projectMap = new HashMap<>();
             Iterator<Project> it = projectList.iterator();
             while (it.hasNext()) {
                 Project projectCur = it.next();
-
-                list.add(new ProjectData(projectCur));
+                Integer projectIdCur = projectCur.getId();
+                
+                ProjectData projectDataCur = new ProjectData(projectCur);
+                projectDataCur.setHasChildren(false);
+                projectMap.put(projectIdCur, projectDataCur);
+                list.add(projectDataCur);
             }
             
+            
+            if (projectMap.size() >0) {
+                Query countQuery = entityManagerUDS.createQuery("SELECT p, count(d) FROM fr.proline.core.orm.uds.Project p, fr.proline.core.orm.uds.Dataset d WHERE d.project=p AND d.parentDataset=null AND p.id IN (:projectIds) GROUP BY p.id");
+                countQuery.setParameter("projectIds", projectMap.keySet());
+                List l = countQuery.getResultList();
+
+                Iterator<Object[]> itCountQuery = l.iterator();
+                while (itCountQuery.hasNext()) {
+                    Object[] resCur = itCountQuery.next();
+                    Project p = (Project) resCur[0];
+                    Long countDataset = (Long) resCur[1];
+                    projectMap.get(p.getId()).setHasChildren(countDataset > 0);
+                }
+            }
  
             entityManagerUDS.getTransaction().commit();
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName() + " failed", e);
             entityManagerUDS.getTransaction().rollback();
         }
@@ -111,7 +132,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
 
     private boolean renameProject() {
 
-        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -123,7 +144,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
 
             entityManagerUDS.getTransaction().commit();
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName() + " failed", e);
             entityManagerUDS.getTransaction().rollback();
             return false;

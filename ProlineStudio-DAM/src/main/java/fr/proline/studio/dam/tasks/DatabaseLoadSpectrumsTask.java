@@ -3,7 +3,7 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.msi.MsQuery;
 import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.Spectrum;
-import fr.proline.core.orm.util.DatabaseManager;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -33,7 +33,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -65,7 +65,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
             
             
             entityManagerMSI.getTransaction().commit();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {

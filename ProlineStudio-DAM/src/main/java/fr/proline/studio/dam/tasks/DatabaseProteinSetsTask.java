@@ -4,7 +4,7 @@ import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.util.DatabaseManager;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,7 +71,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTask() {
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -200,7 +200,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
              */
 
             entityManagerMSI.getTransaction().commit();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
@@ -224,7 +224,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         if (slice == null) {
             return true; // nothing to do : should not happen
         }
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         
         try {
 
@@ -248,7 +248,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
 
             entityManagerMSI.getTransaction().commit();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {

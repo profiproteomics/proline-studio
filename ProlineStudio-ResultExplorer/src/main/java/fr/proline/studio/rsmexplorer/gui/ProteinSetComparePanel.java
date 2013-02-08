@@ -1,8 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -408,7 +408,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             }
 
             
-            DataSetTMP dataSet = (DataSetTMP) proteinSetArray.get( col - 1).getResultSummary().getTransientData().getDataSet();
+            Dataset dataSet = (Dataset) proteinSetArray.get( col - 1).getResultSummary().getTransientData().getDataSet();
             
             if (dataSet != null) {
                 return dataSet.getName();

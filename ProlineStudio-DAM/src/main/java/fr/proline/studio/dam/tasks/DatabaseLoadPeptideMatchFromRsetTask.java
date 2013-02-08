@@ -5,9 +5,7 @@
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.*;
-import fr.proline.core.orm.util.DatabaseManager;
-import fr.proline.repository.Database;
-import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -63,7 +61,7 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
 
     public boolean fetchDataMainTask() {
         
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector( projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -127,7 +125,7 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
 
 
             entityManagerMSI.getTransaction().commit();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
@@ -153,7 +151,7 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
             return true; // nothing to do : should not happen
         }
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
@@ -172,7 +170,7 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
 
 
             entityManagerMSI.getTransaction().commit();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
@@ -253,7 +251,7 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
             }
             
             entityManagerPS.getTransaction().commit();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
         } finally {
             entityManagerPS.close();

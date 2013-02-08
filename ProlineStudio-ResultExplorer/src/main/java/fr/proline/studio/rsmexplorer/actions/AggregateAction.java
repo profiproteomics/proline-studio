@@ -1,7 +1,9 @@
 package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -12,7 +14,9 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.ArrayList;
+import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -43,7 +47,7 @@ public class AggregateAction extends AbstractRSMAction {
             // retrieve parameters
             String name = dialog.getAggregateName();
             final int nbAggregates = dialog.getNbAggregates();
-            int aggregateType = dialog.getAggregateType();
+            Aggregation.ChildNature aggregateType = dialog.getAggregateType();
             
             // check if a child has already the same name with a number suffix
             int suffixNumber = 0;
@@ -74,7 +78,7 @@ public class AggregateAction extends AbstractRSMAction {
             
             final ArrayList<RSMDataSetNode> nodesCreated = new ArrayList<RSMDataSetNode>();
             
-            RSMTree tree = RSMTree.getTree();
+            final RSMTree tree = RSMTree.getTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             for (int i=0;i<nbAggregates;i++) {
                 String aggregateName = name;
@@ -89,21 +93,24 @@ public class AggregateAction extends AbstractRSMAction {
             }
             treeModel.nodeStructureChanged(n);
             
+            // expand the parent node to display its children
+            tree.expandNodeIfNeeded(n);
 
+            
+            
             // add to really create the aggregate dataset
             
-            Integer projectId = null;
-            Integer parentDatasetId = null;;
+            Project project = null;
+            Dataset parentDataset = null;
             if (n.getType() == RSMNode.NodeTypes.PROJECT) {
-                projectId = ((RSMProjectNode)n).getProject().getId();
-                parentDatasetId = null; 
+                project = ((RSMProjectNode)n).getProject();
+                parentDataset = null; 
             } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
-                DataSetTMP parentDataset = ((RSMDataSetNode)n).getDataSet();
-                projectId = parentDataset.getProjectId();
-                parentDatasetId = parentDataset.getId();
+                parentDataset = ((RSMDataSetNode)n).getDataset();
+                project = parentDataset.getProject();
             }
             
-            final ArrayList<DataSetTMP> createdDatasetList = new ArrayList<>();
+            final ArrayList<Dataset> createdDatasetList = new ArrayList<>();
             
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -122,9 +129,9 @@ public class AggregateAction extends AbstractRSMAction {
                     for (int i = 0; i < nbNodes; i++) {
                         
                         RSMDataSetNode datasetNode = nodesCreated.get(i);
-                        DataSetTMP dataset = createdDatasetList.get(i);
+                        Dataset dataset = createdDatasetList.get(i);
                         datasetNode.setIsChanging(false);
-                        ((DataSetData)datasetNode.getData()).setDataSet(dataset);
+                        ((DataSetData)datasetNode.getData()).setDataset(dataset);
                         treeModel.nodeChanged(datasetNode);
                     }
                     
@@ -136,7 +143,7 @@ public class AggregateAction extends AbstractRSMAction {
             
             
             DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-            task.initCreateDatasetAggregate(projectId, parentDatasetId,aggregateType,name,(suffixNumber>0), suffixStart, suffixStart+nbAggregates-1, createdDatasetList);
+            task.initCreateDatasetAggregate(project, parentDataset,aggregateType,name,(suffixNumber>0), suffixStart, suffixStart+nbAggregates-1, createdDatasetList);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }

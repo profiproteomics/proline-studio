@@ -1,13 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.core.orm.util.DatabaseManager;
-import fr.proline.studio.dam.UDSConnectionManagerOLD;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
@@ -76,7 +74,7 @@ public class DatabaseConnectionDialog extends DefaultDialog {
             
             // we must need to close all connections before trying to connect
             // with the new parameters
-            DatabaseManager.getInstance().closeAll();
+            DataStoreConnectorFactory.getInstance().closeAll();
             
         }
         

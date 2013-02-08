@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.core.orm.uds.Project;
-import fr.proline.core.orm.util.DatabaseManager;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import java.io.IOException;
 import javax.persistence.EntityManager;
 
@@ -43,7 +43,7 @@ public class CreateProjectTask extends AbstractServiceTask {
         
         ////////////////////////////////////////////////
         ///////////////////////////////////////////////
-        postUserRequest();  //JPM.TODO : REMOVE !!!!!!!!
+        //postUserRequest();  //JPM.TODO : REMOVE !!!!!!!!
 
         try {
             // create the request
@@ -62,18 +62,24 @@ public class CreateProjectTask extends AbstractServiceTask {
 
             ArrayMap errorMap = (ArrayMap) jsonResult.get("error");
             
+            errorMessage = null;
             if (errorMap != null) {
                 String message = (String) errorMap.get("message");
                 
                 if (message != null) {
                     errorMessage = message.toString();
                 }
-                return false;
+                
+                 //JPM.WART : Web core returns an error and the project id !!!
+                logger.error(getClass().getSimpleName()+errorMessage);
+               // return false; 
             }
 
             idProject = (BigDecimal) jsonResult.get("result");
             if (idProject == null) {
-                errorMessage = "Internal Error : Project Id not found";
+                if (errorMessage == null) { //JPM.WART
+                    errorMessage = "Internal Error : Project Id not found";
+                }
                 return false;
             }
             
@@ -85,7 +91,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             return false;
         }
         
-        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
         
@@ -100,7 +106,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             
             entityManagerUDS.getTransaction().commit();
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName() + " failed", e);
             return false;
         } finally {
@@ -122,7 +128,7 @@ public class CreateProjectTask extends AbstractServiceTask {
     //////////////////////
     // JPM.TODO : remove two next methods
     
-    private static JsonRpcRequest createUserRequest() {
+  /*  private static JsonRpcRequest createUserRequest() {
 
         JsonRpcRequest request = new JsonRpcRequest();
         request.setId(12356);
@@ -158,6 +164,6 @@ public class CreateProjectTask extends AbstractServiceTask {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    }
+    }*/
     
 }

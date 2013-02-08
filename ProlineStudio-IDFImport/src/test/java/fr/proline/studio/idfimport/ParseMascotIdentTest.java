@@ -4,34 +4,34 @@
  */
 package fr.proline.studio.idfimport;
 
-import fr.proline.core.orm.util.DatabaseManager;
+/*import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.repository.IDatabaseConnector;
 import java.io.File;
 import java.net.URISyntaxException;
 import org.junit.*;
-import org.openide.util.Exceptions;
+import org.openide.util.Exceptions;*/
 
 /**
  *
  * @author VD225637
  */
 public class ParseMascotIdentTest {
-    
+    /*
     protected final static String DB_CONFIG_PROP="/dbs_test_connection.properties";
-     
+     */
     public ParseMascotIdentTest() {
     }
 
-    @BeforeClass
+//    @BeforeClass
     public static void setUpClass() throws Exception {       
-        getOrInitDbManager();
+      //  getOrInitDbManager();
     }
 
-    @AfterClass
+   // @AfterClass
     public static void tearDownClass() throws Exception {
     }
     
-    @Before
+   // @Before
     public void setUp() {        
 //        ProvidersFactory.registerPeptideProvider(ImportResultFile.PROVIDER_KEY, new ORMPeptideProvider(ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PS, false)));
 //        ProvidersFactory.registerPTMProvider(ImportResultFile.PROVIDER_KEY, new ORMPTMProvider(ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PS, false)));
@@ -39,33 +39,33 @@ public class ParseMascotIdentTest {
 //        ProvidersFactory.registerSeqDatabaseProvider(ImportResultFile.PROVIDER_KEY, new ORMSeqDatabaseProvider(ProlineDbManagment.getProlineDbManagment().getEntityManager(ProlineRepository.Databases.PDI, false)));
     }
     
-    @After
+ //   @After
     public void tearDown() {
     }
     
-    @Test
+//    @Test
     public void testParseDatFile(){
-        File mascotFile = null;
+      /*  File mascotFile = null;
         try {
             mascotFile = new File(this.getClass().getResource("/F065306.dat").toURI());
         } catch (URISyntaxException ex) {
             Exceptions.printStackTrace(ex);
             Assert.fail(ex.getMessage());
-        }
+        }*/
 //       IResultFile rf = MascotResultFileProvider.getResultFile(mascotFile, ImportResultFile.PROVIDER_KEY_);    
 //       Assert.assertThat(rf, CoreMatchers.notNullValue());
     }
         
-    private static DatabaseManager getOrInitDbManager()  {        
+    /*private static DataStoreConnectorFactory getOrInitDbManager()  {        
         try {
-            if(!DatabaseManager.getInstance().isInitialized())
-            DatabaseManager.getInstance().initialize(DB_CONFIG_PROP);
+            if(!DataStoreConnectorFactory.getInstance().isInitialized())
+            DataStoreConnectorFactory.getInstance().initialize(DB_CONFIG_PROP);
         } catch(Exception e){
             Exceptions.printStackTrace(e);    
             return null;
         }        
     
-        return DatabaseManager.getInstance();
-    }
+        return DataStoreConnectorFactory.getInstance();
+    }*/
     
 }

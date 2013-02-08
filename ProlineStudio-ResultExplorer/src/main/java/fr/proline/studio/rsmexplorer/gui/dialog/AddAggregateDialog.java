@@ -1,9 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dialog;
 import java.awt.Window;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -21,9 +21,12 @@ public class AddAggregateDialog extends DefaultDialog {
             singletonDialog = new AddAggregateDialog(parent);
         }
 
+        singletonDialog.aggregatePanel.reinitialize();
+        
         return singletonDialog;
     }
     
+
     
     private AddAggregateDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
@@ -71,7 +74,7 @@ public class AddAggregateDialog extends DefaultDialog {
        return aggregatePanel.getNbAggregates();
     }
     
-    public int getAggregateType() {
+    public Aggregation.ChildNature getAggregateType() {
         return aggregatePanel.getAggregateType();
     }
     

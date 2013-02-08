@@ -20,9 +20,18 @@ public class AddProjectDialog extends DefaultDialog {
             singletonDialog = new AddProjectDialog(parent);
         }
 
+        singletonDialog.reinitialize();
+        
         return singletonDialog;
     }
 
+    public void reinitialize() {
+
+        // reinit fields
+        nameTextField.setText("");
+        descriptionTextArea.setText("");
+    }
+    
     private AddProjectDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
@@ -35,7 +44,7 @@ public class AddProjectDialog extends DefaultDialog {
         initInternalPanel();
     }
     
-        private void initInternalPanel() {
+    private void initInternalPanel() {
 
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new java.awt.GridBagLayout());

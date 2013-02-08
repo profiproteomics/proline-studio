@@ -1,8 +1,10 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -49,18 +51,18 @@ public class IdentificationAction extends AbstractRSMAction {
             File[] filePaths = dialog.getFilePaths();
             HashMap<String, String> parserArguments = dialog.getParserArguments();
             
-            Integer projectId = null;
-            Integer parentDatasetId = null;
+            Project project = null;
+            Dataset parentDataset = null;
             if (n.getType() == RSMNode.NodeTypes.PROJECT) {
                 RSMProjectNode projectNode = (RSMProjectNode) n;
-                projectId = projectNode.getProject().getId();
+                project = projectNode.getProject();
             } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode dataSetNode = (RSMDataSetNode) n;
-                projectId = dataSetNode.getDataSet().getProjectId();
-                parentDatasetId = dataSetNode.getDataSet().getId();
+                project = dataSetNode.getDataset().getProject();
+                parentDataset = dataSetNode.getDataset();
             } 
-            final Integer _projectId = projectId;
-            final Integer _parentDatasetId = parentDatasetId;
+            final Project _project = project;
+            final Dataset _parentDataset = parentDataset;
                     
             Integer instrumentId = dialog.getInstrumentId();
             Integer peaklistSoftwareId = dialog.getPeaklistSoftwareId();
@@ -78,7 +80,7 @@ public class IdentificationAction extends AbstractRSMAction {
                     datasetName = datasetName.substring(0, indexOfDot);
                 }
                 final String _datasetName = datasetName;
-                DataSetData identificationData = new DataSetData(datasetName, DataSetTMP.SAMPLE_ANALYSIS );  //JPM.TODO
+                DataSetData identificationData = new DataSetData(datasetName, Aggregation.ChildNature.SAMPLE_ANALYSIS );  //JPM.TODO
                 
                 final RSMDataSetNode identificationNode = new RSMDataSetNode(identificationData);
                 identificationNode.setIsChanging(true);
@@ -99,7 +101,7 @@ public class IdentificationAction extends AbstractRSMAction {
                             
                             Integer resultSetId = null; //JPM.TODO !!!! : it must be a result of the service
                             
-                            createDataset(identificationNode, _projectId, _parentDatasetId, _datasetName, resultSetId);
+                            createDataset(identificationNode, _project, _parentDataset, _datasetName, resultSetId);
                             
                             
                         } else {
@@ -110,7 +112,7 @@ public class IdentificationAction extends AbstractRSMAction {
                 };
 
 
-                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, projectId);
+                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, project.getId());
                 AccessServiceThread.getAccessServiceThread().addTask(task);
                 
             }
@@ -119,7 +121,7 @@ public class IdentificationAction extends AbstractRSMAction {
         }
     }
     
-    private void createDataset(final RSMDataSetNode identificationNode, Integer projectId, Integer parentDatasetId, String name, Integer resultSetId) {
+    private void createDataset(final RSMDataSetNode identificationNode, Project project, Dataset parentDataset, String name, Integer resultSetId) {
                                     
 
         identificationNode.setIsChanging(false);
@@ -128,7 +130,7 @@ public class IdentificationAction extends AbstractRSMAction {
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         treeModel.nodeChanged(identificationNode);
 
-        final ArrayList<DataSetTMP> createdDatasetList = new ArrayList<>();
+        final ArrayList<Dataset> createdDatasetList = new ArrayList<>();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -142,9 +144,9 @@ public class IdentificationAction extends AbstractRSMAction {
 
                 if (success) {
 
-                    DataSetTMP dataset = createdDatasetList.get(0);
+                    Dataset dataset = createdDatasetList.get(0);
                     identificationNode.setIsChanging(false);
-                    ((DataSetData) identificationNode.getData()).setDataSet(dataset);
+                    ((DataSetData) identificationNode.getData()).setDataset(dataset);
                     treeModel.nodeChanged(identificationNode);
                 } else {
                     // should not happen
@@ -158,7 +160,7 @@ public class IdentificationAction extends AbstractRSMAction {
 
 
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-        task.initCreateDatasetForIdentification(projectId, parentDatasetId, DataSetTMP.SAMPLE_ANALYSIS, name, resultSetId, null, createdDatasetList);
+        task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, name, resultSetId, null, createdDatasetList);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }

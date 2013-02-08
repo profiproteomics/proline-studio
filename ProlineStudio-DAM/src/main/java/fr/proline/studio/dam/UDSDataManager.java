@@ -1,8 +1,12 @@
 package fr.proline.studio.dam;
 
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Aggregation.ChildNature;
 import fr.proline.core.orm.uds.Instrument;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.core.orm.uds.UserAccount;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -17,6 +21,8 @@ public class UDSDataManager  {
     private PeaklistSoftware[] peaklistSoftwares;
     private UserAccount[] projectUsers;
     private UserAccount projectUser;
+    
+    private HashMap<Aggregation.ChildNature, Aggregation> aggregationMap = null;
     
     private UDSDataManager() {
     }
@@ -44,7 +50,20 @@ public class UDSDataManager  {
         return peaklistSoftwares;
     }
     
+    public void setAggregationList(List<Aggregation> l) {
+        
+        aggregationMap = new HashMap<Aggregation.ChildNature, Aggregation>();
+        
+        Iterator<Aggregation> it = l.iterator();
+        while (it.hasNext()) {
+            Aggregation aggregation = it.next();
+            aggregationMap.put(aggregation.getChildNature(), aggregation);
+        }
+    }
     
+    public Aggregation getAggregation(Aggregation.ChildNature childNature) {
+        return aggregationMap.get(childNature);
+    }
     
     
     public void setProjectUsers(List<UserAccount> l) {

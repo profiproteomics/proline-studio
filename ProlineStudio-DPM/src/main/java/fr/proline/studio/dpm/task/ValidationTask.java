@@ -4,7 +4,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
-import fr.proline.studio.dam.DataSetTMP;
+import fr.proline.core.orm.uds.Dataset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,14 +14,14 @@ import java.util.Map;
  */
 public class ValidationTask extends AbstractServiceTask {
 
-    private DataSetTMP dataset = null;
+    private Dataset dataset = null;
     String description;
     int peptideFDR;
     int peptideMinPepSequence;
     int proteinFDR;
     int proteinMinPepSequence;
     
-    public ValidationTask(AbstractServiceCallback callback, DataSetTMP dataset, String description, int peptideFDR, int peptideMinPepSequence, int proteinFDR, int proteinMinPepSequence) {
+    public ValidationTask(AbstractServiceCallback callback, Dataset dataset, String description, int peptideFDR, int peptideMinPepSequence, int proteinFDR, int proteinMinPepSequence) {
         super(callback, false /*asynchronous*/);
         this.dataset = dataset;
         this.description = description;

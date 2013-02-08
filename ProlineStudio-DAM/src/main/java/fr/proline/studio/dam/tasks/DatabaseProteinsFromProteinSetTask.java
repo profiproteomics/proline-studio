@@ -4,7 +4,7 @@ import fr.proline.core.orm.msi.BioSequence;
 import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
-import fr.proline.core.orm.util.DatabaseManager;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.*;
 import java.util.*;
 import javax.persistence.EntityManager;
@@ -37,7 +37,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
 
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
         try {
             
             entityManagerMSI.getTransaction().begin();

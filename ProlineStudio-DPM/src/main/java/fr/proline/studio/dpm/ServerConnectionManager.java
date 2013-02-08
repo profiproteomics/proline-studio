@@ -5,6 +5,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseConnectionTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
+import fr.proline.studio.dpm.task.CreateProjectTask;
+import fr.proline.studio.dpm.task.CreateUserTask;
 import fr.proline.studio.dpm.task.ServerConnectionTask;
 import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
@@ -77,7 +79,7 @@ public class ServerConnectionManager {
    private void tryServerConnection() {
        tryServerConnection(null, m_serverURL, m_projectUser, m_databasePassword);
    }
-   public void tryServerConnection(final Runnable connectionCallback, String serverURL, String projectUser, String databasePassword) {
+   public void tryServerConnection(final Runnable connectionCallback, String serverURL, final String projectUser, String databasePassword) {
        
        setConnectionState(CONNECTION_SERVER_ASKED);
        
@@ -95,7 +97,7 @@ public class ServerConnectionManager {
            public void run(boolean success) {
                if (success) {
                    // we now ask for the database connection
-                   tryDatabaseConnection(connectionCallback, databaseProperties);
+                   tryDatabaseConnection(connectionCallback, databaseProperties, projectUser);
                } else {
                    setConnectionState(CONNECTION_SERVER_FAILED);
                    connectionError = getErrorMessage();
@@ -107,12 +109,12 @@ public class ServerConnectionManager {
        };
 
 
-       ServerConnectionTask task = new ServerConnectionTask(callback, m_serverURL, m_projectUser, m_databasePassword, databaseProperties);
+       ServerConnectionTask task = new ServerConnectionTask(callback, serverURL, databasePassword, databaseProperties);
        AccessServiceThread.getAccessServiceThread().addTask(task);
        
    }
    
-   private void tryDatabaseConnection(final Runnable connectionCallback, HashMap<Object, Object> databaseProperties) {
+   private void tryDatabaseConnection(final Runnable connectionCallback, HashMap<Object, Object> databaseProperties, String projectUser) {
       
        setConnectionState(CONNECTION_DATABASE_ASKED);
        
@@ -135,6 +137,15 @@ public class ServerConnectionManager {
                     setConnectionState(CONNECTION_DATABASE_FAILED);
                     connectionError = getErrorMessage();
                     
+                    //JPM.TODO : WART if no user has been created
+                    if ((connectionError!= null) && (connectionError.indexOf("dupierris")!=-1)) {
+                        // we create the user dupierris
+                        
+                        //CreateProjectTask.postUserRequest();
+                        
+                        CreateUserTask task = new CreateUserTask(null, "dupierris");
+                        AccessServiceThread.getAccessServiceThread().addTask(task);
+                    }
                 }
                 
                 if (connectionCallback != null) {
@@ -145,7 +156,7 @@ public class ServerConnectionManager {
         };
 
         // ask asynchronous loading of data
-        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback, databaseProperties, m_projectUser);
+        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback, databaseProperties, projectUser);
 
         AccessDatabaseThread.getAccessDatabaseThread().addTask(connectionTask); 
    }

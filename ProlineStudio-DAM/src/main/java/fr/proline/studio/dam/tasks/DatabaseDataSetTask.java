@@ -2,13 +2,16 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.IdentificationDataset;
 import fr.proline.core.orm.uds.Project;
-import fr.proline.core.orm.util.DatabaseManager;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DataSetTMP;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -23,16 +26,15 @@ import javax.persistence.Query;
 public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     private Project project = null;
-    private DataSetTMP dataSet = null;
-    private ArrayList<DataSetTMP> dataSetList = null;
+    private Dataset dataset = null;
+    private ArrayList<Dataset> datasetList = null;
     private List<AbstractData> list = null;
     private ResultSummary rsm = null;
     private String name = null;
-    private Integer projectId = null;
-    private Integer parentDatasetId = null;
+    private Dataset parentDataset = null;
     private Integer resultSetId = null;
     private Integer resultSummaryId = null;
-    private int datasetType;
+    private Aggregation.ChildNature datasetType;
     private String aggregateName;
     private boolean hasSuffix = false;
     private int suffixStart = 0;
@@ -47,7 +49,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int LOAD_RSET_AND_RSM_OF_DATASET = 2;
     private final static int LOAD_DATASET_FOR_RSM = 3;
     private final static int RENAME_DATASET = 4;
-    private final static int CREATE_DATASET = 5;
+    private final static int CREATE_AGGREGATE_DATASET = 5;
+    private final static int CREATE_IDENTIFICATION_DATASET = 6;
     
     public DatabaseDataSetTask(AbstractDatabaseCallback callback) {
         super(callback);
@@ -69,9 +72,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param parentDataSet
      * @param list 
      */
-    public void initLoadChildrenDataset(DataSetTMP parentDataSet, List<AbstractData> list) {
-        this.project = parentDataSet.project;
-        this.dataSet = parentDataSet;
+    public void initLoadChildrenDataset(Dataset parentDataset, List<AbstractData> list) {
+        this.project = parentDataset.getProject();
+        this.parentDataset = parentDataset;
         this.list = list;
         action = LOAD_CHILDREN_DATASET;
     }
@@ -80,9 +83,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * Load Rset and Rsm of a dataset
      * @param dataSet 
      */
-    public void initLoadRsetAndRsm(DataSetTMP dataSet) {
+    public void initLoadRsetAndRsm(Dataset dataset) {
 
-        this.dataSet = dataSet;
+        this.dataset = dataset;
 
         action = LOAD_RSET_AND_RSM_OF_DATASET;
     }
@@ -91,9 +94,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * Load Rset and Rsm of a dataset list
      * @param dataSetList 
      */
-    public void initLoadRsetAndRsm(ArrayList<DataSetTMP> dataSetList) {
+    public void initLoadRsetAndRsm(ArrayList<Dataset> datasetList) {
 
-       this.dataSetList = dataSetList;
+       this.datasetList = datasetList;
 
         action = LOAD_RSET_AND_RSM_OF_DATASET;
     }
@@ -112,37 +115,37 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * rename a dataset
      * @return 
      */
-    public void initRenameDataset(DataSetTMP dataSet, String name) {
+    public void initRenameDataset(Dataset dataset, String name) {
         this.name = name;
-        this.dataSet = dataSet;
+        this.dataset = dataset;
         action = RENAME_DATASET;
     }
 
     
-    public void initCreateDatasetAggregate(Integer projectId, Integer parentDatasetId, int datasetType, String aggregateName, ArrayList<DataSetTMP> dataSetList) {
-        initCreateDatasetAggregate(projectId, parentDatasetId, datasetType, aggregateName, false, 0, 0, dataSetList);
+    public void initCreateDatasetAggregate(Project project, Dataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, ArrayList<Dataset> datasetList) {
+        initCreateDatasetAggregate(project, parentDataset, datasetType, aggregateName, false, 0, 0, datasetList);
     }
-    public void initCreateDatasetAggregate(Integer projectId, Integer parentDatasetId, int datasetType, String aggregateName, boolean hasSuffix, int suffixStart, int suffixStop, ArrayList<DataSetTMP> dataSetList) {
-        this.projectId = projectId;
-        this.parentDatasetId = parentDatasetId;
+    public void initCreateDatasetAggregate(Project project, Dataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, boolean hasSuffix, int suffixStart, int suffixStop, ArrayList<Dataset> datasetList) {
+        this.project = project;
+        this.parentDataset = parentDataset;
         this.datasetType = datasetType;
         this.aggregateName = aggregateName;
         this.hasSuffix = hasSuffix;
         this.suffixStart = suffixStart;
         this.suffixStop = suffixStop;
-        this.dataSetList = dataSetList;
-        action = CREATE_DATASET;
+        this.datasetList = datasetList;
+        action = CREATE_AGGREGATE_DATASET;
     }
     
-    public void initCreateDatasetForIdentification(Integer projectId, Integer parentDatasetId, int datasetType, String aggregateName, Integer resultSetId, Integer resultSummaryId, ArrayList<DataSetTMP> dataSetList) {
-        this.projectId = projectId;
-        this.parentDatasetId = parentDatasetId;
+    public void initCreateDatasetForIdentification(Project project, Dataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, Integer resultSetId, Integer resultSummaryId, ArrayList<Dataset> datasetList) {
+        this.project = project;
+        this.parentDataset = parentDataset;
         this.datasetType = datasetType;
         this.aggregateName = aggregateName;
         this.resultSetId = resultSetId;
         this.resultSummaryId = resultSummaryId;
-        this.dataSetList = dataSetList;
-        action = CREATE_DATASET;
+        this.datasetList = datasetList;
+        action = CREATE_IDENTIFICATION_DATASET;
     }
     
     @Override
@@ -157,32 +160,33 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case LOAD_DATASET_FOR_RSM:
                 return (rsm.getTransientData().getDataSet() == null);
             case LOAD_RSET_AND_RSM_OF_DATASET:
-                if (dataSetList != null) {
-                    int nbDataSet = dataSetList.size();
+                if (datasetList != null) {
+                    int nbDataSet = datasetList.size();
                     for (int i=0;i<nbDataSet;i++) {
-                        DataSetTMP d = dataSetList.get(i);
+                        Dataset d = datasetList.get(i);
                         if (needToFetchRsetAndRsm(d)) {
                             return true;
                         }
                     }
                     return false;
                 } else {
-                    return needToFetchRsetAndRsm(dataSet);
+                    return needToFetchRsetAndRsm(dataset);
                 }
             case RENAME_DATASET:
-            case CREATE_DATASET:
+            case CREATE_AGGREGATE_DATASET:
+            case CREATE_IDENTIFICATION_DATASET:
                 return true; // done one time
          
         }
 
         return true; // should never be called
     }
-    private boolean needToFetchRsetAndRsm(DataSetTMP dataSet) {
-       if ((dataSet.getResultSetId() != null) && (dataSet.getTransientData().getResultSet() == null)) {
+    private boolean needToFetchRsetAndRsm(Dataset dataset) {
+       if ((dataset.getResultSetId() != null) && (dataset.getTransientData().getResultSet() == null)) {
            // need to fetch a result set
            return true;
        }
-       if ((dataSet.getResultSummaryId() != null) && (dataSet.getTransientData().getResultSummary() == null)) {
+       if ((dataset.getResultSummaryId() != null) && (dataset.getTransientData().getResultSummary() == null)) {
            // need to fetch a result summary
            return true;
        }
@@ -204,8 +208,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return fetchDatasetForRsm(rsm);
             case RENAME_DATASET:
                 return renameDataset();
-            case CREATE_DATASET:
-                return createDataset();
+            case CREATE_AGGREGATE_DATASET:
+                return createDataset(false);
+            case CREATE_IDENTIFICATION_DATASET:
+                return createDataset(true);
         }
         
         return false; // should never happen
@@ -216,20 +222,27 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         Integer projectId = project.getId();
 
         
-        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 
 
             
             // load parent DataSet
-            //JPM.TODO : uncomment this code when the database is ready
-            /*TypedQuery<DataSetTMP> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM DataSet d WHERE d.projectId=:projectId", DataSetTMP.class);
+            TypedQuery<Dataset> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE (d.parentDataset IS null) AND d.project.id=:projectId  ORDER BY d.fractionCount ASC", Dataset.class);
             dataSetQuery.setParameter("projectId", projectId);
-            DataSetTMP dataSet = dataSetQuery.getSingleResult();*/
+            List<Dataset> datasetList = dataSetQuery.getResultList();
 
-            //JPM.TODO
-            if (project.getId() == 1) {
+            Iterator<Dataset> it = datasetList.iterator();
+            while (it.hasNext()) {
+                Dataset datasetCur = it.next();
+                list.add(new DataSetData(datasetCur));
+            }
+            
+            project.getTransientData().setChildrenNumber(datasetList.size());
+            
+            //JPM.CLEAN
+            /*if (project.getId() == 1) {
                 DataSetTMP dataSetCur = new DataSetTMP();
                 dataSetCur.description = "";
                 dataSetCur.id = 1;
@@ -241,12 +254,12 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 dataSetCur.aggregateType = DataSetTMP.BIOLOGICAL_SAMPLE;
 
                 list.add(new DataSetData(dataSetCur));
-            }
+            }*/
             
             
             entityManagerUDS.getTransaction().commit();
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             entityManagerUDS.getTransaction().rollback();
             return false;
@@ -260,82 +273,27 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
     public boolean fetchChildrenDataSet() {
 
-        Integer dataSetId = dataSet.getId();
+        Integer parentDatasetId = parentDataset.getId();
 
         
-        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 
-            //JPM.TODO : uncomment this code when the database is ready
-            /*TypedQuery<DataSetTMP> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM DataSet d WHERE d.id=:dataSetId", DataSetTMP.class);
-            dataSetQuery.setParameter("dataSetId", dataSetId);
-            List<DataSetTMP> dataSetResultList = dataSetQuery.getResultList();
-            Iterator<DataSetTMP> itDataSet = dataSetResultList.iterator();
-            while (itDataSet.hasNext()) {
-                DataSetTMP dataSetCur = itDataSet.next();
-                list.add(new DataSetData(dataSetCur));
-            }*/
-            
-            if (dataSetId == 1) {
 
-                //JPM.TODO
-                DataSetTMP dataSetCur = new DataSetTMP();
-                dataSetCur.description = "";
-                dataSetCur.id = 2;
-                dataSetCur.name = "CAVEN456";
-                dataSetCur.parentDataSetId = 1;
-                dataSetCur.project = project;
-                dataSetCur.resultSetId = new Integer(13);
-                dataSetCur.resultSummaryId = null;
-                dataSet.aggregateType = DataSetTMP.OTHER;
-
-                list.add(new DataSetData(dataSetCur));
-
-
-                dataSetCur = new DataSetTMP();
-                dataSetCur.description = "";
-                dataSetCur.id = 3;
-                dataSetCur.name = "CAVEN457";
-                dataSetCur.parentDataSetId = 1;
-                dataSetCur.project = project;
-                dataSetCur.resultSetId = new Integer(13);
-                dataSetCur.resultSummaryId = null;
-                dataSet.aggregateType = DataSetTMP.OTHER;
-
-                list.add(new DataSetData(dataSetCur));
-
-            } else {
-                //JPM.TODO
-                DataSetTMP dataSetCur = new DataSetTMP();
-                dataSetCur.description = "";
-                dataSetCur.id = 4;
-                dataSetCur.name = "RSM 1";
-                dataSetCur.parentDataSetId = 2;
-                dataSetCur.project = project;
-                dataSetCur.resultSetId = new Integer(13);
-                dataSetCur.resultSummaryId = new Integer(2);
-                dataSet.aggregateType = DataSetTMP.OTHER;
-
-                list.add(new DataSetData(dataSetCur));
-                
-                dataSetCur = new DataSetTMP();
-                dataSetCur.description = "";
-                dataSetCur.id = 5;
-                dataSetCur.name = "RSM 2";
-                dataSetCur.parentDataSetId = 2;
-                dataSetCur.project = project;
-                dataSetCur.resultSetId = new Integer(13);
-                dataSetCur.resultSummaryId = new Integer(4);
-                dataSet.aggregateType = DataSetTMP.OTHER;
-
-                list.add(new DataSetData(dataSetCur));
-
+            TypedQuery<Dataset> datasetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", Dataset.class);
+            datasetQuery.setParameter("parentDatasetId", parentDatasetId);
+            List<Dataset> dataSetResultList = datasetQuery.getResultList();
+            Iterator<Dataset> itDataset = dataSetResultList.iterator();
+            while (itDataset.hasNext()) {
+                Dataset datasetCur = itDataset.next();
+                list.add(new DataSetData(datasetCur));
             }
+            
             
             entityManagerUDS.getTransaction().commit();
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             entityManagerUDS.getTransaction().rollback();
             return false;
@@ -349,29 +307,29 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     public boolean fetchRsetAndRsm() {
 
         Integer projectId = null;
-        if (dataSet != null) {
-            projectId = dataSet.getProjectId();
-        } else if (dataSetList != null) {
-            projectId = dataSetList.get(0).getProjectId();
+        if (dataset != null) {
+            projectId = dataset.getProject().getId();
+        } else if (datasetList != null) {
+            projectId = datasetList.get(0).getId();
         }
         
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();       
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();       
         try {
 
             entityManagerMSI.getTransaction().begin();
 
-            if (dataSetList != null) {
-                int nbDataSet = dataSetList.size();
-                for (int i=0; i<nbDataSet;i++) {
-                    fetchRsetAndRsmForOneDataSet(entityManagerMSI, dataSetList.get(i));
+            if (datasetList != null) {
+                int nbDataset = datasetList.size();
+                for (int i=0; i<nbDataset;i++) {
+                    fetchRsetAndRsmForOneDataset(entityManagerMSI, datasetList.get(i));
                 }
                 
-            } else if (dataSet != null) {
-                fetchRsetAndRsmForOneDataSet(entityManagerMSI, dataSet);
+            } else if (dataset != null) {
+                fetchRsetAndRsmForOneDataset(entityManagerMSI, dataset);
             }
             entityManagerMSI.getTransaction().commit();
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName() + " failed", e);
             return false;
         } finally {
@@ -381,21 +339,21 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
     
-    private void fetchRsetAndRsmForOneDataSet(EntityManager entityManagerMSI, DataSetTMP d) {
+    private void fetchRsetAndRsmForOneDataset(EntityManager entityManagerMSI, Dataset d) {
 
-        Integer resultSetId = d.getResultSetId();
-        if (resultSetId != null) {
-            ResultSet rset = entityManagerMSI.find(ResultSet.class, resultSetId);
+        Integer rsetId = d.getResultSetId();
+        if (rsetId != null) {
+            ResultSet rsetFound = entityManagerMSI.find(ResultSet.class, rsetId);
 
-            d.getTransientData().setResultSet(rset);
+            d.getTransientData().setResultSet(rsetFound);
         }
 
-        Integer resultSummaryId = d.getResultSummaryId();
-        if (resultSummaryId != null) {
-            ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, resultSummaryId);
+        Integer rsmId = d.getResultSummaryId();
+        if (rsmId != null) {
+            ResultSummary rsmFound = entityManagerMSI.find(ResultSummary.class, rsmId);
 
-            rsm.getTransientData().setDataSet(d);
-            d.getTransientData().setResultSummary(rsm);
+            rsmFound.getTransientData().setDataSet(d);
+            d.getTransientData().setResultSummary(rsmFound);
         }
     }
     
@@ -405,18 +363,18 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         Integer rsmId = rsm.getId();
 
         
-        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 
             // load dataset for rsm
             //JPM.TODO : uncomment this code when the database is ready
-            /*TypedQuery<DataSetTMP> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM DataSet d WHERE d.resultSummaryId=:rsmId", DataSetTMP.class);
+            /*TypedQuery<DataSetTMP> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE d.resultSummaryId=:rsmId", DataSetTMP.class);
             dataSetQuery.setParameter("rsmId", rsmId);
             DataSetTMP dataSet = dataSetQuery.getSingleResult();
             rsm.getTransientData().setDataSet(dataSet);*/
             
-            if (rsmId.intValue() == 2) {
+            /*JPM.CLEAN if (rsmId.intValue() == 2) {
                 DataSetTMP dataSetCur = new DataSetTMP();
                 dataSetCur.description = "";
                 dataSetCur.id = 4;
@@ -439,12 +397,12 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 dataSetCur.resultSummaryId = new Integer(4);
                 
                 rsm.getTransientData().setDataSet(dataSetCur);
-            }
+            }*/
 
      
             entityManagerUDS.getTransaction().commit();
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             entityManagerUDS.getTransaction().rollback();
             return false;
@@ -458,7 +416,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private boolean renameDataset() {
         
             
-        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -472,7 +430,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      
             entityManagerUDS.getTransaction().commit();
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             entityManagerUDS.getTransaction().rollback();
             return false;
@@ -483,20 +441,20 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
     
-    private boolean createDataset() {
+    private boolean createDataset(boolean identificationDataset) {
                     
-        EntityManager entityManagerUDS = DatabaseManager.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
 
             if (hasSuffix) {
                 for (int i=suffixStart;i<=suffixStop;i++) {
                     String datasetName = aggregateName+String.valueOf(i);
-                    createDataSetImpl(entityManagerUDS, datasetName);
+                    createDataSetImpl(entityManagerUDS, datasetName, identificationDataset);
                 }
 
             } else {
-                createDataSetImpl(entityManagerUDS, aggregateName);
+                createDataSetImpl(entityManagerUDS, aggregateName, identificationDataset);
             }
             
             
@@ -504,7 +462,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      
             entityManagerUDS.getTransaction().commit();
 
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             entityManagerUDS.getTransaction().rollback();
             return false;
@@ -515,21 +473,49 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
     
-    private void createDataSetImpl(EntityManager entityManagerUDS, String datasetName) {
-                    //JPM.TODO
-            /*
-            String insertSQL = "INSERT INTO Dataset "; TODO
-            Query insertQuery = entityManagerUDS.createQuery(insertSQL);
-            insertQuery.executeUpdate();*/
+    private void createDataSetImpl(EntityManager entityManagerUDS, String datasetName, boolean identificationDataset) {
+
+        //JPM.TODO : reuse objects for multiple queries
         
-        //JPM.TODO
-        DataSetTMP datasetCur = new DataSetTMP();
-        datasetCur.name = datasetName;
-        datasetCur.aggregateType = datasetType;
-        datasetCur.parentDataSetId = parentDatasetId;
-        datasetCur.resultSetId = resultSetId;
-        datasetCur.resultSummaryId = resultSummaryId;
+        Project mergedProject = entityManagerUDS.merge(project);
+        Dataset mergedParentDataset = (parentDataset == null) ? null : entityManagerUDS.merge(parentDataset);
+        Aggregation aggregation = UDSDataManager.getUDSDataManager().getAggregation(datasetType);
+        Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
         
-        dataSetList.add(datasetCur);
+        Dataset d = null;
+        if (identificationDataset) {
+            d = new IdentificationDataset();
+            d.setProject(mergedProject);
+            d.setType(Dataset.DatasetType.IDENTIFICATION);
+        } else {
+            d = new Dataset(mergedProject);
+            d.setType(Dataset.DatasetType.AGGREGATE);
+        }
+
+        d.setName(datasetName);
+        d.setParentDataset(mergedParentDataset);
+        d.setResultSetId(resultSetId);
+        d.setResultSummaryId(resultSummaryId);
+        d.setAggregation(mergedAggregation);
+        d.setFractionCount(0); // this aggregate has no child for the moment
+        
+        // number of children of the parent
+        if (mergedParentDataset != null) {
+            Integer fractionCount = mergedParentDataset.getFractionCount();
+            d.setNumber(fractionCount);
+            mergedParentDataset.setFractionCount(fractionCount+1);
+            parentDataset.setFractionCount(fractionCount+1);
+        } else {
+            int childrenCount = project.getTransientData().getChildrenNumber();
+            d.setNumber(childrenCount);
+            project.getTransientData().setChildrenNumber(childrenCount+1);
+        }
+
+        entityManagerUDS.persist(d);
+        if (mergedParentDataset != null) {
+            entityManagerUDS.persist(mergedParentDataset);
+        }
+
+        datasetList.add(d);
     }
 }

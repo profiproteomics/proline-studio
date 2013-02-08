@@ -19,34 +19,22 @@ import java.io.IOException;
 public class ServerConnectionTask extends AbstractServiceTask {
 
     private String serverURL;
-    private String projectUser;
     private String password;
     private HashMap<Object, Object> databaseProperties;  // out parameter
 
     
-    public ServerConnectionTask(AbstractServiceCallback callback, String serverURL, String projectUser, String password, HashMap<Object, Object> databaseProperties) {
+    public ServerConnectionTask(AbstractServiceCallback callback, String serverURL, String password, HashMap<Object, Object> databaseProperties) {
         super(callback, true /*synchronous*/);
         
         this.serverURL = serverURL;
-        this.projectUser = projectUser;
         this.password = password;
         this.databaseProperties = databaseProperties;
     }
     
-    //@Override
-    public boolean askService() {
-        
-        //JPM.TODO : look to the methode bellow
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY, "dupierris");
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, "dupierris");
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, "org.postgresql.Driver");
-        
+    
 
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, "jdbc:postgresql://localhost:5432/UDS_db");
-        
-        return true;
-    }
-    public boolean TODOaskService() {  //JPM.TODO
+    @Override
+    public boolean askService() {
 
         
         
@@ -55,20 +43,19 @@ public class ServerConnectionTask extends AbstractServiceTask {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
             request.setId(id);
-            request.setMethod("JPM.TODO");  // JPM.TODO
+            request.setMethod("template"); 
             
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put("user", projectUser);  //JPM.TODO
-            params.put("password", password);  //JPM.TODO
-            request.setParameters(params);
+            //params.put("password", password);  //JPM.TODO
+            request.setParameters(params); //JPM.TODO : check if we can set null parameters
 
             HttpResponse response = null;
             try {
-                response = postRequest(serverURL, "Proline/JPM.TODO"+request.getMethod()+getIdString(), request); //JPM.TODO
-            } catch (IOException ioe) {
-                errorMessage = "Impossible to connect to the server.";
+                response = postRequest(serverURL, "Proline/admin/connection/"+request.getMethod()+getIdString(), request); //JPM.TODO
+            } catch (Exception e) {
+                errorMessage = "Server Connection Failed.";
                 logger.error(getClass().getSimpleName()+" failed", errorMessage);
-                logger.error(getClass().getSimpleName()+" failed", ioe);
+                logger.error(getClass().getSimpleName()+" failed", e);
                 return false;
             }
             
@@ -85,17 +72,34 @@ public class ServerConnectionTask extends AbstractServiceTask {
                 return false;
             }
 
-            //HPM.TODO : get back database parameters
-            /*idProject = jsonResult.get("result");
-            if (idProject == null) {
-                errorMessage = "Internal Error : Project Id not found";
+            // retrieve database parameters
+            ArrayMap result = (ArrayMap) jsonResult.get("result");
+            if (result == null) {
+                errorMessage = "Internal Error : Dabasase Parameters not returned";
                 return false;
-            }*/
+            }
             
+            String databaseUser = (String) result.get("javax.persistence.jdbc.user");
+            String databaseDriver = (String) result.get("javax.persistence.jdbc.driver");
+            String databaseURL = (String) result.get("javax.persistence.jdbc.url");
+      
+            if ((databaseUser == null) || (databaseDriver == null) || (databaseURL == null)) {
+                errorMessage = "Internal Error : Dabasase Parameters uncomplete";
+                return false;
+            }
             
+            databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY, databaseUser);
+            databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, password);
+            databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, databaseDriver);
+            databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, databaseURL);
+
+   
             
         } catch (Exception e) {
             errorMessage = e.getMessage();
+            if (errorMessage == null) {
+                errorMessage = "Connection to Server failed";
+            }
             logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         }

@@ -5,7 +5,6 @@
 package fr.proline.studio.dam.data;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.UDSConnectionManagerOLD;
 import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProjectTask;
@@ -32,6 +31,7 @@ public class ParentData extends AbstractData {
 
     }
 
+    @Override
     public String getName() {
         return "";
     }

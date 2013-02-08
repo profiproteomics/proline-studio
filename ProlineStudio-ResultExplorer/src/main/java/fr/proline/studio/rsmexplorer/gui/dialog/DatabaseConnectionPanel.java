@@ -1,10 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 
-import fr.proline.studio.dam.UDSConnectionManagerOLD;
+
 import fr.proline.studio.utils.IconManager;
 import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
+
 
 /**
  *

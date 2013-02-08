@@ -36,6 +36,10 @@ public abstract class AbstractData {
         return hasChildren;
     }
 
+    public void setHasChildren(boolean hasChildren) {
+        this.hasChildren = hasChildren;
+    }
+    
     /**
      * This method is called from a thread which is not the AWT and can wait for
      * the answer. So we use a Semaphore to synchronize and wait the result from

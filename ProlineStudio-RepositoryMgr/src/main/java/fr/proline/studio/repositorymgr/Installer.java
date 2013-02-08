@@ -6,7 +6,7 @@ package fr.proline.studio.repositorymgr;
 
 //import fr.proline.repository.DatabaseConnector;
 //import fr.proline.repository.ProlineRepository;
-import fr.proline.core.orm.util.DatabaseManager;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import java.io.*;
 import java.net.URL;
 import java.util.HashMap;

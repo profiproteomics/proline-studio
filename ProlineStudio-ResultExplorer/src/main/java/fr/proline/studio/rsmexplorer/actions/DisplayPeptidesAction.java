@@ -3,8 +3,8 @@ package fr.proline.studio.rsmexplorer.actions;
 
 
 import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -34,7 +34,7 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
         // only one node selected for this action
         RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[0];
         
-        final DataSetTMP dataSet = ((DataSetData) dataSetNode.getData()).getDataSet();
+        final Dataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
         
         if (! dataSetNode.hasResultSet()) {
             return; // should not happen
@@ -48,7 +48,7 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
         
             // prepare window box
             WindowBox wbox = WindowBoxFactory.getPeptidesWindowBox();
-            wbox.setEntryData(dataSet.getProjectId(), rset);
+            wbox.setEntryData(dataSet.getProject().getId(), rset);
             
 
 
@@ -70,7 +70,7 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
                 public void run(boolean success, long taskId, SubTask subTask) {
                     // prepare window box
                     WindowBox wbox = WindowBoxFactory.getPeptidesWindowBox();
-                    wbox.setEntryData(dataSet.getProjectId(), dataSet.getTransientData().getResultSet());
+                    wbox.setEntryData(dataSet.getProject().getId(), dataSet.getTransientData().getResultSet());
 
 
                     // open a window to display the window box

@@ -2,7 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
-import fr.proline.core.orm.util.DatabaseManager;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,7 +71,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     public boolean fetchData() {
 
         HashMap<Integer, Peptide> peptideMap = new HashMap<Integer, Peptide>();
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
 
         try {
 
@@ -89,7 +89,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             }
             
             entityManagerMSI.getTransaction().commit();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
@@ -98,11 +98,11 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         EntityManager entityManagerPS = null;
         try {
         
-            DatabaseManager.getInstance();
-            DatabaseManager.getInstance().getPsDbConnector();
-            DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory();
+            DataStoreConnectorFactory.getInstance();
+            DataStoreConnectorFactory.getInstance().getPsDbConnector();
+            DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory();
             
-        entityManagerPS = DatabaseManager.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
+        entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -115,7 +115,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             fetchPtmData(entityManagerPS, peptideMap);
             
             entityManagerPS.getTransaction().commit();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {

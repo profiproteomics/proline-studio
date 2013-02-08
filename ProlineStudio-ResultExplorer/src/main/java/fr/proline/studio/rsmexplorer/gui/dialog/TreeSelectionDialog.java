@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.studio.dam.DataSetTMP;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
@@ -20,7 +20,7 @@ import javax.swing.tree.TreePath;
 public class TreeSelectionDialog extends DefaultDialog {
     
     private RSMTree tree = null;
-    private ArrayList<DataSetTMP> selectedDataSetList = null;
+    private ArrayList<Dataset> selectedDatasetList = null;
     
     public TreeSelectionDialog(Window parent, RSMTree tree, String title) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
@@ -45,9 +45,9 @@ public class TreeSelectionDialog extends DefaultDialog {
         tree.setSelection(rsmArray);
     }
     
-    public ArrayList<DataSetTMP> getSelectedDataSetList() {
-        ArrayList<DataSetTMP> returnedList = selectedDataSetList;
-        selectedDataSetList = null; // avoid a potential memory leak
+    public ArrayList<Dataset> getSelectedDatasetList() {
+        ArrayList<Dataset> returnedList = selectedDatasetList;
+        selectedDatasetList = null; // avoid a potential memory leak
         
         return returnedList;
     }
@@ -62,7 +62,7 @@ public class TreeSelectionDialog extends DefaultDialog {
             return false;
         }
 
-        selectedDataSetList = new ArrayList<DataSetTMP>();
+        selectedDatasetList = new ArrayList<Dataset>();
 
         
         int size = paths.length;
@@ -71,10 +71,10 @@ public class TreeSelectionDialog extends DefaultDialog {
             if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
 
-                selectedDataSetList.add(dataSetNode.getDataSet());
+                selectedDatasetList.add(dataSetNode.getDataset());
             }
         }
-        if (selectedDataSetList.isEmpty()) {
+        if (selectedDatasetList.isEmpty()) {
             showSelectionError();
             return false;
         }
@@ -86,7 +86,7 @@ public class TreeSelectionDialog extends DefaultDialog {
     
     @Override
     protected boolean cancelCalled() {
-        selectedDataSetList = null;
+        selectedDatasetList = null;
 
         return true;
     }

@@ -114,6 +114,10 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             if (errorMap != null) {
 
                 errorMessage = (String) errorMap.get("message");
+                if (errorMessage == null) {
+                    errorMessage = "";
+                }
+                logger.error(getClass().getSimpleName() + " failed "+errorMessage);
                 return ServiceState.STATE_FAILED; // should not happen !
             }
             
@@ -127,6 +131,10 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                     return ServiceState.STATE_DONE;
                 } else {
                     errorMessage = (String) resultMap.get("message");
+                    if (errorMessage == null) {
+                        errorMessage = "";
+                    }
+                    logger.error(getClass().getSimpleName() + " failed "+errorMessage);
                     return ServiceState.STATE_FAILED;
                 }
                 

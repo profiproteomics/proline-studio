@@ -188,7 +188,7 @@ public class ServerConnectionDialog extends DefaultDialog {
             highlight(serverURLTextField);
             return false;
         }
-        if (serverURL.length() < "http://".length()) {
+        if (serverURL.length() <= "http://".length()) {
             setStatus(true, "The Server URL is incorrect");
             highlight(serverURLTextField);
             return false;
@@ -212,6 +212,13 @@ public class ServerConnectionDialog extends DefaultDialog {
         setBusy(true);
         
         String serverURL = serverURLTextField.getText();
+        if (! serverURL.endsWith("/")) {
+            //JPM.WART : server URL must ends with a "/"
+            // if the user forgets it, the error is really strange (exception with no message reported)
+            serverURL = serverURL+"/";
+            serverURLTextField.setText(serverURL);
+        }
+        
         String projectUser  = userTextField.getText();
         String password = new String(passwordField.getPassword());
         

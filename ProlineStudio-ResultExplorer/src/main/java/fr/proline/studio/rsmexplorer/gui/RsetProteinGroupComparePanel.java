@@ -3,8 +3,8 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -147,7 +147,7 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
                     treeSelectionDialog.setVisible(true);
 
                     if (treeSelectionDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-                        final ArrayList<DataSetTMP> selectedDataSetList = treeSelectionDialog.getSelectedDataSetList();
+                        final ArrayList<Dataset> selectedDatasetList = treeSelectionDialog.getSelectedDatasetList();
 
                         // load data
 
@@ -163,7 +163,7 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
 
                             @Override
                             public void run(boolean success, long taskId, SubTask subTask) {
-                                updataData(selectedDataSetList);
+                                updataData(selectedDatasetList);
                             }
                         };
 
@@ -171,14 +171,14 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
                         // ask asynchronous loading of data
                         
                         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-                        task.initLoadRsetAndRsm(selectedDataSetList);
+                        task.initLoadRsetAndRsm(selectedDatasetList);
 
                         if (task.needToFetch()) {
                             task.setPriority(AbstractDatabaseTask.Priority.HIGH_3); // must be done as fast as possible to avoid to let the use wait
                             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
                         } else {
                             // all ResultSummaries are already loaded, no need to execute the task
-                            updataData(selectedDataSetList);
+                            updataData(selectedDatasetList);
                         }
 
 
@@ -189,7 +189,7 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
 
         }
 
-        private void updataData(ArrayList<DataSetTMP> selectedDataSetList) {
+        private void updataData(ArrayList<Dataset> selectedDatasetList) {
 
        
             DataBoxProteinSetsCmp dataBox = (DataBoxProteinSetsCmp) proteinSetComparePanel.getDataBox();
@@ -198,10 +198,10 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
 
             ArrayList<ProteinMatch> proteinMatchArrayList = new ArrayList<ProteinMatch>();
             ArrayList<Integer> resultSetIdArrayList = new ArrayList<Integer>();
-            int size = selectedDataSetList.size();
+            int size = selectedDatasetList.size();
             ArrayList<ResultSummary> selectedRsmList = new ArrayList<ResultSummary>(size);
             for (int i = 0; i < size; i++) {
-                ResultSummary rsm = selectedDataSetList.get(i).getTransientData().getResultSummary();
+                ResultSummary rsm = selectedDatasetList.get(i).getTransientData().getResultSummary();
                 selectedRsmList.add(rsm);
                 Integer resultSetId = rsm.getResultSet().getId();
                 resultSetIdArrayList.add(resultSetId);

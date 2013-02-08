@@ -66,6 +66,9 @@ public class AddProjectAction  extends AbstractRSMAction {
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             treeModel.insertNodeInto(projectNode, n, insertionIndex);
             
+            // expand the parent node to display its children
+            tree.expandNodeIfNeeded(n);
+            
             AbstractServiceCallback callback = new AbstractServiceCallback() {
 
                 @Override

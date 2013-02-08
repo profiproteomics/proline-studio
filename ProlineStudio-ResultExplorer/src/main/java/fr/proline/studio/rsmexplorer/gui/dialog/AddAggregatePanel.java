@@ -5,7 +5,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 
-import fr.proline.studio.dam.DataSetTMP;
+import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
 import java.awt.Container;
@@ -19,7 +19,7 @@ import javax.swing.*;
  */
 public class AddAggregatePanel extends javax.swing.JPanel {
 
-    private static Integer[] aggregateTypes = { DataSetTMP.BIOLOGICAL_GROUP, DataSetTMP.BIOLOGICAL_SAMPLE, DataSetTMP.SAMPLE_ANALYSIS, DataSetTMP.OTHER };
+    private static Aggregation.ChildNature[] aggregateTypes = { Aggregation.ChildNature.BIOLOGICAL_GROUP, Aggregation.ChildNature.BIOLOGICAL_SAMPLE, Aggregation.ChildNature.SAMPLE_ANALYSIS, Aggregation.ChildNature.OTHER };
     
     /**
      * Creates new form AddAggregatePanel
@@ -159,15 +159,15 @@ public class AddAggregatePanel extends javax.swing.JPanel {
         return 1;
     }
     
-    protected int getAggregateType() {
-        return ((Integer)typeCombobox.getSelectedItem()).intValue();
+    protected Aggregation.ChildNature getAggregateType() {
+        return ((Aggregation.ChildNature)typeCombobox.getSelectedItem());
     }
 
     protected final void initDefaults() {
 
         nameTextfield.setText("");
         
-        typeCombobox.setSelectedItem(new Integer(DataSetTMP.BIOLOGICAL_SAMPLE));
+        typeCombobox.setSelectedItem(Aggregation.ChildNature.BIOLOGICAL_SAMPLE);
         
         multipleAggregateCheckBox.setSelected(false);
         nbAggregateSpinner.setValue(new Integer(2));
@@ -175,6 +175,9 @@ public class AddAggregatePanel extends javax.swing.JPanel {
              
     }
 
+    public void reinitialize() {
+        nameTextfield.setText("");
+    }
     
     public class DataSetComboboxRenderer extends DefaultListCellRenderer {
         
@@ -182,22 +185,22 @@ public class AddAggregatePanel extends javax.swing.JPanel {
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             JLabel l = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         
-            int selectedType = ((Integer) value).intValue();
+            Aggregation.ChildNature selectedType = ((Aggregation.ChildNature) value);
             
             switch (selectedType) {
-                case DataSetTMP.BIOLOGICAL_GROUP:
+                case BIOLOGICAL_GROUP:
                     l.setText("Biological Group");
                     l.setIcon(IconManager.getIcon(IconManager.IconType.VIAL));
                     break;
-                case DataSetTMP.BIOLOGICAL_SAMPLE:
+                case BIOLOGICAL_SAMPLE:
                     l.setText("Biological Sample");
                     l.setIcon(IconManager.getIcon(IconManager.IconType.GEL));
                     break;
-                case DataSetTMP.SAMPLE_ANALYSIS:
+                case SAMPLE_ANALYSIS:
                     l.setText("Sample Analysis");
                     l.setIcon(IconManager.getIcon(IconManager.IconType.GEL));
                     break;
-                case DataSetTMP.OTHER:
+                case OTHER:
                     l.setText("Other");
                     l.setIcon(null);
                     break;

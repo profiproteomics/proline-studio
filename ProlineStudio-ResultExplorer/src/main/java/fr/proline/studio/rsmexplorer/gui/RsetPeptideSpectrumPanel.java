@@ -16,6 +16,8 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.slf4j.LoggerFactory;
 
+
+
 import fr.proline.core.utils.lzma.package$EasyLzma$;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;

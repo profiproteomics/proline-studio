@@ -123,7 +123,13 @@ public final class RSMExplorerTopComponent extends TopComponent  {
                     });
 
                 } else if (serciceConnectionMgr.isConnectionDone()) {
-                    RSMTree.getTree().startLoading();
+                    SwingUtilities.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            RSMTree.getTree().startLoading();
+                        }
+                    }); 
                 }
    
             }

@@ -2,7 +2,8 @@ package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.studio.dam.DataSetTMP;
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.utils.IconManager;
@@ -24,19 +25,19 @@ public class RSMDataSetNode extends RSMNode {
     @Override
     public ImageIcon getIcon() {
 
-
+        Aggregation.ChildNature aggreagateType = ((DataSetData) getData()).getAggregateType();
         
         //JPM.TODO : icon management of Dataset
-        int aggreagateType;
         if (isChanging()) {
-            aggreagateType = ((DataSetData) getData()).getAggregateType();
+            
+            
             
             switch (aggreagateType) {
-                case DataSetTMP.BIOLOGICAL_GROUP:
+                case BIOLOGICAL_GROUP:
                     return getIcon(IconManager.IconType.VIAL);
-                case DataSetTMP.BIOLOGICAL_SAMPLE:
+                case BIOLOGICAL_SAMPLE:
                     return getIcon(IconManager.IconType.GEL);
-                case DataSetTMP.SAMPLE_ANALYSIS:
+                case SAMPLE_ANALYSIS:
                     return getIcon(IconManager.IconType.GEL);
             }
 
@@ -44,21 +45,21 @@ public class RSMDataSetNode extends RSMNode {
             
             
         } else {
-            DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
-            aggreagateType = dataSet.aggregateType;
+
 
             switch (aggreagateType) {
-                case DataSetTMP.BIOLOGICAL_GROUP:
+                case BIOLOGICAL_GROUP:
                     return getIcon(IconManager.IconType.VIAL);
-                case DataSetTMP.BIOLOGICAL_SAMPLE:
+                case BIOLOGICAL_SAMPLE:
                     return getIcon(IconManager.IconType.GEL);
-                case DataSetTMP.SAMPLE_ANALYSIS:
+                case SAMPLE_ANALYSIS:
                     return getIcon(IconManager.IconType.GEL);
             }
 
-            if (dataSet.getResultSummaryId() != null) {
+            Dataset dataset = ((DataSetData) getData()).getDataset();
+            if (dataset.getResultSummaryId() != null) {
                 return getIcon(IconManager.IconType.RSM);
-            } else if (dataSet.getResultSetId() != null) {
+            } else if (dataset.getResultSetId() != null) {
                 return getIcon(IconManager.IconType.RSET);
             }
             
@@ -74,39 +75,39 @@ public class RSMDataSetNode extends RSMNode {
     
 
     
-    public DataSetTMP getDataSet() {
-        return ((DataSetData) getData()).getDataSet();
+    public Dataset getDataset() {
+        return ((DataSetData) getData()).getDataset();
     }
     
     public boolean hasResultSummary() {
-        DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
+        Dataset dataSet = ((DataSetData) getData()).getDataset();
         return (dataSet.getResultSummaryId() != null);
     }
     
 
     public Integer getResultSummaryId() {
-        return ((DataSetData) getData()).getDataSet().getResultSummaryId();
+        return ((DataSetData) getData()).getDataset().getResultSummaryId();
     }
     
     public ResultSummary getResultSummary() {
         // getResultSummary() can return null if the resultSummary has not been loaded previously
-        DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
+        Dataset dataSet = ((DataSetData) getData()).getDataset();
         return dataSet.getTransientData().getResultSummary();
     }
     
     
     public boolean hasResultSet() {
-        DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
+        Dataset dataSet = ((DataSetData) getData()).getDataset();
         return (dataSet.getResultSetId() != null);
     }
     
     public Integer getResultSetId() {
-        return ((DataSetData) getData()).getDataSet().getResultSetId();
+        return ((DataSetData) getData()).getDataset().getResultSetId();
     }
     
     public ResultSet getResultSet() {
         // getResultSet() can return null if the resultSet has not been loaded previously
-        DataSetTMP dataSet = ((DataSetData) getData()).getDataSet();
+        Dataset dataSet = ((DataSetData) getData()).getDataset();
         return dataSet.getTransientData().getResultSet();
     }
     

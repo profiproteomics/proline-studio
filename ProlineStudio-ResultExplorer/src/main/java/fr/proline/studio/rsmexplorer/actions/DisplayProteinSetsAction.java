@@ -1,8 +1,8 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -31,7 +31,7 @@ public class DisplayProteinSetsAction extends AbstractRSMAction {
         // only one node selected for this action
         RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[0];
 
-        final DataSetTMP dataSet = ((DataSetData) dataSetNode.getData()).getDataSet();
+        final Dataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
 
         if (!dataSetNode.hasResultSummary()) {
             return; // should not happen
@@ -42,7 +42,7 @@ public class DisplayProteinSetsAction extends AbstractRSMAction {
 
             // prepare window box
             WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox();
-            wbox.setEntryData(dataSet.getProjectId(), rsm);
+            wbox.setEntryData(dataset.getProject().getId(), rsm);
 
 
             // open a window to display the window box
@@ -63,7 +63,7 @@ public class DisplayProteinSetsAction extends AbstractRSMAction {
                 public void run(boolean success, long taskId, SubTask subTask) {
                     // prepare window box
                     WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox();
-                    wbox.setEntryData(dataSet.getProjectId(), dataSet.getTransientData().getResultSummary());
+                    wbox.setEntryData(dataset.getProject().getId(), dataset.getTransientData().getResultSummary());
 
 
                     // open a window to display the window box
@@ -76,7 +76,7 @@ public class DisplayProteinSetsAction extends AbstractRSMAction {
 
             // ask asynchronous loading of data
             DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-            task.initLoadRsetAndRsm(dataSet);
+            task.initLoadRsetAndRsm(dataset);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
 

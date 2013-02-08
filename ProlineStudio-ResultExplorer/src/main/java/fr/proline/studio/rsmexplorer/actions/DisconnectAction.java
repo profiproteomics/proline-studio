@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.core.orm.util.DatabaseManager;
-import fr.proline.studio.dam.UDSConnectionManagerOLD;
+
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import org.openide.util.NbBundle;
 
@@ -23,7 +22,7 @@ public class DisconnectAction extends AbstractRSMAction {
         // close all windows
         // mange actions being done
         
-        //DatabaseManager.getInstance().closeAll();
+        //DataStoreConnectorFactory.getInstance().closeAll();
     }
     
     

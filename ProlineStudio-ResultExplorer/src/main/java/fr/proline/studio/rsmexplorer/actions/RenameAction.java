@@ -1,8 +1,8 @@
 package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.DatabaseProjectTask;
@@ -13,8 +13,6 @@ import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
-import java.awt.Component;
-import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -41,7 +39,7 @@ public class RenameAction extends AbstractRSMAction {
         RSMNode.NodeTypes nodeType = n.getType();
         if (nodeType == RSMNode.NodeTypes.DATA_SET) {
             final RSMDataSetNode datasetNode = (RSMDataSetNode) n;
-            final DataSetTMP dataset = datasetNode.getDataSet();
+            final Dataset dataset = datasetNode.getDataset();
             name = dataset.getName();
 
             final String newName = showRenameDialog(name, x, y);

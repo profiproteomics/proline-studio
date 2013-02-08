@@ -1,7 +1,8 @@
 package fr.proline.studio.dam.data;
 
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.DataSetTMP;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import java.util.List;
@@ -12,17 +13,17 @@ import java.util.List;
  */
 public class DataSetData extends AbstractData {
     
-    private DataSetTMP dataSet = null;
+    private Dataset dataset = null;
     private String temporaryName = null;
-    private int temporaryAggregateType;
+    private Aggregation.ChildNature temporaryAggregateType;
 
-    public DataSetData(DataSetTMP dataSet) {
+    public DataSetData(Dataset dataSet) {
         dataType = DataTypes.DATA_SET;
 
-        this.dataSet = dataSet;
+        this.dataset = dataSet;
 
     }
-    public DataSetData(String temporaryName, int temporaryAggregateType) {
+    public DataSetData(String temporaryName, Aggregation.ChildNature temporaryAggregateType) {
         dataType = DataTypes.DATA_SET;
 
         this.temporaryName = temporaryName;
@@ -30,39 +31,52 @@ public class DataSetData extends AbstractData {
 
     }
 
-    public DataSetTMP getDataSet() {
-        return dataSet;
+    public Dataset getDataset() {
+        return dataset;
     }
     
-    public void setDataSet(DataSetTMP dataSet) {
-        this.dataSet = dataSet;
+    public void setDataset(Dataset dataset) {
+        this.dataset = dataset;
         temporaryName = null;
     }
     
     @Override
+    public boolean hasChildren() {
+        if (dataset != null) {
+            return (dataset.getFractionCount()>0);
+        }
+        return false;
+    }
+    
+    @Override
     public String getName() {
-        if (dataSet == null) {
+        if (dataset == null) {
             if (temporaryName != null) {
                 return temporaryName;
             } else {
                 return "";
             }
         } else {
-            return dataSet.getName();
+            return dataset.getName();
         }
     }
 
-    public int getAggregateType() {
-        if (dataSet == null) {
+    public Aggregation.ChildNature getAggregateType() {
+        if (dataset == null) {
             return temporaryAggregateType;
         }
-        return dataSet.aggregateType;
+        Aggregation aggreation = dataset.getAggregation();
+        if (aggreation == null) {
+            // should not happen !
+            return temporaryAggregateType;
+        }
+        return aggreation.getChildNature();
     }
     
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-        task.initLoadChildrenDataset(dataSet, list);
+        task.initLoadChildrenDataset(dataset, list);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
 

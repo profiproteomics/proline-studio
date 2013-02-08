@@ -35,7 +35,7 @@ public abstract class AbstractServiceTask {
     
     protected static int idIncrement = 0;
     
-    private static String BASE_URL = "http://localhost:8080/"; //JPM.TODO : move it 
+    protected static String baseURL = "";
     
     protected static final Logger logger = LoggerFactory.getLogger(AbstractServiceTask.class);
     
@@ -67,10 +67,12 @@ public abstract class AbstractServiceTask {
     }
     
     protected HttpResponse postRequest(String serviceURL, JsonRpcRequest rpcRequest) throws IOException {
-        return postRequest(BASE_URL, serviceURL, rpcRequest);
+        return postRequest(baseURL, serviceURL, rpcRequest);
     }
     protected HttpResponse postRequest(String serverURL, String serviceURL, JsonRpcRequest rpcRequest) throws IOException {
        
+        baseURL = serverURL;
+        
         //JPM.TODO : create some of the following classes only the first time
         // -> transport, factory, JacksonFactory, JsonObjectParser
         HttpTransport transport = new ApacheHttpTransport();
@@ -80,6 +82,9 @@ public abstract class AbstractServiceTask {
         JsonHttpContent content = new JsonHttpContent(new JacksonFactory(), rpcRequest.getParameters());
         HttpRequest httpRequest = factory.buildPostRequest(new GenericUrl(serverURL + serviceURL), content);
 
+        httpRequest.setConnectTimeout(0);
+        httpRequest.setReadTimeout(0);
+        
         JsonObjectParser parser = new JsonObjectParser(new GsonFactory());
         httpRequest.setParser(parser);
         
@@ -88,6 +93,7 @@ public abstract class AbstractServiceTask {
         HttpResponse response = httpRequest.execute();
         //System.out.println(response.parseAsString());
 
+        
         return response;
     }
     

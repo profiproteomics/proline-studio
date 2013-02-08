@@ -81,12 +81,15 @@ public class DoubleParameter extends AbstractParameter {
 
     @Override
     public String getStringValue() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getObjectValue().toString();
     }
 
     @Override
     public Object getObjectValue() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (graphicalType.equals(JTextField.class)) {
+           return ((JTextField) parameterComponent).getText();
+        }
+        return ""; // should not happen
     }
     
 }

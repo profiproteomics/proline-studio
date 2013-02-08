@@ -203,12 +203,14 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         RSMNode root = (RSMNode) model.getRoot(); 
         model.insertNodeInto(new RSMHourGlassNode(null), root, 0);
         
+        
+        
         // show loading and start the loading
         expandRow(0);
         
 
     }
-    private void startLoading(RSMNode nodeToLoad) {
+    private void startLoading(final RSMNode nodeToLoad) {
 
         
         
@@ -229,6 +231,11 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         final ArrayList<AbstractData> childrenList = new ArrayList<AbstractData>();
         final AbstractData parentData = nodeToLoad.getData();
 
+        if (nodeToLoad.getType() == RSMNode.NodeTypes.TREE_PARENT) {
+            nodeToLoad.setIsChanging(true);
+            model.nodeChanged(nodeToLoad);
+        }
+        
         // Callback used only for the synchronization with the AccessDatabaseThread
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -244,6 +251,12 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
                     @Override
                     public void run() {
+                        
+                        if (nodeToLoad.getType() == RSMNode.NodeTypes.TREE_PARENT) {
+                            nodeToLoad.setIsChanging(false);
+                            model.nodeChanged(nodeToLoad);
+                        }
+                        
                         dataLoaded(parentData, childrenList);
 
                         if (loadingMap.isEmpty() && (selectionFromrsmArray != null)) {
@@ -257,7 +270,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             }
         };
 
-
+        
 
         parentData.load(callback, childrenList);
     }
@@ -283,6 +296,21 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
 
     }
+    
+    public void expandNodeIfNeeded(RSMNode n) {
+        final TreePath pathToExpand = new TreePath(n.getPath());
+        if (!isExpanded(pathToExpand)) {
+
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    expandPath(pathToExpand);
+                }
+            });
+        }
+    }
+    
     
     /**
      * Return an array of all selected nodes of the tree

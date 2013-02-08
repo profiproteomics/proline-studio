@@ -5,7 +5,7 @@
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.util.DatabaseManager;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class DatabaseSearchProteinSetsTask extends AbstractDatabaseTask {
     
     @Override
     public boolean fetchData() {
-        EntityManager entityManagerMSI = DatabaseManager.getInstance().getMsiDbConnector( projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector( projectId).getEntityManagerFactory().createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
             

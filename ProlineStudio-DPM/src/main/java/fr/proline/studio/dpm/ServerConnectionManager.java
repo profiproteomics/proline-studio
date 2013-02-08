@@ -81,6 +81,13 @@ public class ServerConnectionManager {
    }
    public void tryServerConnection(final Runnable connectionCallback, String serverURL, final String projectUser, String databasePassword) {
        
+       // pre-check to avoid to try a connection when the parameters are not set
+       if (serverURL.length()<="http://".length()) {
+           setConnectionState(CONNECTION_SERVER_FAILED);
+           return;
+       }
+
+       
        setConnectionState(CONNECTION_SERVER_ASKED);
        
        final HashMap<Object, Object> databaseProperties = new HashMap<Object, Object>();

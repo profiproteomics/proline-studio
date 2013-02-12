@@ -9,12 +9,10 @@ import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
-import scala.actors.scheduler.ExecutorScheduler;
 
 
 /**

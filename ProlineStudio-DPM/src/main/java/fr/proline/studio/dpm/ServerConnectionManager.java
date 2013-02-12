@@ -39,6 +39,12 @@ public class ServerConnectionManager {
     private String m_databasePassword;
     
     
+    private String previousServerURL = "";
+    private String previousProjectUser = "";
+    private String previousDatabsePassword = "";
+    private int previousErrorId = -1;
+    
+    
     private static ServerConnectionManager connectionManager = null;
 
     public static synchronized ServerConnectionManager getServerConnectionManager() {
@@ -80,13 +86,31 @@ public class ServerConnectionManager {
        tryServerConnection(null, m_serverURL, m_projectUser, m_databasePassword);
    }
    public void tryServerConnection(final Runnable connectionCallback, String serverURL, final String projectUser, String databasePassword) {
-       
+
        // pre-check to avoid to try a connection when the parameters are not set
        if (serverURL.length()<="http://".length()) {
            setConnectionState(CONNECTION_SERVER_FAILED);
            return;
        }
 
+       
+       // check if the user has not already tried to connect with the same parameters
+       // and the project user was unknown
+       if ((previousServerURL.compareTo(serverURL) ==0 ) &&
+           (previousDatabsePassword.compareTo(databasePassword) ==0 ) &&
+           (previousErrorId == DatabaseConnectionTask.ERROR_USER_UNKNOWN)) {
+           // special case, we only check the project user
+           tryProjectUser(connectionCallback, projectUser);
+           return;
+       }
+       
+       // keep settings used to try to connect
+       previousServerURL = serverURL;
+       previousDatabsePassword = databasePassword;
+       previousProjectUser = projectUser;
+       previousErrorId = -1;
+       
+     
        
        setConnectionState(CONNECTION_SERVER_ASKED);
        
@@ -121,6 +145,47 @@ public class ServerConnectionManager {
        
    }
    
+   private void tryProjectUser(final Runnable connectionCallback, String projectUser) {
+       setConnectionState(CONNECTION_DATABASE_ASKED);
+       
+       
+        // ask for the connection
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask) {
+
+                if (success) {
+                    // save connection parameters
+                    saveParameters();
+                    setConnectionState(CONNECTION_DONE);
+                } else {
+                    
+                    previousErrorId = getErrorId();
+                    
+                    setConnectionState(CONNECTION_DATABASE_FAILED);
+                    connectionError = getErrorMessage();
+
+                }
+                
+                 if (connectionCallback != null) {
+                    connectionCallback.run();
+                }
+
+            }
+        };
+
+        // ask asynchronous loading of data
+        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback, projectUser);
+
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(connectionTask); 
+   }
+   
    private void tryDatabaseConnection(final Runnable connectionCallback, HashMap<Object, Object> databaseProperties, String projectUser) {
       
        setConnectionState(CONNECTION_DATABASE_ASKED);
@@ -141,6 +206,9 @@ public class ServerConnectionManager {
                     saveParameters();
                     setConnectionState(CONNECTION_DONE);
                 } else {
+                    
+                    previousErrorId = getErrorId();
+                    
                     setConnectionState(CONNECTION_DATABASE_FAILED);
                     connectionError = getErrorMessage();
                     

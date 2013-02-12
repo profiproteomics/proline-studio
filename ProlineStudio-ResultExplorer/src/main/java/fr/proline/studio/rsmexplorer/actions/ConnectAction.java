@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-//import fr.proline.studio.dam.UDSConnectionManagerOLD;
-import fr.proline.studio.rsmexplorer.gui.dialog.DatabaseConnectionDialog;
+
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import org.openide.util.NbBundle;

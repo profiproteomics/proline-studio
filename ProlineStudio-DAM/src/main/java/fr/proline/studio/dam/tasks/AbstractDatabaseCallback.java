@@ -8,6 +8,7 @@ package fr.proline.studio.dam.tasks;
 public abstract class AbstractDatabaseCallback {
     
     private String errorMessage = null;
+    private int errorId = -1;
     
     /**
      * Returns if the callback must be called 
@@ -28,7 +29,11 @@ public abstract class AbstractDatabaseCallback {
     public String getErrorMessage() {
         return errorMessage;
     }
-    public void setErrorMessage(String errorMessage) {
+    public int getErrorId() {
+        return errorId;
+    }
+    public void setErrorMessage(String errorMessage, int errorId) {
         this.errorMessage = errorMessage;
+        this.errorId = errorId;
     }
 }

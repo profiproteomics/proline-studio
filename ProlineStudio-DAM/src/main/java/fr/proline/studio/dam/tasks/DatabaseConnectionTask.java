@@ -30,7 +30,16 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
     // used for MSI and PS Connection
     private int projectId;
 
+    public static int ERROR_USER_UNKNOWN = 1;
 
+   
+    
+    private int action;
+    
+    private static int UDS_CONNECTION = 0;
+    private static int MSI_CONNECTION = 1;
+    private static int UDS_USER_TEST  = 2;
+            
     /**
      * Constructor used for UDS database
      *
@@ -44,7 +53,21 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         this.databaseProperties = databaseProperties;
         this.projectUser = projectUser;
 
+        action = UDS_CONNECTION;
+    }
+    
+    /**
+     * Constructor to check if the project user is known in the database
+     * @param callback
+     * @param databaseProperties
+     * @param projectUser 
+     */
+    public DatabaseConnectionTask(AbstractDatabaseCallback callback, String projectUser) {
+        super(callback, Priority.TOP);
 
+        this.projectUser = projectUser;
+
+        action = UDS_USER_TEST;
     }
 
     /**
@@ -59,6 +82,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         databaseProperties = null;
         this.projectId = projectId;
 
+        action = MSI_CONNECTION;
 
     }
 
@@ -71,7 +95,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
         
-            if (databaseProperties != null) {
+            if (action == UDS_CONNECTION) {
                 
                 // UDS Connection
                 try {
@@ -108,80 +132,30 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 }
                 
                 // check if the projectUser asked is known
-                UDSDataManager udsMgr = UDSDataManager.getUDSDataManager();
-                boolean foundUser = false;
-                UserAccount[] projectUsers = udsMgr.getProjectUsersArray();
-                int nb = projectUsers.length;
-                for (int i=0;i<nb;i++) {
-                    UserAccount account = projectUsers[i];
-                    if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
-                        udsMgr.setProjectUser(account);
-                        foundUser = true;
-                        break;
-                    }
-                }
-                if (!foundUser) {
-                    errorMessage = "Project User "+projectUser+" is unknown";
-                    DataStoreConnectorFactory.getInstance().closeAll();
+                if (!checkProjectUser()) {
                     return false;
                 }
                 
-                // Load All instruments
-                try {
-                    entityManagerUDS.getTransaction().begin();
-
-                    TypedQuery<Instrument> instrumentQuery = entityManagerUDS.createQuery("SELECT i FROM fr.proline.core.orm.uds.Instrument i ORDER BY i.name ASC", Instrument.class);
-                    List<Instrument> instrumentList = instrumentQuery.getResultList();
-                    UDSDataManager.getUDSDataManager().setIntruments(instrumentList);
-
-                    entityManagerUDS.getTransaction().commit();
-
-                } catch (Exception e) {
-                    errorMessage = "Unable to load Instruments from UDS";
-                    logger.error(getClass().getSimpleName() + " failed", e);
-                    entityManagerUDS.getTransaction().rollback();
-                    DataStoreConnectorFactory.getInstance().closeAll();
-                    return false;
-                }
-
-                // Load All peaklist softwares
-                try {
-                    entityManagerUDS.getTransaction().begin();
-
-                    TypedQuery<PeaklistSoftware> instrumentQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.PeaklistSoftware p ORDER BY p.name ASC", PeaklistSoftware.class);
-                    List<PeaklistSoftware> peaklistSoftwareList = instrumentQuery.getResultList();
-                    UDSDataManager.getUDSDataManager().setPeaklistSofwares(peaklistSoftwareList);
-
-                    entityManagerUDS.getTransaction().commit();
-
-                } catch (Exception e) {
-                    errorMessage = "Unable to load Peaklist Softwares from UDS";
-                    logger.error(getClass().getSimpleName() + " failed", e);
-                    entityManagerUDS.getTransaction().rollback();
-                    DataStoreConnectorFactory.getInstance().closeAll();
+                // check if the projectUser asked is known
+                if (!loadUDSData(entityManagerUDS)) {
                     return false;
                 }
                 
-                // Look all Aggregation
-                try {
-                    entityManagerUDS.getTransaction().begin();
-
-                    TypedQuery<Aggregation> aggregationQuery = entityManagerUDS.createQuery("SELECT a FROM fr.proline.core.orm.uds.Aggregation a", Aggregation.class);
-                    List<Aggregation> aggregationList = aggregationQuery.getResultList();
-                    UDSDataManager.getUDSDataManager().setAggregationList(aggregationList);
-
-                    entityManagerUDS.getTransaction().commit();
-
-                } catch (Exception e) {
-                    errorMessage = "Unable to load Peaklist Softwares from UDS";
-                    logger.error(getClass().getSimpleName() + " failed", e);
-                    entityManagerUDS.getTransaction().rollback();
-                    DataStoreConnectorFactory.getInstance().closeAll();
-                    return false;
-                }
                 
                 entityManagerUDS.close();
-            } else {
+            } else if (action == UDS_USER_TEST) {
+                // check if the projectUser asked is known
+                if (!checkProjectUser()) {
+                    return false;
+                }
+                
+                // load needed UDS Data
+                EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+                if (!loadUDSData(entityManagerUDS)) {
+                    return false;
+                }
+                
+            } else if (action == MSI_CONNECTION) {
                 try {
                     // MSI Connection
                     EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
@@ -200,6 +174,89 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         return true;
     }
 
+    private boolean checkProjectUser() {
+        // check if the projectUser asked is known
+        UDSDataManager udsMgr = UDSDataManager.getUDSDataManager();
+        boolean foundUser = false;
+        UserAccount[] projectUsers = udsMgr.getProjectUsersArray();
+        int nb = projectUsers.length;
+        for (int i = 0; i < nb; i++) {
+            UserAccount account = projectUsers[i];
+            if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
+                udsMgr.setProjectUser(account);
+                foundUser = true;
+                break;
+            }
+        }
+        if (!foundUser) {
+            errorMessage = "Project User " + projectUser + " is unknown";
+            //DataStoreConnectorFactory.getInstance().closeAll();
+            errorId = ERROR_USER_UNKNOWN;
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean loadUDSData(EntityManager entityManagerUDS) {
+
+
+        // Load All instruments
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            TypedQuery<Instrument> instrumentQuery = entityManagerUDS.createQuery("SELECT i FROM fr.proline.core.orm.uds.Instrument i ORDER BY i.name ASC", Instrument.class);
+            List<Instrument> instrumentList = instrumentQuery.getResultList();
+            UDSDataManager.getUDSDataManager().setIntruments(instrumentList);
+
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            errorMessage = "Unable to load Instruments from UDS";
+            logger.error(getClass().getSimpleName() + " failed", e);
+            entityManagerUDS.getTransaction().rollback();
+            DataStoreConnectorFactory.getInstance().closeAll();
+            return false;
+        }
+
+        // Load All peaklist softwares
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            TypedQuery<PeaklistSoftware> instrumentQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.PeaklistSoftware p ORDER BY p.name ASC", PeaklistSoftware.class);
+            List<PeaklistSoftware> peaklistSoftwareList = instrumentQuery.getResultList();
+            UDSDataManager.getUDSDataManager().setPeaklistSofwares(peaklistSoftwareList);
+
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            errorMessage = "Unable to load Peaklist Softwares from UDS";
+            logger.error(getClass().getSimpleName() + " failed", e);
+            entityManagerUDS.getTransaction().rollback();
+            DataStoreConnectorFactory.getInstance().closeAll();
+            return false;
+        }
+
+        // Look all Aggregation
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            TypedQuery<Aggregation> aggregationQuery = entityManagerUDS.createQuery("SELECT a FROM fr.proline.core.orm.uds.Aggregation a", Aggregation.class);
+            List<Aggregation> aggregationList = aggregationQuery.getResultList();
+            UDSDataManager.getUDSDataManager().setAggregationList(aggregationList);
+
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            errorMessage = "Unable to load Aggregates from UDS";
+            logger.error(getClass().getSimpleName() + " failed", e);
+            entityManagerUDS.getTransaction().rollback();
+            DataStoreConnectorFactory.getInstance().closeAll();
+            return false;
+        }
+
+        return true;
+    }
     
     /*
     public static void testInsert(byte[] testByteDouble, byte[] testByteFloat) {

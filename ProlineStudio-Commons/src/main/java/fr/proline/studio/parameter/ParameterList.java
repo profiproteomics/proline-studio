@@ -33,7 +33,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             return parametersPanel;
         }
 
-        Preferences preferences = NbPreferences.forModule(ParameterList.class);
+        Preferences preferences = NbPreferences.root();
         String prefixKey = name.replaceAll(" ", "_")+".";
         
         
@@ -79,7 +79,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     }
     
     public void completePanel(JPanel p, GridBagConstraints c) {
-        Preferences preferences = NbPreferences.forModule(ParameterList.class);
+        Preferences preferences = NbPreferences.root();
         String prefixKey = name.replaceAll(" ", "_")+".";
         
          int nbParameters = size();
@@ -121,7 +121,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     }
     
     public void saveParameters() {
-        Preferences preferences = NbPreferences.forModule(ParameterList.class);
+        Preferences preferences = NbPreferences.root();
         String prefixKey = name.replaceAll(" ", "_")+".";
         
         int nbParameters = size();

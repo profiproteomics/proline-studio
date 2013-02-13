@@ -60,7 +60,7 @@ public class ServerConnectionManager {
     }
     
    private void restoreParameters() {
-        Preferences preferences = NbPreferences.forModule(ServerConnectionManager.class);
+        Preferences preferences = NbPreferences.root();
 
         m_serverURL = preferences.get(KEY_SERVER_URL, "http://");
         m_projectUser = preferences.get(KEY_PROJECT_USER, "");
@@ -68,7 +68,7 @@ public class ServerConnectionManager {
     }
    
        public void saveParameters() {
-        Preferences preferences = NbPreferences.forModule(ServerConnectionManager.class);
+        Preferences preferences = NbPreferences.root();
         
         preferences.put(KEY_SERVER_URL, m_serverURL);
         preferences.put(KEY_PROJECT_USER, m_projectUser);

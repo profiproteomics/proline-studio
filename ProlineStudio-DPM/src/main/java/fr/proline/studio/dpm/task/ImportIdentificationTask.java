@@ -127,6 +127,10 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                 Boolean success = (Boolean) resultMap.get("success");
                 // key not used : "duration", "progression" JPM.TODO
                 
+                if (success == null) {
+                    return ServiceState.STATE_WAITING;
+                }
+                
                 if (success) {
                     return ServiceState.STATE_DONE;
                 } else {

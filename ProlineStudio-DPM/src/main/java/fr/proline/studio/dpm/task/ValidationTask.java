@@ -121,6 +121,10 @@ public class ValidationTask extends AbstractServiceTask {
             if (resultMap != null) {
                 Boolean success = (Boolean) resultMap.get("success");  //JPM.TODO : get ResultSummary created
                 
+                if (success == null) {
+                    return ServiceState.STATE_WAITING;
+                }
+                
                 if (success) {
                     return ServiceState.STATE_DONE;
                 } else {

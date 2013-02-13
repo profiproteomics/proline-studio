@@ -67,6 +67,7 @@ public class IdentificationAction extends AbstractRSMAction {
             Integer instrumentId = dialog.getInstrumentId();
             Integer peaklistSoftwareId = dialog.getPeaklistSoftwareId();
             
+            RSMTree tree = RSMTree.getTree();
             
             // Start identification for each file
             int nbFiles = filePaths.length;
@@ -84,9 +85,11 @@ public class IdentificationAction extends AbstractRSMAction {
                 
                 final RSMDataSetNode identificationNode = new RSMDataSetNode(identificationData);
                 identificationNode.setIsChanging(true);
-                RSMTree tree = RSMTree.getTree();
+                
                 final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 treeModel.insertNodeInto(identificationNode, n, n.getChildCount());
+                
+
                 
                 AbstractServiceCallback callback = new AbstractServiceCallback() {
 
@@ -115,6 +118,11 @@ public class IdentificationAction extends AbstractRSMAction {
                 ImportIdentificationTask task = new ImportIdentificationTask(callback, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, project.getId());
                 AccessServiceThread.getAccessServiceThread().addTask(task);
                 
+            }
+            
+            if (nbFiles>0) {
+                // expand the parent node to display its children
+                tree.expandNodeIfNeeded(n);
             }
             
 

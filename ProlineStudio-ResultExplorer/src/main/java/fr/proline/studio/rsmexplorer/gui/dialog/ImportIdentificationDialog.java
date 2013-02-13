@@ -55,7 +55,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private JPanel parserParametersPanel = null;
 
 
-
+    private File defaultDirectory = null;
     
 
     public static ImportIdentificationDialog getDialog(Window parent) {
@@ -78,7 +78,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
         initInternalPanel();
 
-        restoreParser();
+        restoreInitialParameters();
     }
 
     private void initInternalPanel() {
@@ -208,8 +208,13 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                
                 JFileChooser fchooser = new JFileChooser();
+                if ((defaultDirectory!=null) && (defaultDirectory.isDirectory())) {
+                    fchooser.setCurrentDirectory(defaultDirectory);
+                }
                 fchooser.setMultiSelectionEnabled(true);
+                
                 int nbFilters = FILE_EXTENSIONS_DESCRIPTION.length;
                 //FileNameExtensionFilter defaultFilter = null;
                 for (int i = 0; i < nbFilters; i++) {
@@ -252,7 +257,14 @@ public class ImportIdentificationDialog extends DefaultDialog {
                             }
                         }
                     }
-
+                    
+                    if (nbFiles>0) {
+                        File f = files[0];
+                        f = f.getParentFile();
+                        if ((f!=null) && (f.isDirectory())) {
+                            defaultDirectory = f;
+                        }
+                    }
                 }
             }
         });
@@ -383,11 +395,21 @@ public class ImportIdentificationDialog extends DefaultDialog {
         // retrieve values
         //HashMap<String, String> values = parameterList.getValues();
 
-        // Save Parameters
+        
+        // save parser
+        String parserSelected = parameterList.toString();
+        Preferences preferences = NbPreferences.root();
+        preferences.put("IdentificationParser", parserSelected);
+        
+        // save file path
+        if (defaultDirectory != null) {
+          preferences.put("IdentificationFilePath", defaultDirectory.getAbsolutePath());  
+        }
+
+        
+        // Save Other Parameters        
         parameterList.saveParameters();
-        
-        //JPM.TODO
-        
+
         return true;
 
     }
@@ -420,8 +442,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
 
 
-    private void restoreParser() {
-        Preferences preferences = NbPreferences.forModule(ImportIdentificationDialog.class);
+    private void restoreInitialParameters() {
+        Preferences preferences = NbPreferences.root();
         String parser = preferences.get("IdentificationParser", null);
 
         int parserIndex = -1;
@@ -443,7 +465,16 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
         // select the parser
         parserComboBox.setSelectedIndex(parserIndex);
-
+        
+        
+        // Prefered File Path
+        String filePath = preferences.get("IdentificationFilePath", null);
+        if (filePath != null) {
+            File f = new File(filePath);
+            if (f.isDirectory()) {
+                defaultDirectory = f;
+            }
+        }
     }
 
 

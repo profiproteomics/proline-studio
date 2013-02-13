@@ -64,6 +64,7 @@ public class IdentificationAction extends AbstractRSMAction {
             final Project _project = project;
             final Dataset _parentDataset = parentDataset;
                     
+            String parserId = dialog.getParserId();
             Integer instrumentId = dialog.getInstrumentId();
             Integer peaklistSoftwareId = dialog.getPeaklistSoftwareId();
             
@@ -115,7 +116,7 @@ public class IdentificationAction extends AbstractRSMAction {
                 };
 
 
-                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, project.getId());
+                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, project.getId());
                 AccessServiceThread.getAccessServiceThread().addTask(task);
                 
             }

@@ -33,10 +33,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
     private static ImportIdentificationDialog singletonDialog = null;
     
-    private final static String[] PARSER_NAMES = {"Mascot", "Test"};
-    private final static String[] FILE_EXTENSIONS = {"dat", "test"};
-    private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Test Identification"};
-    
+    private final static String[] PARSER_NAMES = {"Mascot", "Omssa"};
+    private final static String[] FILE_EXTENSIONS = {"dat", "omx"};
+    private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Omssa Identification Result"};
+    private final static String[] PARSER_IDS = { "mascot.dat", "omssa.omx" };
     
     
     private JList<File> fileList;
@@ -49,8 +49,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private JComboBox parserComboBox;
     private int previousParserIndex = -1;
     private ParameterList sourceParameterList;
-    
-    //private JPanel sourcePanel = null;
+
     
     private JPanel parserParametersPanel = null;
 
@@ -369,8 +368,14 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
 
     private void reinitialize() {
+        
+        // reinit of files selection
         ((DefaultListModel) fileList.getModel()).removeAllElements();
         removeFileButton.setEnabled(false);
+        
+        // reinit of some parameters
+        ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
+        parameterList.clean();
     }
 
     @Override
@@ -507,6 +512,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return peaklistSoftware.getId();
     }
     
+    public String getParserId() {
+        return PARSER_IDS[parserComboBox.getSelectedIndex()];
+    }
 
 
     
@@ -514,7 +522,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private ParameterList[] createParameters() {
         ParameterList[] plArray = new ParameterList[2];
         plArray[0] = createMascotParser();
-        plArray[1] = createTestParser();
+        plArray[1] = createOmssaParser();
         return plArray;
     }
     
@@ -526,10 +534,14 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return parameterList;
     }
     
-    private ParameterList createTestParser() {
-        ParameterList parameterList = new ParameterList("TEST Parser");
-        parameterList.add(new DoubleParameter("test", "Test", JTextField.class, new Double(4), null, null));
-    
+    private ParameterList createOmssaParser() {
+        ParameterList parameterList = new ParameterList("Omssa Parser");
+        
+        parameterList.add(new FileParameter("usermod.xml.file", "Usermods file path", JTextField.class, "", "Usermods XML File", "xml"));
+        parameterList.add(new BooleanParameter("fasta.contains.target", "Fasta contains target entries", JCheckBox.class, Boolean.TRUE));
+        parameterList.add(new BooleanParameter("fasta.contains.decoy", "Fasta contains decoy entries", JCheckBox.class, Boolean.TRUE));
+
+        
         return parameterList;
     }
     

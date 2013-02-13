@@ -60,10 +60,14 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             
             c.gridx = 0;
             c.weightx = 0;
-            JLabel l = new JLabel(parameter.getName()+" :");
-            l.setHorizontalAlignment(JLabel.RIGHT);
-            parametersPanel.add(l, c);
+            if (parameter.showLabel()) {
+                JLabel l = new JLabel(parameter.getName() + " :");
 
+                l.setHorizontalAlignment(JLabel.RIGHT);
+                parametersPanel.add(l, c);
+            }
+            
+            
             String parameterValue = preferences.get(prefixKey+suffixKey, null);
             
             
@@ -176,5 +180,12 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         return null;
     }
     
+    public void clean() {
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+            parameter.clean();
+        }
+    }
     
 }

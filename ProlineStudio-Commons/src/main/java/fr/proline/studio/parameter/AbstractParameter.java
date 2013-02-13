@@ -31,11 +31,27 @@ public abstract class AbstractParameter {
 
     public abstract JComponent getComponent(Object value);
     public abstract void initDefault();
+    
     public abstract ParameterError checkParameter();
     
     
     public abstract String getStringValue();
     public abstract Object getObjectValue();
     
+    /**
+     * Returns if the parameter wants its name to be displayed in the panel
+     * @return 
+     */
+    public boolean showLabel() {
+        return true;
+    }
+    
+    /**
+     * Called when a window is reopened to be able to clean
+     * some parameters (like FileParameter)
+     */
+    public void clean() {
+        
+    }
 
 }

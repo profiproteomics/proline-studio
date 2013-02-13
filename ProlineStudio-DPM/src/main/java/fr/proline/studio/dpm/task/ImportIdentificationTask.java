@@ -16,14 +16,17 @@ import java.util.Map;
  */
 public class ImportIdentificationTask extends AbstractServiceTask {
 
-    HashMap<String, String> parserArguments;
-    String filePath;
-    int instrumentId;
-    int peaklistSoftwareId;
-    int projectId;
+    private String parserId;
+    private HashMap<String, String> parserArguments;
+    private String filePath;
+    private int instrumentId;
+    private int peaklistSoftwareId;
+    private int projectId;
     
-    public ImportIdentificationTask(AbstractServiceCallback callback, HashMap<String, String> parserArguments, String filePath, int instrumentId, int peaklistSoftwareId, int projectId) {
+    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String filePath, int instrumentId, int peaklistSoftwareId, int projectId) {
         super(callback, false /*asynchronous*/);
+        
+        this.parserId = parserId;
         this.parserArguments = parserArguments;
         this.filePath = filePath;
         this.instrumentId = instrumentId;
@@ -48,8 +51,8 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             
             // add the file to parse
             Map<String, Object> resultfile = new HashMap<String, Object>();
-            resultfile.put("path", filePath);  //JPM.TODO : possible file access problem
-            resultfile.put("format", "mascot.dat");  //JPM.TODO
+            resultfile.put("path", filePath);  // files must be accessible from web-core by the same path
+            resultfile.put("format", parserId);
             args.add(resultfile);
             params.put("result_files", args);
 

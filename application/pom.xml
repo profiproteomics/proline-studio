@@ -61,11 +61,11 @@
             <artifactId>ProlineStudio-branding</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-IDFImport</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-ResultExplorer</artifactId>

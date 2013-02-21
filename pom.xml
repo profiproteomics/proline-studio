@@ -22,7 +22,7 @@
     <module>ProlineStudio-Commons</module>
     <module>ProlineStudio-DAM</module>
     <module>ProlineStudio-ResultExplorer</module>
-    <module>ProlineStudio-IDFImport</module>
+    <!-- <module>ProlineStudio-IDFImport</module> -->
     <!-- <module>ProlineStudio-RepositoryMgr</module> -->
     <module>ProlineStudio-CoreWrapper</module>
     <module>ProlineStudio-Logger</module>

@@ -11,13 +11,15 @@ import java.io.IOException;
 import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import fr.proline.studio.dam.taskinfo.AbstractLongTask;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 
 /**
  * Superclass for all Task which wants to access to a web-core service and looks for
  * the result.
  * @author jm235353
  */
-public abstract class AbstractServiceTask {
+public abstract class AbstractServiceTask extends AbstractLongTask {
     
     public enum ServiceState {
         STATE_FAILED,
@@ -39,7 +41,11 @@ public abstract class AbstractServiceTask {
     
     protected static final Logger logger = LoggerFactory.getLogger(AbstractServiceTask.class);
     
-    public AbstractServiceTask(AbstractServiceCallback callback, boolean synchronous) {
+    public static final String TASK_LIST_INFO = "Services";
+    
+    public AbstractServiceTask(AbstractServiceCallback callback, boolean synchronous, TaskInfo taskInfo) {
+        super(taskInfo);
+        
         this.callback = callback;
         this.synchronous = synchronous;
         
@@ -108,6 +114,7 @@ public abstract class AbstractServiceTask {
             return;
         }
 
+        callback.setTaskInfo(taskInfo);
         callback.setErrorMessage(errorMessage);
         
         if (callback.mustBeCalledInAWT()) {

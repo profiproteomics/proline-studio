@@ -4,6 +4,7 @@ import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,20 +24,20 @@ public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask
     private String proteinMatchName = null;
     
     public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, Integer projectId, ProteinMatch proteinMatch) {
-        super(callback, Priority.NORMAL_3);
+        super(callback, Priority.NORMAL_3, new TaskInfo("Load Data", "Load Protein Sets for Protein Match", TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinMatchArray = new ArrayList<ProteinMatch>(1);
         this.proteinMatchArray.add(proteinMatch);        
     }
     
     public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, Integer projectId, ArrayList<ProteinMatch> proteinMatchArray) {
-        super(callback, Priority.NORMAL_3);
+        super(callback, Priority.NORMAL_3, new TaskInfo("Load Data", "Load Protein Sets for Protein Matches", TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinMatchArray = proteinMatchArray;        
     }
     
     public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, Integer projectId, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<Integer> resultSetIdArray, String proteinMatchName ) {
-        super(callback, Priority.NORMAL_3);
+        super(callback, Priority.NORMAL_3, new TaskInfo("Load Data", "Load Protein Sets for Protein Match", TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinMatchArray = proteinMatchArray;   
         this.resultSetIdArray = resultSetIdArray;

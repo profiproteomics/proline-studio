@@ -1,6 +1,7 @@
 package fr.proline.studio.dam.tasks;
 
 
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import javax.swing.SwingUtilities;
 
 /**
@@ -14,12 +15,12 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
     // Manager of the subtasks
     protected SubTaskManager subTaskManager;
     
-    public AbstractDatabaseSlicerTask(AbstractDatabaseCallback callback, int subTaskCount) {
-        super(callback);
+    public AbstractDatabaseSlicerTask(AbstractDatabaseCallback callback, int subTaskCount, TaskInfo taskInfo) {
+        super(callback, taskInfo);
         subTaskManager = new SubTaskManager(subTaskCount);
     }
-    public AbstractDatabaseSlicerTask(AbstractDatabaseCallback callback, int subTaskCount, Priority priority) {
-        super(callback, priority);
+    public AbstractDatabaseSlicerTask(AbstractDatabaseCallback callback, int subTaskCount, Priority priority, TaskInfo taskInfo) {
+        super(callback, priority, taskInfo);
         subTaskManager = new SubTaskManager(subTaskCount);
     }
     

@@ -13,6 +13,7 @@ import java.util.Map;
 import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.io.IOException;
 import javax.persistence.EntityManager;
 
@@ -28,7 +29,7 @@ public class CreateProjectTask extends AbstractServiceTask {
     private ProjectData projectData;
     
     public CreateProjectTask(AbstractServiceCallback callback, String name, String description, int ownerId, ProjectData projectData) {
-        super(callback, true /*synchronous*/);
+        super(callback, true /*synchronous*/, new TaskInfo("Add Project", "Add Project named "+name, TASK_LIST_INFO));
         
         this.name = name;
         this.description = description;

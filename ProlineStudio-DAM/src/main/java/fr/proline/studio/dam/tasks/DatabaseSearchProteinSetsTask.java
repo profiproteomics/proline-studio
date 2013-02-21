@@ -6,7 +6,7 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
-import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -27,7 +27,7 @@ public class DatabaseSearchProteinSetsTask extends AbstractDatabaseTask {
     private ArrayList<Integer>     searchResult = null;
     
     public DatabaseSearchProteinSetsTask(AbstractDatabaseCallback callback, Integer projectId, ResultSummary rsm, String searchAccession, ArrayList<Integer> searchResult) {
-        super(callback, Priority.HIGH_1);
+        super(callback, Priority.HIGH_1, new TaskInfo("Search", "Search Protein Set "+searchAccession, TASK_LIST_INFO));
         this.projectId = projectId;
         this.rsm = rsm;       
         this.searchAccession = searchAccession;

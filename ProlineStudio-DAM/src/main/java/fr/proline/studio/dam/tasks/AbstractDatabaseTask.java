@@ -1,5 +1,7 @@
 package fr.proline.studio.dam.tasks;
 
+import fr.proline.studio.dam.taskinfo.AbstractLongTask;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +12,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public abstract class AbstractDatabaseTask implements Comparable<AbstractDatabaseTask> {
+public abstract class AbstractDatabaseTask extends AbstractLongTask implements Comparable<AbstractDatabaseTask> {
 
     // Different possible priorities of a Task
     public enum Priority {
@@ -40,17 +42,20 @@ public abstract class AbstractDatabaseTask implements Comparable<AbstractDatabas
     protected String errorMessage = null;
     protected int errorId = -1;
     
+    public final static String TASK_LIST_INFO = "Database Access";
+    
     /**
      * Contructor
      *
      * @param callback called by the AccessDatabaseThread when the data is
      * fetched
      */
-    public AbstractDatabaseTask(AbstractDatabaseCallback callback) {
-        this(callback, Priority.NORMAL_1);
+    public AbstractDatabaseTask(AbstractDatabaseCallback callback, TaskInfo taskInfo) {
+        this(callback, Priority.NORMAL_1, taskInfo);
     }
 
-    public AbstractDatabaseTask(AbstractDatabaseCallback callback, Priority priority) {
+    public AbstractDatabaseTask(AbstractDatabaseCallback callback, Priority priority, TaskInfo taskInfo) {
+        super(taskInfo);
         this.callback = callback;
         this.defaultPriority = priority;
         this.currentPriority = priority;

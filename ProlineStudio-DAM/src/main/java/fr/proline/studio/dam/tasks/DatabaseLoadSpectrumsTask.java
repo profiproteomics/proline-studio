@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
@@ -19,7 +20,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
     private PeptideMatch peptideMatch = null;
 
     public DatabaseLoadSpectrumsTask(AbstractDatabaseCallback callback, Integer projectId, PeptideMatch peptideMatch) {
-        super(callback);
+        super(callback, new TaskInfo("Load Data", "Load Spectrum for Peptide Match", TASK_LIST_INFO));
         this.projectId = projectId;
         this.peptideMatch = peptideMatch;
     }

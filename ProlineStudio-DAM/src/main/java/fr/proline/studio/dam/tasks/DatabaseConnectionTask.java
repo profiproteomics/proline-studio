@@ -2,6 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 
 
+import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Instrument;
 import fr.proline.core.orm.uds.PeaklistSoftware;
@@ -11,6 +12,8 @@ import fr.proline.repository.ProlineDatabaseType;
 import fr.proline.repository.DatabaseConnectorFactory;
 import fr.proline.repository.IDatabaseConnector;
 import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
@@ -48,7 +51,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * @param projectId
      */
     public DatabaseConnectionTask(AbstractDatabaseCallback callback, Map<Object, Object> databaseProperties, String projectUser) {
-        super(callback, Priority.TOP);
+        super(callback, Priority.TOP, new TaskInfo("DB Connection", "Connection to UDS", TASK_LIST_INFO));
 
         this.databaseProperties = databaseProperties;
         this.projectUser = projectUser;
@@ -63,7 +66,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * @param projectUser 
      */
     public DatabaseConnectionTask(AbstractDatabaseCallback callback, String projectUser) {
-        super(callback, Priority.TOP);
+        super(callback, Priority.TOP, null);
 
         this.projectUser = projectUser;
 
@@ -77,7 +80,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * @param projectId
      */
     public DatabaseConnectionTask(AbstractDatabaseCallback callback, int projectId) {
-        super(callback, Priority.TOP);
+        super(callback, Priority.TOP, new TaskInfo("DB Connection", "Connection to MSI", TASK_LIST_INFO));
 
         databaseProperties = null;
         this.projectId = projectId;
@@ -259,19 +262,41 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
     }
     
     /*
-    public static void testInsert(byte[] testByteDouble, byte[] testByteFloat) {
+    public static void testInsert(Integer projectId) {
         
-        int SQL_LOOP = 10000;
+        double[] doubles = { 13.25, 57145.454545 };
         
-        int lIndex = 0;
+        ByteBuffer byteDBuffer = ByteBuffer.allocate(doubles.length*8);
+        for (int i=0;i<doubles.length;i++) {
+            byteDBuffer.putDouble(doubles[i]);
+        }
+        byte[] byteDArray = byteDBuffer.array();
         
-        long timeStart5 = System.currentTimeMillis();
-         EntityManager entityManagerMSI = ProlineDBManagement.getProlineDBManagement().getProjectEntityManager(Database.MSI, true, AccessDatabaseThread.getProjectIdTMP()); 
+        float[] floats = { 13.25f, 57145.454f };
+        
+        ByteBuffer byteFBuffer = ByteBuffer.allocate(floats.length*4);
+        for (int i=0;i<floats.length;i++) {
+            byteFBuffer.putFloat(floats[i]);
+        }
+        byte[] byteFArray = byteFBuffer.array();
+        
+        
+        testInsert(projectId, byteDArray, byteFArray);
+        
+    }
+    
+    
+  
+    public static void testInsert(Integer projectId, byte[] testByteDouble, byte[] testByteFloat) {
+        
+
+
+         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+
         try {
 
             entityManagerMSI.getTransaction().begin();
-        
-        for (lIndex = 0; lIndex < SQL_LOOP; lIndex++) {
+
             Spectrum s = new Spectrum();
             s.setTitle("Title");
             s.setMozList(testByteDouble);
@@ -286,11 +311,9 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             s.setPeaklistId(1);
             s.setInstrumentConfigId(1);
             entityManagerMSI.persist(s);
-        }
+
         
-        
-        
-         entityManagerMSI.getTransaction().commit();
+            entityManagerMSI.getTransaction().commit();
          
          
          
@@ -300,9 +323,10 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             entityManagerMSI.close();
         }
         
-        long deltaTime5 = System.currentTimeMillis()-timeStart5;
-        System.out.println(" Création de 10000 spectrum : "+deltaTime5);*/
+    }*/
         /*
+
+
         long timeStart6 = 0;
         try {
     String DATABASE_URL = "jdbc:postgresql://gre037784:5433/MSIORM_db";
@@ -343,9 +367,9 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         }
         
         long deltaTime6 = System.currentTimeMillis()-timeStart6;
-        System.out.println(" Création de 10000 spectrum : "+deltaTime6);*/
-    /*}*/
-    /*
+        System.out.println(" Création de 10000 spectrum : "+deltaTime6);
+    }
+    
     private static void bytes2Hex(StringBuilder sb, byte[] byteArray) {
     
         int nb = byteArray.length;

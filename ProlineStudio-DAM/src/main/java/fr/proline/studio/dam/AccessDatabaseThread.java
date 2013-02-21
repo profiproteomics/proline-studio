@@ -4,8 +4,11 @@ import fr.proline.repository.AbstractDatabaseConnector;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseConnectionTask;
 import fr.proline.studio.dam.tasks.PriorityChangement;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dam.taskinfo.TaskInfoProviderInterface;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.PriorityQueue;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +19,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class AccessDatabaseThread extends Thread {
+public class AccessDatabaseThread extends Thread implements TaskInfoProviderInterface {
 
     private static AccessDatabaseThread instance;
     private PriorityQueue<AbstractDatabaseTask> actions;
@@ -253,6 +256,15 @@ public class AccessDatabaseThread extends Thread {
                 actions.offer(task);
             }
 
+        }
+    }
+
+    @Override
+    public void provideTaskInfo(List<TaskInfo> taskInfoList) {
+        synchronized (this) {
+            for (int i=0; i<actions.size();i++) {
+                
+            }
         }
     }
 

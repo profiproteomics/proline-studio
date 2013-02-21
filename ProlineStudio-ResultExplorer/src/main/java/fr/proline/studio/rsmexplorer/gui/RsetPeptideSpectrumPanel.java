@@ -23,6 +23,10 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.CrosshairState;
 import org.jfree.chart.plot.PlotRenderingInfo;
@@ -167,26 +171,42 @@ public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements Data
         }
 
 
-        byte[] intensityByteArray = package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
-        byte[] massByteArray = package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
+        byte[] intensityByteArray = spectrum.getIntensityList(); //package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
+        byte[] massByteArray = spectrum.getMozList(); //package$EasyLzma$.MODULE$.uncompress(spectrum.getMozList());
 
-        String intensityListString = new String(intensityByteArray);
+        
+        
+        ByteBuffer intensityByteBuffer = ByteBuffer.wrap(intensityByteArray).order(ByteOrder.LITTLE_ENDIAN);
+        FloatBuffer intensityFloatBuffer = intensityByteBuffer.asFloatBuffer();
+        double[] intensityDoubleArray = new double[intensityFloatBuffer.remaining()];
+        for (int i=0;i<intensityDoubleArray.length;i++) {
+            intensityDoubleArray[i] = (double) intensityFloatBuffer.get();
+        }
+        
+        ByteBuffer massByteBuffer = ByteBuffer.wrap(massByteArray).order(ByteOrder.LITTLE_ENDIAN);
+        DoubleBuffer massDoubleBuffer = massByteBuffer.asDoubleBuffer();
+        double[] massDoubleArray = new double[massDoubleBuffer.remaining()]; 
+        for (int i=0;i<massDoubleArray.length;i++) {
+            massDoubleArray[i] = massDoubleBuffer.get();
+        }
+        
+        /*String intensityListString = new String(intensityByteArray);
         String massListString = new String(massByteArray);
 
 
         String[] intensitiyStringArray = intensityListString.split(" ");
-        String[] massListStringArray = massListString.split(" ");
+        String[] massListStringArray = massListString.split(" ");*/
 
-        int size = massListStringArray.length;
-        if (size != intensitiyStringArray.length) {
+        int size = intensityDoubleArray.length;
+        if (size != massDoubleArray.length) {
             LoggerFactory.getLogger(RsmProteinAndPeptideSequencePanel.class).error("Intensity and Mass List have different size");
             return;
         }
 
         double[][] data = new double[2][size];
         for (int i = 0; i < size; i++) {
-            data[0][i] = Double.parseDouble(massListStringArray[i]);
-            data[1][i] = Double.parseDouble(intensitiyStringArray[i]);
+            data[0][i] = massDoubleArray[i];
+            data[1][i] = intensityDoubleArray[i];
         }
 
         dataSet.addSeries(SERIES_NAME, data);
@@ -238,4 +258,15 @@ public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements Data
             }
         }
     }
+    
+      public static byte[] floatsToBytes( float[] floats) {
+
+    // Convert float to a byte buffer
+    ByteBuffer byteBuf = ByteBuffer.allocate(4 * floats.length).order(ByteOrder.LITTLE_ENDIAN);
+    for (int i=0;i<floats.length;i++) {
+        byteBuf.putFloat(floats[i]);
+    }
+    // Convert byte buffer into a byte array
+    return byteBuf.array();
+  }
 }

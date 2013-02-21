@@ -4,6 +4,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,9 +23,10 @@ public class ImportIdentificationTask extends AbstractServiceTask {
     private int instrumentId;
     private int peaklistSoftwareId;
     private int projectId;
+    private Integer[] resultSetId = null;
     
-    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String filePath, int instrumentId, int peaklistSoftwareId, int projectId) {
-        super(callback, false /*asynchronous*/);
+    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String filePath, int instrumentId, int peaklistSoftwareId, int projectId, Integer[] resultSetId) {
+        super(callback, false /*asynchronous*/, new TaskInfo("Import Identification", "Import Identification "+filePath, TASK_LIST_INFO));
         
         this.parserId = parserId;
         this.parserArguments = parserArguments;
@@ -32,6 +34,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
         this.instrumentId = instrumentId;
         this.peaklistSoftwareId = peaklistSoftwareId;
         this.projectId = projectId;
+        this.resultSetId = resultSetId;
     }
     
     @Override
@@ -135,6 +138,24 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                 }
                 
                 if (success) {
+                    
+                    //JPM.TODO : get ResultSetId
+                    ArrayList returnedValues = (ArrayList) resultMap.get("result");
+                    if ((returnedValues == null) || (returnedValues.isEmpty()))  {
+                        logger.error(getClass().getSimpleName() + " failed : No returned values");
+                        return ServiceState.STATE_FAILED;
+                    }
+                    
+                    ArrayMap returnedValuesMap = (ArrayMap) returnedValues.get(0);
+                    
+                    BigDecimal resultSetIdBD = (BigDecimal) returnedValuesMap.get("target_resultset_id");
+                    if (resultSetId == null) {
+                        logger.error(getClass().getSimpleName() + " failed : No returned Resultset Id");
+                        return ServiceState.STATE_FAILED;
+                    }
+                    
+                    resultSetId[0] = new Integer(resultSetIdBD.intValue());
+                    
                     return ServiceState.STATE_DONE;
                 } else {
                     errorMessage = (String) resultMap.get("message");

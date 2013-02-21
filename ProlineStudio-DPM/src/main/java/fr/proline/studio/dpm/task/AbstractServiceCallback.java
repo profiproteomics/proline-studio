@@ -1,13 +1,17 @@
 package fr.proline.studio.dpm.task;
 
+import fr.proline.studio.dam.taskinfo.TaskInfo;
+
 /**
  * Superclass for all Callback which are called when a service is done
  * @author jm235353
  */
 public abstract class AbstractServiceCallback {
     
-     private String errorMessage = null;
-    
+    private String errorMessage = null;
+    private TaskInfo taskInfo = null;
+     
+     
     /**
      * Returns if the callback must be called 
      * in the Graphical Thread (AWT)
@@ -30,4 +34,12 @@ public abstract class AbstractServiceCallback {
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }   
+    
+    public TaskInfo getTaskInfo() {
+        return taskInfo;
+    }
+    
+    public void setTaskInfo(TaskInfo taskInfo) {
+        this.taskInfo = taskInfo;
+    }
 }

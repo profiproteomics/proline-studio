@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.*;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,7 +44,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     private ArrayList<Integer> proteinSetIds = null;
 
     public DatabaseProteinSetsTask(AbstractDatabaseCallback callback, Integer projectId, ResultSummary rsm) {
-        super(callback, SUB_TASK_COUNT);
+        super(callback, SUB_TASK_COUNT, new TaskInfo("Load Data", "Load Protein Sets of a Result Summary", TASK_LIST_INFO));
         this.projectId = projectId;
         this.rsm = rsm;
     }

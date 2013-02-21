@@ -4,6 +4,7 @@ import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
     private final static int RENAME_PROJECT = 1;
     
     public DatabaseProjectTask(AbstractDatabaseCallback callback) {
-        super(callback);
+        super(callback, null);
 
     }
     
@@ -39,6 +40,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
      * @param list 
      */
     public void initLoadProject(String user, List<AbstractData> list) {
+        setTaskInfo(new TaskInfo("Load Projects", "Load Projects for User "+user, TASK_LIST_INFO));
         this.user = user;
         this.list = list;
         
@@ -51,6 +53,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
      * @param list 
      */
     public void initRenameProject(Integer projectId, String name) {
+        setTaskInfo(new TaskInfo("Rename Project", "Rename Project to "+name, TASK_LIST_INFO));
         this.projectId = projectId;
         this.name = name;
         

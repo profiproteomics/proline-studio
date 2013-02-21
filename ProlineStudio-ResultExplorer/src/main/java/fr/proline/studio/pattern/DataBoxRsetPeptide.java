@@ -7,7 +7,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchFromRsetTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.gui.RsetPeptideMatchPanel;
+import fr.proline.studio.rsmexplorer.gui.RsetPeptideMatchPanelTEST;
 
 /**
  *
@@ -41,7 +41,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        RsetPeptideMatchPanel p = new RsetPeptideMatchPanel();
+        RsetPeptideMatchPanelTEST p = new RsetPeptideMatchPanelTEST();
         p.setName(name);
         p.setDataBox(this);
         panel = p;
@@ -66,9 +66,9 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
                if (subTask == null) {
 
                     PeptideMatch[] peptideMatchArray = _rset.getTransientPeptideMatches();
-                    ((RsetPeptideMatchPanel)panel).setData(taskId, peptideMatchArray);
+                    ((RsetPeptideMatchPanelTEST)panel).setData(taskId, peptideMatchArray);
                } else {
-                    ((RsetPeptideMatchPanel)panel).dataUpdated(subTask);
+                    ((RsetPeptideMatchPanelTEST)panel).dataUpdated(subTask);
                 }
             }
         };
@@ -85,7 +85,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(PeptideMatch.class)) {
-                return ((RsetPeptideMatchPanel)panel).getSelectedPeptideMatch();
+                return ((RsetPeptideMatchPanelTEST)panel).getSelectedPeptideMatch();
             }
             if (parameterType.equals(ResultSet.class)) {
                 if (rset != null) {

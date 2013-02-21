@@ -18,6 +18,7 @@ import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,7 +91,8 @@ public class IdentificationAction extends AbstractRSMAction {
                 final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 treeModel.insertNodeInto(identificationNode, n, n.getChildCount());
                 
-
+                // used as out parameter for the service
+                final Integer[] _resultSetId = new Integer[1]; 
                 
                 AbstractServiceCallback callback = new AbstractServiceCallback() {
 
@@ -103,9 +105,7 @@ public class IdentificationAction extends AbstractRSMAction {
                     public void run(boolean success) {
                         if (success) {
                             
-                            Integer resultSetId = null; //JPM.TODO !!!! : it must be a result of the service
-                            
-                            createDataset(identificationNode, _project, _parentDataset, _datasetName, resultSetId);
+                            createDataset(identificationNode, _project, _parentDataset, _datasetName, _resultSetId[0], getTaskInfo());
                             
                             
                         } else {
@@ -116,7 +116,7 @@ public class IdentificationAction extends AbstractRSMAction {
                 };
 
 
-                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, project.getId());
+                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, project.getId(), _resultSetId);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
                 
             }
@@ -130,7 +130,7 @@ public class IdentificationAction extends AbstractRSMAction {
         }
     }
     
-    private void createDataset(final RSMDataSetNode identificationNode, Project project, Dataset parentDataset, String name, Integer resultSetId) {
+    private void createDataset(final RSMDataSetNode identificationNode, Project project, Dataset parentDataset, String name, Integer resultSetId, TaskInfo taskInfo) {
                                     
 
         identificationNode.setIsChanging(false);
@@ -169,7 +169,7 @@ public class IdentificationAction extends AbstractRSMAction {
 
 
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-        task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, name, resultSetId, null, createdDatasetList);
+        task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, name, resultSetId, null, createdDatasetList, taskInfo);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }

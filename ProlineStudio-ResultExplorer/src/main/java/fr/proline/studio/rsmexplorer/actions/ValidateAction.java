@@ -4,10 +4,20 @@
  */
 package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.core.orm.uds.Dataset;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.task.AbstractServiceCallback;
+import fr.proline.studio.dpm.task.ValidationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ValidationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.util.HashMap;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -32,8 +42,9 @@ public class ValidateAction extends AbstractRSMAction {
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             
             // retrieve parameters
-            /*String description = dialog.getDescription();
-            int peptideFDR = dialog.getPeptideFDR();
+            HashMap<String, String> parserArguments = dialog.getParserArguments();
+            //String description = dialog.getDescription();
+            /*int peptideFDR = dialog.getPeptideFDR();
             int peptideMinPepSequence = dialog.getPeptideMinPepSequence();
             int proteinFDR = dialog.getProteinFDR();
             int proteinMinPepSequence = dialog.getProteinMinPepSequence();*/
@@ -41,23 +52,11 @@ public class ValidateAction extends AbstractRSMAction {
             // start validation for each selected Dataset
             int nbNodes = selectedNodes.length;
             for (int i=0;i<nbNodes;i++) {
-                RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[i];
+                final RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[i];
 
-                /*
-                // Create temporary nodes for the validation
-                String datasetName = f.getName();
-                int indexOfDot = datasetName.lastIndexOf('.');
-                if (indexOfDot != -1) {
-                    datasetName = datasetName.substring(0, indexOfDot);
-                }
-                final String _datasetName = datasetName;
-                DataSetData identificationData = new DataSetData(datasetName, DataSetTMP.SAMPLE_ANALYSIS );  //JPM.TODO
+                dataSetNode.setIsChanging(true);
                 
-                final RSMDataSetNode identificationNode = new RSMDataSetNode(identificationData);
-                identificationNode.setIsChanging(true);
-                RSMTree tree = RSMTree.getTree();
-                final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-                treeModel.insertNodeInto(identificationNode, n, n.getChildCount());
+                final Dataset d = dataSetNode.getDataset();
                 
                 AbstractServiceCallback callback = new AbstractServiceCallback() {
 
@@ -70,21 +69,23 @@ public class ValidateAction extends AbstractRSMAction {
                     public void run(boolean success) {
                         if (success) {
                             
-                            Integer resultSetId = null; //JPM.TODO !!!! : it must be a result of the service
+                            Integer resultSummaryId = null; //JPM.TODO !!!! : it must be a result of the service
                             
-                            createDataset(identificationNode, _projectId, _parentDatasetId, _datasetName, resultSetId);
+                            updateDataset(dataSetNode, d, resultSummaryId, getTaskInfo());
                             
                             
                         } else {
                             //JPM.TODO : manage error with errorMessage
-                            treeModel.removeNodeFromParent(identificationNode);
+                            dataSetNode.setIsChanging(false);
                         }
                     }
                 };
 
 
-                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, projectId);
-                AccessServiceThread.getAccessServiceThread().addTask(task);*/
+                ValidationTask task = new ValidationTask(callback, dataSetNode.getDataset(), "", parserArguments);
+                AccessServiceThread.getAccessServiceThread().addTask(task);
+                
+
                 
             }
             
@@ -92,16 +93,7 @@ public class ValidateAction extends AbstractRSMAction {
         }
     }
     
-    /*private void createDataset(final RSMDataSetNode identificationNode, Integer projectId, Integer parentDatasetId, String name, Integer resultSetId) {
-                                    
-
-        identificationNode.setIsChanging(false);
-
-        RSMTree tree = RSMTree.getTree();
-        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-        treeModel.nodeChanged(identificationNode);
-
-        final ArrayList<DataSetTMP> createdDatasetList = new ArrayList<>();
+    private void updateDataset(final RSMDataSetNode datasetNode, final Dataset d, Integer resultSummaryId, TaskInfo taskInfo) {
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -115,13 +107,11 @@ public class ValidateAction extends AbstractRSMAction {
 
                 if (success) {
 
-                    DataSetTMP dataset = createdDatasetList.get(0);
-                    identificationNode.setIsChanging(false);
-                    ((DataSetData) identificationNode.getData()).setDataSet(dataset);
-                    treeModel.nodeChanged(identificationNode);
+                    datasetNode.setIsChanging(false);
+                    //treeModel.nodeChanged(datasetNode); //JPM.TODO : code needed if the validation change the icon
                 } else {
                     // should not happen
-                    treeModel.removeNodeFromParent(identificationNode);
+                    datasetNode.setIsChanging(false);
                 }
             }
         };
@@ -131,10 +121,10 @@ public class ValidateAction extends AbstractRSMAction {
 
 
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-        task.initCreateDatasetForIdentification(projectId, parentDatasetId, DataSetTMP.SAMPLE_ANALYSIS, name, resultSetId, null, createdDatasetList);
+        task.initModifyDatasetForValidation(d, resultSummaryId, taskInfo);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
-    }*/
+    }
     
 
     @Override

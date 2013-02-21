@@ -177,6 +177,10 @@ public class ValidationDialog extends DefaultDialog {
       
     }
  
+    public HashMap<String, String> getParserArguments() {
+        ParameterList parameterList = (ParameterList) validationCombobox.getSelectedItem();
+        return parameterList.getValues();
+    }
 
     
     

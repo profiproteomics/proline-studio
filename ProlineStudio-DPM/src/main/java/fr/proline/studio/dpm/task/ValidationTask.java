@@ -5,6 +5,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,19 +17,13 @@ public class ValidationTask extends AbstractServiceTask {
 
     private Dataset dataset = null;
     String description;
-    int peptideFDR;
-    int peptideMinPepSequence;
-    int proteinFDR;
-    int proteinMinPepSequence;
+    HashMap<String, String> parserArguments;
     
-    public ValidationTask(AbstractServiceCallback callback, Dataset dataset, String description, int peptideFDR, int peptideMinPepSequence, int proteinFDR, int proteinMinPepSequence) {
-        super(callback, false /*asynchronous*/);
+    public ValidationTask(AbstractServiceCallback callback, Dataset dataset, String description, HashMap<String, String> parserArguments) {
+        super(callback, false /*asynchronous*/, new TaskInfo("Validation", "Validation of "+dataset.getName()+" Result Set", TASK_LIST_INFO));
         this.dataset = dataset;
         this.description = description;
-        this.peptideFDR = peptideFDR;
-        this.peptideMinPepSequence = peptideMinPepSequence;
-        this.proteinFDR = proteinFDR;
-        this.proteinMinPepSequence = proteinMinPepSequence;
+        this.parserArguments = parserArguments;
     }
     
     @Override
@@ -38,12 +33,21 @@ public class ValidationTask extends AbstractServiceTask {
             JsonRpcRequest request = new JsonRpcRequest();
             
             request.setId(id);
-            request.setMethod("JPM.TODO");  // JPM.TODO method name
+            request.setMethod("run_job");
             
             
             Map<String, Object> params = new HashMap<String, Object>();
-	    /*params.put("project_id", projectId);  //JPM.TODO : parameters
+	    params.put("project_id", dataset.getProject().getId());  
+            params.put("result_set_id", dataset.getResultSetId() );
+            params.put("description", description ); //JPM.TODO : string is ""
+            params.put("mode", "" );  //JPM.TODO : checked : 14/02/2013 not used in WebCore ValidateResultSet.scala
             
+            // parserArguments : not used //JPM.TODO
+            
+            //params.put("pep_match_params", "" );  //JPM.TODO //JPM.TODO : parameters
+            //params.put("prot_set_params", "" );  //JPM.TODO
+            
+            /*
             List args = new ArrayList();
             
             // add the file to parse
@@ -52,16 +56,12 @@ public class ValidationTask extends AbstractServiceTask {
             resultfile.put("format", "mascot.dat");  //JPM.TODO
             args.add(resultfile);
             params.put("result_files", args);
-
-            
-            
-            params.put("instrument_config_id", instrumentId);
-            params.put("peaklist_software_id", peaklistSoftwareId);*/
+*/
 
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("Proline/JPM.TODO"+request.getMethod()+getIdString(), request); //JPM.TODO : URL
+            HttpResponse response = postRequest("Proline/dps.msi/validate_result_set/"+request.getMethod()+getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -97,14 +97,14 @@ public class ValidationTask extends AbstractServiceTask {
             JsonRpcRequest request = new JsonRpcRequest();
             
             request.setId(idIncrement++);
-            request.setMethod("get_job_status");  //JPM.TODO : check method name
+            request.setMethod("get_job_status");
             
             Map<String, Object> params = new HashMap<String, Object>();
 	    params.put("job_id", id);
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("Proline/JPM.TODO"+request.getMethod()+getIdString(), request); //JPM.TODO
+            HttpResponse response = postRequest("Proline/dps.msi/validate_result_set/"+request.getMethod()+getIdString(), request); //JPM.TODO
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -126,6 +126,9 @@ public class ValidationTask extends AbstractServiceTask {
                 }
                 
                 if (success) {
+                    
+                    //JPM.TODO : get ResultRsmId
+                    
                     return ServiceState.STATE_DONE;
                 } else {
                     errorMessage = (String) resultMap.get("message");

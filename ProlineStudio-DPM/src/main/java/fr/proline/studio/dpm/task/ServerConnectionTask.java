@@ -5,10 +5,10 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.repository.AbstractDatabaseConnector;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.HashMap;
 import java.util.Map;
 
-import java.io.IOException;
 
 
 /**
@@ -24,7 +24,7 @@ public class ServerConnectionTask extends AbstractServiceTask {
 
     
     public ServerConnectionTask(AbstractServiceCallback callback, String serverURL, String password, HashMap<Object, Object> databaseProperties) {
-        super(callback, true /*synchronous*/);
+        super(callback, true /*synchronous*/, new TaskInfo("Connection", "Connection to Server "+serverURL, TASK_LIST_INFO));
         
         this.serverURL = serverURL;
         this.password = password;

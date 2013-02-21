@@ -6,6 +6,7 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,7 +38,7 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
     
 
     public DatabaseLoadPeptideMatchFromRsetTask(AbstractDatabaseCallback callback, Integer projectId, ResultSet rset) {
-        super(callback, SUB_TASK_COUNT);
+        super(callback, SUB_TASK_COUNT, new TaskInfo("Load Data", "Load Peptide Matches for Result Set", TASK_LIST_INFO));
         this.projectId = projectId;
         this.rset = rset;
         

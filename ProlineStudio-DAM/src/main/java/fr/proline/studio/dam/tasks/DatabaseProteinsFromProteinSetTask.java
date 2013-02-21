@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.*;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.*;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -23,7 +24,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
     private ProteinSet proteinSet = null;
 
     public DatabaseProteinsFromProteinSetTask(AbstractDatabaseCallback callback, Integer projectId, ProteinSet proteinSet) {
-        super(callback, Priority.NORMAL_3);
+        super(callback, Priority.NORMAL_3, new TaskInfo("Load Data", "Load Proteins of a Protein Set", TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinSet = proteinSet;        
     }

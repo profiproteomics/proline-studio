@@ -4,6 +4,7 @@ import com.google.api.client.http.*;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class CreateUserTask extends AbstractServiceTask {
 
     
     public CreateUserTask(AbstractServiceCallback callback, String name) {
-        super(callback, true /*synchronous*/);
+        super(callback, true /*synchronous*/, new TaskInfo("Create User", "Create User "+name, TASK_LIST_INFO));
         
         this.name = name;
 

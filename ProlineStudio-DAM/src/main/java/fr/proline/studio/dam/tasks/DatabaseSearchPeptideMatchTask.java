@@ -3,6 +3,7 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -22,7 +23,7 @@ public class DatabaseSearchPeptideMatchTask extends AbstractDatabaseTask {
     private ArrayList<Integer>     searchResult = null;
     
     public DatabaseSearchPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, ResultSet rset, String searchString, ArrayList<Integer> searchResult) {
-        super(callback, Priority.HIGH_1);
+        super(callback, Priority.HIGH_1, new TaskInfo("Search", "Search Peptide Match "+searchString, TASK_LIST_INFO));
         this.projectId = projectId;
         this.rset = rset;       
         this.searchString = searchString;

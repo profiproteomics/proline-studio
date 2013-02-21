@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.BioSequence;
@@ -9,6 +5,7 @@ import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.*;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -25,7 +22,7 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
     private PeptideMatch peptideMatch = null;
 
     public DatabaseProteinsFromPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, PeptideMatch peptideMatch) {
-        super(callback, Priority.NORMAL_3);
+        super(callback, Priority.NORMAL_3, new TaskInfo("Load Data", "Load Proteins for a Peptide Match", TASK_LIST_INFO));
         this.projectId = projectId;
         this.peptideMatch = peptideMatch;        
     }

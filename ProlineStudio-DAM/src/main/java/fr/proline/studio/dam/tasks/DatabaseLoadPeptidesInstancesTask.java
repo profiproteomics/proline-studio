@@ -4,6 +4,7 @@ import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,7 +26,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     private ArrayList<ResultSummary> rsmList = null;
 
     public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, Integer projectId, ProteinMatch proteinMatch, ArrayList<ResultSummary> rsmList) {
-        super(callback);
+        super(callback, new TaskInfo("Load Data", "Load Peptide Sets for Protein Match", TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinMatch = proteinMatch;
         this.proteinMatchArray = null;
@@ -34,7 +35,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     }
     
     public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, Integer projectId, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmList) {
-        super(callback);
+        super(callback, new TaskInfo("Load Data", "Load Peptide Sets for Protein Matches", TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinMatch = null;
         this.proteinMatchArray = proteinMatchArray;

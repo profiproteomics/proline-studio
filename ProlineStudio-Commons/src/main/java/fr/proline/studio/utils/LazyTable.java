@@ -13,7 +13,7 @@ import javax.swing.event.ListSelectionEvent;
  *
  * @author JM235353
  */
-public class LazyTable extends DecoratedTable implements AdjustmentListener {
+public class LazyTable extends DecoratedMarkerTable implements AdjustmentListener {
 
     // used to register the last action done by the user.
     // this last action is used to know if we automatically scroll

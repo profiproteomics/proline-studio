@@ -1,3 +1,4 @@
 Manifest-Version: 1.0
+OpenIDE-Module-Layer: fr/proline/prolinestudio/branding/layer.xml
 OpenIDE-Module-Localizing-Bundle: fr/proline/prolinestudio/branding/Bundle.properties
 AutoUpdate-Essential-Module: true

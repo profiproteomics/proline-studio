@@ -93,6 +93,14 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                 
                 return false;
             }
+            
+            BigDecimal resultId = (BigDecimal) jsonResult.get("result");
+            if (resultId != null) {
+                id = resultId.intValue();
+            } else {
+                logger.error(getClass().getSimpleName() + " failed : id not defined");
+            }
+            
 
 
 

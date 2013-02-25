@@ -52,7 +52,7 @@ public class UDSDataManager  {
     
     public void setAggregationList(List<Aggregation> l) {
         
-        aggregationMap = new HashMap<Aggregation.ChildNature, Aggregation>();
+        aggregationMap = new HashMap<>();
         
         Iterator<Aggregation> it = l.iterator();
         while (it.hasNext()) {

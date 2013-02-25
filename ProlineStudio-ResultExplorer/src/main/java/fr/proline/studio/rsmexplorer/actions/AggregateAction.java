@@ -86,7 +86,7 @@ public class AggregateAction extends AbstractRSMAction {
                     aggregateName += suffixNumber;
                     suffixNumber++;
                 }
-                RSMDataSetNode datasetNode = new RSMDataSetNode(new DataSetData(aggregateName, aggregateType));
+                RSMDataSetNode datasetNode = new RSMDataSetNode(new DataSetData(aggregateName, Dataset.DatasetType.AGGREGATE, aggregateType));
                 nodesCreated.add(datasetNode);
                 datasetNode.setIsChanging(true);
                 n.add(datasetNode);

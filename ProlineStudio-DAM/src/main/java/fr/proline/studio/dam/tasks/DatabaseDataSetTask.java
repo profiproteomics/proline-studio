@@ -500,9 +500,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         
         Project mergedProject = entityManagerUDS.merge(project);
         Dataset mergedParentDataset = (parentDataset == null) ? null : entityManagerUDS.merge(parentDataset);
-        Aggregation aggregation = UDSDataManager.getUDSDataManager().getAggregation(datasetType);
-        Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
-        
+         
         Dataset d = null;
         if (identificationDataset) {
             d = new IdentificationDataset();
@@ -511,13 +509,17 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } else {
             d = new Dataset(mergedProject);
             d.setType(Dataset.DatasetType.AGGREGATE);
+            
+            Aggregation aggregation = UDSDataManager.getUDSDataManager().getAggregation(datasetType);
+            Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
+            d.setAggregation(mergedAggregation);
+ 
         }
 
         d.setName(datasetName);
         d.setParentDataset(mergedParentDataset);
         d.setResultSetId(resultSetId);
         d.setResultSummaryId(resultSummaryId);
-        d.setAggregation(mergedAggregation);
         d.setFractionCount(0); // this aggregate has no child for the moment
         
         // number of children of the parent

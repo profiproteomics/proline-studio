@@ -83,7 +83,7 @@ public class IdentificationAction extends AbstractRSMAction {
                     datasetName = datasetName.substring(0, indexOfDot);
                 }
                 final String _datasetName = datasetName;
-                DataSetData identificationData = new DataSetData(datasetName, Aggregation.ChildNature.SAMPLE_ANALYSIS );  //JPM.TODO
+                DataSetData identificationData = new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS );  //JPM.TODO
                 
                 final RSMDataSetNode identificationNode = new RSMDataSetNode(identificationData);
                 identificationNode.setIsChanging(true);

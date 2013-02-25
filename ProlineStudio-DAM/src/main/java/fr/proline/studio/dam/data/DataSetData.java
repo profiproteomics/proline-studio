@@ -15,7 +15,8 @@ public class DataSetData extends AbstractData {
     
     private Dataset dataset = null;
     private String temporaryName = null;
-    private Aggregation.ChildNature temporaryAggregateType;
+    private Aggregation.ChildNature temporaryAggregateType = null;
+    private Dataset.DatasetType temporaryDatasetType = null;
 
     public DataSetData(Dataset dataSet) {
         dataType = DataTypes.DATA_SET;
@@ -23,11 +24,12 @@ public class DataSetData extends AbstractData {
         this.dataset = dataSet;
 
     }
-    public DataSetData(String temporaryName, Aggregation.ChildNature temporaryAggregateType) {
+    public DataSetData(String temporaryName, Dataset.DatasetType temporaryDatasetType, Aggregation.ChildNature temporaryAggregateType) {
         dataType = DataTypes.DATA_SET;
 
         this.temporaryName = temporaryName;
         this.temporaryAggregateType = temporaryAggregateType;
+        this.temporaryDatasetType = temporaryDatasetType;
 
     }
 
@@ -67,10 +69,16 @@ public class DataSetData extends AbstractData {
         }
         Aggregation aggreation = dataset.getAggregation();
         if (aggreation == null) {
-            // should not happen !
             return temporaryAggregateType;
         }
         return aggreation.getChildNature();
+    }
+    
+    public Dataset.DatasetType getDatasetType() {
+        if (dataset == null) {
+            return temporaryDatasetType;
+        }
+        return dataset.getType();
     }
     
     @Override

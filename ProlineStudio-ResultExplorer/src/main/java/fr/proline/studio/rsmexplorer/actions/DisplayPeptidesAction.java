@@ -41,13 +41,14 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
         }
         
         ResultSet rset = dataSetNode.getResultSet();
+        final boolean hasResultSummary = dataSetNode.hasResultSummary();
         
         
         
         if (rset != null) {
         
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getPeptidesWindowBox();
+            WindowBox wbox = (hasResultSummary) ? WindowBoxFactory.getPeptidesWindowBox(dataSet.getName()+" Peptides") : WindowBoxFactory.getPeptidesForRsetOnlyWindowBox(dataSet.getName()+" Peptides");
             wbox.setEntryData(dataSet.getProject().getId(), rset);
             
 
@@ -57,7 +58,7 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
             win.open();
             win.requestActive();
         } else {
-                        // we have to load the result summary
+                        // we have to load the result set
 
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -69,7 +70,7 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask) {
                     // prepare window box
-                    WindowBox wbox = WindowBoxFactory.getPeptidesWindowBox();
+                    WindowBox wbox = (hasResultSummary) ? WindowBoxFactory.getPeptidesWindowBox(dataSet.getName()+" Peptides") : WindowBoxFactory.getPeptidesForRsetOnlyWindowBox(dataSet.getName()+" Peptides");
                     wbox.setEntryData(dataSet.getProject().getId(), dataSet.getTransientData().getResultSet());
 
 

@@ -4,6 +4,7 @@ import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.Dataset.DatasetType;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.utils.IconManager;
@@ -24,52 +25,31 @@ public class RSMDataSetNode extends RSMNode {
 
     @Override
     public ImageIcon getIcon() {
-
-        Aggregation.ChildNature aggreagateType = ((DataSetData) getData()).getAggregateType();
         
-        //JPM.TODO : icon management of Dataset
-        if (isChanging()) {
-            
-            
-            
-            switch (aggreagateType) {
-                case BIOLOGICAL_GROUP:
-                    return getIcon(IconManager.IconType.VIAL);
-                case BIOLOGICAL_SAMPLE:
-                    return getIcon(IconManager.IconType.GEL);
-                case SAMPLE_ANALYSIS:
-                    return getIcon(IconManager.IconType.GEL);
-            }
-
-            return getIcon(IconManager.IconType.RSET);
-            
-            
-        } else {
-
-
-            switch (aggreagateType) {
-                case BIOLOGICAL_GROUP:
-                    return getIcon(IconManager.IconType.VIAL);
-                case BIOLOGICAL_SAMPLE:
-                    return getIcon(IconManager.IconType.GEL);
-                case SAMPLE_ANALYSIS:
-                    return getIcon(IconManager.IconType.GEL);
-            }
-
-            Dataset dataset = ((DataSetData) getData()).getDataset();
-            if (dataset.getResultSummaryId() != null) {
-                return getIcon(IconManager.IconType.RSM);
-            } else if (dataset.getResultSetId() != null) {
-                return getIcon(IconManager.IconType.RSET);
-            }
-            
+        Dataset.DatasetType type = ((DataSetData) getData()).getDatasetType();
+        switch(type) {
+            case IDENTIFICATION:
+                Dataset dataset = ((DataSetData) getData()).getDataset();
+                if (dataset != null) {
+                    if (dataset.getResultSummaryId() == null) {
+                        return getIcon(IconManager.IconType.RSET);
+                    } else {
+                        return getIcon(IconManager.IconType.RSM);
+                    }
+                } else {
+                    return getIcon(IconManager.IconType.RSET);
+                }
+                
+            case AGGREGATE:
+                //Aggregation.ChildNature aggregateType = ((DataSetData) getData()).getAggregateType();
+                //JPM.TODO : according to aggregateType type :icon must be different
+                return getIcon(IconManager.IconType.VIAL);
+            default:
+                // sould not happen
+                
         }
         
-        
-        
-
-        //JPM.TODO : return another icon for OTHER ???
-        return getIcon(IconManager.IconType.GEL);
+        return null;
 
     }
     

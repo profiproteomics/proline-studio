@@ -190,21 +190,21 @@ public class AddAggregatePanel extends javax.swing.JPanel {
             switch (selectedType) {
                 case BIOLOGICAL_GROUP:
                     l.setText("Biological Group");
-                    l.setIcon(IconManager.getIcon(IconManager.IconType.VIAL));
+                    //l.setIcon(IconManager.getIcon(IconManager.IconType.VIAL));
                     break;
                 case BIOLOGICAL_SAMPLE:
                     l.setText("Biological Sample");
-                    l.setIcon(IconManager.getIcon(IconManager.IconType.GEL));
+                    //l.setIcon(IconManager.getIcon(IconManager.IconType.GEL));
                     break;
                 case SAMPLE_ANALYSIS:
                     l.setText("Sample Analysis");
-                    l.setIcon(IconManager.getIcon(IconManager.IconType.GEL));
+                    //l.setIcon(IconManager.getIcon(IconManager.IconType.GEL));
                     break;
                 case OTHER:
                     l.setText("Other");
-                    l.setIcon(null);
+                    //l.setIcon(null);
                     break;
-            }
+            } //JPM.TODO : icons
 
             return l;
         } 

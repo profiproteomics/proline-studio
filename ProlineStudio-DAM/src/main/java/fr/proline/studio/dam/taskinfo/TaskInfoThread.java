@@ -1,6 +1,7 @@
 package fr.proline.studio.dam.taskinfo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -13,8 +14,10 @@ public class TaskInfoThread extends Thread {
     private long lastUpdate = 0;
     private boolean needUpdate = false;
     
-    private ArrayList<TaskInfoProviderInterface> providers = new ArrayList<>();
     private ArrayList<TaskInfoListenerInterface> listeners = new ArrayList<>();
+    
+    private HashMap<String, ArrayList<TaskInfoGroup>> taskInfoGroupMap = new HashMap<>();
+    
 
     private static TaskInfoThread m_singleton = null;
     
@@ -68,8 +71,10 @@ public class TaskInfoThread extends Thread {
         notifyAll();
     }
 
-    public synchronized void addProvider(TaskInfoProviderInterface provider) {
-        providers.add(provider);
+    public synchronized void addTaskInfo(TaskInfo taskInfo) {
+        
+        //taskInfo. //JPM.TODO
+        
         needUpdate = true;
         notifyAll();
     }
@@ -84,4 +89,17 @@ public class TaskInfoThread extends Thread {
         listeners.remove(listener);
     }
 
+    
+    private class TaskInfoGroup {
+    
+        private ArrayList<TaskInfo> finishedTask;
+        private ArrayList<TaskInfo> waitingTask;
+        
+        public TaskInfoGroup() {
+            finishedTask = new ArrayList<TaskInfo>();
+            waitingTask = new ArrayList<TaskInfo>();
+        }
+        
+    }
+    
 }

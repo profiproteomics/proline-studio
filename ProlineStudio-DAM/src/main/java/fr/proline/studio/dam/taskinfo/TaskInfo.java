@@ -22,5 +22,15 @@ public class TaskInfo {
         this.taskDescription = taskDescription;
     }
 
+    public String getIdList() {
+        return idList;
+    }
     
+    public String getTaskName() {
+        return taskName;
+    }
+    
+    public String getTaskDescription() {
+        return taskDescription;
+    }
 }

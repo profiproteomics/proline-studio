@@ -48,7 +48,7 @@ public class ServerConnectionDialog extends DefaultDialog {
         internalPanel.setLayout(new java.awt.GridBagLayout());
 
 
-        JPanel URLPanel = createURLPanel();
+        JPanel URLPanel = createHostPanel();
         JPanel loginPanel = createLoginPanel();
 
         GridBagConstraints c = new GridBagConstraints();
@@ -69,12 +69,12 @@ public class ServerConnectionDialog extends DefaultDialog {
     }
     
      
-    private JPanel createURLPanel() {
+    private JPanel createHostPanel() {
         
         JPanel URLPanel = new JPanel(new GridBagLayout());
         URLPanel.setBorder(BorderFactory.createTitledBorder(" Server Parameter "));
         
-        JLabel serverLabel = new JLabel("Server URL :");
+        JLabel serverLabel = new JLabel("Server Host :");
         serverURLTextField = new JTextField(30);
 
         GridBagConstraints c = new GridBagConstraints();

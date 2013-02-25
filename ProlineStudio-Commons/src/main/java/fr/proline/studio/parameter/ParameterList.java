@@ -113,6 +113,27 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
     
+    public void updateIsUsed() {
+        Preferences preferences = NbPreferences.root();
+        String prefixKey = name.replaceAll(" ", "_") + ".";
+
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+
+            String parameterName = parameter.getName();
+                String suffixKey = parameterName.replaceAll(" ", "_") + ".";
+                String parameterValue = preferences.get(prefixKey + suffixKey, null);
+            
+            if (!parameter.isUsed()) {
+                if ((parameterValue != null) && (!parameterValue.isEmpty())) {
+                    parameter.setUsed(true);
+                }
+            }
+            
+            parameter.getComponent(parameterValue);
+        }
+    }
     
     public void initDefaults() {
 

@@ -23,12 +23,21 @@ public class IntegerParameter extends AbstractParameter {
         this.maxValue = maxValue;
 
     }
+    
+    public IntegerParameter(String key, String name, JComponent component, Integer defaultValue, Integer minValue, Integer maxValue) {
+        super(key, name, Integer.class, component.getClass());
+        this.defaultValue = defaultValue;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+        this.parameterComponent = component;
+
+    }
 
     @Override
     public JComponent getComponent(Object value) {
 
         Integer startValue = null;
-        if (value != null) {
+        if (value != null)  {
             try {
                 int valueParsed = Integer.parseInt(value.toString());
                 startValue = new Integer(valueParsed);
@@ -39,6 +48,14 @@ public class IntegerParameter extends AbstractParameter {
             startValue = defaultValue;
         }
 
+        if (parameterComponent !=null) {
+            if (graphicalType.equals(JTextField.class)) {
+                ((JTextField) parameterComponent).setText(startValue.toString());
+                return parameterComponent;
+            }
+        }
+        
+        
         
         if (graphicalType.equals(JTextField.class)) {
 
@@ -153,6 +170,10 @@ public class IntegerParameter extends AbstractParameter {
     
     @Override
     public ParameterError checkParameter() {
+        
+        if (!used) {
+            return null;
+        }
         
         Integer value = null;
         

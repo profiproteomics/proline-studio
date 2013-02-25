@@ -40,7 +40,9 @@ public class IconManager {
         OPEN_FILE,
         EXCLAMATION,
         INFORMATION,
-        EMPTY
+        EMPTY,
+        PLUS,
+        CROSS
     }
     private static HashMap<IconType, ImageIcon> iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> iconHourGlassMap = new HashMap<>();
@@ -148,6 +150,10 @@ public class IconManager {
                 return "fr/proline/studio/images/information.png";
             case EMPTY:
                 return "fr/proline/studio/images/empty.png";
+            case PLUS:
+                return "fr/proline/studio/images/plus-small7x7.png";
+            case CROSS:
+                return "fr/proline/studio/images/cross-small7x7.png";
         }
 
 

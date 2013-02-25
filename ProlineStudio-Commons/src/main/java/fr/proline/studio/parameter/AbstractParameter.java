@@ -13,6 +13,8 @@ public abstract class AbstractParameter {
     protected Class type;
     protected Class graphicalType;
     protected JComponent parameterComponent = null;
+    protected boolean used = true;
+    protected Object associatedData = null;
 
     protected AbstractParameter(String key, String name, Class type, Class graphicalType) {
         this.key = key;
@@ -29,6 +31,9 @@ public abstract class AbstractParameter {
         return key;
     }
 
+    public JComponent getComponent() {
+        return parameterComponent;
+    }
     public abstract JComponent getComponent(Object value);
     public abstract void initDefault();
     
@@ -53,5 +58,27 @@ public abstract class AbstractParameter {
     public void clean() {
         
     }
+    
+    public boolean isUsed() {
+        return used;
+    }
+    
+    public void setUsed(boolean used) {
+        this.used = used;
+    }
 
+    
+    @Override
+    public String toString() {
+        return getName();
+    }
+
+    public void setAssociatedData(Object associatedData) {
+        this.associatedData = associatedData;
+    }
+    
+    public Object getAssociatedData() {
+        return associatedData;
+    }
+    
 }

@@ -20,10 +20,31 @@ public class DoubleParameter extends AbstractParameter {
         this.maxValue = maxValue;
 
     }
+    
+    public DoubleParameter(String key, String name, JComponent component, Double defaultValue, Double minValue, Double maxValue) {
+        super(key, name, Double.class, component.getClass());
+        this.defaultValue = defaultValue;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+        this.parameterComponent = component;
+    }
 
     @Override
     public JComponent getComponent(Object value) {
 
+        if (parameterComponent != null) {
+            if (graphicalType.equals(JTextField.class)) {
+                if (value != null) {
+                    ((JTextField) parameterComponent).setText(value.toString());
+                } else if (defaultValue != null) {
+                    ((JTextField) parameterComponent).setText(defaultValue.toString());
+                }
+
+                return parameterComponent;
+            }
+        }
+        
+        
         if (graphicalType.equals(JTextField.class)) {
             JTextField textField = new JTextField(3);
             if (value != null) {
@@ -52,6 +73,10 @@ public class DoubleParameter extends AbstractParameter {
 
     @Override
     public ParameterError checkParameter() {
+        
+        if (!used) {
+            return null;
+        }
         
         Double value = null;
         

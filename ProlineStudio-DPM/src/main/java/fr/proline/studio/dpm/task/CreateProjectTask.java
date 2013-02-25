@@ -68,8 +68,18 @@ public class CreateProjectTask extends AbstractServiceTask {
                 String message = (String) errorMap.get("message");
                 
                 if (message != null) {
-                    errorMessage = message.toString();
+                    errorMessage = message;
                 }
+                
+                String data = (String) errorMap.get("data");
+                if (data != null) {
+                    if (errorMessage == null) {
+                        errorMessage = data;
+                    } else {
+                        errorMessage = errorMessage+"\n"+data;
+                    }
+                }
+                
                 
                  //JPM.WART : Web core returns an error and the project id !!!
                 logger.error(getClass().getSimpleName()+errorMessage);

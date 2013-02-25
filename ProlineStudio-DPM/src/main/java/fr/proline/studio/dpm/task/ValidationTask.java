@@ -6,6 +6,7 @@ import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,9 +72,27 @@ public class ValidationTask extends AbstractServiceTask {
                 String message = (String) errorMap.get("message");
 
                 if (message != null) {
-                    errorMessage = message.toString();
+                    errorMessage = message;
                 }
+                
+                String data = (String) errorMap.get("data");
+                if (data != null) {
+                    if (errorMessage == null) {
+                        errorMessage = data;
+                    } else {
+                        errorMessage = errorMessage+"\n"+data;
+                    }
+                }
+                
                 return false;
+            }
+            
+            
+            BigDecimal resultId = (BigDecimal) jsonResult.get("result");
+            if (resultId != null) {
+                id = resultId.intValue();
+            } else {
+                logger.error(getClass().getSimpleName() + " failed : id not defined");
             }
 
 
@@ -113,6 +132,16 @@ public class ValidationTask extends AbstractServiceTask {
             if (errorMap != null) {
 
                 errorMessage = (String) errorMap.get("message");
+                
+                String data = (String) errorMap.get("data");
+                if (data != null) {
+                    if (errorMessage == null) {
+                        errorMessage = data;
+                    } else {
+                        errorMessage = errorMessage+"\n"+data;
+                    }
+                }
+                
                 return ServiceState.STATE_FAILED; // should not happen !
             }
             

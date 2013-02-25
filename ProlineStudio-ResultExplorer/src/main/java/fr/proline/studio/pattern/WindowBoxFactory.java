@@ -14,7 +14,7 @@ import javax.swing.border.EmptyBorder;
 public class WindowBoxFactory {
     
     
-    public static WindowBox getPeptidesWindowBox() {
+    public static WindowBox getPeptidesWindowBox(String name) {
         
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[5];
@@ -26,10 +26,22 @@ public class WindowBoxFactory {
         boxes[4] = new DataBoxRsetPeptidesOfProteinsCmp();
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
         
-        return new WindowBox( "Peptides", generatePanel(boxes), boxes[0] );
+        return new WindowBox( name, generatePanel(boxes), boxes[0] );
     }
     
-    public static WindowBox getProteinSetsWindowBox() {
+    public static WindowBox getPeptidesForRsetOnlyWindowBox(String name) {
+        
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[3];
+        boxes[0] = new DataBoxRsetPeptide();
+        boxes[1] = new DataBoxRsetPeptideSpectrum();
+        boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[2] = new DataBoxRsetProteinsForPeptideMatch();
+        
+        return new WindowBox( name, generatePanel(boxes), boxes[0] );
+    }
+    
+    public static WindowBox getProteinSetsWindowBox(String name) {
         
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[5];
@@ -40,7 +52,7 @@ public class WindowBoxFactory {
         boxes[4] = new DataBoxRsetPeptideSpectrum();
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         
-        return new WindowBox( "Protein Sets", generatePanel(boxes), boxes[0] );
+        return new WindowBox( name, generatePanel(boxes), boxes[0] );
     }
     
     

@@ -42,7 +42,7 @@ public class ValidateAction extends AbstractRSMAction {
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             
             // retrieve parameters
-            HashMap<String, String> parserArguments = dialog.getParserArguments();
+            HashMap<String, String> parserArguments = null; ///dialog.getParserArguments(); JPM.TODO
             //String description = dialog.getDescription();
             /*int peptideFDR = dialog.getPeptideFDR();
             int peptideMinPepSequence = dialog.getPeptideMinPepSequence();

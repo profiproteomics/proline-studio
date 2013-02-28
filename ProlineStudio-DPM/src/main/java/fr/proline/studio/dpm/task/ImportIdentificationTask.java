@@ -178,7 +178,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                     ArrayMap returnedValuesMap = (ArrayMap) returnedValues.get(0);
                     
                     // retrieve resultSet id
-                    BigDecimal resultSetIdBD = (BigDecimal) returnedValuesMap.get("target_resultset_id");
+                    BigDecimal resultSetIdBD = (BigDecimal) returnedValuesMap.get("target_result_set_id");
                     if (resultSetIdBD == null) {
                         logger.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
                         return ServiceState.STATE_FAILED;

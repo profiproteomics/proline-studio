@@ -57,7 +57,7 @@ public class ValidationTask extends AbstractServiceTask {
             if (argumentsMap.containsKey("SCORE")) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", "SCORE");
-                filterCfg.put("threshold", Float.valueOf(argumentsMap.get("SCORE")).floatValue());
+                filterCfg.put("threshold", Float.valueOf(argumentsMap.get("SCORE")));
                 pepFilters.add(filterCfg);
             }
             if (argumentsMap.containsKey("MASCOT_EVALUE")) {

@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.db.explorer.JDBCDriver;
@@ -405,11 +405,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().begin();
 
             // load dataset for rsm
-            //JPM.TODO : uncomment this code when the database is ready
-            /*TypedQuery<DataSetTMP> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE d.resultSummaryId=:rsmId", DataSetTMP.class);
+            TypedQuery<Dataset> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE d.resultSummaryId=:rsmId", Dataset.class);
             dataSetQuery.setParameter("rsmId", rsmId);
-            DataSetTMP dataSet = dataSetQuery.getSingleResult();
-            rsm.getTransientData().setDataSet(dataSet);*/
+            Dataset dataSet = dataSetQuery.getSingleResult();
+            rsm.getTransientData().setDataSet(dataSet);
             
 
 
@@ -434,13 +433,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
 
-            //JPM.TODO
-            /*
             String renameSQL = "UPDATE Dataset d set d.name= :name where d.id = :datasetId";
             Query renameQuery = entityManagerUDS.createQuery(renameSQL);
-            renameQuery.setParameter("datasetId", dataSet.getId());
+            renameQuery.setParameter("datasetId", dataset.getId());
             renameQuery.setParameter("name", name);
-            renameQuery.executeUpdate();*/
+            renameQuery.executeUpdate();
      
             entityManagerUDS.getTransaction().commit();
 

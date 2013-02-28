@@ -9,7 +9,6 @@ import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
 import javax.swing.*;
-import org.openide.util.ImageUtilities;
 
 /**
  * Used to create a panel containing other panels separated by SplitPanes
@@ -17,8 +16,8 @@ import org.openide.util.ImageUtilities;
  */
 public class SplittedPanelContainer extends JPanel {
 
-    private ArrayList<SplittedPanel> panelArray = new ArrayList<SplittedPanel>(4);
-    private ArrayList<JSplitPane> splitPaneArray = new ArrayList<JSplitPane>(3);
+    private ArrayList<SplittedPanel> panelArray = new ArrayList<>(4);
+    private ArrayList<JSplitPane> splitPaneArray = new ArrayList<>(3);
 
     
     private JPanel mainPanel;
@@ -45,7 +44,7 @@ public class SplittedPanelContainer extends JPanel {
         for (int i=0;i<nb;i++) {
             totalHeight += heights[i];
         }
-        int defaultHeight = totalHeight/4;
+        int defaultHeight = totalHeight/nb;
         for (int i=0;i<nb;i++) {
             heights[i] = defaultHeight;
         }
@@ -622,11 +621,11 @@ public class SplittedPanelContainer extends JPanel {
         
         //private SplittedPanelContainer splittedPanelContainer;
         
-        private ArrayList<JButton> buttons = new ArrayList<JButton>(4);
-        private ArrayList<JSeparator> separators = new ArrayList<JSeparator>(4);
+        private ArrayList<JButton> buttons = new ArrayList<>(4);
+        private ArrayList<JSeparator> separators = new ArrayList<>(4);
         
-        private ArrayList<SplittedPanel> splittedPanels = new ArrayList<SplittedPanel>(4);
-        private ArrayList<Integer> previousHeights = new ArrayList<Integer>(4);
+        private ArrayList<SplittedPanel> splittedPanels = new ArrayList<>(4);
+        private ArrayList<Integer> previousHeights = new ArrayList<>(4);
         
         private MouseAdapter mouseListenerForButtons;
         

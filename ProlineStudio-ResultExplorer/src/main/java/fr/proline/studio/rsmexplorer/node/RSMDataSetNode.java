@@ -32,7 +32,11 @@ public class RSMDataSetNode extends RSMNode {
                 Dataset dataset = ((DataSetData) getData()).getDataset();
                 if (dataset != null) {
                     if (dataset.getResultSummaryId() == null) {
-                        return getIcon(IconManager.IconType.RSET);
+                        if (isChanging()) {
+                            return getIcon(IconManager.IconType.RSM); // will become a RSM
+                        } else {
+                            return getIcon(IconManager.IconType.RSET);
+                        }
                     } else {
                         return getIcon(IconManager.IconType.RSM);
                     }

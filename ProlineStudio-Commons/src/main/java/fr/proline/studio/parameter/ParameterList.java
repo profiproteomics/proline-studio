@@ -56,7 +56,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             AbstractParameter parameter = get(i);
 
             String parameterName = parameter.getName();
-            String suffixKey = parameterName.replaceAll(" ", "_")+".";
+            String suffixKey = parameterName.replaceAll(" ", "_");
             
             c.gridx = 0;
             c.weightx = 0;
@@ -91,7 +91,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             AbstractParameter parameter = get(i);
             
             String parameterName = parameter.getName();
-            String suffixKey = parameterName.replaceAll(" ", "_")+".";
+            String suffixKey = parameterName.replaceAll(" ", "_");
             
             c.gridy++;
             
@@ -122,7 +122,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             AbstractParameter parameter = get(i);
 
             String parameterName = parameter.getName();
-                String suffixKey = parameterName.replaceAll(" ", "_") + ".";
+                String suffixKey = parameterName.replaceAll(" ", "_");
                 String parameterValue = preferences.get(prefixKey + suffixKey, null);
             
             if (!parameter.isUsed()) {
@@ -154,20 +154,32 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             AbstractParameter parameter = get(i);
 
             String parameterName = parameter.getName();
-            String suffixKey = parameterName.replaceAll(" ", "_")+".";
+            String suffixKey = parameterName.replaceAll(" ", "_");
         
             String key = prefixKey+suffixKey;
-            String value = parameter.getStringValue();
-            preferences.put(key, value);
+            
+            if (parameter.isUsed()) {
+                String value = parameter.getStringValue();
+                preferences.put(key, value);
+            } else {
+                preferences.remove(key);
+            }
+            
+
         }
     }
     
     public HashMap<String, String> getValues() {
-        HashMap<String, String> valuesMap = new HashMap<String, String>();
+        HashMap<String, String> valuesMap = new HashMap<>();
         
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
             AbstractParameter parameter = get(i);
+
+            if (!parameter.isUsed()) {
+                continue;
+            }
+            
             String key = parameter.getKey();
             String value = parameter.getStringValue();
             valuesMap.put(key, value);

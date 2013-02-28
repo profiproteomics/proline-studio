@@ -45,7 +45,7 @@ public class IdentificationAction extends AbstractRSMAction {
         ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);
-        
+
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             
             // retrieve parameters

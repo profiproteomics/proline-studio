@@ -64,8 +64,8 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             params.put("instrument_config_id", instrumentId);
             params.put("peaklist_software_id", peaklistSoftwareId);
 
-            //JPM.TODO : parserArguments not used for the moment
-
+            // parser arguments
+            params.put("importer_properties", parserArguments);
             
             request.setParameters(params);
 
@@ -91,14 +91,18 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                     }
                 }
                 
+                if (errorMessage != null) {
+                    logger.error(getClass().getSimpleName() + " failed : "+errorMessage);
+                }
+                
                 return false;
             }
             
-            BigDecimal resultId = (BigDecimal) jsonResult.get("result");
-            if (resultId != null) {
-                id = resultId.intValue();
+            BigDecimal jobId = (BigDecimal) jsonResult.get("result");
+            if (jobId != null) {
+                id = jobId.intValue();
             } else {
-                logger.error(getClass().getSimpleName() + " failed : id not defined");
+                logger.error(getClass().getSimpleName() + " failed : job id not defined");
             }
             
 
@@ -164,7 +168,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                 
                 if (success) {
                     
-                    //JPM.TODO : get ResultSetId
+
                     ArrayList returnedValues = (ArrayList) resultMap.get("result");
                     if ((returnedValues == null) || (returnedValues.isEmpty()))  {
                         logger.error(getClass().getSimpleName() + " failed : No returned values");
@@ -173,9 +177,10 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                     
                     ArrayMap returnedValuesMap = (ArrayMap) returnedValues.get(0);
                     
+                    // retrieve resultSet id
                     BigDecimal resultSetIdBD = (BigDecimal) returnedValuesMap.get("target_resultset_id");
-                    if (resultSetId == null) {
-                        logger.error(getClass().getSimpleName() + " failed : No returned Resultset Id");
+                    if (resultSetIdBD == null) {
+                        logger.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
                         return ServiceState.STATE_FAILED;
                     }
                     

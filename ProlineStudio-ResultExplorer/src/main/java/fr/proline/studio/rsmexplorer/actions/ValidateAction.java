@@ -38,16 +38,13 @@ public class ValidateAction extends AbstractRSMAction {
         ValidationDialog dialog = ValidationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);
+
         
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             
             // retrieve parameters
-            HashMap<String, String> parserArguments = null; ///dialog.getParserArguments(); JPM.TODO
-            //String description = dialog.getDescription();
-            /*int peptideFDR = dialog.getPeptideFDR();
-            int peptideMinPepSequence = dialog.getPeptideMinPepSequence();
-            int proteinFDR = dialog.getProteinFDR();
-            int proteinMinPepSequence = dialog.getProteinMinPepSequence();*/
+            HashMap<String, String> parserArguments = dialog.getArguments();
+
 
             // start validation for each selected Dataset
             int nbNodes = selectedNodes.length;
@@ -57,6 +54,9 @@ public class ValidateAction extends AbstractRSMAction {
                 dataSetNode.setIsChanging(true);
                 
                 final Dataset d = dataSetNode.getDataset();
+                
+                // used as out parameter for the service
+                final Integer[] _resultSummaryId = new Integer[1]; 
                 
                 AbstractServiceCallback callback = new AbstractServiceCallback() {
 
@@ -68,10 +68,8 @@ public class ValidateAction extends AbstractRSMAction {
                     @Override
                     public void run(boolean success) {
                         if (success) {
-                            
-                            Integer resultSummaryId = null; //JPM.TODO !!!! : it must be a result of the service
-                            
-                            updateDataset(dataSetNode, d, resultSummaryId, getTaskInfo());
+                             
+                            updateDataset(dataSetNode, d, _resultSummaryId[0], getTaskInfo());
                             
                             
                         } else {
@@ -82,7 +80,7 @@ public class ValidateAction extends AbstractRSMAction {
                 };
 
 
-                ValidationTask task = new ValidationTask(callback, dataSetNode.getDataset(), "", parserArguments);
+                ValidationTask task = new ValidationTask(callback, dataSetNode.getDataset(), "", parserArguments, _resultSummaryId);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
                 
 

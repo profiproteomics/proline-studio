@@ -42,12 +42,30 @@ public class UDSDataManager  {
         return instruments;
     }
     
+    public Instrument[] getInstrumentsWithNullArray() {
+        
+        int length = instruments.length;
+        Instrument[] instrumentsWithNull = new Instrument[length+1];
+        instrumentsWithNull[0] = null;
+        System.arraycopy(instruments, 0, instrumentsWithNull, 1, length);
+        return instrumentsWithNull;
+    }
+    
     public void setPeaklistSofwares(List<PeaklistSoftware> l) {
         peaklistSoftwares = l.toArray(new PeaklistSoftware[l.size()]);
     }
     
     public PeaklistSoftware[] getPeaklistSoftwaresArray() {
         return peaklistSoftwares;
+    }
+    
+    public PeaklistSoftware[] getPeaklistSoftwaresWithNullArray() {
+        
+        int length = peaklistSoftwares.length;
+        PeaklistSoftware[] peaklistSoftwaresWithNull = new PeaklistSoftware[length+1];
+        peaklistSoftwaresWithNull[0] = null;
+        System.arraycopy(peaklistSoftwares, 0, peaklistSoftwaresWithNull, 1, length);
+        return peaklistSoftwaresWithNull;
     }
     
     public void setAggregationList(List<Aggregation> l) {

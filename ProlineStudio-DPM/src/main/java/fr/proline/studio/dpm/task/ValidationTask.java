@@ -7,6 +7,7 @@ import com.google.api.client.util.ArrayMap;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,13 +19,15 @@ public class ValidationTask extends AbstractServiceTask {
 
     private Dataset dataset = null;
     String description;
-    HashMap<String, String> parserArguments;
+    HashMap<String, String> argumentsMap;
+    Integer[] resultSummaryId = null;
     
-    public ValidationTask(AbstractServiceCallback callback, Dataset dataset, String description, HashMap<String, String> parserArguments) {
+    public ValidationTask(AbstractServiceCallback callback, Dataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId) {
         super(callback, false /*asynchronous*/, new TaskInfo("Validation", "Validation of "+dataset.getName()+" Result Set", TASK_LIST_INFO));
         this.dataset = dataset;
         this.description = description;
-        this.parserArguments = parserArguments;
+        this.argumentsMap = argumentsMap;
+        this.resultSummaryId = resultSummaryId;
     }
     
     @Override
@@ -41,24 +44,60 @@ public class ValidationTask extends AbstractServiceTask {
 	    params.put("project_id", dataset.getProject().getId());  
             params.put("result_set_id", dataset.getResultSetId() );
             params.put("description", description ); //JPM.TODO : string is ""
-            params.put("mode", "" );  //JPM.TODO : checked : 14/02/2013 not used in WebCore ValidateResultSet.scala
+             
+            // Peptide Filters
+            ArrayList pepFilters = new ArrayList();
             
-            // parserArguments : not used //JPM.TODO
+            if (argumentsMap.containsKey("RANK")) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", "RANK");
+                filterCfg.put("threshold", Integer.valueOf(argumentsMap.get("RANK")) );
+                pepFilters.add(filterCfg);
+            }
+            if (argumentsMap.containsKey("SCORE")) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", "SCORE");
+                filterCfg.put("threshold", Float.valueOf(argumentsMap.get("SCORE")).floatValue());
+                pepFilters.add(filterCfg);
+            }
+            if (argumentsMap.containsKey("MASCOT_EVALUE")) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", "MASCOT_EVALUE");
+                filterCfg.put("threshold", Float.valueOf(argumentsMap.get("MASCOT_EVALUE")));
+                pepFilters.add(filterCfg);
+            }
+            if (argumentsMap.containsKey("PEP_SEQ_LENGTH")) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", "PEP_SEQ_LENGTH");
+                filterCfg.put("threshold", Integer.valueOf(argumentsMap.get("PEP_SEQ_LENGTH")));
+                pepFilters.add(filterCfg);
+            }
+            params.put("pep_match_filters",pepFilters);
             
-            //params.put("pep_match_params", "" );  //JPM.TODO //JPM.TODO : parameters
-            //params.put("prot_set_params", "" );  //JPM.TODO
-            
-            /*
-            List args = new ArrayList();
-            
-            // add the file to parse
-            Map<String, Object> resultfile = new HashMap<String, Object>();
-            resultfile.put("path", filePath);  //JPM.TODO : possible file access problem
-            resultfile.put("format", "mascot.dat");  //JPM.TODO
-            args.add(resultfile);
-            params.put("result_files", args);
-*/
+            // Peptide Validator
+            if (argumentsMap.containsKey("expected_fdr")) {
+                HashMap pepMatchValidator = new HashMap();
+                pepMatchValidator.put("parameter", argumentsMap.get("expected_fdr_parameter"));
+                pepMatchValidator.put("expected_fdr", argumentsMap.get("expected_fdr"));
+                params.put("pep_match_validator_config", pepMatchValidator);
+            }
 
+            
+            
+            if (argumentsMap.containsKey("use_td_competition")) {
+                params.put("use_td_competition", Boolean.parseBoolean(argumentsMap.get("use_td_competition")) );
+            }
+                
+                
+            // protein parameters
+            if (argumentsMap.containsKey("protein_expected_fdr")) {
+                HashMap protSetValidator = new HashMap();
+                protSetValidator.put("parameter", "SCORE");
+                protSetValidator.put("expected_fdr", argumentsMap.get("protein_expected_fdr"));
+                protSetValidator.put("validation_method","PROTEIN_SET_RULES");
+                params.put("prot_set_validator_config", protSetValidator);
+            }
+            
 
             request.setParameters(params);
 
@@ -84,13 +123,17 @@ public class ValidationTask extends AbstractServiceTask {
                     }
                 }
                 
+                if (errorMessage != null) {
+                    logger.error(getClass().getSimpleName() + " failed : "+errorMessage);
+                }
+                
                 return false;
             }
             
             
-            BigDecimal resultId = (BigDecimal) jsonResult.get("result");
-            if (resultId != null) {
-                id = resultId.intValue();
+            BigDecimal jobId = (BigDecimal) jsonResult.get("result");
+            if (jobId != null) {
+                id = jobId.intValue();
             } else {
                 logger.error(getClass().getSimpleName() + " failed : id not defined");
             }
@@ -155,9 +198,16 @@ public class ValidationTask extends AbstractServiceTask {
                 }
                 
                 if (success) {
-                    
-                    //JPM.TODO : get ResultRsmId
-                    
+
+                    // retrieve resultSummary id
+                    BigDecimal resultSummaryIdBD = (BigDecimal) resultMap.get("result");
+                    if (resultSummaryIdBD == null) {
+                        logger.error(getClass().getSimpleName() + " failed : No returned ResultSummary Id");
+                        return ServiceState.STATE_FAILED;
+                    }
+
+                    resultSummaryId[0] = new Integer(resultSummaryIdBD.intValue());
+
                     return ServiceState.STATE_DONE;
                 } else {
                     errorMessage = (String) resultMap.get("message");

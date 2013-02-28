@@ -389,8 +389,16 @@ public class ImportIdentificationDialog extends DefaultDialog {
             return false;
         }
         
+        // check source parameters
+        ParameterError error = sourceParameterList.checkParameters();
+        
+        
         // check specific parameters
-        ParameterError error = parameterList.checkParameters();
+        if (error == null) {
+            error = parameterList.checkParameters();
+        }
+        
+        // report error
         if (error != null) {
             setStatus(true, error.getErrorMessage());
             highlight(error.getParameterComponent());
@@ -412,7 +420,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
         }
 
         
-        // Save Other Parameters        
+        // Save Other Parameters    
+        sourceParameterList.saveParameters();
         parameterList.saveParameters();
 
         return true;
@@ -563,12 +572,17 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }  
         };
         
-        parameterList.add(new ObjectParameter("instrument", "Instrument", UDSDataManager.getUDSDataManager().getInstrumentsArray(), -1, instrumentToString));
-        parameterList.add(new ObjectParameter("peaklist_software", "Peaklist Software", UDSDataManager.getUDSDataManager().getPeaklistSoftwaresArray(), -1, softwareToString));
+        ObjectParameter instrumentParameter = new ObjectParameter("instrument", "Instrument", UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray(), -1, instrumentToString);
+        parameterList.add(instrumentParameter);
+        
+        ObjectParameter peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray(), -1, softwareToString);
+        parameterList.add(peaklistParameter);
 
         return parameterList;
         
     }
     
+    
+
     
 }

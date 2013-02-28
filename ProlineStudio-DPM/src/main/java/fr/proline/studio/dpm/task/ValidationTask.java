@@ -185,6 +185,10 @@ public class ValidationTask extends AbstractServiceTask {
                     }
                 }
                 
+                if (errorMessage != null) {
+                    logger.error(getClass().getSimpleName() + " failed : " + errorMessage);
+                }
+                
                 return ServiceState.STATE_FAILED; // should not happen !
             }
             
@@ -211,6 +215,13 @@ public class ValidationTask extends AbstractServiceTask {
                     return ServiceState.STATE_DONE;
                 } else {
                     errorMessage = (String) resultMap.get("message");
+                    
+                    
+                    if (errorMessage != null) {
+                        logger.error(getClass().getSimpleName() + " failed : " + errorMessage);
+                    }
+                
+                    
                     return ServiceState.STATE_FAILED;
                 }
                 

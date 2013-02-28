@@ -3,21 +3,22 @@ package fr.proline.studio.dam.tasks;
 
 
 import fr.proline.core.orm.msi.Spectrum;
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Instrument;
-import fr.proline.core.orm.uds.PeaklistSoftware;
-import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.core.orm.uds.*;
+import fr.proline.core.orm.uds.repository.ExternalDbRepository;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.repository.ProlineDatabaseType;
 import fr.proline.repository.DatabaseConnectorFactory;
 import fr.proline.repository.IDatabaseConnector;
 import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
+import org.netbeans.api.db.explorer.JDBCDriver;
+import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 /**
  * Used to connect to a UDS DB or MSI DB
@@ -134,6 +135,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     return false;
                 }
                 
+
+                
                 // check if the projectUser asked is known
                 if (!checkProjectUser()) {
                     return false;
@@ -146,6 +149,32 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 
                 
                 entityManagerUDS.close();
+                
+               
+                // add the UDS connection to the Netbeans Service
+                String udsJdbcDriver = (String) databaseProperties.get("javax.persistence.jdbc.driver");
+                String udsJdbcUrl = (String) databaseProperties.get("javax.persistence.jdbc.url");
+                try {
+                    ConnectionManager cm = ConnectionManager.getDefault();
+
+                    JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers(udsJdbcDriver)[0];
+
+                    DatabaseConnection dbconn = DatabaseConnection.create(driver, udsJdbcUrl, (String) databaseProperties.get("javax.persistence.jdbc.user"), "public", (String) databaseProperties.get("javax.persistence.jdbc.password"), true);
+                 
+                    cm.addConnection(dbconn);
+                } catch (Exception e) {
+                    
+                    String message = e.getMessage();
+                    if ((message == null) || (message.indexOf("connection already exists") == -1)) { //JPM.WART : avoid error because the connection already exist
+                        logger.error(getClass().getSimpleName() + " failed to add UDS connection to Services ", e);
+                    }
+                }
+                
+                // keep some information to be able to add MSI connection to Netbeans Service
+                UDSDataManager.getUDSDataManager().setUdsJdbcDriver(udsJdbcDriver);
+                UDSDataManager.getUDSDataManager().setUdsJdbcURL(udsJdbcUrl);
+                
+                
             } else if (action == UDS_USER_TEST) {
                 // check if the projectUser asked is known
                 if (!checkProjectUser()) {
@@ -164,6 +193,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
                     entityManagerMSI.close();
 
+                    
                     // PS Connection
                     EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
                     entityManagerPS.close();

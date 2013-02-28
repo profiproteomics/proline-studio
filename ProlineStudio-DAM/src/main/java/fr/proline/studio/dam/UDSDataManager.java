@@ -21,6 +21,8 @@ public class UDSDataManager  {
     private PeaklistSoftware[] peaklistSoftwares;
     private UserAccount[] projectUsers;
     private UserAccount projectUser;
+    private String jdbcURL;
+    private String jdbcDriver;
     
     private HashMap<Aggregation.ChildNature, Aggregation> aggregationMap = null;
     
@@ -104,5 +106,19 @@ public class UDSDataManager  {
         return projectUser.getLogin();
     }
 
-    
+    public void setUdsJdbcDriver(String jdbcDriver) {
+        this.jdbcDriver = jdbcDriver;
+    }
+    public String getUdsJdbcDriver() {
+        return jdbcDriver;
+    }
+
+    public void setUdsJdbcURL(String jdbcURL) {
+        this.jdbcURL = jdbcURL;
+    }
+
+    public String getUdsJdbcURL() {
+        return  jdbcURL;
+    }
+
 }

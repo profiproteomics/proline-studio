@@ -2,11 +2,10 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
-import fr.proline.core.orm.uds.IdentificationDataset;
-import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.*;
+import fr.proline.core.orm.uds.repository.ExternalDbRepository;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.repository.ProlineDatabaseType;
 import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
@@ -17,6 +16,10 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.Query;
+import org.netbeans.api.db.explorer.ConnectionManager;
+import org.netbeans.api.db.explorer.DatabaseConnection;
+import org.netbeans.api.db.explorer.JDBCDriver;
+import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 /**
  * Used to load dataset in two cases :
@@ -252,30 +255,43 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             // load parent DataSet
             TypedQuery<Dataset> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE (d.parentDataset IS null) AND d.project.id=:projectId  ORDER BY d.fractionCount ASC", Dataset.class);
             dataSetQuery.setParameter("projectId", projectId);
-            List<Dataset> datasetList = dataSetQuery.getResultList();
+            List<Dataset> datasetListSelected = dataSetQuery.getResultList();
 
-            Iterator<Dataset> it = datasetList.iterator();
+            Iterator<Dataset> it = datasetListSelected.iterator();
             while (it.hasNext()) {
                 Dataset datasetCur = it.next();
                 list.add(new DataSetData(datasetCur));
             }
             
-            project.getTransientData().setChildrenNumber(datasetList.size());
+            project.getTransientData().setChildrenNumber(datasetListSelected.size());
             
-            //JPM.CLEAN
-            /*if (project.getId() == 1) {
-                DataSetTMP dataSetCur = new DataSetTMP();
-                dataSetCur.description = "";
-                dataSetCur.id = 1;
-                dataSetCur.name = "CB_342";
-                dataSetCur.parentDataSetId = null;
-                dataSetCur.project = project;
-                dataSetCur.resultSetId = null;
-                dataSetCur.resultSummaryId = null;
-                dataSetCur.aggregateType = DataSetTMP.BIOLOGICAL_SAMPLE;
+            // add the UDS connection to the Netbeans Service
+            ExternalDb msiDb = ExternalDbRepository.findExternalByTypeAndProject(entityManagerUDS, ProlineDatabaseType.MSI, entityManagerUDS.merge(project));
+            
+            
+            
+            try {
+                ConnectionManager cm = ConnectionManager.getDefault();
 
-                list.add(new DataSetData(dataSetCur));
-            }*/
+                JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers( UDSDataManager.getUDSDataManager().getUdsJdbcDriver() )[0]; //JPM.WART : same driver for uds and msi
+
+                String udsJdbcUrl = UDSDataManager.getUDSDataManager().getUdsJdbcURL();
+                
+                String msiJdbcUrl = udsJdbcUrl.substring(0, udsJdbcUrl.lastIndexOf('/')+1) + msiDb.getDbName();
+                
+                
+                DatabaseConnection dbconn = DatabaseConnection.create(driver, msiJdbcUrl, msiDb.getDbUser(), "public", msiDb.getDbPassword(), true);
+
+                cm.addConnection(dbconn);
+            } catch (Exception e) {
+
+                String message = e.getMessage();
+                if ((message == null) || (message.indexOf("connection already exists") == -1)) { //JPM.WART : avoid error because the connection already exist
+                    logger.error(getClass().getSimpleName() + " failed to add UDS connection to Services ", e);
+                }
+            }
+            
+            
             
             
             entityManagerUDS.getTransaction().commit();
@@ -395,30 +411,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             DataSetTMP dataSet = dataSetQuery.getSingleResult();
             rsm.getTransientData().setDataSet(dataSet);*/
             
-            /*JPM.CLEAN if (rsmId.intValue() == 2) {
-                DataSetTMP dataSetCur = new DataSetTMP();
-                dataSetCur.description = "";
-                dataSetCur.id = 4;
-                dataSetCur.name = "RSM 1";
-                dataSetCur.parentDataSetId = 2;
-                dataSetCur.project = project;
-                dataSetCur.resultSetId = new Integer(13);
-                dataSetCur.resultSummaryId = new Integer(2);
-                
-                rsm.getTransientData().setDataSet(dataSetCur);
-            } else if (rsmId.intValue() == 4) {
-                
-                DataSetTMP dataSetCur = new DataSetTMP();
-                dataSetCur.description = "";
-                dataSetCur.id = 5;
-                dataSetCur.name = "RSM 2";
-                dataSetCur.parentDataSetId = 2;
-                dataSetCur.project = project;
-                dataSetCur.resultSetId = new Integer(13);
-                dataSetCur.resultSummaryId = new Integer(4);
-                
-                rsm.getTransientData().setDataSet(dataSetCur);
-            }*/
+
 
      
             entityManagerUDS.getTransaction().commit();

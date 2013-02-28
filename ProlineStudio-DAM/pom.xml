@@ -36,7 +36,7 @@
 
     <dependencies>
         <!-- NetBeans dependencies -->
-        <dependency>
+        <!--<dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-api-annotations-common</artifactId>
             <version>${netbeans.version}</version>
@@ -45,7 +45,209 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util</artifactId>
             <version>${netbeans.version}</version>
+        </dependency> -->
+        
+        <!-- TOTOCHE -->
+        
+               <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-annotations-common</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm</type>
         </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-lookup</artifactId>
+            <version>${netbeans.version}</version>
+            <type>jar</type>
+        </dependency>                
+        <!-- NbModuleSuite functional in RELEASE70 or later: -->
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-nbjunit</artifactId>
+            <version>${netbeans.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-awt</artifactId>
+            <version>${netbeans.version}</version>           
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-db</artifactId>
+            <version>${netbeans.version}</version>
+            <type>jar</type>
+<!--            <exclusions>
+                <exclusion>
+                    <artifactId>org-netbeans-modules-db-kit</artifactId>
+                    <groupId>org.netbeans.modules</groupId>
+                </exclusion>
+            </exclusions>   -->
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-db-core</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-dbapi</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-db-metadata-model</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>      
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-db-drivers</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-db-sql-editor</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-db-dataview</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+       <!-- Cluster ide dependencies -->     
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-core-ide</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency> 
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-project-libraries</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-projectapi</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-projectuiapi</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency> 
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-projectui</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openidex-util</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-completion</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-editor-actions</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-deprecated-pre65formatting</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-lib</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-lib2</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-indent</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-editor-settings-storage</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-settings</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-util</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-fold</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-lexer</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-libs-swingx</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        
+        <!-- TOTOCHE -->
+            
+            
+        
+        
         <!-- ProlineStudio dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>

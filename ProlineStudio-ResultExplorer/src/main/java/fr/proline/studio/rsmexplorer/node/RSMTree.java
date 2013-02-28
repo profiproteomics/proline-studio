@@ -335,9 +335,17 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         // retrieve selected nodes
         RSMNode[] selectedNodes = getSelectedNodes();
         
+        // check if nodes are changing
+        int nbNodes = selectedNodes.length;
+        for (int i=0;i<nbNodes;i++) {
+            if (selectedNodes[i].isChanging()) {
+                // do not show a popup on a node which is changing
+                return;
+            }
+        }
+        
         // check if the Root node is selected
         boolean rootNodeSelected = false;
-        int nbNodes = selectedNodes.length;
         for (int i=0;i<nbNodes;i++) {
             RSMNode n = selectedNodes[i];
             if (n.isRoot()) {

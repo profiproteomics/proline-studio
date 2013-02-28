@@ -331,7 +331,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         if (dataset != null) {
             projectId = dataset.getProject().getId();
         } else if (datasetList != null) {
-            projectId = datasetList.get(0).getId();
+            projectId = datasetList.get(0).getProject().getId();
         }
         
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();       

@@ -112,7 +112,7 @@ public class DecoratedMarkerTable extends DecoratedTable implements MarkerCompon
         }
         
         int row = rowAtPoint(new Point(0, y+viewRect.y-headerHeight));
-        System.out.println(row);
+        //System.out.println(row);
         return row;
     }
 }

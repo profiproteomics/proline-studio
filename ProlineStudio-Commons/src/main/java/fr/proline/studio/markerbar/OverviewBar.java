@@ -57,7 +57,7 @@ public class OverviewBar extends AbstractBar  implements MouseListener {
         int y = e.getY();
         int rowClicked = (int) Math.round(  ( ((double) y) / ((double) getHeight()) )*nbRows );
         
-        System.out.println(rowClicked);
+        //System.out.println(rowClicked);
         
         componentInterface.scrollToVisible(rowClicked);
         

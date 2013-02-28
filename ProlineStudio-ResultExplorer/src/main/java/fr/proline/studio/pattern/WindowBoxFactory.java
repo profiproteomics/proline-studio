@@ -38,7 +38,11 @@ public class WindowBoxFactory {
         boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         boxes[2] = new DataBoxRsetProteinsForPeptideMatch();
         
-        return new WindowBox( name, generatePanel(boxes), boxes[0] );
+
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0] );
+        winBox.resetDefaultSize(); //JPM.WART
+        return winBox;
+        
     }
     
     public static WindowBox getProteinSetsWindowBox(String name) {

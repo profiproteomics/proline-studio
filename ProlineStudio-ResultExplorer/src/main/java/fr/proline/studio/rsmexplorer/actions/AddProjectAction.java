@@ -13,7 +13,6 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.awt.StatusDisplayer;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -30,7 +29,6 @@ public class AddProjectAction  extends AbstractRSMAction {
     @Override
     public void actionPerformed(final RSMNode[] selectedNodes, int x, int y) {
         
-        StatusDisplayer.getDefault().setStatusText("Add Project", StatusDisplayer.IMPORTANCE_ANNOTATION);
         
         // only one node selected for this action
         final RSMNode n = selectedNodes[0];

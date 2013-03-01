@@ -1,7 +1,9 @@
 package fr.proline.studio.dpm;
 
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.task.AbstractServiceTask;
 import java.util.LinkedList;
+import org.openide.awt.StatusDisplayer;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -11,6 +13,8 @@ import org.slf4j.LoggerFactory;
 public class ServiceStatusThread extends Thread {
     
     private final static int DELAY_BETWEEN_POLLING = 10000;
+    
+    private TaskInfo currentTaskInfo = null;
     
     private static ServiceStatusThread instance;
     
@@ -36,6 +40,7 @@ public class ServiceStatusThread extends Thread {
         try {
             while (true) {
                 
+                
                 Thread.sleep(DELAY_BETWEEN_POLLING);
                 
                 AbstractServiceTask task = null;
@@ -43,8 +48,12 @@ public class ServiceStatusThread extends Thread {
 
                     if (!taskList.isEmpty()) {
                         task = taskList.poll();
+                        currentTaskInfo = task.getTaskInfo();
+                        updateStatusDisplay();
                     } else {
                         // taskList is empty, we stop to do polling
+                        currentTaskInfo = null;
+                        updateStatusDisplay();
                         wait();
                     }
                     notifyAll();
@@ -92,5 +101,29 @@ public class ServiceStatusThread extends Thread {
             // wake up the thread if it is waiting
             notifyAll();
         }
+        
+        updateStatusDisplay();
     }
+    
+    public void updateStatusDisplay() {
+
+        synchronized (this) {
+            int taskListSize = taskList.size();
+            TaskInfo taskInfoToDisplay = null;
+            if (currentTaskInfo !=null) {
+                taskListSize++;
+                taskInfoToDisplay = currentTaskInfo;
+            } else if (taskListSize>0) {
+                taskInfoToDisplay = taskList.peek().getTaskInfo();
+            }
+            String status;
+            if (taskInfoToDisplay != null) {
+                status = taskListSize+" service(s) running. Awaiting "+taskInfoToDisplay.getTaskName()+".";
+            } else {
+                status = "";
+            }
+            StatusDisplayer.getDefault().setStatusText(status, StatusDisplayer.IMPORTANCE_ANNOTATION);
+        }
+    }
+    
 }

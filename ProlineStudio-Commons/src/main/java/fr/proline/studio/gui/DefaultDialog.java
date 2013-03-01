@@ -336,8 +336,8 @@ public class DefaultDialog extends javax.swing.JDialog {
         }
         
         // bottom right corner check
-        int width = getWidth();
-        int height = getHeight();
+        int width = getWidth(); 
+        int height = getHeight()+30; // +30 is for window task bar
         
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         if (x+width>screenSize.width) {

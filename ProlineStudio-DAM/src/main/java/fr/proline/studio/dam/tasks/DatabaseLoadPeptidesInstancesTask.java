@@ -108,19 +108,20 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             e.printStackTrace();
         }
         
-        
-        try {
+        if (!peptideMap.isEmpty()) {
+            try {
 
-            entityManagerPS.getTransaction().begin();
-            
-            fetchPtmData(entityManagerPS, peptideMap);
-            
-            entityManagerPS.getTransaction().commit();
-        } catch (Exception e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
-            return false;
-        } finally {
-            entityManagerPS.close();
+                entityManagerPS.getTransaction().begin();
+
+                fetchPtmData(entityManagerPS, peptideMap);
+
+                entityManagerPS.getTransaction().commit();
+            } catch (Exception e) {
+                logger.error(getClass().getSimpleName() + " failed", e);
+                return false;
+            } finally {
+                entityManagerPS.close();
+            }
         }
         
         return true;

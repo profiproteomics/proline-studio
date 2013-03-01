@@ -135,8 +135,8 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
                         // no data ready (should not happen)
                         return;
                     }
-
-                    RSMTree tree = RSMTree.getTree().copyResultSetRootSubTree(rset);
+                    Integer projectId = proteinSetComparePanel.getDataBox().getProjectId();
+                    RSMTree tree = RSMTree.getTree().copyResultSetRootSubTree(rset, projectId);
 
                     Window window = SwingUtilities.getWindowAncestor(legendPanel);
 

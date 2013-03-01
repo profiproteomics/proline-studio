@@ -106,7 +106,7 @@ public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implem
     public void setData(ProteinMatch pm, PeptideInstance selectedPeptide, PeptideInstance[] peptideInstances) {
         
         if ((pm == null) || (pm.getTransientData().getBioSequence() == null)) {
-            editorPane.setText("");
+            editorPane.setText("Protein Sequence not avaible in database");
 
             return;
         }

@@ -68,11 +68,11 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     }
 
-    public RSMTree copyResultSetRootSubTree(ResultSet rset) {
+    public RSMTree copyResultSetRootSubTree(ResultSet rset, Integer projectId) {
 
         int rsetId = rset.getId().intValue();
 
-        RSMDataSetNode rsetNode = findResultSetNode((RSMNode) model.getRoot(), rsetId);
+        RSMDataSetNode rsetNode = findResultSetNode((RSMNode) model.getRoot(), rsetId, projectId);
 
         if (rsetNode == null) {
             return null;
@@ -84,22 +84,29 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     }
 
-    private RSMDataSetNode findResultSetNode(RSMNode node, int rsetId) {
+    private RSMDataSetNode findResultSetNode(RSMNode node, int rsetId, Integer projectId) {
 
         int nbChildren = node.getChildCount();
 
         for (int i = 0; i < nbChildren; i++) {
             RSMNode childNode = (RSMNode) node.getChildAt(i);
-            if (childNode.getType() == RSMNode.NodeTypes.DATA_SET) {
+            RSMNode.NodeTypes childType = childNode.getType();
+            if (childType == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode dataSetNode = ((RSMDataSetNode) childNode);
                 Integer resultSetId = dataSetNode.getResultSetId();
 
                 if ((resultSetId != null) && (resultSetId.intValue() == rsetId)) {
                     return dataSetNode;
                 }
+            } else if (childType == RSMNode.NodeTypes.PROJECT) {
+                RSMProjectNode projectNode = ((RSMProjectNode) childNode);
+                if (projectNode.getProject().getId() != projectId) {
+                    // we are not in the right project
+                    continue;
+                }
             }
             if (!childNode.isLeaf()) {
-                RSMDataSetNode dataSetNode = findResultSetNode(childNode, rsetId);
+                RSMDataSetNode dataSetNode = findResultSetNode(childNode, rsetId, projectId);
                 if (dataSetNode != null) {
                     return dataSetNode;
                 }
@@ -112,16 +119,20 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     private RSMDataSetNode findResultSetNodeRootParent(RSMDataSetNode node) {
 
-        RSMDataSetNode resultSetRootParent = node;
+        /*RSMDataSetNode resultSetRootParent = node;
         RSMNode parentNode = (RSMNode) node.getParent();
         while (parentNode != null) {
             if (parentNode.getType() == RSMNode.NodeTypes.DATA_SET) {
+                RSMDataSetNode datasetParentNode = (RSMDataSetNode) parentNode;
+                
                 resultSetRootParent = (RSMDataSetNode) parentNode;
             }
             parentNode = (RSMNode) parentNode.getParent();
         }
 
-        return resultSetRootParent;
+        return resultSetRootParent;*/
+        //JPM.TODO : no longer correct for the way I use Dataset
+        return node;
     }
 
     public void setSelection(ArrayList<ResultSummary> rsmArray) {

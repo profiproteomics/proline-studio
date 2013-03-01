@@ -169,6 +169,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         action = MODIFY_VALIDATED_DATASET;
     }
     
+  
     @Override
     public boolean needToFetch() {
 
@@ -253,7 +254,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
             
             // load parent DataSet
-            TypedQuery<Dataset> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE (d.parentDataset IS null) AND d.project.id=:projectId  ORDER BY d.fractionCount ASC", Dataset.class);
+            TypedQuery<Dataset> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE (d.parentDataset IS null) AND d.project.id=:projectId  ORDER BY d.number ASC", Dataset.class);
             dataSetQuery.setParameter("projectId", projectId);
             List<Dataset> datasetListSelected = dataSetQuery.getResultList();
 
@@ -491,7 +492,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         Project mergedProject = entityManagerUDS.merge(project);
         Dataset mergedParentDataset = (parentDataset == null) ? null : entityManagerUDS.merge(parentDataset);
          
-        Dataset d = null;
+        Dataset d;
         if (identificationDataset) {
             d = new IdentificationDataset();
             d.setProject(mergedProject);

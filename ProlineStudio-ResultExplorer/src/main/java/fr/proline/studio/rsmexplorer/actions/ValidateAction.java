@@ -17,6 +17,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.ValidationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.util.ArrayList;
 import java.util.HashMap;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -34,9 +35,20 @@ public class ValidateAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) { 
 
+        int nbNodes = selectedNodes.length;
+        ArrayList<Dataset> datasetList = new ArrayList<>(nbNodes);
+        for (int i=0; i<nbNodes; i++) {
+            RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[i];
+            Dataset d = dataSetNode.getDataset();
+            datasetList.add(d);
+        }
+        
+        
+        
         
         ValidationDialog dialog = ValidationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
+        dialog.setDatasetList(datasetList);
         dialog.setVisible(true);
 
         
@@ -47,7 +59,7 @@ public class ValidateAction extends AbstractRSMAction {
 
 
             // start validation for each selected Dataset
-            int nbNodes = selectedNodes.length;
+            
             for (int i=0;i<nbNodes;i++) {
                 final RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[i];
 

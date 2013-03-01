@@ -72,6 +72,18 @@ public class ValidationTask extends AbstractServiceTask {
                 filterCfg.put("threshold", Integer.valueOf(argumentsMap.get("PEP_SEQ_LENGTH")));
                 pepFilters.add(filterCfg);
             }
+            if (argumentsMap.containsKey("SCORE_IT_P-VALUE")) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", "SCORE_IT_P-VALUE");
+                filterCfg.put("threshold", Float.valueOf(argumentsMap.get("SCORE_IT_P-VALUE")));
+                pepFilters.add(filterCfg);
+            }
+            if (argumentsMap.containsKey("SCORE_HT_P-VALUE")) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", "SCORE_HT_P-VALUE");
+                filterCfg.put("threshold", Float.valueOf(argumentsMap.get("SCORE_HT_P-VALUE")));
+                pepFilters.add(filterCfg);
+            }
             params.put("pep_match_filters",pepFilters);
             
             // Peptide Validator

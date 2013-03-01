@@ -1,10 +1,18 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.uds.Dataset;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.*;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
 
@@ -20,8 +28,8 @@ public class ValidationDialog extends DefaultDialog {
     
     private final static String[] FDR_ESTIMATOR_VALUES = {null, "Default", "Competition Based"};
     private final static String[] FDR_ESTIMATOR_VALUES_ASSOCIATED_KEYS = {null, "false", "true"};
-    private final static String[] FDR_ON_VALUES = {null, "Score", "e-Value"};
-    private final static String[] FDR_ON_VALUES_ASSOCIATED_KEYS = {null, "SCORE", "MASCOT_EVALUE"};
+    private final static String[] FDR_ON_VALUES = {null, "Score", "e-Value", "Identity p-Value", "Homology p-Value"};
+    private final static String[] FDR_ON_VALUES_ASSOCIATED_KEYS = {null, "SCORE", "MASCOT_EVALUE", "SCORE_IT_P-VALUE", "SCORE_HT_P-VALUE"};
     
     private ParameterList parameterList;
     
@@ -41,11 +49,23 @@ public class ValidationDialog extends DefaultDialog {
     private JTextField proteinFdrTextField = null;
     private JLabel proteinFdrPercentageLabel = null;
     private JComboBox fdrOnValueComboBox = null;
+    private JCheckBox fdrCheckbox = null;
+    private JCheckBox proteinFdrCheckbox = null;
 
+    private enum DecoyStatus {
+        WAITING,
+        HAS_DECOY,
+        NO_DECOY
+    }
+    
+    private DecoyStatus hasDecoy  = DecoyStatus.WAITING;
+    
     public static ValidationDialog getDialog(Window parent) {
         if (singletonDialog == null) {
             singletonDialog = new ValidationDialog(parent);
         }
+        
+        
 
         return singletonDialog;
     }
@@ -65,6 +85,51 @@ public class ValidationDialog extends DefaultDialog {
 
     }
 
+    public synchronized void setHasDecoy(DecoyStatus hasDecoy) {
+        this.hasDecoy = hasDecoy;
+    }
+    public synchronized DecoyStatus getHasDecoy() {
+        return hasDecoy;
+    }
+    
+    public void setDatasetList(final ArrayList<Dataset> datasetList) {
+
+        setHasDecoy(DecoyStatus.WAITING);
+        
+        // we need to load ResultSet of dataset to be sure if we
+        // can validate on Decoy Resultset or not
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask) {
+                
+                int nb = datasetList.size();
+                for (int i=0;i<nb;i++) {
+                    Dataset dataset = datasetList.get(i);
+                    ResultSet rset = dataset.getTransientData().getResultSet();
+                    
+                    if (rset.getDecoyResultSet() == null) {
+                        setHasDecoy(DecoyStatus.NO_DECOY);
+                        return;
+                    }
+                }
+                setHasDecoy(DecoyStatus.HAS_DECOY);
+            }
+        };
+
+        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+        task.initLoadRsetAndRsm(datasetList);
+        task.setPriority(AbstractDatabaseTask.Priority.HIGH_3); // must be done as fast as possible to avoid to let the use wait
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+                                
+    }
+    
     private JPanel createInternalPanel() {
         JPanel internalPanel = new JPanel(new GridBagLayout());
 
@@ -220,7 +285,7 @@ public class ValidationDialog extends DefaultDialog {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         boolean fdrUsed = fdrFilterParameter.isUsed();
-        final JCheckBox fdrCheckbox = new JCheckBox();
+        fdrCheckbox = new JCheckBox();
         fdrLabel = new JLabel("Ensure FDR <=");
         fdrPercentageLabel = new JLabel("%  on");
         fdrCheckbox.setSelected(fdrUsed);
@@ -329,16 +394,16 @@ public class ValidationDialog extends DefaultDialog {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         boolean parameterUsed = proteinFdrFilterParameter.isUsed();
-        final JCheckBox fdrCheckbox = new JCheckBox("");
+        proteinFdrCheckbox = new JCheckBox("");
         proteinFdrLabel = new JLabel("Protein FDR <=");
-        fdrCheckbox.setSelected(parameterUsed);
+        proteinFdrCheckbox.setSelected(parameterUsed);
         proteinFdrPercentageLabel = new JLabel(" %");
 
         updateproteinFdrObjects(parameterUsed);
 
         c.gridx = 0;
         c.gridy = 0;
-        proteinSetFilterPanel.add(fdrCheckbox, c);
+        proteinSetFilterPanel.add(proteinFdrCheckbox, c);
 
         c.gridx++;
         proteinSetFilterPanel.add(proteinFdrLabel, c);
@@ -351,11 +416,11 @@ public class ValidationDialog extends DefaultDialog {
         c.weightx = 1.0;
         proteinSetFilterPanel.add(Box.createHorizontalBox(), c);
 
-        fdrCheckbox.addActionListener(new ActionListener() {
+        proteinFdrCheckbox.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean enabled = (fdrCheckbox.isSelected());
+                boolean enabled = (proteinFdrCheckbox.isSelected());
                 updateproteinFdrObjects(enabled);
             }
         });
@@ -364,9 +429,9 @@ public class ValidationDialog extends DefaultDialog {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                boolean enabled = (fdrCheckbox.isSelected());
+                boolean enabled = (proteinFdrCheckbox.isSelected());
                 if (!enabled) {
-                    fdrCheckbox.setSelected(true);
+                    proteinFdrCheckbox.setSelected(true);
                     updateproteinFdrObjects(true);
                     if (e.getSource().equals(proteinFdrTextField)) {
                         proteinFdrTextField.requestFocusInWindow();
@@ -391,7 +456,7 @@ public class ValidationDialog extends DefaultDialog {
     }
 
     private void createParameters() {
-        prefilterParameters = new AbstractParameter[4];
+        prefilterParameters = new AbstractParameter[6];
         prefilterParameters[0] = new IntegerParameter("RANK", "Rank", new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
         prefilterParameters[0].setAssociatedData("<=");
         prefilterParameters[1] = new IntegerParameter("PEP_SEQ_LENGTH", "Length", new JTextField(6), new Integer(4), new Integer(4), null);
@@ -400,6 +465,10 @@ public class ValidationDialog extends DefaultDialog {
         prefilterParameters[2].setAssociatedData(">=");
         prefilterParameters[3] = new DoubleParameter("MASCOT_EVALUE", "e-Value", new JTextField(6), new Double(1), new Double(0), new Double(1));
         prefilterParameters[3].setAssociatedData("<=");
+        prefilterParameters[4] = new DoubleParameter("SCORE_IT_P-VALUE", "Identity p-Value", new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        prefilterParameters[4].setAssociatedData("=");   
+        prefilterParameters[5] = new DoubleParameter("SCORE_HT_P-VALUE", "Homology p-Value", new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        prefilterParameters[5].setAssociatedData("=");
 
         for (int i = 0; i < prefilterParameters.length; i++) {
             AbstractParameter p = prefilterParameters[i];
@@ -437,6 +506,36 @@ public class ValidationDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
 
+        boolean aFdrSelected = fdrCheckbox.isSelected() || proteinFdrCheckbox.isSelected();
+
+        if (aFdrSelected && (getHasDecoy() == DecoyStatus.WAITING)) {
+            // we have not finished to read data for decoy check
+            // we are waiting for one second
+            setBusy(true);
+            javax.swing.Timer t = new Timer(1000, new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    okCalled();
+                }
+            });
+            t.setRepeats(false);
+            t.start();
+            return false;
+        }
+         
+        setBusy(false);
+        
+        if (aFdrSelected && (getHasDecoy() == DecoyStatus.NO_DECOY)) {
+            setStatus(true, "A FDR can not be calculated with no Decoy Data");
+            if (fdrCheckbox.isSelected()) {
+                highlight(fdrCheckbox);
+            } else {
+                highlight(proteinFdrCheckbox);
+            }
+            return false;
+        }
+            
         // check parameters
         ParameterError error = parameterList.checkParameters();
         if (error != null) {

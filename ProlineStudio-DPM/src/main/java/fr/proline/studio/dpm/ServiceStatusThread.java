@@ -40,6 +40,8 @@ public class ServiceStatusThread extends Thread {
         try {
             while (true) {
                 
+                currentTaskInfo = null;
+                updateStatusDisplay();
                 
                 Thread.sleep(DELAY_BETWEEN_POLLING);
                 

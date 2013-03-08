@@ -32,7 +32,12 @@ public class LazyData implements Comparable<LazyData> {
         }
 
         return data.compareTo(o.data);
-
-
+    }
+    
+    @Override
+    public String toString() {
+        if (data == null) 
+            return super.toString();
+        return data.toString();
     }
 }

@@ -138,6 +138,7 @@
                 </executions>
                 <configuration>
                     <publicPackages>
+                        <publicPackage>com.thierry.filtering</publicPackage>
                         <publicPackage>fr.proline.studio</publicPackage>
                         <publicPackage>fr.proline.studio.action</publicPackage>
                         <publicPackage>fr.proline.studio.dbs</publicPackage>

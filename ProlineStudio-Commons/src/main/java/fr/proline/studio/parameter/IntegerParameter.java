@@ -182,7 +182,7 @@ public class IntegerParameter extends AbstractParameter {
             try {
                 value = Integer.parseInt(textField.getText());
             } catch (NumberFormatException nfe) {
-                return new ParameterError(name+" is  not a Integer", parameterComponent);
+                return new ParameterError(name+" is not a Integer", parameterComponent);
             }
         } else if (graphicalType.equals(JSlider.class)) {
             // with a slider, there can be no error

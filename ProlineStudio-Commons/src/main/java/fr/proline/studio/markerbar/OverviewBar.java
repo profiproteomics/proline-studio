@@ -57,9 +57,19 @@ public class OverviewBar extends AbstractBar  implements MouseListener {
         int y = e.getY();
         int rowClicked = (int) Math.round(  ( ((double) y) / ((double) getHeight()) )*nbRows );
         
-        //System.out.println(rowClicked);
+        // search for the nearest marker
+        int rowWithMarker = containerPanel.findNearestRowWithMarker(rowClicked);
         
-        componentInterface.scrollToVisible(rowClicked);
+        // calculate number of pixels between the row with marker and the row clicked
+        // if the difference is less that 5 pixels, act as if the user has clicked on the marker
+        double nbPixels = (((double)Math.abs(rowWithMarker-rowClicked))/nbRows)*getHeight();
+        if (nbPixels<=5) {
+            componentInterface.scrollToVisible(rowWithMarker);
+        } else {
+            componentInterface.scrollToVisible(rowClicked);
+        }
+        
+        
         
     }
 

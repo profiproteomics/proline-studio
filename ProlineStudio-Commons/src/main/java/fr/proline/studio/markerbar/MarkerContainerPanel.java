@@ -185,6 +185,39 @@ public class MarkerContainerPanel extends JPanel {
         return !markers.isEmpty();
     }
     
+    public int findNearestRowWithMarker(int row) {
+        Integer rowKey = Integer.valueOf(row);
+        Integer nearestLowerRowKey = markers.floorKey(rowKey);
+        Integer nearestHigherRowKey = markers.higherKey(rowKey);
+        
+        int rowLower = -1;
+        if (nearestLowerRowKey != null) {
+            rowLower = nearestLowerRowKey.intValue();
+        }
+        
+        int rowHigher= -1;
+        if (nearestHigherRowKey != null) {
+            rowHigher = nearestHigherRowKey.intValue();
+        }
+
+        if ((rowLower == -1) && (rowHigher == -1)) {
+            return row;
+        } else if ((rowLower != -1) && (rowHigher == -1)) {
+            return rowLower;
+        } else if ((rowLower == -1) && (rowHigher != -1)) {
+            return rowHigher;
+        } else {
+            if ((row-rowLower)<=(rowHigher-row)) {
+                return rowLower;
+            } else {
+                return rowHigher;
+            }
+        }
+        
+        
+        
+    }
+    
     
     private void repaintBars() {
         if (overviewBar != null) {

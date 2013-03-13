@@ -84,7 +84,7 @@ public class TableSelection implements Transferable, ClipboardOwner {
         stringFlavors.add(new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType + ";class=java.lang.String",
                 "String Flavor"));
         stringFlavors.add(DataFlavor.stringFlavor);
-        supporterFlavors.addAll(htmlFlavors);
+        //supporterFlavors.addAll(htmlFlavors);
         supporterFlavors.addAll(textFlavors);
         supporterFlavors.addAll(stringFlavors);
     }
@@ -120,16 +120,27 @@ public class TableSelection implements Transferable, ClipboardOwner {
     }
 
     public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+        
+        //long start = System.currentTimeMillis();
         String transferedData = null;
         if (isHTMLDataFlavor(flavor)) {
+            //System.out.println("HTML");
             transferedData = getHTMLStringSelection();
         }
         if (isTextDataFlavor(flavor)) {
+            //System.out.println("TEXT");
             transferedData = getTextStringSelection();
         }
         if (isStringDataFlavor(flavor)) {
+            //System.out.println("STRING");
             transferedData = getTextStringSelection();
         }
+        
+        /*long stop = System.currentTimeMillis();
+        
+        double delta = ((double)(stop-start))/1000.0;
+        System.out.println(delta);*/
+        
         if (transferedData != null) {
             return getTransferData(flavor, transferedData);
         }

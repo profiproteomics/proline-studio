@@ -21,7 +21,7 @@ public class FileParameter extends AbstractParameter {
     private String fileFilterExtension;
 
     public FileParameter(String key, String name, Class graphicalType, String defaultValue, String fileFilterName, String fileFilterExtension) {
-        super(key, name, Integer.class, graphicalType);
+        super(key, name, String.class, graphicalType);
         this.defaultValue = defaultValue;
         this.fileFilterName = fileFilterName;
         this.fileFilterExtension = fileFilterExtension;

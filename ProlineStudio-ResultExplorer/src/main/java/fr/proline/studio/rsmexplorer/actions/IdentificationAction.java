@@ -66,6 +66,7 @@ public class IdentificationAction extends AbstractRSMAction {
             final Dataset _parentDataset = parentDataset;
                     
             String parserId = dialog.getParserId();
+            String decoyRegex = dialog.getDecoyRegex();
             Integer instrumentId = dialog.getInstrumentId();
             Integer peaklistSoftwareId = dialog.getPeaklistSoftwareId();
             
@@ -116,7 +117,7 @@ public class IdentificationAction extends AbstractRSMAction {
                 };
 
 
-                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, f.getAbsolutePath(), instrumentId, peaklistSoftwareId, project.getId(), _resultSetId);
+                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, f.getAbsolutePath(), decoyRegex, instrumentId, peaklistSoftwareId, project.getId(), _resultSetId);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
                 
             }

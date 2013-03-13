@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import javax.swing.*;
@@ -39,6 +40,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private final static String[] PARSER_IDS = { "mascot.dat", "omssa.omx" };
     
     
+    private final static String[] DECOY_VALUES = {null, "No Decoy", "Software Engine Decoy", "Concataned Decoy"};
+    private final static String[] DECOY_VALUES_ASSOCIATED_KEYS = DECOY_VALUES;
+    private static final int CONCATENATED_DECOY_INDEX = 3;
+    
+    
     private JList<File> fileList;
     private JScrollPane fileListScrollPane;
 
@@ -49,7 +55,15 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private JComboBox parserComboBox;
     private int previousParserIndex = -1;
     private ParameterList sourceParameterList;
+    private StringParameter decoyRegexParameter;
 
+    
+    private JComboBox instrumentsComboBox = null;
+    private JComboBox peaklistSoftwaresComboBox = null;
+    private JComboBox decoyComboBox = null;
+    private JLabel decoyAccessionRegexLabel = null;
+    private JTextField decoyRegexTextField = null;
+    private JButton regexButton;
     
     private JPanel parserParametersPanel = null;
 
@@ -148,7 +162,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         JPanel fileSelectionPanel = new JPanel(new GridBagLayout());
         fileSelectionPanel.setBorder(BorderFactory.createTitledBorder(" Files Selection "));
 
-        fileList = new JList<File>(new DefaultListModel());
+        fileList = new JList<>(new DefaultListModel());
         fileListScrollPane = new JScrollPane(fileList) {
 
             private Dimension preferredSize = new Dimension(360, 200);
@@ -289,7 +303,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         // Creation of Objects for the Parser Panel
         JPanel parserPanel = new JPanel(new GridBagLayout());
 
-        JLabel parserLabel = new JLabel("Parser :");
+        JLabel parserLabel = new JLabel("Software Engine :");
         parserLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         parserComboBox = new JComboBox(createParameters());
         
@@ -306,12 +320,76 @@ public class ImportIdentificationDialog extends DefaultDialog {
         parserPanel.add(parserLabel, c);
 
         c.gridx++;
+        c.gridwidth = 2;
         c.weightx = 1;
         parserPanel.add(parserComboBox, c);
 
         sourceParameterList = createSourceParameters();
-        sourceParameterList.completePanel(parserPanel, c);
+        sourceParameterList.updateIsUsed();
+        
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        c.gridy++;
+        JLabel instrumentLabel = new JLabel("Instrument :");
+        instrumentLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        parserPanel.add(instrumentLabel, c);
+        
+        c.gridx++;
+        c.gridwidth = 2;
+        c.weightx = 1;
+        parserPanel.add(instrumentsComboBox, c);
+        
+        
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        c.gridy++;
+        JLabel peaklistSoftwareLabel = new JLabel("Peaklist Software :");
+        peaklistSoftwareLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        parserPanel.add(peaklistSoftwareLabel, c);
+        
+        c.gridx++;
+        c.gridwidth = 2;
+        c.weightx = 1;
+        parserPanel.add(peaklistSoftwaresComboBox, c);
+        
+        
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        c.gridy++;
+        JLabel decoyLabel = new JLabel("Decoy :");
+        decoyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        parserPanel.add(decoyLabel, c);
+        
+        c.gridx++;
+        c.gridwidth = 2;
+        c.weightx = 1;
+        parserPanel.add(decoyComboBox, c);
+        
+        
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        c.gridy++;
+        decoyAccessionRegexLabel = new JLabel("Decoy Accesion Regex :");
+        decoyAccessionRegexLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        parserPanel.add(decoyAccessionRegexLabel, c);
+        
+        c.gridx++;
+        c.weightx = 1;
+        parserPanel.add(decoyRegexTextField, c);
+        
+        c.gridx++;
+        c.weightx = 0;
+        regexButton = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));
+        regexButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        parserPanel.add(regexButton, c);
+        
+        
 
+            
         parserComboBox.addActionListener(new ActionListener() {
 
             @Override
@@ -330,9 +408,104 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }
         });
         
+        
+        decoyComboBox.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateDecoyRegexEnabled();
+            }
+        });
+        
+        regexButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                ArrayList<String> regexArrayList = readRegexArray(null);
+                SelectRegexDialog regexDialog = SelectRegexDialog.getDialog(singletonDialog, regexArrayList);
+                regexDialog.setLocationRelativeTo(regexButton);
+                regexDialog.setVisible(true);
+                if (regexDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                    
+                    
+                    
+                    String selectedRegex = regexDialog.getSelectedRegex();
+                    if (selectedRegex != null) {
+                        decoyRegexTextField.setText(selectedRegex);
+                    }
+                    regexArrayList = regexDialog.getRegexArrayList();
+                    writeRegexArray(regexArrayList);
+                }
+            }
+        });
+        
         return parserPanel;
     }
 
+    private ArrayList<String> readRegexArray(String regexToAdd) {
+        
+        ArrayList<String> regexArrayList = new ArrayList();
+        Preferences preferences = NbPreferences.root();
+        int i = 1;
+        while (true) {
+            String regex = preferences.get("DecoyRegex_"+i, null);
+            if (regex == null) {
+                break;
+            }
+            if ((regexToAdd !=null) && (regex.compareTo(regexToAdd) == 0)) {
+                regexToAdd = null;
+                regexArrayList.add(0, regex);
+            } else {
+                regexArrayList.add(regex);
+            }
+            i++;
+        } 
+        if (regexToAdd!=null) {
+            regexArrayList.add(0, regexToAdd);
+        }
+        
+        if (regexArrayList.isEmpty()) {
+            regexArrayList.add("###REV###\\S+"); // Grenoble Regex
+            regexArrayList.add("sp\\|REV_\\S+"); // Strasbourg Regex
+        }
+
+        
+        return regexArrayList;
+    }
+    private void writeRegexArray(ArrayList<String> regexArrayList) {
+        Preferences preferences = NbPreferences.root();
+        
+        // remove previous regex
+        int i = 1;
+        while (true) {
+            String key = "DecoyRegex_"+i;
+        
+            String regex = preferences.get(key, null);
+            if (regex == null) {
+                break;
+            }
+            preferences.remove(key);
+            i++;
+        }
+        
+        // put new regex
+        for (i=0;i<regexArrayList.size();i++) {
+            String key = "DecoyRegex_"+(i+1);
+            preferences.put(key, regexArrayList.get(i));
+        }
+    }
+    
+    
+    
+    private void updateDecoyRegexEnabled() {
+        boolean enabled = (decoyComboBox.getSelectedIndex() == CONCATENATED_DECOY_INDEX);  
+        decoyRegexParameter.setUsed(enabled); // done anyway to be sure there is not a problem at initialization
+        decoyAccessionRegexLabel.setEnabled(enabled);
+        decoyRegexTextField.setEnabled(enabled);
+        regexButton.setEnabled(enabled);
+
+    }
 
     
     
@@ -376,6 +549,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
         // reinit of some parameters
         ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
         parameterList.clean();
+        
+        updateDecoyRegexEnabled();
     }
 
     @Override
@@ -423,6 +598,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
         // Save Other Parameters    
         sourceParameterList.saveParameters();
         parameterList.saveParameters();
+        
+        if (decoyRegexTextField.isEnabled()) {
+            ArrayList<String> regexArrayList = readRegexArray(decoyRegexTextField.getText());
+            writeRegexArray(regexArrayList);
+        }
 
         return true;
 
@@ -525,7 +705,12 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return PARSER_IDS[parserComboBox.getSelectedIndex()];
     }
 
-
+    public String getDecoyRegex() {
+        if (decoyRegexTextField.isEnabled()) {
+            return decoyRegexTextField.getText();
+        }
+        return null;
+    }
     
     
     private ParameterList[] createParameters() {
@@ -572,17 +757,210 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }  
         };
         
-        ObjectParameter instrumentParameter = new ObjectParameter("instrument", "Instrument", UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray(), -1, instrumentToString);
+        instrumentsComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray());
+        ObjectParameter<Instrument> instrumentParameter = new ObjectParameter<>("instrument", "Instrument", instrumentsComboBox, UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray(), null, -1, instrumentToString);
         parameterList.add(instrumentParameter);
         
-        ObjectParameter peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray(), -1, softwareToString);
+        peaklistSoftwaresComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray());
+        ObjectParameter<PeaklistSoftware> peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", peaklistSoftwaresComboBox, UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray(), null, -1, softwareToString);
         parameterList.add(peaklistParameter);
+        
+        decoyComboBox = new JComboBox(DECOY_VALUES);
+        ObjectParameter<String> decoyParameter = new ObjectParameter<>("decoy_accession", "Decoy", decoyComboBox, DECOY_VALUES, DECOY_VALUES_ASSOCIATED_KEYS, 0, null);
+        parameterList.add(decoyParameter);
 
+        decoyRegexTextField = new JTextField(20);
+        decoyRegexParameter = new StringParameter("decoy_accession", "Decoy Accession", decoyRegexTextField, "", new Integer(2), null);
+        decoyRegexParameter.setUsed(false);
+        parameterList.add(decoyRegexParameter);
+        
+        
         return parameterList;
         
     }
     
-    
+    /**
+     * Class used to select Regex previously used
+     */
+    public static class SelectRegexDialog extends DefaultDialog {
+        
+        private static SelectRegexDialog selectRegexSingletonDialog = null;
+        
+        private JList<String> regexList;
+        private JScrollPane regexListScrollPane;
+        private JButton removeRegexButton;
+        
+        
+        private String selectedRegex = null;
+        private ArrayList<String> regexArrayList = null;
+        
+        public static SelectRegexDialog getDialog(JDialog parent, ArrayList<String> regexArrayList) {
+            if (selectRegexSingletonDialog == null) {
+                selectRegexSingletonDialog = new SelectRegexDialog(parent);
+            }
+            selectRegexSingletonDialog.initData(regexArrayList);
+            
+            
+            return selectRegexSingletonDialog;
+        }
+        
+        private SelectRegexDialog(JDialog parent) {
+            super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+            
+            setTitle("Select Decoy Accession Regex");
+            setResizable(false);
+            setMinimumSize(new Dimension(200, 240));
+            setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
+            
+            initInternalPanel();
+        }
+        
+        private void initData(ArrayList<String> regexArrayList) {
+            this.regexArrayList = regexArrayList;
+            
+            DefaultListModel<String> model = (DefaultListModel<String>) regexList.getModel();
+            model.clear();
+            
+            int nb = regexArrayList.size();
+            for (int i=0;i<nb;i++) {
+                model.addElement(regexArrayList.get(i));
+            }
+        }
+        
+        private void initInternalPanel() {
+            
+            JPanel internalPanel = new JPanel();
+            internalPanel.setLayout(new java.awt.GridBagLayout());
 
-    
+            // create regexSelectionPanel
+            JPanel regexSelectionPanel = createRegexSelectionPanel();
+            
+            
+            
+            GridBagConstraints c = new GridBagConstraints();
+            c.anchor = GridBagConstraints.NORTHWEST;
+            c.fill = GridBagConstraints.BOTH;
+            c.insets = new java.awt.Insets(5, 5, 5, 5);
+            
+            c.gridx = 0;
+            c.gridy = 0;
+            c.weightx = 1.0;
+            c.weighty = 1.0;
+            internalPanel.add(regexSelectionPanel, c);
+            
+            
+            setInternalComponent(internalPanel);
+            
+            
+        }
+        
+        private JPanel createRegexSelectionPanel() {
+
+            
+            // Creation of Objects for Regex Selection Panel
+            JPanel regexSelectionPanel = new JPanel(new GridBagLayout());
+            regexSelectionPanel.setBorder(BorderFactory.createTitledBorder(" Regex Selection "));
+            
+            regexList = new JList<String>(new DefaultListModel<String>());
+            regexListScrollPane = new JScrollPane(regexList) {
+                
+                private Dimension preferredSize = new Dimension(280, 140);
+                
+                @Override
+                public Dimension getPreferredSize() {
+                    return preferredSize;
+                }
+            };
+            
+            
+            removeRegexButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
+            removeRegexButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+
+            // Placement of Objects for Regex Selection Panel
+            GridBagConstraints c = new GridBagConstraints();
+            c.anchor = GridBagConstraints.NORTHWEST;
+            c.fill = GridBagConstraints.BOTH;
+            c.insets = new java.awt.Insets(5, 5, 5, 5);
+            
+            c.gridx = 0;
+            c.gridy = 0;
+            c.gridheight = 3;
+            c.weightx = 1.0;
+            c.weighty = 1.0;
+            regexSelectionPanel.add(regexListScrollPane, c);
+            
+            
+            c.gridx++;
+            c.gridheight = 1;
+            c.weightx = 0;
+            c.weighty = 0;
+            regexSelectionPanel.add(removeRegexButton, c);
+            
+            c.gridy++;
+            regexSelectionPanel.add(Box.createVerticalStrut(30), c);
+
+
+            // Actions on objects
+
+            regexList.addListSelectionListener(new ListSelectionListener() {
+                
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    boolean sometingSelected = (regexList.getSelectedIndex() != -1);
+                    removeRegexButton.setEnabled(sometingSelected);
+                }
+            });
+            
+            
+            
+            removeRegexButton.addActionListener(new ActionListener() {
+                
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    List<String> selectedValues = regexList.getSelectedValuesList();
+                    Iterator<String> it = selectedValues.iterator();
+                    while (it.hasNext()) {
+                        ((DefaultListModel) regexList.getModel()).removeElement(it.next());
+                    }
+                    removeRegexButton.setEnabled(false);
+                }
+            });
+            
+            return regexSelectionPanel;
+            
+        }
+        
+        @Override
+        protected boolean okCalled() {
+            selectedRegex = regexList.getSelectedValue();
+            
+            DefaultListModel<String> model = (DefaultListModel<String>) regexList.getModel();
+            int size = model.getSize();
+            if (regexArrayList == null) {
+                regexArrayList = new ArrayList<>(size);
+            } else {
+                regexArrayList.clear();
+            }
+            for (int i=0;i<size;i++) {
+                regexArrayList.add(model.elementAt(i));
+            }
+
+            return true;
+        }
+        
+        @Override
+        protected boolean cancelCalled() {
+            selectedRegex = null;
+            return true;
+        }
+
+
+        public String getSelectedRegex() {
+            return selectedRegex;
+        }
+        
+        public ArrayList<String> getRegexArrayList() {
+            return regexArrayList;
+        }
+    }
 }

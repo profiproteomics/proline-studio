@@ -20,17 +20,19 @@ public class ImportIdentificationTask extends AbstractServiceTask {
     private String parserId;
     private HashMap<String, String> parserArguments;
     private String filePath;
+    private String decoyRegex;
     private int instrumentId;
     private int peaklistSoftwareId;
     private int projectId;
     private Integer[] resultSetId = null;
     
-    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String filePath, int instrumentId, int peaklistSoftwareId, int projectId, Integer[] resultSetId) {
+    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String filePath, String decoyRegex, int instrumentId, int peaklistSoftwareId, int projectId, Integer[] resultSetId) {
         super(callback, false /*asynchronous*/, new TaskInfo("Import Identification", "Import Identification "+filePath, TASK_LIST_INFO));
         
         this.parserId = parserId;
         this.parserArguments = parserArguments;
         this.filePath = filePath;
+        this.decoyRegex = decoyRegex;
         this.instrumentId = instrumentId;
         this.peaklistSoftwareId = peaklistSoftwareId;
         this.projectId = projectId;
@@ -56,6 +58,9 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             Map<String, Object> resultfile = new HashMap<String, Object>();
             resultfile.put("path", filePath);  // files must be accessible from web-core by the same path
             resultfile.put("format", parserId);
+            if (decoyRegex != null) {
+                resultfile.put("decoy_strategy", decoyRegex);
+            }
             args.add(resultfile);
             params.put("result_files", args);
 

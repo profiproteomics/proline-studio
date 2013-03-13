@@ -11,7 +11,7 @@ import java.text.DecimalFormatSymbols;
  */
 public class DataFormat {
     
-    private final static DecimalFormat decimalFormat = new DecimalFormat();
+    private final static DecimalFormat decimalFormat = new DecimalFormat("###.##");
     
     static {
         DecimalFormatSymbols dfs = decimalFormat.getDecimalFormatSymbols();

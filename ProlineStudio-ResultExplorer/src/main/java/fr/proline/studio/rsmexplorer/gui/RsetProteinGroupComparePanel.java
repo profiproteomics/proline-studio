@@ -22,7 +22,6 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
-import org.openide.util.ImageUtilities;
 
 /**
  *
@@ -196,10 +195,10 @@ public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanel
             ProteinMatch proteinMatch = (ProteinMatch) dataBox.getData(false, ProteinMatch.class);
             String proteinMatchName = proteinMatch.getAccession();
 
-            ArrayList<ProteinMatch> proteinMatchArrayList = new ArrayList<ProteinMatch>();
-            ArrayList<Integer> resultSetIdArrayList = new ArrayList<Integer>();
+            ArrayList<ProteinMatch> proteinMatchArrayList = new ArrayList<>();
+            ArrayList<Integer> resultSetIdArrayList = new ArrayList<>();
             int size = selectedDatasetList.size();
-            ArrayList<ResultSummary> selectedRsmList = new ArrayList<ResultSummary>(size);
+            ArrayList<ResultSummary> selectedRsmList = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 ResultSummary rsm = selectedDatasetList.get(i).getTransientData().getResultSummary();
                 selectedRsmList.add(rsm);

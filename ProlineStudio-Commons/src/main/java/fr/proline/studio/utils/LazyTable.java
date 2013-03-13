@@ -1,6 +1,5 @@
 package fr.proline.studio.utils;
 
-import com.thierry.filtering.TableSelection;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
@@ -49,7 +48,7 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
 
         // look for scrolling
         verticalScrollbar.addAdjustmentListener(this);
-        TableSelection.installCopyAction(this);
+        
     }
 
     /**

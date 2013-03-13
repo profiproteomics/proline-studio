@@ -1,5 +1,6 @@
 package fr.proline.studio.utils;
 
+import com.thierry.filtering.TableSelection;
 import java.awt.Color;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
@@ -25,6 +26,7 @@ public class DecoratedTable extends JXTable {
         // highlight one line of two
         addHighlighter(HighlighterFactory.createSimpleStriping());
 
+        TableSelection.installCopyAction(this);
     }
 
     public void displayColumnAsPercentage(int column) {

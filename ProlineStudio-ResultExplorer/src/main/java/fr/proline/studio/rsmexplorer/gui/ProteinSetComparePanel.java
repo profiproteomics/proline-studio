@@ -167,10 +167,10 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             }
 
             if (proteinMatchNameStatusMap == null) {
-                proteinMatchNameStatusMap = new HashMap<String, ProteinStatus>();
-                proteinNameList = new ArrayList<String>();
-                srcProteinMatchMap = new HashMap<Integer, ProteinMatch>();
-                proteinOfProteinSetsMap = new HashMap<ProteinSet, HashMap<String, ProteinMatch>>();
+                proteinMatchNameStatusMap = new HashMap<>();
+                proteinNameList = new ArrayList<>();
+                srcProteinMatchMap = new HashMap<>();
+                proteinOfProteinSetsMap = new HashMap<>();
             } else {
                 proteinMatchNameStatusMap.clear();
                 proteinNameList.clear();
@@ -191,7 +191,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             }
 
             if (proteinSetArray == null) {
-                proteinSetArray = new ArrayList<ProteinSet>();
+                proteinSetArray = new ArrayList<>();
             } else {
                 proteinSetArray.clear();
             }
@@ -213,7 +213,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
                     ProteinSet pset = proteinSetArrayCur[i];
                     ResultSummary rsm = pset.getResultSummary();
                     
-                    HashMap<String, ProteinMatch> proteinNameToProteinMatchOfProteinSetMap = new HashMap<String, ProteinMatch>();
+                    HashMap<String, ProteinMatch> proteinNameToProteinMatchOfProteinSetMap = new HashMap<>();
                     proteinOfProteinSetsMap.put(pset, proteinNameToProteinMatchOfProteinSetMap);
                     
                     // if rsmMap != null, the user has selected resultSummary to display
@@ -316,7 +316,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             String proteinName = getProteinMatchName(rowIndex);
             int size = proteinSetArray.size();
             
-            ArrayList<ProteinMatch> proteinMatchList = new ArrayList<ProteinMatch>(size);
+            ArrayList<ProteinMatch> proteinMatchList = new ArrayList<>(size);
             
             
             for (int i=0;i<size;i++) {
@@ -344,7 +344,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             }
 
             int size = proteinSetArray.size();
-            ArrayList<ResultSummary> rsmArray = new ArrayList<ResultSummary>(size);
+            ArrayList<ResultSummary> rsmArray = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 rsmArray.add(proteinSetArray.get(i).getResultSummary());
             }
@@ -401,7 +401,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
         @Override
         public String getColumnName(int col) {
             if (col == COLTYPE_PROTEIN_NAME) {
-                return "Protein";
+                return "Protein Set";
             }
             if (proteinSetArray == null) {
                 return "";
@@ -426,7 +426,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
         public static final int SAME_SET = 0;
         public static final int SUB_SET = 1;
         public static final int NOT_PRESENT = 2;
-        HashMap<ResultSummary, Boolean> sameSetSubSetMap = new HashMap<ResultSummary, Boolean>();
+        HashMap<ResultSummary, Boolean> sameSetSubSetMap = new HashMap<>();
 
         public ProteinStatus() {
         }
@@ -482,7 +482,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             
             ResultSummary rsm = model.getResultSummary(columnConverted - 1);
 
-            String nbPeptidesString = null;
+            String nbPeptidesString;
 
             
             int rowConverted = -1;
@@ -549,8 +549,8 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
             
             final int SQUARE_SIZE = 10;
             
-            String columnName = null;
-            ImageIcon icon = null;
+            String columnName;
+            ImageIcon icon;
             
             int colorIndex = columnConverted - 1;
             

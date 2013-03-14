@@ -374,6 +374,18 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             spectralCountMap.put(proteinMatchId, specificSpectralCount);
         }
 
+        if (specificSpectralCountRes.size()<sliceOfProteinMatchIds.size()) {
+            // some protein Match have a specific spectral count == 0
+            // so the previous SQL request return no data
+            Iterator<Integer> itProteinMatchId = sliceOfProteinMatchIds.iterator();
+            while (itProteinMatchId.hasNext()) {
+                Integer proteinMatchId = itProteinMatchId.next();
+                if (!spectralCountMap.containsKey(proteinMatchId)) {
+                    spectralCountMap.put(proteinMatchId, Integer.valueOf(0));
+                }
+            }
+        }
+        
 
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
             ProteinSet proteinSetCur = proteinSetArray[i];

@@ -71,6 +71,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         this.project = project;
         this.list = list;
         action = LOAD_PARENT_DATASET;
+        setPriority(Priority.HIGH_1);
     }
     
     /**
@@ -84,6 +85,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         this.parentDataset = parentDataset;
         this.list = list;
         action = LOAD_CHILDREN_DATASET;
+        setPriority(Priority.HIGH_1);
     }
     
     /**

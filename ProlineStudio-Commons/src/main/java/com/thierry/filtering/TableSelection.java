@@ -84,7 +84,7 @@ public class TableSelection implements Transferable, ClipboardOwner {
         stringFlavors.add(new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType + ";class=java.lang.String",
                 "String Flavor"));
         stringFlavors.add(DataFlavor.stringFlavor);
-        //supporterFlavors.addAll(htmlFlavors);
+        supporterFlavors.addAll(htmlFlavors);
         supporterFlavors.addAll(textFlavors);
         supporterFlavors.addAll(stringFlavors);
     }

@@ -24,7 +24,9 @@ public class OverviewBar extends AbstractBar  implements MouseListener {
         g.setColor(Color.lightGray);
         g.drawRect(0, 0, getWidth()-1, getHeight()-1);
         
-        double nbRows = (double) containerPanel.getMarkerComponentInterface().getRowCount();
+        MarkerComponentInterface markerComponentInterface = containerPanel.getMarkerComponentInterface();
+        
+        double nbRows = (double) markerComponentInterface.getRowCount();
         double heightD = (double) getHeight();
         double h = heightD / nbRows;
 
@@ -37,7 +39,9 @@ public class OverviewBar extends AbstractBar  implements MouseListener {
             for (int i = 0; i < size; i++) {
                 AbstractMarker marker = markersArrayList.get(i);
 
-                int y = (int) Math.round(((double) row.intValue()) * h);
+                int graphicalRow = markerComponentInterface.convertRowIndexToView(row.intValue());
+                
+                int y = (int) Math.round(((double) graphicalRow) * h);
 
                 MarkerRendererInterface renderer = containerPanel.getRenderer(marker);
 

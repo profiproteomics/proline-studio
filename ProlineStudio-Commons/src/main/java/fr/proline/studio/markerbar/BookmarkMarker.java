@@ -11,7 +11,7 @@ package fr.proline.studio.markerbar;
 public class BookmarkMarker extends DefaultMarker {
     
     public BookmarkMarker(int row) {
-        super(row, row, BOOKMARK_MARKER);
+        super(row, BOOKMARK_MARKER);
     }
 
     

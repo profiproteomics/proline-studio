@@ -13,7 +13,7 @@ public class AnnotationMarker extends DefaultMarker {
     private String text = null;
     
     public AnnotationMarker(int row, String text) {
-        super(row, row, ANNOTATION_MARKER);
+        super(row, ANNOTATION_MARKER);
         
         this.text = text;
     }

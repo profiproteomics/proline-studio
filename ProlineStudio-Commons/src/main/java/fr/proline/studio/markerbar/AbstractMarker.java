@@ -4,13 +4,11 @@ public abstract class AbstractMarker {
 
     private boolean visibleInMarkerBar;
     private boolean visibleInOverviewBar;
-    private int rowStart = -1;
-    private int rowEnd = -1;
+    private int row = -1;
     private int type = -1;
 
-    public AbstractMarker(int rowStart, int rowEnd, boolean visibleInMarkerBar, boolean visibleInOverviewBar, int type) {
-        this.rowStart = rowStart;
-        this.rowEnd = rowEnd;
+    public AbstractMarker(int row, boolean visibleInMarkerBar, boolean visibleInOverviewBar, int type) {
+        this.row = row;
         this.visibleInMarkerBar = visibleInMarkerBar;
         this.visibleInOverviewBar = visibleInOverviewBar;
         this.type = type;
@@ -24,13 +22,10 @@ public abstract class AbstractMarker {
         return visibleInOverviewBar;
     }
 
-    public int getRowStart() {
-        return rowStart;
+    public int getRow() {
+        return row;
     }
 
-    public int getRowend() {
-        return rowEnd;
-    }
     
     public int getType() {
         return type;

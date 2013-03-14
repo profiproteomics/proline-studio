@@ -42,12 +42,12 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         Iterator<Integer> itRow = markerMap.keySet().iterator();
         while (itRow.hasNext()) {
             Integer row = itRow.next();
-            int rowInt = row.intValue();
-            if (rowInt < firstVisibleRow) {
+            int rowInt = componentInterface.convertRowIndexToView(row.intValue());
+            
+            
+            
+            if ((rowInt < firstVisibleRow) || (rowInt > lastVisibleRow)) {
                 continue;
-            }
-            if (rowInt > lastVisibleRow) {
-                break;
             }
 
             ArrayList<AbstractMarker> markersArrayList = markerMap.get(row);
@@ -88,7 +88,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
     public void mouseReleased(MouseEvent e) {
         
         MarkerComponentInterface componentInterface = containerPanel.getMarkerComponentInterface();
-        rowClicked = componentInterface.getRow(e.getY());
+        rowClicked = componentInterface.getRowInModel(e.getY());
                 
         if (e.isPopupTrigger()) {
             
@@ -122,7 +122,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
     @Override
     public void mouseMoved(MouseEvent e) {
         MarkerComponentInterface componentInterface = containerPanel.getMarkerComponentInterface();
-        int row = componentInterface.getRow(e.getY());
+        int row = componentInterface.getRowInModel(e.getY());
         
         AnnotationMarker marker = (AnnotationMarker) containerPanel.getMarker(row, DefaultMarker.ANNOTATION_MARKER);
         

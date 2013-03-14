@@ -7,12 +7,13 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.TreeMap;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-public class MarkerContainerPanel extends JPanel {
+public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
 
     private TreeMap<Integer, ArrayList<AbstractMarker>> markers = new TreeMap<Integer, ArrayList<AbstractMarker>>();
     private HashMap<Class, MarkerRendererInterface> renderers = new HashMap<Class, MarkerRendererInterface>();
@@ -31,6 +32,8 @@ public class MarkerContainerPanel extends JPanel {
         markerBar = new MarkerBar(this);
         overviewBar = new OverviewBar(this);
 
+        markerComponent.addViewChangeListerner(this);
+        
         setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -93,7 +96,7 @@ public class MarkerContainerPanel extends JPanel {
     }
 
     public void addMarker(AbstractMarker marker) {
-        Integer rowKey = Integer.valueOf(marker.getRowStart());
+        Integer rowKey = Integer.valueOf(marker.getRow());
         ArrayList<AbstractMarker> markersInRow = markers.get(rowKey);
         if (markersInRow == null) {
             markersInRow = new ArrayList<AbstractMarker>(1);
@@ -185,35 +188,28 @@ public class MarkerContainerPanel extends JPanel {
         return !markers.isEmpty();
     }
     
-    public int findNearestRowWithMarker(int row) {
-        Integer rowKey = Integer.valueOf(row);
-        Integer nearestLowerRowKey = markers.floorKey(rowKey);
-        Integer nearestHigherRowKey = markers.higherKey(rowKey);
+    public int findNearestRowWithMarker(int rowInView) {
         
-        int rowLower = -1;
-        if (nearestLowerRowKey != null) {
-            rowLower = nearestLowerRowKey.intValue();
-        }
+        int minDistance = Integer.MAX_VALUE;
+        Integer nearestRowKey = null;
         
-        int rowHigher= -1;
-        if (nearestHigherRowKey != null) {
-            rowHigher = nearestHigherRowKey.intValue();
-        }
-
-        if ((rowLower == -1) && (rowHigher == -1)) {
-            return row;
-        } else if ((rowLower != -1) && (rowHigher == -1)) {
-            return rowLower;
-        } else if ((rowLower == -1) && (rowHigher != -1)) {
-            return rowHigher;
-        } else {
-            if ((row-rowLower)<=(rowHigher-row)) {
-                return rowLower;
-            } else {
-                return rowHigher;
+        Iterator<Integer> it = markers.keySet().iterator();
+        while (it.hasNext()) {
+            Integer rowKey = it.next();
+            int row = markerComponent.convertRowIndexToView(rowKey.intValue());
+            int distance = Math.abs(rowInView-row);
+            if (distance<minDistance) {
+                minDistance = distance;
+                nearestRowKey = rowKey;
             }
         }
+        if (nearestRowKey == null) {
+            return rowInView;
+        }
         
+        return markerComponent.convertRowIndexToView(nearestRowKey.intValue());
+        
+
         
         
     }
@@ -226,5 +222,10 @@ public class MarkerContainerPanel extends JPanel {
         if (markerBar != null) {
             markerBar.repaint();
         }
+    }
+
+    @Override
+    public void viewChanged() {
+        repaintBars();
     }
 }

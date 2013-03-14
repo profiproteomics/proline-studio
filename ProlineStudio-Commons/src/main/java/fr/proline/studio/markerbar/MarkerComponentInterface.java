@@ -14,9 +14,16 @@ public interface MarkerComponentInterface {
 
     public int getRowYStop(int row);
     
-    public int getRow(int y);
+    public int getRowInModel(int y);
     
     public int convertRowIndexToModel(int rowIndex);
     
     public int convertRowIndexToView(int rowIndex);
+    
+    public void addViewChangeListerner(ViewChangeListener listener);
+    
+    public void removeViewChangeListener(ViewChangeListener listener);
+    
+    public void dispatchViewChange();
+    
 }

@@ -55,12 +55,15 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
      * @param success  boolean indicating if the fetch has succeeded
      */
     @Override
-    public void callback(final boolean success) {
+    public void callback(final boolean success, final boolean finished) {
         if (callback == null) {
             return;
         }
 
         final SubTask taskDone = subTaskManager.getCurrentTask();
+        /*if (taskDone != null) {
+            taskDone.setAllSubtaskFinished(!hasSubTasksToBeDone());
+        }*/
         
         if (callback.mustBeCalledInAWT()) {
             // Callback must be executed in the Graphical thread (AWT)
@@ -68,13 +71,13 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
 
                 @Override
                 public void run() {
-                    callback.run(success, id, taskDone);
+                    callback.run(success, id, taskDone, finished);
                 }
             });
         } else {
             // Method called in the current thread
             // In this case, we assume the execution is fast.
-            callback.run(success, id, taskDone);
+            callback.run(success, id, taskDone, finished);
         }
 
 

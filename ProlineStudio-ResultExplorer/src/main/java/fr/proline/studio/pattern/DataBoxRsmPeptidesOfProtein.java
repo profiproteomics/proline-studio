@@ -79,7 +79,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (success) {
                     ((RsmPeptidesOfProteinPanel) panel).setData(proteinMatch, rsm);

@@ -150,7 +150,7 @@ public class IdentificationAction extends AbstractRSMAction {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (success) {
 

@@ -14,6 +14,7 @@ public class SubTask implements Comparable<SubTask> {
     private int startIndex;
     private int stopIndex;
     private boolean highPriority = false;
+    //private boolean allSubtaskFinished = false;
 
     public SubTask(int subTaskId, int startIndex, int stopIndex) {
         this.subTaskId = subTaskId;
@@ -56,6 +57,14 @@ public class SubTask implements Comparable<SubTask> {
         this.highPriority = highPriority;
     }
 
+    /*public boolean isAllSubtaskFinished() {
+        return allSubtaskFinished;
+    }*/
+
+    /*public void setAllSubtaskFinished(boolean allSubtaskFinished) {
+        this.allSubtaskFinished = allSubtaskFinished;
+    }*/
+    
     @Override
     public int compareTo(SubTask o) {
         if (highPriority && !o.highPriority) {

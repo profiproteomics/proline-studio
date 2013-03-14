@@ -106,7 +106,7 @@ public class ValidationDialog extends DefaultDialog {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 
                 int nb = datasetList.size();
                 for (int i=0;i<nb;i++) {

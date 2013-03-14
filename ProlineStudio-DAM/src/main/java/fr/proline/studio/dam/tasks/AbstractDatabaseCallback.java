@@ -24,7 +24,7 @@ public abstract class AbstractDatabaseCallback {
      * @param taskId    id of the task which has been executed
      * @param slice     if subTask is not null : only a subpart of the task has been done
      */
-    public abstract void run(boolean success, long taskId, SubTask subTask);
+    public abstract void run(boolean success, long taskId, SubTask subTask, boolean finished);
     
     public String getErrorMessage() {
         return errorMessage;

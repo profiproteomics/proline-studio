@@ -256,7 +256,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 SwingUtilities.invokeLater(new Runnable() {
 

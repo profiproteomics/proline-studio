@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.event.ListSelectionEvent;
+import org.jdesktop.swingx.JXTable;
 import org.openide.util.ImageUtilities;
 
 /**
@@ -48,17 +49,21 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
 
     }
 
-    public void setData(Long taskId, ProteinSet[] proteinSets) {
+    public void setData(Long taskId, ProteinSet[] proteinSets, boolean finished) {
         ((ProteinGroupTableModel) proteinGroupTable.getModel()).setData(taskId, proteinSets);
 
         // select the first row
         if ((proteinSets != null) && (proteinSets.length > 0)) {
             proteinGroupTable.getSelectionModel().setSelectionInterval(0, 0);
         }
+        
+        if (finished) {
+            ((ProteinGroupTable)proteinGroupTable).setSortable(true);
+        }
     }
 
-    public void dataUpdated(SubTask subTask) {
-        ((ProteinGroupTable) proteinGroupTable).dataUpdated(subTask);
+    public void dataUpdated(SubTask subTask, boolean finished) {
+        ((ProteinGroupTable) proteinGroupTable).dataUpdated(subTask, finished);
     }
 
     public ProteinSet getSelectedProteinSet() {
@@ -209,7 +214,7 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
                     }
 
                     @Override
-                    public void run(boolean success, long taskId, SubTask subTask) {
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                         // contruct the Map of proteinSetId
                         
@@ -253,6 +258,8 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
             super(proteinGroupScrollPane.getVerticalScrollBar() );
             
             setDefaultRenderer(Float.class, new FloatRenderer( getDefaultRenderer(String.class) ) );
+            
+
         }
         
         /** 
@@ -298,7 +305,7 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
         }
         String searchTextBeingDone = null;
 
-        public void dataUpdated(SubTask subTask) {
+        public void dataUpdated(SubTask subTask, boolean finished) {
             
             LastAction keepLastAction = lastAction;
             try {
@@ -338,6 +345,10 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
 
                 lastAction = keepLastAction;
  
+            }
+            
+            if (finished) {
+                setSortable(true);
             }
         }
         

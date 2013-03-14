@@ -43,18 +43,22 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
         this.dataBox = dataBox;
     }
 
-    public void setData(long taskId, PeptideMatch[] peptideMatches) {
+    public void setData(long taskId, PeptideMatch[] peptideMatches, boolean finished) {
         ((PeptideMatchTableModel) peptideMatchTable.getModel()).setData(taskId, peptideMatches);
 
         // select the first row
         if ((peptideMatches != null) && (peptideMatches.length > 0)) {
             peptideMatchTable.getSelectionModel().setSelectionInterval(0, 0);
         }
+        
+        if (finished) {
+            ((PeptideMatchTable)peptideMatchTable).setSortable(true);
+        }
     }
 
-    public void dataUpdated(SubTask subTask) {
+    public void dataUpdated(SubTask subTask, boolean finished) {
 
-        ((PeptideMatchTable) peptideMatchTable).dataUpdated(subTask);
+        ((PeptideMatchTable) peptideMatchTable).dataUpdated(subTask, finished);
 
 
     }
@@ -206,7 +210,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
                     }
 
                     @Override
-                    public void run(boolean success, long taskId, SubTask subTask) {
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                         // contruct the Map of proteinSetId
 
@@ -251,6 +255,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
             setDefaultRenderer(Float.class, new FloatRenderer( getDefaultRenderer(String.class) ) );
             
             displayColumnAsPercentage(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE);
+            
         }
 
         /**
@@ -301,7 +306,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
         
         
         
-        public void dataUpdated(SubTask subTask) {
+        public void dataUpdated(SubTask subTask, boolean finished) {
 
             LastAction keepLastAction = lastAction;
             try {
@@ -339,6 +344,10 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
 
                 lastAction = keepLastAction;
 
+            }
+            
+            if (finished) {
+                setSortable(true);
             }
         }
 

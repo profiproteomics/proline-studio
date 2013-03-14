@@ -185,7 +185,7 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
      *
      * @param success boolean indicating if the fetch has succeeded
      */
-    public void callback(final boolean success) {
+    public void callback(final boolean success, final boolean finished) {
         if (callback == null) {
             return;
         }
@@ -198,13 +198,13 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
 
                 @Override
                 public void run() {
-                    callback.run(success, id, null);
+                    callback.run(success, id, null, finished);
                 }
             });
         } else {
             // Method called in the current thread
             // In this case, we assume the execution is fast.
-            callback.run(success, id, null);
+            callback.run(success, id, null, finished);
         }
 
 

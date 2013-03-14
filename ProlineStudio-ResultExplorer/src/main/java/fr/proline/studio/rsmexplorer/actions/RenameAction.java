@@ -58,7 +58,7 @@ public class RenameAction extends AbstractRSMAction {
                     }
 
                     @Override
-                    public void run(boolean success, long taskId, SubTask subTask) {
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                         datasetNode.setIsChanging(false);
                         dataset.setName(newName);
                         ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(datasetNode);
@@ -92,7 +92,7 @@ public class RenameAction extends AbstractRSMAction {
                     }
 
                     @Override
-                    public void run(boolean success, long taskId, SubTask subTask) {
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                         projectNode.setIsChanging(false);
                         project.setName(newName);
                         ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(projectNode);

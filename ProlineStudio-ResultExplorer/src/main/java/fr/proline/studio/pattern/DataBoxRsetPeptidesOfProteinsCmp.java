@@ -68,7 +68,7 @@ public class DataBoxRsetPeptidesOfProteinsCmp extends AbstractDataBox {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
   
                 
                 ((RsetPeptidesOfProteinsCmpPanel) panel).setData(proteinMatchArrayList, resultSummaryArrayList);

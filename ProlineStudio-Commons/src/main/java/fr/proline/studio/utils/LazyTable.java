@@ -5,6 +5,7 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollBar;
 import javax.swing.event.ListSelectionEvent;
 
@@ -32,11 +33,16 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
 
         setDefaultRenderer(LazyData.class, new LazyTableCellRenderer());
 
+        final LazyTable table = this;
         // look for sorting column
         getTableHeader().addMouseListener(new MouseAdapter() {
 
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (!isSortable()) {
+                    JOptionPane.showMessageDialog(table.getTableHeader(), "Sorting is not available while data is loading.","Sorting not Available",JOptionPane.INFORMATION_MESSAGE);
+                }
+                
                 int col = columnAtPoint(e.getPoint());
 
                 lastAction = LastAction.ACTION_SORTING;
@@ -49,6 +55,8 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
         // look for scrolling
         verticalScrollbar.addAdjustmentListener(this);
         
+        // sorting forbidden while data is not loaded
+        setSortable(false);
     }
 
     /**

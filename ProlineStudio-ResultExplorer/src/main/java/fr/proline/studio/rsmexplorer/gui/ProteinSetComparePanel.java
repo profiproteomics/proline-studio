@@ -286,7 +286,7 @@ public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterf
                             }
 
                             @Override
-                            public void run(boolean success, long taskId, SubTask subTask) {
+                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                 JTableHeader th = table.getTableHeader();
                                 th.repaint();
                             }

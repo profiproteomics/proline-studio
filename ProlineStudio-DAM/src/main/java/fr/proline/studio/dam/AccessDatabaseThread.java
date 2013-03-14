@@ -103,7 +103,7 @@ public class AccessDatabaseThread extends Thread {
 
 
                 // call callback code
-                action.callback(success);
+                action.callback(success, !action.hasSubTasksToBeDone());
 
                 synchronized (this) {
                     // check if subtasks need to be done
@@ -139,7 +139,7 @@ public class AccessDatabaseThread extends Thread {
         // check if we need to fetch data for this action
         if (!action.needToFetch()) {
             // fetch already done : return immediately
-            action.callback(true);
+            action.callback(true, true);
             return;
         }
 

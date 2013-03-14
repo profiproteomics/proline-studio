@@ -158,7 +158,7 @@ public class ServerConnectionManager {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (success) {
                     // save connection parameters
@@ -199,7 +199,7 @@ public class ServerConnectionManager {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (success) {
                     // save connection parameters

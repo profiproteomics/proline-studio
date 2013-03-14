@@ -193,7 +193,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
                     }
 
                     @Override
-                    public void run(boolean success, long taskId, SubTask subTask) {
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                         // contruct the Map of proteinSetId
 

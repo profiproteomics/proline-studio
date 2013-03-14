@@ -63,7 +63,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
 
                 ((RsetPeptideSpectrumPanel) panel).setData(peptideMatch);

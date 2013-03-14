@@ -68,7 +68,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
 
                 ((RsmProteinsOfProteinSetPanel)panel).setData(proteinSet, null /*

@@ -64,7 +64,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask) {
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
 
                 ((RsetProteinsForPeptideMatchPanel)panel).setData(peptideMatch);

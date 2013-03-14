@@ -68,7 +68,7 @@ public class DisplayPeptidesAction extends AbstractRSMAction {
                 }
 
                 @Override
-                public void run(boolean success, long taskId, SubTask subTask) {
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     // prepare window box
                     WindowBox wbox = (hasResultSummary) ? WindowBoxFactory.getPeptidesWindowBox(dataSet.getName()+" Peptides") : WindowBoxFactory.getPeptidesForRsetOnlyWindowBox(dataSet.getName()+" Peptides");
                     wbox.setEntryData(dataSet.getProject().getId(), dataSet.getTransientData().getResultSet());

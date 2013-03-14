@@ -60,7 +60,7 @@ public class DisplayProteinSetsAction extends AbstractRSMAction {
                 }
 
                 @Override
-                public void run(boolean success, long taskId, SubTask subTask) {
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     // prepare window box
                     WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox(dataset.getName()+" Protein Sets");
                     wbox.setEntryData(dataset.getProject().getId(), dataset.getTransientData().getResultSummary());

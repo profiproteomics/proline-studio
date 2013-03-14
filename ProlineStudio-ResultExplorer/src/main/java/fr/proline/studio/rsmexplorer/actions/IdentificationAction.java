@@ -20,6 +20,7 @@ import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.tree.DefaultTreeModel;
@@ -117,7 +118,14 @@ public class IdentificationAction extends AbstractRSMAction {
                 };
 
 
-                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, f.getAbsolutePath(), decoyRegex, instrumentId, peaklistSoftwareId, project.getId(), _resultSetId);
+                // use canonicalPath when it is possible to be sure to have an unique path
+                String canonicalPath;
+                try {
+                    canonicalPath = f.getCanonicalPath();
+                } catch (IOException ioe) {
+                    canonicalPath = f.getAbsolutePath(); // should not happen
+                }
+                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, project.getId(), _resultSetId);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
                 
             }

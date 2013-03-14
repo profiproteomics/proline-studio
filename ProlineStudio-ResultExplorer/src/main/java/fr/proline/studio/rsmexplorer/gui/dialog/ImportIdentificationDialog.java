@@ -591,7 +591,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         
         // save file path
         if (defaultDirectory != null) {
-          preferences.put("IdentificationFilePath", defaultDirectory.getAbsolutePath());  
+          preferences.put("UserIdentificationFilePath", defaultDirectory.getAbsolutePath());  
         }
 
         
@@ -661,12 +661,21 @@ public class ImportIdentificationDialog extends DefaultDialog {
         parserComboBox.setSelectedIndex(parserIndex);
         
         
-        // Prefered File Path
-        String filePath = preferences.get("IdentificationFilePath", null);
+        // Prefered User File Path
+        String filePath = preferences.get("UserIdentificationFilePath", null);
         if (filePath != null) {
             File f = new File(filePath);
             if (f.isDirectory()) {
                 defaultDirectory = f;
+            }
+        } else {
+            // User Server File Path for Prefered User File Path
+            String serverFilePath = preferences.get("ServerIdentificationFilePath", null);
+            if (serverFilePath != null) {
+                File f = new File(serverFilePath);
+                if (f.isDirectory()) {
+                    defaultDirectory = f;
+                }
             }
         }
     }

@@ -5,11 +5,15 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.prefs.Preferences;
+import org.openide.util.NbPreferences;
 
 /**
  * Task to import identifications from files
@@ -19,19 +23,19 @@ public class ImportIdentificationTask extends AbstractServiceTask {
 
     private String parserId;
     private HashMap<String, String> parserArguments;
-    private String filePath;
+    private String canonicalFilePath;
     private String decoyRegex;
     private int instrumentId;
     private int peaklistSoftwareId;
     private int projectId;
     private Integer[] resultSetId = null;
     
-    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String filePath, String decoyRegex, int instrumentId, int peaklistSoftwareId, int projectId, Integer[] resultSetId) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Import Identification", "Import Identification "+filePath, TASK_LIST_INFO));
+    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String canonicalFilePath, String decoyRegex, int instrumentId, int peaklistSoftwareId, int projectId, Integer[] resultSetId) {
+        super(callback, false /*asynchronous*/, new TaskInfo("Import Identification", "Import Identification "+canonicalFilePath, TASK_LIST_INFO));
         
         this.parserId = parserId;
         this.parserArguments = parserArguments;
-        this.filePath = filePath;
+        this.canonicalFilePath = canonicalFilePath;
         this.decoyRegex = decoyRegex;
         this.instrumentId = instrumentId;
         this.peaklistSoftwareId = peaklistSoftwareId;
@@ -54,9 +58,32 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             
             List args = new ArrayList();
             
+            // retrieve the canonical server file path
+            Preferences preferences = NbPreferences.root();
+            String serverFilePath = preferences.get("ServerIdentificationFilePath", null);
+            if (serverFilePath !=null) {
+                // retrieve canonical file path when it is possible
+                File serverFile = new File(serverFilePath);
+                if (serverFile.exists() && serverFile.isDirectory()) {
+                    try {
+                        serverFilePath = serverFile.getCanonicalPath();
+                    } catch (IOException ioe) {
+                        
+                    }
+                }
+                
+                // if canonicalFilePath="D:\\dir1\dir2\foo.dat" and serverFilePath="D:\\dir1\";
+                // then canonicalFilePath="dir2\foo.dat"
+                if (canonicalFilePath.startsWith(serverFilePath)) {
+                    canonicalFilePath = canonicalFilePath.substring(serverFilePath.length());
+                }
+            }
+            
+            
+            
             // add the file to parse
             Map<String, Object> resultfile = new HashMap<String, Object>();
-            resultfile.put("path", filePath);  // files must be accessible from web-core by the same path
+            resultfile.put("path", canonicalFilePath);  // files must be accessible from web-core by the same path
             resultfile.put("format", parserId);
             if (decoyRegex != null) {
                 resultfile.put("decoy_strategy", decoyRegex);

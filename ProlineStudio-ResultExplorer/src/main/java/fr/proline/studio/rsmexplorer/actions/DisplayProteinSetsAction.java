@@ -52,6 +52,13 @@ public class DisplayProteinSetsAction extends AbstractRSMAction {
         } else {
             // we have to load the result summary
 
+            final WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox(dataset.getName()+" Protein Sets");
+            
+            // open a window to display the window box
+            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+            win.open();
+            win.requestActive();
+            
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                 @Override
@@ -62,14 +69,11 @@ public class DisplayProteinSetsAction extends AbstractRSMAction {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     // prepare window box
-                    WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox(dataset.getName()+" Protein Sets");
+                    
                     wbox.setEntryData(dataset.getProject().getId(), dataset.getTransientData().getResultSummary());
 
 
-                    // open a window to display the window box
-                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                    win.open();
-                    win.requestActive();
+                    
                 }
             };
 

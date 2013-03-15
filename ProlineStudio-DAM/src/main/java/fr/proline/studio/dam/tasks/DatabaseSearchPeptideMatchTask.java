@@ -36,14 +36,14 @@ public class DatabaseSearchPeptideMatchTask extends AbstractDatabaseTask {
         try {
             entityManagerMSI.getTransaction().begin();
             
-            // Search the first ProteinSet which has a Best Protein Match with the searched name
+            // Search peptideMatches with the searched name
             TypedQuery<Integer> searchQuery = entityManagerMSI.createQuery("SELECT pm.id FROM fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id AND p.sequence LIKE :search ORDER BY pm.msQuery.initialId ASC, p.sequence ASC", Integer.class);
             searchQuery.setParameter("search", "%"+searchString+"%");
             searchQuery.setParameter("rsetId", rset.getId());
-            List<Integer> proteinSetIdList = searchQuery.getResultList();
+            List<Integer> peptideMatchIdList = searchQuery.getResultList();
 
             searchResult.clear();
-            searchResult.addAll(proteinSetIdList);
+            searchResult.addAll(peptideMatchIdList);
 
             entityManagerMSI.getTransaction().commit();
         } catch  (RuntimeException e) {

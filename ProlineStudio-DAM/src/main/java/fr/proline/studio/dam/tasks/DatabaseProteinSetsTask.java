@@ -82,8 +82,8 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             //long timeStart = System.currentTimeMillis();
 
             // Load Protein Sets
-            // SELECT ps FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId ORDER BY ps.score DESC
-            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId ORDER BY ps.score DESC", ProteinSet.class);
+            // SELECT ps FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY ps.score DESC
+            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY ps.score DESC", ProteinSet.class);
             proteinSetsQuery.setParameter("rsmId", rsmId);
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
 

@@ -41,13 +41,13 @@ public class DatabaseSearchProteinSetsTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().begin();
             
             // Search the first ProteinSet which has a Best Protein Match with the searched name
-            TypedQuery<Integer> searchQuery = entityManagerMSI.createQuery("SELECT ps.id FROM ProteinSet ps, ProteinMatch pm WHERE ps.typicalProteinMatchId=pm.id AND pm.accession LIKE :search ORDER BY ps.score DESC", Integer.class);
+            TypedQuery<Integer> searchQuery = entityManagerMSI.createQuery("SELECT ps.id FROM ProteinSet ps, ProteinMatch pm WHERE ps.typicalProteinMatchId=pm.id AND ps.isValidated=true AND pm.accession LIKE :search ORDER BY ps.score DESC", Integer.class);
             searchQuery.setParameter("search", "%"+searchAccession+"%");
             List<Integer> proteinSetIdList = searchQuery.getResultList();
             
             if (proteinSetIdList.isEmpty()) {
                 // No ProteinSet found, we search for a Protein Match in the subset
-                searchQuery = entityManagerMSI.createQuery("SELECT ps.id FROM ProteinSet ps, ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm WHERE ps_to_pm.proteinSet.id=ps.id AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId  AND pm.accession LIKE :search ORDER BY ps.score DESC", Integer.class);
+                searchQuery = entityManagerMSI.createQuery("SELECT ps.id FROM ProteinSet ps, ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm WHERE ps.isValidated=true AND ps_to_pm.proteinSet.id=ps.id AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId  AND pm.accession LIKE :search ORDER BY ps.score DESC", Integer.class);
                 searchQuery.setParameter("search", "%"+searchAccession+"%");
                 searchQuery.setParameter("rsmId", rsm.getId());
                 

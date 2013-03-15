@@ -115,7 +115,7 @@ public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask
 
 
         // Load Protein Sets and their typical Protein Match in the same time
-        Query proteinSetQuery = entityManagerMSI.createQuery("SELECT ps, typicalPm FROM ProteinMatch typicalPm, ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE ps_to_pm.proteinSet.id=ps.id AND ps_to_pm.proteinMatch.id=:proteinMatchId AND ps.typicalProteinMatchId=typicalPm.id ORDER BY ps_to_pm.resultSummary.id ASC");
+        Query proteinSetQuery = entityManagerMSI.createQuery("SELECT ps, typicalPm FROM ProteinMatch typicalPm, ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE ps_to_pm.proteinSet.id=ps.id AND ps_to_pm.proteinMatch.id=:proteinMatchId AND ps.typicalProteinMatchId=typicalPm.id AND ps.isValidated=true ORDER BY ps_to_pm.resultSummary.id ASC");
         proteinSetQuery.setParameter("proteinMatchId", proteinMatch.getId());
         List l = proteinSetQuery.getResultList();
 

@@ -6,7 +6,7 @@
   <parent>
     <artifactId>ProFI-Pom</artifactId>
     <groupId>fr.proline</groupId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
   </parent>
 
   <groupId>fr.proline</groupId>
@@ -22,8 +22,6 @@
     <module>ProlineStudio-Commons</module>
     <module>ProlineStudio-DAM</module>
     <module>ProlineStudio-ResultExplorer</module>
-    <!-- <module>ProlineStudio-IDFImport</module> -->
-    <!-- <module>ProlineStudio-RepositoryMgr</module> -->
     <module>ProlineStudio-CoreWrapper</module>
     <module>ProlineStudio-Logger</module>
     <module>ProlineStudio-DPM</module>
@@ -60,16 +58,20 @@
           </configuration>
         </plugin>
 
-        <plugin>
+		<plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>2.3.1</version>
+          <!-- Version inherited from ProFI-Pom -->
+          <configuration>
+            <!-- to have the jar plugin pickup the nbm generated manifest -->
+            <useDefaultManifestFile>true</useDefaultManifestFile>
+          </configuration>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.0</version>
+          <!-- Version inherited from ProFI-Pom -->
           <configuration>
             <source>1.7</source> <!-- Java version : 1.7 -->
             <target>1.7</target>

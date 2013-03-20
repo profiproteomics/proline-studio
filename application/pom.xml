@@ -28,7 +28,7 @@
             <version>${netbeans.version}</version>
             <type>pom</type>
         </dependency>
-                
+
         <!-- NbModuleSuite functional in RELEASE70 or later: -->
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -54,18 +54,14 @@
             <artifactId>org-openide-awt</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
-        
-        <!-- ProlineStudio dependencies -->        
+
+        <!-- ProlineStudio dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-branding</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ProlineStudio-IDFImport</artifactId>
-            <version>${project.version}</version>
-        </dependency> -->
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-ResultExplorer</artifactId>
@@ -104,15 +100,7 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
+
         </plugins>
     </build>
 

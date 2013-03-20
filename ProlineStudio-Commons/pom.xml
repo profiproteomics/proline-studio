@@ -15,21 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <!--
-        Repository hosting NetBeans modules, especially APIs.
-        Versions are based on IDE releases, e.g.: RELEASE691
-        To create your own repository, use: nbm:populate-repository
-        -->
-        <repository>
-            <id>netbeans</id>
-            <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+	<!-- dependencyManagement only used in parent POMs
       <dependencyManagement>
            <dependencies>
             <dependency>
@@ -39,6 +25,8 @@
             </dependency>
   	</dependencies>
     </dependencyManagement>
+	-->
+
     <dependencies>
         <!-- Netbeans dependencies -->
         <dependency>
@@ -68,7 +56,7 @@
             <artifactId>org-openide-nodes</artifactId>
             <version>${netbeans.version}</version>
             <type>nbm</type>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-nbjunit</artifactId>
@@ -111,26 +99,29 @@
 
     <build>
         <plugins>
+		    <!-- Used by embeded MascotParser
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.8.1</version>
                 <configuration>
-                    <forkMode>once</forkMode>                    
+                    <forkMode>once</forkMode>
                     <argLine>-Djava.library.path=${project.build.directory}/bin</argLine>
-                </configuration>  			
-            </plugin>            
+                </configuration>
+            </plugin>
+			-->
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
-                <extensions>true</extensions>                
+                <extensions>true</extensions>
                 <executions>
                     <execution>
                         <id>addargs</id>
-                        <goals>                            
+                        <goals>
                             <goal>run-platform</goal>
                         </goals>
-                        
+
                         <configuration>
                             <additionalArguments>java.library.path=${project.build.directory}/bin</additionalArguments>
                         </configuration>
@@ -152,23 +143,8 @@
                     </publicPackages>
                 </configuration>
             </plugin>
-                       
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <!-- to have the jar plugin pickup the nbm generated manifest -->
-                    <useDefaultManifestFile>true</useDefaultManifestFile>
-<!--                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                    </archive>                    -->
-                </configuration>
-            </plugin>
+
+		   <!-- Used by embeded MascotParser
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -191,15 +167,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
+			-->
+
         </plugins>
     </build>
 </project>

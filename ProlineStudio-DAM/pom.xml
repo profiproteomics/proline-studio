@@ -18,38 +18,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <!--
-        Repository hosting NetBeans modules, especially APIs.
-        Versions are based on IDE releases, e.g.: RELEASE691
-        To create your own repository, use: nbm:populate-repository
-        -->
-        <repository>
-            <id>netbeans</id>
-            <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <dependencies>
-        <!-- NetBeans dependencies -->
-        <!--<dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-api-annotations-common</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
+
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency> -->
-        
-        <!-- TOTOCHE -->
-        
-               <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-api-annotations-common</artifactId>
             <version>${netbeans.version}</version>
@@ -66,7 +37,7 @@
             <artifactId>org-openide-util-lookup</artifactId>
             <version>${netbeans.version}</version>
             <type>jar</type>
-        </dependency>                
+        </dependency>
         <!-- NbModuleSuite functional in RELEASE70 or later: -->
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -77,7 +48,7 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-awt</artifactId>
-            <version>${netbeans.version}</version>           
+            <version>${netbeans.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -107,7 +78,7 @@
             <groupId>org.netbeans.modules</groupId>
             <artifactId>org-netbeans-modules-db-metadata-model</artifactId>
             <version>${netbeans.version}</version>
-            <type>nbm-file</type>      
+            <type>nbm-file</type>
         </dependency>
         <dependency>
             <groupId>org.netbeans.modules</groupId>
@@ -127,13 +98,13 @@
             <version>${netbeans.version}</version>
             <type>nbm-file</type>
         </dependency>
-       <!-- Cluster ide dependencies -->     
+       <!-- Cluster ide dependencies -->
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-core-ide</artifactId>
             <version>${netbeans.version}</version>
             <type>nbm-file</type>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-project-libraries</artifactId>
@@ -151,7 +122,7 @@
             <artifactId>org-netbeans-modules-projectuiapi</artifactId>
             <version>${netbeans.version}</version>
             <type>nbm-file</type>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>org.netbeans.modules</groupId>
             <artifactId>org-netbeans-modules-projectui</artifactId>
@@ -242,12 +213,12 @@
             <version>${netbeans.version}</version>
             <type>nbm-file</type>
         </dependency>
-        
+
         <!-- TOTOCHE -->
-            
-            
-        
-        
+
+
+
+
         <!-- ProlineStudio dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -269,10 +240,11 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
-                <version>3.7</version>
+                <!-- Version inherited from ProlineStudio-parent -->
                 <extensions>true</extensions>
                 <configuration>
                     <publicPackages>
@@ -286,26 +258,6 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <!-- NetBeans 6.9+ requires JDK 6 -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <!-- to have the jar plugin pickup the nbm generated manifest -->
-                    <useDefaultManifestFile>true</useDefaultManifestFile>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>

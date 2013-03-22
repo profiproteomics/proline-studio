@@ -56,6 +56,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         super.setVisible(v);
     }
     
+    @Override
      public void pack() {
          if (firstDisplay) {
             super.pack();
@@ -86,7 +87,7 @@ public class DefaultDialog extends javax.swing.JDialog {
  
     }
 
-    protected void setButtonVisible(int buttonId, boolean visible) {
+    public void setButtonVisible(int buttonId, boolean visible) {
         switch (buttonId) {
             case BUTTON_OK:
                 okButton.setVisible(visible);
@@ -125,6 +126,20 @@ public class DefaultDialog extends javax.swing.JDialog {
                 break;
             case BUTTON_DEFAULT:
                 defaultButton.setIcon(icon);
+                break;
+        }
+    }
+    
+    protected void doClick(int buttonId) {
+        switch (buttonId) {
+            case BUTTON_OK:
+                okButton.doClick();
+                break;
+            case BUTTON_CANCEL:
+                cancelButton.doClick();
+                break;
+            case BUTTON_DEFAULT:
+                defaultButton.doClick();
                 break;
         }
     }
@@ -230,6 +245,8 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.weighty = 0;
         
         okButton = new JButton(IconManager.getIcon(IconManager.IconType.OK));
+        okButton.setDefaultCapable(true);
+        getRootPane().setDefaultButton(okButton);
         cancelButton = new JButton(IconManager.getIcon(IconManager.IconType.CANCEL));
         defaultButton = new JButton(IconManager.getIcon(IconManager.IconType.DEFAULT));
         

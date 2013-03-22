@@ -4,12 +4,18 @@ import fr.proline.core.orm.uds.Instrument;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.parameter.*;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.util.system.OSInfo;
+import fr.proline.util.system.OSType;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -580,13 +586,45 @@ public class ImportIdentificationDialog extends DefaultDialog {
             return false;
         }
                
-        // retrieve values
-        //HashMap<String, String> values = parameterList.getValues();
 
+        // check that the server file path is defined
+        Preferences preferences = NbPreferences.root();
+        String serverFilePath = preferences.get("ServerIdentificationFilePath", null);
+        if (serverFilePath == null) {
+            
+            OptionDialog dialog = new OptionDialog(this, "Server Identification File Path", "Please define the file path where the identifications (Mascot, Omssa files...) are saved.\nAsk to your IT Administrator if you don't know where it is.\nIf the data server is running on your computer, the file path can be empty.", "Identification File Path");
+                    
+            // on windows, try to predict the path for identifications
+            OSType osType = OSInfo.getOSType();
+            if ((osType == OSType.WINDOWS_AMD64) || (osType == OSType.WINDOWS_X86)) {
+                File f = fileList.getModel().getElementAt(0);
+                try {
+                    String path = f.getCanonicalPath();
+                    int indexOfSeparator = path.indexOf(File.separatorChar);
+                    if (indexOfSeparator != -1) {
+                        path = path.substring(0, indexOfSeparator+1);
+                        dialog.setText(path);
+                    }
+                } catch (IOException ioe) {
+                    
+                } 
+            }
+            
+            dialog.setAllowEmptyText(true);
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
+            
+            if (dialog.getButtonClicked() == OptionDialog.BUTTON_OK) {
+                preferences.put("ServerIdentificationFilePath", dialog.getText());
+            } else {
+                return false;
+            }
+            
+        }
+        
         
         // save parser
         String parserSelected = parameterList.toString();
-        Preferences preferences = NbPreferences.root();
         preferences.put("IdentificationParser", parserSelected);
         
         // save file path
@@ -822,6 +860,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
             setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
             
             initInternalPanel();
+            
+
         }
         
         private void initData(ArrayList<String> regexArrayList) {
@@ -870,7 +910,18 @@ public class ImportIdentificationDialog extends DefaultDialog {
             JPanel regexSelectionPanel = new JPanel(new GridBagLayout());
             regexSelectionPanel.setBorder(BorderFactory.createTitledBorder(" Regex Selection "));
             
-            regexList = new JList<String>(new DefaultListModel<String>());
+            regexList = new JList<>(new DefaultListModel<String>());
+            
+            // double clicking on regex -> select it and click on ok button
+            regexList.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() == 2) {
+                        selectRegexSingletonDialog.doClick(DefaultDialog.BUTTON_OK);
+                    }
+                }
+            });
+            
             regexListScrollPane = new JScrollPane(regexList) {
                 
                 private Dimension preferredSize = new Dimension(280, 140);

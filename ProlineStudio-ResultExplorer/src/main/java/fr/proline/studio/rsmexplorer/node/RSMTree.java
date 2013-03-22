@@ -22,7 +22,7 @@ import javax.swing.tree.*;
  */
 public class RSMTree extends JTree implements TreeWillExpandListener, MouseListener {
 
-    private DefaultTreeModel model;
+    private RSMTreeModel model;
     private boolean isMainTree;
     private static RSMTree instance = null;
 
@@ -35,6 +35,14 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     private RSMTree() {
 
+        setEditable(true);
+        
+        RSMTransferHandler handler = new RSMTransferHandler();
+        setTransferHandler(handler);
+
+        setDragEnabled(true);
+        setDropMode(DropMode.ON_OR_INSERT);
+        
         isMainTree = true;
 
         // Model of the tree
@@ -55,17 +63,34 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     }
 
     private void initTree(RSMNode top) {
-        model = new DefaultTreeModel(top);
+        model = new RSMTreeModel(top);
         setModel(model);
 
         // rendering of the tree
         putClientProperty("JTree.lineStyle", "Horizontal");
-        setCellRenderer(new RSMTreeRenderer());
-
+        
+        RSMTreeRenderer renderer = new RSMTreeRenderer();
+        setCellRenderer(renderer);
+        if (isEditable()) {
+            setCellEditor(new RSMTreeCellEditor(this, renderer));
+        }
+        
         // -- listeners
         addTreeWillExpandListener(this); // used for lazy loading
         addMouseListener(this);         // used for popup triggering
 
+    }
+    
+    @Override
+    public boolean isPathEditable(TreePath path) {
+        if (isEditable()) {
+            RSMNode node = (RSMNode) path.getLastPathComponent();
+            RSMNode.NodeTypes nodeType = node.getType();
+            if ((nodeType == RSMNode.NodeTypes.DATA_SET) || (nodeType == RSMNode.NodeTypes.PROJECT)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public RSMTree copyResultSetRootSubTree(ResultSet rset, Integer projectId) {
@@ -499,7 +524,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     public void mouseExited(MouseEvent e) {}
 
 
-    class RSMTreeRenderer extends DefaultTreeCellRenderer {
+    private class RSMTreeRenderer extends DefaultTreeCellRenderer {
 
         public RSMTreeRenderer() {
         }
@@ -517,5 +542,47 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         }
     }
     
+    private class RSMTreeCellEditor extends DefaultTreeCellEditor {
+        public RSMTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer) {
+            super(tree, renderer);
+        }
+        
+        @Override
+        protected void determineOffset(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row) {
+            renderer.getTreeCellRendererComponent(tree, value, isSelected, expanded, leaf, row, true);
+            editingIcon = renderer.getIcon();
+            
+            if(editingIcon != null) {
+                offset = renderer.getIconTextGap() + editingIcon.getIconWidth();
+            } else {
+                offset = renderer.getIconTextGap();
+            }
+        }
+    }
+    
+    private class RSMTreeModel extends DefaultTreeModel {
+
+        public RSMTreeModel(TreeNode root) {
+            super(root, false);
+        }
+
+        /**
+         * This sets the user object of the TreeNode identified by path and
+         * posts a node changed. If you use custom user objects in the TreeModel
+         * you're going to need to subclass this and set the user object of the
+         * changed node to something meaningful.
+         */
+        @Override
+        public void valueForPathChanged(TreePath path, Object newValue) {
+            RSMNode rsmNode = (RSMNode) path.getLastPathComponent();
+
+            if (rsmNode.getType()== RSMNode.NodeTypes.PROJECT) {
+                ((RSMProjectNode) rsmNode).rename(newValue.toString());
+            } else if (rsmNode.getType()== RSMNode.NodeTypes.DATA_SET) {
+                ((RSMDataSetNode) rsmNode).rename(newValue.toString());
+            }
+        }
+    }
+
     
 }

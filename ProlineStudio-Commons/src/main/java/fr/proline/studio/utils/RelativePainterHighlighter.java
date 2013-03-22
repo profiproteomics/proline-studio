@@ -172,16 +172,19 @@ public class RelativePainterHighlighter extends PainterHighlighter {
 
         public RelativePainter() {
             this(null);
+            setHorizontalAlignment(HorizontalAlignment.RIGHT);
         }
         
         
         public RelativePainter(Painter<? super T> delegate) {
             this.painter = delegate;
+            setHorizontalAlignment(HorizontalAlignment.RIGHT);
         }
         
         public RelativePainter(Painter<? super T> delegate, double xPercent) {
             this(delegate);
             xFactor = xPercent;
+            setHorizontalAlignment(HorizontalAlignment.RIGHT);
         }
         public void setPainter(Painter<? super T> painter) {
             Object old = getPainter();

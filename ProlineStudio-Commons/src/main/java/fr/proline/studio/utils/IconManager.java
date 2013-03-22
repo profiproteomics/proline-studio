@@ -43,7 +43,8 @@ public class IconManager {
         EMPTY,
         PLUS,
         CROSS,
-        DOCUMENT_LIST
+        DOCUMENT_LIST,
+        WEB_LINK
     }
     private static HashMap<IconType, ImageIcon> iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> iconHourGlassMap = new HashMap<>();
@@ -82,6 +83,9 @@ public class IconManager {
                     int green = (color & 0x0000FF00) >> 8;
                     int blue = color & 0x000000FF;
                     int greyLevel = (int) Math.round(((double) (red + green + blue)) / 3.0);
+                    // lighter grey
+                    greyLevel  += (int) 100;
+                    if (greyLevel>255) greyLevel = 255;
                     int grey = alpha + (greyLevel << 16) + (greyLevel << 8) + greyLevel;
                     im.setRGB(x, y, grey);
                 }
@@ -157,6 +161,8 @@ public class IconManager {
                 return "fr/proline/studio/images/cross-small7x7.png";
             case DOCUMENT_LIST:
                 return "fr/proline/studio/images/document-list.png";
+            case WEB_LINK:
+                return "fr/proline/studio/images/weblink.png";
         }
 
 

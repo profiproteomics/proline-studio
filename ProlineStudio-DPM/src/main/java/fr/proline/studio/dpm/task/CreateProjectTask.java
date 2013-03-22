@@ -14,7 +14,6 @@ import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import java.io.IOException;
 import javax.persistence.EntityManager;
 
 /**
@@ -40,12 +39,8 @@ public class CreateProjectTask extends AbstractServiceTask {
     @Override
     public boolean askService() {
         
-        BigDecimal idProject = null;
+        BigDecimal idProject;
         
-        ////////////////////////////////////////////////
-        ///////////////////////////////////////////////
-        //postUserRequest();  //JPM.TODO : REMOVE !!!!!!!!
-
         try {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
@@ -57,7 +52,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             params.put("owner_id", ownerId);
             request.setParameters(params);
 
-            HttpResponse response = postRequest("Proline/admin/project/"+request.getMethod()+getIdString(), request);
+            HttpResponse response = postRequest("admin/project/"+request.getMethod()+getIdString(), request);
             
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -136,45 +131,5 @@ public class CreateProjectTask extends AbstractServiceTask {
     }
     
     
-    //////////////////////
-    // JPM.TODO : remove two next methods
-    
-  /*  private static JsonRpcRequest createUserRequest() {
-
-        JsonRpcRequest request = new JsonRpcRequest();
-        request.setId(12356);
-        //request.setMethod("create");
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("login", "dupierris");
-        request.setParameters(params);
-
-        return request;
-    }
-    
-    
-    public static void postUserRequest() {
-                HttpTransport transport = new ApacheHttpTransport();
-        HttpRequestFactory factory = transport.createRequestFactory();
-        try {
-
-            JsonHttpContent content = new JsonHttpContent(new JacksonFactory(), createUserRequest().getParameters());
-            HttpRequest request = factory.buildPostRequest(new GenericUrl("http://localhost:8080/Proline/admin/user_account/create"), content);
-
-            //JsonHttpContent content = new JsonHttpContent(new JacksonFactory(), createProjectRequest().getParameters());
-            //HttpRequest request = factory.buildPostRequest(new GenericUrl("http://localhost:8080/Proline/admin/project/create"), content);
-
-
-            System.out.println(content.getData().toString());
-            HttpResponse response = request.execute();
-            System.out.println(response.parseAsString());
-            
-            
-
-            
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }*/
     
 }

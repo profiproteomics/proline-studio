@@ -14,9 +14,7 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.ArrayList;
-import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -35,8 +33,7 @@ public class AggregateAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
 
-        // only one node selected for this action
-        final RSMNode n = selectedNodes[0];
+
         
         AddAggregateDialog dialog = AddAggregateDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
@@ -49,103 +46,112 @@ public class AggregateAction extends AbstractRSMAction {
             final int nbAggregates = dialog.getNbAggregates();
             Aggregation.ChildNature aggregateType = dialog.getAggregateType();
             
-            // check if a child has already the same name with a number suffix
-            int suffixNumber = 0;
-            int nbChildren = n.getChildCount();
-            for (int i=0;i<nbChildren;i++) {
-                RSMNode child = (RSMNode) n.getChildAt(i);
-                String childName = child.toString();
-                
-                if (childName.startsWith(name)) {
-                    String suffix = childName.substring(name.length());
-                    try {
-                        int number = Integer.parseInt(suffix);
-                        if (number>suffixNumber) {
-                            suffixNumber = number;
+            int nbNodes = selectedNodes.length;
+                  
+            for (int iNode=0;iNode<nbNodes;iNode++) {
+        
+                final RSMNode n = selectedNodes[iNode];
+            
+
+
+                // check if a child has already the same name with a number suffix
+                int suffixNumber = 0;
+                int nbChildren = n.getChildCount();
+                for (int i = 0; i < nbChildren; i++) {
+                    RSMNode child = (RSMNode) n.getChildAt(i);
+                    String childName = child.toString();
+
+                    if (childName.startsWith(name)) {
+                        String suffix = childName.substring(name.length());
+                        try {
+                            int number = Integer.parseInt(suffix);
+                            if (number > suffixNumber) {
+                                suffixNumber = number;
+                            }
+                        } catch (NumberFormatException nfe) {
+                            // can happen not a bug
                         }
-                    } catch (NumberFormatException nfe) {
-                        // can happen not a bug
                     }
                 }
-            }
-            
-            if ((suffixNumber == 0) && (nbAggregates>1)) {
-                suffixNumber = 1;
-            } else if (suffixNumber >0) {
-                suffixNumber++;
-            }
-            int suffixStart = suffixNumber;
-            
-            final ArrayList<RSMDataSetNode> nodesCreated = new ArrayList<RSMDataSetNode>();
-            
-            final RSMTree tree = RSMTree.getTree();
-            final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-            for (int i=0;i<nbAggregates;i++) {
-                String aggregateName = name;
-                if (suffixNumber>0) {
-                    aggregateName += suffixNumber;
+
+                if ((suffixNumber == 0) && (nbAggregates > 1)) {
+                    suffixNumber = 1;
+                } else if (suffixNumber > 0) {
                     suffixNumber++;
                 }
-                RSMDataSetNode datasetNode = new RSMDataSetNode(new DataSetData(aggregateName, Dataset.DatasetType.AGGREGATE, aggregateType));
-                nodesCreated.add(datasetNode);
-                datasetNode.setIsChanging(true);
-                n.add(datasetNode);
-            }
-            treeModel.nodeStructureChanged(n);
-            
-            // expand the parent node to display its children
-            tree.expandNodeIfNeeded(n);
+                int suffixStart = suffixNumber;
 
-            
-            
-            // add to really create the aggregate dataset
-            
-            Project project = null;
-            Dataset parentDataset = null;
-            if (n.getType() == RSMNode.NodeTypes.PROJECT) {
-                project = ((RSMProjectNode)n).getProject();
-                parentDataset = null; 
-            } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
-                parentDataset = ((RSMDataSetNode)n).getDataset();
-                project = parentDataset.getProject();
-            }
-            
-            final ArrayList<Dataset> createdDatasetList = new ArrayList<>();
-            
-            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+                final ArrayList<RSMDataSetNode> nodesCreated = new ArrayList<RSMDataSetNode>();
 
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
+                final RSMTree tree = RSMTree.getTree();
+                final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                for (int i = 0; i < nbAggregates; i++) {
+                    String aggregateName = name;
+                    if (suffixNumber > 0) {
+                        aggregateName += suffixNumber;
+                        suffixNumber++;
+                    }
+                    RSMDataSetNode datasetNode = new RSMDataSetNode(new DataSetData(aggregateName, Dataset.DatasetType.AGGREGATE, aggregateType));
+                    nodesCreated.add(datasetNode);
+                    datasetNode.setIsChanging(true);
+                    n.add(datasetNode);
+                }
+                treeModel.nodeStructureChanged(n);
+
+                // expand the parent node to display its children
+                tree.expandNodeIfNeeded(n);
+
+
+
+                // add to really create the aggregate dataset
+
+                Project project = null;
+                Dataset parentDataset = null;
+                if (n.getType() == RSMNode.NodeTypes.PROJECT) {
+                    project = ((RSMProjectNode) n).getProject();
+                    parentDataset = null;
+                } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
+                    parentDataset = ((RSMDataSetNode) n).getDataset();
+                    project = parentDataset.getProject();
                 }
 
-                @Override
-                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    
-                    if (!success) {
-                        return; // should not happen
-                    }
-                    int nbNodes = nodesCreated.size();
-                    for (int i = 0; i < nbNodes; i++) {
-                        
-                        RSMDataSetNode datasetNode = nodesCreated.get(i);
-                        Dataset dataset = createdDatasetList.get(i);
-                        datasetNode.setIsChanging(false);
-                        ((DataSetData)datasetNode.getData()).setDataset(dataset);
-                        treeModel.nodeChanged(datasetNode);
-                    }
-                    
-                }
-            };
+                final ArrayList<Dataset> createdDatasetList = new ArrayList<>();
 
-            // ask asynchronous loading of data
-            
-            
-            
-            DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-            task.initCreateDatasetAggregate(project, parentDataset,aggregateType,name,(suffixNumber>0), suffixStart, suffixStart+nbAggregates-1, createdDatasetList);
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-        }
+                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                        if (!success) {
+                            return; // should not happen
+                        }
+                        int nbNodes = nodesCreated.size();
+                        for (int i = 0; i < nbNodes; i++) {
+
+                            RSMDataSetNode datasetNode = nodesCreated.get(i);
+                            Dataset dataset = createdDatasetList.get(i);
+                            datasetNode.setIsChanging(false);
+                            ((DataSetData) datasetNode.getData()).setDataset(dataset);
+                            treeModel.nodeChanged(datasetNode);
+                        }
+
+                    }
+                };
+
+                // ask asynchronous loading of data
+
+
+
+                DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+                task.initCreateDatasetAggregate(project, parentDataset, aggregateType, name, (suffixNumber > 0), suffixStart, suffixStart + nbAggregates - 1, createdDatasetList);
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+            }
+            }
     }
     
     @Override
@@ -153,36 +159,40 @@ public class AggregateAction extends AbstractRSMAction {
         
         int nbSelectedNodes = selectedNodes.length;
         
-        // aggregate must be added in one parent node (for the moment)
-        if (nbSelectedNodes != 1) {
+        if (nbSelectedNodes == 0) {
             setEnabled(false);
             return;
         }
         
-        RSMNode node = selectedNodes[0];
-        
-        // parent node is being created, we can not add an identification
-        if (node.isChanging()) {
-            setEnabled(false);
-            return;
+        for (int i=0;i<nbSelectedNodes;i++) {
+            RSMNode node = selectedNodes[i];
+            
+            // parent node is being created, we can not add an identification
+            if (node.isChanging()) {
+                setEnabled(false);
+                return;
+            }
+                
+            // we can always add an aggregate directly to a project
+            if (node.getType() == RSMNode.NodeTypes.PROJECT) {
+                continue;
+            }
+            
+            // we can add an aggregate only to a data set without a ResultSet or a ResultSummary
+            if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
+                RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
+
+                if (!dataSetNode.hasResultSet() && !dataSetNode.hasResultSummary()) {
+                    continue;
+                } else {
+                    setEnabled(false);
+                    return;
+                }
+            }
+            
         }
 
-        // we can always add an aggregate directly to a project
-        if (node.getType() == RSMNode.NodeTypes.PROJECT) {
-            setEnabled(true);
-            return;
-        }
-        
-        // we can add an aggregate only to a data set without a ResultSet or a ResultSummary
-        if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
-            RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
-        
-            setEnabled(!dataSetNode.hasResultSet() && !dataSetNode.hasResultSummary());
-            return;  
-        }
-
-        setEnabled(false);
-        
-        
+        setEnabled(true);
+ 
     }
 }

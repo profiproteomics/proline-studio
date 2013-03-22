@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.renderer;
 
 import fr.proline.core.orm.msi.MsQuery;
 import java.awt.Component;
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -10,6 +11,10 @@ import javax.swing.table.DefaultTableCellRenderer;
  * @author JM235353
  */
 public class MsQueryRenderer extends DefaultTableCellRenderer {
+    
+    public MsQueryRenderer() {
+        setHorizontalAlignment(JLabel.RIGHT);
+    }
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {

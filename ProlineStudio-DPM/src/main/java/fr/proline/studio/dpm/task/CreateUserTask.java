@@ -39,7 +39,7 @@ public class CreateUserTask extends AbstractServiceTask {
             params.put("login", name);
             request.setParameters(params);
 
-            HttpResponse response = postRequest("Proline/admin/user_account/"+request.getMethod()+getIdString(), request);
+            HttpResponse response = postRequest("admin/user_account/"+request.getMethod()+getIdString(), request);
             
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 

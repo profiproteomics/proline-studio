@@ -51,7 +51,7 @@ public class ServerConnectionTask extends AbstractServiceTask {
 
             HttpResponse response = null;
             try {
-                response = postRequest(serverURL, "Proline/admin/connection/"+request.getMethod()+getIdString(), request); //JPM.TODO
+                response = postRequest(serverURL, "admin/connection/"+request.getMethod()+getIdString(), request); //JPM.TODO
             } catch (Exception e) {
                 errorMessage = "Server Connection Failed.";
                 logger.error(getClass().getSimpleName()+" failed", errorMessage);

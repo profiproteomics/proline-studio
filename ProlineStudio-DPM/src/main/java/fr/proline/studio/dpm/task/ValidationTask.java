@@ -113,7 +113,7 @@ public class ValidationTask extends AbstractServiceTask {
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("Proline/dps.msi/validate_result_set/"+request.getMethod()+getIdString(), request);
+            HttpResponse response = postRequest("dps.msi/validate_result_set/"+request.getMethod()+getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -178,7 +178,7 @@ public class ValidationTask extends AbstractServiceTask {
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("Proline/dps.msi/validate_result_set/"+request.getMethod()+getIdString(), request); //JPM.TODO
+            HttpResponse response = postRequest("dps.msi/validate_result_set/"+request.getMethod()+getIdString(), request); //JPM.TODO
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 

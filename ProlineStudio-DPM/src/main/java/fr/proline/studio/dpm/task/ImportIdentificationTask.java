@@ -101,7 +101,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             
             request.setParameters(params);
 
-            HttpResponse response = postRequest("Proline/dps.msi/import_result_files/"+request.getMethod()+getIdString(), request);
+            HttpResponse response = postRequest("dps.msi/import_result_files/"+request.getMethod()+getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -165,7 +165,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("Proline/dps.msi/import_result_files/"+request.getMethod()+getIdString(), request);
+            HttpResponse response = postRequest("dps.msi/import_result_files/"+request.getMethod()+getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 

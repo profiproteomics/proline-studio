@@ -2,18 +2,11 @@ package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
-import fr.proline.studio.dam.tasks.DatabaseProjectTask;
-import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.gui.dialog.RenameDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
-import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -33,78 +26,27 @@ public class RenameAction extends AbstractRSMAction {
 
         // only one node selected for this action
         final RSMNode n = selectedNodes[0];
-        
-        String name = null;
+
         
         RSMNode.NodeTypes nodeType = n.getType();
         if (nodeType == RSMNode.NodeTypes.DATA_SET) {
-            final RSMDataSetNode datasetNode = (RSMDataSetNode) n;
-            final Dataset dataset = datasetNode.getDataset();
-            name = dataset.getName();
+            RSMDataSetNode datasetNode = (RSMDataSetNode) n;
+            Dataset dataset = datasetNode.getDataset();
+            
+            String name = dataset.getName();
+            String newName = showRenameDialog(name, x, y);
 
-            final String newName = showRenameDialog(name, x, y);
-
-            if ((newName != null) && (newName.compareTo(name) != 0)) {
-                datasetNode.setIsChanging(true);
-                dataset.setName(newName+"...");
-                ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(datasetNode);
-
-
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                        datasetNode.setIsChanging(false);
-                        dataset.setName(newName);
-                        ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(datasetNode);
-                    }
-                };
-
-
-                // ask asynchronous loading of data
-                DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-                task.initRenameDataset(dataset, newName);
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-            }
+            datasetNode.rename(newName);
             
         } else if (nodeType == RSMNode.NodeTypes.PROJECT) {
-            final RSMProjectNode projectNode = (RSMProjectNode) n;
-            final Project project = projectNode.getProject();
-            name = project.getName();
+            RSMProjectNode projectNode = (RSMProjectNode) n;
+            Project project = projectNode.getProject();
+            
+            String name = project.getName();
+            String newName = showRenameDialog(name,  x, y);
 
-            final String newName = showRenameDialog(name,  x, y);
+            projectNode.rename(newName);
 
-            if ((newName != null) && (newName.compareTo(name) != 0)) {
-                projectNode.setIsChanging(true);
-                project.setName(newName+"...");
-                ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(projectNode);
-
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                        projectNode.setIsChanging(false);
-                        project.setName(newName);
-                        ((DefaultTreeModel)RSMTree.getTree().getModel()).nodeChanged(projectNode);
-                    }
-                };
-
-
-                // ask asynchronous loading of data
-                DatabaseProjectTask task = new DatabaseProjectTask(callback);
-                task.initRenameProject(project.getId(), newName);
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-            }
         }
 
 
@@ -112,13 +54,13 @@ public class RenameAction extends AbstractRSMAction {
         
     private String showRenameDialog(String name, int x, int y) {
         
-        RenameDialog dialog = RenameDialog.getDialog(WindowManager.getDefault().getMainWindow());
-        dialog.setNameField(name);
+        OptionDialog dialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Rename", null, "New Name");
+        dialog.setText(name);
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         String newName = null;
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-            newName = dialog.getNameField();
+            newName = dialog.getText();
         }
         
         if ((newName != null) && (newName.length() > 0)) {

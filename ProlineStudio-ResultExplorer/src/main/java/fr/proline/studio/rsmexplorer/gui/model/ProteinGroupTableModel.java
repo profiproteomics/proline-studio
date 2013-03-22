@@ -119,15 +119,9 @@ public class ProteinGroupTableModel extends LazyTableModel {
                     lazyData.setData(null);
                     givePriorityTo(taskId, row, col);
                 } else {
-                    sb.setLength(0);
-                    sb.append((int) (sameSetCount + subSetCount));
-                    sb.append(" (");
-                    sb.append(sameSetCount);
-                    sb.append(',');
-                    sb.append(subSetCount);
-                    sb.append(')');
+                    
 
-                    lazyData.setData(sb.toString());
+                    lazyData.setData(new ProteinCount(sameSetCount, subSetCount));
                 }
                 
                 return lazyData;
@@ -144,7 +138,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
                     
                     givePriorityTo(taskId, row, col);
                 } else {
-                    lazyData.setData( DataFormat.format(proteinMatch.getTransientData().getPeptideSet(rsmId).getPeptideCount() ));
+                    lazyData.setData( proteinMatch.getTransientData().getPeptideSet(rsmId).getPeptideCount() );
                 }
                 return lazyData;
    
@@ -152,7 +146,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
             case COLTYPE_SPECTRAL_COUNT: {
                 LazyData lazyData = getLazyData(row,col);
                 Integer spectralCount = proteinSet.getTransientData().getSpectralCount();
-                lazyData.setData(DataFormat.format(spectralCount));
+                lazyData.setData(spectralCount);
                 if (spectralCount == null) {
                     givePriorityTo(taskId, row, col);
                 }
@@ -161,7 +155,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
             case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
                 LazyData lazyData = getLazyData(row,col);
                 Integer specificSpectralCount = proteinSet.getTransientData().getSpecificSpectralCount();
-                lazyData.setData(DataFormat.format(specificSpectralCount));
+                lazyData.setData(specificSpectralCount);
                 if (specificSpectralCount == null) {
                     givePriorityTo(taskId, row, col);
                 }
@@ -253,6 +247,33 @@ public class ProteinGroupTableModel extends LazyTableModel {
     }
 
 
-    
+    public class ProteinCount implements Comparable {
+
+        private int m_sameSetCount;
+        private int m_subSetCount;
+        
+        public ProteinCount(int sameSetCount, int subSetCount) {
+            m_sameSetCount = sameSetCount;
+            m_subSetCount = subSetCount;
+        }
+        
+        @Override
+        public String toString() {
+            sb.setLength(0);
+            sb.append((int) (m_sameSetCount + m_subSetCount));
+            sb.append(" (");
+            sb.append(m_sameSetCount);
+            sb.append(',');
+            sb.append(m_subSetCount);
+            sb.append(')');
+            return sb.toString();
+        }
+        
+        @Override
+        public int compareTo(Object o) {
+            return m_sameSetCount-((ProteinCount) o).m_sameSetCount;
+        }
+        
+    }
 
 }

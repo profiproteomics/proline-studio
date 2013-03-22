@@ -12,6 +12,7 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
@@ -184,7 +185,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
 
         private void doSearch() {
 
-            final String searchText = searchTextField.getText().trim();
+            final String searchText = searchTextField.getText().trim().toUpperCase();
 
             if (searchText.compareTo(previousSearch) == 0) {
                 // search already done, display next result
@@ -252,7 +253,8 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
             super(scrollPane.getVerticalScrollBar());
             setDefaultRenderer(Peptide.class, new PeptideRenderer());
             setDefaultRenderer(MsQuery.class, new MsQueryRenderer());
-            setDefaultRenderer(Float.class, new FloatRenderer( getDefaultRenderer(String.class) ) );
+            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
+            setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class))  );
             
             displayColumnAsPercentage(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE);
             

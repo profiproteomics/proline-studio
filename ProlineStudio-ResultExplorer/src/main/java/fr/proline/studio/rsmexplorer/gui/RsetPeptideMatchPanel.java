@@ -167,7 +167,7 @@ public class RsetPeptideMatchPanel extends javax.swing.JPanel implements DataBox
 
         private void doSearch() {
 
-            final String searchText = searchTextField.getText().trim();
+            final String searchText = searchTextField.getText().trim().toUpperCase();
 
             if (searchText.compareTo(previousSearch) == 0) {
                 // search already done, display next result

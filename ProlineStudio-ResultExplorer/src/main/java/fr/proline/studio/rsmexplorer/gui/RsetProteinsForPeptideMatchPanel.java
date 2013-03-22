@@ -5,6 +5,9 @@ import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinsOfPeptideMatchTableModel;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.URLCellRenderer;
 import javax.swing.event.ListSelectionEvent;
@@ -26,7 +29,7 @@ public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel impleme
         initComponents();
 
         TableColumn accColumn = proteinTable.getColumnModel().getColumn(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
-        URLCellRenderer renderer = new URLCellRenderer("http://www.uniprot.org/uniprot/");
+        URLCellRenderer renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
         accColumn.setCellRenderer(renderer);
         proteinTable.addMouseListener(renderer);
     }
@@ -131,7 +134,8 @@ public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel impleme
 
         public ProteinTable() {
             displayColumnAsPercentage(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_SCORE);
-
+            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
+            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
         }
 
         /**

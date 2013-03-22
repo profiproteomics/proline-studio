@@ -62,6 +62,8 @@ public class PeptideMatchTableModel extends LazyTableModel {
                 return Float.class;
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
+                return Integer.class;
+            
             default:
                 return String.class;
         }
@@ -138,7 +140,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
             }
 
             case COLTYPE_PEPTIDE_CHARGE: {
-                return DataFormat.format(peptideMatch.getCharge());
+                return peptideMatch.getCharge();
             }
              
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
@@ -162,7 +164,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
  
             }
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: {
-                return DataFormat.format(peptideMatch.getMissedCleavage());
+                return peptideMatch.getMissedCleavage();
             }
             /*case COLTYPE_PEPTIDE_RETENTION_TIME: { //JPM.TODO : can not do it for the moment: Retention Time is on Peptide Instance
                 
@@ -210,13 +212,13 @@ public class PeptideMatchTableModel extends LazyTableModel {
                     } else {
                         Spectrum spectrum = msQuery.getTransientIsSpectrumSet() ? msQuery.getSpectrum() : null;
                         if (spectrum == null) {
-                            lazyData.setData("");
+                            lazyData.setData(Float.valueOf(Float.NaN)); //JPM.WART : value loaded, but there is no result in database
                         } else {
                             Float precursorIntensity = spectrum.getPrecursorIntensity();
                             if (precursorIntensity != null) {
-                                lazyData.setData(DataFormat.format(precursorIntensity, 2));
+                                lazyData.setData(precursorIntensity);
                             } else {
-                                lazyData.setData("");
+                                lazyData.setData(Float.valueOf(Float.NaN)); //JPM.WART : value loaded, but there is no result in database
                             }
                         }
                     }  

@@ -37,10 +37,13 @@ public class ProteinsOfPeptideMatchTableModel extends AbstractTableModel {
     public Class getColumnClass(int col) {
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
-            case COLTYPE_PROTEIN_SCORE:
-            case COLTYPE_PROTEIN_PEPTIDES_COUNT:
-            case COLTYPE_PROTEIN_MASS:
                 return String.class;
+            case COLTYPE_PROTEIN_SCORE:
+                return Float.class;
+            case COLTYPE_PROTEIN_PEPTIDES_COUNT:
+                return Integer.class;
+            case COLTYPE_PROTEIN_MASS:
+                return Double.class;
         }
         return null;
     }
@@ -62,15 +65,15 @@ public class ProteinsOfPeptideMatchTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_NAME:
                 return proteinMatch.getAccession();
             case COLTYPE_PROTEIN_SCORE:
-                return DataFormat.format(proteinMatch.getScore(),2);
+                return proteinMatch.getScore();
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
-                return DataFormat.format(proteinMatch.getPeptideCount());
+                return proteinMatch.getPeptideCount();
             case COLTYPE_PROTEIN_MASS:
                 BioSequence bioSequence = proteinMatch.getTransientData().getBioSequence();
                 if (bioSequence == null) {
-                    return "";
+                    return null;
                 }
-                return DataFormat.format(bioSequence.getMass(), 2);
+                return bioSequence.getMass();
         }
         return null; // should never happen
     }

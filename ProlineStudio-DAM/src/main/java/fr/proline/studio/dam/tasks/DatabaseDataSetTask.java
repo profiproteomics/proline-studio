@@ -11,6 +11,7 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -552,6 +553,70 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             logger.error(getClass().getSimpleName()+" failed", e);
+            entityManagerUDS.getTransaction().rollback();
+            return false;
+        } finally {
+            entityManagerUDS.close();
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Called when the tree Project/Dataset has been modified by the user by Drag & Drop
+     * @param databaseObjectsToModify  HashMap whose keys can be Project or Parent Dataset
+     */
+    public static boolean updateDatasetAndProjectsTree(HashMap<Object, ArrayList<Dataset>> databaseObjectsToModify) {
+         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        try {
+            entityManagerUDS.getTransaction().begin();
+            
+            Iterator it = databaseObjectsToModify.keySet().iterator();
+            while (it.hasNext()) {
+                Object parentObject = it.next();
+                ArrayList<Dataset> datasetList = databaseObjectsToModify.get(parentObject);
+                
+                Dataset parentDataset = null;
+                Dataset mergedParentDataset = null;
+                Project parentProject = null;
+                //Project mergedParentProject = null;
+                if (parentObject instanceof Dataset) {
+                    parentDataset = (Dataset) parentObject;
+                    mergedParentDataset = entityManagerUDS.merge(parentDataset);
+                } else if (parentObject instanceof Project) {
+                    parentProject = (Project) parentObject;
+                }
+                
+                
+                // update children dataset
+                int nbDataset = datasetList.size();
+                for (int i=0;i<nbDataset;i++) {
+                    
+                    // update dataset
+                    Dataset dataset = datasetList.get(i);
+                    Dataset mergedDataset = entityManagerUDS.merge(dataset);
+                    mergedDataset.setNumber(i);
+                    dataset.setNumber(i);
+                    mergedDataset.setParentDataset(mergedParentDataset); // can be null when it is directly in a Project
+                    dataset.setParentDataset(parentDataset);
+                    entityManagerUDS.persist(mergedDataset);
+   
+                }
+                
+                // updata parent object
+                if (parentDataset != null) {
+                    mergedParentDataset.setFractionCount(nbDataset);
+                    parentDataset.setFractionCount(nbDataset);
+                    entityManagerUDS.persist(mergedParentDataset);
+                } else if (parentProject != null) {
+                    parentProject.getTransientData().setChildrenNumber(nbDataset);
+                }
+            }
+            
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            logger.error("updateDatasetAndProjectsTree failed", e);
             entityManagerUDS.getTransaction().rollback();
             return false;
         } finally {

@@ -10,8 +10,15 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.URL;
+import java.util.prefs.Preferences;
+import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -21,13 +28,17 @@ import org.slf4j.LoggerFactory;
 
 public class URLCellRenderer extends DefaultTableCellRenderer implements MouseListener {
     
-    public static final String HTMLAI_CLOSE = "</a></i></html>";
-    public static final String HTMLIA_HREF = "<html><i><a href=";
+    //public static final String HTMLAI_CLOSE = "</a></i></html>";
+    //public static final String HTMLIA_HREF = "<html><i><a href=";
 
-    private String URLTemplate;
+    private String m_preferenceKey;
+    private String m_defaultURLTemplate;
+    private int m_column;
     
-    public URLCellRenderer(String template) {
-        URLTemplate = template;
+    public URLCellRenderer(String preferenceKey, String defaultURLTemplate, int column) {
+        m_preferenceKey = preferenceKey;
+        m_column = column;
+        m_defaultURLTemplate = defaultURLTemplate;
     }
     
     
@@ -35,32 +46,61 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus,
             int row, int column) {
+
         super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
-            StringBuilder builder = new StringBuilder(90);
-            builder.append(HTMLIA_HREF).append(URLTemplate).append(value.toString()).append('>');
-            builder.append(value.toString()).append(HTMLAI_CLOSE);
-        setText(builder.toString());
+
+        setIcon(IconManager.getIcon(IconManager.IconType.WEB_LINK));
+
         return this;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (e.isAltDown()) {
+        
         JTable table = (JTable) e.getSource();
         Point pt = e.getPoint();
-        int ccol = table.columnAtPoint(pt);
+        int col = table.columnAtPoint(pt);
+        
+        if (col != m_column) {
+            return;
+        }
+ 
+        JTableHeader th = table.getTableHeader();  
+        TableColumnModel tcm = th.getColumnModel();
+        
+        int columnStart = 0;
+        for (int i=0;i<m_column;i++) {
+            TableColumn column = tcm.getColumn(i);
+            columnStart += column.getWidth();
+        }
+ 
+        // check that the user has clicked on the icon
+        if (columnStart+20<e.getX()) {
+            return;
+        }
 
-        int crow = table.rowAtPoint(pt);
-        Object value = table.getValueAt(crow, ccol);
+        int row = table.rowAtPoint(pt);
+        
+        Object value = table.getValueAt(row, col);
+
         LoggerFactory.getLogger(this.getClass()).info(value.toString());
         try {
             if (Desktop.isDesktopSupported()) { // JDK 1.6.0
-                Desktop.getDesktop().browse(new URL(URLTemplate + value.toString()).toURI());
+                
+                Preferences preferences = NbPreferences.root();
+                String template = preferences.get(m_preferenceKey, null);
+                if (template == null) {
+                    template = m_defaultURLTemplate;
+                    preferences.put(m_preferenceKey, m_defaultURLTemplate);
+                }
+                
+                Desktop.getDesktop().browse(new URL(template + value.toString()).toURI());
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            // should not happen
+            LoggerFactory.getLogger(this.getClass()).error(getClass().getSimpleName() + " failed", ex);
         }
-        }
+
     }
 
     @Override

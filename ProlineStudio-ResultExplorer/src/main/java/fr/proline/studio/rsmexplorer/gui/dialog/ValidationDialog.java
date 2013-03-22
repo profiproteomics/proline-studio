@@ -187,8 +187,10 @@ public class ValidationDialog extends DefaultDialog {
         c.gridy = 0;
         prefilterPanel.add(prefiltersSelectedPanel, c);
 
-
+        
+        
         prefilterJComboBox = new JComboBox(prefilterParameters);
+        prefilterJComboBox.setRenderer(new ParameterComboboxRenderer(null));
         addPrefilterButton = new JButton(IconManager.getIcon(IconManager.IconType.PLUS));
         addPrefilterButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
@@ -211,6 +213,9 @@ public class ValidationDialog extends DefaultDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AbstractParameter p = (AbstractParameter) prefilterJComboBox.getSelectedItem();
+                if (p == null) {
+                    return;
+                }
                 p.setUsed(true);
                 initPrefilterPanel();
             }
@@ -231,14 +236,31 @@ public class ValidationDialog extends DefaultDialog {
         c.gridy = 0;
 
         int nbUsed = 0;
+        boolean putAndInFront = false;
         int nbParameters = prefilterParameters.length;
         for (int i = 0; i < nbParameters; i++) {
             final AbstractParameter p = prefilterParameters[i];
-            if (p.isUsed()) {
+
+            if ( (p != null) && (p.isUsed())) {
 
                 c.gridx = 0;
-                prefiltersSelectedPanel.add(new JLabel(p.getName() + " " + ((String) p.getAssociatedData())), c);
+                if (putAndInFront) {
+                    prefiltersSelectedPanel.add(new JLabel("AND"), c);
+                } else {
+                    putAndInFront = true;
+                    prefiltersSelectedPanel.add(new JLabel("   "), c);
+                }
+                
+                c.gridx++;
+                JLabel prefilterNameLabel = new JLabel(p.getName());
+                prefilterNameLabel.setHorizontalAlignment(JLabel.RIGHT);
+                prefiltersSelectedPanel.add(prefilterNameLabel, c);
 
+                c.gridx++;
+                JLabel cmpLabel = new JLabel(((String) p.getAssociatedData()));
+                cmpLabel.setHorizontalAlignment(JLabel.CENTER);
+                prefiltersSelectedPanel.add(cmpLabel, c);
+                
                 c.weightx = 1;
                 c.gridx++;
                 prefiltersSelectedPanel.add(p.getComponent(), c);
@@ -456,28 +478,32 @@ public class ValidationDialog extends DefaultDialog {
     }
 
     private void createParameters() {
-        prefilterParameters = new AbstractParameter[6];
-        prefilterParameters[0] = new IntegerParameter("RANK", "Rank", new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
-        prefilterParameters[0].setAssociatedData("<=");
-        prefilterParameters[1] = new IntegerParameter("PEP_SEQ_LENGTH", "Length", new JTextField(6), new Integer(4), new Integer(4), null);
-        prefilterParameters[1].setAssociatedData(">=");
-        prefilterParameters[2] = new DoubleParameter("SCORE", "Score", new JTextField(6), new Double(0), new Double(0), (Double) null);
+        prefilterParameters = new AbstractParameter[7];
+        prefilterParameters[0] = null;
+        prefilterParameters[1] = new IntegerParameter("RANK", "Rank", new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
+        prefilterParameters[1].setAssociatedData("<=");
+        prefilterParameters[2] = new IntegerParameter("PEP_SEQ_LENGTH", "Length", new JTextField(6), new Integer(4), new Integer(4), null);
         prefilterParameters[2].setAssociatedData(">=");
-        prefilterParameters[3] = new DoubleParameter("MASCOT_EVALUE", "e-Value", new JTextField(6), new Double(1), new Double(0), new Double(1));
-        prefilterParameters[3].setAssociatedData("<=");
-        prefilterParameters[4] = new DoubleParameter("SCORE_IT_P-VALUE", "Identity p-Value", new JTextField(6), new Double(0.05), new Double(0), new Double(1));
-        prefilterParameters[4].setAssociatedData("=");   
-        prefilterParameters[5] = new DoubleParameter("SCORE_HT_P-VALUE", "Homology p-Value", new JTextField(6), new Double(0.05), new Double(0), new Double(1));
-        prefilterParameters[5].setAssociatedData("=");
+        prefilterParameters[3] = new DoubleParameter("SCORE", "Score", new JTextField(6), new Double(0), new Double(0), (Double) null);
+        prefilterParameters[3].setAssociatedData(">=");
+        prefilterParameters[4] = new DoubleParameter("MASCOT_EVALUE", "e-Value", new JTextField(6), new Double(1), new Double(0), new Double(1));
+        prefilterParameters[4].setAssociatedData("<=");
+        prefilterParameters[5] = new DoubleParameter("SCORE_IT_P-VALUE", "Identity p-Value", new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        prefilterParameters[5].setAssociatedData("=");   
+        prefilterParameters[6] = new DoubleParameter("SCORE_HT_P-VALUE", "Homology p-Value", new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        prefilterParameters[6].setAssociatedData("=");
 
         for (int i = 0; i < prefilterParameters.length; i++) {
             AbstractParameter p = prefilterParameters[i];
+            if (p == null) {
+                continue;
+            }
             p.setUsed(false);
             parameterList.add(p);
         }
 
-        fdrTextField = new JTextField(4);
-        fdrFilterParameter = new IntegerParameter("expected_fdr", "FDR", fdrTextField, new Integer(5), new Integer(0), new Integer(10));
+        fdrTextField = new JTextField(5);
+        fdrFilterParameter = new DoubleParameter("expected_fdr", "FDR", fdrTextField, new Double(5), new Double(0), new Double(10));
         fdrFilterParameter.setUsed(false);
         parameterList.add(fdrFilterParameter);
 
@@ -490,8 +516,8 @@ public class ValidationDialog extends DefaultDialog {
         ObjectParameter<String> fdrEstimatorParameter = new ObjectParameter<>("use_td_competition", "FDR Estimator", fdrEstimatorComboBox, FDR_ESTIMATOR_VALUES, FDR_ESTIMATOR_VALUES_ASSOCIATED_KEYS, 0, null);
         parameterList.add(fdrEstimatorParameter);
 
-        proteinFdrTextField = new JTextField(4);
-        proteinFdrFilterParameter = new IntegerParameter("protein_expected_fdr", "Protein FDR", proteinFdrTextField, new Integer(5), new Integer(0), new Integer(10));
+        proteinFdrTextField = new JTextField(5);
+        proteinFdrFilterParameter = new DoubleParameter("protein_expected_fdr", "Protein FDR", proteinFdrTextField, new Double(5), new Double(0), new Double(10));
         proteinFdrFilterParameter.setUsed(false);
         parameterList.add(proteinFdrFilterParameter);
 

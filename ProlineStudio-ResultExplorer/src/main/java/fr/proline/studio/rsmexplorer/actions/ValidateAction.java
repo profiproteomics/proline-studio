@@ -17,8 +17,10 @@ import fr.proline.studio.rsmexplorer.gui.dialog.ValidationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -58,12 +60,16 @@ public class ValidateAction extends AbstractRSMAction {
             HashMap<String, String> parserArguments = dialog.getArguments();
 
 
-            // start validation for each selected Dataset
+            RSMTree tree = RSMTree.getTree();
+            final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             
+            // start validation for each selected Dataset
             for (int i=0;i<nbNodes;i++) {
                 final RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[i];
 
                 dataSetNode.setIsChanging(true);
+                treeModel.nodeChanged(dataSetNode);
+                
                 
                 final Dataset d = dataSetNode.getDataset();
                 
@@ -87,6 +93,8 @@ public class ValidateAction extends AbstractRSMAction {
                         } else {
                             //JPM.TODO : manage error with errorMessage
                             dataSetNode.setIsChanging(false);
+
+                            treeModel.nodeChanged(dataSetNode);
                         }
                     }
                 };
@@ -115,14 +123,11 @@ public class ValidateAction extends AbstractRSMAction {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                if (success) {
+                datasetNode.setIsChanging(false);
 
-                    datasetNode.setIsChanging(false);
-                    //treeModel.nodeChanged(datasetNode); //JPM.TODO : code needed if the validation change the icon
-                } else {
-                    // should not happen
-                    datasetNode.setIsChanging(false);
-                }
+                RSMTree tree = RSMTree.getTree();
+                DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                treeModel.nodeChanged(datasetNode);
             }
         };
 

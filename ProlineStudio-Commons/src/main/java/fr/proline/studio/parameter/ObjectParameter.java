@@ -40,7 +40,7 @@ public class ObjectParameter<E> extends AbstractParameter {
         this.paramToString = paramToString;
         this.parameterComponent = comboBox;
         this.associatedObjects = associatedObjects;
-        comboBox.setRenderer(new ParameterComboboxRenderer());
+        comboBox.setRenderer(new ParameterComboboxRenderer(paramToString));
 
     }
     
@@ -64,7 +64,7 @@ public class ObjectParameter<E> extends AbstractParameter {
         
         if (graphicalType.equals(JComboBox.class)) {
             JComboBox combobox = new JComboBox(objects);
-            combobox.setRenderer(new ParameterComboboxRenderer());
+            combobox.setRenderer(new ParameterComboboxRenderer(paramToString));
             
             if ((value == null) || (! selectItem(combobox, value))) {
                     combobox.setSelectedIndex(defaultIndex);
@@ -178,28 +178,7 @@ public class ObjectParameter<E> extends AbstractParameter {
         return null; // should not happen
     }
     
-    private class ParameterComboboxRenderer extends DefaultListCellRenderer {
-
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            JLabel l = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            if (value == null) {
-                l.setText("< Select >");
-                return l;
-            }
-            
-            String display = null;
-            if (paramToString != null) {
-                display = paramToString.toString((E) value);
-            } else {
-                display = value.toString();
-            }
-            l.setText(display);
-
-            return l;
-        }
-    }
+    
     
     
 }

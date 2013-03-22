@@ -5,10 +5,15 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Dataset.DatasetType;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
+import javax.swing.tree.DefaultTreeModel;
 
 /**
  * Node for Dataset
@@ -108,6 +113,43 @@ public class RSMDataSetNode extends RSMNode {
         
         return isLeaf();
         
+    }
+    
+    public void rename(final String newName) {
+
+        Dataset dataset = getDataset();
+        String name = dataset.getName();
+
+        if ((newName != null) && (newName.compareTo(name) != 0)) {
+
+            final RSMDataSetNode datasetNode = this;
+
+            setIsChanging(true);
+            dataset.setName(newName + "...");
+            ((DefaultTreeModel) RSMTree.getTree().getModel()).nodeChanged(this);
+
+
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    datasetNode.setIsChanging(false);
+                    datasetNode.getDataset().setName(newName);
+                    ((DefaultTreeModel) RSMTree.getTree().getModel()).nodeChanged(datasetNode);
+                }
+            };
+
+
+            // ask asynchronous loading of data
+            DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+            task.initRenameDataset(dataset, newName);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        }
     }
     
     

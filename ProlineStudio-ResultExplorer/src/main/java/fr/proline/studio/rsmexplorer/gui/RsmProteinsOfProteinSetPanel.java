@@ -5,7 +5,8 @@ import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
-import fr.proline.studio.rsmexplorer.gui.model.ProteinsOfPeptideMatchTableModel;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.Color;
@@ -30,8 +31,8 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
         initComponents();
 
         ((DecoratedTable) proteinTable).displayColumnAsPercentage(ProteinTableModel.COLTYPE_PROTEIN_SCORE);
-        TableColumn accColumn = proteinTable.getColumnModel().getColumn(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
-        URLCellRenderer renderer = new URLCellRenderer("http://www.uniprot.org/uniprot/");
+        TableColumn accColumn = proteinTable.getColumnModel().getColumn(ProteinTableModel.COLTYPE_PROTEIN_NAME);
+        URLCellRenderer renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", ProteinTableModel.COLTYPE_PROTEIN_NAME);
         accColumn.setCellRenderer(renderer);
         proteinTable.addMouseListener(renderer);
 
@@ -162,6 +163,10 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
 
     private class ProteinTable extends DecoratedTable {
 
+        public ProteinTable() {
+            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(Float.class)) ) );
+        }
+        
         /**
          * Called whenever the value of the selection changes.
          *

@@ -8,6 +8,7 @@ import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.utils.LazyTable;
 import java.awt.event.ActionEvent;
@@ -15,7 +16,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.event.ListSelectionEvent;
-import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.openide.util.ImageUtilities;
 
 /**
@@ -188,7 +189,7 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
         
         private void doSearch() {
             
-            final String searchText = searchTextField.getText().trim();
+            final String searchText = searchTextField.getText().trim().toUpperCase();
 
             if (searchText.compareTo(previousSearch) == 0) {
                 // search already done, display next result
@@ -257,9 +258,9 @@ public class RsmProteinSetPanel extends javax.swing.JPanel implements DataBoxPan
         public ProteinGroupTable() {
             super(proteinGroupScrollPane.getVerticalScrollBar() );
             
-            setDefaultRenderer(Float.class, new FloatRenderer( getDefaultRenderer(String.class) ) );
+            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             
-
+            setDefaultRenderer(ProteinGroupTableModel.ProteinCount.class, new DefaultRightAlignRenderer(new DefaultTableRenderer()));
         }
         
         /** 

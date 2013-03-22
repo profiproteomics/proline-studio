@@ -4,6 +4,9 @@ import fr.proline.core.orm.msi.*;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.utils.DecoratedTable;
 import javax.swing.event.ListSelectionEvent;
@@ -105,6 +108,8 @@ public class RsmPeptidesOfProteinPanel extends javax.swing.JPanel implements Dat
         
         public PeptideTable() {
             setDefaultRenderer(Peptide.class, new PeptideRenderer());
+            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
+            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
         } 
         
         

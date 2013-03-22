@@ -40,12 +40,12 @@ public class ValidationTask extends AbstractServiceTask {
             request.setMethod("run_job");
             
             
-            Map<String, Object> params = new HashMap<String, Object>();
+            Map<String, Object> params = new HashMap<>();
 	    params.put("project_id", dataset.getProject().getId());  
             params.put("result_set_id", dataset.getResultSetId() );
             params.put("description", description ); //JPM.TODO : string is ""
              
-            // Peptide Filters
+            // Peptide Pre-Filters
             ArrayList pepFilters = new ArrayList();
             
             if (argumentsMap.containsKey("RANK")) {
@@ -101,6 +101,19 @@ public class ValidationTask extends AbstractServiceTask {
             }
                 
                 
+            // Protein Pre-Filters
+            ArrayList proteinFilters = new ArrayList();
+            
+            if (argumentsMap.containsKey("PROTEOTYPIQUE_PEP")) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", "PROTEOTYPIQUE_PEP");
+                filterCfg.put("threshold", Integer.valueOf(argumentsMap.get("PROTEOTYPIQUE_PEP")) );
+                proteinFilters.add(filterCfg);
+            }
+            
+            params.put("prot_set_filters", proteinFilters);
+            
+            
             // protein parameters
             if (argumentsMap.containsKey("protein_expected_fdr")) {
                 HashMap protSetValidator = new HashMap();

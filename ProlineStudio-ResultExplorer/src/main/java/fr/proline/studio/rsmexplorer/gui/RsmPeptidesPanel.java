@@ -1,104 +1,52 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.MsQuery;
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideMatch;
-import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
+import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.PeptideInstanceTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.utils.LazyTable;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import org.openide.util.ImageUtilities;
+
 
 /**
  *
  * @author JM235353
  */
-public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements DataBoxPanelInterface {
+public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
 
-    private PeptideMatchTable peptideMatchTable;
+    private PeptideInstanceTable peptideInstanceTable;
     private JScrollPane scrollPane;
     private JButton searchButton;
     private JTextField searchTextField;
     
+    
     /**
      * Creates new form RsetPeptideMatchPanel
      */
-    public RsetPeptideMatchPanelTEST() {
+    public RsmPeptidesPanel() {
         initComponents();
 
     }
-
-    @Override
-    public void setDataBox(AbstractDataBox dataBox) {
-        this.dataBox = dataBox;
-    }
-
-    public void setData(long taskId, PeptideMatch[] peptideMatches, boolean finished) {
-        ((PeptideMatchTableModel) peptideMatchTable.getModel()).setData(taskId, peptideMatches);
-
-        // select the first row
-        if ((peptideMatches != null) && (peptideMatches.length > 0)) {
-            peptideMatchTable.getSelectionModel().setSelectionInterval(0, 0);
-        }
-        
-        if (finished) {
-            ((PeptideMatchTable)peptideMatchTable).setSortable(true);
-        }
-    }
-
-    public void dataUpdated(SubTask subTask, boolean finished) {
-
-        ((PeptideMatchTable) peptideMatchTable).dataUpdated(subTask, finished);
-
-
-    }
-
-    public PeptideMatch getSelectedPeptideMatch() {
-
-        PeptideMatchTable table = ((PeptideMatchTable) peptideMatchTable);
-
-        // Retrieve Selected Row
-        int selectedRow = table.getSelectedRow();
-
-        // nothing selected
-        if (selectedRow == -1) {
-            return null;
-
-        }
-
-        // convert according to the sorting
-        selectedRow = table.convertRowIndexToModel(selectedRow);
-
-
-
-        // Retrieve ProteinSet selected
-        PeptideMatchTableModel tableModel = (PeptideMatchTableModel) table.getModel();
-        return tableModel.getPeptideMatch(selectedRow);
-    }
-
-                       
+    
     private void initComponents() {
 
         setLayout(new GridBagLayout());
@@ -107,19 +55,24 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
+
+
         // create objects
         scrollPane = new JScrollPane();
-        peptideMatchTable = new PeptideMatchTable();
-        peptideMatchTable.setModel(new PeptideMatchTableModel((LazyTable)peptideMatchTable));
         
-        MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(scrollPane, (PeptideMatchTable) peptideMatchTable);
+        peptideInstanceTable = new PeptideInstanceTable();
+        peptideInstanceTable.setModel(new PeptideInstanceTableModel((LazyTable) peptideInstanceTable));
         
-        scrollPane.setViewportView(peptideMatchTable);
-	peptideMatchTable.setFillsViewportHeight(true);
-	peptideMatchTable.setViewport(scrollPane.getViewport());
+        MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(scrollPane, (PeptideInstanceTable) peptideInstanceTable);
         
-        searchButton = new SearchButton();
+        
+        scrollPane.setViewportView(peptideInstanceTable);
+	peptideInstanceTable.setFillsViewportHeight(true);
+	peptideInstanceTable.setViewport(scrollPane.getViewport());
 
+        searchButton = new SearchButton();
+      
+        
         searchTextField = new JTextField(16) {
             @Override
             public Dimension getMinimumSize() {
@@ -128,7 +81,8 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
             
         };
 
-                c.gridx = 0;
+        
+        c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
@@ -148,17 +102,71 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
         
         c.gridx++;
         add(searchButton, c);
-        
+
     }
+
+    @Override
+    public void setDataBox(AbstractDataBox dataBox) {
+        this.dataBox = dataBox;
+    }
+
+    public void setData(long taskId, PeptideInstance[] peptideInstances, boolean finished) {
+        ((PeptideInstanceTableModel) peptideInstanceTable.getModel()).setData(taskId, peptideInstances);
+
+        // select the first row
+        if ((peptideInstances != null) && (peptideInstances.length > 0)) {
+            peptideInstanceTable.getSelectionModel().setSelectionInterval(0, 0);
+        }
+        
+        if (finished) {
+            ((PeptideInstanceTable)peptideInstanceTable).setSortable(true);
+        }
+    }
+
+    public void dataUpdated(SubTask subTask, boolean finished) {
+
+        ((PeptideInstanceTable) peptideInstanceTable).dataUpdated(subTask, finished);
+
+
+    }
+
+    public PeptideInstance getSelectedPeptideInstance() {
+
+        PeptideInstanceTable table = ((PeptideInstanceTable) peptideInstanceTable);
+
+        // Retrieve Selected Row
+        int selectedRow = table.getSelectedRow();
+
+        // nothing selected
+        if (selectedRow == -1) {
+            return null;
+
+        }
+
+        // convert according to the sorting
+        selectedRow = table.convertRowIndexToModel(selectedRow);
+
+
+
+        // Retrieve ProteinSet selected
+        PeptideInstanceTableModel tableModel = (PeptideInstanceTableModel) table.getModel();
+        return tableModel.getPeptideInstance(selectedRow);
+    }
+
+
+                 
+
+               
+
     private class SearchButton extends JButton {
 
         String previousSearch = "";
         int searchIndex = 0;
-        ArrayList<Integer> peptideMatchIds = new ArrayList<Integer>();
+        ArrayList<Integer> peptideInstanceIds = new ArrayList<>();
 
         public SearchButton() {
-            
-            setIcon(new javax.swing.ImageIcon(ImageUtilities.loadImage ("fr/proline/studio/images/search.png")));
+
+            setIcon(new ImageIcon(ImageUtilities.loadImage ("fr/proline/studio/images/search.png")));
             setMargin(new Insets(1,1,1,1));
             
             addActionListener(new java.awt.event.ActionListener() {
@@ -171,26 +179,26 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
         }
 
         public void sortingChanged() {
-            if (peptideMatchIds.isEmpty()) {
+            if (peptideInstanceIds.isEmpty()) {
                 return;
             }
             searchIndex = -1;
-            ((PeptideMatchTableModel) peptideMatchTable.getModel()).sortAccordingToModel(peptideMatchIds);
+            ((PeptideInstanceTableModel) peptideInstanceTable.getModel()).sortAccordingToModel(peptideInstanceIds);
         }
 
         private void doSearch() {
-
+            
             final String searchText = searchTextField.getText().trim().toUpperCase();
 
             if (searchText.compareTo(previousSearch) == 0) {
                 // search already done, display next result
                 searchIndex++;
-                if (searchIndex >= peptideMatchIds.size()) {
+                if (searchIndex >= peptideInstanceIds.size()) {
                     searchIndex = 0;
                 }
 
-                if (!peptideMatchIds.isEmpty()) {
-                    ((PeptideMatchTable) peptideMatchTable).selectProteinSet(peptideMatchIds.get(searchIndex), searchText);
+                if (!peptideInstanceIds.isEmpty()) {
+                    ((PeptideInstanceTable) peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
                 }
 
             } else {
@@ -211,11 +219,11 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
                         // contruct the Map of proteinSetId
 
 
-                        if (!peptideMatchIds.isEmpty()) {
+                        if (!peptideInstanceIds.isEmpty()) {
 
-                            ((PeptideMatchTableModel) peptideMatchTable.getModel()).sortAccordingToModel(peptideMatchIds);
+                            ((PeptideInstanceTableModel) peptideInstanceTable.getModel()).sortAccordingToModel(peptideInstanceIds);
 
-                            ((PeptideMatchTable) peptideMatchTable).selectProteinSet(peptideMatchIds.get(searchIndex), searchText);
+                            ((PeptideInstanceTable) peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
 
                         }
 
@@ -225,33 +233,30 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
                     }
                 };
 
-                ResultSet rset = ((PeptideMatchTableModel) peptideMatchTable.getModel()).getResultSet();
+                ResultSummary rsm = ((PeptideInstanceTableModel) peptideInstanceTable.getModel()).getResultSummary();
 
-                
                 // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideMatchTask(callback, dataBox.getProjectId(), rset, searchText, peptideMatchIds));
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, dataBox.getProjectId(), rsm, searchText, peptideInstanceIds));
 
                 searchButton.setEnabled(false);
             }
         }
     }
 
-    private class PeptideMatchTable extends LazyTable {
+    private class PeptideInstanceTable extends LazyTable {
 
         /**
          * Called whenever the value of the selection changes.
          *
          * @param e the event that characterizes the change.
          */
-        //ProteinSet proteinSetSelected = null;
-        public PeptideMatchTable() {
+        public PeptideInstanceTable() {
             super(scrollPane.getVerticalScrollBar());
             setDefaultRenderer(Peptide.class, new PeptideRenderer());
-            setDefaultRenderer(MsQuery.class, new MsQueryRenderer());
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class))  );
-            
-            displayColumnAsPercentage(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE);
+
+            displayColumnAsPercentage(PeptideInstanceTableModel.COLTYPE_PEPTIDE_SCORE);
             
         }
 
@@ -271,13 +276,13 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
 
 
 
-            dataBox.propagateDataChanged(PeptideMatch.class);
+            dataBox.propagateDataChanged(PeptideInstance.class); //JPM.TODO
 
         }
 
-        public void selectProteinSet(Integer proteinSetId, String searchText) {
-            PeptideMatchTableModel tableModel = (PeptideMatchTableModel) getModel();
-            int row = tableModel.findRow(proteinSetId);
+        public void selectPeptideInstance(Integer peptideInstanceId, String searchText) {
+            PeptideInstanceTableModel tableModel = (PeptideInstanceTableModel) getModel();
+            int row = tableModel.findRow(peptideInstanceId);
             if (row == -1) {
                 return;
             }
@@ -317,7 +322,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
 
                 selectionWillBeRestored(true);
                 try {
-                    ((PeptideMatchTableModel) getModel()).dataUpdated();
+                    ((PeptideInstanceTableModel) getModel()).dataUpdated();
                 } finally {
                     selectionWillBeRestored(false);
                 }
@@ -331,8 +336,8 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
 
                     // if the subtask correspond to the loading of the data of the sorted column,
                     // we keep the row selected visible
-                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((PeptideMatchTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
-                        ((PeptideMatchTable) peptideMatchTable).scrollRowToVisible(rowSelectedInView);
+                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((PeptideInstanceTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
+                        ((PeptideInstanceTable) peptideInstanceTable).scrollRowToVisible(rowSelectedInView);
                     }
 
                 }

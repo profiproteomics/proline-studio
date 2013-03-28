@@ -128,12 +128,12 @@ public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implem
                 continue;
             }
             
-            Peptide p = peptideInstances[i].getTransientBestPeptideMatch().getTransientData().getPeptide();
+            Peptide p = peptideInstances[i].getTransientData().getBestPeptideMatch().getTransientData().getPeptide();
             hightlight(p, false, highlights);
         }
         // highlight for selecte peptide (must be done last to override modifications
         // of overlaping non selected peptides
-        hightlight(selectedPeptide.getTransientBestPeptideMatch().getTransientData().getPeptide(), true, highlights);
+        hightlight(selectedPeptide.getTransientData().getBestPeptideMatch().getTransientData().getPeptide(), true, highlights);
         
 
        

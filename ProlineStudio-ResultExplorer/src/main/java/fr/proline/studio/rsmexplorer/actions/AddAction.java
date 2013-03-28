@@ -12,9 +12,10 @@ import org.openide.util.NbBundle;
  */
 public class AddAction extends AbstractRSMAction {
 
-    private IdentificationAction identificationAction;
-    private AggregateAction aggregateAction;
+    private IdentificationAction m_identificationAction;
+    private AggregateAction m_aggregateAction;
     
+    private JMenu m_menu;
     
    public AddAction() {
        super(NbBundle.getMessage(AddAction.class, "CTL_AddAction"));
@@ -22,28 +23,30 @@ public class AddAction extends AbstractRSMAction {
 
     @Override
     public JMenuItem getPopupPresenter() {
-        JMenu menu = new JMenu((String) getValue(NAME));
+        m_menu = new JMenu((String) getValue(NAME));
         
-        identificationAction = new IdentificationAction();
-        aggregateAction = new AggregateAction();
+        m_identificationAction = new IdentificationAction();
+        m_aggregateAction = new AggregateAction();
         
-        JMenuItem identificationItem = new JMenuItem(identificationAction);
-        JMenuItem aggregateItem = new JMenuItem(aggregateAction);
+        JMenuItem identificationItem = new JMenuItem(m_identificationAction);
+        JMenuItem aggregateItem = new JMenuItem(m_aggregateAction);
         
-        menu.add(identificationItem);
-        menu.add(aggregateItem);
+        m_menu.add(identificationItem);
+        m_menu.add(aggregateItem);
 
-        return menu;
+        return m_menu;
     }
     
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
         
-        identificationAction.updateEnabled(selectedNodes);
-        aggregateAction.updateEnabled(selectedNodes);
+        m_identificationAction.updateEnabled(selectedNodes);
+        m_aggregateAction.updateEnabled(selectedNodes);
         
-        setEnabled(identificationAction.isEnabled() || aggregateAction.isEnabled());
         
+        boolean isEnabled = m_identificationAction.isEnabled() || m_aggregateAction.isEnabled();
+        setEnabled(isEnabled);
+        m_menu.setEnabled(isEnabled);
     }
 
    

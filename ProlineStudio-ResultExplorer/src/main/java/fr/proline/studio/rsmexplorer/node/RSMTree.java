@@ -438,14 +438,18 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             if (mainPopup == null) {
 
                 // create the actions
-                mainActions = new ArrayList<AbstractRSMAction>(7);  // <--- get in sync
+                mainActions = new ArrayList<>(10);  // <--- get in sync
 
-                DisplayPeptidesAction displayPeptidesAction = new DisplayPeptidesAction();
-                mainActions.add(displayPeptidesAction);
+                DisplayRsetAction displayRsetAction = new DisplayRsetAction();
+                mainActions.add(displayRsetAction);
+                
+                DisplayRsmAction displayRsmAction = new DisplayRsmAction();
+                mainActions.add(displayRsmAction);
 
-                DisplayProteinSetsAction displayProteinSetsAction = new DisplayProteinSetsAction();
-                mainActions.add(displayProteinSetsAction);
 
+                PropertiesAction propertiesAction = new PropertiesAction();
+                mainActions.add(propertiesAction);
+                
                 mainActions.add(null);  // separator
 
                 AddAction addAction = new AddAction();
@@ -453,12 +457,14 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 
                 ValidateAction validateAction = new ValidateAction();
                 mainActions.add(validateAction);
+                
 
                 mainActions.add(null);  // separator
 
                 RenameAction renameAction = new RenameAction();
                 mainActions.add(renameAction);
 
+                
                 DeleteAction deleteAction = new DeleteAction();
                 mainActions.add(deleteAction);
 

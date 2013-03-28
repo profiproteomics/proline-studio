@@ -62,7 +62,6 @@ public final class RSMExplorerTopComponent extends TopComponent  {
 
         explorerScrollPane = new javax.swing.JScrollPane();
         tree = RSMTree.getTree();;
-        searchPanel = new fr.proline.studio.gui.SearchPanel();
 
         explorerScrollPane.setViewportView(tree);
 
@@ -70,21 +69,16 @@ public final class RSMExplorerTopComponent extends TopComponent  {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(explorerScrollPane)
-            .addComponent(searchPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(explorerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 426, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(searchPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(explorerScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE))
+            .addComponent(explorerScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane explorerScrollPane;
-    private fr.proline.studio.gui.SearchPanel searchPanel;
     private javax.swing.JTree tree;
     // End of variables declaration//GEN-END:variables
     @Override

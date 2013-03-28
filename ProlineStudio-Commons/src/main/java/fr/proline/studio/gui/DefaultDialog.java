@@ -31,7 +31,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     
     private boolean firstDisplay = true;
     
-    protected int buttonClicked = -1;
+    protected int buttonClicked = BUTTON_CANCEL;
     
      
     /**
@@ -45,6 +45,15 @@ public class DefaultDialog extends javax.swing.JDialog {
     }
     public DefaultDialog(Window parent, Dialog.ModalityType modalityType) {
         super(parent, modalityType);
+        
+        addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosing(WindowEvent we) {
+                cancelButtonActionPerformed();
+            }
+        });
+        
         initComponents(); 
 
     }
@@ -54,6 +63,11 @@ public class DefaultDialog extends javax.swing.JDialog {
         pack();
 
         super.setVisible(v);
+        
+        if (v) {
+            // reinit button when dialog is opened
+            buttonClicked = BUTTON_CANCEL;
+        }
     }
     
     @Override

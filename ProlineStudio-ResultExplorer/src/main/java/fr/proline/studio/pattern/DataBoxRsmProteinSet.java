@@ -5,13 +5,14 @@
 package fr.proline.studio.pattern;
 
 
+import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
+import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanelTEST;
 
 /**
  *
@@ -31,12 +32,18 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
         DataParameter inParameter = new DataParameter();
         inParameter.addParameter(ResultSummary.class, false);
         registerInParameter(inParameter);
+        
+        // or one PeptideInstance
+        inParameter = new DataParameter();
+        inParameter.addParameter(PeptideInstance.class, false);
+        registerInParameter(inParameter);
+        
    
         // Register possible out parameters
         // One or Multiple ProteinSet
         DataParameter outParameter = new DataParameter();
         outParameter.addParameter(ProteinSet.class, true);
-        outParameter.addParameter(ResultSummary.class, true);
+        outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
 
        
@@ -45,7 +52,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        RsmProteinSetPanel p = new RsmProteinSetPanel();
+        RsmProteinSetPanelTEST p = new RsmProteinSetPanelTEST();
         p.setName(name);
         p.setDataBox(this);
         panel = p;
@@ -54,44 +61,79 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     @Override
     public void dataChanged(Class dataType) {
         
-        final ResultSummary _rsm = (rsm!=null) ? rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
+        if (dataType == PeptideInstance.class) {
 
-        
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            final PeptideInstance _peptideInstance = (PeptideInstance) previousDataBox.getData(false, PeptideInstance.class);
+
             
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
+            if (_peptideInstance == null) {
+                ((RsmProteinSetPanelTEST) panel).setData(null, null, true);
+                return;
             }
+            
+            
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                
-                
-                
-                if (subTask == null) {
-
-                    ProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
-                    ((RsmProteinSetPanel)panel).setData(taskId, proteinSetArray, finished);
-                } else {
-                    ((RsmProteinSetPanel)panel).dataUpdated(subTask, finished);
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
                 }
-            }
-        };
-        
 
-        // ask asynchronous loading of data
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinSetsTask(callback, getProjectId(), _rsm));
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-       
+                    if (subTask == null) {
+
+                        ProteinSet[] proteinSetArray = _peptideInstance.getTransientData().getProteinSetArray();
+                        ((RsmProteinSetPanelTEST) panel).setData(taskId, proteinSetArray, finished);
+                    } else {
+                        ((RsmProteinSetPanelTEST) panel).dataUpdated(subTask, finished);
+                    }
+                }
+            };
+
+
+            // ask asynchronous loading of data
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinSetsTask(callback, getProjectId(), _peptideInstance));
+
+        } else {
         
+            final ResultSummary _rsm = (rsm != null) ? rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
+
+
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+
+
+                    if (subTask == null) {
+
+                        ProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
+                        ((RsmProteinSetPanelTEST) panel).setData(taskId, proteinSetArray, finished);
+                    } else {
+                        ((RsmProteinSetPanelTEST) panel).dataUpdated(subTask, finished);
+                    }
+                }
+            };
+
+
+            // ask asynchronous loading of data
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinSetsTask(callback, getProjectId(), _rsm));
+        }
     }
     
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(ProteinSet.class)) {
-                return ((RsmProteinSetPanel)panel).getSelectedProteinSet();
+                return ((RsmProteinSetPanelTEST)panel).getSelectedProteinSet();
             }
             if (parameterType.equals(ResultSummary.class)) {
                 if (rsm != null) {

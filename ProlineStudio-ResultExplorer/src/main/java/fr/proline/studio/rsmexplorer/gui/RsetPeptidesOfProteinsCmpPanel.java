@@ -223,7 +223,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
                 }
                  int nbPeptides = peptideInstances.length;
                 for (int j = 0; j < nbPeptides; j++) {
-                    PeptideMatch peptideMatch = peptideInstances[j].getTransientBestPeptideMatch();
+                    PeptideMatch peptideMatch = peptideInstances[j].getTransientData().getBestPeptideMatch();
                     peptideMatchMap.put(peptideMatch.getId(), peptideMatch);
                 }
             }
@@ -297,7 +297,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPan
                         int nbPeptides = peptideInstanceArray.length;
                         boolean peptideFound = false;
                         for (int j=0;j<nbPeptides;j++) {
-                            PeptideMatch p = peptideInstanceArray[j].getTransientBestPeptideMatch();
+                            PeptideMatch p = peptideInstanceArray[j].getTransientData().getBestPeptideMatch();
                             if (p.getId().intValue() == peptideMatchCur.getId().intValue()) {
                                 peptideFound = true;
                                 break;

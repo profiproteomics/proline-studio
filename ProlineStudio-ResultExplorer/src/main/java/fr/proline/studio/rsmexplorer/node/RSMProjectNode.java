@@ -10,6 +10,12 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
+import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Sheet;
+import org.openide.nodes.Node.Property;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Node for the opened Projects
@@ -67,5 +73,37 @@ public class RSMProjectNode extends RSMNode {
         }
     }
 
+    @Override
+    public Sheet createSheet() {
+        Project p = getProject();
+        
+        Sheet sheet = Sheet.createDefault();
+        
+        try {
+
+            Sheet.Set propGroup = Sheet.createPropertiesSet();
+            
+         
+            Property prop = new PropertySupport.Reflection<Integer>(p, Integer.class, "getId", null);
+            prop.setName("id");
+            propGroup.put(prop);
+            
+            prop = new PropertySupport.Reflection<String>(p, String.class, "getName", null);
+            prop.setName("name");
+            propGroup.put(prop);
+            
+            prop = new PropertySupport.Reflection<String>(p, String.class, "getDescription", null);
+            prop.setName("description");
+            propGroup.put(prop);
+            
+            sheet.put(propGroup);
+
+        } catch (NoSuchMethodException e) {
+            Logger logger = LoggerFactory.getLogger(RSMNode.class);
+            logger.error(getClass().getSimpleName() + " properties error ", e);
+        }
+        
+        return sheet;
+    }
     
 }

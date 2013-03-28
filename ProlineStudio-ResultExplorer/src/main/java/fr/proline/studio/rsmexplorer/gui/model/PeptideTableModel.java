@@ -77,7 +77,7 @@ public class PeptideTableModel extends AbstractTableModel {
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
                 // Retrieve typical Peptide Match
-                PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
+                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch == null) {
                     return null;
                 }
@@ -85,14 +85,14 @@ public class PeptideTableModel extends AbstractTableModel {
             }
             case COLTYPE_PEPTIDE_SCORE: {
                 // Retrieve typical Peptide Match
-                PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
+                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch == null) {
                     return null; // should never happen   
                 }
                 return peptideMatch.getScore();
             }
             case COLTYPE_PROTEIN_GROUPS_MATCHES: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
+                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch == null) {
                     return ""; // should never happen   
                 }
@@ -121,21 +121,21 @@ public class PeptideTableModel extends AbstractTableModel {
 
             }
             case COLTYPE_PEPTIDE_CHARGE: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
+                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch == null) {
                     return ""; // should never happen   
                 }
                 return DataFormat.format(peptideMatch.getCharge());
             }
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
+                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch == null) {
                     return null; // should never happen   
                 }
                 return peptideMatch.getExperimentalMoz();
             }
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
+                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch != null) {
                     Peptide p = peptideMatch.getTransientData().getPeptide();
                     if (p != null) {
@@ -145,7 +145,7 @@ public class PeptideTableModel extends AbstractTableModel {
                 return null;
             }
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
+                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch == null) {
                     return null;
                 }
@@ -155,7 +155,7 @@ public class PeptideTableModel extends AbstractTableModel {
                 return peptideInstance.getElutionTime();
             }
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
+                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch != null) {
                     MsQuery msQuery = peptideMatch.getMsQuery();
                     if (msQuery != null) {
@@ -171,7 +171,7 @@ public class PeptideTableModel extends AbstractTableModel {
                 return null;
             }
             case COLTYPE_PEPTIDE_PTM: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientBestPeptideMatch();
+                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch != null) {
                     Peptide p = peptideMatch.getTransientData().getPeptide();
                     if (p != null) {

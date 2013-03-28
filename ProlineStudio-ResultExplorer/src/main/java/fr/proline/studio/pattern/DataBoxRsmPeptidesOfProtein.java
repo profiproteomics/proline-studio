@@ -104,7 +104,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         } else if (parameterType!= null && (parameterType.equals(PeptideMatch.class))) {
             PeptideInstance pi = ((RsmPeptidesOfProteinPanel)panel).getSelectedPeptide();
             if (pi != null) {
-                return pi.getTransientBestPeptideMatch();
+                return pi.getTransientData().getBestPeptideMatch();
             }
         }
         return super.getData(getArray, parameterType);

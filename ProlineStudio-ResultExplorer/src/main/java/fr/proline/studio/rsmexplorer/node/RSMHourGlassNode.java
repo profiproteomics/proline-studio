@@ -4,6 +4,7 @@ package fr.proline.studio.rsmexplorer.node;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
+import org.openide.nodes.Sheet;
 
 /**
  * Node used for a part of the tree which is not already loaded
@@ -29,6 +30,10 @@ public class RSMHourGlassNode extends RSMNode {
         return getIcon(IconManager.IconType.HOUR_GLASS);
     }
 
+    @Override
+    public Sheet createSheet() {
+        return null; // should never be called
+    }
 
     
 }

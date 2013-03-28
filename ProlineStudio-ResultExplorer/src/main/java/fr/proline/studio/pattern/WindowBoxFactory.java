@@ -45,6 +45,19 @@ public class WindowBoxFactory {
         
     }
     
+    public static WindowBox getRsmPeptidesWindowBox(String name) {
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[4];
+        boxes[0] = new DataBoxRsmPeptideInstances();
+        boxes[1] = new DataBoxRsmProteinSet();
+        boxes[2] = new DataBoxRsmProteinsOfProteinSet();
+        boxes[3] = new DataBoxRsmPeptidesOfProtein();
+        //boxes[3].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
+
+        
+        return new WindowBox( name, generatePanel(boxes), boxes[0] );
+    }
+    
     public static WindowBox getProteinSetsWindowBox(String name) {
         
         // create boxes

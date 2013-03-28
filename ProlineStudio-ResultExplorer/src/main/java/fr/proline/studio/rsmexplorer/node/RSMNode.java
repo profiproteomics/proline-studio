@@ -2,15 +2,17 @@ package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.PropertiesProviderInterface;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
+import org.openide.nodes.Sheet;
 
 /**
  * Super class for all nodes
  * @author JM235353
  */
-public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneable {
+public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneable, PropertiesProviderInterface {
 
    
     
@@ -88,5 +90,7 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
         return isChanging;
     }
     
+    @Override
+    public abstract Sheet createSheet();
     
 }

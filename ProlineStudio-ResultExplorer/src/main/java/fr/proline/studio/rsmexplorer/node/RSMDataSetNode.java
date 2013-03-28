@@ -14,6 +14,12 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
+import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Sheet;
+import org.openide.nodes.Node.Property;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Node for Dataset
@@ -152,5 +158,65 @@ public class RSMDataSetNode extends RSMNode {
         }
     }
     
+    @Override
+    public Sheet createSheet() {
+        Dataset dataset = getDataset();
+        
+        Sheet sheet = Sheet.createDefault();
+        
+
+        
+        try {
+            Sheet.Set propGroup = Sheet.createPropertiesSet();
+            propGroup.setName("Data Set");
+            propGroup.setDisplayName("Data Set");
+
+            Property prop = new PropertySupport.Reflection<Integer>(dataset, Integer.class, "getId", null);
+            prop.setName("id");
+            propGroup.put(prop);
+            
+            sheet.put(propGroup);
+
+            if (hasResultSet()) {
+                sheet.put(createResultSetSheetSet(dataset));
+            }
+
+            if (hasResultSummary()) {
+                sheet.put(createResultSummarySheetSet(dataset));
+            }
+
+        } catch (NoSuchMethodException e) {
+            Logger logger = LoggerFactory.getLogger(RSMNode.class);
+            logger.error(getClass().getSimpleName() + " properties error ", e);
+        }
+        
+
+        
+        return sheet;
+    }
     
+    private Sheet.Set createResultSetSheetSet(Dataset dataset) throws NoSuchMethodException {
+        Sheet.Set propGroup = Sheet.createPropertiesSet();
+        propGroup.setName("Result Set");
+        propGroup.setDisplayName("Result Set");
+
+        Property prop = new PropertySupport.Reflection<Integer>(dataset, Integer.class, "getResultSetId", null);
+        prop.setName("ResultSet id");
+        propGroup.put(prop);
+
+     
+        return propGroup;
+    }
+    
+    private Sheet.Set createResultSummarySheetSet(Dataset dataset) throws NoSuchMethodException {
+        Sheet.Set propGroup = Sheet.createPropertiesSet();
+        propGroup.setName("Result Summary");
+        propGroup.setDisplayName("Result Summary");
+        
+        Property prop = new PropertySupport.Reflection<Integer>(dataset, Integer.class, "getResultSummaryId", null);
+        prop.setName("ResultSummary id");
+        propGroup.put(prop);
+        
+        return propGroup;
+    }
 }

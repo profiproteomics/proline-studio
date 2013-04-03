@@ -1,13 +1,11 @@
 package fr.proline.studio.dam;
 
-import fr.proline.repository.AbstractDatabaseConnector;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
-import fr.proline.studio.dam.tasks.DatabaseConnectionTask;
 import fr.proline.studio.dam.tasks.PriorityChangement;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.PriorityQueue;
 import org.slf4j.LoggerFactory;
 
@@ -25,28 +23,16 @@ public class AccessDatabaseThread extends Thread {
     private HashMap<Long, AbstractDatabaseTask> actionMap;
     private HashMap<Long, PriorityChangement> priorityChangements;
 
+    private AccessDatabaseWorkerPool m_workerPool = null;
+    
     private AccessDatabaseThread() {
-        actions = new PriorityQueue<AbstractDatabaseTask>();
-        actionMap = new HashMap<Long, AbstractDatabaseTask>();
-        priorityChangements = new HashMap<Long, PriorityChangement>();
-
-        //JPM.CLEAN : remove it code for test
-        // UDS DB properties
-        /*HashMap<Object, Object> databaseProperties = new HashMap<Object, Object>();
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY, "dupierris");
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, "dupierris");
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, "org.postgresql.Driver");
+        actions = new PriorityQueue<>();
+        actionMap = new HashMap<>();
+        priorityChangements = new HashMap<>();
         
+        m_workerPool = AccessDatabaseWorkerPool.getWorkerPool();
 
-        databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, "jdbc:postgresql://localhost:5432/UDS_db");*/
-        //databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, "jdbc:postgresql://gre037784:5433/UDS_db");
-
-        //DatabaseConnectionTask connection = new DatabaseConnectionTask(null, databaseProperties, getProjectIdTMP());
-        //addTask(connection);
-
-        //CreateDatabaseTestTask createDatabase = new CreateDatabaseTestTask(null);
-        //addTask(createDatabase);
-
+        setName("AccessDatabaseThread"); // useful for debugging
     }
 
     public static AccessDatabaseThread getAccessDatabaseThread() {
@@ -77,9 +63,11 @@ public class AccessDatabaseThread extends Thread {
                                 PriorityChangement priorityChangement = priorityChangements.get(taskId);
                                 AbstractDatabaseTask task = priorityChangement.getTask();
 
-                                actions.remove(task);
-                                task.applyPriorityChangement(priorityChangement);
-                                actions.offer(task);
+                                if (actions.contains(task)) {
+                                    actions.remove(task);
+                                    task.applyPriorityChangement(priorityChangement);
+                                    actions.offer(task);
+                                }
                             }
                         }
 
@@ -93,31 +81,26 @@ public class AccessDatabaseThread extends Thread {
                     notifyAll();
                 }
 
-                //Thread.sleep(500);
-
-                //System.out.println("Action : "+action.getClass().toString()+" "+System.currentTimeMillis());
-
-                // fetch data
-                boolean success = action.fetchData();
-
-
-
-                // call callback code
-                action.callback(success, !action.hasSubTasksToBeDone());
-
-                synchronized (this) {
-                    // check if subtasks need to be done
-                    if (action.hasSubTasksToBeDone()) {
-                        // put back action in the queue for subtasks
-                        actions.add(action);
-
-                    } else {
-                        // action completely finished
-                        actionMap.remove(action.getId());
-                        priorityChangements.remove(action.getId());
+                
+                
+                
+                Object workerPoolMutex = m_workerPool.getMutex();
+                synchronized (workerPoolMutex) {
+                    
+                    AccessDatabaseWorkerThread workerThread = null;
+                    while (true) {
+                        workerThread = m_workerPool.getWorkerThread(action.getCurrentPriority());
+                        if (workerThread != null) {
+                            break;
+                        }
+                        workerPoolMutex.wait();
                     }
+                    workerThread.setAction(action);
+                    
+                    workerPoolMutex.notifyAll();
                 }
 
+                
 
             }
 
@@ -129,24 +112,63 @@ public class AccessDatabaseThread extends Thread {
 
     }
 
+    public void actionDone(AbstractDatabaseTask task) {
+        synchronized (this) {
+            // check if subtasks need to be done
+            if (task.hasSubTasksToBeDone()) {
+                // put back action in the queue for subtasks
+                actions.add(task);
+                
+            } else {
+                // action completely finished
+                actionMap.remove(task.getId());
+                priorityChangements.remove(task.getId());
+            }
+            
+            if (task.hasConsecutiveTask()) {
+                AbstractDatabaseTask consecutiveTask = task.getConsecutiveTask();
+                Priority taskPriority = task.getCurrentPriority();
+                if (taskPriority.ordinal() > consecutiveTask.getCurrentPriority().ordinal()) {
+                    consecutiveTask.setPriority(taskPriority);
+                }
+                
+                addTask(consecutiveTask);
+            }
+            
+            notifyAll();
+        }
+        
+    }
+    
     /**
      * Add a task to be done later according to its priority
      *
      * @param action
      */
-    public final void addTask(AbstractDatabaseTask action) {
+    public final void addTask(AbstractDatabaseTask task) {
 
         // check if we need to fetch data for this action
-        if (!action.needToFetch()) {
+        if (!task.needToFetch()) {
             // fetch already done : return immediately
-            action.callback(true, true);
+            task.callback(true, true);
+            
+            if (task.hasConsecutiveTask()) {
+                AbstractDatabaseTask consecutiveTask = task.getConsecutiveTask();
+                Priority taskPriority = task.getCurrentPriority();
+                if (taskPriority.ordinal() > consecutiveTask.getCurrentPriority().ordinal()) {
+                    consecutiveTask.setPriority(taskPriority);
+                }
+                
+                addTask(consecutiveTask);
+            }
+            
             return;
         }
 
         // action is queued
         synchronized (this) {
-            actions.add(action);
-            actionMap.put(action.getId(), action);
+            actions.add(task);
+            actionMap.put(task.getId(), task);
             notifyAll();
         }
     }

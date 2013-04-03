@@ -42,6 +42,8 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
     protected String errorMessage = null;
     protected int errorId = -1;
     
+    protected AbstractDatabaseTask m_consecutiveTask = null;
+    
     public final static String TASK_LIST_INFO = "Database Access";
     
     /**
@@ -68,6 +70,18 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
 
     }
 
+    public void setConsecutiveTask(AbstractDatabaseTask task) {
+        m_consecutiveTask = task;
+    }
+    
+    public AbstractDatabaseTask getConsecutiveTask() {
+        return m_consecutiveTask;
+    }
+    
+    public boolean hasConsecutiveTask() {
+        return (m_consecutiveTask != null);
+    }
+    
     /**
      * Return the id of the Task
      *

@@ -15,12 +15,21 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
     // Manager of the subtasks
     protected SubTaskManager subTaskManager;
     
+    public AbstractDatabaseSlicerTask(AbstractDatabaseCallback callback) {
+        super(callback, null);
+    }
+    
     public AbstractDatabaseSlicerTask(AbstractDatabaseCallback callback, int subTaskCount, TaskInfo taskInfo) {
         super(callback, taskInfo);
         subTaskManager = new SubTaskManager(subTaskCount);
     }
     public AbstractDatabaseSlicerTask(AbstractDatabaseCallback callback, int subTaskCount, Priority priority, TaskInfo taskInfo) {
         super(callback, priority, taskInfo);
+        subTaskManager = new SubTaskManager(subTaskCount);
+    }
+    
+    public void init(int subTaskCount, TaskInfo taskInfo) {
+        setTaskInfo(taskInfo);
         subTaskManager = new SubTaskManager(subTaskCount);
     }
     

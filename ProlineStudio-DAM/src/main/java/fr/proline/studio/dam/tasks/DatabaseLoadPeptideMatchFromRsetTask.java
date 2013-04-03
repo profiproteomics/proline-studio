@@ -70,19 +70,32 @@ public class DatabaseLoadPeptideMatchFromRsetTask extends AbstractDatabaseSlicer
             Integer rsetId = rset.getId();
 
             // Load Peptide Match order by query id and Peptide name
-            // SELECT pm FROM PeptideMatch pm, Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id ORDER BY pm.msQuery.initialId ASC, p.sequence ASC
-            TypedQuery<PeptideMatch> peptideMatchQuery = entityManagerMSI.createQuery("SELECT pm FROM PeptideMatch pm, Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id ORDER BY pm.msQuery.initialId ASC, p.sequence ASC", PeptideMatch.class);
+            // (pm.msQuery is fetch because it is declared as lazy and it is needed later)
+            // SELECT pm, pm.msQuery FROM PeptideMatch pm, Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id ORDER BY pm.msQuery.initialId ASC, p.sequence ASC
+            Query peptideMatchQuery = entityManagerMSI.createQuery("SELECT pm, pm.msQuery FROM PeptideMatch pm, Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id ORDER BY pm.msQuery.initialId ASC, p.sequence ASC");
             peptideMatchQuery.setParameter("rsetId", rsetId);
-            List<PeptideMatch> peptideMatches = peptideMatchQuery.getResultList();
+            //List<PeptideMatch> peptideMatches = peptideMatchQuery.getResultList();
+            List<Object[]> resultList = peptideMatchQuery.getResultList();
+            
+            ArrayList<PeptideMatch> peptideMatches = new ArrayList<>(resultList.size());
+            PeptideMatch[] peptideMatchArray = new PeptideMatch[resultList.size()];
+            Iterator<Object[]> it = resultList.iterator();
+            int index = 0;
+            while (it.hasNext()) {
+                Object[] resCur = it.next();
+                PeptideMatch pm = (PeptideMatch) resCur[0];
+                peptideMatchArray[index++] = pm;
+                peptideMatches.add(pm);
+                // resCur[1] : (pm.msQuery is fetch because it is declared as lazy and it is needed later)
+            }
 
-            PeptideMatch[] peptideMatchArray = peptideMatches.toArray(new PeptideMatch[peptideMatches.size()]);
             rset.setTransientPeptideMatches(peptideMatchArray);
 
             
             // Retrieve Peptide Match Ids and create map of PeptideMatch in the same time
             int nb = peptideMatchArray.length;
-            peptideMatchIds = new ArrayList<Integer>(nb);
-            peptideMatchMap = new HashMap<Integer, PeptideMatch>();
+            peptideMatchIds = new ArrayList<>(nb);
+            peptideMatchMap = new HashMap<>();
             for (int i = 0; i < nb; i++) {
                 PeptideMatch pm = peptideMatchArray[i];
                 Integer id = pm.getId();

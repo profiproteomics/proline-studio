@@ -34,6 +34,8 @@ public class IconManager {
         USER,
         MAXIMIZE,
         MINIMIZE,
+        ASSOCIATE,
+        DISSOCIATE,
         DELETE,
         QUESTION,
         ERASER,
@@ -141,6 +143,10 @@ public class IconManager {
                 return "fr/proline/studio/images/maximize.png";
             case MINIMIZE:
                 return "fr/proline/studio/images/minimize.png";
+            case ASSOCIATE:
+                return "fr/proline/studio/images/associate.png";
+            case DISSOCIATE:
+                return "fr/proline/studio/images/dissociate.png";
             case DELETE:
                 return "fr/proline/studio/images/deleteBlue.png";
             case QUESTION:

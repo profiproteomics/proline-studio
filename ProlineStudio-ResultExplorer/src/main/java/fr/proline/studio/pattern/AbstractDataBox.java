@@ -25,8 +25,8 @@ public abstract class AbstractDataBox {
     protected DataBoxPanelInterface panel;
     
     // In and out Parameters Registered
-    private HashSet<DataParameter> inParameters = new HashSet<DataParameter>();
-    private ArrayList<DataParameter> outParameters = new ArrayList<DataParameter>();
+    private HashSet<DataParameter> inParameters = new HashSet<>();
+    private ArrayList<DataParameter> outParameters = new ArrayList<>();
     
     
     private Integer projectId = null;

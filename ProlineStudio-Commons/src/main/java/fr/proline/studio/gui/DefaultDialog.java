@@ -62,12 +62,14 @@ public class DefaultDialog extends javax.swing.JDialog {
     public void setVisible(boolean v) {
         pack();
 
-        super.setVisible(v);
-        
         if (v) {
             // reinit button when dialog is opened
             buttonClicked = BUTTON_CANCEL;
         }
+        
+        super.setVisible(v);
+        
+
     }
     
     @Override

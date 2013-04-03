@@ -94,7 +94,9 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
 
 
             // ask asynchronous loading of data
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinSetsTask(callback, getProjectId(), _peptideInstance));
+            DatabaseProteinSetsTask task = new DatabaseProteinSetsTask(callback);
+            task.initLoadProteinSetForPeptideInstance(getProjectId(), _peptideInstance);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
         } else {
         
@@ -125,7 +127,10 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
 
 
             // ask asynchronous loading of data
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinSetsTask(callback, getProjectId(), _rsm));
+            
+            DatabaseProteinSetsTask task = new DatabaseProteinSetsTask(callback);
+            task.initLoadProteinSets(getProjectId(), _rsm);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }
     

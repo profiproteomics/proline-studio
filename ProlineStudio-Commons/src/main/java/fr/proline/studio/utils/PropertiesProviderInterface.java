@@ -7,5 +7,10 @@ import org.openide.nodes.Sheet;
  * @author JM235353
  */
 public interface PropertiesProviderInterface {
+    
     public Sheet createSheet();
+    
+    public void loadDataForProperties(Runnable callback);
+    
+    
 }

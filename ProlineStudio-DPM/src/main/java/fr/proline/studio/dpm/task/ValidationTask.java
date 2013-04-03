@@ -104,10 +104,10 @@ public class ValidationTask extends AbstractServiceTask {
             // Protein Pre-Filters
             ArrayList proteinFilters = new ArrayList();
             
-            if (argumentsMap.containsKey("PROTEOTYPIQUE_PEP")) {
+            if (argumentsMap.containsKey("SPECIFIC_PEP")) {
                 HashMap filterCfg = new HashMap();
-                filterCfg.put("parameter", "PROTEOTYPIQUE_PEP");
-                filterCfg.put("threshold", Integer.valueOf(argumentsMap.get("PROTEOTYPIQUE_PEP")) );
+                filterCfg.put("parameter", "SPECIFIC_PEP");
+                filterCfg.put("threshold", Integer.valueOf(argumentsMap.get("SPECIFIC_PEP")) );
                 proteinFilters.add(filterCfg);
             }
             

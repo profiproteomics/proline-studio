@@ -31,6 +31,12 @@ public class RSMHourGlassNode extends RSMNode {
     }
 
     @Override
+    public void loadDataForProperties(Runnable callback) {
+        // nothing to do
+        callback.run();
+    }
+    
+    @Override
     public Sheet createSheet() {
         return null; // should never be called
     }

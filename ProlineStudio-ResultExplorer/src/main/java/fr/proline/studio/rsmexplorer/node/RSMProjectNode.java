@@ -74,6 +74,12 @@ public class RSMProjectNode extends RSMNode {
     }
 
     @Override
+    public void loadDataForProperties(Runnable callback) {
+        // nothing to do
+        callback.run();
+    }
+    
+    @Override
     public Sheet createSheet() {
         Project p = getProject();
         

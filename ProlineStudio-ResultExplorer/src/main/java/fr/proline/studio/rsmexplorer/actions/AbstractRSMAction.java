@@ -26,7 +26,6 @@ public abstract class AbstractRSMAction extends AbstractAction {
         RSMTree tree = RSMTree.getTree();
         
         TreePath treePath = tree.getSelectionPath();
-        RSMNode n = (RSMNode) treePath.getLastPathComponent();
         
         tree.getPathBounds(treePath);
         

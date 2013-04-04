@@ -57,6 +57,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int CREATE_AGGREGATE_DATASET = 5;
     private final static int CREATE_IDENTIFICATION_DATASET = 6;
     private final static int MODIFY_VALIDATED_DATASET = 7;
+    private final static int MODIFY_MERGED_DATASET = 8;
     
     public DatabaseDataSetTask(AbstractDatabaseCallback callback) {
         super(callback, null);
@@ -172,6 +173,14 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         action = MODIFY_VALIDATED_DATASET;
     }
     
+    public void initModifyDatasetForMerge(Dataset dataset, Integer resultSetId, TaskInfo taskInfo) {
+        setTaskInfo(taskInfo);
+        setPriority(Priority.HIGH_2);
+        this.dataset = dataset;
+        this.resultSetId = resultSetId;
+        action = MODIFY_MERGED_DATASET;
+    }
+    
   
     @Override
     public boolean needToFetch() {
@@ -201,6 +210,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case CREATE_AGGREGATE_DATASET:
             case CREATE_IDENTIFICATION_DATASET:
             case MODIFY_VALIDATED_DATASET:
+            case MODIFY_MERGED_DATASET:
                 return true; // done one time
          
         }
@@ -240,6 +250,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return createDataset(true);
             case MODIFY_VALIDATED_DATASET:
                 return modifyDatasetRSM();
+            case MODIFY_MERGED_DATASET:
+                return  modifyDatasetRset();
         }
         
         return false; // should never happen
@@ -267,7 +279,36 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 list.add(new DataSetData(datasetCur));
             }
             
-            project.getTransientData().setChildrenNumber(datasetListSelected.size());
+            // check that the Trash exists
+            /*boolean hasTrash = false;
+            int size = datasetListSelected.size();
+            if (size > 0) {
+                Dataset trash = datasetListSelected.get(datasetListSelected.size()-1);
+                if (trash.getName().compareTo("Trash") == 0) {
+                    hasTrash = true;
+                }
+            }
+            if (!hasTrash) {
+                Project mergedProject = entityManagerUDS.merge(project);
+                Dataset trashDataset = new Dataset(mergedProject);
+                trashDataset.setType(Dataset.DatasetType.AGGREGATE);
+            
+                Aggregation aggregation = UDSDataManager.getUDSDataManager().getAggregation(Aggregation.ChildNature.OTHER);
+                Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
+                trashDataset.setAggregation(mergedAggregation);
+                
+                trashDataset.setName("Trash");
+                trashDataset.setFractionCount(0); // trash is empty
+
+                trashDataset.setNumber(Integer.MAX_VALUE);
+
+                entityManagerUDS.persist(trashDataset);
+                
+                list.add(new DataSetData(trashDataset));
+            }
+            */
+            
+            project.getTransientData().setChildrenNumber(list.size());
             
             // add the UDS connection to the Netbeans Service
             ExternalDb msiDb = ExternalDbRepository.findExternalByTypeAndProject(entityManagerUDS, ProlineDatabaseType.MSI, entityManagerUDS.merge(project));
@@ -562,6 +603,31 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
     
+        private boolean modifyDatasetRset() {
+         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        try {
+            entityManagerUDS.getTransaction().begin();
+            
+            Dataset mergedDataset = entityManagerUDS.merge(dataset);
+        
+            dataset.setResultSetId(resultSetId);
+            mergedDataset.setResultSummaryId(resultSetId);
+            
+            entityManagerUDS.persist(mergedDataset);
+            
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            logger.error(getClass().getSimpleName()+" failed", e);
+            entityManagerUDS.getTransaction().rollback();
+            return false;
+        } finally {
+            entityManagerUDS.close();
+        }
+        
+        return true;
+    }
+    
     /**
      * Called when the tree Project/Dataset has been modified by the user by Drag & Drop
      * @param databaseObjectsToModify  HashMap whose keys can be Project or Parent Dataset
@@ -595,8 +661,23 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     // update dataset
                     Dataset dataset = datasetList.get(i);
                     Dataset mergedDataset = entityManagerUDS.merge(dataset);
-                    mergedDataset.setNumber(i);
-                    dataset.setNumber(i);
+                   
+                    
+                    // check if it is the Trash
+                    boolean isTrash = false;
+                    if ((dataset.getType() == Dataset.DatasetType.AGGREGATE)
+                            && (dataset.getAggregation().getChildNature() == Aggregation.ChildNature.OTHER)
+                            && (dataset.getName().compareTo("Trash") == 0)) {
+                        isTrash = true;
+                    }
+
+                    if (isTrash) {
+                        mergedDataset.setNumber(Integer.MAX_VALUE);
+                        dataset.setNumber(Integer.MAX_VALUE);
+                    } else {
+                        mergedDataset.setNumber(i);
+                        dataset.setNumber(i);
+                    }
                     mergedDataset.setParentDataset(mergedParentDataset); // can be null when it is directly in a Project
                     dataset.setParentDataset(parentDataset);
                     entityManagerUDS.persist(mergedDataset);

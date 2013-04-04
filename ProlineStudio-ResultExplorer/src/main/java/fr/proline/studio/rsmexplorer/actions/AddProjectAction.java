@@ -9,6 +9,7 @@ import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.CreateProjectTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddProjectDialog;
+import fr.proline.studio.rsmexplorer.node.RSMHourGlassNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
@@ -20,7 +21,7 @@ import org.openide.windows.WindowManager;
  * To Add a Project in the UDS DB
  * @author jm235353
  */
-public class AddProjectAction  extends AbstractRSMAction {
+public class AddProjectAction extends AbstractRSMAction {
 
     public AddProjectAction() {
         super(NbBundle.getMessage(AggregateAction.class, "CTL_AddProjectAction"));
@@ -81,6 +82,7 @@ public class AddProjectAction  extends AbstractRSMAction {
                 public void run(boolean success) {
                     if (success) {
                         projectNode.setIsChanging(false);
+                        projectNode.add(new RSMHourGlassNode(null));
                         treeModel.nodeChanged(projectNode);
                     } else {
                         //JPM.TODO : manage error with errorMessage

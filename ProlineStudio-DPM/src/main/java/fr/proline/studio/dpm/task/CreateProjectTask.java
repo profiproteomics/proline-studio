@@ -7,12 +7,15 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Dataset;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import javax.persistence.EntityManager;
 
@@ -107,6 +110,23 @@ public class CreateProjectTask extends AbstractServiceTask {
                 errorMessage = "Internal Error : ";
                 return false;
             }
+
+            // create the trash
+            /*Dataset trashDataset = new Dataset(p);
+            trashDataset.setType(Dataset.DatasetType.TRASH); //JPM.TODO ?
+
+            Aggregation aggregation = UDSDataManager.getUDSDataManager().getAggregation(Aggregation.ChildNature.OTHER);
+            Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
+            trashDataset.setAggregation(mergedAggregation);
+
+            trashDataset.setName("Trash");
+            trashDataset.setFractionCount(0); // trash is empty
+
+            trashDataset.setNumber(Integer.MAX_VALUE); //JPM.TODO ?
+
+            p.getTransientData().setChildrenNumber(1);
+
+            entityManagerUDS.persist(trashDataset);*/
             
             projectData.setProject(p);
             

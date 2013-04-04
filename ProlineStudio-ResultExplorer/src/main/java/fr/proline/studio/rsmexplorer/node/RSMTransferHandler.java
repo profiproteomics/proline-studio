@@ -47,7 +47,13 @@ public class RSMTransferHandler extends TransferHandler {
                 if (node.isChanging()) {
                     return null;
                 }
+                
                 RSMDataSetNode datasetNode = (RSMDataSetNode) node;
+                
+                if (datasetNode.isTrash()) {
+                    return null;
+                }
+                
                 Integer projectId = datasetNode.getDataset().getProject().getId();
                 if (commonProjectId == null) {
                     commonProjectId = projectId;
@@ -104,18 +110,7 @@ public class RSMTransferHandler extends TransferHandler {
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
         
-        /*RSMTreePathListTransferable transfer = (RSMTreePathListTransferable) data;
 
-        RSMTree tree = (RSMTree) source;
-        DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-
-
-        ArrayList<RSMNode> nodeList = RSMTreePathListTransferable.getNodeList(transfer.getTransferKey());
-        int nbNodes = nodeList.size();
-        for (int i = 0; i < nbNodes; i++) {
-            RSMNode node = nodeList.get(i);
-            treeModel.removeNodeFromParent(node);
-        }*/
 
         // clean all transferred data
         RSMTransferable.clearRegisteredData();
@@ -164,16 +159,32 @@ public class RSMTransferHandler extends TransferHandler {
             }
 
 
-            // drop node must be in the same project that nodes being transferred
+            
+            
             try {
-                RSMTransferable nodeList = (RSMTransferable) support.getTransferable().getTransferData(RSMTransferable.RSMNodeList_FLAVOR);
-                if (nodeList.getProjectId().intValue() != dropProjectId.intValue()) {
+                
+                // drop node must be in the same project that nodes being transferred
+                RSMTransferable nodeListTransferable = (RSMTransferable) support.getTransferable().getTransferData(RSMTransferable.RSMNodeList_FLAVOR);
+                if (nodeListTransferable.getProjectId().intValue() != dropProjectId.intValue()) {
                     return false;
+                }
+                
+                // drop node must not be equal or a child of a transferred node
+                ArrayList<RSMNode> nodeList = RSMTransferable.getNodeList(nodeListTransferable.getTransferKey());
+                int nbNodes = nodeList.size();
+                for (int i = 0; i < nbNodes; i++) {
+                    RSMNode nodeTransfered = nodeList.get(i);
+
+                    if (dropRSMNode.isNodeAncestor(nodeTransfered)) {
+                        return false;
+                    }
                 }
             } catch (UnsupportedFlavorException | IOException e) {
                 // should never happen
                 return false;
             }
+
+            
             
             return true;
 
@@ -199,7 +210,16 @@ public class RSMTransferHandler extends TransferHandler {
 
                 // no insert index specified -> we insert at the end
                 if (childIndex == -1) {
+                    
                     childIndex = dropRSMNode.getChildCount();
+                    
+                    // special case to drop before the Trash
+                    if (childIndex>0) {
+                        RSMNode lastChild = (RSMNode) dropRSMNode.getChildAt(childIndex-1);
+                        if ((lastChild instanceof RSMDataSetNode) && ((RSMDataSetNode) lastChild).isTrash()) {
+                            childIndex--; // we drop before the Trash
+                        }
+                    }
                 }
                 
                 // used to keep parent node modified

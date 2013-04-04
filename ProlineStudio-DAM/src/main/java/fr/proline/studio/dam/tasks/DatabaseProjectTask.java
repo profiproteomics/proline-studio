@@ -89,20 +89,20 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             List<Project> projectList = projectQuery.getResultList();
 
 
-            HashMap<Integer, ProjectData> projectMap = new HashMap<>();
+            //HashMap<Integer, ProjectData> projectMap = new HashMap<>();
             Iterator<Project> it = projectList.iterator();
             while (it.hasNext()) {
                 Project projectCur = it.next();
-                Integer projectIdCur = projectCur.getId();
+                //Integer projectIdCur = projectCur.getId();
                 
                 ProjectData projectDataCur = new ProjectData(projectCur);
-                projectDataCur.setHasChildren(false);
-                projectMap.put(projectIdCur, projectDataCur);
+                projectDataCur.setHasChildren(true); // always has a Trash
+                //projectMap.put(projectIdCur, projectDataCur);
                 list.add(projectDataCur);
             }
             
             
-            if (projectMap.size() >0) {
+            /*if (projectMap.size() >0) {
                 Query countQuery = entityManagerUDS.createQuery("SELECT p, count(d) FROM fr.proline.core.orm.uds.Project p, fr.proline.core.orm.uds.Dataset d WHERE d.project=p AND d.parentDataset=null AND p.id IN (:projectIds) GROUP BY p.id");
                 countQuery.setParameter("projectIds", projectMap.keySet());
                 List l = countQuery.getResultList();
@@ -112,9 +112,12 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
                     Object[] resCur = itCountQuery.next();
                     Project p = (Project) resCur[0];
                     Long countDataset = (Long) resCur[1];
+                    if (countDataset == 0) {
+                        countDataset += 1; // for Trash
+                    }
                     projectMap.get(p.getId()).setHasChildren(countDataset > 0);
                 }
-            }
+            }*/
  
             entityManagerUDS.getTransaction().commit();
 

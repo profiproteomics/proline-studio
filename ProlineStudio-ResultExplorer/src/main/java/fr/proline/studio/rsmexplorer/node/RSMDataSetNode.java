@@ -41,10 +41,11 @@ public class RSMDataSetNode extends RSMNode {
     @Override
     public ImageIcon getIcon() {
         
-        Dataset.DatasetType type = ((DataSetData) getData()).getDatasetType();
-        switch(type) {
+        Dataset dataset = ((DataSetData) getData()).getDataset();
+        Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
+        switch(datasetType) {
             case IDENTIFICATION:
-                Dataset dataset = ((DataSetData) getData()).getDataset();
+                
                 if (dataset != null) {
                     if (dataset.getResultSummaryId() == null) {
                         if (isChanging()) {
@@ -60,8 +61,18 @@ public class RSMDataSetNode extends RSMNode {
                 }
                 
             case AGGREGATE:
+                if (isTrash()) {
+                    return getIcon(IconManager.IconType.TRASH);
+                }
                 //Aggregation.ChildNature aggregateType = ((DataSetData) getData()).getAggregateType();
                 //JPM.TODO : according to aggregateType type :icon must be different
+                
+                if (dataset != null) {
+                    if (dataset.getResultSetId() != null) {
+                        return getIcon(IconManager.IconType.VIAL_MERGED);
+                    }
+                }
+                
                 return getIcon(IconManager.IconType.VIAL);
             default:
                 // sould not happen
@@ -76,6 +87,21 @@ public class RSMDataSetNode extends RSMNode {
     
     public Dataset getDataset() {
         return ((DataSetData) getData()).getDataset();
+    }
+    
+    public boolean isTrash() {
+        Dataset dataset = ((DataSetData) getData()).getDataset();
+        if (dataset == null) {
+            return false;
+        }
+        Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
+        if (datasetType != Dataset.DatasetType.AGGREGATE) {
+            return false;
+        }
+        if ((dataset.getAggregation().getChildNature() == Aggregation.ChildNature.OTHER) && (dataset.getName().compareTo("Trash") == 0)) {
+            return true;
+        }
+        return false;
     }
     
     public boolean hasResultSummary() {

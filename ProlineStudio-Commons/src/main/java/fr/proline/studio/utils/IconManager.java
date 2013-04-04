@@ -47,7 +47,8 @@ public class IconManager {
         CROSS,
         DOCUMENT_LIST,
         WEB_LINK,
-        TRASH
+        TRASH,
+        VIAL_MERGED
     }
     private static HashMap<IconType, ImageIcon> iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> iconHourGlassMap = new HashMap<>();
@@ -172,6 +173,8 @@ public class IconManager {
                 return "fr/proline/studio/images/weblink.png";
             case TRASH:
                 return "fr/proline/studio/images/trash.png";
+            case VIAL_MERGED:
+                return "fr/proline/studio/images/vialMerged.png";
         }
 
 

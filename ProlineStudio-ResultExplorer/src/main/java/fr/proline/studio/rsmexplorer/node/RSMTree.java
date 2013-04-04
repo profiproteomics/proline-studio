@@ -310,6 +310,66 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         parentData.load(callback, childrenList);
     }
+    
+    
+    /**
+     * Load a node if needed. The node will not be expanded, but the data will be used
+     * @param nodeToLoad 
+     */
+    public void loadInBackground(final RSMNode nodeToLoad, final AbstractDatabaseCallback parentCallback ) {
+
+        // check if the loading is necessary :
+        // it is necessary only if we have an hour glass child
+        // which correspond to data not already loaded
+        if (nodeToLoad.getChildCount() == 0) {
+            parentCallback.run(true, 0, null, true);
+            return;
+        }
+        RSMNode childNode = (RSMNode) nodeToLoad.getChildAt(0);
+        if (childNode.getType() != RSMNode.NodeTypes.HOUR_GLASS) {
+            parentCallback.run(true, 0, null, true);
+            return;
+        }
+
+        // register hour glass which is expanded
+        loadingMap.put(nodeToLoad.getData(), nodeToLoad);
+
+        final ArrayList<AbstractData> childrenList = new ArrayList<>();
+        final AbstractData parentData = nodeToLoad.getData();
+
+
+        // Callback used only for the synchronization with the AccessDatabaseThread
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return false;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        
+                        dataLoaded(parentData, childrenList);
+                        
+                        // use of childrenList / parentData
+                       parentCallback.run(true, 0, null, true);
+                    }
+                });
+
+            }
+        };
+
+        
+
+        parentData.load(callback, childrenList);
+    }
+    
+    //TOTOCHE
 
     private static HashMap<AbstractData, RSMNode> loadingMap = new HashMap<AbstractData, RSMNode>();
 
@@ -380,13 +440,20 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             }
         }
         
-        // check if the Root node is selected
+        // check if the Root node or Trash is selected
         boolean rootNodeSelected = false;
+        boolean trashNodeSelected = false;
         for (int i=0;i<nbNodes;i++) {
             RSMNode n = selectedNodes[i];
             if (n.isRoot()) {
                 rootNodeSelected = true;
                 break;
+            }
+            if (n instanceof RSMDataSetNode) {
+                RSMDataSetNode datasetNode = (RSMDataSetNode) n;
+                if (datasetNode.isTrash()) {
+                    trashNodeSelected = true;
+                }
             }
         }
         
@@ -431,6 +498,24 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             popup = rootPopup;
             actions = rootActions;
             
+        } else if (trashNodeSelected && (nbNodes == 1)) {
+            
+            // creation of the popup if needed
+            if (trashPopup == null) {
+                 // create the actions
+                trashActions = new ArrayList<>(1);  // <--- get in sync
+                
+                EmptyTrashAction emtpyTrashAction = new EmptyTrashAction();
+                trashActions.add(emtpyTrashAction);
+                
+                trashPopup = new JPopupMenu();
+                
+                trashPopup.add(emtpyTrashAction.getPopupPresenter());
+            }
+            
+            popup = trashPopup;
+            actions = trashActions;
+            
         } else {
 
 
@@ -438,7 +523,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             if (mainPopup == null) {
 
                 // create the actions
-                mainActions = new ArrayList<>(10);  // <--- get in sync
+                mainActions = new ArrayList<>(11);  // <--- get in sync
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction();
                 mainActions.add(displayRsetAction);
@@ -454,6 +539,9 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
                 AddAction addAction = new AddAction();
                 mainActions.add(addAction);
+                
+                MergeAction mergeAction = new MergeAction();
+                mainActions.add(mergeAction);
                 
                 ValidateAction validateAction = new ValidateAction();
                 mainActions.add(validateAction);
@@ -504,6 +592,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     private ArrayList<AbstractRSMAction> mainActions;
     private JPopupMenu rootPopup;
     private ArrayList<AbstractRSMAction> rootActions;
+    private JPopupMenu trashPopup;
+    private ArrayList<AbstractRSMAction> trashActions;
     
     @Override
     public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {

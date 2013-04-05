@@ -15,9 +15,9 @@ public class WindowBoxFactory {
     
     
     public static WindowBox getPeptidesWindowBox(String name) {
-        
+        return getPeptidesForRsetOnlyWindowBox(name);
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[5];
+       /* AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxRsetPeptide();
         boxes[1] = new DataBoxRsetPeptideSpectrum();
         boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
@@ -26,7 +26,7 @@ public class WindowBoxFactory {
         boxes[4] = new DataBoxRsetPeptidesOfProteinsCmp();
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
         
-        return new WindowBox( name, generatePanel(boxes), boxes[0] );
+        return new WindowBox( name, generatePanel(boxes), boxes[0] );*/
     }
     
     public static WindowBox getPeptidesForRsetOnlyWindowBox(String name) {
@@ -52,7 +52,7 @@ public class WindowBoxFactory {
         boxes[1] = new DataBoxRsmProteinSet();
         boxes[2] = new DataBoxRsmProteinsOfProteinSet();
         boxes[3] = new DataBoxRsmPeptidesOfProtein();
-        //boxes[3].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
+        boxes[3].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
 
         
         return new WindowBox( name, generatePanel(boxes), boxes[0] );
@@ -109,6 +109,8 @@ public class WindowBoxFactory {
                 JComponent rightComponent = (JComponent) boxes[i].getPanel();
                 sp.setRightComponent(rightComponent);
                 sp.setName(leftComponent.getName()+" / "+rightComponent.getName()); 
+                
+                sp.setDividerLocation(350); //JPM.TODO
                 panels[panelIdx++] = sp;
             } else if ( layout == AbstractDataBox.DataBoxLayout.TABBED) {
                 if (prevLayout == AbstractDataBox.DataBoxLayout.TABBED) {

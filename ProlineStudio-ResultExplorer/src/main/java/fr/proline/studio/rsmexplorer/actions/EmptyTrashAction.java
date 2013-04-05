@@ -25,7 +25,8 @@ public class EmptyTrashAction extends AbstractRSMAction {
     
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
-        
+        setEnabled(false); //JPM.TODO
+        /*
         if (selectedNodes.length!=1) {
             setEnabled(false);
             return;
@@ -34,7 +35,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
         RSMDataSetNode trashNode = (RSMDataSetNode) selectedNodes[0];
         
         setEnabled(!trashNode.isLeaf());
-
+        * */
     }
     
 }

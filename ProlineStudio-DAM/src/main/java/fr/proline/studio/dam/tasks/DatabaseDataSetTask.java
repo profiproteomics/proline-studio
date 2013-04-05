@@ -273,25 +273,31 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             dataSetQuery.setParameter("projectId", projectId);
             List<Dataset> datasetListSelected = dataSetQuery.getResultList();
 
+            Dataset trash = null;
             Iterator<Dataset> it = datasetListSelected.iterator();
             while (it.hasNext()) {
                 Dataset datasetCur = it.next();
-                list.add(new DataSetData(datasetCur));
-            }
-            
-            // check that the Trash exists
-            /*boolean hasTrash = false;
-            int size = datasetListSelected.size();
-            if (size > 0) {
-                Dataset trash = datasetListSelected.get(datasetListSelected.size()-1);
-                if (trash.getName().compareTo("Trash") == 0) {
-                    hasTrash = true;
+               
+                
+                if (datasetCur.getType() == Dataset.DatasetType.TRASH) {
+                    trash = datasetCur;
+                } else {
+                    list.add(new DataSetData(datasetCur));
                 }
             }
+            
+            boolean hasTrash = false;
+            if (trash != null) {
+                list.add(new DataSetData(trash));
+                hasTrash = true;
+            }
+            
+            // add Trash if it not exists
+
             if (!hasTrash) {
                 Project mergedProject = entityManagerUDS.merge(project);
                 Dataset trashDataset = new Dataset(mergedProject);
-                trashDataset.setType(Dataset.DatasetType.AGGREGATE);
+                trashDataset.setType(Dataset.DatasetType.TRASH);
             
                 Aggregation aggregation = UDSDataManager.getUDSDataManager().getAggregation(Aggregation.ChildNature.OTHER);
                 Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
@@ -300,13 +306,13 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 trashDataset.setName("Trash");
                 trashDataset.setFractionCount(0); // trash is empty
 
-                trashDataset.setNumber(Integer.MAX_VALUE);
+                trashDataset.setNumber(list.size());
 
                 entityManagerUDS.persist(trashDataset);
                 
                 list.add(new DataSetData(trashDataset));
             }
-            */
+    
             
             project.getTransientData().setChildrenNumber(list.size());
             
@@ -655,6 +661,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 
                 
                 // update children dataset
+                int decForTrash = 0;
                 int nbDataset = datasetList.size();
                 for (int i=0;i<nbDataset;i++) {
                     
@@ -662,21 +669,14 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     Dataset dataset = datasetList.get(i);
                     Dataset mergedDataset = entityManagerUDS.merge(dataset);
                    
-                    
-                    // check if it is the Trash
-                    boolean isTrash = false;
-                    if ((dataset.getType() == Dataset.DatasetType.AGGREGATE)
-                            && (dataset.getAggregation().getChildNature() == Aggregation.ChildNature.OTHER)
-                            && (dataset.getName().compareTo("Trash") == 0)) {
-                        isTrash = true;
-                    }
 
-                    if (isTrash) {
-                        mergedDataset.setNumber(Integer.MAX_VALUE);
-                        dataset.setNumber(Integer.MAX_VALUE);
+                    if (dataset.getType() == Dataset.DatasetType.TRASH) {
+                        mergedDataset.setNumber(nbDataset-1);
+                        dataset.setNumber(nbDataset-1);
+                        decForTrash = 1;
                     } else {
-                        mergedDataset.setNumber(i);
-                        dataset.setNumber(i);
+                        mergedDataset.setNumber(i-decForTrash);
+                        dataset.setNumber(i-decForTrash);
                     }
                     mergedDataset.setParentDataset(mergedParentDataset); // can be null when it is directly in a Project
                     dataset.setParentDataset(parentDataset);

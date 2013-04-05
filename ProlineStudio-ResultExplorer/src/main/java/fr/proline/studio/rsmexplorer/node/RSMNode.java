@@ -77,7 +77,10 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
         return data.getName();
     }
 
-
+    public boolean isInTrash() {
+        return false;
+    }
+    
     public boolean canBeDeleted() {
         return false;
     }

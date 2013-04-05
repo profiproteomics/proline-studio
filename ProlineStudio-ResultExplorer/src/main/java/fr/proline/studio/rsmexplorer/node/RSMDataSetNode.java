@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.nodes.Node.Property;
@@ -61,9 +62,7 @@ public class RSMDataSetNode extends RSMNode {
                 }
                 
             case AGGREGATE:
-                if (isTrash()) {
-                    return getIcon(IconManager.IconType.TRASH);
-                }
+
                 //Aggregation.ChildNature aggregateType = ((DataSetData) getData()).getAggregateType();
                 //JPM.TODO : according to aggregateType type :icon must be different
                 
@@ -74,6 +73,8 @@ public class RSMDataSetNode extends RSMNode {
                 }
                 
                 return getIcon(IconManager.IconType.VIAL);
+            case TRASH:
+                return getIcon(IconManager.IconType.TRASH);
             default:
                 // sould not happen
                 
@@ -95,10 +96,7 @@ public class RSMDataSetNode extends RSMNode {
             return false;
         }
         Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
-        if (datasetType != Dataset.DatasetType.AGGREGATE) {
-            return false;
-        }
-        if ((dataset.getAggregation().getChildNature() == Aggregation.ChildNature.OTHER) && (dataset.getName().compareTo("Trash") == 0)) {
+        if (datasetType == Dataset.DatasetType.TRASH) {
             return true;
         }
         return false;
@@ -137,17 +135,28 @@ public class RSMDataSetNode extends RSMNode {
     }
     
     @Override
+    public boolean isInTrash() {
+        if (isTrash()) {
+            return true;
+        }
+        return ((RSMNode) getParent()).isInTrash();
+    }
+    
+    @Override
     public boolean canBeDeleted() {
         
         // for the moment, we can delete only empty DataSet with no leaf
-        if (hasResultSet()) {
+        if (isChanging()) {
             return false;
         }
-        if (hasResultSummary()) {
+        if (isInTrash()) {
             return false;
         }
         
-        return isLeaf();
+        
+        
+        
+        return true;
         
     }
     

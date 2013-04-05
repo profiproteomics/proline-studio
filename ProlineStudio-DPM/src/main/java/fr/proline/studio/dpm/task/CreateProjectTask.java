@@ -112,8 +112,8 @@ public class CreateProjectTask extends AbstractServiceTask {
             }
 
             // create the trash
-            /*Dataset trashDataset = new Dataset(p);
-            trashDataset.setType(Dataset.DatasetType.TRASH); //JPM.TODO ?
+            Dataset trashDataset = new Dataset(p);
+            trashDataset.setType(Dataset.DatasetType.TRASH);
 
             Aggregation aggregation = UDSDataManager.getUDSDataManager().getAggregation(Aggregation.ChildNature.OTHER);
             Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
@@ -122,11 +122,11 @@ public class CreateProjectTask extends AbstractServiceTask {
             trashDataset.setName("Trash");
             trashDataset.setFractionCount(0); // trash is empty
 
-            trashDataset.setNumber(Integer.MAX_VALUE); //JPM.TODO ?
+            trashDataset.setNumber(0); //JPM.TODO ?
 
             p.getTransientData().setChildrenNumber(1);
 
-            entityManagerUDS.persist(trashDataset);*/
+            entityManagerUDS.persist(trashDataset);
             
             projectData.setProject(p);
             

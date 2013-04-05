@@ -2,9 +2,11 @@ package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ParentData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.actions.*;
 import java.awt.Component;
@@ -169,9 +171,9 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         }
 
         RSMNode rootNode = (RSMNode) model.getRoot();
-        ArrayList<TreePath> selectedPathArray = new ArrayList<TreePath>(rsmArray.size());
+        ArrayList<TreePath> selectedPathArray = new ArrayList<>(rsmArray.size());
 
-        ArrayList<RSMNode> nodePath = new ArrayList<RSMNode>();
+        ArrayList<RSMNode> nodePath = new ArrayList<>();
         nodePath.add(rootNode);
         setSelectionImpl(rootNode, nodePath, rsmArray, selectedPathArray);
 
@@ -264,7 +266,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         // register hour glass which is expanded
         loadingMap.put(nodeToLoad.getData(), nodeToLoad);
 
-        final ArrayList<AbstractData> childrenList = new ArrayList<AbstractData>();
+        final ArrayList<AbstractData> childrenList = new ArrayList<>();
         final AbstractData parentData = nodeToLoad.getData();
 
         if (nodeToLoad.getType() == RSMNode.NodeTypes.TREE_PARENT) {
@@ -369,9 +371,133 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         parentData.load(callback, childrenList);
     }
     
-    //TOTOCHE
+    public void moveToTrash(RSMNode[] selectedNodes) {
 
-    private static HashMap<AbstractData, RSMNode> loadingMap = new HashMap<AbstractData, RSMNode>();
+        int nbSelectedNode = selectedNodes.length;
+        if (nbSelectedNode==0) {
+            return; // should not happen
+        }
+        
+
+            // we must keep only parent nodes
+            // if a child and its parent are selected, we keep only the parent
+            ArrayList<RSMNode> keptNodes = new ArrayList<>(nbSelectedNode);
+            keptNodes.add(selectedNodes[0]);
+            mainloop:
+            for (int i=1;i<nbSelectedNode;i++) {
+                RSMNode curNode = selectedNodes[i];
+                
+                // look for an ancestor
+                int nbKeptNodes = keptNodes.size();
+                for (int j=0;j<nbKeptNodes;j++) {
+                    
+                    RSMNode curKeptNode = keptNodes.get(j);
+                    if (curNode.isNodeAncestor(curKeptNode)) {
+                        // ancestor is already in kept node
+                        continue mainloop;
+                    }
+                }
+                // look for children and remove them
+                for (int j=nbKeptNodes-1;j>=0;j--) {
+                    
+                    RSMNode curKeptNode = keptNodes.get(j);
+                    if (curKeptNode.isNodeAncestor(curNode)) {
+                        // we have found a children
+                        keptNodes.remove(j);
+                    }
+                }
+                keptNodes.add(curNode);
+ 
+            }
+
+        
+        
+        // search Project Node
+        RSMProjectNode projectNode = null;
+        RSMNode parentNodeCur = (RSMNode) keptNodes.get(0).getParent();
+        while (parentNodeCur != null) {
+            if (parentNodeCur instanceof RSMProjectNode) {
+                projectNode = (RSMProjectNode) parentNodeCur;
+                break;
+            }
+            parentNodeCur = (RSMNode) parentNodeCur.getParent();
+        }
+
+        if (projectNode == null) {
+            return; // should not happen
+        }
+
+        // search trash (should be at the end)
+        RSMDataSetNode trash = null;
+        int nbChildren = projectNode.getChildCount();
+        for (int i = nbChildren - 1; i >= 0; i--) {
+            RSMNode childNode = (RSMNode) projectNode.getChildAt(i);
+            if (childNode instanceof RSMDataSetNode) {
+                RSMDataSetNode datasetNode = (RSMDataSetNode) childNode;
+                if (datasetNode.isTrash()) {
+                    trash = datasetNode;
+                    break;
+                }
+            }
+        }
+        if (trash == null) {
+            return; // should not happen
+        }
+
+        // move node to Trash
+        HashSet<RSMNode> allParentNodeModified = new HashSet<>();
+        allParentNodeModified.add(trash);
+
+        int nbKeptNodes = keptNodes.size();
+        for (int i=0;i<nbKeptNodes;i++) {
+            RSMNode nodeCur = keptNodes.get(i);
+            allParentNodeModified.add((RSMNode) nodeCur.getParent());
+            model.removeNodeFromParent(nodeCur);
+            model.insertNodeInto(nodeCur, trash, trash.getChildCount());
+        }
+
+        
+
+        HashMap<Object, ArrayList<Dataset>> databaseObjectsToModify = new HashMap<>();
+
+        Iterator<RSMNode> it = allParentNodeModified.iterator();
+        while (it.hasNext()) {
+
+            RSMNode parentNode = it.next();
+
+            // get Parent Database Object
+            Object databaseParentObject = null;
+            RSMNode.NodeTypes type = parentNode.getType();
+            if (type == RSMNode.NodeTypes.DATA_SET) {
+                RSMDataSetNode datasetNode = ((RSMDataSetNode) parentNode);
+                databaseParentObject = datasetNode.getDataset();
+            } else if (type == RSMNode.NodeTypes.PROJECT) {
+                RSMProjectNode projectNodeS = ((RSMProjectNode) parentNode);
+                databaseParentObject = projectNodeS.getProject();
+            }
+
+
+
+            // get new Dataset children
+            int nb = parentNode.getChildCount();
+            ArrayList<Dataset> datasetList = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                // we are sure that it is a Dataset
+                RSMDataSetNode childNode = ((RSMDataSetNode) parentNode.getChildAt(i));
+                Dataset dataset = childNode.getDataset();
+                datasetList.add(dataset);
+            }
+
+            // register this modification
+            databaseObjectsToModify.put(databaseParentObject, datasetList);
+        }
+
+        // ask the modification to the database at once (intricate to put in a thread in Dnd context)
+        DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify);
+
+    }
+        
+    private static HashMap<AbstractData, RSMNode> loadingMap = new HashMap<>();
 
     public  void dataLoaded(AbstractData data, List<AbstractData> list) {
 
@@ -440,25 +566,29 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             }
         }
         
-        // check if the Root node or Trash is selected
+        // check if the Root node or Trash or a Node in Trash is selected
+
         boolean rootNodeSelected = false;
         boolean trashNodeSelected = false;
         for (int i=0;i<nbNodes;i++) {
             RSMNode n = selectedNodes[i];
             if (n.isRoot()) {
                 rootNodeSelected = true;
-                break;
             }
+
             if (n instanceof RSMDataSetNode) {
                 RSMDataSetNode datasetNode = (RSMDataSetNode) n;
                 if (datasetNode.isTrash()) {
                     trashNodeSelected = true;
+                } else if (datasetNode.isInTrash()) {
+                    // no popup on nodes in trash
+                    return;
                 }
             }
         }
         
-        JPopupMenu popup = null;
-        ArrayList<AbstractRSMAction> actions = null;
+        JPopupMenu popup;
+        ArrayList<AbstractRSMAction> actions;
         
         if (rootNodeSelected && (nbNodes >= 1)) {
             if (nbNodes > 1) {

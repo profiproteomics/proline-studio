@@ -52,7 +52,7 @@ public class AggregateAction extends AbstractRSMAction {
         
                 final RSMNode n = selectedNodes[iNode];
             
-
+                boolean isParentAProject = (n.getType() == RSMNode.NodeTypes.PROJECT);
 
                 // check if a child has already the same name with a number suffix
                 int suffixNumber = 0;
@@ -81,7 +81,7 @@ public class AggregateAction extends AbstractRSMAction {
                 }
                 int suffixStart = suffixNumber;
 
-                final ArrayList<RSMDataSetNode> nodesCreated = new ArrayList<RSMDataSetNode>();
+                final ArrayList<RSMDataSetNode> nodesCreated = new ArrayList<>();
 
                 final RSMTree tree = RSMTree.getTree();
                 final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -94,7 +94,12 @@ public class AggregateAction extends AbstractRSMAction {
                     RSMDataSetNode datasetNode = new RSMDataSetNode(new DataSetData(aggregateName, Dataset.DatasetType.AGGREGATE, aggregateType));
                     nodesCreated.add(datasetNode);
                     datasetNode.setIsChanging(true);
-                    n.add(datasetNode);
+                    
+                    if (isParentAProject) {
+                        n.insert(datasetNode, n.getChildCount()-1);
+                    } else {
+                        n.add(datasetNode);
+                    }
                 }
                 treeModel.nodeStructureChanged(n);
 

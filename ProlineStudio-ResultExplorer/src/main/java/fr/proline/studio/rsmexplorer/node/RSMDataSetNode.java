@@ -284,7 +284,9 @@ public class RSMDataSetNode extends RSMNode {
                 
                 
                 MsiSearch msiSearch = rset.getMsiSearch();
-                sheet.put(createMsiSearchSheetSet(msiSearch));
+                if (msiSearch != null) {
+                    sheet.put(createMsiSearchSheetSet(msiSearch));
+                }
                 
                 Peaklist peaklist = msiSearch.getPeaklist();
                 sheet.put(createPeakListSheetSet(peaklist));

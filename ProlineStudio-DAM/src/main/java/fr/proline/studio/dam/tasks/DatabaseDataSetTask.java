@@ -617,7 +617,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             Dataset mergedDataset = entityManagerUDS.merge(dataset);
         
             dataset.setResultSetId(resultSetId);
-            mergedDataset.setResultSummaryId(resultSetId);
+            mergedDataset.setResultSetId(resultSetId);
             
             entityManagerUDS.persist(mergedDataset);
             

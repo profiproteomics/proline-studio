@@ -55,9 +55,11 @@ public class IdentificationAction extends AbstractRSMAction {
             
             Project project = null;
             Dataset parentDataset = null;
+            boolean isParentAProject = false;
             if (n.getType() == RSMNode.NodeTypes.PROJECT) {
                 RSMProjectNode projectNode = (RSMProjectNode) n;
                 project = projectNode.getProject();
+                isParentAProject = true;
             } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode dataSetNode = (RSMDataSetNode) n;
                 project = dataSetNode.getDataset().getProject();
@@ -91,8 +93,12 @@ public class IdentificationAction extends AbstractRSMAction {
                 identificationNode.setIsChanging(true);
                 
                 final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-                treeModel.insertNodeInto(identificationNode, n, n.getChildCount());
-                
+                if (isParentAProject) {
+                    
+                    treeModel.insertNodeInto(identificationNode, n, n.getChildCount()-1);
+                } else {
+                    treeModel.insertNodeInto(identificationNode, n, n.getChildCount());
+                }
                 // used as out parameter for the service
                 final Integer[] _resultSetId = new Integer[1]; 
                 

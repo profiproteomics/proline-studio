@@ -146,18 +146,9 @@ public class MergeTask extends AbstractServiceTask {
                 }
                 
                 if (success) {
-                    
 
-                    ArrayList returnedValues = (ArrayList) resultMap.get("result");
-                    if ((returnedValues == null) || (returnedValues.isEmpty()))  {
-                        logger.error(getClass().getSimpleName() + " failed : No returned values");
-                        return ServiceState.STATE_FAILED;
-                    }
-                    
-                    ArrayMap returnedValuesMap = (ArrayMap) returnedValues.get(0);
-                    
                     // retrieve resultSet id
-                    BigDecimal resultSetIdBD = (BigDecimal) returnedValuesMap.get("target_result_set_id");
+                    BigDecimal resultSetIdBD = (BigDecimal) resultMap.get("result");
                     if (resultSetIdBD == null) {
                         logger.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
                         return ServiceState.STATE_FAILED;

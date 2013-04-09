@@ -286,29 +286,30 @@ public class RSMDataSetNode extends RSMNode {
                 MsiSearch msiSearch = rset.getMsiSearch();
                 if (msiSearch != null) {
                     sheet.put(createMsiSearchSheetSet(msiSearch));
-                }
                 
-                Peaklist peaklist = msiSearch.getPeaklist();
-                sheet.put(createPeakListSheetSet(peaklist));
                 
-                SearchSetting searchSetting = msiSearch.getSearchSetting();
-                sheet.put(createSearchSettingSheetSet(searchSetting));
-                
-                InstrumentConfig instrumentConfig = searchSetting.getInstrumentConfig();
-                sheet.put(createInstrumentConfigSheetSet(instrumentConfig));
-             
-                Set<Enzyme> enzymeSet = searchSetting.getEnzymes();
-                Iterator<Enzyme> it = enzymeSet.iterator();
-                while (it.hasNext()) {
-                    sheet.put(createEnzimeSheetSet(it.next()));
-                }
-                
-                Set<SearchSettingsSeqDatabaseMap> searchSettingsSeqDatabaseMapSet = searchSetting.getSearchSettingsSeqDatabaseMaps();
-                Iterator<SearchSettingsSeqDatabaseMap> itSeqDbMap = searchSettingsSeqDatabaseMapSet.iterator();
-                while (itSeqDbMap.hasNext()) {
-                    SearchSettingsSeqDatabaseMap seqDbMap = itSeqDbMap.next();
-                    
-                    sheet.put(createSeqDatabaseheetSet(seqDbMap.getSeqDatabase()));
+                    Peaklist peaklist = msiSearch.getPeaklist();
+                    sheet.put(createPeakListSheetSet(peaklist));
+
+                    SearchSetting searchSetting = msiSearch.getSearchSetting();
+                    sheet.put(createSearchSettingSheetSet(searchSetting));
+
+                    InstrumentConfig instrumentConfig = searchSetting.getInstrumentConfig();
+                    sheet.put(createInstrumentConfigSheetSet(instrumentConfig));
+
+                    Set<Enzyme> enzymeSet = searchSetting.getEnzymes();
+                    Iterator<Enzyme> it = enzymeSet.iterator();
+                    while (it.hasNext()) {
+                        sheet.put(createEnzimeSheetSet(it.next()));
+                    }
+
+                    Set<SearchSettingsSeqDatabaseMap> searchSettingsSeqDatabaseMapSet = searchSetting.getSearchSettingsSeqDatabaseMaps();
+                    Iterator<SearchSettingsSeqDatabaseMap> itSeqDbMap = searchSettingsSeqDatabaseMapSet.iterator();
+                    while (itSeqDbMap.hasNext()) {
+                        SearchSettingsSeqDatabaseMap seqDbMap = itSeqDbMap.next();
+
+                        sheet.put(createSeqDatabaseheetSet(seqDbMap.getSeqDatabase()));
+                    }
                 }
 
             }

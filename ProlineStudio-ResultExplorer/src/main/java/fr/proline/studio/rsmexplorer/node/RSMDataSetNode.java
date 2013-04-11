@@ -10,11 +10,13 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
@@ -270,16 +272,38 @@ public class RSMDataSetNode extends RSMNode {
 
             if (hasResultSummary()) {
                 sheet.put(createResultSummarySheetSet(dataset));
+                ResultSummary rsm = dataset.getTransientData().getResultSummary();
+                try {
+                    Map<String, Object> map = rsm.getSerializedPropertiesAsMap();
+                    SerializedPropertiesUtil.getProperties(sheet, "Ret Properties", map);
+                } catch (Exception e) {
+                    Logger logger = LoggerFactory.getLogger(RSMNode.class);
+                    logger.error(getClass().getSimpleName() + " properties error ", e);
+                }
             }
 
             if (hasResultSet()) {
                 
                 ResultSet rset = dataset.getTransientData().getResultSet();
                 sheet.put(createResultSetSheetSet(rset, false));
+                try {
+                    Map<String, Object> map = rset.getSerializedPropertiesAsMap();
+                    SerializedPropertiesUtil.getProperties(sheet, "Rsm Properties", map);
+                } catch (Exception e) {
+                    Logger logger = LoggerFactory.getLogger(RSMNode.class);
+                    logger.error(getClass().getSimpleName() + " properties error ", e);
+                }
                 
                 ResultSet rsetDecoy = rset.getDecoyResultSet();
                 if (rsetDecoy != null) {
                     sheet.put(createResultSetSheetSet(rsetDecoy, true));
+                    try {
+                        Map<String, Object> map = rsetDecoy.getSerializedPropertiesAsMap();
+                        SerializedPropertiesUtil.getProperties(sheet, "Decoy Ret Properties", map);
+                    } catch (Exception e) {
+                        Logger logger = LoggerFactory.getLogger(RSMNode.class);
+                        logger.error(getClass().getSimpleName() + " properties error ", e);
+                    }
                 }
                 
                 
@@ -345,9 +369,9 @@ public class RSMDataSetNode extends RSMNode {
         prop.setName("Description");
         propGroup.put(prop);
         
-        prop = new PropertySupport.Reflection<>(rset, String.class, "getSerializedProperties", null);
+        /*prop = new PropertySupport.Reflection<>(rset, String.class, "getSerializedProperties", null);
         prop.setName("Serialized Properties");
-        propGroup.put(prop);
+        propGroup.put(prop);*/
 
         prop = new PropertySupport.ReadOnly(
                 "MS Query Count",
@@ -713,9 +737,9 @@ public class RSMDataSetNode extends RSMNode {
         };
         propGroup.put(prop);
         
-        prop = new PropertySupport.Reflection<>(rsm, String.class, "getSerializedProperties", null);
+        /*prop = new PropertySupport.Reflection<>(rsm, String.class, "getSerializedProperties", null);
         prop.setName("Serialized Properties");
-        propGroup.put(prop);
+        propGroup.put(prop);*/
 
         prop = new PropertySupport.Reflection<>(rsm, Boolean.class, "getIsQuantified", null);
         prop.setName("Is Quantified");

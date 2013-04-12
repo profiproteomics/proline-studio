@@ -618,20 +618,17 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         // SameSet count query
         /**
-         * SELECT ps, count(pm) FROM ProteinMatch pm, ProteinMatch typicalPm,
-         * ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE
-         * ps_to_pm.proteinSet.id IN (:proteinSetIds) AND ps_to_pm.proteinSet.id
-         * = ps.id AND ps_to_pm.proteinMatch.id=pm.id AND
-         * ps_to_pm.resultSummary.id=:rsmId AND ps.typicalProteinMatchId =
-         * typicalPm.id AND pm.peptideCount=typicalPm.peptideCount GROUP BY ps
+         * SELECT ps.id, count(pm) 
+         * FROM ProteinSet ps, PeptideSet pepset, ProteinMatch pm, PeptideSetProteinMatchMap pepset_to_pm 
+         * WHERE ps.id IN (:proteinSetIds) AND pepset.proteinSet=ps AND 
+         * pepset_to_pm.id.peptideSetId=pepset.id AND pepset_to_pm.id.proteinMatchId=pm.id 
+         * GROUP BY ps
          */
-        String sameSetCountQueryString = "SELECT ps.id, count(pm) FROM   ProteinMatch pm, ProteinMatch typicalPm, ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE  ps_to_pm.proteinSet.id IN (:proteinSetIds) AND ps_to_pm.proteinSet.id = ps.id AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId AND ps.typicalProteinMatchId = typicalPm.id AND pm.peptideCount=typicalPm.peptideCount GROUP BY ps";
+        String sameSetCountQueryString = "SELECT ps.id, count(pm) FROM ProteinSet ps, PeptideSet pepset, ProteinMatch pm, PeptideSetProteinMatchMap pepset_to_pm WHERE ps.id IN (:proteinSetIds) AND pepset.proteinSet=ps AND pepset_to_pm.id.peptideSetId=pepset.id AND pepset_to_pm.id.proteinMatchId=pm.id GROUP BY ps";
         Query sameSetCountQuery = entityManagerMSI.createQuery(sameSetCountQueryString);
 
-
-
         sameSetCountQuery.setParameter("proteinSetIds", sliceOfProteinSetIds);
-        sameSetCountQuery.setParameter("rsmId", rsm.getId());
+        //sameSetCountQuery.setParameter("rsmId", rsm.getId());
         List<Object[]> sameSetCountRes = sameSetCountQuery.getResultList();
         Iterator<Object[]> sameSetCountResIt = sameSetCountRes.iterator();
         while (sameSetCountResIt.hasNext()) {

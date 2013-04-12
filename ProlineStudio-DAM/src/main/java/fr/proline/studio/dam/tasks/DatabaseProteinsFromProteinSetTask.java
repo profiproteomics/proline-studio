@@ -66,7 +66,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
         Integer rsmId = proteinSet.getResultSummary().getId();
 
         // Load Proteins and their peptide count for the current result summary
-        Query proteinMatchQuery = entityManagerMSI.createQuery("SELECT pm, pepset FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, PeptideSet pepset, PeptideSetProteinMatchMap pepset_to_pm WHERE ps_to_pm.proteinSet.id=:proteinSetId AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId AND pepset_to_pm.resultSummary.id=:rsmId AND pepset_to_pm.id.peptideSetId=pepset.id AND pepset_to_pm.id.proteinMatchId=pm.id ORDER BY pm.score DESC");
+        Query proteinMatchQuery = entityManagerMSI.createQuery("SELECT pm, pepset FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, PeptideSet pepset, PeptideSetProteinMatchMap pepset_to_pm WHERE ps_to_pm.proteinSet.id=:proteinSetId AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId AND pepset_to_pm.resultSummary.id=:rsmId AND pepset_to_pm.id.peptideSetId=pepset.id AND pepset_to_pm.id.proteinMatchId=pm.id ORDER BY pepset.score DESC");
         proteinMatchQuery.setParameter("proteinSetId", proteinSet.getId());
         proteinMatchQuery.setParameter("rsmId", rsmId);
         List<Object[]> proteinMatchList = proteinMatchQuery.getResultList();
@@ -74,11 +74,11 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
 
 
         // Dispatch Proteins in sameSet and subSet
-        ArrayList<ProteinMatch> sameSet = new ArrayList<ProteinMatch>(proteinMatchList.size());
-        ArrayList<ProteinMatch> subSet = new ArrayList<ProteinMatch>(proteinMatchList.size());
+        ArrayList<ProteinMatch> sameSet = new ArrayList<>(proteinMatchList.size());
+        ArrayList<ProteinMatch> subSet = new ArrayList<>(proteinMatchList.size());
 
         // temporary Map to link a bioSequenceId to a ProteinMatch
-        HashMap<Integer, ProteinMatch> biosequenceToProteinMap = new HashMap<Integer, ProteinMatch>();
+        HashMap<Integer, ProteinMatch> biosequenceToProteinMap = new HashMap<>();
 
         Iterator<Object[]> it = proteinMatchList.iterator();
         int peptitesCountInSameSet = 0;

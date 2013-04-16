@@ -2,7 +2,7 @@ package fr.proline.studio.dam;
 
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Aggregation.ChildNature;
-import fr.proline.core.orm.uds.Instrument;
+import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.core.orm.uds.UserAccount;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class UDSDataManager  {
     
     private static UDSDataManager singleton = null;
     
-    private Instrument[] instruments;
+    private InstrumentConfiguration[] instruments;
     private PeaklistSoftware[] peaklistSoftwares;
     private UserAccount[] projectUsers;
     private UserAccount projectUser;
@@ -36,18 +36,18 @@ public class UDSDataManager  {
         return singleton;
     }
     
-    public void setIntruments(List<Instrument> l) {
-        instruments = l.toArray(new Instrument[l.size()]);
+    public void setIntruments(List<InstrumentConfiguration> l) {
+        instruments = l.toArray(new InstrumentConfiguration[l.size()]);
     }
     
-    public Instrument[] getInstrumentsArray() {
+    public InstrumentConfiguration[] getInstrumentsArray() {
         return instruments;
     }
     
-    public Instrument[] getInstrumentsWithNullArray() {
+    public InstrumentConfiguration[] getInstrumentsWithNullArray() {
         
         int length = instruments.length;
-        Instrument[] instrumentsWithNull = new Instrument[length+1];
+        InstrumentConfiguration[] instrumentsWithNull = new InstrumentConfiguration[length+1];
         instrumentsWithNull[0] = null;
         System.arraycopy(instruments, 0, instrumentsWithNull, 1, length);
         return instrumentsWithNull;

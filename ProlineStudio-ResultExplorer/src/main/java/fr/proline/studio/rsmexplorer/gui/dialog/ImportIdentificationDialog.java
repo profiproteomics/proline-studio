@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.core.orm.uds.Instrument;
+import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.gui.DefaultDialog;
@@ -91,7 +91,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
 
-        setTitle("Import Identifications");
+        setTitle("Import Search Results");
         setResizable(true);
         setMinimumSize(new Dimension(200, 240));
 
@@ -739,7 +739,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
     public Integer getInstrumentId() {
         
-        Instrument instrument = (Instrument) sourceParameterList.getParameter("instrument").getObjectValue(); 
+        InstrumentConfiguration instrument = (InstrumentConfiguration) sourceParameterList.getParameter("instrument").getObjectValue(); 
         return instrument.getId();
     }
     
@@ -790,9 +790,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
         
         ParameterList parameterList = new ParameterList("Parameter Source");
         
-        AbstractParameterToString<Instrument> instrumentToString = new AbstractParameterToString<Instrument>() {
+        AbstractParameterToString<InstrumentConfiguration> instrumentToString = new AbstractParameterToString<InstrumentConfiguration>() {
             @Override
-            public String toString(Instrument o) {
+            public String toString(InstrumentConfiguration o) {
                 return o.getName();
             }  
         };
@@ -805,7 +805,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         };
         
         instrumentsComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray());
-        ObjectParameter<Instrument> instrumentParameter = new ObjectParameter<>("instrument", "Instrument", instrumentsComboBox, UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray(), null, -1, instrumentToString);
+        ObjectParameter<InstrumentConfiguration> instrumentParameter = new ObjectParameter<>("instrument", "Instrument", instrumentsComboBox, UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray(), null, -1, instrumentToString);
         parameterList.add(instrumentParameter);
         
         peaklistSoftwaresComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray());

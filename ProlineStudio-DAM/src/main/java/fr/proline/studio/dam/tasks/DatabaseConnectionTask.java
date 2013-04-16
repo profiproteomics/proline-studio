@@ -2,6 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 
 
+
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.uds.*;
 import fr.proline.core.orm.uds.repository.ExternalDbRepository;
@@ -238,14 +239,14 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
 
-            TypedQuery<Instrument> instrumentQuery = entityManagerUDS.createQuery("SELECT i FROM fr.proline.core.orm.uds.Instrument i ORDER BY i.name ASC", Instrument.class);
-            List<Instrument> instrumentList = instrumentQuery.getResultList();
+            TypedQuery<InstrumentConfiguration> instrumentQuery = entityManagerUDS.createQuery("SELECT i FROM fr.proline.core.orm.uds.InstrumentConfiguration i ORDER BY i.name ASC", InstrumentConfiguration.class);
+            List<InstrumentConfiguration> instrumentList = instrumentQuery.getResultList();
             UDSDataManager.getUDSDataManager().setIntruments(instrumentList);
 
             entityManagerUDS.getTransaction().commit();
 
         } catch (Exception e) {
-            errorMessage = "Unable to load Instruments from UDS";
+            errorMessage = "Unable to load Instrument Configurations from UDS";
             logger.error(getClass().getSimpleName() + " failed", e);
             entityManagerUDS.getTransaction().rollback();
             DataStoreConnectorFactory.getInstance().closeAll();
@@ -256,8 +257,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
 
-            TypedQuery<PeaklistSoftware> instrumentQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.PeaklistSoftware p ORDER BY p.name ASC", PeaklistSoftware.class);
-            List<PeaklistSoftware> peaklistSoftwareList = instrumentQuery.getResultList();
+            TypedQuery<PeaklistSoftware> peaklistSoftwareQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.PeaklistSoftware p ORDER BY p.name ASC", PeaklistSoftware.class);
+            List<PeaklistSoftware> peaklistSoftwareList = peaklistSoftwareQuery.getResultList();
             UDSDataManager.getUDSDataManager().setPeaklistSofwares(peaklistSoftwareList);
 
             entityManagerUDS.getTransaction().commit();

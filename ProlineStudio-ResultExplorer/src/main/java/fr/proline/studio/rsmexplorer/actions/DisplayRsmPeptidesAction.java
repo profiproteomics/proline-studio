@@ -46,7 +46,7 @@ public class DisplayRsmPeptidesAction extends AbstractRSMAction {
         if (rsm != null) {
         
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getRsmPeptidesWindowBox(dataSet.getName()+" Peptides");
+            WindowBox wbox = WindowBoxFactory.getRsmPeptidesWindowBox("[IS] "+dataSet.getName()+" Peptides");
             wbox.setEntryData(dataSet.getProject().getId(), rsm);
 
             // open a window to display the window box

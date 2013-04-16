@@ -275,7 +275,7 @@ public class RSMDataSetNode extends RSMNode {
                 ResultSummary rsm = dataset.getTransientData().getResultSummary();
                 try {
                     Map<String, Object> map = rsm.getSerializedPropertiesAsMap();
-                    SerializedPropertiesUtil.getProperties(sheet, "Ret Properties", map);
+                    SerializedPropertiesUtil.getProperties(sheet, "SR Properties", map);
                 } catch (Exception e) {
                     Logger logger = LoggerFactory.getLogger(RSMNode.class);
                     logger.error(getClass().getSimpleName() + " properties error ", e);
@@ -288,7 +288,7 @@ public class RSMDataSetNode extends RSMNode {
                 sheet.put(createResultSetSheetSet(rset, false));
                 try {
                     Map<String, Object> map = rset.getSerializedPropertiesAsMap();
-                    SerializedPropertiesUtil.getProperties(sheet, "Rsm Properties", map);
+                    SerializedPropertiesUtil.getProperties(sheet, "IS Properties", map);
                 } catch (Exception e) {
                     Logger logger = LoggerFactory.getLogger(RSMNode.class);
                     logger.error(getClass().getSimpleName() + " properties error ", e);
@@ -315,6 +315,9 @@ public class RSMDataSetNode extends RSMNode {
                     Peaklist peaklist = msiSearch.getPeaklist();
                     sheet.put(createPeakListSheetSet(peaklist));
 
+                    PeaklistSoftware peaklistSoftware = peaklist.getPeaklistSoftware();
+                    sheet.put(createPeakListSoftwareSheetSet(peaklistSoftware));
+                    
                     SearchSetting searchSetting = msiSearch.getSearchSetting();
                     sheet.put(createSearchSettingSheetSet(searchSetting));
 
@@ -352,7 +355,7 @@ public class RSMDataSetNode extends RSMNode {
     
     private Sheet.Set createResultSetSheetSet(final ResultSet rset, boolean decoy) throws NoSuchMethodException {
         Sheet.Set propGroup = Sheet.createPropertiesSet();
-        String name = decoy ? "Decoy Result Set" : "Result Set";
+        String name = decoy ? "Decoy Search Result" : "Search Result";
         propGroup.setName(name);
         propGroup.setDisplayName(name);
 
@@ -524,7 +527,7 @@ public class RSMDataSetNode extends RSMNode {
         return propGroup;
     }
     
-    private Sheet.Set createPeakListSheetSet(PeaklistSoftware peaklistSoftware) throws NoSuchMethodException {
+    private Sheet.Set createPeakListSoftwareSheetSet(PeaklistSoftware peaklistSoftware) throws NoSuchMethodException {
 
         Sheet.Set propGroup = Sheet.createPropertiesSet();
         propGroup.setName("Peaklist Software");
@@ -711,8 +714,8 @@ public class RSMDataSetNode extends RSMNode {
     
     private Sheet.Set createResultSummarySheetSet(Dataset dataset) throws NoSuchMethodException {
         Sheet.Set propGroup = Sheet.createPropertiesSet();
-        propGroup.setName("Result Summary");
-        propGroup.setDisplayName("Result Summary");
+        propGroup.setName("Identification Summary");
+        propGroup.setDisplayName("Identification Summary");
         
         final ResultSummary rsm = dataset.getTransientData().getResultSummary();
         

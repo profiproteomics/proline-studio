@@ -52,7 +52,7 @@ public class DisplayRsmProteinSetsAction extends AbstractRSMAction {
         } else {
             // we have to load the result summary
 
-            final WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox(dataset.getName()+" Protein Sets");
+            final WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox("[IS] "+dataset.getName()+" Protein Sets");
             
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);

@@ -81,6 +81,8 @@
       <type>test-jar</type>
     </dependency> <!-- JPM.TODO : to remove when we no longer use ResultSet Generator -->
 
+  </dependencies>
+
   <build>
     <plugins>
 

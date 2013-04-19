@@ -15,6 +15,8 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -94,8 +96,9 @@ public class RSMTransferHandler extends TransferHandler {
             }
 
 
-
-            Integer transferKey =  RSMTransferable.register(keptNodes);
+            RSMTransferable.TransferData data = new RSMTransferable.TransferData();
+            data.setNodeList(keptNodes);
+            Integer transferKey =  RSMTransferable.register(data);
 
             
             
@@ -170,17 +173,23 @@ public class RSMTransferHandler extends TransferHandler {
                 }
                 
                 // drop node must not be equal or a child of a transferred node
-                ArrayList<RSMNode> nodeList = RSMTransferable.getNodeList(nodeListTransferable.getTransferKey());
-                int nbNodes = nodeList.size();
-                for (int i = 0; i < nbNodes; i++) {
-                    RSMNode nodeTransfered = nodeList.get(i);
+                RSMTransferable.TransferData data = RSMTransferable.getData(nodeListTransferable.getTransferKey());
+                
+                if (data.isNodeList()) {
+                    ArrayList<RSMNode> nodeList = (ArrayList<RSMNode>) data.getDataList();
+                    int nbNodes = nodeList.size();
+                    for (int i = 0; i < nbNodes; i++) {
+                        RSMNode nodeTransfered = nodeList.get(i);
 
-                    if (dropRSMNode.isNodeAncestor(nodeTransfered)) {
-                        return false;
+                        if (dropRSMNode.isNodeAncestor(nodeTransfered)) {
+                            return false;
+                        }
                     }
                 }
             } catch (UnsupportedFlavorException | IOException e) {
                 // should never happen
+                Logger logger = LoggerFactory.getLogger(RSMTransferHandler.class);
+                logger.error(getClass().getSimpleName() + " DnD error ", e);
                 return false;
             }
 
@@ -195,114 +204,143 @@ public class RSMTransferHandler extends TransferHandler {
 
     @Override
     public boolean importData(TransferSupport support) {
-        
+
         if (canImport(support)) {
+
             try {
                 RSMTransferable transfer = (RSMTransferable) support.getTransferable().getTransferData(RSMTransferable.RSMNodeList_FLAVOR);
-
-                JTree.DropLocation location = ((JTree.DropLocation) support.getDropLocation());
-                TreePath dropTreePath = location.getPath();
-                int childIndex = location.getChildIndex();
-                RSMNode dropRSMNode = (RSMNode) dropTreePath.getLastPathComponent();
-
-                RSMTree tree = RSMTree.getTree();
-                DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-
-                // no insert index specified -> we insert at the end
-                if (childIndex == -1) {
-                    
-                    childIndex = dropRSMNode.getChildCount();
-                    
-                    // special case to drop before the Trash
-                    if (childIndex>0) {
-                        RSMNode lastChild = (RSMNode) dropRSMNode.getChildAt(childIndex-1);
-                        if ((lastChild instanceof RSMDataSetNode) && ((RSMDataSetNode) lastChild).isTrash()) {
-                            childIndex--; // we drop before the Trash
-                        }
-                    }
+                RSMTransferable.TransferData data = RSMTransferable.getData(transfer.getTransferKey());
+                if (data.isNodeList()) {
+                    return importNodes(support, data);
+                } else {
+                    return importResultSets(support, data);
                 }
-                
-                // used to keep parent node modified
-                // to be able later to modify the database
-                HashSet<RSMNode>  allParentNodeModified = new HashSet<>();
-                allParentNodeModified.add(dropRSMNode);
-                
-                
-                ArrayList<RSMNode> nodeList = RSMTransferable.getNodeList(transfer.getTransferKey());
-                int nbNodes = nodeList.size();
-                for (int i = 0; i < nbNodes; i++) {
-                    RSMNode node = nodeList.get(i);
-                    
-                    
-                    // specific case when the node is moved in its parent
-                    int indexChild = -1;
-                    if (dropRSMNode.isNodeChild(node)) {
-                        // we are moving the node in its parent
-                        indexChild = dropRSMNode.getIndex(node);
-                        if (indexChild<childIndex) {
-                            childIndex--;
-                        }
-                    } else {
-                        allParentNodeModified.add((RSMNode)node.getParent());
-                    }
-                    
-                    // remove from parent (required when drag and dropped in the same parent)
-                    treeModel.removeNodeFromParent(node);
-                    
-                    // add to new parent
-                    treeModel.insertNodeInto(node, dropRSMNode, childIndex);
-                    
-                    childIndex++;
-                   
-                }
-                
-                // create HashMap of Databse Object which need to be updated
-                HashMap<Object, ArrayList<Dataset>> databaseObjectsToModify = new HashMap<>();
-                
-                Iterator<RSMNode> it = allParentNodeModified.iterator();
-                while (it.hasNext()) {
-                    
-                    RSMNode parentNode = it.next();
-                    
-                    // get Parent Database Object
-                    Object databaseParentObject = null;
-                    RSMNode.NodeTypes type = parentNode.getType();
-                    if (type == RSMNode.NodeTypes.DATA_SET) {
-                        RSMDataSetNode datasetNode = ((RSMDataSetNode) parentNode);
-                        databaseParentObject = datasetNode.getDataset();
-                    } else if (type == RSMNode.NodeTypes.PROJECT) {
-                        RSMProjectNode projectNode = ((RSMProjectNode) parentNode);
-                        databaseParentObject = projectNode.getProject();
-                    }
-                    
-                    
-                    
-                    // get new Dataset children
-                    int nbChildren = parentNode.getChildCount();
-                    ArrayList<Dataset> datasetList = new ArrayList<>(nbChildren);
-                    for (int i=0;i<nbChildren;i++) {
-                        // we are sure that it is a Dataset
-                        RSMDataSetNode childNode = ((RSMDataSetNode) parentNode.getChildAt(i));
-                        Dataset dataset = childNode.getDataset();
-                        datasetList.add(dataset);
-                    }
-                    
-                    // register this modification
-                    databaseObjectsToModify.put(databaseParentObject, datasetList);
-                }
-                
-                // ask the modification to the database at once (intricate to put in a thread in Dnd context)
-                DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify);
-                
-                
-                return true;
-                
+
             } catch (UnsupportedFlavorException | IOException e) {
                 // should never happen
+                Logger logger = LoggerFactory.getLogger(RSMTransferHandler.class);
+                logger.error(getClass().getSimpleName() + " DnD error ", e);
                 return false;
+            }
+
+            
+        }
+        
+        return false;
+    }
+    
+    private boolean importResultSets(TransferSupport support, RSMTransferable.TransferData data) {
+        System.out.println("importResultSets");
+        return false;
+    }
+    
+    private boolean importNodes(TransferSupport support, RSMTransferable.TransferData data) {
+
+
+
+        JTree.DropLocation location = ((JTree.DropLocation) support.getDropLocation());
+        TreePath dropTreePath = location.getPath();
+        int childIndex = location.getChildIndex();
+        RSMNode dropRSMNode = (RSMNode) dropTreePath.getLastPathComponent();
+
+        RSMTree tree = RSMTree.getTree();
+        DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+
+        // no insert index specified -> we insert at the end
+        if (childIndex == -1) {
+
+            childIndex = dropRSMNode.getChildCount();
+
+            // special case to drop before the Trash
+            if (childIndex > 0) {
+                RSMNode lastChild = (RSMNode) dropRSMNode.getChildAt(childIndex - 1);
+                if ((lastChild instanceof RSMDataSetNode) && ((RSMDataSetNode) lastChild).isTrash()) {
+                    childIndex--; // we drop before the Trash
+                }
             }
         }
 
-        return false;
+        // used to keep parent node modified
+        // to be able later to modify the database
+        HashSet<RSMNode> allParentNodeModified = new HashSet<>();
+        allParentNodeModified.add(dropRSMNode);
+
+
+        ArrayList<RSMNode> nodeList = (ArrayList<RSMNode>) data.getDataList();
+        int nbNodes = nodeList.size();
+        for (int i = 0; i < nbNodes; i++) {
+            RSMNode node = nodeList.get(i);
+
+
+            // specific case when the node is moved in its parent
+            int indexChild = -1;
+            if (dropRSMNode.isNodeChild(node)) {
+                // we are moving the node in its parent
+                indexChild = dropRSMNode.getIndex(node);
+                if (indexChild < childIndex) {
+                    childIndex--;
+                }
+            } else {
+                allParentNodeModified.add((RSMNode) node.getParent());
+            }
+
+            // remove from parent (required when drag and dropped in the same parent)
+            treeModel.removeNodeFromParent(node);
+
+            // add to new parent
+            treeModel.insertNodeInto(node, dropRSMNode, childIndex);
+
+            childIndex++;
+
+        }
+
+        // create HashMap of Databse Object which need to be updated
+        HashMap<Object, ArrayList<Dataset>> databaseObjectsToModify = new HashMap<>();
+
+        Iterator<RSMNode> it = allParentNodeModified.iterator();
+        while (it.hasNext()) {
+
+            RSMNode parentNode = it.next();
+
+            // get Parent Database Object
+            Object databaseParentObject = null;
+            RSMNode.NodeTypes type = parentNode.getType();
+            if (type == RSMNode.NodeTypes.DATA_SET) {
+                RSMDataSetNode datasetNode = ((RSMDataSetNode) parentNode);
+                databaseParentObject = datasetNode.getDataset();
+            } else if (type == RSMNode.NodeTypes.PROJECT) {
+                RSMProjectNode projectNode = ((RSMProjectNode) parentNode);
+                databaseParentObject = projectNode.getProject();
+            }
+
+
+
+            // get new Dataset children
+            int nbChildren = parentNode.getChildCount();
+            ArrayList<Dataset> datasetList = new ArrayList<>(nbChildren);
+            for (int i = 0; i < nbChildren; i++) {
+                // we are sure that it is a Dataset
+
+                RSMNode childNode = ((RSMNode) parentNode.getChildAt(i));
+                if (!(childNode instanceof RSMDataSetNode)) {
+                    continue; // possible for "All imported" node
+                }
+                RSMDataSetNode childDatasetNode = (RSMDataSetNode) childNode;
+                Dataset dataset = childDatasetNode.getDataset();
+                datasetList.add(dataset);
+            }
+
+            // register this modification
+            databaseObjectsToModify.put(databaseParentObject, datasetList);
+        }
+
+        // ask the modification to the database at once (intricate to put in a thread in Dnd context)
+        DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify);
+
+
+        return true;
+
+
     }
+
 }

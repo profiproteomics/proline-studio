@@ -27,6 +27,9 @@ public class RSMChildFactory  {
             case DATA_SET:
                 result = new RSMDataSetNode(key);
                 break;
+            case ALL_IMPORTED:
+                result = new RSMAllImportedNode(key);
+                break;
         }
         
         if (key.hasChildren()) {

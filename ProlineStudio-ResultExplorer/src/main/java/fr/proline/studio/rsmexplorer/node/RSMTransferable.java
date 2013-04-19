@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.node;
 
+import fr.proline.core.orm.msi.ResultSet;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -16,11 +17,12 @@ import javax.swing.tree.TreePath;
 public class RSMTransferable implements Transferable, Serializable {
     
     public final static DataFlavor RSMNodeList_FLAVOR = new DataFlavor(RSMTree.class, "Drag and drop RSM TreePath list");
+
     
-    private Integer m_transferKey= null;
+    private Integer m_transferKey = null;
     private Integer m_projectId = null;
     
-    private static HashMap<Integer,ArrayList<RSMNode>> transferMap = new HashMap<>();
+    private static HashMap<Integer, TransferData> transferMap = new HashMap<>();
     
     private static final DataFlavor[] DATA_FLAVORS = { RSMNodeList_FLAVOR };
     
@@ -31,18 +33,22 @@ public class RSMTransferable implements Transferable, Serializable {
         m_projectId = projectId;
     }
 
-    public static Integer register(ArrayList<RSMNode> nodes) {
+    public static Integer register(TransferData data) {
         
         Integer transferKey = Integer.valueOf(m_transferIndex);
         m_transferIndex++;
         
-        transferMap.put(transferKey, nodes);
+        transferMap.put(transferKey, data);
         
         
         return transferKey;
     
     }
-    public static ArrayList<RSMNode> getNodeList(Integer transferKey) {
+
+ 
+    
+    
+    public static TransferData getData(Integer transferKey) {
         return transferMap.get(transferKey);
     }
     public static void clearRegisteredData() {
@@ -75,5 +81,35 @@ public class RSMTransferable implements Transferable, Serializable {
     
     public Integer getProjectId() {
         return m_projectId;
+    }
+    
+    
+    public static class TransferData {
+        
+        private boolean m_isNodeList;
+        private ArrayList m_dataList = null;
+        
+        public TransferData() {
+            
+        }
+        
+        public void setResultSetList(ArrayList<ResultSet> list) {
+            m_isNodeList = false;
+            m_dataList = list;
+        }
+        
+        public void setNodeList(ArrayList<RSMNode> list) {
+            m_isNodeList = true;
+            m_dataList = list;
+        }
+        
+        public boolean isNodeList() {
+            return m_isNodeList;
+        }
+        
+        public ArrayList getDataList() {
+            return m_dataList;
+        }
+        
     }
 }

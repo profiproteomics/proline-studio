@@ -45,6 +45,14 @@ public class WindowBoxFactory {
         
     }
     
+    public static WindowBox getRsmPSMWindowBox(String name) {
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxRsmPeptide();
+
+        return new WindowBox( name, generatePanel(boxes), boxes[0] );
+    }  
+    
     public static WindowBox getRsmPeptidesWindowBox(String name) {
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[4];
@@ -70,6 +78,18 @@ public class WindowBoxFactory {
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         
         return new WindowBox( name, generatePanel(boxes), boxes[0] );
+    }
+    
+    public static WindowBox getAllResultSetWindowBox(String name) {
+        
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxRsetAll();
+
+        WindowBox winBox = new WindowBox(name, generatePanel(boxes), boxes[0]);
+
+        return winBox;
+
     }
     
     

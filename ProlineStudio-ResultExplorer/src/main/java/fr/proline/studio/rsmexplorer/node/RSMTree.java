@@ -505,6 +505,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
 
         parentNode.remove(0); // remove the first child which correspond to the hour glass
+
         
         int indexToInsert = 0;
         Iterator<AbstractData> it = list.iterator();
@@ -570,6 +571,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         boolean rootNodeSelected = false;
         boolean trashNodeSelected = false;
+        boolean allImportedNodeSelected = false;
         for (int i=0;i<nbNodes;i++) {
             RSMNode n = selectedNodes[i];
             if (n.isRoot()) {
@@ -584,6 +586,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                     // no popup on nodes in trash
                     return;
                 }
+            } else if (n instanceof RSMAllImportedNode) {
+                allImportedNodeSelected = true;
             }
         }
         
@@ -600,7 +604,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             // we show the popup to connect or disconnect
             if (rootPopup == null) {
                 // create the actions
-                rootActions = new ArrayList<AbstractRSMAction>(2);  // <--- get in sync
+                rootActions = new ArrayList<>(2);  // <--- get in sync
 
                 AddProjectAction addProjectAction = new AddProjectAction();
                 rootActions.add(addProjectAction);
@@ -646,6 +650,24 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             popup = trashPopup;
             actions = trashActions;
             
+        } else if (allImportedNodeSelected && (nbNodes == 1)) {
+            
+            // creation of the popup if needed
+            if (allImportedPopup == null) {
+                 // create the actions
+                allImportedActions = new ArrayList<>(2);  // <--- get in sync
+   
+                DisplayAllRsetAction allRsetAction = new DisplayAllRsetAction();
+                allImportedActions.add(allRsetAction);
+                
+                allImportedPopup = new JPopupMenu();
+                
+                allImportedPopup.add(allRsetAction.getPopupPresenter());
+            }
+            
+            popup = allImportedPopup;
+            actions = allImportedActions;
+            
         } else {
 
 
@@ -664,6 +686,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
                 PropertiesAction propertiesAction = new PropertiesAction();
                 mainActions.add(propertiesAction);
+
                 
                 mainActions.add(null);  // separator
 
@@ -724,6 +747,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     private ArrayList<AbstractRSMAction> rootActions;
     private JPopupMenu trashPopup;
     private ArrayList<AbstractRSMAction> trashActions;
+    private JPopupMenu allImportedPopup;
+    private ArrayList<AbstractRSMAction> allImportedActions;
     
     @Override
     public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {

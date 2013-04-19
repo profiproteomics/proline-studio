@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.*;
-import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchFromRsetTask;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.utils.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -78,12 +78,12 @@ public class PeptideInstanceTableModel extends LazyTableModel {
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_PTM:
-                return DatabaseLoadPeptideMatchFromRsetTask.SUB_TASK_PEPTIDE;
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_PEPTIDE;
             /*case COLTYPE_PEPTIDE_MSQUERY:
-                return DatabaseLoadPeptideMatchFromRsetTask.SUB_TASK_MSQUERY;*/
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_MSQUERY;*/
           /*case COLTYPE_PEPTIDE_RETENTION_TIME:*/
             /*case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
-                return DatabaseLoadPeptideMatchFromRsetTask.SUB_TASK_SPECTRUM;*/
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_SPECTRUM;*/
         }
         return -1;
     }

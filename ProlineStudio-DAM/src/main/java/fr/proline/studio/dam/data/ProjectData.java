@@ -53,6 +53,8 @@ public class ProjectData extends AbstractData {
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
 
+        list.add(new AllImportedData());
+        
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
         task.initLoadParentDataset(project, list);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);

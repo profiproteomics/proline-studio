@@ -44,7 +44,9 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
                 }
                 
                 int col = columnAtPoint(e.getPoint());
-
+                col = (col==-1) ? -1 : convertColumnIndexToModel(col);
+                
+                
                 lastAction = LastAction.ACTION_SORTING;
 
                 ((LazyTableModel) getModel()).sortingChanged(col);

@@ -35,7 +35,11 @@ public abstract class LazyTableModel extends AbstractTableModel {
      * @return 
      */
     protected LazyData getLazyData(int row, int col) {
-        if (((LazyTable) table).getSortedColumnIndex() == col) {
+        
+        int sortedColumn = ((LazyTable) table).getSortedColumnIndex();
+        sortedColumn = (sortedColumn == -1) ? -1 : table.convertColumnIndexToModel(sortedColumn);
+        
+        if ( sortedColumn == col) {
             int nb = getRowCount();
             if ((dataForSortedColumn == null) || (dataForSortedColumn.length != nb)) {
                 dataForSortedColumn = new LazyData[nb];

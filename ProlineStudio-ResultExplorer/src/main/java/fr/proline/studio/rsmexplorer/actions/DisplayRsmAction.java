@@ -11,6 +11,7 @@ import org.openide.util.NbBundle;
  */
 public class DisplayRsmAction extends AbstractRSMAction {
 
+    private  DisplayRsmPSMAction m_displayRsmPSMAction;
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
 
@@ -24,12 +25,15 @@ public class DisplayRsmAction extends AbstractRSMAction {
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
 
+        m_displayRsmPSMAction = new DisplayRsmPSMAction();
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction();
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction();
 
+        JMenuItem displayRsmPSMItem = new JMenuItem(m_displayRsmPSMAction);
         JMenuItem displayRsmPeptidesItem = new JMenuItem(m_displayRsmPeptidesAction);
         JMenuItem displayRsmProteinSetsItem = new JMenuItem(m_displayRsmProteinSetsAction);
 
+        m_menu.add(displayRsmPSMItem);
         m_menu.add(displayRsmPeptidesItem);
         m_menu.add(displayRsmProteinSetsItem);
 

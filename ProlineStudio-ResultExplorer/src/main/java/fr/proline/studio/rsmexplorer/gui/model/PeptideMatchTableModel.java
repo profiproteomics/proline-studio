@@ -1,7 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.*;
-import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchFromRsetTask;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.utils.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,12 +23,18 @@ public class PeptideMatchTableModel extends LazyTableModel {
     //public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 7;  //JPM.TODO : retention time (=elution time) is for the moment in PeptideInstance
     public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 7;
     public static final int COLTYPE_PEPTIDE_PTM = 8;
-    private static final String[] columnNames = {"Peptide", "Score", "MsQuery", "Charge", "MoZ Exp.", "Mass Calc.", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM"};
+    public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 9;
+    private static final String[] columnNamesRset = {"Peptide", "Score", "MsQuery", "Charge", "MoZ Exp.", "Mass Calc.", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM"};
+    private static final String[] columnNamesRsm = {"Peptide", "Score", "MsQuery", "Charge", "MoZ Exp.", "Mass Calc.", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM", "Protein Sets"};
+    
     private PeptideMatch[] peptideMatches = null;
 
+    private boolean m_forRSM;
     
-    public PeptideMatchTableModel(LazyTable table) {
+    public PeptideMatchTableModel(LazyTable table, boolean forRSM) {
         super(table);
+        
+        m_forRSM = forRSM;
     }
     
     
@@ -38,12 +45,21 @@ public class PeptideMatchTableModel extends LazyTableModel {
     
     @Override
     public int getColumnCount() {
-        return columnNames.length;
+        if (m_forRSM) {
+            return columnNamesRsm.length;
+        } else {
+            return columnNamesRset.length;
+        }
+        
     }
 
     @Override
     public String getColumnName(int col) {
-        return columnNames[col];
+        if (m_forRSM) {
+            return columnNamesRsm[col];
+        } else {
+            return columnNamesRset[col];
+        }
     }
 
     @Override
@@ -56,6 +72,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
             //case COLTYPE_PEPTIDE_RETENTION_TIME:
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
             case COLTYPE_PEPTIDE_PTM:
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
                 return LazyData.class;
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
@@ -73,16 +90,23 @@ public class PeptideMatchTableModel extends LazyTableModel {
 
     @Override
     public int getSubTaskId(int col) {
+ 
         switch (col) {
+
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_PTM:
-                return DatabaseLoadPeptideMatchFromRsetTask.SUB_TASK_PEPTIDE;
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_PEPTIDE;
             case COLTYPE_PEPTIDE_MSQUERY:
-                return DatabaseLoadPeptideMatchFromRsetTask.SUB_TASK_MSQUERY;
-          /*case COLTYPE_PEPTIDE_RETENTION_TIME:*/
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_MSQUERY;
+            /*
+             * case COLTYPE_PEPTIDE_RETENTION_TIME:
+             */
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
-                return DatabaseLoadPeptideMatchFromRsetTask.SUB_TASK_SPECTRUM;
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_SPECTRUM;
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_PROTEINSET_NAME_LIST;
+
         }
         return -1;
     }
@@ -245,6 +269,19 @@ public class PeptideMatchTableModel extends LazyTableModel {
                 }
                 return lazyData;
             }
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: {
+                LazyData lazyData = getLazyData(row, col);
+                PeptideMatch.TransientData data = peptideMatch.getTransientData();
+                String proteinSetNames = data.getProteinSetStringList();
+                if (proteinSetNames == null) {
+                    givePriorityTo(taskId, row, col);
+                    lazyData.setData(null);
+                } else {
+                    lazyData.setData(proteinSetNames);
+                }
+                return lazyData;
+            }
+                
         }
         return null; // should never happen
     }
@@ -308,7 +345,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
     }
 
     public void sortAccordingToModel(ArrayList<Integer> peptideMatchIds) {
-        HashSet<Integer> peptideMatchIdMap = new HashSet<Integer>(peptideMatchIds.size());
+        HashSet<Integer> peptideMatchIdMap = new HashSet<>(peptideMatchIds.size());
         peptideMatchIdMap.addAll(peptideMatchIds);
 
         int nb = peptideMatches.length;

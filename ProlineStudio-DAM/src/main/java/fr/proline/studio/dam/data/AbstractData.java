@@ -16,10 +16,11 @@ public abstract class AbstractData {
         MAIN,
         PROJECT,
         DATA_SET,
-        IDENTIFICATION,
-        IDENTIFICATION_FRACTION,
-        RESULT_SET,
-        RESULT_SUMMARY
+        //IDENTIFICATION,
+        //IDENTIFICATION_FRACTION,
+        //RESULT_SET,
+        //RESULT_SUMMARY,
+        ALL_IMPORTED
     }
     protected String name;
     protected DataTypes dataType;

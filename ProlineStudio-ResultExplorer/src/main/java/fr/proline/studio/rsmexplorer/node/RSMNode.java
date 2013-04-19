@@ -21,6 +21,7 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
         TREE_PARENT,
         PROJECT,
         DATA_SET,
+        DATA_ALL_IMPORTED,
         HOUR_GLASS
     }
     private static Action[] actionInstance = null;

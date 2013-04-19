@@ -80,12 +80,6 @@
       <version>${core.version}</version>
       <type>test-jar</type>
     </dependency> <!-- JPM.TODO : to remove when we no longer use ResultSet Generator -->
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-  </dependencies>
 
   <build>
     <plugins>

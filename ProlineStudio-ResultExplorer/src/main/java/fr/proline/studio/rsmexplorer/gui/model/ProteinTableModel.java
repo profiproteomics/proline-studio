@@ -79,7 +79,7 @@ public class ProteinTableModel extends AbstractTableModel {
                     return Boolean.FALSE;
                 }
             case COLTYPE_PROTEIN_SCORE:
-                Float score = Float.valueOf(proteinMatch.getScore());
+                Float score = Float.valueOf(proteinMatch.getTransientData().getPeptideSet(rsmId).getScore() );
                 return score;
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return proteinMatch.getTransientData().getPeptideSet(rsmId).getPeptideCount();

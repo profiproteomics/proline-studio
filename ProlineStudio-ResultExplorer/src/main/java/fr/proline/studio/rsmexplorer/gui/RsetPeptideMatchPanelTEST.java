@@ -42,11 +42,12 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
     private JButton searchButton;
     private JTextField searchTextField;
     
+
     /**
      * Creates new form RsetPeptideMatchPanel
      */
-    public RsetPeptideMatchPanelTEST() {
-        initComponents();
+    public RsetPeptideMatchPanelTEST(boolean forRSM) {
+        initComponents(forRSM);
 
     }
 
@@ -99,7 +100,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
     }
 
                        
-    private void initComponents() {
+    private void initComponents(boolean forRSM) {
 
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -110,7 +111,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
         // create objects
         scrollPane = new JScrollPane();
         peptideMatchTable = new PeptideMatchTable();
-        peptideMatchTable.setModel(new PeptideMatchTableModel((LazyTable)peptideMatchTable));
+        peptideMatchTable.setModel(new PeptideMatchTableModel((LazyTable)peptideMatchTable, forRSM));
         
         MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(scrollPane, (PeptideMatchTable) peptideMatchTable);
         

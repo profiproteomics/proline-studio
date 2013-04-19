@@ -5,7 +5,7 @@ import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchFromRsetTask;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsetPeptideMatchPanelTEST;
 
@@ -41,7 +41,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        RsetPeptideMatchPanelTEST p = new RsetPeptideMatchPanelTEST();
+        RsetPeptideMatchPanelTEST p = new RsetPeptideMatchPanelTEST(false);
         p.setName(name);
         p.setDataBox(this);
         panel = p;
@@ -65,7 +65,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
                 
                if (subTask == null) {
 
-                    PeptideMatch[] peptideMatchArray = _rset.getTransientPeptideMatches();
+                    PeptideMatch[] peptideMatchArray = _rset.getTransientData().getPeptideMatches();
                     ((RsetPeptideMatchPanelTEST)panel).setData(taskId, peptideMatchArray, finished);
                } else {
                     ((RsetPeptideMatchPanelTEST)panel).dataUpdated(subTask, finished);
@@ -75,7 +75,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
         
 
         // ask asynchronous loading of data
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptideMatchFromRsetTask(callback, getProjectId(), _rset));
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptideMatchTask(callback, getProjectId(), _rset));
 
        
         

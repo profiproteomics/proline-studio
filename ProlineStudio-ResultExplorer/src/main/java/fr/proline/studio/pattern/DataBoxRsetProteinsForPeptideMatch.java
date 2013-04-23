@@ -41,7 +41,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
         RsetProteinsForPeptideMatchPanel p = new RsetProteinsForPeptideMatchPanel();
         p.setName(name);
         p.setDataBox(this);
-        panel = p;
+        m_panel = p;
     }
     
 
@@ -50,7 +50,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
         final PeptideMatch peptideMatch = (PeptideMatch) previousDataBox.getData(false, PeptideMatch.class);
 
         if (peptideMatch == null) {
-            ((RsetProteinsForPeptideMatchPanel)panel).setData(null);
+            ((RsetProteinsForPeptideMatchPanel)m_panel).setData(null);
             return;
         }
 
@@ -67,7 +67,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
 
-                ((RsetProteinsForPeptideMatchPanel)panel).setData(peptideMatch);
+                ((RsetProteinsForPeptideMatchPanel)m_panel).setData(peptideMatch);
             }
         };
 
@@ -80,7 +80,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null && (parameterType.equals(ProteinMatch.class))) {
-            return ((RsetProteinsForPeptideMatchPanel)panel).getSelectedProteinMatch();
+            return ((RsetProteinsForPeptideMatchPanel)m_panel).getSelectedProteinMatch();
         }
         return super.getData(getArray, parameterType);
     }

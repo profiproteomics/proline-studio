@@ -14,7 +14,6 @@ import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsmPeptidesOfProteinPanel;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -56,7 +55,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         RsmPeptidesOfProteinPanel p = new RsmPeptidesOfProteinPanel();
         p.setName(name);
         p.setDataBox(this);
-        panel = p;
+        m_panel = p;
     }
     
 
@@ -66,7 +65,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         final ResultSummary rsm = (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
 
         if (proteinMatch == null) {
-            ((RsmPeptidesOfProteinPanel) panel).setData(null, null);
+            ((RsmPeptidesOfProteinPanel) m_panel).setData(null, null);
             return;
         }
 
@@ -82,15 +81,15 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (success) {
-                    ((RsmPeptidesOfProteinPanel) panel).setData(proteinMatch, rsm);
+                    ((RsmPeptidesOfProteinPanel) m_panel).setData(proteinMatch, rsm);
                 } else {
-                    ((RsmPeptidesOfProteinPanel) panel).setData(null, null);
+                    ((RsmPeptidesOfProteinPanel) m_panel).setData(null, null);
                 }
             }
         };
 
         // Load data if needed asynchronously
-        ArrayList<ResultSummary> rsmList = new ArrayList<ResultSummary>(1);
+        ArrayList<ResultSummary> rsmList = new ArrayList<>(1);
         rsmList.add(rsm);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, getProjectId(), proteinMatch, rsmList));
 
@@ -100,9 +99,9 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null && (parameterType.equals(PeptideInstance.class))) {
-            return ((RsmPeptidesOfProteinPanel)panel).getSelectedPeptide();
+            return ((RsmPeptidesOfProteinPanel)m_panel).getSelectedPeptide();
         } else if (parameterType!= null && (parameterType.equals(PeptideMatch.class))) {
-            PeptideInstance pi = ((RsmPeptidesOfProteinPanel)panel).getSelectedPeptide();
+            PeptideInstance pi = ((RsmPeptidesOfProteinPanel)m_panel).getSelectedPeptide();
             if (pi != null) {
                 return pi.getTransientData().getBestPeptideMatch();
             }

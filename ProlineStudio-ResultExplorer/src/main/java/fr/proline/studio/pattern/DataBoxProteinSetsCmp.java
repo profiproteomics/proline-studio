@@ -48,7 +48,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
         RsetProteinGroupComparePanel p = new RsetProteinGroupComparePanel();
         p.setName(name);
         p.setDataBox(this);
-        panel = p;
+        m_panel = p;
     }
 
     @Override
@@ -56,11 +56,11 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
         final ProteinMatch proteinMatch = (ProteinMatch) previousDataBox.getData(false, ProteinMatch.class);
 
         if (proteinMatch == null) {
-            ((RsetProteinGroupComparePanel)panel).setData(null, null);
+            ((RsetProteinGroupComparePanel)m_panel).setData(null, null);
             return;
         }
 
-        ArrayList<ProteinMatch> proteinMatchArray = new ArrayList<ProteinMatch>(1);
+        ArrayList<ProteinMatch> proteinMatchArray = new ArrayList<>(1);
         proteinMatchArray.add(proteinMatch);
         loadData(proteinMatchArray, null, null, null);
 
@@ -87,8 +87,8 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
                     // after proteinSet are loaded, we need to load PeptideSet of all proteins of proteinSets
                     proteinSetLoaded = true;
 
-                    ArrayList<ProteinMatch> proteinMatchParameterArray = new ArrayList<ProteinMatch>();
-                    ArrayList<ResultSummary> resultSummaryParameterArray = new ArrayList<ResultSummary>();
+                    ArrayList<ProteinMatch> proteinMatchParameterArray = new ArrayList<>();
+                    ArrayList<ResultSummary> resultSummaryParameterArray = new ArrayList<>();
                     
                     int size = proteinMatchArray.size();
                     for (int i=0;i<size;i++) {
@@ -120,7 +120,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
 
                 HashMap<Integer, ArrayList<Integer>> rsmIdMap = null;
                 if (resultSummaryArray != null) {
-                    rsmIdMap = new HashMap<Integer, ArrayList<Integer>>();
+                    rsmIdMap = new HashMap<>();
                     
                     int size = resultSummaryArray.size();
                     for (int i=0;i<size;i++) {
@@ -128,7 +128,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
                         Integer rsetId = rsm.getResultSet().getId();
                         ArrayList<Integer> rsmIdList = rsmIdMap.get(rsetId);
                         if (rsmIdList == null) {
-                            rsmIdList = new ArrayList<Integer>();
+                            rsmIdList = new ArrayList<>();
                             rsmIdMap.put(rsetId, rsmIdList);
                         }
                         rsmIdList.add(rsm.getId());
@@ -145,7 +145,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
                     }
                 }
                 
-                ((RsetProteinGroupComparePanel) panel).setData(proteinMatchCleanedArray, rsmIdMap); 
+                ((RsetProteinGroupComparePanel) m_panel).setData(proteinMatchCleanedArray, rsmIdMap); 
             }
         };
 
@@ -160,7 +160,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
             if (parameterType.equals(ProteinMatch.class)) {
-                ArrayList<ProteinMatch> proteinMatchList = ((RsetProteinGroupComparePanel) panel).getComparePanel().getSelectedProteinMatchArray();
+                ArrayList<ProteinMatch> proteinMatchList = ((RsetProteinGroupComparePanel) m_panel).getComparePanel().getSelectedProteinMatchArray();
                 if (getArray) {
                     return proteinMatchList;
                 } else {
@@ -172,9 +172,9 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
                 }
             } else if (parameterType.equals(ResultSummary.class)) {
                 if (getArray) {
-                    return ((RsetProteinGroupComparePanel) panel).getComparePanel().getResultSummaryList();
+                    return ((RsetProteinGroupComparePanel) m_panel).getComparePanel().getResultSummaryList();
                 } else {
-                    return ((RsetProteinGroupComparePanel) panel).getComparePanel().getFirstResultSummary();
+                    return ((RsetProteinGroupComparePanel) m_panel).getComparePanel().getFirstResultSummary();
                 }
             }
         }

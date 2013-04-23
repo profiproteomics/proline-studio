@@ -51,7 +51,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         RsmPeptidesPanel p = new RsmPeptidesPanel();
         p.setName(name);
         p.setDataBox(this);
-        panel = p;
+        m_panel = p;
     }
     
     @Override
@@ -73,9 +73,9 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                if (subTask == null) {
 
                     PeptideInstance[] peptideinstanceArray = _rsm.getTransientData().getPeptideInstanceArray();
-                    ((RsmPeptidesPanel)panel).setData(taskId, peptideinstanceArray, finished);
+                    ((RsmPeptidesPanel)m_panel).setData(taskId, peptideinstanceArray, finished);
                } else {
-                    ((RsmPeptidesPanel)panel).dataUpdated(subTask, finished);
+                    ((RsmPeptidesPanel)m_panel).dataUpdated(subTask, finished);
                 }
             }
         };
@@ -92,10 +92,10 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(PeptideInstance.class)) {
-                return ((RsmPeptidesPanel)panel).getSelectedPeptideInstance();
+                return ((RsmPeptidesPanel)m_panel).getSelectedPeptideInstance();
             }
             if (parameterType.equals(PeptideMatch.class)) {
-                PeptideInstance pi = ((RsmPeptidesPanel)panel).getSelectedPeptideInstance();
+                PeptideInstance pi = ((RsmPeptidesPanel)m_panel).getSelectedPeptideInstance();
                 if (pi == null) {
                     return null;
                 }

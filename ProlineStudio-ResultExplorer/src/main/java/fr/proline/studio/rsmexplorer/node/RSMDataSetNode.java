@@ -377,10 +377,10 @@ public class RSMDataSetNode extends RSMNode {
         propGroup.put(prop);*/
 
         prop = new PropertySupport.ReadOnly(
-                "MS Query Count",
+                "Assigned Queries Count",
                 Integer.class,
-                "MS Query Count",
-                "MS Query Count") {
+                "Assigned Queries Count",
+                "Assigned Queries Count") {
 
             @Override
             public Object getValue() throws InvocationTargetException {
@@ -390,10 +390,10 @@ public class RSMDataSetNode extends RSMNode {
         propGroup.put(prop);
         
         prop = new PropertySupport.ReadOnly(
-                "Peptide Match Count",
+                "PSM Count",
                 Integer.class,
-                "Peptide Match Count",
-                "Peptide Match Count") {
+                "PSM Count",
+                "PSM Count") {
 
             @Override
             public Object getValue() throws InvocationTargetException {

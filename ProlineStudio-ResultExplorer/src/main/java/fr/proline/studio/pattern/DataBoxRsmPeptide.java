@@ -6,7 +6,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.gui.RsetPeptideMatchPanelTEST;
+import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
 
 public class DataBoxRsmPeptide extends AbstractDataBox {
 
@@ -36,10 +36,10 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        RsetPeptideMatchPanelTEST p = new RsetPeptideMatchPanelTEST(true);
+        PeptideMatchPanel p = new PeptideMatchPanel(true);
         p.setName(name);
         p.setDataBox(this);
-        panel = p;
+        m_panel = p;
     }
     
     @Override
@@ -61,9 +61,9 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
                if (subTask == null) {
 
                     PeptideMatch[] peptideMatchArray = _rsm.getTransientData().getPeptideMatches();
-                    ((RsetPeptideMatchPanelTEST)panel).setData(taskId, peptideMatchArray, finished);
+                    ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, finished);
                } else {
-                    ((RsetPeptideMatchPanelTEST)panel).dataUpdated(subTask, finished);
+                    ((PeptideMatchPanel)m_panel).dataUpdated(subTask, finished);
                 }
             }
         };
@@ -80,7 +80,7 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(PeptideMatch.class)) {
-                return ((RsetPeptideMatchPanelTEST)panel).getSelectedPeptideMatch();
+                return ((PeptideMatchPanel)m_panel).getSelectedPeptideMatch();
             }
             if (parameterType.equals(ResultSummary.class)) {
                 if (m_rsm != null) {

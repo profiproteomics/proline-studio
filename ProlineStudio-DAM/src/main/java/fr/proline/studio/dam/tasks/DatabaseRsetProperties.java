@@ -104,7 +104,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
         rset.getTransientData().setPeptideMatchesCount(Integer.valueOf(peptideMatchNumber.intValue()));
 
         // Count Ms Queries
-        TypedQuery<Long> countMsQueriesQuery = entityManagerMSI.createQuery("SELECT count(msq) FROM fr.proline.core.orm.msi.MsQuery msq, fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.resultSet.id=:rsetId AND msq=pm.msQuery", Long.class);
+        TypedQuery<Long> countMsQueriesQuery = entityManagerMSI.createQuery("SELECT count(DISTINCT msq) FROM fr.proline.core.orm.msi.MsQuery msq, fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.resultSet.id=:rsetId AND msq=pm.msQuery", Long.class);
         countMsQueriesQuery.setParameter("rsetId", rsetId);
         Long msQueriesNumber = countMsQueriesQuery.getSingleResult();
 

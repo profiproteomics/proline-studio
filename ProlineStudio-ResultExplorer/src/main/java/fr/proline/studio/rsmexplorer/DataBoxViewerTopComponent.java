@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer;
 import fr.proline.studio.pattern.WindowBox;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Image;
 import org.openide.windows.TopComponent;
 
 /**
@@ -11,14 +12,14 @@ import org.openide.windows.TopComponent;
  */
 public class DataBoxViewerTopComponent extends TopComponent {
 
-    WindowBox windowBox = null;
+    WindowBox m_windowBox = null;
     
     /**
      * Creates new form DataBoxViewerTopComponent
      */
     public DataBoxViewerTopComponent(WindowBox windowBox) {
         
-        this.windowBox = windowBox;
+        m_windowBox = windowBox;
         
         // Add panel
         setLayout(new GridLayout());
@@ -29,12 +30,15 @@ public class DataBoxViewerTopComponent extends TopComponent {
         
         // Set Tooltip
         setToolTipText(windowBox.getName()); 
-        
-        
-        
-        
+
     }
 
+    @Override
+    public Image getIcon() {
+        return m_windowBox.getIcon();
+    }
+    
+    
     @Override
     public int getPersistenceType() {
         return PERSISTENCE_NEVER;
@@ -50,7 +54,7 @@ public class DataBoxViewerTopComponent extends TopComponent {
             firstPaint = false;
             
             // size correctly the sub panels
-            windowBox.resetDefaultSize();
+            m_windowBox.resetDefaultSize();
         }
     }
     private boolean firstPaint = true;

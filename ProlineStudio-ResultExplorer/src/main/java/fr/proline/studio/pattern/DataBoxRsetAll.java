@@ -42,7 +42,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
         RsetAllPanel p = new RsetAllPanel();
         p.setName(name);
         p.setDataBox(this);
-        panel = p;
+        m_panel = p;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                    ((RsetAllPanel) panel).setData(taskId, resultSetArrayList);
+                    ((RsetAllPanel) m_panel).setData(taskId, resultSetArrayList);
 
                 }
             };
@@ -80,7 +80,7 @@ public class DataBoxRsetAll extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(ResultSet.class)) {
-                return ((RsetAllPanel)panel).getSelectedResultSet();
+                return ((RsetAllPanel)m_panel).getSelectedResultSet();
             }
 
         }

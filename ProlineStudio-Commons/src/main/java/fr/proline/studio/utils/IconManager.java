@@ -28,7 +28,9 @@ public class IconManager {
         HOUR_GLASS_MINI,
         GEL,
         RSET,
+        RSET_DECOY,
         RSM,
+        RSM_DECOY,
         VIAL,
         PROJECT,
         USER,
@@ -49,11 +51,18 @@ public class IconManager {
         WEB_LINK,
         TRASH,
         VIAL_MERGED,
-        ALL_IMPORTED
+        ALL_IMPORTED,
+        PROPERTIES
     }
     private static HashMap<IconType, ImageIcon> iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> iconHourGlassMap = new HashMap<>();
 
+    
+    public static Image getImage(IconType iconType) {
+        ImageIcon icon = getIcon(iconType);
+        return icon.getImage();
+    }
+    
     public static ImageIcon getIcon(IconType iconType) {
 
         ImageIcon icon = iconMap.get(iconType);
@@ -134,8 +143,12 @@ public class IconManager {
                 return "fr/proline/studio/images/gel.png";
             case RSET:
                 return "fr/proline/studio/images/resultSet.png";
+            case RSET_DECOY:
+                return "fr/proline/studio/images/resultSetDecoy.png";
             case RSM:
                 return "fr/proline/studio/images/resultSummary.png";
+            case RSM_DECOY:
+                return "fr/proline/studio/images/resultSummaryDecoy.png";
             case VIAL:
                 return "fr/proline/studio/images/vial.png";
             case PROJECT:
@@ -177,7 +190,10 @@ public class IconManager {
             case VIAL_MERGED:
                 return "fr/proline/studio/images/vialMerged.png";
             case ALL_IMPORTED:
-                return "fr/proline/studio/images/all-imported.png";   
+                return "fr/proline/studio/images/all-imported.png"; 
+            case PROPERTIES:
+                return "fr/proline/studio/images/property.png"; 
+            
         }
 
 

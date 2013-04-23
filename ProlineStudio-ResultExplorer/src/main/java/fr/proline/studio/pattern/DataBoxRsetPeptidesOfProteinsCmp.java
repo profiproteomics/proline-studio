@@ -42,7 +42,7 @@ public class DataBoxRsetPeptidesOfProteinsCmp extends AbstractDataBox {
         RsetPeptidesOfProteinsCmpPanel p = new RsetPeptidesOfProteinsCmpPanel();
         p.setName(name);
         p.setDataBox(this);
-        panel = p;
+        m_panel = p;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class DataBoxRsetPeptidesOfProteinsCmp extends AbstractDataBox {
         List<ResultSummary> resultSummaryList = (List<ResultSummary>) previousDataBox.getData(true, ResultSummary.class);
 
         if ((proteinMatchList == null) || (proteinMatchList.isEmpty()) || (resultSummaryList == null) || (resultSummaryList.isEmpty())) {
-            ((RsetPeptidesOfProteinsCmpPanel) panel).setData(null, null);
+            ((RsetPeptidesOfProteinsCmpPanel) m_panel).setData(null, null);
             return;
         }
 
@@ -71,7 +71,7 @@ public class DataBoxRsetPeptidesOfProteinsCmp extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
   
                 
-                ((RsetPeptidesOfProteinsCmpPanel) panel).setData(proteinMatchArrayList, resultSummaryArrayList);
+                ((RsetPeptidesOfProteinsCmpPanel) m_panel).setData(proteinMatchArrayList, resultSummaryArrayList);
             }
         };
 

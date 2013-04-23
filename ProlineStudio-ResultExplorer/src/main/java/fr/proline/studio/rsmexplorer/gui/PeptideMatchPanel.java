@@ -1,9 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.MsQuery;
-import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideMatch;
-import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.*;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
@@ -11,74 +8,104 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
+import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.LazyTable;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import org.openide.util.ImageUtilities;
+import org.openide.windows.TopComponent;
 
 /**
  *
  * @author JM235353
  */
-public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements DataBoxPanelInterface {
+public class PeptideMatchPanel extends JPanel implements DataBoxPanelInterface/*, ButtonProviderInterface*/ {
 
-    private AbstractDataBox dataBox;
+    private AbstractDataBox m_dataBox;
 
-    private PeptideMatchTable peptideMatchTable;
-    private JScrollPane scrollPane;
-    private JButton searchButton;
-    private JTextField searchTextField;
+    private boolean m_forRSM;
     
+    private PeptideMatchTable m_peptideMatchTable;
+    private JScrollPane m_scrollPane;
+    private JButton m_searchButton;
+    private JTextField m_searchTextField;
+    
+    private JButton m_decoyButton;
 
     /**
      * Creates new form RsetPeptideMatchPanel
      */
-    public RsetPeptideMatchPanelTEST(boolean forRSM) {
-        initComponents(forRSM);
+    public PeptideMatchPanel(boolean forRSM) {
+        m_forRSM = forRSM;
+        initComponents();
 
     }
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.dataBox = dataBox;
+        m_dataBox = dataBox;
     }
 
     public void setData(long taskId, PeptideMatch[] peptideMatches, boolean finished) {
-        ((PeptideMatchTableModel) peptideMatchTable.getModel()).setData(taskId, peptideMatches);
+        
+        // update toolbar
+        if (m_forRSM) {
+            ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+            if (rsm != null) {
+                m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
+            }
+        } else {
+            ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
+            if (rset != null) {
+                m_decoyButton.setEnabled(rset.getDecoyResultSet() != null);
+            }
+        }
+        
+        ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).setData(taskId, peptideMatches);
 
         // select the first row
         if ((peptideMatches != null) && (peptideMatches.length > 0)) {
-            peptideMatchTable.getSelectionModel().setSelectionInterval(0, 0);
+            m_peptideMatchTable.getSelectionModel().setSelectionInterval(0, 0);
         }
         
         if (finished) {
-            ((PeptideMatchTable)peptideMatchTable).setSortable(true);
+            ((PeptideMatchTable)m_peptideMatchTable).setSortable(true);
         }
     }
 
     public void dataUpdated(SubTask subTask, boolean finished) {
 
-        ((PeptideMatchTable) peptideMatchTable).dataUpdated(subTask, finished);
+        ((PeptideMatchTable) m_peptideMatchTable).dataUpdated(subTask, finished);
 
 
     }
 
+    private String getTopComponentName() {
+        Container c = getParent();
+        while ((c != null) && !(c instanceof TopComponent)) {
+            c = c.getParent();
+        }
+        if ((c != null) && (c instanceof TopComponent)) {
+            return ((TopComponent) c).getName();
+        }
+        return "";
+    }
+    
     public PeptideMatch getSelectedPeptideMatch() {
 
-        PeptideMatchTable table = ((PeptideMatchTable) peptideMatchTable);
+        PeptideMatchTable table = ((PeptideMatchTable) m_peptideMatchTable);
 
         // Retrieve Selected Row
         int selectedRow = table.getSelectedRow();
@@ -99,29 +126,88 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
         return tableModel.getPeptideMatch(selectedRow);
     }
 
-                       
-    private void initComponents(boolean forRSM) {
+    private void initComponents() {
+        JToolBar toolbar = initToolbar();
+        JPanel internalPanel = createInternalPanel();
+        
+        setLayout(new BorderLayout());
+        add(toolbar, BorderLayout.WEST);
+        add(internalPanel, BorderLayout.CENTER);
+    }
+    
+    private JToolBar initToolbar() {
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+        
+        IconManager.IconType iconType = (m_forRSM) ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSET_DECOY;
+        m_decoyButton = new JButton(IconManager.getIcon(iconType));
+        m_decoyButton.setToolTipText("Display Decoy Data"); 
+        m_decoyButton.setEnabled(false);
 
-        setLayout(new GridBagLayout());
+
+        
+        m_decoyButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                WindowBox wbox;
+                if (m_forRSM) {
+                    ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                    ResultSummary decoyRsm = rsm.getDecotResultSummary();
+                    if (decoyRsm == null) {
+                        return;
+                    }
+                    wbox = WindowBoxFactory.getRsmPSMWindowBox("Decoy " + getTopComponentName(), true);
+                    wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
+                    
+                } else {
+                     ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
+                    ResultSet decoyRset = rset.getDecoyResultSet();
+                    if (decoyRset == null) {
+                        return;
+                    }
+                    wbox = WindowBoxFactory.getPeptidesForRsetOnlyWindowBox("Decoy " + getTopComponentName(), true);
+                    wbox.setEntryData(m_dataBox.getProjectId(), decoyRset);
+                }
+
+                // open a window to display the window box
+                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                win.open();
+                win.requestActive();
+            }
+        });
+        
+
+        
+        toolbar.add(m_decoyButton);
+        return toolbar;
+    }
+                       
+    private JPanel createInternalPanel() {
+
+        JPanel internalPanel = new JPanel();
+        
+        internalPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         // create objects
-        scrollPane = new JScrollPane();
-        peptideMatchTable = new PeptideMatchTable();
-        peptideMatchTable.setModel(new PeptideMatchTableModel((LazyTable)peptideMatchTable, forRSM));
+        m_scrollPane = new JScrollPane();
+        m_peptideMatchTable = new PeptideMatchTable();
+        m_peptideMatchTable.setModel(new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM));
         
-        MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(scrollPane, (PeptideMatchTable) peptideMatchTable);
+        MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_peptideMatchTable);
         
-        scrollPane.setViewportView(peptideMatchTable);
-	peptideMatchTable.setFillsViewportHeight(true);
-	peptideMatchTable.setViewport(scrollPane.getViewport());
+        m_scrollPane.setViewportView(m_peptideMatchTable);
+	m_peptideMatchTable.setFillsViewportHeight(true);
+	m_peptideMatchTable.setViewport(m_scrollPane.getViewport());
         
-        searchButton = new SearchButton();
+        m_searchButton = new SearchButton();
 
-        searchTextField = new JTextField(16) {
+        m_searchTextField = new JTextField(16) {
             @Override
             public Dimension getMinimumSize() {
                 return super.getPreferredSize();
@@ -134,28 +220,43 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
-        add(markerContainerPanel, c);
+        internalPanel.add(markerContainerPanel, c);
         
         c.gridx = 0;
         c.gridy++;
         c.weighty = 0;
         c.weightx = 1;
         c.gridwidth = 1;
-        add(Box.createHorizontalGlue(), c);
+        internalPanel.add(Box.createHorizontalGlue(), c);
         
         c.gridx++;
         c.weightx = 0;
-        add(searchTextField, c);
+        internalPanel.add(m_searchTextField, c);
         
         c.gridx++;
-        add(searchButton, c);
+        internalPanel.add(m_searchButton, c);
         
+        return internalPanel;
     }
+
+    /*@Override
+    public int getNumberOfButtons() {
+        ResultSet rset = (ResultSet) dataBox.getData(false, ResultSet.class);
+        if ((rset == null) || (rset.getDecoyResultSet() == null)) {
+            return 0;
+        }
+        return 1;
+    }
+
+*/
+    
+    
+    
     private class SearchButton extends JButton {
 
         String previousSearch = "";
         int searchIndex = 0;
-        ArrayList<Integer> peptideMatchIds = new ArrayList<Integer>();
+        ArrayList<Integer> peptideMatchIds = new ArrayList<>();
 
         public SearchButton() {
             
@@ -176,12 +277,12 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
                 return;
             }
             searchIndex = -1;
-            ((PeptideMatchTableModel) peptideMatchTable.getModel()).sortAccordingToModel(peptideMatchIds);
+            ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).sortAccordingToModel(peptideMatchIds);
         }
 
         private void doSearch() {
 
-            final String searchText = searchTextField.getText().trim().toUpperCase();
+            final String searchText = m_searchTextField.getText().trim().toUpperCase();
 
             if (searchText.compareTo(previousSearch) == 0) {
                 // search already done, display next result
@@ -191,7 +292,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
                 }
 
                 if (!peptideMatchIds.isEmpty()) {
-                    ((PeptideMatchTable) peptideMatchTable).selectProteinSet(peptideMatchIds.get(searchIndex), searchText);
+                    ((PeptideMatchTable) m_peptideMatchTable).selectProteinSet(peptideMatchIds.get(searchIndex), searchText);
                 }
 
             } else {
@@ -214,25 +315,25 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
 
                         if (!peptideMatchIds.isEmpty()) {
 
-                            ((PeptideMatchTableModel) peptideMatchTable.getModel()).sortAccordingToModel(peptideMatchIds);
+                            ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).sortAccordingToModel(peptideMatchIds);
 
-                            ((PeptideMatchTable) peptideMatchTable).selectProteinSet(peptideMatchIds.get(searchIndex), searchText);
+                            ((PeptideMatchTable) m_peptideMatchTable).selectProteinSet(peptideMatchIds.get(searchIndex), searchText);
 
                         }
 
 
                         //System.out.println("Ids size "+proteinSetIds.size());
-                        searchButton.setEnabled(true);
+                        m_searchButton.setEnabled(true);
                     }
                 };
 
-                ResultSet rset = ((PeptideMatchTableModel) peptideMatchTable.getModel()).getResultSet();
+                ResultSet rset = ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).getResultSet();
 
                 
                 // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideMatchTask(callback, dataBox.getProjectId(), rset, searchText, peptideMatchIds));
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideMatchTask(callback, m_dataBox.getProjectId(), rset, searchText, peptideMatchIds));
 
-                searchButton.setEnabled(false);
+                m_searchButton.setEnabled(false);
             }
         }
     }
@@ -246,7 +347,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
          */
         //ProteinSet proteinSetSelected = null;
         public PeptideMatchTable() {
-            super(scrollPane.getVerticalScrollBar());
+            super(m_scrollPane.getVerticalScrollBar());
             setDefaultRenderer(Peptide.class, new PeptideRenderer());
             setDefaultRenderer(MsQuery.class, new MsQueryRenderer());
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
@@ -272,7 +373,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
 
 
 
-            dataBox.propagateDataChanged(PeptideMatch.class);
+            m_dataBox.propagateDataChanged(PeptideMatch.class);
 
         }
 
@@ -333,7 +434,7 @@ public class RsetPeptideMatchPanelTEST extends javax.swing.JPanel implements Dat
                     // if the subtask correspond to the loading of the data of the sorted column,
                     // we keep the row selected visible
                     if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((PeptideMatchTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
-                        ((PeptideMatchTable) peptideMatchTable).scrollRowToVisible(rowSelectedInView);
+                        ((PeptideMatchTable) m_peptideMatchTable).scrollRowToVisible(rowSelectedInView);
                     }
 
                 }

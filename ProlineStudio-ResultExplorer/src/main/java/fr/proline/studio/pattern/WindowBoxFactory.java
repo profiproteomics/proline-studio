@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.utils.IconManager;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -14,8 +15,8 @@ import javax.swing.border.EmptyBorder;
 public class WindowBoxFactory {
     
     
-    public static WindowBox getPeptidesWindowBox(String name) {
-        return getPeptidesForRsetOnlyWindowBox(name);
+    public static WindowBox getPeptidesWindowBox(String name, boolean isDecoy) {
+        return getPeptidesForRsetOnlyWindowBox(name, isDecoy);
         // create boxes
        /* AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxRsetPeptide();
@@ -29,7 +30,7 @@ public class WindowBoxFactory {
         return new WindowBox( name, generatePanel(boxes), boxes[0] );*/
     }
     
-    public static WindowBox getPeptidesForRsetOnlyWindowBox(String name) {
+    public static WindowBox getPeptidesForRsetOnlyWindowBox(String name, boolean isDecoy) {
         
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[3];
@@ -38,19 +39,20 @@ public class WindowBoxFactory {
         boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         boxes[2] = new DataBoxRsetProteinsForPeptideMatch();
         
-
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0] );
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
         winBox.resetDefaultSize(); //JPM.WART
         return winBox;
         
     }
     
-    public static WindowBox getRsmPSMWindowBox(String name) {
+    public static WindowBox getRsmPSMWindowBox(String name, boolean isDecoy) {
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxRsmPeptide();
 
-        return new WindowBox( name, generatePanel(boxes), boxes[0] );
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;
+        return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
     }  
     
     public static WindowBox getRsmPeptidesWindowBox(String name) {
@@ -63,7 +65,7 @@ public class WindowBoxFactory {
         boxes[3].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
 
         
-        return new WindowBox( name, generatePanel(boxes), boxes[0] );
+        return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.RSM));
     }
     
     public static WindowBox getProteinSetsWindowBox(String name) {
@@ -77,7 +79,7 @@ public class WindowBoxFactory {
         boxes[4] = new DataBoxRsetPeptideSpectrum();
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         
-        return new WindowBox( name, generatePanel(boxes), boxes[0] );
+        return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.RSM));
     }
     
     public static WindowBox getAllResultSetWindowBox(String name) {
@@ -86,7 +88,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxRsetAll();
 
-        WindowBox winBox = new WindowBox(name, generatePanel(boxes), boxes[0]);
+        WindowBox winBox = new WindowBox(name, generatePanel(boxes), boxes[0], null);
 
         return winBox;
 

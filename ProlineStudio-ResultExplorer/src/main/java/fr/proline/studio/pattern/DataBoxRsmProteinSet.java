@@ -55,7 +55,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
         RsmProteinSetPanelTEST p = new RsmProteinSetPanelTEST();
         p.setName(name);
         p.setDataBox(this);
-        panel = p;
+        m_panel = p;
     }
     
     @Override
@@ -67,7 +67,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
 
             
             if (_peptideInstance == null) {
-                ((RsmProteinSetPanelTEST) panel).setData(null, null, true);
+                ((RsmProteinSetPanelTEST) m_panel).setData(null, null, true);
                 return;
             }
             
@@ -85,9 +85,9 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
                     if (subTask == null) {
 
                         ProteinSet[] proteinSetArray = _peptideInstance.getTransientData().getProteinSetArray();
-                        ((RsmProteinSetPanelTEST) panel).setData(taskId, proteinSetArray, finished);
+                        ((RsmProteinSetPanelTEST) m_panel).setData(taskId, proteinSetArray, finished);
                     } else {
-                        ((RsmProteinSetPanelTEST) panel).dataUpdated(subTask, finished);
+                        ((RsmProteinSetPanelTEST) m_panel).dataUpdated(subTask, finished);
                     }
                 }
             };
@@ -118,9 +118,9 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
                     if (subTask == null) {
 
                         ProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
-                        ((RsmProteinSetPanelTEST) panel).setData(taskId, proteinSetArray, finished);
+                        ((RsmProteinSetPanelTEST) m_panel).setData(taskId, proteinSetArray, finished);
                     } else {
-                        ((RsmProteinSetPanelTEST) panel).dataUpdated(subTask, finished);
+                        ((RsmProteinSetPanelTEST) m_panel).dataUpdated(subTask, finished);
                     }
                 }
             };
@@ -138,7 +138,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(ProteinSet.class)) {
-                return ((RsmProteinSetPanelTEST)panel).getSelectedProteinSet();
+                return ((RsmProteinSetPanelTEST)m_panel).getSelectedProteinSet();
             }
             if (parameterType.equals(ResultSummary.class)) {
                 if (rsm != null) {

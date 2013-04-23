@@ -47,7 +47,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         RsmProteinsOfProteinSetPanel p = new RsmProteinsOfProteinSetPanel();
         p.setName(name);
         p.setDataBox(this);
-        panel = p;
+        m_panel = p;
     }
     
     @Override
@@ -55,7 +55,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         final ProteinSet proteinSet = (ProteinSet) previousDataBox.getData(false, ProteinSet.class);
 
         if (proteinSet == null) {
-            ((RsmProteinsOfProteinSetPanel)panel).setData(null, null);
+            ((RsmProteinsOfProteinSetPanel)m_panel).setData(null, null);
             return;
         }
         
@@ -71,7 +71,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
 
-                ((RsmProteinsOfProteinSetPanel)panel).setData(proteinSet, null /*
+                ((RsmProteinsOfProteinSetPanel)m_panel).setData(proteinSet, null /*
                          * searchedText
                          */); //JPM.TODO
             }
@@ -86,7 +86,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null && (parameterType.equals(ProteinMatch.class))) {
-            return ((RsmProteinsOfProteinSetPanel)panel).getSelectedProteinMatch();
+            return ((RsmProteinsOfProteinSetPanel) m_panel).getSelectedProteinMatch();
         }
         return super.getData(getArray, parameterType);
     }

@@ -22,11 +22,11 @@ public abstract class AbstractDataBox {
     };
     
     // Panel corresponding to this box
-    protected DataBoxPanelInterface panel;
+    protected DataBoxPanelInterface m_panel;
     
     // In and out Parameters Registered
-    private HashSet<DataParameter> inParameters = new HashSet<>();
-    private ArrayList<DataParameter> outParameters = new ArrayList<>();
+    private HashSet<DataParameter> m_inParameters = new HashSet<>();
+    private ArrayList<DataParameter> m_outParameters = new ArrayList<>();
     
     
     private Integer projectId = null;
@@ -39,15 +39,15 @@ public abstract class AbstractDataBox {
     protected AbstractDataBox previousDataBox = null;
     
     protected void registerInParameter(DataParameter parameter) {
-        inParameters.add(parameter);
+        m_inParameters.add(parameter);
     }
     
     protected void registerOutParameter(DataParameter parameter)  {
-        outParameters.add(parameter);
+        m_outParameters.add(parameter);
     }
     
     public boolean isDataDependant(Class dataType) {
-        Iterator<DataParameter> it = inParameters.iterator();
+        Iterator<DataParameter> it = m_inParameters.iterator();
         while (it.hasNext()) {
             DataParameter parameter = it.next();
             if (parameter.isDataDependant(dataType)) {
@@ -60,12 +60,12 @@ public abstract class AbstractDataBox {
     
     public boolean isCompatible(AbstractDataBox nextDataBox) {
         
-        Iterator<DataParameter> it = nextDataBox.inParameters.iterator();
+        Iterator<DataParameter> it = nextDataBox.m_inParameters.iterator();
         
         while (it.hasNext()) {
             DataParameter parameter = it.next();
             
-            if (parameter.isCompatibleWithOutParameter(outParameters)) {
+            if (parameter.isCompatibleWithOutParameter(m_outParameters)) {
                 return true;
             }
         }
@@ -121,7 +121,7 @@ public abstract class AbstractDataBox {
     }
     
     public DataBoxPanelInterface getPanel() {
-        return panel;
+        return m_panel;
     }
     
     public void setLayout(DataBoxLayout layout) {
@@ -135,4 +135,6 @@ public abstract class AbstractDataBox {
     public String getName() {
         return name;
     }
+    
+
 }

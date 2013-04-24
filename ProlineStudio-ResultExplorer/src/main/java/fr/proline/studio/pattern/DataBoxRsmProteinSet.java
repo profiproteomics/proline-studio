@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
 
@@ -12,18 +8,23 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanelTEST;
+import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
 
 /**
- *
+ * Databox for the list of Protein Sets of a Rsm
+ * OR for the list of Protein Sets corresponding to a Peptide Instance
  * @author JM235353
  */
 public class DataBoxRsmProteinSet extends AbstractDataBox {
     
-    ResultSummary rsm = null;
+    private ResultSummary m_rsm = null;
+    private boolean m_forRSM;
     
-    public DataBoxRsmProteinSet() {
+    
+    public DataBoxRsmProteinSet(boolean forRSM) {
 
+        m_forRSM = forRSM;
+       
          // Name of this databox
         name = "Protein Set";
         
@@ -52,7 +53,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        RsmProteinSetPanelTEST p = new RsmProteinSetPanelTEST();
+        RsmProteinSetPanel p = new RsmProteinSetPanel(m_forRSM);
         p.setName(name);
         p.setDataBox(this);
         m_panel = p;
@@ -67,7 +68,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
 
             
             if (_peptideInstance == null) {
-                ((RsmProteinSetPanelTEST) m_panel).setData(null, null, true);
+                ((RsmProteinSetPanel) m_panel).setData(null, null, true);
                 return;
             }
             
@@ -85,9 +86,9 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
                     if (subTask == null) {
 
                         ProteinSet[] proteinSetArray = _peptideInstance.getTransientData().getProteinSetArray();
-                        ((RsmProteinSetPanelTEST) m_panel).setData(taskId, proteinSetArray, finished);
+                        ((RsmProteinSetPanel) m_panel).setData(taskId, proteinSetArray, finished);
                     } else {
-                        ((RsmProteinSetPanelTEST) m_panel).dataUpdated(subTask, finished);
+                        ((RsmProteinSetPanel) m_panel).dataUpdated(subTask, finished);
                     }
                 }
             };
@@ -100,7 +101,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
 
         } else {
         
-            final ResultSummary _rsm = (rsm != null) ? rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
+            final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
 
 
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -118,9 +119,9 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
                     if (subTask == null) {
 
                         ProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
-                        ((RsmProteinSetPanelTEST) m_panel).setData(taskId, proteinSetArray, finished);
+                        ((RsmProteinSetPanel) m_panel).setData(taskId, proteinSetArray, finished);
                     } else {
-                        ((RsmProteinSetPanelTEST) m_panel).dataUpdated(subTask, finished);
+                        ((RsmProteinSetPanel) m_panel).dataUpdated(subTask, finished);
                     }
                 }
             };
@@ -138,11 +139,11 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(ProteinSet.class)) {
-                return ((RsmProteinSetPanelTEST)m_panel).getSelectedProteinSet();
+                return ((RsmProteinSetPanel)m_panel).getSelectedProteinSet();
             }
             if (parameterType.equals(ResultSummary.class)) {
-                if (rsm != null) {
-                    return rsm;
+                if (m_rsm != null) {
+                    return m_rsm;
                 }
             }
         }
@@ -151,7 +152,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
  
     @Override
     public void setEntryData(Object data) {
-        rsm = (ResultSummary) data;
+        m_rsm = (ResultSummary) data;
         dataChanged(ResultSummary.class);
     }
 }

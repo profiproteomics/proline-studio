@@ -55,31 +55,34 @@ public class WindowBoxFactory {
         return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
     }  
     
-    public static WindowBox getRsmPeptidesWindowBox(String name) {
+    public static WindowBox getRsmPeptidesWindowBox(String name, boolean isDecoy) {
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxRsmPeptideInstances();
-        boxes[1] = new DataBoxRsmProteinSet();
+        boxes[1] = new DataBoxRsmProteinSet(false);
         boxes[2] = new DataBoxRsmProteinsOfProteinSet();
         boxes[3] = new DataBoxRsmPeptidesOfProtein();
         boxes[3].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
 
-        
-        return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.RSM));
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;
+        return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
-    public static WindowBox getProteinSetsWindowBox(String name) {
+    public static WindowBox getProteinSetsWindowBox(String name, boolean isDecoy) {
         
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[5];
-        boxes[0] = new DataBoxRsmProteinSet();
+        boxes[0] = new DataBoxRsmProteinSet(true);
         boxes[1] = new DataBoxRsmProteinsOfProteinSet();
         boxes[2] = new DataBoxRsmPeptidesOfProtein();
         boxes[3] = new DataBoxRsmProteinAndPeptideSequence();
         boxes[4] = new DataBoxRsetPeptideSpectrum();
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         
-        return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.RSM));
+        
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;
+        
+        return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
     public static WindowBox getAllResultSetWindowBox(String name) {

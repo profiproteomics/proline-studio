@@ -10,19 +10,23 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideInstanceTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
+import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.LazyTable;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import org.openide.util.ImageUtilities;
+import org.openide.windows.TopComponent;
 
 
 /**
@@ -31,13 +35,14 @@ import org.openide.util.ImageUtilities;
  */
 public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
 
-    private AbstractDataBox dataBox;
+    private AbstractDataBox m_dataBox;
 
-    private PeptideInstanceTable peptideInstanceTable;
-    private JScrollPane scrollPane;
-    private JButton searchButton;
-    private JTextField searchTextField;
+    private PeptideInstanceTable m_peptideInstanceTable;
+    private JScrollPane m_scrollPane;
+    private JButton m_searchButton;
+    private JTextField m_searchTextField;
     
+    private JButton m_decoyButton;
     
     /**
      * Creates new form RsetPeptideMatchPanel
@@ -49,7 +54,69 @@ public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanel
     
     private void initComponents() {
 
-        setLayout(new GridBagLayout());
+        JToolBar toolbar = initToolbar();
+        JPanel internalPanel = createInternalPanel();
+
+        setLayout(new BorderLayout());
+        add(toolbar, BorderLayout.WEST);
+        add(internalPanel, BorderLayout.CENTER);
+
+    }
+    
+    private String getTopComponentName() {
+        Container c = getParent();
+        while ((c != null) && !(c instanceof TopComponent)) {
+            c = c.getParent();
+        }
+        if ((c != null) && (c instanceof TopComponent)) {
+            return ((TopComponent) c).getName();
+        }
+        return "";
+    }
+    
+    private JToolBar initToolbar() {
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+
+        m_decoyButton = new JButton(IconManager.getIcon(IconManager.IconType.RSM_DECOY));
+        m_decoyButton.setToolTipText("Display Decoy Data");
+        m_decoyButton.setEnabled(false);
+
+
+
+        m_decoyButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+
+                ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                ResultSummary decoyRsm = rsm.getDecotResultSummary();
+                if (decoyRsm == null) {
+                    return;
+                }
+                WindowBox wbox = WindowBoxFactory.getRsmPeptidesWindowBox("Decoy " + getTopComponentName(), true);
+                wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
+
+                // open a window to display the window box
+                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                win.open();
+                win.requestActive();
+            }
+        });
+
+
+
+        toolbar.add(m_decoyButton);
+        return toolbar;
+    }
+      
+    
+    private JPanel createInternalPanel() {
+
+        JPanel internalPanel = new JPanel();
+        
+        internalPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -58,22 +125,22 @@ public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanel
 
 
         // create objects
-        scrollPane = new JScrollPane();
+        m_scrollPane = new JScrollPane();
         
-        peptideInstanceTable = new PeptideInstanceTable();
-        peptideInstanceTable.setModel(new PeptideInstanceTableModel((LazyTable) peptideInstanceTable));
+        m_peptideInstanceTable = new PeptideInstanceTable();
+        m_peptideInstanceTable.setModel(new PeptideInstanceTableModel((LazyTable) m_peptideInstanceTable));
         
-        MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(scrollPane, (PeptideInstanceTable) peptideInstanceTable);
+        MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(m_scrollPane, (PeptideInstanceTable) m_peptideInstanceTable);
         
         
-        scrollPane.setViewportView(peptideInstanceTable);
-	peptideInstanceTable.setFillsViewportHeight(true);
-	peptideInstanceTable.setViewport(scrollPane.getViewport());
+        m_scrollPane.setViewportView(m_peptideInstanceTable);
+	m_peptideInstanceTable.setFillsViewportHeight(true);
+	m_peptideInstanceTable.setViewport(m_scrollPane.getViewport());
 
-        searchButton = new SearchButton();
+        m_searchButton = new SearchButton();
       
         
-        searchTextField = new JTextField(16) {
+        m_searchTextField = new JTextField(16) {
             @Override
             public Dimension getMinimumSize() {
                 return super.getPreferredSize();
@@ -87,52 +154,59 @@ public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanel
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
-        add(markerContainerPanel, c);
+        internalPanel.add(markerContainerPanel, c);
         
         c.gridx = 0;
         c.gridy++;
         c.weighty = 0;
         c.weightx = 1;
         c.gridwidth = 1;
-        add(Box.createHorizontalGlue(), c);
+        internalPanel.add(Box.createHorizontalGlue(), c);
         
         c.gridx++;
         c.weightx = 0;
-        add(searchTextField, c);
+        internalPanel.add(m_searchTextField, c);
         
         c.gridx++;
-        add(searchButton, c);
+        internalPanel.add(m_searchButton, c);
 
+        return internalPanel;
     }
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.dataBox = dataBox;
+        m_dataBox = dataBox;
     }
 
     public void setData(long taskId, PeptideInstance[] peptideInstances, boolean finished) {
-        ((PeptideInstanceTableModel) peptideInstanceTable.getModel()).setData(taskId, peptideInstances);
+        
+        ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+        if (rsm != null) {
+            m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
+        }
+        
+        ((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()).setData(taskId, peptideInstances);
 
         // select the first row
         if ((peptideInstances != null) && (peptideInstances.length > 0)) {
-            peptideInstanceTable.getSelectionModel().setSelectionInterval(0, 0);
+            m_peptideInstanceTable.getSelectionModel().setSelectionInterval(0, 0);
         }
         
         if (finished) {
-            ((PeptideInstanceTable)peptideInstanceTable).setSortable(true);
+            ((PeptideInstanceTable)m_peptideInstanceTable).setSortable(true);
         }
     }
 
     public void dataUpdated(SubTask subTask, boolean finished) {
 
-        ((PeptideInstanceTable) peptideInstanceTable).dataUpdated(subTask, finished);
+        ((PeptideInstanceTable) m_peptideInstanceTable).dataUpdated(subTask, finished);
 
 
     }
 
     public PeptideInstance getSelectedPeptideInstance() {
 
-        PeptideInstanceTable table = ((PeptideInstanceTable) peptideInstanceTable);
+        PeptideInstanceTable table = ((PeptideInstanceTable) m_peptideInstanceTable);
 
         // Retrieve Selected Row
         int selectedRow = table.getSelectedRow();
@@ -183,12 +257,12 @@ public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanel
                 return;
             }
             searchIndex = -1;
-            ((PeptideInstanceTableModel) peptideInstanceTable.getModel()).sortAccordingToModel(peptideInstanceIds);
+            ((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()).sortAccordingToModel(peptideInstanceIds);
         }
 
         private void doSearch() {
             
-            final String searchText = searchTextField.getText().trim().toUpperCase();
+            final String searchText = m_searchTextField.getText().trim().toUpperCase();
 
             if (searchText.compareTo(previousSearch) == 0) {
                 // search already done, display next result
@@ -198,7 +272,7 @@ public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanel
                 }
 
                 if (!peptideInstanceIds.isEmpty()) {
-                    ((PeptideInstanceTable) peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
+                    ((PeptideInstanceTable) m_peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
                 }
 
             } else {
@@ -221,24 +295,24 @@ public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanel
 
                         if (!peptideInstanceIds.isEmpty()) {
 
-                            ((PeptideInstanceTableModel) peptideInstanceTable.getModel()).sortAccordingToModel(peptideInstanceIds);
+                            ((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()).sortAccordingToModel(peptideInstanceIds);
 
-                            ((PeptideInstanceTable) peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
+                            ((PeptideInstanceTable) m_peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
 
                         }
 
 
                         //System.out.println("Ids size "+proteinSetIds.size());
-                        searchButton.setEnabled(true);
+                        m_searchButton.setEnabled(true);
                     }
                 };
 
-                ResultSummary rsm = ((PeptideInstanceTableModel) peptideInstanceTable.getModel()).getResultSummary();
+                ResultSummary rsm = ((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()).getResultSummary();
 
                 // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, dataBox.getProjectId(), rsm, searchText, peptideInstanceIds));
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, m_dataBox.getProjectId(), rsm, searchText, peptideInstanceIds));
 
-                searchButton.setEnabled(false);
+                m_searchButton.setEnabled(false);
             }
         }
     }
@@ -251,7 +325,7 @@ public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanel
          * @param e the event that characterizes the change.
          */
         public PeptideInstanceTable() {
-            super(scrollPane.getVerticalScrollBar());
+            super(m_scrollPane.getVerticalScrollBar());
             setDefaultRenderer(Peptide.class, new PeptideRenderer());
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class))  );
@@ -276,7 +350,7 @@ public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanel
 
 
 
-            dataBox.propagateDataChanged(PeptideInstance.class); //JPM.TODO
+            m_dataBox.propagateDataChanged(PeptideInstance.class); //JPM.TODO
 
         }
 
@@ -337,7 +411,7 @@ public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanel
                     // if the subtask correspond to the loading of the data of the sorted column,
                     // we keep the row selected visible
                     if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((PeptideInstanceTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
-                        ((PeptideInstanceTable) peptideInstanceTable).scrollRowToVisible(rowSelectedInView);
+                        ((PeptideInstanceTable) m_peptideInstanceTable).scrollRowToVisible(rowSelectedInView);
                     }
 
                 }

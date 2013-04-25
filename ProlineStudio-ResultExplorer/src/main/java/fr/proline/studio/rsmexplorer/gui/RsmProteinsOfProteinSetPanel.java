@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
+import fr.proline.studio.rsmexplorer.gui.renderer.BooleanRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.utils.DecoratedTable;
@@ -165,6 +166,9 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
 
         public ProteinTable() {
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(Float.class)) ) );
+            setDefaultRenderer(Boolean.class, new BooleanRenderer());
+            
+        
         }
         
         /**

@@ -21,6 +21,7 @@ public class IconManager {
         OK,
         CANCEL,
         DEFAULT,
+        TICK_SMALL,
         SAME_SET,
         SUB_SET,
         ADD_REMOVE,
@@ -129,6 +130,8 @@ public class IconManager {
                 return "fr/proline/studio/images/tick-red.png";
             case DEFAULT:
                 return "fr/proline/studio/images/arrow-circle.png";
+            case TICK_SMALL:
+                return "fr/proline/studio/images/tick-small.png"; 
             case SAME_SET:
                 return "fr/proline/studio/images/sameset.png";
             case SUB_SET:

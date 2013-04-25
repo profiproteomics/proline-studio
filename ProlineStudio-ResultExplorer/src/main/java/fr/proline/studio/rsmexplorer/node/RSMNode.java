@@ -7,6 +7,8 @@ import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
 import org.openide.nodes.Sheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Super class for all nodes
@@ -29,6 +31,8 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
 
     protected boolean isChanging = false;
 
+    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    
     public RSMNode(/*Children children,*/ NodeTypes type, AbstractData data) {
         super(data);
         this.type = type;

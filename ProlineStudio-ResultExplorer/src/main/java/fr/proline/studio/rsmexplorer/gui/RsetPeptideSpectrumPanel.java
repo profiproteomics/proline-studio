@@ -199,7 +199,7 @@ public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements Data
 
         int size = intensityDoubleArray.length;
         if (size != massDoubleArray.length) {
-            LoggerFactory.getLogger(RsmProteinAndPeptideSequencePanel.class).error("Intensity and Mass List have different size");
+            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Intensity and Mass List have different size");
             return;
         }
 

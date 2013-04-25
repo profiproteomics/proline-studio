@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
  */
 public class RSMTransferHandler extends TransferHandler {
     
+    private Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    
     @Override
     public int getSourceActions(JComponent c) {
         return TransferHandler.MOVE;
@@ -188,7 +190,6 @@ public class RSMTransferHandler extends TransferHandler {
                 }
             } catch (UnsupportedFlavorException | IOException e) {
                 // should never happen
-                Logger logger = LoggerFactory.getLogger(RSMTransferHandler.class);
                 logger.error(getClass().getSimpleName() + " DnD error ", e);
                 return false;
             }
@@ -218,7 +219,6 @@ public class RSMTransferHandler extends TransferHandler {
 
             } catch (UnsupportedFlavorException | IOException e) {
                 // should never happen
-                Logger logger = LoggerFactory.getLogger(RSMTransferHandler.class);
                 logger.error(getClass().getSimpleName() + " DnD error ", e);
                 return false;
             }

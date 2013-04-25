@@ -53,7 +53,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             request.setMethod("run_job");
             
             
-            Map<String, Object> params = new HashMap<String, Object>();
+            Map<String, Object> params = new HashMap<>();
 	    params.put("project_id", projectId);
             
             List args = new ArrayList();
@@ -82,7 +82,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             
             
             // add the file to parse
-            Map<String, Object> resultfile = new HashMap<String, Object>();
+            Map<String, Object> resultfile = new HashMap<>();
             resultfile.put("path", canonicalFilePath);  // files must be accessible from web-core by the same path
             resultfile.put("format", parserId);
             if (decoyRegex != null) {
@@ -124,7 +124,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                 }
                 
                 if (errorMessage != null) {
-                    logger.error(getClass().getSimpleName() + " failed : "+errorMessage);
+                    loggerWebcore.error(getClass().getSimpleName() + " failed : "+errorMessage);
                 }
                 
                 return false;
@@ -134,7 +134,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             if (jobId != null) {
                 id = jobId.intValue();
             } else {
-                logger.error(getClass().getSimpleName() + " failed : job id not defined");
+                loggerProline.error(getClass().getSimpleName() + " failed : job id not defined");
             }
             
 
@@ -142,7 +142,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
 
         } catch (Exception e) {
             errorMessage = e.getMessage();
-            logger.error(getClass().getSimpleName() + " failed", e);
+            loggerProline.error(getClass().getSimpleName() + " failed", e);
             return false;
         }
 
@@ -160,7 +160,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             request.setId(idIncrement++);
             request.setMethod("get_job_status");
             
-            Map<String, Object> params = new HashMap<String, Object>();
+            Map<String, Object> params = new HashMap<>();
 	    params.put("job_id", id);
 
             request.setParameters(params);
@@ -184,7 +184,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                     errorMessage = errorMessage+"\n"+data;
                 }
                 
-                logger.error(getClass().getSimpleName() + " failed "+errorMessage);
+                loggerWebcore.error(getClass().getSimpleName() + " failed "+errorMessage);
                 return ServiceState.STATE_FAILED; // should not happen !
             }
             
@@ -203,7 +203,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
 
                     ArrayList returnedValues = (ArrayList) resultMap.get("result");
                     if ((returnedValues == null) || (returnedValues.isEmpty()))  {
-                        logger.error(getClass().getSimpleName() + " failed : No returned values");
+                        loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
                         return ServiceState.STATE_FAILED;
                     }
                     
@@ -212,7 +212,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                     // retrieve resultSet id
                     BigDecimal resultSetIdBD = (BigDecimal) returnedValuesMap.get("target_result_set_id");
                     if (resultSetIdBD == null) {
-                        logger.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
+                        loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
                         return ServiceState.STATE_FAILED;
                     }
                     
@@ -224,7 +224,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                     if (errorMessage == null) {
                         errorMessage = "";
                     }
-                    logger.error(getClass().getSimpleName() + " failed "+errorMessage);
+                    loggerWebcore.error(getClass().getSimpleName() + " failed "+errorMessage);
                     return ServiceState.STATE_FAILED;
                 }
                 
@@ -234,7 +234,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
 
         } catch (Exception e) {
             errorMessage = e.getMessage();
-            logger.error(getClass().getSimpleName() + " failed", e);
+            loggerProline.error(getClass().getSimpleName() + " failed", e);
             return ServiceState.STATE_FAILED; // should not happen !
         }
                

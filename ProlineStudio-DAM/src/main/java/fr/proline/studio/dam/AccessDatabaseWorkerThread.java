@@ -66,7 +66,7 @@ public class AccessDatabaseWorkerThread extends Thread {
 
 
         } catch (Throwable t) {
-            LoggerFactory.getLogger(AccessDatabaseThread.class).debug("Unexpected exception in main loop of AccessDatabaseWorkerThread", t);
+            LoggerFactory.getLogger("ProlineStudio.DAM").debug("Unexpected exception in main loop of AccessDatabaseWorkerThread", t);
         }
 
     }

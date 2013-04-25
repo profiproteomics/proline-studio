@@ -39,7 +39,8 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
     
     protected static String baseURL = "";
     
-    protected static final Logger logger = LoggerFactory.getLogger(AbstractServiceTask.class);
+    protected static final Logger loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
+    protected static final Logger loggerWebcore = LoggerFactory.getLogger("ProlineWebCore");
     
     public static final String TASK_LIST_INFO = "Services";
     

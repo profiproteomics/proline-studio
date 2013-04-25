@@ -45,17 +45,17 @@ public class ServerConnectionTask extends AbstractServiceTask {
             request.setId(id);
             request.setMethod("template"); 
             
-            Map<String, Object> params = new HashMap<String, Object>();
+            Map<String, Object> params = new HashMap<>();
             //params.put("password", password);  //JPM.TODO
             request.setParameters(params); //JPM.TODO : check if we can set null parameters
 
-            HttpResponse response = null;
+            HttpResponse response;
             try {
                 response = postRequest(serverURL, "admin/connection/"+request.getMethod()+getIdString(), request); //JPM.TODO
             } catch (Exception e) {
                 errorMessage = "Server Connection Failed.";
-                logger.error(getClass().getSimpleName()+" failed", errorMessage);
-                logger.error(getClass().getSimpleName()+" failed", e);
+                loggerProline.error(getClass().getSimpleName()+" failed", errorMessage);
+                loggerProline.error(getClass().getSimpleName()+" failed", e);
                 return false;
             }
             
@@ -110,7 +110,7 @@ public class ServerConnectionTask extends AbstractServiceTask {
             if (errorMessage == null) {
                 errorMessage = "Connection to Server failed";
             }
-            logger.error(getClass().getSimpleName()+" failed", e);
+            loggerProline.error(getClass().getSimpleName()+" failed", e);
             return false;
         }
 

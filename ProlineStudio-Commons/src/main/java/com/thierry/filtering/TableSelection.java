@@ -38,6 +38,7 @@ public class TableSelection implements Transferable, ClipboardOwner {
 
         Action copyAction = new AbstractAction("Copy") {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 logger.debug("Table selection change");
                 TableSelection transfer = new TableSelection(table);
@@ -101,7 +102,7 @@ public class TableSelection implements Transferable, ClipboardOwner {
         return stringFlavors.contains(flavor);
     }
 
-    protected static final Logger logger = LoggerFactory.getLogger(TableSelection.class);
+    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.Commons");
     private JTable table;
     private String textReport;
     private String htmlReport;

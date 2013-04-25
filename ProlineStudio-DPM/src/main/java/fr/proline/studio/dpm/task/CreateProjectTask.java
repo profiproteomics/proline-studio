@@ -1,10 +1,7 @@
 package fr.proline.studio.dpm.task;
 
 import com.google.api.client.http.*;
-import com.google.api.client.http.apache.ApacheHttpTransport;
-import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.GenericJson;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.core.orm.uds.Aggregation;
@@ -49,7 +46,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             JsonRpcRequest request = new JsonRpcRequest();
             request.setId(id);
             request.setMethod("create");
-            Map<String, Object> params = new HashMap<String, Object>();
+            Map<String, Object> params = new HashMap<>();
             params.put("name", name);
             params.put("description", description);
             params.put("owner_id", ownerId);
@@ -80,7 +77,7 @@ public class CreateProjectTask extends AbstractServiceTask {
                 
                 
                  //JPM.WART : Web core returns an error and the project id !!!
-                logger.error(getClass().getSimpleName()+errorMessage);
+                loggerWebcore.error(getClass().getSimpleName()+errorMessage);
                // return false; 
             }
 
@@ -96,7 +93,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             
         } catch (Exception e) {
             errorMessage = e.getMessage();
-            logger.error(getClass().getSimpleName()+" failed", e);
+            loggerProline.error(getClass().getSimpleName()+" failed", e);
             return false;
         }
         
@@ -133,7 +130,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             entityManagerUDS.getTransaction().commit();
 
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName() + " failed", e);
+            loggerProline.error(getClass().getSimpleName() + " failed", e);
             return false;
         } finally {
             entityManagerUDS.close();

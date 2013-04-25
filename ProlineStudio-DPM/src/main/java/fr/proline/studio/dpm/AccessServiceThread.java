@@ -75,7 +75,7 @@ public class AccessServiceThread extends Thread {
 
 
         } catch (Throwable t) {
-            LoggerFactory.getLogger(AccessServiceThread.class).debug("Unexpected exception in main loop of AccessServiceThread", t);
+            LoggerFactory.getLogger("ProlineStudio.DPM").debug("Unexpected exception in main loop of AccessServiceThread", t);
             instance = null; // reset thread
         }
 

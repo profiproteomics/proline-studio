@@ -1,9 +1,7 @@
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.core.orm.msi.*;
-import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
-import fr.proline.core.orm.uds.Dataset.DatasetType;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
@@ -20,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.nodes.Node.Property;
@@ -264,7 +261,7 @@ public class RSMDataSetNode extends RSMNode {
             propGroup.setName("Data Set");
             propGroup.setDisplayName("Data Set");
 
-            Property prop = new PropertySupport.Reflection<Integer>(dataset, Integer.class, "getId", null);
+            Property prop = new PropertySupport.Reflection<>(dataset, Integer.class, "getId", null);
             prop.setName("id");
             propGroup.put(prop);
             
@@ -277,7 +274,6 @@ public class RSMDataSetNode extends RSMNode {
                     Map<String, Object> map = rsm.getSerializedPropertiesAsMap();
                     SerializedPropertiesUtil.getProperties(sheet, "SR Properties", map);
                 } catch (Exception e) {
-                    Logger logger = LoggerFactory.getLogger(RSMNode.class);
                     logger.error(getClass().getSimpleName() + " properties error ", e);
                 }
             }
@@ -290,7 +286,6 @@ public class RSMDataSetNode extends RSMNode {
                     Map<String, Object> map = rset.getSerializedPropertiesAsMap();
                     SerializedPropertiesUtil.getProperties(sheet, "IS Properties", map);
                 } catch (Exception e) {
-                    Logger logger = LoggerFactory.getLogger(RSMNode.class);
                     logger.error(getClass().getSimpleName() + " properties error ", e);
                 }
                 
@@ -301,7 +296,6 @@ public class RSMDataSetNode extends RSMNode {
                         Map<String, Object> map = rsetDecoy.getSerializedPropertiesAsMap();
                         SerializedPropertiesUtil.getProperties(sheet, "Decoy Ret Properties", map);
                     } catch (Exception e) {
-                        Logger logger = LoggerFactory.getLogger(RSMNode.class);
                         logger.error(getClass().getSimpleName() + " properties error ", e);
                     }
                 }
@@ -344,7 +338,6 @@ public class RSMDataSetNode extends RSMNode {
 
 
         } catch (NoSuchMethodException e) {
-            Logger logger = LoggerFactory.getLogger(RSMNode.class);
             logger.error(getClass().getSimpleName() + " properties error ", e);
         }
         

@@ -10,7 +10,6 @@ import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ public class MergeTask extends AbstractServiceTask {
                 }
                 
                 if (errorMessage != null) {
-                    logger.error(getClass().getSimpleName() + " failed : "+errorMessage);
+                    loggerWebcore.error(getClass().getSimpleName() + " failed : "+errorMessage);
                 }
                 
                 return false;
@@ -82,12 +81,12 @@ public class MergeTask extends AbstractServiceTask {
             if (jobId != null) {
                 id = jobId.intValue();
             } else {
-                logger.error(getClass().getSimpleName() + " failed : job id not defined");
+                loggerProline.error(getClass().getSimpleName() + " failed : job id not defined");
             }
 
         } catch (Exception e) {
             errorMessage = e.getMessage();
-            logger.error(getClass().getSimpleName() + " failed", e);
+            loggerProline.error(getClass().getSimpleName() + " failed", e);
             return false;
         }
 
@@ -131,7 +130,7 @@ public class MergeTask extends AbstractServiceTask {
                     errorMessage = errorMessage+"\n"+data;
                 }
                 
-                logger.error(getClass().getSimpleName() + " failed "+errorMessage);
+                loggerWebcore.error(getClass().getSimpleName() + " failed "+errorMessage);
                 return ServiceState.STATE_FAILED; // should not happen !
             }
             
@@ -150,7 +149,7 @@ public class MergeTask extends AbstractServiceTask {
                     // retrieve resultSet id
                     BigDecimal resultSetIdBD = (BigDecimal) resultMap.get("result");
                     if (resultSetIdBD == null) {
-                        logger.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
+                        loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
                         return ServiceState.STATE_FAILED;
                     }
                     
@@ -162,7 +161,7 @@ public class MergeTask extends AbstractServiceTask {
                     if (errorMessage == null) {
                         errorMessage = "";
                     }
-                    logger.error(getClass().getSimpleName() + " failed "+errorMessage);
+                    loggerWebcore.error(getClass().getSimpleName() + " failed "+errorMessage);
                     return ServiceState.STATE_FAILED;
                 }
                 
@@ -170,7 +169,7 @@ public class MergeTask extends AbstractServiceTask {
             
         } catch (Exception e) {
             errorMessage = e.getMessage();
-            logger.error(getClass().getSimpleName() + " failed", e);
+            loggerProline.error(getClass().getSimpleName() + " failed", e);
             return ServiceState.STATE_FAILED; // should not happen !
         }
 

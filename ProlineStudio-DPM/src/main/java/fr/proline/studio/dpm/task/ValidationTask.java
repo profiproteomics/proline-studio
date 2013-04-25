@@ -149,7 +149,7 @@ public class ValidationTask extends AbstractServiceTask {
                 }
                 
                 if (errorMessage != null) {
-                    logger.error(getClass().getSimpleName() + " failed : "+errorMessage);
+                    loggerWebcore.error(getClass().getSimpleName() + " failed : "+errorMessage);
                 }
                 
                 return false;
@@ -160,14 +160,14 @@ public class ValidationTask extends AbstractServiceTask {
             if (jobId != null) {
                 id = jobId.intValue();
             } else {
-                logger.error(getClass().getSimpleName() + " failed : id not defined");
+                loggerProline.error(getClass().getSimpleName() + " failed : id not defined");
             }
 
 
 
         } catch (Exception e) {
             errorMessage = e.getMessage();
-            logger.error(getClass().getSimpleName() + " failed", e);
+            loggerProline.error(getClass().getSimpleName() + " failed", e);
             return false;
         }
 
@@ -186,7 +186,7 @@ public class ValidationTask extends AbstractServiceTask {
             request.setId(idIncrement++);
             request.setMethod("get_job_status");
             
-            Map<String, Object> params = new HashMap<String, Object>();
+            Map<String, Object> params = new HashMap<>();
 	    params.put("job_id", id);
 
             request.setParameters(params);
@@ -211,7 +211,7 @@ public class ValidationTask extends AbstractServiceTask {
                 }
                 
                 if (errorMessage != null) {
-                    logger.error(getClass().getSimpleName() + " failed : " + errorMessage);
+                    loggerWebcore.error(getClass().getSimpleName() + " failed : " + errorMessage);
                 }
                 
                 return ServiceState.STATE_FAILED; // should not happen !
@@ -231,7 +231,7 @@ public class ValidationTask extends AbstractServiceTask {
                     // retrieve resultSummary id
                     BigDecimal resultSummaryIdBD = (BigDecimal) resultMap.get("result");
                     if (resultSummaryIdBD == null) {
-                        logger.error(getClass().getSimpleName() + " failed : No returned ResultSummary Id");
+                        loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSummary Id");
                         return ServiceState.STATE_FAILED;
                     }
 
@@ -243,7 +243,7 @@ public class ValidationTask extends AbstractServiceTask {
                     
                     
                     if (errorMessage != null) {
-                        logger.error(getClass().getSimpleName() + " failed : " + errorMessage);
+                        loggerWebcore.error(getClass().getSimpleName() + " failed : " + errorMessage);
                     }
                 
                     
@@ -256,7 +256,7 @@ public class ValidationTask extends AbstractServiceTask {
 
         } catch (Exception e) {
             errorMessage = e.getMessage();
-            logger.error(getClass().getSimpleName() + " failed", e);
+            loggerProline.error(getClass().getSimpleName() + " failed", e);
             return ServiceState.STATE_FAILED; // should not happen !
         }
                

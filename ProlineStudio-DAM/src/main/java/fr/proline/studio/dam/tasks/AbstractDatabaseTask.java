@@ -26,7 +26,7 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
         HIGH_3, // actions to be done fast, but priority higher
         TOP        // action which needs to be done first
     };
-    protected static final Logger logger = LoggerFactory.getLogger(AbstractDatabaseTask.class);
+    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.DAM.Task");
     // callback is called by the AccessDatabaseThread when the data is fetched
     protected AbstractDatabaseCallback callback;
     // default priority of the task

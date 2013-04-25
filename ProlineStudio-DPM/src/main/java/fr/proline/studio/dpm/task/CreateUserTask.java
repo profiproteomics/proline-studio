@@ -68,7 +68,7 @@ public class CreateUserTask extends AbstractServiceTask {
             
         } catch (Exception e) {
             errorMessage = e.getMessage();
-            logger.error(getClass().getSimpleName()+" failed", e);
+            loggerProline.error(getClass().getSimpleName()+" failed", e);
             return false;
         }
         

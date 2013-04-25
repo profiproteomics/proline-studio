@@ -4,6 +4,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.task.AbstractServiceTask;
 import java.util.LinkedList;
 import org.openide.awt.StatusDisplayer;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -27,6 +28,8 @@ public class ServiceStatusThread extends Thread {
         }
         return instance;
     }
+    
+    private static Logger logger = LoggerFactory.getLogger("ProlineStudio.DPM");
     
     private ServiceStatusThread() {
         
@@ -83,7 +86,7 @@ public class ServiceStatusThread extends Thread {
 
 
         } catch (Throwable t) {
-            LoggerFactory.getLogger(AccessServiceThread.class).debug("Unexpected exception in main loop of AccessServiceThread", t);
+            logger.debug("Unexpected exception in main loop of AccessServiceThread", t);
             instance = null; // reset thread
         }
 

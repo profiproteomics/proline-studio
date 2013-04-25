@@ -105,7 +105,6 @@ public class RSMProjectNode extends RSMNode {
             sheet.put(propGroup);
 
         } catch (NoSuchMethodException e) {
-            Logger logger = LoggerFactory.getLogger(RSMNode.class);
             logger.error(getClass().getSimpleName() + " properties error ", e);
         }
         

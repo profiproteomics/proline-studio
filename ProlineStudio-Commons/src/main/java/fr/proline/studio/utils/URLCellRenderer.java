@@ -83,7 +83,7 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
         
         Object value = table.getValueAt(row, col);
 
-        LoggerFactory.getLogger(this.getClass()).info(value.toString());
+        //LoggerFactory.getLogger("ProlineStudio.Commons").info(value.toString());
         try {
             if (Desktop.isDesktopSupported()) { // JDK 1.6.0
                 
@@ -98,7 +98,7 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
             }
         } catch (Exception ex) {
             // should not happen
-            LoggerFactory.getLogger(this.getClass()).error(getClass().getSimpleName() + " failed", ex);
+            LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", ex);
         }
 
     }

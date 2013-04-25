@@ -20,6 +20,8 @@ import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Used to connect to a UDS DB or MSI DB
@@ -101,7 +103,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
     public boolean fetchData() {
         
             if (action == UDS_CONNECTION) {
-                
+
                 // UDS Connection
                 try {
                     

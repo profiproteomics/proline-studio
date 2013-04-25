@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 /**
  * Used to create a panel containing other panels separated by SplitPanes
@@ -24,6 +25,8 @@ public class SplittedPanelContainer extends JPanel {
     private IconifiedPanel iconifiedPanel;
     private JPanel containerPanel;
     
+    private boolean aPanelMaximized = false;
+    
     public SplittedPanelContainer() {   
     }
 
@@ -36,6 +39,195 @@ public class SplittedPanelContainer extends JPanel {
         panelArray.add(splittedPanel);
     }
 
+    public void updateButtons() {
+        int size = panelArray.size();
+        for (int i=0;i<size;i++) {
+            panelArray.get(i).updateAssociationButtons();
+        }
+    }
+    
+    public void splitPanel(JComponent panel, int index) {
+        
+        // prepare the heights of components
+        int[] heights = getHeights();
+        int totalHeight = 0;
+        for (int i=0;i<heights.length;i++) {
+            totalHeight += heights[i];
+        }
+        double coef = ((double)totalHeight) / ((double)(totalHeight + heights[index-1]));
+        
+        int[] newHeights = new int[heights.length + 1];
+        for (int i=0;i<newHeights.length;i++) {
+            if (i<index) {
+                newHeights[i] = (int) (((double)heights[i])*coef);
+            } else if (i == index) {
+                newHeights[i] = newHeights[i-1];
+            } else {
+                newHeights[i] = (int) (((double)heights[i-1])*coef);
+            }
+        }
+        
+        
+        
+        
+        SplittedPanel splittedPanel = new SplittedPanel(index, panel, this);
+        for (int i=index;i<panelArray.size();i++) {
+            panelArray.get(i).incIndex();
+        }
+        panelArray.add(index, splittedPanel);
+        
+        if (index ==0) {
+            // in fact never called ! : index>=1 ; JPM.TODO : remove if it does not change
+            // panel added at the beginning
+            
+            JSplitPane splitPane = new JSplitPane();
+            splitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+            splitPane.setTopComponent(panelArray.get(0));
+            splitPane.setBottomComponent(splitPaneArray.get(0));
+            
+            splitPaneArray.add(0, splitPane);
+            
+        } else if (index == panelArray.size()-1) {
+            // panel added at the end
+            
+            JPanel lastPanel = panelArray.get(panelArray.size()-2);
+            
+            if (splitPaneArray.size()>0) {
+            
+                JSplitPane lastSplitPane = splitPaneArray.get(splitPaneArray.size()-1);
+                lastSplitPane.remove(lastPanel);
+
+                JSplitPane splitPane = new JSplitPane();
+                splitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+                splitPane.setTopComponent(lastPanel);
+                splitPane.setBottomComponent(splittedPanel);
+
+
+                lastSplitPane.setBottomComponent(splitPane);
+
+                splitPaneArray.add(splitPane);
+            } else {
+                JSplitPane splitPane = new JSplitPane();
+                splitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+                splitPane.setTopComponent(lastPanel);
+                splitPane.setBottomComponent(splittedPanel);
+            
+                splitPaneArray.add(splitPane);
+                
+                containerPanel.removeAll();
+                containerPanel.add(splitPane);
+            }
+            
+        } else {
+            // panel added in the middle
+            
+            JSplitPane splitPaneParent = splitPaneArray.get(index-1);
+            Component    bottomComponent = splitPaneParent.getBottomComponent();
+            splitPaneParent.remove(bottomComponent);
+            
+            
+            JSplitPane splitPane = new JSplitPane();
+            splitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+            splitPane.setTopComponent(splittedPanel);
+            splitPane.setBottomComponent(bottomComponent);
+            
+            splitPaneParent.setBottomComponent(splitPane);
+            
+            splitPaneArray.add(index, splitPane);
+            
+        }
+        
+        revalidate();
+        repaint();
+        
+        dispatchHeight(newHeights);
+        
+        //checkCoherence();
+    }
+    
+    public void associatePanelsAsTab(int bottomPanelIndex) {
+        if (bottomPanelIndex ==0) {
+            // should not happen
+            return;
+        }
+        
+        // prepare the heights of components
+        int[] heights = getHeights();
+        int totalHeight = 0;
+        for (int i=0;i<heights.length;i++) {
+            totalHeight += heights[i];
+        }
+        double coef = ((double)totalHeight) / ((double)(totalHeight - heights[bottomPanelIndex]));
+        
+        int[] newHeights = new int[heights.length - 1];
+        for (int i=0;i<heights.length;i++) {
+            if (i<bottomPanelIndex) {
+                newHeights[i] = (int) (((double)heights[i])*coef);
+            } else if (i > bottomPanelIndex) {
+                newHeights[i-1] = (int) (((double)heights[i])*coef);
+            }
+        }
+        
+        
+        
+        
+        SplittedPanel splittedTopPanel = panelArray.get(bottomPanelIndex-1);
+        SplittedPanel splittedBottomPanel = panelArray.get(bottomPanelIndex);
+        
+        JComponent topComponent = splittedTopPanel.getEmbededPanel();
+        JComponent bottomComponent = splittedBottomPanel.getEmbededPanel();
+        
+        removePanel(bottomPanelIndex, false);
+        
+        ArrayList<Component> components = new ArrayList<>();
+        if (topComponent instanceof JTabbedPane) {
+            JTabbedPane tabbedPane = (JTabbedPane) topComponent;
+            int nbTabs = tabbedPane.getTabCount();
+            for (int i=0;i<nbTabs;i++) {
+                components.add(tabbedPane.getComponentAt(i));
+            }
+            tabbedPane.removeAll();
+        } else {
+            components.add(topComponent);
+        }
+        
+        if (bottomComponent instanceof JTabbedPane) {
+            JTabbedPane tabbedPane = (JTabbedPane) bottomComponent;
+            int nbTabs = tabbedPane.getTabCount();
+            for (int i = 0; i < nbTabs; i++) {
+                components.add(tabbedPane.getComponentAt(i));
+            }
+            tabbedPane.removeAll();
+        } else {
+            components.add(bottomComponent);
+        }
+        
+        JTabbedPane tb = new JTabbedPane();
+        tb.setBorder(new EmptyBorder(8,8,8,8));
+        String name = "";
+        for (int i=0;i<components.size();i++) {
+            Component curComp = components.get(i);
+            String curName = curComp.getName();
+            tb.addTab(curName, curComp);
+            if (i == 0) {
+                name = curName;
+            } else {
+                name += " / "+curName;
+            }
+        }
+        tb.setName(name);
+       
+        
+        splittedTopPanel.replaceEmbededPanel(tb);
+        
+        revalidate();
+        repaint();
+        
+        dispatchHeight(newHeights);
+        
+        //checkCoherence();
+    }
+    
     public void resetDefaultSize() {
         int[] heights = getHeights();
         
@@ -83,6 +275,8 @@ public class SplittedPanelContainer extends JPanel {
         mainPanel.add(containerPanel, c);
         
         createPanel(containerPanel, 0);
+        
+        updateButtons();
     }
 
     private JComponent createPanel(JComponent container, int indexPanel) {
@@ -224,7 +418,7 @@ public class SplittedPanelContainer extends JPanel {
      * Remove a Panel when it is minimized
      * @param index 
      */
-    private void removePanel(int index) {
+    private void removePanel(int index, boolean iconifyRemovedPanel) {
 
         // height of the panel removed
         int height = panelArray.get(index).getHeight();
@@ -272,8 +466,13 @@ public class SplittedPanelContainer extends JPanel {
         
 
         SplittedPanel splittedPanel = panelArray.remove(index);
-        iconifiedPanel.addPanel(splittedPanel, height);
+        for (int i=index;i<panelArray.size();i++) {
+            panelArray.get(i).decIndex();
+        }
         
+        if (iconifyRemovedPanel) {
+            iconifiedPanel.addPanel(splittedPanel, height);
+        }
         
         
         revalidate();
@@ -284,17 +483,24 @@ public class SplittedPanelContainer extends JPanel {
 
     /*public void checkCoherence() {
         if (panelArray.size()!=splitPaneArray.size()+1) {
-            if ((panelArray.size()!=0) || (panelArray.size()!=0)) {
+            if (panelArray.size()!=0) {
                 System.out.println("Size error");
                 return;
             }
         }
         
-        JSplitPane splitPane = null;
+        JSplitPane splitPane;
         for (int i=0;i<splitPaneArray.size();i++) {
             splitPane = splitPaneArray.get(i);
             if (! splitPane.getTopComponent().equals(panelArray.get(i))) {
                 System.out.println("component Error type I");
+            }
+        }
+        
+        for (int i=0;i<panelArray.size();i++) {
+            SplittedPanel p = panelArray.get(i);
+            if (p.getIndex() != i) {
+                System.out.println("Index ERROR");
             }
         }
 
@@ -334,7 +540,7 @@ public class SplittedPanelContainer extends JPanel {
         
         
         // remove the panel minimized
-        removePanel(index);
+        removePanel(index, true);
         
         // dispatch new heights
         if (calculateNewHeight) {
@@ -400,6 +606,8 @@ public class SplittedPanelContainer extends JPanel {
      */
     private void maximize(SplittedPanel panel) {
         
+        aPanelMaximized = true;
+        
         int index = panelArray.indexOf(panel);
         
         // save previous heights
@@ -430,6 +638,9 @@ public class SplittedPanelContainer extends JPanel {
      * @param panel 
      */
     private void reduce(SplittedPanel panelToReduce) {
+        
+        aPanelMaximized = false;
+        
         // remove splittedPanel maximized
         remove(0);
         
@@ -482,11 +693,56 @@ public class SplittedPanelContainer extends JPanel {
 
     }
     
+    
+    /**
+     * Icon Button with minimum margin
+     */
+    private class MiniButton extends JButton {
+        public MiniButton(Icon icon) {
+            super(icon);
+            setMargin(new java.awt.Insets(0, 0, 0, 0));
+            setBorderPainted(false);
+            setFocusPainted(false);
+            setContentAreaFilled(false);
+        }
+    }
+    
+    /**
+     * Icon Button with a callback
+     */
+    /*private class MiniCallbackButton extends JButton {
+        
+        private ButtonProviderInterface m_buttonProvider = null;
+        private int m_index = -1;
+        
+        public MiniCallbackButton(ButtonProviderInterface buttonProvider, int index) {
+            super(buttonProvider.getButtonIcon(index));
+
+            setMargin(new java.awt.Insets(3, 3, 3, 3));
+            setFocusPainted(false);
+            
+            m_buttonProvider = buttonProvider;
+            m_index = index;
+
+            setToolTipText(buttonProvider.getTooltip(index));
+            
+            addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    m_buttonProvider.buttonClicked(m_index);
+                }
+            });
+        }
+    }*/
+    
+    
+    
     /**
      * Each panel added by the user is embedded in a SplittedPanel
      * with buttons to maximize, minimize, reduce
      */
-    private class SplittedPanel extends javax.swing.JPanel {
+    private class SplittedPanel extends JPanel {
 
         private JComponent embededPanel;
         private SplittedPanelContainer container;
@@ -496,7 +752,9 @@ public class SplittedPanelContainer extends JPanel {
         private JButton maximizeButton;
         private JButton reduceButton;
         private JButton minimizeButton;
-        private JPanel buttonPanel;
+        private JButton associateButton;
+        private JButton dissociateButton;
+        private JPanel rightButtonPanel;
         
         
         public SplittedPanel(int index, JComponent embededPanel, SplittedPanelContainer container) {
@@ -508,8 +766,30 @@ public class SplittedPanelContainer extends JPanel {
             initComponents();
         }
 
+        public JComponent getEmbededPanel() {
+            return embededPanel;
+        }
+        
+        public void replaceEmbededPanel(JComponent embededPanel) {
+            if (embededPanel.equals(this.embededPanel)) {
+                return;
+            }
+            removeAll();
+            this.embededPanel = embededPanel;
+            setName(embededPanel.getName());
+            initComponents();
+        }
+        
         public int getIndex() {
             return index;
+        }
+        
+        public void incIndex() {
+            index++;
+        }
+        
+        public void decIndex() {
+            index--;
         }
         
         private void initComponents() {
@@ -517,18 +797,16 @@ public class SplittedPanelContainer extends JPanel {
             setLayout(new GridBagLayout());
 
             final SplittedPanel _p = this;
+           
             
-            // Create Graphical Objects for buttonPanel
-            buttonPanel = new JPanel();
-            buttonPanel.setLayout(new GridBagLayout());
+            
+            // Create Graphical Objects for rightButtonPanel
+            rightButtonPanel = new JPanel();
+            rightButtonPanel.setLayout(new GridBagLayout());
 
             ImageIcon maximizeIcon = IconManager.getIcon(IconManager.IconType.MAXIMIZE);
             
-            maximizeButton = new JButton(maximizeIcon);
-            maximizeButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
-            maximizeButton.setBorderPainted(false);
-            maximizeButton.setFocusPainted(false);
-            maximizeButton.setContentAreaFilled(false);
+            maximizeButton = new MiniButton(maximizeIcon);
             maximizeButton.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
@@ -537,16 +815,14 @@ public class SplittedPanelContainer extends JPanel {
                     reduceButton.setVisible(true);
                     minimizeButton.setVisible(false);
                     container.maximize(_p);
+                    
+                    updateButtons();
                 }
             });
             
             ImageIcon minimizeIcon = IconManager.getIcon(IconManager.IconType.MINIMIZE);
             
-            reduceButton = new JButton(minimizeIcon);
-            reduceButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
-            reduceButton.setBorderPainted(false);
-            reduceButton.setFocusPainted(false);
-            reduceButton.setContentAreaFilled(false);
+            reduceButton = new MiniButton(minimizeIcon);
             reduceButton.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
@@ -555,6 +831,8 @@ public class SplittedPanelContainer extends JPanel {
                     reduceButton.setVisible(false);
                     minimizeButton.setVisible(true);
                     container.reduce(_p);
+                    
+                    updateButtons();
                 }
             });
             reduceButton.setVisible(false);
@@ -562,11 +840,7 @@ public class SplittedPanelContainer extends JPanel {
             ImageIcon deleteIcon = IconManager.getIcon(IconManager.IconType.DELETE);
             
             
-            minimizeButton = new JButton(deleteIcon);
-            minimizeButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
-            minimizeButton.setBorderPainted(false);
-            minimizeButton.setFocusPainted(false);
-            minimizeButton.setContentAreaFilled(false);
+            minimizeButton = new MiniButton(deleteIcon);
             minimizeButton.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
@@ -576,41 +850,112 @@ public class SplittedPanelContainer extends JPanel {
                     minimizeButton.setVisible(true);
 
                     container.minimize(_p);
+                    
+                    updateButtons();
                 }
             });
             
+            associateButton = new MiniButton(IconManager.getIcon(IconManager.IconType.ASSOCIATE));
+            associateButton.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    container.associatePanelsAsTab(index);
+                    
+                    updateButtons();
+                }
+            });
+            
+            
+            final SplittedPanel _splittedPanel = this;
+            dissociateButton = new MiniButton(IconManager.getIcon(IconManager.IconType.DISSOCIATE));
+            dissociateButton.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    
+                    JTabbedPane tabbedPane = (JTabbedPane) embededPanel;
+                    int nbTabs = tabbedPane.getTabCount();
+                    
+                    JComponent lastComponent = (JComponent) tabbedPane.getComponentAt(nbTabs-1);
+                    tabbedPane.remove(nbTabs-1);
+                    
+                    Component firstComponent;
+                    if (nbTabs == 2) {
+                        // one tab left
+                        firstComponent = tabbedPane.getComponentAt(0);
+                    } else {
+                        firstComponent = tabbedPane;
+                    }
+                    
+                    _splittedPanel.replaceEmbededPanel((JComponent) firstComponent);
+                    
+                    _splittedPanel.repaint();
+                    
+                    container.splitPanel(lastComponent, index+1);
+                    
+                    updateButtons();
+                }
+            });
 
 
-            // Put Graphical Objects in buttonPanel
             GridBagConstraints cButton = new GridBagConstraints();
+
+            // Put Graphical Objects in rightButtonPanel
             cButton.gridx = 0;
             cButton.gridy = 0;
-            buttonPanel.add(maximizeButton, cButton);
+            cButton.weighty = 0;
+            rightButtonPanel.add(maximizeButton, cButton);
             cButton.gridy++;
-            buttonPanel.add(reduceButton, cButton);
+            rightButtonPanel.add(reduceButton, cButton);
             cButton.gridy++;
-            buttonPanel.add(minimizeButton, cButton);
+            rightButtonPanel.add(minimizeButton, cButton);
             cButton.gridy++;
+            rightButtonPanel.add(associateButton, cButton);
+            cButton.gridy++;
+            rightButtonPanel.add(dissociateButton, cButton);
             cButton.weighty = 1;
-            buttonPanel.add(Box.createVerticalGlue(), cButton);
+            cButton.gridy++;
+            rightButtonPanel.add(Box.createVerticalBox(), cButton);
 
 
-            // put embededPanel in SplittedPanel
+            // put left button panel in SplittedPanel
             GridBagConstraints c = new GridBagConstraints();
             c.gridx = 0;
             c.gridy = 0;
             c.weightx = 1;
             c.weighty = 1;
             c.fill = GridBagConstraints.BOTH;
+
+           
             add(embededPanel, c);
 
             // put button in SplittedPanel
             c.gridx++;
             c.weightx = 0;
-            add(buttonPanel, c);
+            add(rightButtonPanel, c);
 
         }
 
+        public void updateAssociationButtons() {
+            
+            // if a panel has been maximized,
+            // or if a panel has been iconified
+            // we don't allow association button
+            if (!iconifiedPanel.isEmpty() || aPanelMaximized) {
+                associateButton.setEnabled(false);
+                dissociateButton.setEnabled(false);
+                return;
+            }
+            
+            if (embededPanel instanceof JTabbedPane) {
+                associateButton.setEnabled(index>0);
+                dissociateButton.setEnabled(true);
+            } else {
+                associateButton.setEnabled(index>0);
+                dissociateButton.setEnabled(false);
+            }
+        }
         
     }
     
@@ -647,6 +992,10 @@ public class SplittedPanelContainer extends JPanel {
                 }
             };
             
+        }
+        
+        public boolean isEmpty() {
+            return splittedPanels.isEmpty();
         }
         
         public void addPanel(SplittedPanel panel, int height) {
@@ -699,7 +1048,7 @@ public class SplittedPanelContainer extends JPanel {
             int index = buttons.indexOf(b);
             removePanel(index);
            
-            
+            updateButtons();
         }
         
         

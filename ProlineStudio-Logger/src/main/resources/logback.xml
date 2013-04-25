@@ -4,7 +4,7 @@
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
-      <pattern>%-5level: [%thread] %date{dd MMM yyyy - HH:mm:ss} %logger{35} - %msg%n</pattern>
+      <pattern>%-5level: %logger{35} [%thread] %date{dd MMM yyyy - HH:mm:ss} - %msg%n</pattern>
     </encoder>
   </appender>
   
@@ -12,9 +12,27 @@
       <file>Proline_Studio-${user.name}.log</file>
       <append>true</append>
       <encoder>
-        <pattern>%-5level: [%thread] %date{dd MMM yyyy - HH:mm:ss} %logger{35} - %msg%n</pattern>
+        <pattern>%-5level: %logger{35} [%thread] %date{dd MMM yyyy - HH:mm:ss} - %msg%n</pattern>
       </encoder>       
    </appender>
+
+   <appender name="FappenderError" class="ch.qos.logback.core.FileAppender">
+      <file>Proline_Studio-Error-${user.name}.log</file>
+      <append>true</append>
+      <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+      </filter>
+      <encoder>
+        <pattern>%-5level: %logger{35} [%thread] %date{dd MMM yyyy - HH:mm:ss} - %msg%n</pattern>
+      </encoder>       
+   </appender>
+
+
+  <logger name="ProlineStudio" level="DEBUG">
+  </logger>
+  
+  <logger name="ProlineWebCore" level="DEBUG">
+  </logger>
 
   <logger name="fr.proline" level="DEBUG">
   </logger>
@@ -22,9 +40,12 @@
   <logger name="org.hibernate" level="INFO">
   </logger>
 
+
+
   <root level="OFF">
       <appender-ref ref="STDOUT" />
       <appender-ref ref="Fappender" />    
+      <appender-ref ref="FappenderError" />   
   </root>
   
 </configuration>

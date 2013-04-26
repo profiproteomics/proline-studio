@@ -1,0 +1,96 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package fr.proline.studio.dpm;
+
+import com.google.api.client.http.*;
+import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.api.client.http.json.JsonHttpContent;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.rpc2.JsonRpcRequest;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ *
+ * @author CB205360
+ */
+public class SampleCode {
+
+  
+    private static void postRequest() {
+       
+        HttpTransport transport = new ApacheHttpTransport();
+        HttpRequestFactory factory = transport.createRequestFactory();
+        try {
+
+//			JsonHttpContent content = new JsonHttpContent(new JacksonFactory(), createUserRequest().getParameters());
+//			HttpRequest request = factory.buildPostRequest(new GenericUrl("http://localhost:8080/admin/user_account/create"), content);
+
+            JsonHttpContent content = new JsonHttpContent(new JacksonFactory(), createProjectRequest().getParameters());
+            HttpRequest request = factory.buildPostRequest(new GenericUrl("http://localhost:8080/admin/project/create"), content);
+
+
+            System.out.println(content.getData().toString());
+            HttpResponse response = request.execute();
+            System.out.println(response.parseAsString());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+
+    private static JsonRpcRequest createProjectRequest() {
+
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(12356);
+        request.setMethod("create");
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("name", "myProject");
+        params.put("description", "a new test project");
+        params.put("owner_id", 10);
+        request.setParameters(params);
+
+        return request;
+    }
+
+    private static JsonRpcRequest createUserRequest() {
+
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(12356);
+        request.setMethod("create");
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("login", "bruley");
+        request.setParameters(params);
+
+        return request;
+    }
+    
+    	
+	private static JsonRpcRequest createImportRequest() {
+
+		JsonRpcRequest request = new JsonRpcRequest();
+		request.setId(12356);
+		request.setMethod("run_job");
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("project_id", 1);
+		List args = new ArrayList();
+		Map<String, Object> resultfile = new HashMap<String, Object>();
+		resultfile.put("path", "D:/bruley/Data/Mascot/F065770.dat");
+		resultfile.put("format", "mascot.dat");
+		args.add(resultfile);
+		params.put("result_files", args);
+		params.put("instrument_config_id", 15);
+		params.put("peaklist_software_id", 3);
+		
+		request.setParameters(params);
+		
+		return request;
+}
+
+}

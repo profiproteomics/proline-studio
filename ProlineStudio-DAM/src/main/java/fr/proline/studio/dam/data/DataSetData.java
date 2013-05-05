@@ -45,7 +45,7 @@ public class DataSetData extends AbstractData {
     @Override
     public boolean hasChildren() {
         if (dataset != null) {
-            return (dataset.getFractionCount()>0);
+            return (dataset.getChildrenCount()>0);
         }
         return false;
     }

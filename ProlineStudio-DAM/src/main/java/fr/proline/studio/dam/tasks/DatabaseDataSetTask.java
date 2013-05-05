@@ -304,7 +304,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 trashDataset.setAggregation(mergedAggregation);
                 
                 trashDataset.setName("Trash");
-                trashDataset.setFractionCount(0); // trash is empty
+                trashDataset.setChildrenCount(0); // trash is empty
 
                 trashDataset.setNumber(list.size());
 
@@ -561,14 +561,14 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         d.setParentDataset(mergedParentDataset);
         d.setResultSetId(resultSetId);
         d.setResultSummaryId(resultSummaryId);
-        d.setFractionCount(0); // this aggregate has no child for the moment
+        d.setChildrenCount(0); // this aggregate has no child for the moment
         
         // number of children of the parent
         if (mergedParentDataset != null) {
-            Integer fractionCount = mergedParentDataset.getFractionCount();
+            Integer fractionCount = mergedParentDataset.getChildrenCount();
             d.setNumber(fractionCount);
-            mergedParentDataset.setFractionCount(fractionCount+1);
-            parentDataset.setFractionCount(fractionCount+1);
+            mergedParentDataset.setChildrenCount(fractionCount+1);
+            parentDataset.setChildrenCount(fractionCount+1);
         } else {
             int childrenCount = project.getTransientData().getChildrenNumber();
             d.setNumber(childrenCount);
@@ -686,8 +686,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 
                 // updata parent object
                 if (parentDataset != null) {
-                    mergedParentDataset.setFractionCount(nbDataset);
-                    parentDataset.setFractionCount(nbDataset);
+                    mergedParentDataset.setChildrenCount(nbDataset);
+                    parentDataset.setChildrenCount(nbDataset);
                     entityManagerUDS.persist(mergedParentDataset);
                 } else if (parentProject != null) {
                     parentProject.getTransientData().setChildrenNumber(nbDataset);

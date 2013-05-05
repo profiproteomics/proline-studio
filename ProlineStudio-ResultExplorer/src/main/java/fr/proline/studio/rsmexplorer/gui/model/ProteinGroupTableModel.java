@@ -103,7 +103,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 return lazyData;
             }
             case COLTYPE_PROTEIN_SCORE:
-                Float score = Float.valueOf(proteinSet.getScore());
+                Float score = Float.valueOf(proteinSet.getPeptideOverSet().getScore());
                 return score;
             case COLTYPE_PROTEINS_COUNT: {
                 
@@ -190,7 +190,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
         int size = getRowCount();
         for (int i = 0; i < size; i++) {
             ProteinSet proteinSet = proteinSets[i];
-            double score = proteinSet.getScore();
+            double score = proteinSet.getPeptideOverSet().getScore();
             if (score > maxScore) {
                 maxScore = score;
             }

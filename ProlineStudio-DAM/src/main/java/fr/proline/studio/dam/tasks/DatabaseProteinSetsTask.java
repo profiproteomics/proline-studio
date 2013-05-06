@@ -130,8 +130,8 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             //long timeStart = System.currentTimeMillis();
 
             // Load Protein Sets
-            // SELECT ps FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY ps.score DESC
-            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY ps.score DESC", ProteinSet.class);
+            // SELECT ps FROM ProteinSet ps, PeptideSet pepset WHERE ps.resultSummary.id=:rsmId AND ps.peptideOverSet=pset AND ps.isValidated=true ORDER BY pepset.score DESC
+            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM ProteinSet ps, PeptideSet pepset WHERE ps.resultSummary.id=:rsmId AND ps.peptideOverSet=pepset AND ps.isValidated=true ORDER BY pepset.score DESC", ProteinSet.class);
             proteinSetsQuery.setParameter("rsmId", rsmId);
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
 
@@ -305,7 +305,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             // Load Protein Sets
             // SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY prots.score DESC
-            TypedQuery proteinSetsQuery = entityManagerMSI.createQuery("SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY prots.score DESC", ProteinSet.class);
+            TypedQuery proteinSetsQuery = entityManagerMSI.createQuery("SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE prots.peptideOverSet=peps AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY peps.score DESC", ProteinSet.class);
             proteinSetsQuery.setParameter("peptideInstanceId", pepInstanceId);
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
             

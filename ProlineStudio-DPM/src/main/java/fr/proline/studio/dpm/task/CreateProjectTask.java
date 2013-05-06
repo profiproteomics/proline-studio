@@ -117,7 +117,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             trashDataset.setAggregation(mergedAggregation);
 
             trashDataset.setName("Trash");
-            trashDataset.setFractionCount(0); // trash is empty
+            trashDataset.setChildrenCount(0); // trash is empty
 
             trashDataset.setNumber(0); //JPM.TODO ?
 

@@ -51,7 +51,8 @@ public class IconManager {
         DOCUMENT_LIST,
         WEB_LINK,
         TRASH,
-        VIAL_MERGED,
+        VIAL_RSET_MERGED,
+        VIAL_RSM_MERGED,
         ALL_IMPORTED,
         PROPERTIES
     }
@@ -190,8 +191,10 @@ public class IconManager {
                 return "fr/proline/studio/images/weblink.png";
             case TRASH:
                 return "fr/proline/studio/images/trash.png";
-            case VIAL_MERGED:
+            case VIAL_RSET_MERGED:
                 return "fr/proline/studio/images/vialMerged.png";
+            case VIAL_RSM_MERGED:
+                return "fr/proline/studio/images/vialRsmMerged.png";
             case ALL_IMPORTED:
                 return "fr/proline/studio/images/all-imported.png"; 
             case PROPERTIES:

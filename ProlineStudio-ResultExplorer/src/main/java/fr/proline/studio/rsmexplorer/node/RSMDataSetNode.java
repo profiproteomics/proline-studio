@@ -66,8 +66,11 @@ public class RSMDataSetNode extends RSMNode {
                 //JPM.TODO : according to aggregateType type :icon must be different
                 
                 if (dataset != null) {
+                    if (dataset.getResultSummaryId() != null) {
+                         return getIcon(IconManager.IconType.VIAL_RSM_MERGED);
+                    }
                     if (dataset.getResultSetId() != null) {
-                        return getIcon(IconManager.IconType.VIAL_MERGED);
+                        return getIcon(IconManager.IconType.VIAL_RSET_MERGED);
                     }
                 }
                 

@@ -11,7 +11,7 @@
 
   <groupId>fr.proline</groupId>
   <artifactId>ProlineStudio-parent</artifactId>
-  <version>0.1.0</version> <!-- ProlineStudio version -->
+  <version>0.1.1-SNAPSHOT</version> <!-- ProlineStudio version -->
   <packaging>pom</packaging>
 
   <name>ProlineStudio-parent</name>

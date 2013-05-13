@@ -127,12 +127,17 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             Integer rsmId = rsm.getId();
 
-            //long timeStart = System.currentTimeMillis();
+            long timeStart = System.currentTimeMillis();
 
             // Load Protein Sets
             // SELECT ps FROM ProteinSet ps, PeptideSet pepset WHERE ps.resultSummary.id=:rsmId AND ps.peptideOverSet=pset AND ps.isValidated=true ORDER BY pepset.score DESC
-            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM ProteinSet ps, PeptideSet pepset WHERE ps.resultSummary.id=:rsmId AND ps.peptideOverSet=pepset AND ps.isValidated=true ORDER BY pepset.score DESC", ProteinSet.class);
+            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM ProteinSet ps, PeptideSet pepset WHERE ps.resultSummary.id=:rsmId AND pepset.proteinSet=ps AND ps.isValidated=true ORDER BY pepset.score DESC", ProteinSet.class);
+            
+            //TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId", ProteinSet.class);
+            
             proteinSetsQuery.setParameter("rsmId", rsmId);
+            
+           
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
 
             ProteinSet[] proteinSetArray = proteinSets.toArray(new ProteinSet[proteinSets.size()]);
@@ -146,11 +151,13 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
 
 
-            /*
-             * long timeStop = System.currentTimeMillis(); double delta =
-             * ((double) (timeStop-timeStart))/1000; System.out.println("Load
-             * Protein Sets : "+delta); timeStart = System.currentTimeMillis();
-             */
+           /*long timeStop = System.currentTimeMillis(); double delta = ((double) (timeStop-timeStart))/1000; 
+           System.out.println("Load Protein Sets : "+delta); 
+           
+           String t = "Load Protein Sets : "+delta;
+           logger.error(t);
+           
+           timeStart = System.currentTimeMillis();*/
 
 
             // Retrieve Protein Match Ids
@@ -178,11 +185,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             
             
             
-            /*
-             * timeStop = System.currentTimeMillis(); delta = ((double)
-             * (timeStop-timeStart))/1000; System.out.println("Load Typical
-             * Protein : "+delta); timeStart = System.currentTimeMillis();
-             */
+            /*timeStop = System.currentTimeMillis(); delta = ((double) (timeStop-timeStart))/1000;
+            System.out.println("Load Typical Protein : "+delta); 
+            
+            timeStart = System.currentTimeMillis();*/
+
 
 
             /**
@@ -198,11 +205,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
 
 
-            /*
-             * timeStop = System.currentTimeMillis(); delta = ((double)
-             * (timeStop-timeStart))/1000; System.out.println("Calculate
-             * Spectral Count : "+delta); timeStart = System.currentTimeMillis();
-             */
+            /*timeStop = System.currentTimeMillis(); delta = ((double) (timeStop-timeStart))/1000; 
+            System.out.println("Calculate Spectral Count : "+delta); 
+            
+            timeStart = System.currentTimeMillis();*/
+      
 
 
             /**
@@ -217,11 +224,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
 
 
-            /*
-             * timeStop = System.currentTimeMillis(); delta = ((double)
-             * (timeStop-timeStart))/1000; System.out.println("Calculate
-             * Specific Spectral Count : "+delta); timeStart = System.currentTimeMillis();
-             */
+            /*timeStop = System.currentTimeMillis(); delta = ((double) (timeStop-timeStart))/1000; 
+            System.out.println("Calculate Specific Spectral Count : "+delta);
+            
+            timeStart = System.currentTimeMillis();*/
+
 
 
             /*
@@ -242,11 +249,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             sameSetAndSubSetCount(entityManagerMSI, proteinSetIds, subTask);
 
 
-            /*
-             * timeStop = System.currentTimeMillis(); delta = ((double)
-             * (timeStop-timeStart))/1000; System.out.println("Calculate SameSet
-             * and SubSet : "+delta); timeStart = System.currentTimeMillis();
-             */
+           /* timeStop = System.currentTimeMillis(); delta = ((double) (timeStop-timeStart))/1000; 
+            
+            System.out.println("Calculate SameSet and SubSet : "+delta);*/
+
+
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -305,7 +312,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             // Load Protein Sets
             // SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY prots.score DESC
-            TypedQuery proteinSetsQuery = entityManagerMSI.createQuery("SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE prots.peptideOverSet=peps AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY peps.score DESC", ProteinSet.class);
+            TypedQuery proteinSetsQuery = entityManagerMSI.createQuery("SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY peps.score DESC", ProteinSet.class);
             proteinSetsQuery.setParameter("peptideInstanceId", pepInstanceId);
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
             
@@ -468,7 +475,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         typicalProteinQuery.setParameter("rsmId", rsm.getId());
 
         List<Object[]> typicalProteinMatches = typicalProteinQuery.getResultList();
-        HashMap<Integer, ProteinMatch> typicalProteinMap = new HashMap<Integer, ProteinMatch>();
+        HashMap<Integer, ProteinMatch> typicalProteinMap = new HashMap<>();
         Iterator<Object[]> itTypical = typicalProteinMatches.iterator();
         while (itTypical.hasNext()) {
             Object[] resCur = itTypical.next();
@@ -556,7 +563,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         List sliceOfProteinMatchIds = subTask.getSubList(proteinMatchIds);
 
 
-        HashMap<Integer, Integer> spectralCountMap = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> spectralCountMap = new HashMap<>();
 
         // Prepare Specific Spectral count query
         spectralCountMap.clear();

@@ -45,9 +45,9 @@ public class ProteinGroupTableModel extends LazyTableModel {
 
     @Override
     public Class getColumnClass(int col) {
-        if (col == COLTYPE_PROTEIN_SCORE) {
+        /*if (col == COLTYPE_PROTEIN_SCORE) {
             return Float.class;
-        }
+        }*/
         return LazyData.class;
     }
     
@@ -56,6 +56,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
         switch (col) {
             case COLTYPE_PROTEIN_GROUPS_NAME:
                 return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
+            case COLTYPE_PROTEIN_SCORE:
             case COLTYPE_PROTEINS_COUNT:
                 return DatabaseProteinSetsTask.SUB_TASK_SAMESET_SUBSET_COUNT;
             case COLTYPE_PEPTIDES_COUNT:
@@ -102,9 +103,24 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 }
                 return lazyData;
             }
-            case COLTYPE_PROTEIN_SCORE:
-                Float score = Float.valueOf(proteinSet.getPeptideOverSet().getScore());
-                return score;
+            case COLTYPE_PROTEIN_SCORE: {
+                /*Float score = Float.valueOf(proteinSet.getPeptideOverSet().getScore());
+                return score;*/
+                LazyData lazyData = getLazyData(row,col);
+                
+                // Retrieve typical Protein Match
+                ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
+                
+                if (proteinMatch == null) {
+                    lazyData.setData(null);
+                    
+                    givePriorityTo(taskId, row, col);
+                } else {
+                    lazyData.setData( Float.valueOf(proteinMatch.getTransientData().getPeptideSet(rsmId).getScore()) );
+                }
+                return lazyData;
+            }
+                
             case COLTYPE_PROTEINS_COUNT: {
                 
                 
@@ -190,9 +206,13 @@ public class ProteinGroupTableModel extends LazyTableModel {
         int size = getRowCount();
         for (int i = 0; i < size; i++) {
             ProteinSet proteinSet = proteinSets[i];
-            double score = proteinSet.getPeptideOverSet().getScore();
-            if (score > maxScore) {
-                maxScore = score;
+            ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
+            if (proteinMatch != null) {
+                Integer rsmId = proteinSet.getResultSummary().getId();
+                double score = proteinMatch.getTransientData().getPeptideSet(rsmId).getScore();
+                if (score > maxScore) {
+                    maxScore = score;
+                }
             }
         }
         relativizer.setMax(maxScore);

@@ -26,7 +26,7 @@ public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask
     public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, Integer projectId, ProteinMatch proteinMatch) {
         super(callback, Priority.NORMAL_3, new TaskInfo("Load Data", "Load Protein Sets for Protein Match", TASK_LIST_INFO));
         this.projectId = projectId;
-        this.proteinMatchArray = new ArrayList<ProteinMatch>(1);
+        this.proteinMatchArray = new ArrayList<>(1);
         this.proteinMatchArray.add(proteinMatch);        
     }
     
@@ -71,7 +71,7 @@ public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask
                 if (proteinMatch == null) {
                     // we need to load this proteinMatch from its name and its resultSetId
                     Integer resultSetId = resultSetIdArray.get(i);
-                    proteinMatch = fetchAProteinMatch(entityManagerMSI, proteinMatchName, resultSetId);
+                    proteinMatch = fetchAProteinMatch(entityManagerMSI, proteinMatchName, resultSetId); // JPM.TODO : was used for DataBoxProteinSetsCmp : no longer used : remove it or repare it
                     if (proteinMatch == null) {
                         continue;
                     } else {
@@ -102,6 +102,7 @@ public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask
         return true;
     }
 
+    // JPM.TODO : was used for DataBoxProteinSetsCmp : no longer used : remove it or repare it
     private ProteinMatch fetchAProteinMatch(EntityManager entityManagerMSI, String proteinMatchName, Integer resultSetId) {
         
         TypedQuery<ProteinMatch> rsmQuery = entityManagerMSI.createQuery("SELECT pm FROM ProteinMatch pm WHERE pm.resultSet.id=:resultSetId", ProteinMatch.class);

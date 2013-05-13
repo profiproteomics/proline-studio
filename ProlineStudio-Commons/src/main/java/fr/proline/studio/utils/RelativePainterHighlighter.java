@@ -143,6 +143,9 @@ public class RelativePainterHighlighter extends PainterHighlighter {
             
             float floatValue;
             Object value = adapter.getValue(valueColumn);
+            if (value instanceof LazyData) {
+                value = ((LazyData) value).getData();
+            }
             if (value instanceof String) {
                 floatValue = Float.valueOf((String) value);
             } else {

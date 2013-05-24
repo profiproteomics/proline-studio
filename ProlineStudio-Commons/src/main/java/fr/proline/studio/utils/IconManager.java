@@ -26,7 +26,8 @@ public class IconManager {
         SUB_SET,
         ADD_REMOVE,
         HOUR_GLASS,
-        HOUR_GLASS_MINI,
+        HOUR_GLASS_MINI9,
+        HOUR_GLASS_MINI16,
         GEL,
         RSET,
         RSET_DECOY,
@@ -47,14 +48,16 @@ public class IconManager {
         INFORMATION,
         EMPTY,
         PLUS,
-        CROSS,
+        CROSS_SMALL7,
+        CROSS_SMALL16,
         DOCUMENT_LIST,
         WEB_LINK,
         TRASH,
         VIAL_RSET_MERGED,
         VIAL_RSM_MERGED,
         ALL_IMPORTED,
-        PROPERTIES
+        PROPERTIES,
+        ARROW_RIGHT_SMALL
     }
     private static HashMap<IconType, ImageIcon> iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> iconHourGlassMap = new HashMap<>();
@@ -108,7 +111,7 @@ public class IconManager {
             }
 
             if (miniHourGlassImage == null) {
-                miniHourGlassImage = ImageUtilities.loadImage(getIconFilePath(IconType.HOUR_GLASS_MINI), false);
+                miniHourGlassImage = ImageUtilities.loadImage(getIconFilePath(IconType.HOUR_GLASS_MINI9), false);
             }
 
             // add an hour glass at the right bottom corner
@@ -141,8 +144,10 @@ public class IconManager {
                 return "fr/proline/studio/images/addremove.png";
             case HOUR_GLASS:
                 return "fr/proline/studio/images/hourGlass.png";
-            case HOUR_GLASS_MINI:
+            case HOUR_GLASS_MINI9:
                 return "fr/proline/studio/images/hourGlassMini.png";
+            case HOUR_GLASS_MINI16:
+                return "fr/proline/studio/images/hourGlassMini16x16.png";
             case GEL:
                 return "fr/proline/studio/images/gel.png";
             case RSET:
@@ -183,8 +188,10 @@ public class IconManager {
                 return "fr/proline/studio/images/empty.png";
             case PLUS:
                 return "fr/proline/studio/images/plus-small7x7.png";
-            case CROSS:
+            case CROSS_SMALL7:
                 return "fr/proline/studio/images/cross-small7x7.png";
+            case CROSS_SMALL16:
+                return "fr/proline/studio/images/cross-small16x16.png";
             case DOCUMENT_LIST:
                 return "fr/proline/studio/images/document-list.png";
             case WEB_LINK:
@@ -199,6 +206,8 @@ public class IconManager {
                 return "fr/proline/studio/images/all-imported.png"; 
             case PROPERTIES:
                 return "fr/proline/studio/images/property.png"; 
+            case ARROW_RIGHT_SMALL:
+                return "fr/proline/studio/images/arrow-right-small.png"; 
             
         }
 

@@ -123,7 +123,7 @@ public class ServiceStatusThread extends Thread {
             }
             String status;
             if (taskInfoToDisplay != null) {
-                status = taskListSize+" service(s) running. Awaiting "+taskInfoToDisplay.getTaskName()+".";
+                status = taskListSize+" service(s) running. Awaiting "+taskInfoToDisplay.getTaskDescription()+".";
             } else {
                 status = "";
             }

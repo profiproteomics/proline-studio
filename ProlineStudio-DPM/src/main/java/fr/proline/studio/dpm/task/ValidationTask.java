@@ -23,7 +23,7 @@ public class ValidationTask extends AbstractServiceTask {
     Integer[] resultSummaryId = null;
     
     public ValidationTask(AbstractServiceCallback callback, Dataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Validation", "Validation of "+dataset.getName()+" Result Set", TASK_LIST_INFO));
+        super(callback, false /*asynchronous*/, new TaskInfo("Validation of Search Result "+dataset.getName(), TASK_LIST_INFO));
         this.dataset = dataset;
         this.description = description;
         this.argumentsMap = argumentsMap;
@@ -223,11 +223,22 @@ public class ValidationTask extends AbstractServiceTask {
                 Boolean success = (Boolean) resultMap.get("success");  //JPM.TODO : get ResultSummary created
                 
                 if (success == null) {
+                    
+                    String message = (String) resultMap.get("message");
+                    if ((message!=null) && message.startsWith("Running")) {
+                        getTaskInfo().setRunning(false);
+                    }
+                    
                     return ServiceState.STATE_WAITING;
                 }
                 
                 if (success) {
 
+                    BigDecimal duration = (BigDecimal) resultMap.get("duration");
+                    if (duration != null) {
+                        getTaskInfo().setDuration(duration.longValue());
+                    }
+                    
                     // retrieve resultSummary id
                     BigDecimal resultSummaryIdBD = (BigDecimal) resultMap.get("result");
                     if (resultSummaryIdBD == null) {

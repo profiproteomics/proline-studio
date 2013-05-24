@@ -24,7 +24,7 @@ public class ServerConnectionTask extends AbstractServiceTask {
 
     
     public ServerConnectionTask(AbstractServiceCallback callback, String serverURL, String password, HashMap<Object, Object> databaseProperties) {
-        super(callback, true /*synchronous*/, new TaskInfo("Connection", "Connection to Server "+serverURL, TASK_LIST_INFO));
+        super(callback, true /*synchronous*/, new TaskInfo("Connection to Server "+serverURL, TASK_LIST_INFO));
         
         this.serverURL = serverURL;
         this.password = password;

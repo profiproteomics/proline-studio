@@ -97,6 +97,16 @@ public class WindowBoxFactory {
 
     }
     
+    public static WindowBox getTaskListWindowBox() {
+         AbstractDataBox[] boxes = new AbstractDataBox[2];
+         boxes[0] = new DataBoxTaskList();
+         boxes[1] = new DataBoxTaskDescription();
+         
+         WindowBox winBox = new WindowBox("Tasks Log", generatePanel(boxes), boxes[0], null);
+
+        return winBox;
+    }
+    
     
     private static SplittedPanelContainer generatePanel(AbstractDataBox[] boxes) {
         

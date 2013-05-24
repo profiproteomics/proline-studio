@@ -557,18 +557,10 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         
         // retrieve selected nodes
         RSMNode[] selectedNodes = getSelectedNodes();
-        
-        // check if nodes are changing
-        int nbNodes = selectedNodes.length;
-        for (int i=0;i<nbNodes;i++) {
-            if (selectedNodes[i].isChanging()) {
-                // do not show a popup on a node which is changing
-                return;
-            }
-        }
-        
-        // check if the Root node or Trash or a Node in Trash is selected
 
+        int nbNodes = selectedNodes.length;
+
+        // check if the Root node or Trash or a Node in Trash is selected
         boolean rootNodeSelected = false;
         boolean trashNodeSelected = false;
         boolean allImportedNodeSelected = false;
@@ -590,6 +582,19 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 allImportedNodeSelected = true;
             }
         }
+        
+                
+        // check if nodes are changing
+        if ((nbNodes!=1) || (!allImportedNodeSelected)) {
+            for (int i = 0; i < nbNodes; i++) {
+                if (selectedNodes[i].isChanging()) {
+                    // do not show a popup on a node which is changing
+                    // except for All Imported Node
+                    return;
+                }
+            }
+        }
+        
         
         JPopupMenu popup;
         ArrayList<AbstractRSMAction> actions;
@@ -655,14 +660,28 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             // creation of the popup if needed
             if (allImportedPopup == null) {
                  // create the actions
-                allImportedActions = new ArrayList<>(2);  // <--- get in sync
+                allImportedActions = new ArrayList<>(3);  // <--- get in sync
    
+
+                
                 DisplayAllRsetAction allRsetAction = new DisplayAllRsetAction();
                 allImportedActions.add(allRsetAction);
+
+                allImportedActions.add(null);
+                
+                ImportSearchResultAsRsetAction importAction = new ImportSearchResultAsRsetAction();
+                allImportedActions.add(importAction);
                 
                 allImportedPopup = new JPopupMenu();
                 
-                allImportedPopup.add(allRsetAction.getPopupPresenter());
+                for (int i = 0; i < allImportedActions.size(); i++) {
+                    AbstractRSMAction action = allImportedActions.get(i);
+                    if (action == null) {
+                        allImportedPopup.addSeparator();
+                    } else {
+                        allImportedPopup.add(action.getPopupPresenter());
+                    }
+                }
             }
             
             popup = allImportedPopup;

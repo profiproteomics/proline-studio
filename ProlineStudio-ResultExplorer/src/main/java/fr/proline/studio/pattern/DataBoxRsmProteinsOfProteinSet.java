@@ -21,6 +21,7 @@ import fr.proline.studio.rsmexplorer.gui.RsmProteinsOfProteinSetPanel;
  */
 public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     
+    private Integer m_proteinSetCurId = null;
 
     public DataBoxRsmProteinsOfProteinSet() {
 
@@ -58,6 +59,12 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
             ((RsmProteinsOfProteinSetPanel)m_panel).setData(null, null);
             return;
         }
+        
+         if ((m_proteinSetCurId!=null) && (proteinSet.getId().intValue() == m_proteinSetCurId.intValue())) {
+            return;
+        }
+        
+        m_proteinSetCurId = proteinSet.getId();
         
         //final String searchedText = searchTextBeingDone; //JPM.TODO
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

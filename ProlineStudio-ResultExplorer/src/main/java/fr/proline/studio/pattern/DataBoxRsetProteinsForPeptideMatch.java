@@ -14,6 +14,7 @@ import fr.proline.studio.rsmexplorer.gui.RsetProteinsForPeptideMatchPanel;
  */
 public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     
+    private Integer m_peptideMatchCurId = null;
 
     public DataBoxRsetProteinsForPeptideMatch() {
 
@@ -54,6 +55,10 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
             return;
         }
 
+        if ((m_peptideMatchCurId!=null) && (peptideMatch.getId().intValue() == m_peptideMatchCurId.intValue())) {
+            return;
+        }
+        m_peptideMatchCurId = peptideMatch.getId();
         
         //final String searchedText = searchTextBeingDone; //JPM.TODO
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

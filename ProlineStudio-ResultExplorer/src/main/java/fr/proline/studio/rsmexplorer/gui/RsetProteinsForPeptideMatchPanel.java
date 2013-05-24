@@ -20,7 +20,7 @@ import javax.swing.table.TableColumn;
 public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
-    private PeptideMatch peptideMatchCur = null;
+    private Integer peptideMatchCurId = null;
 
     /**
      * Creates new form RsetProteinsForPeptideMatchPanel
@@ -61,15 +61,17 @@ public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel impleme
 
     public void setData(PeptideMatch peptideMatch) {
 
-        if (peptideMatch == peptideMatchCur) {
-            return;
-        }
-        peptideMatchCur = peptideMatch;
-
         if (peptideMatch == null) {
             clearData();
             return;
         }
+        
+        if ((peptideMatchCurId!=null) && (peptideMatch.getId().intValue() == peptideMatchCurId.intValue())) {
+            return;
+        }
+        
+        peptideMatchCurId = peptideMatch.getId();
+
 
 
         ProteinMatch[] proteinMatchArray = peptideMatch.getTransientData().getProteinMatches();

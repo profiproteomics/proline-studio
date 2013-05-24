@@ -19,7 +19,7 @@ public class CreateUserTask extends AbstractServiceTask {
 
     
     public CreateUserTask(AbstractServiceCallback callback, String name) {
-        super(callback, true /*synchronous*/, new TaskInfo("Create User", "Create User "+name, TASK_LIST_INFO));
+        super(callback, true /*synchronous*/, new TaskInfo("Create User "+name, TASK_LIST_INFO));
         
         this.name = name;
 

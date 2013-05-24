@@ -38,13 +38,13 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     private boolean m_loadForRset;
 
     public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, ResultSet rset) {
-        super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Data", "Load Peptide Matches for Result Set", TASK_LIST_INFO));
+        super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Peptide Matches for Search Result "+rset.getId(), TASK_LIST_INFO));
         m_projectId = projectId;
         m_rset = rset;   
         m_loadForRset = true;
     }
     public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, ResultSummary rsm) {
-        super(callback, SUB_TASK_COUNT_RSM, new TaskInfo("Load Data", "Load Peptide Matches for Result Summary", TASK_LIST_INFO));
+        super(callback, SUB_TASK_COUNT_RSM, new TaskInfo("Load Peptide Matches for Identification Summary "+rsm.getId(), TASK_LIST_INFO));
         m_projectId = projectId;
         m_rsm = rsm;
         m_loadForRset = false;

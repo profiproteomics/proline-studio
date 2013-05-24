@@ -55,7 +55,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * @param projectId
      */
     public DatabaseConnectionTask(AbstractDatabaseCallback callback, Map<Object, Object> databaseProperties, String projectUser) {
-        super(callback, Priority.TOP, new TaskInfo("DB Connection", "Connection to UDS", TASK_LIST_INFO));
+        super(callback, Priority.TOP, new TaskInfo("Connection to Database UDS", TASK_LIST_INFO));
 
         this.databaseProperties = databaseProperties;
         this.projectUser = projectUser;
@@ -84,7 +84,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * @param projectId
      */
     public DatabaseConnectionTask(AbstractDatabaseCallback callback, int projectId) {
-        super(callback, Priority.TOP, new TaskInfo("DB Connection", "Connection to MSI", TASK_LIST_INFO));
+        super(callback, Priority.TOP, new TaskInfo("Connection to Database MSI", TASK_LIST_INFO));
 
         databaseProperties = null;
         this.projectId = projectId;

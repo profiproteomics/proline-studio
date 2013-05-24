@@ -33,7 +33,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     private ResultSummary rsm = null;
 
     public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, Integer projectId, ProteinMatch proteinMatch, ArrayList<ResultSummary> rsmList) {
-        super(callback, new TaskInfo("Load Data", "Load Peptide Sets for Protein Match", TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load Peptide Sets for Protein Match "+proteinMatch.getAccession(), TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinMatch = proteinMatch;
         this.proteinMatchArray = null;
@@ -43,7 +43,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     }
     
     public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, Integer projectId, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmList) {
-        super(callback, new TaskInfo("Load Data", "Load Peptide Sets for Protein Matches", TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load Peptide Sets for multiple Protein Matches", TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinMatch = null;
         this.proteinMatchArray = proteinMatchArray;
@@ -52,7 +52,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     }
 
     public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, Integer projectId, ResultSummary rsm) {
-        super(callback, new TaskInfo("Load Data", "Load Peptides for Result Summary", TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load Peptides for Identification Summary "+rsm.getId(), TASK_LIST_INFO));
         this.projectId = projectId;
         this.rsm = rsm;
         action = LOAD_PEPTIDE_INSTANCES_FOR_RSM;

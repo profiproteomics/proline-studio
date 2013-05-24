@@ -275,7 +275,7 @@ public class ValidationDialog extends DefaultDialog {
 
                 c.weightx = 0;
                 c.gridx++;
-                JButton removeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS));
+                JButton removeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
                 removeButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
                 removeButton.addActionListener(new ActionListener() {
 
@@ -596,7 +596,7 @@ public class ValidationDialog extends DefaultDialog {
 
                 c.weightx = 0;
                 c.gridx++;
-                JButton removeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS));
+                JButton removeButton = new JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
                 removeButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
                 removeButton.addActionListener(new ActionListener() {
 

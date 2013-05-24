@@ -660,7 +660,7 @@ public class ValidationDialog extends DefaultDialog {
 
         proteinPrefilterParameters = new AbstractParameter[2];
         proteinPrefilterParameters[0] = null;
-        proteinPrefilterParameters[1] = new IntegerParameter("SPECIFIC_PEP", "Proteotipics Peptides", new JTextField(6), new Integer(1), new Integer(1), null);
+        proteinPrefilterParameters[1] = new IntegerParameter("SPECIFIC_PEP", "Specific Peptides", new JTextField(6), new Integer(1), new Integer(1), null);
         proteinPrefilterParameters[1].setAssociatedData(">=");
         
          for (int i = 0; i < proteinPrefilterParameters.length; i++) {

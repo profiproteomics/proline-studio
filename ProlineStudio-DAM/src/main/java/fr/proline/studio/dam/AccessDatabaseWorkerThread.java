@@ -4,6 +4,8 @@
  */
 package fr.proline.studio.dam;
 
+import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +52,9 @@ public class AccessDatabaseWorkerThread extends Thread {
                     notifyAll();
                 }
 
+                m_action.getTaskInfo().setRunning(true);
+
+                
                 // fetch data
                 boolean success = m_action.fetchData();
 

@@ -1,5 +1,6 @@
 package fr.proline.studio.dpm;
 
+import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.task.AbstractServiceTask;
 import java.util.LinkedList;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,7 @@ import org.slf4j.LoggerFactory;
 public class AccessServiceThread extends Thread {
     private static AccessServiceThread instance;
     
-    private LinkedList<AbstractServiceTask> taskList = new LinkedList<AbstractServiceTask>();
+    private LinkedList<AbstractServiceTask> taskList = new LinkedList<>();
     
     public static AccessServiceThread getAccessServiceThread() {
         if (instance == null) {
@@ -88,6 +89,8 @@ public class AccessServiceThread extends Thread {
      */
     public final void addTask(AbstractServiceTask task) {
 
+        TaskInfoManager.getTaskInfoManager().add(task.getTaskInfo());
+        
         // task is queued
         synchronized (this) {
             taskList.add(task);

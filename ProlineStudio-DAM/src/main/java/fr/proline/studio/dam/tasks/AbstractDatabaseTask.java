@@ -201,6 +201,9 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
      */
     public void callback(final boolean success, final boolean finished) {
         if (callback == null) {
+            
+            getTaskInfo().setFinished(success, errorMessage, true);
+            
             return;
         }
 
@@ -213,12 +216,14 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
                 @Override
                 public void run() {
                     callback.run(success, id, null, finished);
+                    getTaskInfo().setFinished(success, getErrorMessage(), true);
                 }
             });
         } else {
             // Method called in the current thread
             // In this case, we assume the execution is fast.
             callback.run(success, id, null, finished);
+            getTaskInfo().setFinished(success, getErrorMessage(), true);
         }
 
 

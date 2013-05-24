@@ -112,6 +112,9 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
      */
     public void callback(final boolean success) {
         if (callback == null) {
+            
+            getTaskInfo().setFinished(success, errorMessage, false);
+            
             return;
         }
 
@@ -125,12 +128,14 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
                 @Override
                 public void run() {
                     callback.run(success);
+                    getTaskInfo().setFinished(success, errorMessage, false);
                 }
             });
         } else {
             // Method called in the current thread
             // In this case, we assume the execution is fast.
             callback.run(success);
+            getTaskInfo().setFinished(success, errorMessage, false);
         }
 
 

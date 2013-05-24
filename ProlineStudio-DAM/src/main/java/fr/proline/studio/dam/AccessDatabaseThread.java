@@ -3,6 +3,7 @@ package fr.proline.studio.dam;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.PriorityChangement;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -123,6 +124,9 @@ public class AccessDatabaseThread extends Thread {
                 // action completely finished
                 actionMap.remove(task.getId());
                 priorityChangements.remove(task.getId());
+                
+                String errorMessage = task.getErrorMessage();
+                task.getTaskInfo().setFinished((errorMessage==null), errorMessage, true);
             }
             
             if (task.hasConsecutiveTask()) {
@@ -147,6 +151,8 @@ public class AccessDatabaseThread extends Thread {
      */
     public final void addTask(AbstractDatabaseTask task) {
 
+        
+        
         // check if we need to fetch data for this action
         if (!task.needToFetch()) {
             // fetch already done : return immediately
@@ -165,6 +171,8 @@ public class AccessDatabaseThread extends Thread {
             return;
         }
 
+        TaskInfoManager.getTaskInfoManager().add(task.getTaskInfo());
+        
         // action is queued
         synchronized (this) {
             actions.add(task);

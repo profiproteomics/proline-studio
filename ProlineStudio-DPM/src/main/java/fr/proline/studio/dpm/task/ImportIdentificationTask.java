@@ -5,6 +5,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -31,7 +32,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
     private Integer[] resultSetId = null;
     
     public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String canonicalFilePath, String decoyRegex, int instrumentId, int peaklistSoftwareId, int projectId, Integer[] resultSetId) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Import Identification", "Import Identification "+canonicalFilePath, TASK_LIST_INFO));
+        super(callback, false /*asynchronous*/, new TaskInfo("Import Identification "+canonicalFilePath, TASK_LIST_INFO));
         
         this.parserId = parserId;
         this.parserArguments = parserArguments;
@@ -195,11 +196,21 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                 // key not used : "duration", "progression" JPM.TODO
                 
                 if (success == null) {
+                    
+                    String message = (String) resultMap.get("message");
+                    if ((message!=null) && message.startsWith("Running")) {
+                        getTaskInfo().setRunning(false);
+                    }
+                    
                     return ServiceState.STATE_WAITING;
                 }
                 
                 if (success) {
                     
+                    BigDecimal duration = (BigDecimal) resultMap.get("duration");
+                    if (duration != null) {
+                        getTaskInfo().setDuration(duration.longValue());
+                    }
 
                     ArrayList returnedValues = (ArrayList) resultMap.get("result");
                     if ((returnedValues == null) || (returnedValues.isEmpty()))  {

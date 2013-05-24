@@ -25,7 +25,7 @@ public class MergeTask extends AbstractServiceTask {
     private Integer[] m_resultSetId = null;
     
     public MergeTask(AbstractServiceCallback callback, int projectId, List<Integer> resultSetIdList, String parentName, Integer[] resultSetId) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Merge", "Merge on "+parentName, TASK_LIST_INFO));
+        super(callback, false /*asynchronous*/, new TaskInfo("Merge on "+parentName, TASK_LIST_INFO));
         m_resultSetIdList = resultSetIdList;
         m_projectId = projectId;
         m_resultSetId = resultSetId;
@@ -141,11 +141,22 @@ public class MergeTask extends AbstractServiceTask {
                 // key not used : "duration", "progression" JPM.TODO
                 
                 if (success == null) {
+                    
+                    String message = (String) resultMap.get("message");
+                    if ((message!=null) && message.startsWith("Running")) {
+                        getTaskInfo().setRunning(false);
+                    }
+                    
                     return ServiceState.STATE_WAITING;
                 }
                 
                 if (success) {
 
+                    BigDecimal duration = (BigDecimal) resultMap.get("duration");
+                    if (duration != null) {
+                        getTaskInfo().setDuration(duration.longValue());
+                    }
+                    
                     // retrieve resultSet id
                     BigDecimal resultSetIdBD = (BigDecimal) resultMap.get("result");
                     if (resultSetIdBD == null) {

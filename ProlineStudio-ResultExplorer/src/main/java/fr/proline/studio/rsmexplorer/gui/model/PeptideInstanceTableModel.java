@@ -19,10 +19,11 @@ public class PeptideInstanceTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 3;
     public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 4;
     public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 5;
-    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 6; 
+    public static final int COLTYPE_PEPTIDE_NB_PROTEIN_SETS = 6;
+    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 7; 
     //public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 7;
-    public static final int COLTYPE_PEPTIDE_PTM = 7;
-    private static final String[] columnNames = {"Peptide", "Score", "Charge", "MoZ Exp.", "Mass Calc.", "Missed Cl.", "RT", "PTM"};
+    public static final int COLTYPE_PEPTIDE_PTM = 8;
+    private static final String[] columnNames = {"Peptide", "Score", "Charge", "MoZ Exp.", "Mass Calc.", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
     private PeptideInstance[] m_peptideInstances = null;
 
     
@@ -62,7 +63,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
                 return Float.class;
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
-            
+            case COLTYPE_PEPTIDE_NB_PROTEIN_SETS:
                 return Integer.class;
             
             default:
@@ -167,6 +168,9 @@ public class PeptideInstanceTableModel extends LazyTableModel {
             }
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: {
                 return peptideMatch.getMissedCleavage();
+            }
+            case COLTYPE_PEPTIDE_NB_PROTEIN_SETS: {
+                return peptideInstance.getValidatedProteinSetCount();
             }
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
                 return peptideInstance.getElutionTime();

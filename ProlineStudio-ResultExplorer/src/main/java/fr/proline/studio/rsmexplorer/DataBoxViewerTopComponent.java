@@ -4,6 +4,8 @@ import fr.proline.studio.pattern.WindowBox;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import org.openide.windows.TopComponent;
 
 /**
@@ -12,7 +14,7 @@ import org.openide.windows.TopComponent;
  */
 public class DataBoxViewerTopComponent extends TopComponent {
 
-    WindowBox m_windowBox = null;
+    private WindowBox m_windowBox = null;
     
     /**
      * Creates new form DataBoxViewerTopComponent
@@ -33,6 +35,16 @@ public class DataBoxViewerTopComponent extends TopComponent {
 
     }
 
+    @Override
+    protected void componentOpened() {
+        m_windowBox.windowOpened();
+    }
+    
+    @Override
+    protected void componentClosed() {
+        m_windowBox.windowClosed();
+    }
+    
     @Override
     public Image getIcon() {
         return m_windowBox.getIcon();
@@ -58,5 +70,6 @@ public class DataBoxViewerTopComponent extends TopComponent {
         }
     }
     private boolean firstPaint = true;
+
 
 }

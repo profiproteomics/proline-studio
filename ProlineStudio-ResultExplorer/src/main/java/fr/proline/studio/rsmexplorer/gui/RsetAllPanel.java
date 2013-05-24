@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.MsiSearch;
+import fr.proline.core.orm.msi.Peaklist;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -10,13 +11,17 @@ import fr.proline.studio.utils.DecoratedMarkerTable;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.datatransfer.Transferable;
+import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.TransferHandler;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.AbstractTableModel;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -130,9 +135,12 @@ public class RsetAllPanel extends JPanel implements DataBoxPanelInterface {
     private static class ResultSetTableModel extends AbstractTableModel {
 
         public static final int COLTYPE_RSET_ID = 0;
-        public static final int COLTYPE_RSET_FILE_NAME = 1;
-        public static final int COLTYPE_RSET_FILE_PATH = 2;
-        private static final String[] columnNames = { "id", "File Name", "File Path" };
+        public static final int COLTYPE_RSET_NAME = 1;
+        public static final int COLTYPE_PEAKLIST_PATH = 2;
+        public static final int COLTYPE_MSISEARCH_FILE_NAME = 3;
+        public static final int COLTYPE_MSISEARCH_FILE_DIRECTORY = 4;
+        public static final int COLTYPE_MSISEARCH_SEARCH_DATE = 5;
+        private static final String[] columnNames = { "id", "Search Result Name", "Peaklist Path", "MSISearch File Name", "MSISearch File Directory", "Search Date" };
         
         private ArrayList<ResultSet> m_resultSetList = null;
         
@@ -157,11 +165,9 @@ public class RsetAllPanel extends JPanel implements DataBoxPanelInterface {
             switch (col) {
                 case COLTYPE_RSET_ID:
                     return Integer.class;
-                case COLTYPE_RSET_FILE_NAME:
-                case COLTYPE_RSET_FILE_PATH:
+                default:
                     return String.class;
             }
-            return null; // should not happen
         }
         
         @Override
@@ -188,25 +194,49 @@ public class RsetAllPanel extends JPanel implements DataBoxPanelInterface {
                 case COLTYPE_RSET_ID: {
                     return rset.getId();
                 }
-                case COLTYPE_RSET_FILE_NAME: {
+                case COLTYPE_RSET_NAME: {
+                    return rset.getName();
+                }
+                case COLTYPE_PEAKLIST_PATH: {
+                    MsiSearch msiSearch = rset.getMsiSearch();
+                    if (msiSearch == null) {
+                        return "";
+                    }
+                    Peaklist peaklist = msiSearch.getPeaklist();
+                    if (peaklist == null) {
+                        return "";
+                    }
+                    return peaklist.getPath();
+                }
+                case COLTYPE_MSISEARCH_FILE_NAME: {
                     MsiSearch msiSearch = rset.getMsiSearch();
                     if (msiSearch == null) {
                         return "";
                     }
                     return msiSearch.getResultFileName();
                 }
-                case COLTYPE_RSET_FILE_PATH: {
+                case COLTYPE_MSISEARCH_FILE_DIRECTORY: {
                     MsiSearch msiSearch = rset.getMsiSearch();
                     if (msiSearch == null) {
                         return "";
                     }
                     return msiSearch.getResultFileDirectory();
                 }
+                case COLTYPE_MSISEARCH_SEARCH_DATE: {
+                    MsiSearch msiSearch = rset.getMsiSearch();
+                    if (msiSearch == null) {
+                        return "";
+                    }
+                    Timestamp timeStamp = msiSearch.getDate();
+                    return m_df.format(timeStamp);
+
+                }
             }
             return null; // should not happen
         }
         
     }
+    private static final DateFormat m_df = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
     
     public class TableTransferHandler extends TransferHandler {
         
@@ -217,13 +247,15 @@ public class RsetAllPanel extends JPanel implements DataBoxPanelInterface {
         
         @Override
         public boolean canImport(TransferHandler.TransferSupport support) {
+
             return false;
         }
         
         
+
         @Override
         protected Transferable createTransferable(JComponent c) {
-            
+
             ResultSetTable table = (ResultSetTable) c;
             ResultSetTableModel model = (ResultSetTableModel) table.getModel();
             
@@ -253,5 +285,11 @@ public class RsetAllPanel extends JPanel implements DataBoxPanelInterface {
             return new RSMTransferable(transferKey, m_dataBox.getProjectId());
             
         }
+    }
+    
+    protected void exportDone(JComponent source, Transferable data, int action) {
+
+        // clean all transferred data
+        RSMTransferable.clearRegisteredData();
     }
 }

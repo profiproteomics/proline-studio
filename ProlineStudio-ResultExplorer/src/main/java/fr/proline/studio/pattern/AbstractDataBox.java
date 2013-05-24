@@ -3,6 +3,8 @@ package fr.proline.studio.pattern;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  *
@@ -13,7 +15,7 @@ import java.util.Iterator;
  * 
  * @author JM235353
  */
-public abstract class AbstractDataBox {
+public abstract class AbstractDataBox implements ChangeListener {
    
     public enum DataBoxLayout {
       VERTICAL,
@@ -134,6 +136,17 @@ public abstract class AbstractDataBox {
     
     public String getName() {
         return name;
+    }
+    
+    
+    public void windowClosed() {
+    }
+    
+    public void windowOpened() {    
+    }
+    
+    @Override
+    public void stateChanged(ChangeEvent e) {
     }
     
 

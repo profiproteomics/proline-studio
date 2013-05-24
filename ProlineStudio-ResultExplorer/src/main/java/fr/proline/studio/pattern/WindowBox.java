@@ -3,6 +3,8 @@ package fr.proline.studio.pattern;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import java.awt.Image;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * A window box contains a set of Databox and can be display by a DataBoxViewerTopComponent
@@ -47,6 +49,16 @@ public class WindowBox {
     public void resetDefaultSize() {
         m_windowPanel.resetDefaultSize();
     }
+
+    public void windowClosed() {
+        m_entryBox.windowClosed();
+    }
+    
+    public void windowOpened() {
+        m_entryBox.windowOpened();
+    }
+    
+
 
     
 }

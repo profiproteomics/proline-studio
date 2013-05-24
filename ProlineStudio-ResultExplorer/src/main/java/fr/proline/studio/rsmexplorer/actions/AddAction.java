@@ -12,7 +12,7 @@ import org.openide.util.NbBundle;
  */
 public class AddAction extends AbstractRSMAction {
 
-    private IdentificationAction m_identificationAction;
+    private ImportSearchResultAsDatasetAction m_identificationAction;
     private AggregateAction m_aggregateAction;
     
     private JMenu m_menu;
@@ -25,7 +25,7 @@ public class AddAction extends AbstractRSMAction {
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
         
-        m_identificationAction = new IdentificationAction();
+        m_identificationAction = new ImportSearchResultAsDatasetAction();
         m_aggregateAction = new AggregateAction();
         
         JMenuItem identificationItem = new JMenuItem(m_identificationAction);

@@ -1,7 +1,16 @@
 package fr.proline.studio.rsmexplorer.node;
 
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.Project;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -114,8 +123,6 @@ public class RSMTransferHandler extends TransferHandler {
     
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
-        
-
 
         // clean all transferred data
         RSMTransferable.clearRegisteredData();
@@ -230,13 +237,103 @@ public class RSMTransferHandler extends TransferHandler {
     }
     
     private boolean importResultSets(TransferSupport support, RSMTransferable.TransferData data) {
-        System.out.println("importResultSets");
-        return false;
+
+        
+        JTree.DropLocation location = ((JTree.DropLocation) support.getDropLocation());
+        TreePath dropTreePath = location.getPath();
+        int childIndex = location.getChildIndex();
+        RSMNode dropRSMNode = (RSMNode) dropTreePath.getLastPathComponent();
+
+        RSMTree tree = RSMTree.getTree();
+        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+
+        // no insert index specified -> we insert at the end
+        if (childIndex == -1) {
+
+            childIndex = dropRSMNode.getChildCount();
+
+            // special case to drop before the Trash
+            if (childIndex > 0) {
+                RSMNode lastChild = (RSMNode) dropRSMNode.getChildAt(childIndex - 1);
+                if ((lastChild instanceof RSMDataSetNode) && ((RSMDataSetNode) lastChild).isTrash()) {
+                    childIndex--; // we drop before the Trash
+                }
+            }
+        }
+        
+        
+        Project project = null;
+        Dataset parentDataset = null;
+
+        if (dropRSMNode.getType() == RSMNode.NodeTypes.PROJECT) {
+            RSMProjectNode projectNode = (RSMProjectNode) dropRSMNode;
+            project = projectNode.getProject();
+        } else if (dropRSMNode.getType() == RSMNode.NodeTypes.DATA_SET) {
+            RSMDataSetNode dataSetNode = (RSMDataSetNode) dropRSMNode;
+            project = dataSetNode.getDataset().getProject();
+            parentDataset = dataSetNode.getDataset();
+        }
+
+
+        
+        // start imports
+        ArrayList<ResultSet> rsetList = (ArrayList<ResultSet>) data.getDataList();
+        int nbRset = rsetList.size();
+        for (int i = 0; i < nbRset; i++) {
+            ResultSet rset = rsetList.get(i);
+            String datasetName = rset.getMsiSearch().getResultFileName();
+            int indexOfDot = datasetName.lastIndexOf('.');
+            if (indexOfDot != -1) {
+                datasetName = datasetName.substring(0, indexOfDot);
+            }
+
+            DataSetData identificationData = new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO
+
+            final RSMDataSetNode identificationNode = new RSMDataSetNode(identificationData);
+            identificationNode.setIsChanging(true);
+
+            treeModel.insertNodeInto(identificationNode, dropRSMNode, childIndex);
+            childIndex++;
+
+            final ArrayList<Dataset> createdDatasetList = new ArrayList<>();
+
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                     identificationNode.setIsChanging(false);
+                    
+                    if (success) {
+                        Dataset dataset = createdDatasetList.get(0);
+                        identificationNode.setIsChanging(false);
+                        ((DataSetData) identificationNode.getData()).setDataset(dataset);
+                        treeModel.nodeChanged(identificationNode);
+                    } else {
+                        // should not happen
+                        treeModel.removeNodeFromParent(identificationNode);
+                    }
+                }
+            };
+
+
+            DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+            task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, datasetName, rset.getId(), null, createdDatasetList, new TaskInfo("Create Dataset " + datasetName, AbstractDatabaseTask.TASK_LIST_INFO));
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+
+        }
+
+        
+        return true;
     }
     
     private boolean importNodes(TransferSupport support, RSMTransferable.TransferData data) {
-
-
 
         JTree.DropLocation location = ((JTree.DropLocation) support.getDropLocation());
         TreePath dropTreePath = location.getPath();

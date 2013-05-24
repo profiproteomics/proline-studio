@@ -7,14 +7,16 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseRsetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.actions.ImportSearchResultAsRsetAction;
 import fr.proline.studio.rsmexplorer.gui.RsetAllPanel;
 import java.util.ArrayList;
+import javax.swing.event.ChangeEvent;
 
 /**
  *
  * @author JM235353
  */
-public class DataBoxRsetAll extends AbstractDataBox {
+public class DataBoxRsetAll extends AbstractDataBox{
     
     private Project m_project = null;
     
@@ -43,6 +45,8 @@ public class DataBoxRsetAll extends AbstractDataBox {
         p.setName(name);
         p.setDataBox(this);
         m_panel = p;
+        
+        
     }
 
     @Override
@@ -91,5 +95,19 @@ public class DataBoxRsetAll extends AbstractDataBox {
     public void setEntryData(Object data) {
         m_project = (Project) data;
         dataChanged(Project.class);
+        
+        ImportSearchResultAsRsetAction.addEventListener(m_project.getId(), this);
     }
+
+    @Override
+    public void windowClosed() {
+        ImportSearchResultAsRsetAction.removeEventListener(m_project.getId(), this);
+    }
+
+    
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        dataChanged(Project.class);
+    }
+    
 }

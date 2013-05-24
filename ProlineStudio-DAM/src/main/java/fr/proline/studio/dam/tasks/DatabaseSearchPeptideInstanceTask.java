@@ -21,7 +21,7 @@ public class DatabaseSearchPeptideInstanceTask extends AbstractDatabaseTask {
     private ArrayList<Integer>     searchResult = null;
     
     public DatabaseSearchPeptideInstanceTask(AbstractDatabaseCallback callback, Integer projectId, ResultSummary rsm, String searchString, ArrayList<Integer> searchResult) {
-        super(callback, Priority.HIGH_1, new TaskInfo("Search", "Search Peptide Instance "+searchString, TASK_LIST_INFO));
+        super(callback, Priority.HIGH_1, new TaskInfo("Search Peptide Instance "+searchString, TASK_LIST_INFO));
         this.projectId = projectId;
         this.rsm = rsm;       
         this.searchString = searchString;

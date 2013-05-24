@@ -55,20 +55,20 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     }
     
     public void initLoadProteinSets(Integer projectId, ResultSummary rsm) {
-        init(SUB_TASK_COUNT, new TaskInfo("Load Data", "Load Protein Sets of a Result Summary", TASK_LIST_INFO));
+        init(SUB_TASK_COUNT, new TaskInfo("Load Protein Sets of Identification Summary "+rsm.getId(), TASK_LIST_INFO));
         this.projectId = projectId;
         this.rsm = rsm;
         action = LOAD_PROTEIN_SET_FOR_RSM;
     }
     
     public void initCountProteinSets(Dataset dataset) {
-        init(SUB_TASK_COUNT, new TaskInfo("Count Data", "Count Number of Protein Sets of a Result Summary", TASK_LIST_INFO));
+        init(SUB_TASK_COUNT, new TaskInfo("Count Number of Protein Sets of Identification Summary "+dataset.getName(), TASK_LIST_INFO));
         this.dataset = dataset;
         action = LOAD_PROTEIN_SET_NUMBER;
     }
 
-    public void initLoadProteinSetForPeptideInstance(Integer projectId, PeptideInstance peptideInstance) {
-        init(SUB_TASK_COUNT, new TaskInfo("Load Data", "Load Protein Sets for a Peptide Instance", TASK_LIST_INFO));
+    public void initLoadProteinSetForPeptideInstance(Integer projectId, PeptideInstance peptideInstance) {        
+        init(SUB_TASK_COUNT, new TaskInfo("Load Protein Sets for Peptide Instance "+peptideInstance.getId(), TASK_LIST_INFO));
         this.projectId = projectId;
         this.peptideInstance = peptideInstance;
         this.rsm = peptideInstance.getResultSummary();

@@ -24,10 +24,25 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
     private ProteinSet proteinSet = null;
 
     public DatabaseProteinsFromProteinSetTask(AbstractDatabaseCallback callback, Integer projectId, ProteinSet proteinSet) {
-        super(callback, Priority.NORMAL_3, new TaskInfo("Load Data", "Load Proteins of a Protein Set", TASK_LIST_INFO));
+        super(callback, Priority.NORMAL_3, new TaskInfo("Load Proteins of a Protein Set "+getProteinSetName(proteinSet), TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinSet = proteinSet;        
     }
+    
+    private static String getProteinSetName(ProteinSet proteinSet) {
+
+        String name;
+        
+        ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
+        if (proteinMatch != null) {
+            name = proteinMatch.getAccession();
+        } else {
+            name = String.valueOf(proteinSet.getId());
+        }
+
+        return name;
+    }
+    
 
     @Override
     public boolean needToFetch() {

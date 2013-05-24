@@ -19,7 +19,7 @@ public class DatabaseRsetTask extends AbstractDatabaseTask {
     private ArrayList<ResultSet> m_resultSetArrayList = null;
     
     public DatabaseRsetTask(AbstractDatabaseCallback callback, Integer projectId, ArrayList<ResultSet> resultSetArrayList) {
-        super(callback, new TaskInfo("Load Data", "Load All Result Sets", TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load All Search Results", TASK_LIST_INFO));
         m_projectId = projectId;
         m_resultSetArrayList = resultSetArrayList;
     }
@@ -38,7 +38,7 @@ public class DatabaseRsetTask extends AbstractDatabaseTask {
 
             entityManagerMSI.getTransaction().begin();
             
-            TypedQuery<ResultSet> resultSetQuery = entityManagerMSI.createQuery("SELECT rset FROM fr.proline.core.orm.msi.ResultSet rset WHERE rset.type=:decoyType ORDER BY rset.msiSearch.resultFileName", ResultSet.class);
+            TypedQuery<ResultSet> resultSetQuery = entityManagerMSI.createQuery("SELECT rset FROM fr.proline.core.orm.msi.ResultSet rset WHERE rset.type=:decoyType ORDER BY rset.msiSearch.resultFileName ORDERY BY rset.id", ResultSet.class);
             resultSetQuery.setParameter("decoyType", ResultSet.Type.SEARCH);
             List<ResultSet> resultSetList = resultSetQuery.getResultList();
             

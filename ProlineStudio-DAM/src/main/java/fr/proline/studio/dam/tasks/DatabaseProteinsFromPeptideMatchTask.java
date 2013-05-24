@@ -1,8 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.BioSequence;
-import fr.proline.core.orm.msi.PeptideMatch;
-import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -22,11 +20,25 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
     private PeptideMatch peptideMatch = null;
 
     public DatabaseProteinsFromPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, PeptideMatch peptideMatch) {
-        super(callback, Priority.NORMAL_3, new TaskInfo("Load Data", "Load Proteins for a Peptide Match", TASK_LIST_INFO));
+        super(callback, Priority.NORMAL_3, new TaskInfo("Load Proteins for a Peptide Match "+getPeptideName(peptideMatch), TASK_LIST_INFO));
         this.projectId = projectId;
         this.peptideMatch = peptideMatch;        
     }
 
+    private static String getPeptideName(PeptideMatch peptideMatch) {
+        
+        String name;
+        
+        Peptide peptide = peptideMatch.getTransientData().getPeptide();
+        if (peptide != null) {
+            name = peptide.getSequence();
+        } else {
+            name = String.valueOf(peptideMatch.getId());
+        }
+        
+        return name;
+    }
+    
     @Override
     public boolean needToFetch() {
         return (peptideMatch.getTransientData().getProteinMatches() == null);

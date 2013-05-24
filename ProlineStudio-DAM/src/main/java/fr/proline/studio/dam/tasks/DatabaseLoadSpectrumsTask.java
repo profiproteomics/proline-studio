@@ -1,6 +1,7 @@
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
@@ -20,11 +21,25 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
     private PeptideMatch peptideMatch = null;
 
     public DatabaseLoadSpectrumsTask(AbstractDatabaseCallback callback, Integer projectId, PeptideMatch peptideMatch) {
-        super(callback, new TaskInfo("Load Data", "Load Spectrum for Peptide Match", TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load Spectrum for Peptide Match "+getPeptideName(peptideMatch), TASK_LIST_INFO));
         this.projectId = projectId;
         this.peptideMatch = peptideMatch;
     }
 
+    private static String getPeptideName(PeptideMatch peptideMatch) {
+
+        String name;
+
+        Peptide peptide = peptideMatch.getTransientData().getPeptide();
+        if (peptide != null) {
+            name = peptide.getSequence();
+        } else {
+            name = String.valueOf(peptideMatch.getId());
+        }
+
+        return name;
+    }
+    
     @Override
     public boolean needToFetch() {
         return ((! peptideMatch.getTransientData().getIsMsQuerySet()) ||

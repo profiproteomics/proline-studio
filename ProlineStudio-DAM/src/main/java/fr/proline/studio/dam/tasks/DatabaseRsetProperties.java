@@ -26,7 +26,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
     private Dataset m_dataset;
     
     public DatabaseRsetProperties(AbstractDatabaseCallback callback, Integer projectId, Dataset dataset) {
-        super(callback, new TaskInfo("Load Data", "Load Properties for Result Set", TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load Properties for Search Result "+dataset.getName(), TASK_LIST_INFO));
         m_projectId = projectId;
         m_dataset = dataset;
     }

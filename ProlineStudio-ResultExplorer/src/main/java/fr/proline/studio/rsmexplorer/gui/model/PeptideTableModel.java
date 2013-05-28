@@ -14,14 +14,15 @@ public class PeptideTableModel extends AbstractTableModel {
     public static final int COLTYPE_PEPTIDE_NAME = 0;
     public static final int COLTYPE_PEPTIDE_SCORE = 1;
     public static final int COLTYPE_PROTEIN_GROUPS_MATCHES = 2;
-    public static final int COLTYPE_PEPTIDE_CHARGE = 3;
+    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 3;
     public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 4;
-    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 5;
-    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 6;
-    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 7;
-    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
-    public static final int COLTYPE_PEPTIDE_PTM = 9;
-    private static final String[] columnNames = {"Peptide", "Score", "Protein G. Matches", "Charge", "MoZ Exp.", "Mass Calc.", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
+    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 5;
+    public static final int COLTYPE_PEPTIDE_CHARGE = 6;
+    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 7;
+    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 8;
+    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 9;
+    public static final int COLTYPE_PEPTIDE_PTM = 10;
+    private static final String[] columnNames = {"Peptide", "Score", "Protein G. Matches", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
     private PeptideInstance[] peptideInstances = null;
 
     public PeptideInstance getPeptide(int row) {
@@ -52,6 +53,7 @@ public class PeptideTableModel extends AbstractTableModel {
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
                 return Float.class;
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
+            case COLTYPE_PEPTIDE_DELTA_MOZ:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
                 return Double.class;
             case COLTYPE_PEPTIDE_CHARGE:
@@ -132,7 +134,14 @@ public class PeptideTableModel extends AbstractTableModel {
                 if (peptideMatch == null) {
                     return null; // should never happen   
                 }
-                return peptideMatch.getExperimentalMoz();
+                return Double.valueOf(peptideMatch.getExperimentalMoz());
+            }
+            case COLTYPE_PEPTIDE_DELTA_MOZ: {
+                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    return null; // should never happen   
+                }
+                return Double.valueOf(peptideMatch.getDeltaMoz());
             }
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
                 PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();

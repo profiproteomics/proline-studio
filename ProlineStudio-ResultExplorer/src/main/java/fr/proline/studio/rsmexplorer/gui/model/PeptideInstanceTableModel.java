@@ -15,15 +15,18 @@ public class PeptideInstanceTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDE_NAME = 0;
     public static final int COLTYPE_PEPTIDE_SCORE = 1;
     //public static final int COLTYPE_PEPTIDE_MSQUERY = 2;
-    public static final int COLTYPE_PEPTIDE_CHARGE = 2;
+    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 2;
     public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 3;
-    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 4;
-    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 5;
-    public static final int COLTYPE_PEPTIDE_NB_PROTEIN_SETS = 6;
-    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 7; 
-    //public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 7;
-    public static final int COLTYPE_PEPTIDE_PTM = 8;
-    private static final String[] columnNames = {"Peptide", "Score", "Charge", "MoZ Exp.", "Mass Calc.", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
+    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 4;
+    public static final int COLTYPE_PEPTIDE_CHARGE = 5;
+    
+    
+    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 6;
+    public static final int COLTYPE_PEPTIDE_NB_PROTEIN_SETS = 7;
+    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 8; 
+    //public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
+    public static final int COLTYPE_PEPTIDE_PTM = 9;
+    private static final String[] columnNames = {"Peptide", "Score", "Mass Calc.", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
     private PeptideInstance[] m_peptideInstances = null;
 
     
@@ -59,6 +62,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
                 return LazyData.class;
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
+            case COLTYPE_PEPTIDE_DELTA_MOZ:
             case COLTYPE_PEPTIDE_RETENTION_TIME:
                 return Float.class;
             case COLTYPE_PEPTIDE_CHARGE:
@@ -147,8 +151,10 @@ public class PeptideInstanceTableModel extends LazyTableModel {
             }
              
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
-                Float experimentalMoz = Float.valueOf((float) peptideMatch.getExperimentalMoz()) ;
-                return experimentalMoz;
+                return Float.valueOf((float) peptideMatch.getExperimentalMoz());
+            }
+            case COLTYPE_PEPTIDE_DELTA_MOZ: {
+                return Float.valueOf((float) peptideMatch.getDeltaMoz());
             }
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
                 LazyData lazyData = getLazyData(row,col);

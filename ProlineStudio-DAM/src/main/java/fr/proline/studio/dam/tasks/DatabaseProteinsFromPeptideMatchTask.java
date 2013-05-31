@@ -60,7 +60,8 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
             
 
             // temporary Map to link a bioSequenceId to a ProteinMatch
-            HashMap<Integer, ProteinMatch> biosequenceToProteinMap = new HashMap<Integer,ProteinMatch>();
+            HashMap<Integer, ProteinMatch> biosequenceToProteinMap = new HashMap<>();
+            HashMap<String, ProteinMatch> accessionToProteinMap = new HashMap<>();
             
             Iterator<ProteinMatch> it = proteinMatchList.iterator();
             while (it.hasNext()) {
@@ -69,6 +70,8 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
                 Integer bioSequenceId = proteinMatch.getBioSequenceId();
                 if (bioSequenceId != null) {
                     biosequenceToProteinMap.put(bioSequenceId, proteinMatch);
+                } else {
+                    accessionToProteinMap.put(proteinMatch.getAccession(), proteinMatch);
                 }
  
             }
@@ -76,7 +79,7 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
             // retrieve mass
             if (biosequenceToProteinMap.size()>0) {
                 Set idSet = biosequenceToProteinMap.keySet();
-                List<Integer> ids = new ArrayList<Integer>(idSet.size());
+                List<Integer> ids = new ArrayList<>(idSet.size());
                 ids.addAll(idSet);
 
 
@@ -88,11 +91,41 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
                 while (itMass.hasNext()) {
                     Object[] resCur = itMass.next();
                     Integer bioSequenceId = (Integer) resCur[0];
-                    BioSequence bioSequence = (BioSequence) resCur[1];
+                    fr.proline.core.orm.msi.BioSequence bioSequence = (BioSequence) resCur[1];
                     ProteinMatch pm = biosequenceToProteinMap.get(bioSequenceId);
-                    pm.getTransientData().setBioSequence(bioSequence);
+                    pm.getTransientData().setBioSequenceMSI(bioSequence);
                 }
        
+            }
+            
+            if (!accessionToProteinMap.isEmpty()) {
+
+                Set<String> accessionSet = accessionToProteinMap.keySet();
+                List<String> accessionList = new ArrayList<>(accessionSet.size());
+                accessionList.addAll(accessionSet);
+
+                // we are going to look to a Biosequence in PDI db through ProteinIdentifier
+                EntityManager entityManagerPDI = DataStoreConnectorFactory.getInstance().getPdiDbConnector().getEntityManagerFactory().createEntityManager();
+                try {
+                    entityManagerPDI.getTransaction().begin();
+
+                    Query bioseqQuery = entityManagerPDI.createQuery("SELECT pi.value, pi.bioSequence FROM ProteinIdentifier pi WHERE pi.value IN (:listAccession) ");
+                    bioseqQuery.setParameter("listAccession", accessionList);
+
+                    List l = bioseqQuery.getResultList();
+                    Iterator<Object[]> itBioseq = l.iterator();
+                    while (itBioseq.hasNext()) {
+                        Object[] resCur = itBioseq.next();
+                        String accession = (String) resCur[0];
+                        fr.proline.core.orm.pdi.BioSequence bioSequence = (fr.proline.core.orm.pdi.BioSequence) resCur[1];
+                        ProteinMatch pm = accessionToProteinMap.get(accession);
+                        pm.getTransientData().setBioSequencePDI(bioSequence);
+                    }
+
+                    entityManagerPDI.getTransaction().commit();
+                } finally {
+                    entityManagerPDI.close();
+                }
             }
             
             ProteinMatch[] proteins = proteinMatchList.toArray(new ProteinMatch[proteinMatchList.size()]);

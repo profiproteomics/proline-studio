@@ -3,9 +3,9 @@ package fr.proline.studio.dam.tasks;
 
 
 
-import fr.proline.core.orm.msi.Spectrum;
+
 import fr.proline.core.orm.uds.*;
-import fr.proline.core.orm.uds.repository.ExternalDbRepository;
+
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.repository.ProlineDatabaseType;
 import fr.proline.repository.DatabaseConnectorFactory;
@@ -20,22 +20,21 @@ import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 /**
- * Used to connect to a UDS DB or MSI DB
+ * Used to connect to a UDS DB, MSI DB or PDI DB
  *
  * @author JM235353
  */
 public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
     // used for UDS Connection
-    private Map<Object, Object> databaseProperties;
-    private String projectUser;
+    private Map<Object, Object> m_databaseProperties;
+    private String m_projectUser;
     
     // used for MSI and PS Connection
-    private int projectId;
+    private int m_projectId;
 
     public static int ERROR_USER_UNKNOWN = 1;
 
@@ -45,54 +44,83 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
     
     private static int UDS_CONNECTION = 0;
     private static int MSI_CONNECTION = 1;
-    private static int UDS_USER_TEST  = 2;
-            
+    private static int PDI_CONNECTION = 3;
+    private static int UDS_USER_TEST  = 4;
+          
+    
     /**
-     * Constructor used for UDS database
+     * Constructor 
      *
      * @param callback
      * @param databaseProperties
      * @param projectId
      */
-    public DatabaseConnectionTask(AbstractDatabaseCallback callback, Map<Object, Object> databaseProperties, String projectUser) {
-        super(callback, Priority.TOP, new TaskInfo("Connection to Database UDS", TASK_LIST_INFO));
-
-        this.databaseProperties = databaseProperties;
-        this.projectUser = projectUser;
-
+    public DatabaseConnectionTask(AbstractDatabaseCallback callback) {
+        super(callback, null);
+    }
+    
+    /**
+     * Init connection to UDS
+     * @param databaseProperties
+     * @param projectUser 
+     */
+    public void initConnectionToUDS(Map<Object, Object> databaseProperties, String projectUser) {
+        setTaskInfo(new TaskInfo("Connection to UDS Database", TASK_LIST_INFO));
+        setPriority(Priority.TOP);
+        
+        m_databaseProperties = databaseProperties;
+        m_databaseProperties.put("hibernate.show_sql", Boolean.TRUE);
+        m_databaseProperties.put("hibernate.format_sql", Boolean.TRUE);
+        
+        m_projectUser = projectUser;
+        
         action = UDS_CONNECTION;
     }
     
     /**
-     * Constructor to check if the project user is known in the database
-     * @param callback
+     * Connection to MSI
+     * @param projectId 
+     */
+    public void initConnectionToMSI(int projectId) {
+        setTaskInfo(new TaskInfo("Connection to MSI Database", TASK_LIST_INFO));
+        setPriority(Priority.TOP);
+        
+        m_projectId = projectId;
+        
+        action = MSI_CONNECTION;
+    }
+    
+    /**
+     * Connection to PDI
+     * @param projectId 
+     */
+    public void initConnectionToPDI() {
+        setTaskInfo(new TaskInfo("Connection to PDI Database", TASK_LIST_INFO));
+        setPriority(Priority.TOP);
+
+        
+        action = PDI_CONNECTION;
+    }
+    
+    /**
+     * to check if the project user is known in the database
      * @param databaseProperties
      * @param projectUser 
      */
-    public DatabaseConnectionTask(AbstractDatabaseCallback callback, String projectUser) {
-        super(callback, Priority.TOP, null);
+    public void initCheckProjectUser(String projectUser) {
+        setTaskInfo(new TaskInfo("Check Project User", TASK_LIST_INFO));
+        setPriority(Priority.TOP);
 
-        this.projectUser = projectUser;
-
+        m_projectUser = projectUser;
+        
         action = UDS_USER_TEST;
     }
+    
 
-    /**
-     * Constructor used for MSI database
-     *
-     * @param callback
-     * @param projectId
-     */
-    public DatabaseConnectionTask(AbstractDatabaseCallback callback, int projectId) {
-        super(callback, Priority.TOP, new TaskInfo("Connection to Database MSI", TASK_LIST_INFO));
 
-        databaseProperties = null;
-        this.projectId = projectId;
 
-        action = MSI_CONNECTION;
 
-    }
-
+    
     @Override
     public boolean needToFetch() {
         return true; // anyway this task is used only one time for each node
@@ -107,7 +135,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 // UDS Connection
                 try {
                     
-                    IDatabaseConnector udsConn = DatabaseConnectorFactory.createDatabaseConnectorInstance(ProlineDatabaseType.UDS, databaseProperties);
+                    IDatabaseConnector udsConn = DatabaseConnectorFactory.createDatabaseConnectorInstance(ProlineDatabaseType.UDS, m_databaseProperties);
                     DataStoreConnectorFactory.getInstance().initialize(udsConn);
                 } catch (Exception e) {
                     logger.error(getClass().getSimpleName() + " failed", e);
@@ -155,14 +183,14 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 
                
                 // add the UDS connection to the Netbeans Service
-                String udsJdbcDriver = (String) databaseProperties.get("javax.persistence.jdbc.driver");
-                String udsJdbcUrl = (String) databaseProperties.get("javax.persistence.jdbc.url");
+                String udsJdbcDriver = (String) m_databaseProperties.get("javax.persistence.jdbc.driver");
+                String udsJdbcUrl = (String) m_databaseProperties.get("javax.persistence.jdbc.url");
                 try {
                     ConnectionManager cm = ConnectionManager.getDefault();
 
                     JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers(udsJdbcDriver)[0];
 
-                    DatabaseConnection dbconn = DatabaseConnection.create(driver, udsJdbcUrl, (String) databaseProperties.get("javax.persistence.jdbc.user"), "public", (String) databaseProperties.get("javax.persistence.jdbc.password"), true);
+                    DatabaseConnection dbconn = DatabaseConnection.create(driver, udsJdbcUrl, (String) m_databaseProperties.get("javax.persistence.jdbc.user"), "public", (String) m_databaseProperties.get("javax.persistence.jdbc.password"), true);
                  
                     cm.addConnection(dbconn);
                 } catch (Exception e) {
@@ -193,13 +221,24 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             } else if (action == MSI_CONNECTION) {
                 try {
                     // MSI Connection
-                    EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+                    EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
                     entityManagerMSI.close();
 
                     
                     // PS Connection
                     EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
                     entityManagerPS.close();
+                } catch (Exception e) {
+                    logger.error(getClass().getSimpleName() + " failed", e);
+                    errorMessage = e.getMessage();
+                    return false;
+                }
+            } else if (action == PDI_CONNECTION) {
+                try {
+                    // MSI Connection
+                    EntityManager entityManagerPDI = DataStoreConnectorFactory.getInstance().getPdiDbConnector().getEntityManagerFactory().createEntityManager();
+                    entityManagerPDI.close();
+
                 } catch (Exception e) {
                     logger.error(getClass().getSimpleName() + " failed", e);
                     errorMessage = e.getMessage();
@@ -218,14 +257,14 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         int nb = projectUsers.length;
         for (int i = 0; i < nb; i++) {
             UserAccount account = projectUsers[i];
-            if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
+            if (m_projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
                 udsMgr.setProjectUser(account);
                 foundUser = true;
                 break;
             }
         }
         if (!foundUser) {
-            errorMessage = "Project User " + projectUser + " is unknown";
+            errorMessage = "Project User " + m_projectUser + " is unknown";
             //DataStoreConnectorFactory.getInstance().closeAll();
             errorId = ERROR_USER_UNKNOWN;
             return false;

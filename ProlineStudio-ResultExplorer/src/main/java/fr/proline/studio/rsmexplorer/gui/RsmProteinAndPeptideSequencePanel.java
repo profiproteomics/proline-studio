@@ -105,19 +105,31 @@ public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implem
 
     public void setData(ProteinMatch pm, PeptideInstance selectedPeptide, PeptideInstance[] peptideInstances) {
         
-        if ((pm == null) || (pm.getTransientData().getBioSequence() == null)) {
+        if ((pm == null) || ((pm.getTransientData().getBioSequenceMSI() == null) && (pm.getTransientData().getBioSequencePDI() == null))) {
             editorPane.setText("Protein Sequence not avaible in database");
 
             return;
         }
         
-        String sequence = pm.getTransientData().getBioSequence().getSequence();
+        
+        String sequence = null;
+        fr.proline.core.orm.msi.BioSequence bioSequenceMSI = pm.getTransientData().getBioSequenceMSI();
+        if (pm.getTransientData().getBioSequenceMSI() != null) {
+            sequence = pm.getTransientData().getBioSequenceMSI().getSequence();
+        } else if (pm.getTransientData().getBioSequencePDI() != null) {
+            sequence = pm.getTransientData().getBioSequencePDI().getSequence();
+        } 
+        
         
         int sequenceLength = sequence.length();
         
         int[] highlights = new int[sequenceLength];
         for (int i=0;i<sequenceLength;i++) {
             highlights[i] = HIGHLIGHT_NONE;
+        }
+        
+        if (peptideInstances == null) {
+            return;
         }
         
         // highlight for non selected peptides

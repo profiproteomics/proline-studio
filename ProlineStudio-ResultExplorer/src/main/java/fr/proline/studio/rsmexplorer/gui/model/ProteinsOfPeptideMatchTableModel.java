@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.orm.msi.BioSequence;
+
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.studio.utils.DataFormat;
 import javax.swing.table.AbstractTableModel;
@@ -69,11 +69,16 @@ public class ProteinsOfPeptideMatchTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return proteinMatch.getPeptideCount();
             case COLTYPE_PROTEIN_MASS:
-                BioSequence bioSequence = proteinMatch.getTransientData().getBioSequence();
-                if (bioSequence == null) {
-                    return null;
+                fr.proline.core.orm.msi.BioSequence bioSequenceMSI = proteinMatch.getTransientData().getBioSequenceMSI();
+                if (bioSequenceMSI != null) {
+                    return new Float(bioSequenceMSI.getMass());
                 }
-                return bioSequence.getMass();
+                fr.proline.core.orm.pdi.BioSequence bioSequencePDI = proteinMatch.getTransientData().getBioSequencePDI();
+                if (bioSequencePDI != null) {
+                    return new Float(bioSequencePDI.getMass());
+                }
+                return null;
+                
         }
         return null; // should never happen
     }

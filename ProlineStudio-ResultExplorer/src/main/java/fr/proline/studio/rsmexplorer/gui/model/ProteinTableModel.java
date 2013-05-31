@@ -84,11 +84,15 @@ public class ProteinTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return proteinMatch.getTransientData().getPeptideSet(rsmId).getPeptideCount();
             case COLTYPE_PROTEIN_MASS:
-                BioSequence bioSequence = proteinMatch.getTransientData().getBioSequence();
-                if (bioSequence == null) {
-                    return null;
+                fr.proline.core.orm.msi.BioSequence bioSequenceMSI = proteinMatch.getTransientData().getBioSequenceMSI();
+                if (bioSequenceMSI != null) {
+                    return new Float(bioSequenceMSI.getMass());
                 }
-                return new Float(bioSequence.getMass());
+                fr.proline.core.orm.pdi.BioSequence bioSequencePDI = proteinMatch.getTransientData().getBioSequencePDI();
+                if (bioSequencePDI != null) {
+                    return new Float(bioSequencePDI.getMass());
+                }
+                return null;
         }
         return null; // should never happen
     }

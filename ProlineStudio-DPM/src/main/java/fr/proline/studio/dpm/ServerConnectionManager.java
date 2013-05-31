@@ -181,7 +181,8 @@ public class ServerConnectionManager {
         };
 
         // ask asynchronous loading of data
-        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback, projectUser);
+        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback);
+        connectionTask.initCheckProjectUser(projectUser);
 
         AccessDatabaseThread.getAccessDatabaseThread().addTask(connectionTask); 
    }
@@ -205,6 +206,9 @@ public class ServerConnectionManager {
                     // save connection parameters
                     saveParameters();
                     setConnectionState(CONNECTION_DONE);
+                    
+                    // ask connection to PDI
+                    connectionToPdiDB();
                 } else {
                     
                     previousErrorId = getErrorId();
@@ -231,11 +235,33 @@ public class ServerConnectionManager {
         };
 
         // ask asynchronous loading of data
-        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback, databaseProperties, projectUser);
-
+        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback);
+        connectionTask.initConnectionToUDS(databaseProperties, projectUser);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(connectionTask); 
    }
    
+   
+   private void connectionToPdiDB() {
+        
+       // ask for the connection
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return false;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+            }
+        };
+
+        // ask asynchronous loading of data
+        DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback);
+        connectionTask.initConnectionToPDI();
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(connectionTask); 
+   }
    
    public String getServerURL() {
        return m_serverURL;

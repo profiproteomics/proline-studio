@@ -58,6 +58,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int CREATE_IDENTIFICATION_DATASET = 6;
     private final static int MODIFY_VALIDATED_DATASET = 7;
     private final static int MODIFY_MERGED_DATASET = 8;
+    private final static int EMPTY_TRASH = 9;
     
     private static final Object WRITE_DATASET_LOCK = new Object();
     
@@ -183,6 +184,15 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         action = MODIFY_MERGED_DATASET;
     }
     
+    public void initEmptyTrash(Dataset trashDataset) {
+        setTaskInfo(new TaskInfo("Empty Trash", TASK_LIST_INFO));
+        setPriority(Priority.HIGH_2);
+        this.dataset = trashDataset;
+        action = EMPTY_TRASH;
+    }
+    
+
+    
   
     @Override
     public boolean needToFetch() {
@@ -213,6 +223,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case CREATE_IDENTIFICATION_DATASET:
             case MODIFY_VALIDATED_DATASET:
             case MODIFY_MERGED_DATASET:
+            case EMPTY_TRASH:
                 return true; // done one time
          
         }
@@ -254,6 +265,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return modifyDatasetRSM();
             case MODIFY_MERGED_DATASET:
                 return  modifyDatasetRset();
+            case EMPTY_TRASH:
+                return emptyTrash();
         }
         
         return false; // should never happen
@@ -566,17 +579,19 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         }
 
         d.setName(datasetName);
-        d.setParentDataset(mergedParentDataset);
         d.setResultSetId(resultSetId);
         d.setResultSummaryId(resultSummaryId);
         d.setChildrenCount(0); // this aggregate has no child for the moment
         
         // number of children of the parent
         if (mergedParentDataset != null) {
-            Integer fractionCount = mergedParentDataset.getChildrenCount();
-            d.setNumber(fractionCount);
-            mergedParentDataset.setChildrenCount(fractionCount+1);
-            parentDataset.setChildrenCount(fractionCount+1);
+            mergedParentDataset.addChild(d);
+            try {
+                parentDataset.addChild(d);
+            } catch (org.hibernate.LazyInitializationException e) {
+                // if this exception happens, there is in fact nothing to do
+                // (children have never been loaded)
+            }
         } else {
             int childrenCount = project.getTransientData().getChildrenNumber();
             d.setNumber(childrenCount);
@@ -654,12 +669,51 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
     
+    private boolean emptyTrash() {
+        synchronized(WRITE_DATASET_LOCK) {
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+            try {
+                entityManagerUDS.getTransaction().begin();
+
+                Dataset mergedTrash = entityManagerUDS.merge(dataset); // dataset is the Trash
+                removeChildren(entityManagerUDS, mergedTrash);
+                mergedTrash.setChildren(new ArrayList());
+                mergedTrash.setChildrenCount(0);
+                entityManagerUDS.persist(mergedTrash);
+
+                entityManagerUDS.getTransaction().commit();
+
+            } catch (Exception e) {
+                logger.error("updateDatasetAndProjectsTree failed", e);
+                entityManagerUDS.getTransaction().rollback();
+                return false;
+            } finally {
+                entityManagerUDS.close();
+            }
+
+        }
+        
+        return true;
+    }
+    private void removeChildren(EntityManager entityManagerUDS, Dataset d) {
+        List<Dataset> children = d.getChildren();
+        if (children != null) {
+            Iterator<Dataset> it = children.iterator();
+            while (it.hasNext()) {
+                Dataset child = it.next();
+                removeChildren(entityManagerUDS, child);
+            }
+            children.clear();
+        }
+        entityManagerUDS.remove(d);
+    }
+        
     /**
      * Called when the tree Project/Dataset has been modified by the user by Drag & Drop
      * @param databaseObjectsToModify  HashMap whose keys can be Project or Parent Dataset
      */
     public static boolean updateDatasetAndProjectsTree(HashMap<Object, ArrayList<Dataset>> databaseObjectsToModify) {
-         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
             entityManagerUDS.getTransaction().begin();
             
@@ -668,6 +722,16 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 Object parentObject = it.next();
                 ArrayList<Dataset> datasetList = databaseObjectsToModify.get(parentObject);
                 
+                int nbDataset = datasetList.size();
+                ArrayList<Dataset> mergedDatasetList = new ArrayList<>(nbDataset);
+                
+                for (int i=0;i<nbDataset;i++) {
+                    Dataset dataset = datasetList.get(i);
+                    Dataset mergedDataset = entityManagerUDS.merge(dataset);
+                    mergedDatasetList.add(mergedDataset);
+                }
+                
+                
                 Dataset parentDataset = null;
                 Dataset mergedParentDataset = null;
                 Project parentProject = null;
@@ -675,43 +739,30 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 if (parentObject instanceof Dataset) {
                     parentDataset = (Dataset) parentObject;
                     mergedParentDataset = entityManagerUDS.merge(parentDataset);
+
+                    
+                    mergedParentDataset.replaceAllChildren(mergedDatasetList);
+                    try {
+                        parentDataset.replaceAllChildren(datasetList);
+                    } catch (org.hibernate.LazyInitializationException e) {
+                        // if this exception happens, there is in fact nothing to do
+                        // (children have never been loaded)
+                    }
+                    
                 } else if (parentObject instanceof Project) {
                     parentProject = (Project) parentObject;
-                }
-                
-                
-                // update children dataset
-                int decForTrash = 0;
-                int nbDataset = datasetList.size();
-                for (int i=0;i<nbDataset;i++) {
-                    
-                    // update dataset
-                    Dataset dataset = datasetList.get(i);
-                    Dataset mergedDataset = entityManagerUDS.merge(dataset);
-                   
-
-                    if (dataset.getType() == Dataset.DatasetType.TRASH) {
-                        mergedDataset.setNumber(nbDataset-1);
-                        dataset.setNumber(nbDataset-1);
-                        decForTrash = 1;
-                    } else {
-                        mergedDataset.setNumber(i-decForTrash);
-                        dataset.setNumber(i-decForTrash);
-                    }
-                    mergedDataset.setParentDataset(mergedParentDataset); // can be null when it is directly in a Project
-                    dataset.setParentDataset(parentDataset);
-                    entityManagerUDS.persist(mergedDataset);
-   
-                }
-                
-                // updata parent object
-                if (parentDataset != null) {
-                    mergedParentDataset.setChildrenCount(nbDataset);
-                    parentDataset.setChildrenCount(nbDataset);
-                    entityManagerUDS.persist(mergedParentDataset);
-                } else if (parentProject != null) {
                     parentProject.getTransientData().setChildrenNumber(nbDataset);
                 }
+                
+                 for (int i=0;i<nbDataset;i++) {
+                     Dataset mergedDataset = mergedDatasetList.get(i);
+                     entityManagerUDS.persist(mergedDataset);
+                 }
+                 if (mergedParentDataset != null) {
+                     entityManagerUDS.persist(mergedParentDataset);
+                 }
+                
+                
             }
             
             entityManagerUDS.getTransaction().commit();
@@ -726,4 +777,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         
         return true;
     }
+    
+
+
 }

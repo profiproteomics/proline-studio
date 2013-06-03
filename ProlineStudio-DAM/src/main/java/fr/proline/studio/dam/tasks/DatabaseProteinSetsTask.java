@@ -41,8 +41,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     private ResultSummary rsm = null;
     private PeptideInstance peptideInstance = null;
     private Dataset dataset = null;
-    private Integer[] m_numberOfProteinSets = null;
-    
+
     
     // data kept for sub tasks
     private ArrayList<Integer> proteinMatchIds = null;
@@ -127,13 +126,9 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             Integer rsmId = rsm.getId();
 
-            long timeStart = System.currentTimeMillis();
-
             // Load Protein Sets
-            // SELECT ps FROM ProteinSet ps, PeptideSet pepset WHERE ps.resultSummary.id=:rsmId AND ps.peptideOverSet=pset AND ps.isValidated=true ORDER BY pepset.score DESC
-            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM ProteinSet ps, PeptideSet pepset WHERE ps.resultSummary.id=:rsmId AND pepset.proteinSet=ps AND ps.isValidated=true ORDER BY pepset.score DESC", ProteinSet.class);
-            
-            //TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId", ProteinSet.class);
+            // SELECT ps FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC
+            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC", ProteinSet.class);
             
             proteinSetsQuery.setParameter("rsmId", rsmId);
             
@@ -149,15 +144,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
                 proteinSetMap.put(proteinSetCur.getId(), proteinSetCur);
             }
 
-
-
-           /*long timeStop = System.currentTimeMillis(); double delta = ((double) (timeStop-timeStart))/1000; 
-           System.out.println("Load Protein Sets : "+delta); 
-           
-           String t = "Load Protein Sets : "+delta;
-           logger.error(t);
-           
-           timeStart = System.currentTimeMillis();*/
 
 
             // Retrieve Protein Match Ids
@@ -470,7 +456,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         
         List sliceOfProteinMatchIds = subTask.getSubList(proteinMatchIds);
 
-        Query typicalProteinQuery = entityManagerMSI.createQuery("SELECT pm, pepset FROM ProteinMatch pm, PeptideSet pepset, PeptideSetProteinMatchMap pset_to_pm  WHERE pm.id IN (:listId) AND pset_to_pm.id.proteinMatchId=pm.id AND pset_to_pm.id.peptideSetId=pepset.id AND pset_to_pm.resultSummary.id=:rsmId");
+        Query typicalProteinQuery = entityManagerMSI.createQuery("SELECT pm, pepset FROM PeptideSetProteinMatchMap pset_to_pm JOIN pset_to_pm.proteinMatch as pm JOIN pset_to_pm.PeptideSet as pepset WHERE pm.id IN (:listId) AND pset_to_pm.resultSummary.id=:rsmId");
         typicalProteinQuery.setParameter("listId", sliceOfProteinMatchIds);
         typicalProteinQuery.setParameter("rsmId", rsm.getId());
 
@@ -489,11 +475,8 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             proteinSetCur.getTransientData().setTypicalProteinMatch(typicalProteinMap.get(proteinSetCur.getProteinMatchId()));
         }
     }
-    
-    
 
-    
-    
+ 
 
     /**
      * Retrieve spectral count for a Sub Task

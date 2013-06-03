@@ -40,11 +40,15 @@ public class AccessDatabaseWorkerThread extends Thread {
     public void run() {
         try {
             while (true) {
+                
+                AbstractDatabaseTask action = null;
+                
                 synchronized (this) {
 
                     while (true) {
 
                         if (m_action != null) {
+                            action = m_action;
                             break;
                         }
                         wait();
@@ -52,19 +56,21 @@ public class AccessDatabaseWorkerThread extends Thread {
                     notifyAll();
                 }
 
-                m_action.getTaskInfo().setRunning(true);
+                action.getTaskInfo().setRunning(true);
 
                 
                 // fetch data
-                boolean success = m_action.fetchData();
+                boolean success = action.fetchData();
 
                 // call callback code (if there is not a consecutive task)
-                m_action.callback(success, !m_action.hasSubTasksToBeDone());
+                action.callback(success, !action.hasSubTasksToBeDone());
 
                 
-                AccessDatabaseThread.getAccessDatabaseThread().actionDone(m_action);
+                AccessDatabaseThread.getAccessDatabaseThread().actionDone(action);
 
-                m_action = null;
+                synchronized(this) {
+                    m_action = null;
+                }
 
                 m_workerPool.threadFinished();
             }

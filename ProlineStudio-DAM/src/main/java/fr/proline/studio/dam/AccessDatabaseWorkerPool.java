@@ -49,7 +49,7 @@ public class AccessDatabaseWorkerPool {
             case NORMAL_3:
             case NORMAL_2:
             case NORMAL_1:   
-                return getHighThread();
+                return getNormalThread();
             case LOW:
             default:
                 return getLowThread();

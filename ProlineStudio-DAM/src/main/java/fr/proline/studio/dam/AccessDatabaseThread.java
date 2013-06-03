@@ -119,7 +119,7 @@ public class AccessDatabaseThread extends Thread {
             if (task.hasSubTasksToBeDone()) {
                 // put back action in the queue for subtasks
                 actions.add(task);
-                
+
             } else {
                 // action completely finished
                 actionMap.remove(task.getId());
@@ -280,9 +280,12 @@ public class AccessDatabaseThread extends Thread {
             } else {
                 priorityChangements.remove(taskId);
                 AbstractDatabaseTask task = priorityChangement.getTask();
-                actions.remove(task);
+                boolean isActionRegistered = actions.remove(task);
                 task.resetPriority();
-                actions.offer(task);
+                if (isActionRegistered) {
+                    actions.offer(task);
+                }
+
             }
 
         }

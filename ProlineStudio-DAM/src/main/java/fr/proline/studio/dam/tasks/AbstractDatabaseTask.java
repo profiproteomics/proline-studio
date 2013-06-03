@@ -111,7 +111,7 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
     }
 
     public void resetPriority() {
-        defaultPriority = currentPriority;
+        currentPriority = defaultPriority;
     }
 
     /**

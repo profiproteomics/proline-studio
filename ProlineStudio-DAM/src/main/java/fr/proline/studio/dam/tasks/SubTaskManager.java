@@ -13,7 +13,7 @@ import java.util.PriorityQueue;
 public class SubTaskManager {
 
     // Priority Queue for Sub Tasks
-    private PriorityQueue<SubTask> subTasks = new PriorityQueue<SubTask>();
+    private PriorityQueue<SubTask> subTasks = new PriorityQueue<>();
     // We keep a count of remaining SubTasks of each type
     private int[] subTaskCount;
     // Current Task
@@ -154,6 +154,6 @@ public class SubTaskManager {
             subTaskTmp.clear();
         }
     }
-    private ArrayList<SubTask> subTaskTmp = new ArrayList<SubTask>();
+    private ArrayList<SubTask> subTaskTmp = new ArrayList<>();
 
 }

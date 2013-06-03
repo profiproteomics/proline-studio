@@ -54,7 +54,7 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
     
     @Override
     public void resetPriority() {
-        defaultPriority = currentPriority;
+        currentPriority = defaultPriority;
         subTaskManager.resetPriority();
     }
     

@@ -85,10 +85,18 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         };
 
         // Load data if needed asynchronously
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromProteinSetTask(callback, getProjectId(), proteinSet));
-
+        DatabaseProteinsFromProteinSetTask task = new DatabaseProteinsFromProteinSetTask(callback, getProjectId(), proteinSet);
+        Long taskId = task.getId();
+        if (m_previousTaskId != null) {
+            // old task is suppressed if it has not been already done
+            AccessDatabaseThread.getAccessDatabaseThread().removeTask(m_previousTaskId);
+        }
+        m_previousTaskId = taskId;
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
+    private Long m_previousTaskId = null;
+    
     
     @Override
     public Object getData(boolean getArray, Class parameterType) {

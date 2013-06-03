@@ -181,6 +181,24 @@ public class AccessDatabaseThread extends Thread {
         }
     }
 
+    public final void removeTask(Long taskId) {
+        synchronized (this) {
+            AbstractDatabaseTask task = actionMap.get(taskId);
+            if (task == null) {
+                // task is already finished
+                return;
+            }
+            boolean isActionRegistered = actions.remove(task);
+            if (isActionRegistered) {
+                // action was not running, remove it from map
+                actionMap.remove(taskId);
+                // remove iis info from TaskInfoManager
+                TaskInfoManager.getTaskInfoManager().cancel(task.getTaskInfo());
+            }
+        }
+    }
+    
+    
     /**
      * Add an index to be loaded in priority for a given task (index added
      * define a range of indexes to be loaded firstly)

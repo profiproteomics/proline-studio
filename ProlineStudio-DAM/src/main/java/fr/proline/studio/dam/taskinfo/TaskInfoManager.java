@@ -40,6 +40,11 @@ public class TaskInfoManager {
         m_curUpdate++;
     }
     
+    public void cancel(TaskInfo taskInfo) {
+        m_tasks.remove(taskInfo);
+        m_curUpdate++;
+    }
+    
     public synchronized void update(TaskInfo taskInfo) {
         m_taskToBeUpdated.add(taskInfo);
         m_curUpdate++;

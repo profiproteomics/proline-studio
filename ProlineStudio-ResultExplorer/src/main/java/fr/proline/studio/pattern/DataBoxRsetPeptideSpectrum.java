@@ -71,7 +71,14 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         };
 
         // Load data if needed asynchronously
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadSpectrumsTask(callback, getProjectId(), peptideMatch));
+        DatabaseLoadSpectrumsTask task = new DatabaseLoadSpectrumsTask(callback, getProjectId(), peptideMatch);
+        Long taskId = task.getId();
+        if (m_previousTaskId != null) {
+            // old task is suppressed if it has not been already done
+            AccessDatabaseThread.getAccessDatabaseThread().removeTask(m_previousTaskId);
+        }
+        m_previousTaskId = taskId;
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
                  
                  
@@ -80,4 +87,6 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             ((RsetPeptideSpectrumPanel) m_panel).setData(peptideMatch);
         }
     }
+    private Long m_previousTaskId = null;
+    
 }

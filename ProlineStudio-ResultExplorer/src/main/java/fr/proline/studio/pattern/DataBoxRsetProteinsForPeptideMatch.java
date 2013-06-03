@@ -77,10 +77,18 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
         };
 
         // Load data if needed asynchronously
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseProteinsFromPeptideMatchTask(callback, getProjectId(), peptideMatch));
-
+        DatabaseProteinsFromPeptideMatchTask task = new DatabaseProteinsFromPeptideMatchTask(callback, getProjectId(), peptideMatch);
+        Long taskId = task.getId();
+        if (m_previousTaskId != null) {
+            // old task is suppressed if it has not been already done
+            AccessDatabaseThread.getAccessDatabaseThread().removeTask(m_previousTaskId);
+        }
+        m_previousTaskId = taskId;
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
+    private Long m_previousTaskId = null;
+    
     
     @Override
     public Object getData(boolean getArray, Class parameterType) {

@@ -86,6 +86,13 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
         // retrieve Typical Protein Match
         ProteinMatch typicalProtein = proteinSetData.getTypicalProteinMatch();
 
+        
+        if (typicalProtein == null) {
+            // data not ready
+            clearData();
+            return;
+        }
+        
         // Modify Panel Border Title
         //((ProteinGroupProteinSelectedPanel) ViewTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(typicalProtein.getAccession());
         //JPM.TODO

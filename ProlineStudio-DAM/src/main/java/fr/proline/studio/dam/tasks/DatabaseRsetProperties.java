@@ -43,7 +43,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
         try {
 
             entityManagerMSI.getTransaction().begin();
-            
+
             ResultSet rset = m_dataset.getTransientData().getResultSet();
             fetchData_count(entityManagerMSI, rset);
             
@@ -104,7 +104,10 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
         rset.getTransientData().setPeptideMatchesCount(Integer.valueOf(peptideMatchNumber.intValue()));
 
         // Count Ms Queries
-        TypedQuery<Long> countMsQueriesQuery = entityManagerMSI.createQuery("SELECT count(DISTINCT msq) FROM fr.proline.core.orm.msi.MsQuery msq, fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.resultSet.id=:rsetId AND msq=pm.msQuery", Long.class);
+        /*TypedQuery<Long> countMsQueriesQuery = entityManagerMSI.createQuery("SELECT count(DISTINCT msq) FROM fr.proline.core.orm.msi.MsQuery msq, fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.resultSet.id=:rsetId AND msq=pm.msQuery", Long.class);
+        */
+        TypedQuery<Long> countMsQueriesQuery = entityManagerMSI.createQuery("SELECT count(msq) FROM fr.proline.core.orm.msi.MsQuery msq, fr.proline.core.orm.msi.ResultSet rset, fr.proline.core.orm.msi.MsiSearch msi_search WHERE rset.id=:rsetId AND rset.msiSearch=msi_search AND msq.msiSearch=msi_search", Long.class);
+        
         countMsQueriesQuery.setParameter("rsetId", rsetId);
         Long msQueriesNumber = countMsQueriesQuery.getSingleResult();
 

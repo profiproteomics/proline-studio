@@ -14,10 +14,10 @@ public class Installer extends ModuleInstall {
     @Override
     public void restored() {
 
+        // set the proline version for the application title
         System.setProperty("netbeans.buildnumber", "0.1.1a"); 
         
         // initialize the connection to the server as soon as possible
-        //UDSConnectionManagerOLD.getUDSConnectionManager();
         ServerConnectionManager.getServerConnectionManager();
 
     }

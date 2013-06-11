@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 
 import fr.proline.core.utils.lzma.package$EasyLzma$;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.Graphics2D;
@@ -38,7 +39,7 @@ import org.jfree.data.xy.XYDataset;
  * Panel used to display a Spectrum of a PeptideMatch
  * @author JM235353
  */
-public class RsetPeptideSpectrumPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
+public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
     

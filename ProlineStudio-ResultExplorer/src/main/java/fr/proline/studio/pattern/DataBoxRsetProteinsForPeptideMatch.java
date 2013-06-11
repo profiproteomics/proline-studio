@@ -52,6 +52,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
 
         if (peptideMatch == null) {
             ((RsetProteinsForPeptideMatchPanel)m_panel).setData(null);
+            m_peptideMatchCurId = null;
             return;
         }
 
@@ -59,6 +60,8 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
             return;
         }
         m_peptideMatchCurId = peptideMatch.getId();
+        
+        final int loadingId = setLoading();
         
         //final String searchedText = searchTextBeingDone; //JPM.TODO
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -73,6 +76,8 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
 
 
                 ((RsetProteinsForPeptideMatchPanel)m_panel).setData(peptideMatch);
+                
+                setLoaded(loadingId);
             }
         };
 

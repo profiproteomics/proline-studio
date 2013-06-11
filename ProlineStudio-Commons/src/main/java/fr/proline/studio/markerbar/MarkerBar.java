@@ -1,9 +1,7 @@
 package fr.proline.studio.markerbar;
 
 import fr.proline.studio.gui.DefaultDialog;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -11,24 +9,61 @@ import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
-import javax.swing.JPopupMenu;
+import javax.swing.*;
 import org.openide.windows.WindowManager;
 
 public class MarkerBar extends AbstractBar implements MouseListener, MouseMotionListener {
 
     private static final long serialVersionUID = 1L;
 
+    private static final int TEXT_PAD = 4;
+    private static Font m_lineNumbersFont = null;
+    private static FontMetrics m_lineNumbersFontMercrics = null;
+    private static int m_fontAscent = 0;
+    private static int m_fontDescent = 0;
+    
+    private boolean m_displayLineNumbers = false;
+    private int m_maxLineNumber = -1;
+    
     public MarkerBar(MarkerContainerPanel containerPanel) {
         super(containerPanel);
 
         addMouseListener(this);
         addMouseMotionListener(this);
+
     }
 
+    public boolean isLineNumbersDisplayed() {
+        return m_displayLineNumbers;
+    }
+    
+    public void setLineNumbersDisplayed(boolean displayLineNumbers) {
+        m_displayLineNumbers = displayLineNumbers;
+    }
+
+    public boolean setMaxLineNumber(int maxLineNumber) {
+        boolean changed = (m_maxLineNumber != maxLineNumber);
+        m_maxLineNumber = maxLineNumber;
+        return changed;
+    }
+    
+    @Override
+    public Dimension getMinimumSize() {
+        Dimension dim = super.getMinimumSize();
+        if ((m_displayLineNumbers) && (m_maxLineNumber != -1)) {
+            String numberString = String.valueOf(m_maxLineNumber);
+            dim.width = m_lineNumbersFontMercrics.stringWidth(numberString)+TEXT_PAD*2;
+        }
+
+        return dim;
+    }
+    
+    @Override
     public void paint(Graphics g) {
 
+        g.setColor(m_almostWhiteColor);
+        g.fillRect(1, 1, getWidth()-2, getHeight()-2);
+        
         g.setColor(Color.lightGray);
         g.drawRect(0, 0, getWidth()-1, getHeight()-1);
         
@@ -37,19 +72,25 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         int firstVisibleRow = componentInterface.getFirstVisibleRow();
         int lastVisibleRow = componentInterface.getLastVisibleRow();
 
-
+        if (m_lineNumbersFont == null) {
+            m_lineNumbersFont = new Font("SansSerif", Font.PLAIN, 10);
+            m_lineNumbersFontMercrics = g.getFontMetrics(m_lineNumbersFont);
+            m_fontAscent = m_lineNumbersFontMercrics.getAscent();
+            m_fontDescent = m_lineNumbersFontMercrics.getDescent();
+        }
+ 
         TreeMap<Integer, ArrayList<AbstractMarker>> markerMap = containerPanel.getMarkerArray();
         Iterator<Integer> itRow = markerMap.keySet().iterator();
         while (itRow.hasNext()) {
             Integer row = itRow.next();
             int rowInt = componentInterface.convertRowIndexToView(row.intValue());
-            
-            
-            
+
             if ((rowInt < firstVisibleRow) || (rowInt > lastVisibleRow)) {
                 continue;
             }
 
+            
+            
             ArrayList<AbstractMarker> markersArrayList = markerMap.get(row);
             int size = markersArrayList.size();
             for (int i = 0; i < size; i++) {
@@ -62,10 +103,28 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
 
                 renderer.paint(AbstractBar.BarType.MARKER_BAR, g, 0, y1, getWidth(), y2 - y1);
             }
+            
+
+
         }
+        
+        // display lines
+        if ((m_displayLineNumbers) && (firstVisibleRow!=-1)) {
+            g.setColor(Color.black);
+            for (int i = firstVisibleRow; i <= lastVisibleRow; i++) {
+                int y1 = componentInterface.getRowYStart(i);
+                int y2 = componentInterface.getRowYStop(i);
 
+                String numberString = String.valueOf(i + 1);
+                int xText = getWidth() - m_lineNumbersFontMercrics.stringWidth(numberString) - TEXT_PAD;
+                int yText = (y1 + ((y2 + 1 - y1) / 2)) - ((m_fontAscent + m_fontDescent) / 2) + m_fontAscent;
 
+                g.drawString(numberString, xText, yText);
+
+            }
+        }
     }
+    private static final Color m_almostWhiteColor = new Color(248,248,248);
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -141,12 +200,14 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
             return m_popup;
         }
         
-        actions = new AbstractMarkerBarAction[5];
-        actions[0] = new AddAnnotationAction();
-        actions[1] = new AddBookmarkAction();
-        actions[2] = new RemoveMarkerAction();
-        actions[3] = null;
-        actions[4] = new RemoveAllMarkersAction();
+        actions = new AbstractMarkerBarAction[7];
+        actions[0] = new DisplayLineNumbersAction();
+        actions[1] = null;
+        actions[2] = new AddAnnotationAction();
+        actions[3] = new AddBookmarkAction();
+        actions[4] = new RemoveMarkerAction();
+        actions[5] = null;
+        actions[6] = new RemoveAllMarkersAction();
         
         
         m_popup = new JPopupMenu();
@@ -155,7 +216,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
             if (action == null) {
                 m_popup.addSeparator();
             } else {
-                m_popup.add(action);
+                m_popup.add(action.getPopupPresenter());
             }
         }
         
@@ -186,7 +247,43 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         }
         
         public abstract void updateEnabled(int row);
+        
+        public JMenuItem getPopupPresenter() {
+            return new JMenuItem(this);
+        }
     }
+    
+    
+    private class DisplayLineNumbersAction extends AbstractMarkerBarAction {
+
+        private JCheckBoxMenuItem m_checkboxMenuItem = null;
+        
+        public DisplayLineNumbersAction() {
+            super("Display Line Numbers");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            setLineNumbersDisplayed(!isLineNumbersDisplayed());
+            containerPanel.revalidate();
+            containerPanel.repaint();
+        }
+
+        @Override
+        public void updateEnabled(int row) {
+            setEnabled(true);
+            ((JCheckBoxMenuItem)getPopupPresenter()).setSelected(m_displayLineNumbers);
+        }
+        
+        @Override
+         public JMenuItem getPopupPresenter() {
+            if (m_checkboxMenuItem == null) {
+                m_checkboxMenuItem = new JCheckBoxMenuItem(this);
+            }
+            return m_checkboxMenuItem;
+        }
+    }
+    
     
     private class AddAnnotationAction extends AbstractMarkerBarAction {
 

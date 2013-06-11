@@ -311,7 +311,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
     public class DefaultErrorRenderer implements TableCellRenderer, Serializable {
 
         private TableCellRenderer m_renderer;
-
+        
         public DefaultErrorRenderer(TableCellRenderer renderer) {
             m_renderer = renderer;
         }
@@ -329,7 +329,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 if (taskInfo.hasErrorMessage()) {
                     l.setForeground(Color.red);
                 } else {
-                    l.setForeground(Color.black);
+                    if (isSelected) {
+                        l.setForeground(Color.white);
+                    } else {
+                        l.setForeground(Color.black);
+                    }
                 }
 
             }
@@ -337,4 +341,6 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             return c;
         }
     }
+    
+    
 }

@@ -43,6 +43,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     private JButton m_searchButton;
     private JTextField m_searchTextField;
     
+    private MarkerContainerPanel m_markerContainerPanel;
+    
     private JButton m_decoyButton;
 
     /**
@@ -79,6 +81,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         // select the first row
         if ((peptideMatches != null) && (peptideMatches.length > 0)) {
             m_peptideMatchTable.getSelectionModel().setSelectionInterval(0, 0);
+            
+            m_markerContainerPanel.setMaxLineNumber(peptideMatches.length);
         }
         
         if (finished) {
@@ -200,7 +204,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         m_peptideMatchTable = new PeptideMatchTable();
         m_peptideMatchTable.setModel(new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM));
         
-        MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_peptideMatchTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_peptideMatchTable);
         
         m_scrollPane.setViewportView(m_peptideMatchTable);
 	m_peptideMatchTable.setFillsViewportHeight(true);
@@ -221,7 +225,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
-        internalPanel.add(markerContainerPanel, c);
+        internalPanel.add(m_markerContainerPanel, c);
         
         c.gridx = 0;
         c.gridy++;

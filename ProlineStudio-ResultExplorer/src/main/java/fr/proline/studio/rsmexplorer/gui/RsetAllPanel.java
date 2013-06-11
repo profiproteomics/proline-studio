@@ -42,6 +42,8 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
     private AbstractDataBox m_dataBox;
     private ResultSetTable m_resultSetTable;
     
+    private MarkerContainerPanel m_markerContainerPanel;
+    
     public RsetAllPanel() {
         initComponents();
 
@@ -60,7 +62,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         m_resultSetTable = new ResultSetTable();
         m_resultSetTable.setModel(new ResultSetTableModel());
         
-        MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(scrollPane, m_resultSetTable);
+        m_markerContainerPanel = new MarkerContainerPanel(scrollPane, m_resultSetTable);
         
         scrollPane.setViewportView(m_resultSetTable);
 	m_resultSetTable.setFillsViewportHeight(true);
@@ -73,7 +75,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
-        add(markerContainerPanel, c);
+        add(m_markerContainerPanel, c);
         
 
         
@@ -85,6 +87,8 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         // select the first row
         if ((resultSetList != null) && (resultSetList.size() > 0)) {
             m_resultSetTable.getSelectionModel().setSelectionInterval(0, 0);
+            
+            m_markerContainerPanel.setMaxLineNumber(resultSetList.size());
         }
 
     }

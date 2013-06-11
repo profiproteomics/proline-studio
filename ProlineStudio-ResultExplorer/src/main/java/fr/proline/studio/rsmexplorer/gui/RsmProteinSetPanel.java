@@ -41,7 +41,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private ProteinGroupTable m_proteinGroupTable;
     private JButton m_searchButton;
     private JTextField m_searchTextField;
-                
+    private MarkerContainerPanel m_markerContainerPanel;
     
     private boolean m_forRSM;
     private JButton m_decoyButton;
@@ -73,6 +73,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         // select the first row
         if ((proteinSets != null) && (proteinSets.length > 0)) {
             m_proteinGroupTable.getSelectionModel().setSelectionInterval(0, 0);
+            m_markerContainerPanel.setMaxLineNumber(proteinSets.length);
         }
         
         if (finished) {
@@ -193,7 +194,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         
         
 
-        MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(m_proteinGroupScrollPane, (ProteinGroupTable) m_proteinGroupTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_proteinGroupScrollPane, (ProteinGroupTable) m_proteinGroupTable);
         
         m_proteinGroupScrollPane.setViewportView(m_proteinGroupTable);
         m_proteinGroupTable.setFillsViewportHeight(true);
@@ -233,7 +234,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
-        internalPanel.add(markerContainerPanel, c);
+        internalPanel.add(m_markerContainerPanel, c);
         
         c.gridx = 0;
         c.gridy++;

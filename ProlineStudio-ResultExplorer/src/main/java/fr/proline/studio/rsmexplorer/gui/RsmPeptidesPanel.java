@@ -43,6 +43,8 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     private JButton m_searchButton;
     private JTextField m_searchTextField;
     
+    private MarkerContainerPanel m_markerContainerPanel;
+    
     private JButton m_decoyButton;
     
     /**
@@ -131,7 +133,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         m_peptideInstanceTable = new PeptideInstanceTable();
         m_peptideInstanceTable.setModel(new PeptideInstanceTableModel((LazyTable) m_peptideInstanceTable));
         
-        MarkerContainerPanel markerContainerPanel = new MarkerContainerPanel(m_scrollPane, (PeptideInstanceTable) m_peptideInstanceTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, (PeptideInstanceTable) m_peptideInstanceTable);
         
         
         m_scrollPane.setViewportView(m_peptideInstanceTable);
@@ -155,7 +157,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
-        internalPanel.add(markerContainerPanel, c);
+        internalPanel.add(m_markerContainerPanel, c);
         
         c.gridx = 0;
         c.gridy++;
@@ -191,6 +193,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         // select the first row
         if ((peptideInstances != null) && (peptideInstances.length > 0)) {
             m_peptideInstanceTable.getSelectionModel().setSelectionInterval(0, 0);
+            m_markerContainerPanel.setMaxLineNumber(peptideInstances.length);
         }
         
         if (finished) {

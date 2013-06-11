@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -32,7 +33,7 @@ import org.openide.windows.TopComponent;
  * 
  * @author JM235353
  */
-public class RsmProteinSetPanel extends JPanel implements DataBoxPanelInterface {
+public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
     

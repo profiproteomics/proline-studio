@@ -59,6 +59,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         
         final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
 
+        final int loadingId = setLoading();
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             
@@ -76,7 +77,9 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                     ((RsmPeptidesPanel)m_panel).setData(taskId, peptideinstanceArray, finished);
                } else {
                     ((RsmPeptidesPanel)m_panel).dataUpdated(subTask, finished);
-                }
+               }
+               
+               setLoaded(loadingId);
             }
         };
         

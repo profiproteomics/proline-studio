@@ -9,4 +9,7 @@ public interface DataBoxPanelInterface {
     
     public void setDataBox(AbstractDataBox dataBox);
     
+    public void setLoading(int id);
+    
+    public void setLoaded(int id);
 }

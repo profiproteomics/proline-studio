@@ -72,6 +72,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
                 return;
             }
             
+            final int loadingId = setLoading();
             
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -90,6 +91,8 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
                     } else {
                         ((RsmProteinSetPanel) m_panel).dataUpdated(subTask, finished);
                     }
+                    
+                    setLoaded(loadingId);
                 }
             };
 
@@ -109,6 +112,7 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
         
             final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
 
+            final int loadingId = setLoading();
 
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -120,8 +124,6 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-
-
                     if (subTask == null) {
 
                         ProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
@@ -129,6 +131,8 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
                     } else {
                         ((RsmProteinSetPanel) m_panel).dataUpdated(subTask, finished);
                     }
+                    
+                    setLoaded(loadingId);
                 }
             };
 

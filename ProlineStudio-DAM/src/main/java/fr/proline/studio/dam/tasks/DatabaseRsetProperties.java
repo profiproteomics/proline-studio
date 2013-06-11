@@ -22,19 +22,29 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseRsetProperties extends AbstractDatabaseTask {
     
-    private Integer m_projectId;
-    private Dataset m_dataset;
+    private Integer m_projectId = null;
+    private Dataset m_dataset = null;
+    private ResultSet m_rset = null;
     
     public DatabaseRsetProperties(AbstractDatabaseCallback callback, Integer projectId, Dataset dataset) {
         super(callback, new TaskInfo("Load Properties for Search Result "+dataset.getName(), TASK_LIST_INFO));
         m_projectId = projectId;
         m_dataset = dataset;
     }
+    
+    public DatabaseRsetProperties(AbstractDatabaseCallback callback, Integer projectId, ResultSet rset, String name) {
+        super(callback, new TaskInfo("Load Properties for Search Result "+name, TASK_LIST_INFO));
+        m_projectId = projectId;
+        m_rset = rset;
+    }
+    
 
     @Override
     public boolean needToFetch() {
-        ResultSet rset = m_dataset.getTransientData().getResultSet();
-        return (rset.getTransientData().getMSQueriesCount() == null);
+        if (m_rset == null) {
+            m_rset = m_dataset.getTransientData().getResultSet();
+        }
+        return (m_rset.getTransientData().getPeptideMatchesCount() == null);
     }
     
     @Override
@@ -44,16 +54,16 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
 
             entityManagerMSI.getTransaction().begin();
 
-            ResultSet rset = m_dataset.getTransientData().getResultSet();
-            fetchData_count(entityManagerMSI, rset);
+
+            fetchData_count(entityManagerMSI, m_rset);
             
-            ResultSet rsetDecoy = rset.getDecoyResultSet();
+            ResultSet rsetDecoy = m_rset.getDecoyResultSet();
             if (rsetDecoy != null) {
                 fetchData_count(entityManagerMSI, rsetDecoy);
             }
             
             // Load Enzymes
-            SearchSetting searchSetting = rset.getMsiSearch().getSearchSetting();
+            SearchSetting searchSetting = m_rset.getMsiSearch().getSearchSetting();
             
             SearchSetting mergedSearchSetting = entityManagerMSI.merge(searchSetting);
             Set<Enzyme> enzymeSet = mergedSearchSetting.getEnzymes();
@@ -106,12 +116,12 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
         // Count Ms Queries
         /*TypedQuery<Long> countMsQueriesQuery = entityManagerMSI.createQuery("SELECT count(DISTINCT msq) FROM fr.proline.core.orm.msi.MsQuery msq, fr.proline.core.orm.msi.PeptideMatch pm WHERE pm.resultSet.id=:rsetId AND msq=pm.msQuery", Long.class);
         */
-        TypedQuery<Long> countMsQueriesQuery = entityManagerMSI.createQuery("SELECT count(msq) FROM fr.proline.core.orm.msi.MsQuery msq, fr.proline.core.orm.msi.ResultSet rset, fr.proline.core.orm.msi.MsiSearch msi_search WHERE rset.id=:rsetId AND rset.msiSearch=msi_search AND msq.msiSearch=msi_search", Long.class);
+        /*TypedQuery<Long> countMsQueriesQuery = entityManagerMSI.createQuery("SELECT count(msq) FROM fr.proline.core.orm.msi.MsQuery msq, fr.proline.core.orm.msi.ResultSet rset, fr.proline.core.orm.msi.MsiSearch msi_search WHERE rset.id=:rsetId AND rset.msiSearch=msi_search AND msq.msiSearch=msi_search", Long.class);
         
         countMsQueriesQuery.setParameter("rsetId", rsetId);
         Long msQueriesNumber = countMsQueriesQuery.getSingleResult();
 
-        rset.getTransientData().setMSQueriesCount(Integer.valueOf(msQueriesNumber.intValue()));
+        rset.getTransientData().setMSQueriesCount(Integer.valueOf(msQueriesNumber.intValue()));*/
 
     }
 }

@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.Color;
@@ -15,7 +16,7 @@ import javax.swing.*;
  * Panel to display information about a specific task
  * @author JM235353
  */
-public class TaskDescriptionPanel extends JPanel implements DataBoxPanelInterface {
+public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
     

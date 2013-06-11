@@ -69,6 +69,8 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
             return;
         }
 
+        final int loadingId = setLoading();
+        
         // prepare callback to view new data
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -85,6 +87,8 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
                 } else {
                     ((RsmPeptidesOfProteinPanel) m_panel).setData(null, null);
                 }
+                
+                setLoaded(loadingId);
             }
         };
 

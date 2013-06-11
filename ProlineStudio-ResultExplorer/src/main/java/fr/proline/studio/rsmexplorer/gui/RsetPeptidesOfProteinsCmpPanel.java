@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SquareColorPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -20,7 +21,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  * @author JM235353
  */
-public class RsetPeptidesOfProteinsCmpPanel extends JPanel implements DataBoxPanelInterface {
+public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
 

@@ -56,7 +56,9 @@ public class DataBoxRsetAll extends AbstractDataBox{
 
             final ArrayList<ResultSet> resultSetArrayList = new ArrayList<>();
             
-             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            final int loadingId = setLoading();
+            
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                 @Override
                 public boolean mustBeCalledInAWT() {
@@ -68,6 +70,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
 
                     ((RsetAllPanel) m_panel).setData(taskId, resultSetArrayList);
 
+                    setLoaded(loadingId);
                 }
             };
 

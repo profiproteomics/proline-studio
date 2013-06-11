@@ -5,6 +5,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -31,7 +32,7 @@ import org.openide.windows.TopComponent;
  *
  * @author JM235353
  */
-public class PeptideMatchPanel extends JPanel implements DataBoxPanelInterface/*, ButtonProviderInterface*/ {
+public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
 

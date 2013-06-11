@@ -40,6 +40,8 @@ public abstract class AbstractDataBox implements ChangeListener {
     protected AbstractDataBox nextDataBox = null;
     protected AbstractDataBox previousDataBox = null;
     
+    private int m_loadingId = 0;
+    
     protected void registerInParameter(DataParameter parameter) {
         m_inParameters.add(parameter);
     }
@@ -59,6 +61,8 @@ public abstract class AbstractDataBox implements ChangeListener {
         return false;
     }
   
+    
+    
     
     public boolean isCompatible(AbstractDataBox nextDataBox) {
         
@@ -149,5 +153,15 @@ public abstract class AbstractDataBox implements ChangeListener {
     public void stateChanged(ChangeEvent e) {
     }
     
+    
+    protected int setLoading() {
+        final int loadingId = m_loadingId++;
+        m_panel.setLoading(loadingId);
+        return loadingId;
+    }
+    
+    protected void setLoaded(int loadingId) {
+        m_panel.setLoaded(loadingId);
+    }
 
 }

@@ -78,17 +78,17 @@ public class HourglassPanel extends JPanel implements ActionListener {
         if (m_loadingFont == null) {
             m_loadingFont = new Font("SansSerif", Font.BOLD, 12);
             FontMetrics metrics = g.getFontMetrics(m_loadingFont);
-            fontHeight = metrics.getAscent();
+            m_fontAscent = metrics.getAscent();
 
         }
         g.setFont(m_loadingFont);
         g.setColor(Color.black);
-        g.drawString("Loading Data...", PAD+INTERNAL_PAD*2+ICON_WIDTH, height-BOX_HEIGHT-PAD+INTERNAL_PAD+fontHeight);
+        g.drawString("Loading Data...", PAD+INTERNAL_PAD*2+ICON_WIDTH, height-BOX_HEIGHT-PAD+INTERNAL_PAD+m_fontAscent);
         
         
     }
     private static Font m_loadingFont = null;
-    private static int fontHeight = 0;
+    private static int m_fontAscent = 0;
 
     @Override
     public void actionPerformed(ActionEvent e) {

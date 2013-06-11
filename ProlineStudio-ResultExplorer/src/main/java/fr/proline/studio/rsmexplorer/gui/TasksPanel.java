@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.DecoratedMarkerTable;
@@ -22,7 +23,7 @@ import org.jdesktop.swingx.renderer.DefaultTableRenderer;
  *
  * @author JM235353
  */
-public class TasksPanel extends JPanel implements DataBoxPanelInterface {
+public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
     private LogTable m_logTable;

@@ -52,6 +52,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
         
         final ResultSet _rset = (rset!=null) ? rset : (ResultSet) previousDataBox.getData(false, ResultSet.class);
 
+        final int loadingId = setLoading();
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             
@@ -69,7 +70,9 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
                     ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, finished);
                } else {
                     ((PeptideMatchPanel)m_panel).dataUpdated(subTask, finished);
-                }
+               }
+               
+               setLoaded(loadingId);
             }
         };
         

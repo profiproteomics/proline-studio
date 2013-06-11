@@ -13,10 +13,14 @@ import java.util.TreeMap;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+/**
+ * Panel which contains MarkerBar at left, OverviewBar at right, and a user panel in the center
+ * @author JM235353
+ */
 public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
 
-    private TreeMap<Integer, ArrayList<AbstractMarker>> markers = new TreeMap<Integer, ArrayList<AbstractMarker>>();
-    private HashMap<Class, MarkerRendererInterface> renderers = new HashMap<Class, MarkerRendererInterface>();
+    private TreeMap<Integer, ArrayList<AbstractMarker>> markers = new TreeMap<>();
+    private HashMap<Class, MarkerRendererInterface> renderers = new HashMap<>();
     private static final long serialVersionUID = 1L;
     private MarkerComponentInterface markerComponent = null;
     private static DefaultMarkerRenderer defaultRenderer = null;
@@ -228,4 +232,12 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     public void viewChanged() {
         repaintBars();
     }
+    
+     public void setMaxLineNumber(int maxLineNumber) {
+         if ((markerBar != null) && (markerBar.setMaxLineNumber(maxLineNumber)) && (markerBar.isLineNumbersDisplayed()) ) {
+            revalidate();
+            repaint();
+         }
+    }
+    
 }

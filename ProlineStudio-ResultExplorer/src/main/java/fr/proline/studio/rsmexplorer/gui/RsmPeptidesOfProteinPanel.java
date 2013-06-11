@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
@@ -14,7 +15,7 @@ import javax.swing.event.ListSelectionEvent;
  *
  * @author JM235353
  */
-public class RsmPeptidesOfProteinPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
+public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
     

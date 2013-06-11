@@ -7,6 +7,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -33,7 +34,7 @@ import org.openide.windows.TopComponent;
  *
  * @author JM235353
  */
-public class RsmPeptidesPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
+public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
 

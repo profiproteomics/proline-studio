@@ -18,12 +18,12 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
         // Name of this databox
         name = "Spectrum";
-        
+
         // Register in parameters
         DataParameter inParameter = new DataParameter();
         inParameter.addParameter(PeptideMatch.class, false);
         registerInParameter(inParameter);
-        
+
         inParameter = new DataParameter();
         inParameter.addParameter(PeptideInstance.class, false);
         registerInParameter(inParameter);
@@ -49,44 +49,48 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             return;
         }
 
-        boolean needToLoadData = ((! peptideMatch.getTransientData().getIsMsQuerySet()) ||
-                                 (! peptideMatch.getMsQuery().getTransientIsSpectrumSet()));
-        
+        boolean needToLoadData = ((!peptideMatch.getTransientData().getIsMsQuerySet())
+                || (!peptideMatch.getMsQuery().getTransientIsSpectrumSet()));
+
         if (needToLoadData) {
-         
-                    //final String searchedText = searchTextBeingDone; //JPM.TODO
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
+            final int loadingId = setLoading();
+
+            //final String searchedText = searchTextBeingDone; //JPM.TODO
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+
+                    ((RsetPeptideSpectrumPanel) m_panel).setData(peptideMatch);
+                    
+                    setLoaded(loadingId);
+                }
+            };
+
+            // Load data if needed asynchronously
+            DatabaseLoadSpectrumsTask task = new DatabaseLoadSpectrumsTask(callback, getProjectId(), peptideMatch);
+            Long taskId = task.getId();
+            if (m_previousTaskId != null) {
+                // old task is suppressed if it has not been already done
+                AccessDatabaseThread.getAccessDatabaseThread().removeTask(m_previousTaskId);
             }
+            m_previousTaskId = taskId;
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
 
-                ((RsetPeptideSpectrumPanel) m_panel).setData(peptideMatch);
-            }
-        };
 
-        // Load data if needed asynchronously
-        DatabaseLoadSpectrumsTask task = new DatabaseLoadSpectrumsTask(callback, getProjectId(), peptideMatch);
-        Long taskId = task.getId();
-        if (m_previousTaskId != null) {
-            // old task is suppressed if it has not been already done
-            AccessDatabaseThread.getAccessDatabaseThread().removeTask(m_previousTaskId);
-        }
-        m_previousTaskId = taskId;
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-                 
-                 
-            
         } else {
             ((RsetPeptideSpectrumPanel) m_panel).setData(peptideMatch);
         }
     }
     private Long m_previousTaskId = null;
-    
+
 }

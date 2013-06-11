@@ -10,6 +10,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataBoxProteinSetsCmp;
@@ -27,7 +28,7 @@ import javax.swing.*;
  *
  * @author JM235353
  */
-public class RsetProteinGroupComparePanel extends JPanel implements DataBoxPanelInterface {
+public class RsetProteinGroupComparePanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private JPanel internalPanel;
     private ProteinSetComparePanel proteinSetComparePanel;

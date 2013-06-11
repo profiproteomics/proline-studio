@@ -57,6 +57,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
 
         if (proteinSet == null) {
             ((RsmProteinsOfProteinSetPanel)m_panel).setData(null, null);
+            m_proteinSetCurId = null;
             return;
         }
         
@@ -65,6 +66,9 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         }
         
         m_proteinSetCurId = proteinSet.getId();
+        
+        
+        final int loadingId = setLoading();
         
         //final String searchedText = searchTextBeingDone; //JPM.TODO
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -81,6 +85,8 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
                 ((RsmProteinsOfProteinSetPanel)m_panel).setData(proteinSet, null /*
                          * searchedText
                          */); //JPM.TODO
+                
+                setLoaded(loadingId);
             }
         };
 

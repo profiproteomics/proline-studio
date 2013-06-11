@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
@@ -20,7 +21,7 @@ import javax.swing.table.TableColumn;
  *
  * @author JM235353
  */
-public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
+public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
     private ProteinSet proteinSetCur = null;
@@ -168,6 +169,8 @@ public class RsmProteinsOfProteinSetPanel extends javax.swing.JPanel implements 
     private javax.swing.JTable proteinTable;
     private javax.swing.JScrollPane scrollPane;
     // End of variables declaration//GEN-END:variables
+
+
 
     private class ProteinTable extends DecoratedTable {
 

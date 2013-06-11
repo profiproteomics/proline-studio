@@ -21,6 +21,10 @@ public class OverviewBar extends AbstractBar  implements MouseListener {
     @Override
     public void paint(Graphics g) {
 
+        g.setColor(m_almostWhiteColor);
+        g.fillRect(1, 1, getWidth()-2, getHeight()-2);
+        
+        
         g.setColor(Color.lightGray);
         g.drawRect(0, 0, getWidth()-1, getHeight()-1);
         
@@ -52,6 +56,7 @@ public class OverviewBar extends AbstractBar  implements MouseListener {
 
 
     }
+    private static final Color m_almostWhiteColor = new Color(248,248,248);
 
     @Override
     public void mouseClicked(MouseEvent e) {

@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.GlobalValues;
@@ -19,7 +20,7 @@ import javax.swing.text.html.StyleSheet;
  *
  * @author JM235353
  */
-public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implements DataBoxPanelInterface {
+public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
     
@@ -273,6 +274,16 @@ public class RsmProteinAndPeptideSequencePanel extends javax.swing.JPanel implem
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         this.dataBox = dataBox;
+    }
+
+    @Override
+    public void setLoading(int id) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void setLoaded(int id) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 

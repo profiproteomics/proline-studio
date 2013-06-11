@@ -6,6 +6,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.*;
@@ -30,7 +31,7 @@ import org.jdesktop.swingx.renderer.DefaultTableRenderer;
  *
  * @author JM235353
  */
-public class ProteinSetComparePanel extends JPanel implements DataBoxPanelInterface {
+public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private ProteinSetCmpTable table;
     private AbstractDataBox dataBox;

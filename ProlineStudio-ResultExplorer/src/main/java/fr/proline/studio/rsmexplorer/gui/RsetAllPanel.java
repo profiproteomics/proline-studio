@@ -3,31 +3,41 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.MsiSearch;
 import fr.proline.core.orm.msi.Peaklist;
 import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
+import fr.proline.studio.dam.tasks.DatabaseRsetProperties;
+import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
+import fr.proline.studio.rsmexplorer.actions.PropertiesAction;
 import fr.proline.studio.rsmexplorer.node.RSMTransferable;
 import fr.proline.studio.utils.DecoratedMarkerTable;
+import fr.proline.studio.utils.PropertiesProviderInterface;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.TransferHandler;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.LoggerFactory;
+import org.openide.nodes.Sheet;
+import org.openide.util.NbBundle;
 
 /**
  *
  * @author JM235353
  */
-public class RsetAllPanel extends JPanel implements DataBoxPanelInterface {
+public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
     private ResultSetTable m_resultSetTable;
@@ -108,10 +118,47 @@ public class RsetAllPanel extends JPanel implements DataBoxPanelInterface {
     
     private class ResultSetTable extends DecoratedMarkerTable {
         
+        private JPopupMenu m_popup = null;
+        
         public ResultSetTable() {
             setDragEnabled(true);
             TableTransferHandler handler = new TableTransferHandler();
             setTransferHandler(handler);
+            
+            addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (e.isPopupTrigger()) {
+                        getPopup().show(e.getComponent(), e.getX(), e.getY());
+                    }
+                }
+            });
+        }
+        
+        private JPopupMenu getPopup() {
+            if (m_popup == null) {
+                m_popup = new JPopupMenu();
+                
+                // create the actions
+                ArrayList<PropertiesFromTableAction> popupActions = new ArrayList<>(1);  // <--- get in sync
+
+                PropertiesFromTableAction propertiesAction = new PropertiesFromTableAction();
+                popupActions.add(propertiesAction);
+
+
+                // add actions to popup
+                for (int i = 0; i < popupActions.size(); i++) {
+                    PropertiesFromTableAction action = popupActions.get(i);
+                    if (action == null) {
+                        m_popup.addSeparator();
+                    } else {
+                        m_popup.add(action.getPopupPresenter());
+                    }
+                }
+                
+            }
+            return m_popup;
         }
         
         /**
@@ -129,8 +176,141 @@ public class RsetAllPanel extends JPanel implements DataBoxPanelInterface {
             m_dataBox.propagateDataChanged(ResultSet.class);
 
         }
+
     }
     
+    private class PropertiesFromTableAction extends AbstractAction {
+
+        public PropertiesFromTableAction() {
+            super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            ResultSetTableModel model = (ResultSetTableModel) m_resultSetTable.getModel();
+            
+            Integer projectId = m_dataBox.getProjectId();
+            
+            int[] selectedRows = m_resultSetTable.getSelectedRows();
+            int nbSelectedRset = selectedRows.length;
+            final ResultsetPropertiesProvider[] resultPropertiesProviderArray = new ResultsetPropertiesProvider[nbSelectedRset];
+            for (int i = 0; i < nbSelectedRset; i++) {
+                int rowInModel = m_resultSetTable.convertRowIndexToModel(selectedRows[i]);
+                
+                ResultSet rset = model.getResultSet(rowInModel);
+                resultPropertiesProviderArray[i] = new ResultsetPropertiesProvider(rset, projectId, rset.getName());
+            }
+            
+            String rsetFileName = resultPropertiesProviderArray[0].getResultset().getMsiSearch().getResultFileName();
+            if (rsetFileName != null) {
+                int index = rsetFileName.lastIndexOf('.');
+                if (index != -1) {
+                    rsetFileName = rsetFileName.substring(0, index);
+                }
+            } else {
+                rsetFileName = ""; // should not happen
+            }
+
+            String dialogName = "Properties "+rsetFileName;
+
+            final PropertiesTopComponent win = new PropertiesTopComponent(dialogName);
+            win.open();
+            win.requestActive();
+
+
+            // load data for properties
+            DataLoadedCallback dataLoadedCallback = new DataLoadedCallback(nbSelectedRset) {
+
+                @Override
+                public void run() {
+                    m_nbDataToLoad--;
+                    if (m_nbDataToLoad == 0) {
+
+                        win.setProperties(resultPropertiesProviderArray);
+
+
+                    }
+                }
+            };
+
+            int nbDataToLoad = resultPropertiesProviderArray.length;
+            for (int i = 0; i < nbDataToLoad; i++) {
+                resultPropertiesProviderArray[i].loadDataForProperties(dataLoadedCallback);
+            }
+        }
+
+        public JMenuItem getPopupPresenter() {
+            return new JMenuItem(this);
+        }
+    }
+    
+    public abstract class DataLoadedCallback implements Runnable {
+
+        protected int m_nbDataToLoad = 0;
+
+        public DataLoadedCallback(int nb) {
+            m_nbDataToLoad = nb;
+        }
+
+        @Override
+        public abstract void run();
+    }
+    
+    public class ResultsetPropertiesProvider implements PropertiesProviderInterface {
+
+        private ResultSet m_rset = null;
+        private String m_name = null;
+        private Integer m_projectId = null;
+
+        public ResultsetPropertiesProvider(ResultSet rset, Integer projectId, String name) {
+            m_rset = rset;
+            m_name = name;
+            m_projectId = projectId;
+        }
+
+        @Override
+        public Sheet createSheet() {
+            return PropertiesAction.createSheet(null, m_rset, null);
+        }
+
+        @Override
+        public void loadDataForProperties(final Runnable callback) {
+
+
+            AbstractDatabaseCallback taskCallback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                    callback.run();
+
+
+                }
+            };
+
+
+
+            //Load ResultSet Extra Data
+            DatabaseRsetProperties task = new DatabaseRsetProperties(taskCallback, m_projectId, m_rset, m_name);
+            task.setPriority(AbstractDatabaseTask.Priority.HIGH_3); // highest priority
+
+
+
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        }
+        
+        public ResultSet getResultset() {
+            return m_rset;
+        }
+    }
+
+
     
     private static class ResultSetTableModel extends AbstractTableModel {
 
@@ -285,11 +465,16 @@ public class RsetAllPanel extends JPanel implements DataBoxPanelInterface {
             return new RSMTransferable(transferKey, m_dataBox.getProjectId());
             
         }
+        
+        @Override
+        protected void exportDone(JComponent source, Transferable data, int action) {
+
+            // clean all transferred data
+            RSMTransferable.clearRegisteredData();
+        }
     }
     
-    protected void exportDone(JComponent source, Transferable data, int action) {
 
-        // clean all transferred data
-        RSMTransferable.clearRegisteredData();
-    }
+    
+    
 }

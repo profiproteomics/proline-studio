@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinsOfPeptideMatchTableModel;
@@ -17,7 +18,7 @@ import javax.swing.table.TableColumn;
  *
  * @author JM235353
  */
-public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel implements DataBoxPanelInterface {
+public class RsetProteinsForPeptideMatchPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
     private Integer peptideMatchCurId = null;
@@ -63,6 +64,7 @@ public class RsetProteinsForPeptideMatchPanel extends javax.swing.JPanel impleme
 
         if (peptideMatch == null) {
             clearData();
+            peptideMatchCurId = null;
             return;
         }
         

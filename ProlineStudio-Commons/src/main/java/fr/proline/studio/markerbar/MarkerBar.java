@@ -50,7 +50,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
     @Override
     public Dimension getMinimumSize() {
         Dimension dim = super.getMinimumSize();
-        if ((m_displayLineNumbers) && (m_maxLineNumber != -1)) {
+        if ((m_displayLineNumbers) && (m_maxLineNumber != -1) && (m_lineNumbersFont != null)) {
             String numberString = String.valueOf(m_maxLineNumber);
             dim.width = m_lineNumbersFontMercrics.stringWidth(numberString)+TEXT_PAD*2;
         }
@@ -59,8 +59,24 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
     }
     
     @Override
+    public Dimension getPreferredSize() {
+        Dimension dim = super.getPreferredSize();
+        if ((m_displayLineNumbers) && (m_maxLineNumber != -1) && (m_lineNumbersFont != null)) {
+            String numberString = String.valueOf(m_maxLineNumber);
+            int minWidth = m_lineNumbersFontMercrics.stringWidth(numberString)+TEXT_PAD*2;
+            if (dim.width<minWidth) {
+                dim.width = minWidth;
+            }
+        }
+
+        return dim;
+    }
+    
+    @Override
     public void paint(Graphics g) {
 
+        initFontForLineNumbers(g); // must be done even if line numbers are not displayed at the beginning
+        
         g.setColor(m_almostWhiteColor);
         g.fillRect(1, 1, getWidth()-2, getHeight()-2);
         
@@ -72,12 +88,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         int firstVisibleRow = componentInterface.getFirstVisibleRow();
         int lastVisibleRow = componentInterface.getLastVisibleRow();
 
-        if (m_lineNumbersFont == null) {
-            m_lineNumbersFont = new Font("SansSerif", Font.PLAIN, 10);
-            m_lineNumbersFontMercrics = g.getFontMetrics(m_lineNumbersFont);
-            m_fontAscent = m_lineNumbersFontMercrics.getAscent();
-            m_fontDescent = m_lineNumbersFontMercrics.getDescent();
-        }
+        
  
         TreeMap<Integer, ArrayList<AbstractMarker>> markerMap = containerPanel.getMarkerArray();
         Iterator<Integer> itRow = markerMap.keySet().iterator();
@@ -110,6 +121,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         
         // display lines
         if ((m_displayLineNumbers) && (firstVisibleRow!=-1)) {
+            
             g.setColor(Color.black);
             for (int i = firstVisibleRow; i <= lastVisibleRow; i++) {
                 int y1 = componentInterface.getRowYStart(i);
@@ -126,6 +138,16 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
     }
     private static final Color m_almostWhiteColor = new Color(248,248,248);
 
+    private void initFontForLineNumbers(Graphics g) {
+        if (m_lineNumbersFont == null) {
+            m_lineNumbersFont = new Font("SansSerif", Font.PLAIN, 10);
+            m_lineNumbersFontMercrics = g.getFontMetrics(m_lineNumbersFont);
+            m_fontAscent = m_lineNumbersFontMercrics.getAscent();
+            m_fontDescent = m_lineNumbersFontMercrics.getDescent();
+        }
+    }
+    
+    
     @Override
     public void mouseClicked(MouseEvent e) {
 

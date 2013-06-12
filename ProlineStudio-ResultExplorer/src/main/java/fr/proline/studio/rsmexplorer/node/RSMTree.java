@@ -483,9 +483,11 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             ArrayList<Dataset> datasetList = new ArrayList<>(nb);
             for (int i = 0; i < nb; i++) {
                 // we are sure that it is a Dataset
-                RSMDataSetNode childNode = ((RSMDataSetNode) parentNode.getChildAt(i));
-                Dataset dataset = childNode.getDataset();
-                datasetList.add(dataset);
+                RSMNode childNode = ((RSMNode) parentNode.getChildAt(i));
+                if (childNode instanceof RSMDataSetNode) {
+                    Dataset dataset = ((RSMDataSetNode)childNode).getDataset();
+                    datasetList.add(dataset);
+                }
             }
 
             // register this modification

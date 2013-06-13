@@ -95,9 +95,9 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         return false;
     }
 
-    public RSMTree copyResultSetRootSubTree(ResultSet rset, Integer projectId) {
+    public RSMTree copyResultSetRootSubTree(ResultSet rset, long projectId) {
 
-        int rsetId = rset.getId().intValue();
+        long rsetId = rset.getId();
 
         RSMDataSetNode rsetNode = findResultSetNode((RSMNode) model.getRoot(), rsetId, projectId);
 
@@ -111,7 +111,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     }
 
-    private RSMDataSetNode findResultSetNode(RSMNode node, int rsetId, Integer projectId) {
+    private RSMDataSetNode findResultSetNode(RSMNode node, long rsetId, long projectId) {
 
         int nbChildren = node.getChildCount();
 
@@ -120,7 +120,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             RSMNode.NodeTypes childType = childNode.getType();
             if (childType == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode dataSetNode = ((RSMDataSetNode) childNode);
-                Integer resultSetId = dataSetNode.getResultSetId();
+                Long resultSetId = dataSetNode.getResultSetId();
 
                 if ((resultSetId != null) && (resultSetId.intValue() == rsetId)) {
                     return dataSetNode;
@@ -192,14 +192,14 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
 
                 RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
-                Integer rsmId = dataSetNode.getResultSummaryId();
+                Long rsmId = dataSetNode.getResultSummaryId();
                 if (rsmId != null) {
 
 
                     int size = rsmArray.size();
                     for (int i = 0; i < size; i++) {
                         ResultSummary rsmItem = rsmArray.get(i);
-                        if (rsmItem.getId().intValue() == rsmId.intValue()) {
+                        if (rsmItem.getId() == rsmId.longValue()) {
                             nodePath.add(node);
                             TreePath path = new TreePath(nodePath.toArray());
                             selectedPathArray.add(path);

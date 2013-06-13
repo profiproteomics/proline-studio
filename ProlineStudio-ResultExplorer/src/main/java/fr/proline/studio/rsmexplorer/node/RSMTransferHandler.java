@@ -11,7 +11,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
@@ -49,7 +48,7 @@ public class RSMTransferHandler extends TransferHandler {
             
             // only Dataset which are not being changed can be transferred
             // furthermore Dataset must be of the same project
-            Integer commonProjectId = null;
+            long commonProjectId = -1;
             RSMNode[] selectedNodes = tree.getSelectedNodes();
             int nbSelectedNode = selectedNodes.length;
             for (int i=0;i<nbSelectedNode;i++) {
@@ -67,10 +66,10 @@ public class RSMTransferHandler extends TransferHandler {
                     return null;
                 }
                 
-                Integer projectId = datasetNode.getDataset().getProject().getId();
-                if (commonProjectId == null) {
+                long projectId = datasetNode.getDataset().getProject().getId();
+                if (commonProjectId == -1) {
                     commonProjectId = projectId;
-                } else if (commonProjectId.intValue() != projectId.intValue()) {
+                } else if (commonProjectId != projectId) {
                     return null;
                 }
             } 
@@ -155,7 +154,7 @@ public class RSMTransferHandler extends TransferHandler {
                 return false;
             }
             
-            Integer dropProjectId = null;
+            long dropProjectId;
             RSMNode.NodeTypes nodeType = dropRSMNode.getType();
             if ( nodeType == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode dropDatasetNode = (RSMDataSetNode) dropRSMNode;
@@ -177,7 +176,7 @@ public class RSMTransferHandler extends TransferHandler {
                 
                 // drop node must be in the same project that nodes being transferred
                 RSMTransferable nodeListTransferable = (RSMTransferable) support.getTransferable().getTransferData(RSMTransferable.RSMNodeList_FLAVOR);
-                if (nodeListTransferable.getProjectId().intValue() != dropProjectId.intValue()) {
+                if (nodeListTransferable.getProjectId() != dropProjectId) {
                     return false;
                 }
                 
@@ -370,7 +369,7 @@ public class RSMTransferHandler extends TransferHandler {
 
 
             // specific case when the node is moved in its parent
-            int indexChild = -1;
+            int indexChild;
             if (dropRSMNode.isNodeChild(node)) {
                 // we are moving the node in its parent
                 indexChild = dropRSMNode.getIndex(node);

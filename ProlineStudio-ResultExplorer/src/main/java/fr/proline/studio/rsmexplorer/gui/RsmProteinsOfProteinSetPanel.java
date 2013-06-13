@@ -115,7 +115,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     private void clearData() {
         proteinNameTextField.setText("");
         //((ProteinGroupProteinSelectedPanel) ViewTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(null); //JPM.TODO
-        ((ProteinTableModel) proteinTable.getModel()).setData(null, null, null);
+        ((ProteinTableModel) proteinTable.getModel()).setData(-1, null, null);
 
     }
 

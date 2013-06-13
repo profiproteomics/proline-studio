@@ -59,7 +59,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     public void setData(Long taskId, ProteinSet[] proteinSets, boolean finished) {
         
-                // update toolbar
+        // update toolbar
         if (m_forRSM) {
             ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
             if (rsm != null) {
@@ -259,7 +259,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         String previousSearch = "";
         int searchIndex = 0;
-        ArrayList<Integer> proteinSetIds = new ArrayList<>();
+        ArrayList<Long> proteinSetIds = new ArrayList<>();
 
         
         public SearchButton() {
@@ -377,7 +377,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         }
         
-        public void selectProteinSet(Integer proteinSetId, String searchText) {
+        public void selectProteinSet(Long proteinSetId, String searchText) {
             ProteinGroupTableModel tableModel = (ProteinGroupTableModel) getModel();
             int row = tableModel.findRow(proteinSetId);
             if (row == -1) {

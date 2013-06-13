@@ -20,7 +20,7 @@ public class RSMTransferable implements Transferable, Serializable {
 
     
     private Integer m_transferKey = null;
-    private Integer m_projectId = null;
+    private long m_projectId = -1;
     
     private static HashMap<Integer, TransferData> transferMap = new HashMap<>();
     
@@ -28,7 +28,7 @@ public class RSMTransferable implements Transferable, Serializable {
     
     private static final long serialVersionUID = 1L;
     
-    public RSMTransferable(Integer transferKey, Integer projectId) {
+    public RSMTransferable(Integer transferKey, long projectId) {
         m_transferKey = transferKey;
         m_projectId = projectId;
     }
@@ -79,7 +79,7 @@ public class RSMTransferable implements Transferable, Serializable {
         return m_transferKey;
     }
     
-    public Integer getProjectId() {
+    public long getProjectId() {
         return m_projectId;
     }
     

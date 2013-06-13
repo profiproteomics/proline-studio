@@ -17,6 +17,7 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
 
         // Name of this databox
         name = "PSM";
+        description = "All PSM of an Identification Summary or coresponding to a Peptide Instance";
         
         // Register Possible in parameters
         // One ResultSummary

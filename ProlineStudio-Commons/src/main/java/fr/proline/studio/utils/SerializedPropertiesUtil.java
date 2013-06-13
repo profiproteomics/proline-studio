@@ -182,7 +182,7 @@ public class SerializedPropertiesUtil {
         while (it.hasNext()) {
             Object key = it.next();
             Object value = serializedPropertiesMap.get(key);
-            String valueString = null;
+            String valueString;
             if (value instanceof Map) {
                 if (listOfMaps == null) {
                     listOfMaps = new ArrayList<>();

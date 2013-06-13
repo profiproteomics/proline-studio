@@ -23,7 +23,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
     public DataBoxRsetAll() {
 
         // Name of this databox
-        name = "Result Sets";
+        name = "Search Results";
         
         // Register Possible in parameters
         // One ResultSummary

@@ -737,13 +737,13 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return parameterList.getValues();
     }
 
-    public Integer getInstrumentId() {
+    public long getInstrumentId() {
         
         InstrumentConfiguration instrument = (InstrumentConfiguration) sourceParameterList.getParameter("instrument").getObjectValue(); 
         return instrument.getId();
     }
     
-    public Integer getPeaklistSoftwareId() {
+    public long getPeaklistSoftwareId() {
         PeaklistSoftware peaklistSoftware = (PeaklistSoftware) sourceParameterList.getParameter("peaklist_software").getObjectValue();  
         return peaklistSoftware.getId();
     }

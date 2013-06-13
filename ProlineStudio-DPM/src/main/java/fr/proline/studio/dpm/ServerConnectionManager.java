@@ -5,7 +5,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseConnectionTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.CreateProjectTask;
 import fr.proline.studio.dpm.task.CreateUserTask;
 import fr.proline.studio.dpm.task.ServerConnectionTask;
 import java.util.HashMap;

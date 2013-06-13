@@ -14,7 +14,8 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private  DisplayRsmPSMAction m_displayRsmPSMAction;
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
-
+    private DisplayUserWindowAction m_displayUserWindowAction;
+    
     private JMenu m_menu;
     
     public DisplayRsmAction() {
@@ -28,14 +29,19 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction = new DisplayRsmPSMAction();
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction();
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction();
+        m_displayUserWindowAction = new DisplayUserWindowAction();
+
 
         JMenuItem displayRsmPSMItem = new JMenuItem(m_displayRsmPSMAction);
         JMenuItem displayRsmPeptidesItem = new JMenuItem(m_displayRsmPeptidesAction);
         JMenuItem displayRsmProteinSetsItem = new JMenuItem(m_displayRsmProteinSetsAction);
+        JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
 
         m_menu.add(displayRsmPSMItem);
         m_menu.add(displayRsmPeptidesItem);
         m_menu.add(displayRsmProteinSetsItem);
+        m_menu.addSeparator();
+        m_menu.add(displayUserWindowItem);
 
         return m_menu;
     }
@@ -43,10 +49,12 @@ public class DisplayRsmAction extends AbstractRSMAction {
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
 
+        m_displayRsmPSMAction.updateEnabled(selectedNodes);
         m_displayRsmPeptidesAction.updateEnabled(selectedNodes);
         m_displayRsmProteinSetsAction.updateEnabled(selectedNodes);
+        m_displayUserWindowAction.updateEnabled(selectedNodes);
 
-        boolean isEnabled = m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled();
+        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled() || m_displayUserWindowAction.isEnabled();
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
 

@@ -31,9 +31,10 @@ public abstract class AbstractDataBox implements ChangeListener {
     private ArrayList<DataParameter> m_outParameters = new ArrayList<>();
     
     
-    private Integer projectId = null;
+    private long projectId = -1;
     
     protected String name;
+    protected String description = "";
     
     private DataBoxLayout layout = DataBoxLayout.VERTICAL;
     
@@ -62,6 +63,17 @@ public abstract class AbstractDataBox implements ChangeListener {
     }
   
     
+    public boolean isCompatible(ArrayList<DataParameter> outParameters) {
+        Iterator<DataParameter> it = m_inParameters.iterator();
+        while (it.hasNext()) {
+            DataParameter parameter = it.next();
+            
+            if (parameter.isCompatibleWithOutParameter(outParameters)) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     
     public boolean isCompatible(AbstractDataBox nextDataBox) {
@@ -111,18 +123,18 @@ public abstract class AbstractDataBox implements ChangeListener {
         
     }
     
-    public void setProjectId(Integer projectId) {
+    public void setProjectId(long projectId) {
         this.projectId = projectId;
     }
     
-    public Integer getProjectId() {
-        if (projectId!=null) {
+    public long getProjectId() {
+        if (projectId!=-1) {
             return projectId;
         }
         if (previousDataBox != null) {
             return previousDataBox.getProjectId();
         }
-        return null; // should not happen
+        return -1; // should not happen
         
     }
     
@@ -142,6 +154,9 @@ public abstract class AbstractDataBox implements ChangeListener {
         return name;
     }
     
+    public String getDescription() {
+        return description;
+    }
     
     public void windowClosed() {
     }

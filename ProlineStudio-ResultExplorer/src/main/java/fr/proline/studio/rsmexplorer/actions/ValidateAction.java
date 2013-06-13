@@ -111,7 +111,7 @@ public class ValidateAction extends AbstractRSMAction {
         }
     }
     
-    private void updateDataset(final RSMDataSetNode datasetNode, final Dataset d, Integer resultSummaryId, TaskInfo taskInfo) {
+    private void updateDataset(final RSMDataSetNode datasetNode, final Dataset d, long resultSummaryId, TaskInfo taskInfo) {
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

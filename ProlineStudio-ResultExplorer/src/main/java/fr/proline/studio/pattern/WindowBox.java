@@ -41,7 +41,7 @@ public class WindowBox {
         return m_entryBox;
     }
     
-    public void setEntryData(Integer projectId, Object data) {
+    public void setEntryData(long projectId, Object data) {
         m_entryBox.setProjectId(projectId);
         m_entryBox.setEntryData(data);
     }

@@ -28,17 +28,23 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
          // Name of this databox
         name = "Protein Set";
         
+        if (forRSM) {
+            description = "All Protein Sets of an Identification Summary";
+        } else {
+            description = "All Protein Sets coresponding to a Peptide Instance";
+        }
         // Register Possible in parameters
         // One ResultSummary
-        DataParameter inParameter = new DataParameter();
-        inParameter.addParameter(ResultSummary.class, false);
-        registerInParameter(inParameter);
-        
-        // or one PeptideInstance
-        inParameter = new DataParameter();
-        inParameter.addParameter(PeptideInstance.class, false);
-        registerInParameter(inParameter);
-        
+        if (forRSM) {
+            DataParameter inParameter = new DataParameter();
+            inParameter.addParameter(ResultSummary.class, false);
+            registerInParameter(inParameter);
+        } else {
+            // or one PeptideInstance
+            DataParameter inParameter = new DataParameter();
+            inParameter.addParameter(PeptideInstance.class, false);
+            registerInParameter(inParameter);
+        }
    
         // Register possible out parameters
         // One or Multiple ProteinSet

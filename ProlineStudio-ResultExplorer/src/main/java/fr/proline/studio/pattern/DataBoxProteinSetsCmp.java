@@ -68,7 +68,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
 
     
     
-    public void loadData(final ArrayList<ProteinMatch> proteinMatchArray, ArrayList<Integer> resultSetIdArray, String proteinMatchName, final ArrayList<ResultSummary> resultSummaryArray ) {
+    public void loadData(final ArrayList<ProteinMatch> proteinMatchArray, ArrayList<Long> resultSetIdArray, String proteinMatchName, final ArrayList<ResultSummary> resultSummaryArray ) {
 
         //final String searchedText = searchTextBeingDone; //JPM.TODO
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -118,15 +118,15 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
                     return;
                 }
 
-                HashMap<Integer, ArrayList<Integer>> rsmIdMap = null;
+                HashMap<Long, ArrayList<Long>> rsmIdMap = null;
                 if (resultSummaryArray != null) {
                     rsmIdMap = new HashMap<>();
                     
                     int size = resultSummaryArray.size();
                     for (int i=0;i<size;i++) {
                         ResultSummary rsm = resultSummaryArray.get(i);
-                        Integer rsetId = rsm.getResultSet().getId();
-                        ArrayList<Integer> rsmIdList = rsmIdMap.get(rsetId);
+                        Long rsetId = rsm.getResultSet().getId();
+                        ArrayList<Long> rsmIdList = rsmIdMap.get(rsetId);
                         if (rsmIdList == null) {
                             rsmIdList = new ArrayList<>();
                             rsmIdMap.put(rsetId, rsmIdList);
@@ -136,7 +136,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
                 }
 
                 // create a list without twice the same ProteinMatch
-                ArrayList<ProteinMatch> proteinMatchCleanedArray = new ArrayList<ProteinMatch>();
+                ArrayList<ProteinMatch> proteinMatchCleanedArray = new ArrayList<>();
                 int size = proteinMatchArray.size();
                 for (int i=0;i<size;i++) {
                     ProteinMatch pm = proteinMatchArray.get(i);

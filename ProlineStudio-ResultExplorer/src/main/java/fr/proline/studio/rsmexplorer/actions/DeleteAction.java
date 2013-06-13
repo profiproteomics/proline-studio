@@ -23,7 +23,7 @@ public class DeleteAction extends AbstractRSMAction {
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
 
-        Integer commonProjectId = null;
+        long commonProjectId = -1;
         int nbSelectedNodes = selectedNodes.length;
         for (int i=0;i<nbSelectedNodes;i++) {
             RSMNode node = selectedNodes[i];
@@ -34,10 +34,10 @@ public class DeleteAction extends AbstractRSMAction {
             }
             
             RSMDataSetNode datasetNode = (RSMDataSetNode) selectedNodes[i];
-            Integer projectId = datasetNode.getDataset().getProject().getId();
-            if (commonProjectId == null) {
+            long projectId = datasetNode.getDataset().getProject().getId();
+            if (commonProjectId == -1) {
                 commonProjectId = projectId;
-            } else if (commonProjectId.intValue() != projectId.intValue()) {
+            } else if (commonProjectId != projectId) {
                 setEnabled(false);
                 return;
             }

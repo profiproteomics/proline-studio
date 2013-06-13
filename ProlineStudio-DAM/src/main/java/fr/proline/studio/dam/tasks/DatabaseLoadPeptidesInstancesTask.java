@@ -3,7 +3,6 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
-import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,14 +24,14 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     private final static int LOAD_PEPTIDE_INSTANCE_FOR_PEPTIDE_MATCH   = 0;
     private final static int LOAD_PEPTIDE_INSTANCES_FOR_RSM   = 1;
     
-    private Integer projectId = null;
+    private long projectId = -1;
     private ProteinMatch proteinMatch = null;
     private ArrayList<ProteinMatch> proteinMatchArray = null;
     private ArrayList<ResultSummary> rsmList = null;
     
     private ResultSummary rsm = null;
 
-    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, Integer projectId, ProteinMatch proteinMatch, ArrayList<ResultSummary> rsmList) {
+    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, long projectId, ProteinMatch proteinMatch, ArrayList<ResultSummary> rsmList) {
         super(callback, new TaskInfo("Load Peptide Sets for Protein Match "+proteinMatch.getAccession(), TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinMatch = proteinMatch;
@@ -42,7 +41,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         
     }
     
-    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, Integer projectId, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmList) {
+    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, long projectId, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmList) {
         super(callback, new TaskInfo("Load Peptide Sets for multiple Protein Matches", TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinMatch = null;
@@ -51,7 +50,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         action = LOAD_PEPTIDE_INSTANCE_FOR_PEPTIDE_MATCH;
     }
 
-    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, Integer projectId, ResultSummary rsm) {
+    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm) {
         super(callback, new TaskInfo("Load Peptides for Identification Summary "+rsm.getId(), TASK_LIST_INFO));
         this.projectId = projectId;
         this.rsm = rsm;
@@ -155,7 +154,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
     public boolean fetchDataForPeptideMatch() {
 
-        HashMap<Integer, Peptide> peptideMap = new HashMap<>();
+        HashMap<Long, Peptide> peptideMap = new HashMap<>();
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
 
         try {
@@ -180,16 +179,18 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         } finally {
             entityManagerMSI.close();
         }
-        EntityManager entityManagerPS = null;
+        
+        EntityManager entityManagerPS;
         try {
         
             DataStoreConnectorFactory.getInstance();
             DataStoreConnectorFactory.getInstance().getPsDbConnector();
             DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory();
             
-        entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
+            entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(getClass().getSimpleName()+" failed", e);
+            return false;
         }
         
         if (!peptideMap.isEmpty()) {
@@ -211,7 +212,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         return true;
     }
     
-    private void fetchPeptideData(EntityManager entityManagerMSI, ResultSummary rsm, ProteinMatch proteinMatch, HashMap<Integer, Peptide> peptideMap) {
+    private void fetchPeptideData(EntityManager entityManagerMSI, ResultSummary rsm, ProteinMatch proteinMatch, HashMap<Long, Peptide> peptideMap) {
 
         // Retrieve peptideSet of a proteinMatch
         PeptideSet peptideSet = proteinMatch.getTransientData().getPeptideSet(rsm.getId());
@@ -285,7 +286,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
             ArrayList<ProteinSet> proteinSetArray = p.getTransientData().getProteinSetArray();
             if (proteinSetArray == null) {
-                proteinSetArray = new ArrayList<ProteinSet>();
+                proteinSetArray = new ArrayList<>();
                 p.getTransientData().setProteinSetArray(proteinSetArray);
             }
             proteinSetArray.add(ps);
@@ -293,7 +294,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
     }
     
-    private void fetchPtmData(EntityManager entityManagerPS, HashMap<Integer, Peptide> peptideMap) {
+    private void fetchPtmData(EntityManager entityManagerPS, HashMap<Long, Peptide> peptideMap) {
 
         TypedQuery<PeptidePtm> ptmQuery = entityManagerPS.createQuery("SELECT ptm FROM fr.proline.core.orm.ps.PeptidePtm ptm WHERE ptm.peptide.id IN (:peptideIds)", PeptidePtm.class);
         ptmQuery.setParameter("peptideIds", peptideMap.keySet());

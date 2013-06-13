@@ -37,8 +37,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private ResultSummary rsm = null;
     private String name = null;
     private Dataset parentDataset = null;
-    private Integer resultSetId = null;
-    private Integer resultSummaryId = null;
+    private Long resultSetId = null;
+    private Long resultSummaryId = null;
     private Aggregation.ChildNature datasetType;
     private String aggregateName;
     private boolean hasSuffix = false;
@@ -155,7 +155,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         action = CREATE_AGGREGATE_DATASET;
     }
     
-    public void initCreateDatasetForIdentification(Project project, Dataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, Integer resultSetId, Integer resultSummaryId, ArrayList<Dataset> datasetList, TaskInfo taskInfo) {
+    public void initCreateDatasetForIdentification(Project project, Dataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, Long resultSetId, Long resultSummaryId, ArrayList<Dataset> datasetList, TaskInfo taskInfo) {
         setTaskInfo(taskInfo);
         setPriority(Priority.HIGH_2);
         this.project = project;
@@ -168,7 +168,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         action = CREATE_IDENTIFICATION_DATASET;
     }
     
-    public void initModifyDatasetForValidation(Dataset dataset, Integer resultSummaryId, TaskInfo taskInfo) {
+    public void initModifyDatasetForValidation(Dataset dataset, Long resultSummaryId, TaskInfo taskInfo) {
         setTaskInfo(taskInfo);
         setPriority(Priority.HIGH_2);
         this.dataset = dataset;
@@ -176,7 +176,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         action = MODIFY_VALIDATED_DATASET;
     }
     
-    public void initModifyDatasetForMerge(Dataset dataset, Integer resultSetId, TaskInfo taskInfo) {
+    public void initModifyDatasetForMerge(Dataset dataset, Long resultSetId, TaskInfo taskInfo) {
         setTaskInfo(taskInfo);
         setPriority(Priority.HIGH_2);
         this.dataset = dataset;
@@ -274,7 +274,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
     public boolean fetchParentsDataSet() {
 
-        Integer projectId = project.getId();
+        long projectId = project.getId();
 
         
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
@@ -376,7 +376,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
     public boolean fetchChildrenDataSet() {
 
-        Integer parentDatasetId = parentDataset.getId();
+        long parentDatasetId = parentDataset.getId();
 
         
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
@@ -409,7 +409,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     public boolean fetchRsetAndRsm() {
 
-        Integer projectId = null;
+        long projectId = -1;
         if (dataset != null) {
             projectId = dataset.getProject().getId();
         } else if (datasetList != null) {
@@ -444,14 +444,14 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     private void fetchRsetAndRsmForOneDataset(EntityManager entityManagerMSI, Dataset d) {
 
-        Integer rsetId = d.getResultSetId();
+        Long rsetId = d.getResultSetId();
         if (rsetId != null) {
             ResultSet rsetFound = entityManagerMSI.find(ResultSet.class, rsetId);
 
             d.getTransientData().setResultSet(rsetFound);
         }
 
-        Integer rsmId = d.getResultSummaryId();
+        Long rsmId = d.getResultSummaryId();
         if (rsmId != null) {
             ResultSummary rsmFound = entityManagerMSI.find(ResultSummary.class, rsmId);
 
@@ -463,7 +463,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     private boolean fetchDatasetForRsm(ResultSummary rsm) {
         
-        Integer rsmId = rsm.getId();
+        Long rsmId = rsm.getId();
 
         
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
@@ -732,9 +732,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 }
                 
                 
-                Dataset parentDataset = null;
+                Dataset parentDataset;
                 Dataset mergedParentDataset = null;
-                Project parentProject = null;
+                Project parentProject;
                 //Project mergedParentProject = null;
                 if (parentObject instanceof Dataset) {
                     parentDataset = (Dataset) parentObject;

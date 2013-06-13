@@ -16,12 +16,12 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseSearchPeptideMatchTask extends AbstractDatabaseTask {
   
-    private Integer projectId = null;
+    private long projectId = -1;
     private ResultSet rset = null;
     private String        searchString = null;
-    private ArrayList<Integer>     searchResult = null;
+    private ArrayList<Long>     searchResult = null;
     
-    public DatabaseSearchPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, ResultSet rset, String searchString, ArrayList<Integer> searchResult) {
+    public DatabaseSearchPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset, String searchString, ArrayList<Long> searchResult) {
         super(callback, Priority.HIGH_1, new TaskInfo("Search Peptide Match "+searchString, TASK_LIST_INFO));
         this.projectId = projectId;
         this.rset = rset;       
@@ -36,10 +36,10 @@ public class DatabaseSearchPeptideMatchTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().begin();
             
             // Search peptideMatches with the searched name
-            TypedQuery<Integer> searchQuery = entityManagerMSI.createQuery("SELECT pm.id FROM fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id AND p.sequence LIKE :search ORDER BY pm.msQuery.initialId ASC, p.sequence ASC", Integer.class);
+            TypedQuery<Long> searchQuery = entityManagerMSI.createQuery("SELECT pm.id FROM fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id AND p.sequence LIKE :search ORDER BY pm.msQuery.initialId ASC, p.sequence ASC", Long.class);
             searchQuery.setParameter("search", "%"+searchString+"%");
             searchQuery.setParameter("rsetId", rset.getId());
-            List<Integer> peptideMatchIdList = searchQuery.getResultList();
+            List<Long> peptideMatchIdList = searchQuery.getResultList();
 
             searchResult.clear();
             searchResult.addAll(peptideMatchIdList);

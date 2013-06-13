@@ -15,10 +15,10 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseRsetTask extends AbstractDatabaseTask {
 
-    private Integer m_projectId = null;
+    private long m_projectId = -1;
     private ArrayList<ResultSet> m_resultSetArrayList = null;
     
-    public DatabaseRsetTask(AbstractDatabaseCallback callback, Integer projectId, ArrayList<ResultSet> resultSetArrayList) {
+    public DatabaseRsetTask(AbstractDatabaseCallback callback, long projectId, ArrayList<ResultSet> resultSetArrayList) {
         super(callback, new TaskInfo("Load All Search Results", TASK_LIST_INFO));
         m_projectId = projectId;
         m_resultSetArrayList = resultSetArrayList;

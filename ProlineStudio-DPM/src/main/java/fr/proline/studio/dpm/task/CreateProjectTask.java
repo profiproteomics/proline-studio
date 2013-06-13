@@ -24,10 +24,10 @@ public class CreateProjectTask extends AbstractServiceTask {
 
     private String name;
     private String description;
-    private int ownerId;
+    private long ownerId;
     private ProjectData projectData;
     
-    public CreateProjectTask(AbstractServiceCallback callback, String name, String description, int ownerId, ProjectData projectData) {
+    public CreateProjectTask(AbstractServiceCallback callback, String name, String description, long ownerId, ProjectData projectData) {
         super(callback, true /*synchronous*/, new TaskInfo("Add Project named "+name, TASK_LIST_INFO));
         
         this.name = name;

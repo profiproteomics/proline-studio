@@ -5,7 +5,6 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -20,7 +19,7 @@ import javax.persistence.TypedQuery;
 public class DatabaseProjectTask extends AbstractDatabaseTask {
 
     private String user = null;
-    private Integer projectId = null;
+    private long projectId = -1;
     private List<AbstractData> list = null;
     private String name = null;
 
@@ -52,7 +51,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
      * @param projectId
      * @param list 
      */
-    public void initRenameProject(Integer projectId, String name) {
+    public void initRenameProject(long projectId, String name) {
         setTaskInfo(new TaskInfo("Rename Project to "+name, TASK_LIST_INFO));
         this.projectId = projectId;
         this.name = name;
@@ -93,8 +92,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             Iterator<Project> it = projectList.iterator();
             while (it.hasNext()) {
                 Project projectCur = it.next();
-                //Integer projectIdCur = projectCur.getId();
-                
+
                 ProjectData projectDataCur = new ProjectData(projectCur);
                 projectDataCur.setHasChildren(true); // always has a Trash
                 //projectMap.put(projectIdCur, projectDataCur);

@@ -20,10 +20,10 @@ import javax.persistence.Query;
  */
 public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
     
-    private Integer projectId = null;
+    private long projectId = -1;
     private ProteinSet proteinSet = null;
 
-    public DatabaseProteinsFromProteinSetTask(AbstractDatabaseCallback callback, Integer projectId, ProteinSet proteinSet) {
+    public DatabaseProteinsFromProteinSetTask(AbstractDatabaseCallback callback, long projectId, ProteinSet proteinSet) {
         super(callback, Priority.NORMAL_3, new TaskInfo("Load Proteins of a Protein Set "+getProteinSetName(proteinSet), TASK_LIST_INFO));
         this.projectId = projectId;
         this.proteinSet = proteinSet;        
@@ -78,7 +78,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
 
         //int peptitesCountInSameSet = typicalProtein.getPeptideCount();
 
-        Integer rsmId = proteinSet.getResultSummary().getId();
+        Long rsmId = proteinSet.getResultSummary().getId();
 
         // Load Proteins and their peptide count for the current result summary
         Query proteinMatchQuery = entityManagerMSI.createQuery("SELECT pm, pepset FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, PeptideSet pepset, PeptideSetProteinMatchMap pepset_to_pm WHERE ps_to_pm.proteinSet.id=:proteinSetId AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId AND pepset_to_pm.resultSummary.id=:rsmId AND pepset_to_pm.id.peptideSetId=pepset.id AND pepset_to_pm.id.proteinMatchId=pm.id ORDER BY pepset.score DESC");
@@ -93,7 +93,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
         ArrayList<ProteinMatch> subSet = new ArrayList<>(proteinMatchList.size());
 
         // temporary Map to link a bioSequenceId to a ProteinMatch
-        HashMap<Integer, ProteinMatch> biosequenceToProteinMap = new HashMap<>();
+        HashMap<Long, ProteinMatch> biosequenceToProteinMap = new HashMap<>();
         HashMap<String, ProteinMatch> accessionToProteinMap = new HashMap<>();
 
         Iterator<Object[]> it = proteinMatchList.iterator();
@@ -122,7 +122,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
                 subSet.add(proteinMatch);
             }
 
-            Integer bioSequenceId = proteinMatch.getBioSequenceId();
+            Long bioSequenceId = proteinMatch.getBioSequenceId();
             if (bioSequenceId != null) {
                 biosequenceToProteinMap.put(bioSequenceId, proteinMatch);
             } else {
@@ -145,7 +145,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
             Iterator<Object[]> itBioseq = l.iterator();
             while (itBioseq.hasNext()) {
                 Object[] resCur = itBioseq.next();
-                Integer bioSequenceId = (Integer) resCur[0];
+                Long bioSequenceId = (Long) resCur[0];
                 fr.proline.core.orm.msi.BioSequence bioSequence = (fr.proline.core.orm.msi.BioSequence) resCur[1];
                 ProteinMatch pm =  biosequenceToProteinMap.get(bioSequenceId);
                 pm.getTransientData().setBioSequenceMSI(bioSequence);

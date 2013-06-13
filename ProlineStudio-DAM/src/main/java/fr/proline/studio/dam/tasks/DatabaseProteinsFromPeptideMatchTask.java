@@ -16,10 +16,10 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
     
-    private Integer projectId = null;
+    private long projectId = -1;
     private PeptideMatch peptideMatch = null;
 
-    public DatabaseProteinsFromPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, PeptideMatch peptideMatch) {
+    public DatabaseProteinsFromPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, PeptideMatch peptideMatch) {
         super(callback, Priority.NORMAL_3, new TaskInfo("Load Proteins for a Peptide Match "+getPeptideName(peptideMatch), TASK_LIST_INFO));
         this.projectId = projectId;
         this.peptideMatch = peptideMatch;        
@@ -60,14 +60,14 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
             
 
             // temporary Map to link a bioSequenceId to a ProteinMatch
-            HashMap<Integer, ProteinMatch> biosequenceToProteinMap = new HashMap<>();
+            HashMap<Long, ProteinMatch> biosequenceToProteinMap = new HashMap<>();
             HashMap<String, ProteinMatch> accessionToProteinMap = new HashMap<>();
             
             Iterator<ProteinMatch> it = proteinMatchList.iterator();
             while (it.hasNext()) {
                 ProteinMatch proteinMatch = it.next();
 
-                Integer bioSequenceId = proteinMatch.getBioSequenceId();
+                Long bioSequenceId = proteinMatch.getBioSequenceId();
                 if (bioSequenceId != null) {
                     biosequenceToProteinMap.put(bioSequenceId, proteinMatch);
                 } else {
@@ -90,7 +90,7 @@ public class DatabaseProteinsFromPeptideMatchTask extends AbstractDatabaseTask {
                 Iterator<Object[]> itMass=l.iterator();
                 while (itMass.hasNext()) {
                     Object[] resCur = itMass.next();
-                    Integer bioSequenceId = (Integer) resCur[0];
+                    Long bioSequenceId = (Long) resCur[0];
                     fr.proline.core.orm.msi.BioSequence bioSequence = (BioSequence) resCur[1];
                     ProteinMatch pm = biosequenceToProteinMap.get(bioSequenceId);
                     pm.getTransientData().setBioSequenceMSI(bioSequence);

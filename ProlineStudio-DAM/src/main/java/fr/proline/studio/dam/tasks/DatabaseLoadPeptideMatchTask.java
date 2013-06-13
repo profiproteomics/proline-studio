@@ -27,23 +27,23 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     public static final int SUB_TASK_COUNT_RSET = 3; // <<----- get in sync // SUB_TASK_PROTEINSET_NAME_LIST not used for RSET
     public static final int SUB_TASK_COUNT_RSM = 4; // <<----- get in sync
     
-    private Integer m_projectId = null;
+    private long m_projectId = -1;
     private ResultSet m_rset = null;
     private ResultSummary m_rsm = null;
     
     // data kept for sub tasks
-    private ArrayList<Integer> peptideMatchIds = null;
-    private HashMap<Integer, PeptideMatch> peptideMatchMap = null;
+    private ArrayList<Long> peptideMatchIds = null;
+    private HashMap<Long, PeptideMatch> peptideMatchMap = null;
     
     private boolean m_loadForRset;
 
-    public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, ResultSet rset) {
+    public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset) {
         super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Peptide Matches for Search Result "+rset.getId(), TASK_LIST_INFO));
         m_projectId = projectId;
         m_rset = rset;   
         m_loadForRset = true;
     }
-    public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, Integer projectId, ResultSummary rsm) {
+    public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm) {
         super(callback, SUB_TASK_COUNT_RSM, new TaskInfo("Load Peptide Matches for Identification Summary "+rsm.getId(), TASK_LIST_INFO));
         m_projectId = projectId;
         m_rsm = rsm;
@@ -83,7 +83,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             
             if (m_loadForRset) {
 
-                Integer rsetId = m_rset.getId();
+                Long rsetId = m_rset.getId();
 
                 // Load Peptide Match order by query id and Peptide name
                 // (pm.msQuery is fetch because it is declared as lazy and it is needed later)
@@ -108,7 +108,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 m_rset.getTransientData().setPeptideMatches(peptideMatchArray);
 
             } else {
-                Integer rsmId = m_rsm.getId();
+                Long rsmId = m_rsm.getId();
 
 
                 // Load Peptide Match which have a Peptide Instance in the rsm
@@ -138,7 +138,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             peptideMatchMap = new HashMap<>();
             for (int i = 0; i < nb; i++) {
                 PeptideMatch pm = peptideMatchArray[i];
-                Integer pmId = pm.getId();
+                Long pmId = pm.getId();
                 peptideMatchIds.add(i, pmId);
                 peptideMatchMap.put(pmId, pm);
             }
@@ -268,7 +268,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         Iterator<Object[]> it = peptides.iterator();
         while (it.hasNext()) {
             Object[] res = it.next();
-            Integer peptideMatchId = (Integer) res[0];
+            Long peptideMatchId = (Long) res[0];
             Peptide peptide = (Peptide) res[1];
             peptideMatchMap.get(peptideMatchId).getTransientData().setPeptide(peptide);
         }
@@ -290,12 +290,12 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         Query msQueryQuery = entityManagerMSI.createQuery("SELECT pm.id, msq FROM PeptideMatch pm,MsQuery msq WHERE pm.id IN (:listId) AND pm.msQuery=msq");
         msQueryQuery.setParameter("listId", sliceOfPeptideMatchIds);
 
-        int i = subTask.getStartIndex();
+
         List<Object[]> msQueries = msQueryQuery.getResultList();
         Iterator<Object[]> it = msQueries.iterator();
         while (it.hasNext()) {
             Object[] resCur = it.next();
-            Integer peptideMatchId = (Integer) resCur[0];
+            Long peptideMatchId = (Long) resCur[0];
             MsQuery q = (MsQuery) resCur[1];
             PeptideMatch peptideMatch = peptideMatchMap.get(peptideMatchId);
             peptideMatch.getTransientData().setIsMsQuerySet(true);
@@ -315,7 +315,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         Iterator<Object[]> it = msQueries.iterator();
         while (it.hasNext()) {
             Object[] resCur = it.next();
-            Integer peptideMatchId = (Integer) resCur[0];
+            Long peptideMatchId = (Long) resCur[0];
             Spectrum spectrum = (Spectrum) resCur[1];
             PeptideMatch peptideMatch = peptideMatchMap.get(peptideMatchId);
             MsQuery q = peptideMatch.getMsQuery();
@@ -349,7 +349,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         while (it.hasNext()) {
             Object[] resCur = it.next();
             String proteinName = (String) resCur[0];
-            Integer peptideMatchId = (Integer) resCur[1];
+            Long peptideMatchId = (Long) resCur[1];
 
             PeptideMatch peptideMatch = peptideMatchMap.get(peptideMatchId);
 

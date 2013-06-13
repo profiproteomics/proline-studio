@@ -22,17 +22,17 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseRsetProperties extends AbstractDatabaseTask {
     
-    private Integer m_projectId = null;
+    private long m_projectId;
     private Dataset m_dataset = null;
     private ResultSet m_rset = null;
     
-    public DatabaseRsetProperties(AbstractDatabaseCallback callback, Integer projectId, Dataset dataset) {
+    public DatabaseRsetProperties(AbstractDatabaseCallback callback, long projectId, Dataset dataset) {
         super(callback, new TaskInfo("Load Properties for Search Result "+dataset.getName(), TASK_LIST_INFO));
         m_projectId = projectId;
         m_dataset = dataset;
     }
     
-    public DatabaseRsetProperties(AbstractDatabaseCallback callback, Integer projectId, ResultSet rset, String name) {
+    public DatabaseRsetProperties(AbstractDatabaseCallback callback, long projectId, ResultSet rset, String name) {
         super(callback, new TaskInfo("Load Properties for Search Result "+name, TASK_LIST_INFO));
         m_projectId = projectId;
         m_rset = rset;
@@ -96,7 +96,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
 
     private void fetchData_count(EntityManager entityManagerMSI, ResultSet rset) throws Exception {
         
-        Integer rsetId = rset.getId();
+        Long rsetId = rset.getId();
         
         // Count Protein Match
         TypedQuery<Long> countProteinMatchQuery = entityManagerMSI.createQuery("SELECT count(pm) FROM fr.proline.core.orm.msi.ProteinMatch pm WHERE pm.resultSet.id=:rsetId", Long.class);

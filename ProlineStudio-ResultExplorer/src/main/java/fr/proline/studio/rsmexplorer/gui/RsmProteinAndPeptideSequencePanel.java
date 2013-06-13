@@ -162,8 +162,8 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             SequenceMatchPK smpk = peptideData.getSequenceMatch().getId();
             
             
-            int start = smpk.getStart().intValue();
-            int stop = smpk.getStop().intValue();
+            int start = smpk.getStart();
+            int stop = smpk.getStop();
             
             if (selectedPeptide) {
                 for (int j=start;j<=stop;j++) {

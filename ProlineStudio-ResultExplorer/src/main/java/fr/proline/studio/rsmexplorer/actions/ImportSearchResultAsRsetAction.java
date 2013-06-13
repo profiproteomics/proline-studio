@@ -27,7 +27,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
 
     private static int m_beingImportedNumber = 0;
     
-    private static HashMap<Integer, ArrayList<ChangeListener>> m_listenerMap = new HashMap<>();
+    private static HashMap<Long, ArrayList<ChangeListener>> m_listenerMap = new HashMap<>();
     
     public ImportSearchResultAsRsetAction() {
         super(NbBundle.getMessage(ImportSearchResultAsRsetAction.class, "CTL_AddSearchResult"));
@@ -54,8 +54,8 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
             
             String parserId = dialog.getParserId();
             String decoyRegex = dialog.getDecoyRegex();
-            Integer instrumentId = dialog.getInstrumentId();
-            Integer peaklistSoftwareId = dialog.getPeaklistSoftwareId();
+            long instrumentId = dialog.getInstrumentId();
+            long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
             
             RSMTree tree = RSMTree.getTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -63,7 +63,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
             allImportedNode.setIsChanging(true);
             treeModel.nodeChanged(allImportedNode);
             
-            final Integer projectId = project.getId();
+            final Long projectId = project.getId();
             
             AbstractServiceCallback callback = new AbstractServiceCallback() {
 
@@ -99,7 +99,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
                 } catch (IOException ioe) {
                     canonicalPath = f.getAbsolutePath(); // should not happen
                 }
-                Integer[] resultSetId = new Integer[1];
+                Long[] resultSetId = new Long[1];
                 ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, projectId, resultSetId);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
             }
@@ -123,7 +123,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
     }
     
     
-    public static synchronized void addEventListener(Integer key, ChangeListener l) {
+    public static synchronized void addEventListener(Long key, ChangeListener l) {
         ArrayList<ChangeListener> listeners = m_listenerMap.get(key);
         if (listeners == null) {
             listeners = new ArrayList<>(1);
@@ -131,7 +131,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
         }
         listeners.add(l);
     }
-    public static synchronized void removeEventListener(Integer key, ChangeListener l) {
+    public static synchronized void removeEventListener(Long key, ChangeListener l) {
         ArrayList<ChangeListener> listeners = m_listenerMap.get(key);
         if (listeners == null) {
             return;
@@ -141,7 +141,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
             m_listenerMap.remove(key);
         }
     }
-    public static synchronized void fireListener(Integer key) {
+    public static synchronized void fireListener(Long key) {
         
         ArrayList<ChangeListener> listeners = m_listenerMap.get(key);
         if (listeners == null) {

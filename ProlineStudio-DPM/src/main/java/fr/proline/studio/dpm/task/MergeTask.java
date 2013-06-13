@@ -20,11 +20,11 @@ import java.util.Map;
  */
 public class MergeTask extends AbstractServiceTask {
 
-    private List<Integer> m_resultSetIdList = null;
-    private int m_projectId;
-    private Integer[] m_resultSetId = null;
+    private List<Long> m_resultSetIdList = null;
+    private long m_projectId = -1;
+    private Long[] m_resultSetId = null;
     
-    public MergeTask(AbstractServiceCallback callback, int projectId, List<Integer> resultSetIdList, String parentName, Integer[] resultSetId) {
+    public MergeTask(AbstractServiceCallback callback, long projectId, List<Long> resultSetIdList, String parentName, Long[] resultSetId) {
         super(callback, false /*asynchronous*/, new TaskInfo("Merge on "+parentName, TASK_LIST_INFO));
         m_resultSetIdList = resultSetIdList;
         m_projectId = projectId;
@@ -164,7 +164,7 @@ public class MergeTask extends AbstractServiceTask {
                         return ServiceState.STATE_FAILED;
                     }
                     
-                    m_resultSetId[0] = new Integer(resultSetIdBD.intValue());
+                    m_resultSetId[0] = new Long(resultSetIdBD.longValue());
                     
                     return ServiceState.STATE_DONE;
                 } else {

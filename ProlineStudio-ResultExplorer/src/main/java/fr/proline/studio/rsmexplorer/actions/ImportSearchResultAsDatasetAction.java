@@ -71,8 +71,8 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                     
             String parserId = dialog.getParserId();
             String decoyRegex = dialog.getDecoyRegex();
-            Integer instrumentId = dialog.getInstrumentId();
-            Integer peaklistSoftwareId = dialog.getPeaklistSoftwareId();
+            long instrumentId = dialog.getInstrumentId();
+            long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
             
             RSMTree tree = RSMTree.getTree();
             
@@ -101,7 +101,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                     treeModel.insertNodeInto(identificationNode, n, n.getChildCount());
                 }
                 // used as out parameter for the service
-                final Integer[] _resultSetId = new Integer[1]; 
+                final Long[] _resultSetId = new Long[1]; 
                 
                 AbstractServiceCallback callback = new AbstractServiceCallback() {
 
@@ -148,7 +148,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
         }
     }
     
-    private void createDataset(final RSMDataSetNode identificationNode, Project project, Dataset parentDataset, String name, Integer resultSetId, TaskInfo taskInfo) {
+    private void createDataset(final RSMDataSetNode identificationNode, Project project, Dataset parentDataset, String name, Long resultSetId, TaskInfo taskInfo) {
                                     
 
         identificationNode.setIsChanging(false);

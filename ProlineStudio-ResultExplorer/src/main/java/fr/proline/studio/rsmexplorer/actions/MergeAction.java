@@ -52,7 +52,7 @@ public class MergeAction extends AbstractRSMAction {
                     error = "Merge on a Aggregate with only one Child is not possible";
                 }
 
-                ArrayList<Integer> resultSetIdList = new ArrayList<>();
+                ArrayList<Long> resultSetIdList = new ArrayList<>();
                 for (int i = 0; i < nbChildren; i++) {
                     RSMDataSetNode childNode = (RSMDataSetNode) node.getChildAt(i);
                     if (!childNode.hasResultSet()) {
@@ -78,10 +78,10 @@ public class MergeAction extends AbstractRSMAction {
 
     }
 
-    private void askMergeService(final RSMDataSetNode node, final List<Integer> resultSetIdList) {
+    private void askMergeService(final RSMDataSetNode node, final List<Long> resultSetIdList) {
 
         final Dataset dataset = node.getDataset();
-        Integer projectId = dataset.getProject().getId();
+        long projectId = dataset.getProject().getId();
         String datasetName = dataset.getName();
 
         node.setIsChanging(true);
@@ -90,7 +90,7 @@ public class MergeAction extends AbstractRSMAction {
         treeModel.nodeChanged(node);
 
         // used as out parameter for the service
-        final Integer[] _resultSetId = new Integer[1];
+        final Long[] _resultSetId = new Long[1];
 
 
         AbstractServiceCallback callback = new AbstractServiceCallback() {
@@ -118,7 +118,7 @@ public class MergeAction extends AbstractRSMAction {
         AccessServiceThread.getAccessServiceThread().addTask(task);
     }
 
-    private void updateDataset(final RSMDataSetNode datasetNode, Dataset d, Integer resultSetId, TaskInfo taskInfo) {
+    private void updateDataset(final RSMDataSetNode datasetNode, Dataset d, Long resultSetId, TaskInfo taskInfo) {
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

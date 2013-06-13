@@ -26,12 +26,12 @@ public class ImportIdentificationTask extends AbstractServiceTask {
     private HashMap<String, String> parserArguments;
     private String canonicalFilePath;
     private String decoyRegex;
-    private int instrumentId;
-    private int peaklistSoftwareId;
-    private int projectId;
-    private Integer[] resultSetId = null;
+    private long instrumentId;
+    private long peaklistSoftwareId;
+    private long projectId;
+    private Long[] resultSetId = null;
     
-    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String canonicalFilePath, String decoyRegex, int instrumentId, int peaklistSoftwareId, int projectId, Integer[] resultSetId) {
+    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String canonicalFilePath, String decoyRegex, long instrumentId, long peaklistSoftwareId, long projectId, Long[] resultSetId) {
         super(callback, false /*asynchronous*/, new TaskInfo("Import Identification "+canonicalFilePath, TASK_LIST_INFO));
         
         this.parserId = parserId;
@@ -227,7 +227,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                         return ServiceState.STATE_FAILED;
                     }
                     
-                    resultSetId[0] = new Integer(resultSetIdBD.intValue());
+                    resultSetId[0] = new Long(resultSetIdBD.longValue());
                     
                     return ServiceState.STATE_DONE;
                 } else {

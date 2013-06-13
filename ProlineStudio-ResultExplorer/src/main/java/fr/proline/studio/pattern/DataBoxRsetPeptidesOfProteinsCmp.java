@@ -56,8 +56,8 @@ public class DataBoxRsetPeptidesOfProteinsCmp extends AbstractDataBox {
             return;
         }
 
-        final ArrayList<ProteinMatch> proteinMatchArrayList = new ArrayList<ProteinMatch>(proteinMatchList);
-        final ArrayList<ResultSummary> resultSummaryArrayList = new ArrayList<ResultSummary>(resultSummaryList);
+        final ArrayList<ProteinMatch> proteinMatchArrayList = new ArrayList<>(proteinMatchList);
+        final ArrayList<ResultSummary> resultSummaryArrayList = new ArrayList<>(resultSummaryList);
         
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

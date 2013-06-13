@@ -240,7 +240,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
         String previousSearch = "";
         int searchIndex = 0;
-        ArrayList<Integer> peptideInstanceIds = new ArrayList<>();
+        ArrayList<Long> peptideInstanceIds = new ArrayList<>();
 
         public SearchButton() {
 
@@ -358,7 +358,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
         }
 
-        public void selectPeptideInstance(Integer peptideInstanceId, String searchText) {
+        public void selectPeptideInstance(Long peptideInstanceId, String searchText) {
             PeptideInstanceTableModel tableModel = (PeptideInstanceTableModel) getModel();
             int row = tableModel.findRow(peptideInstanceId);
             if (row == -1) {

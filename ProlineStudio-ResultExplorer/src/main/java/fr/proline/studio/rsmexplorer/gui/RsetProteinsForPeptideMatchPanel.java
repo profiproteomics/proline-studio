@@ -21,7 +21,7 @@ import javax.swing.table.TableColumn;
 public class RsetProteinsForPeptideMatchPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox dataBox;
-    private Integer peptideMatchCurId = null;
+    private long peptideMatchCurId = -1;
 
     /**
      * Creates new form RsetProteinsForPeptideMatchPanel
@@ -64,11 +64,11 @@ public class RsetProteinsForPeptideMatchPanel extends HourglassPanel implements 
 
         if (peptideMatch == null) {
             clearData();
-            peptideMatchCurId = null;
+            peptideMatchCurId = -1;
             return;
         }
         
-        if ((peptideMatchCurId!=null) && (peptideMatch.getId().intValue() == peptideMatchCurId.intValue())) {
+        if ((peptideMatchCurId!=-1) && (peptideMatch.getId() == peptideMatchCurId)) {
             return;
         }
         

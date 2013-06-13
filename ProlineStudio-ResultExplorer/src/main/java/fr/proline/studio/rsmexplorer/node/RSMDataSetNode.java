@@ -111,7 +111,7 @@ public class RSMDataSetNode extends RSMNode {
     }
     
 
-    public Integer getResultSummaryId() {
+    public Long getResultSummaryId() {
         return ((DataSetData) getData()).getDataset().getResultSummaryId();
     }
     
@@ -127,7 +127,7 @@ public class RSMDataSetNode extends RSMNode {
         return (dataSet.getResultSetId() != null);
     }
     
-    public Integer getResultSetId() {
+    public Long getResultSetId() {
         return ((DataSetData) getData()).getDataset().getResultSetId();
     }
     

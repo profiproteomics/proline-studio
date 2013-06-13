@@ -90,15 +90,15 @@ public class RSMProjectNode extends RSMNode {
             Sheet.Set propGroup = Sheet.createPropertiesSet();
             
          
-            Property prop = new PropertySupport.Reflection<Integer>(p, Integer.class, "getId", null);
+            Property prop = new PropertySupport.Reflection<>(p, Long.class, "getId", null);
             prop.setName("id");
             propGroup.put(prop);
             
-            prop = new PropertySupport.Reflection<String>(p, String.class, "getName", null);
+            prop = new PropertySupport.Reflection<>(p, String.class, "getName", null);
             prop.setName("name");
             propGroup.put(prop);
             
-            prop = new PropertySupport.Reflection<String>(p, String.class, "getDescription", null);
+            prop = new PropertySupport.Reflection<>(p, String.class, "getDescription", null);
             prop.setName("description");
             propGroup.put(prop);
             

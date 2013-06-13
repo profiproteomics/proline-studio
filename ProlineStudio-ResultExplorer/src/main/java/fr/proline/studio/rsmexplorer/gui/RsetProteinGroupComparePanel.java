@@ -77,7 +77,7 @@ public class RsetProteinGroupComparePanel extends HourglassPanel implements Data
         proteinSetComparePanel.setDataBox(dataBox);
     }
 
-    public void setData(ArrayList<ProteinMatch> proteinMatchArray, HashMap<Integer, ArrayList<Integer>> rsmIdMap) {
+    public void setData(ArrayList<ProteinMatch> proteinMatchArray, HashMap<Long, ArrayList<Long>> rsmIdMap) {
         proteinSetComparePanel.setData(proteinMatchArray, rsmIdMap);
     }
 
@@ -135,7 +135,7 @@ public class RsetProteinGroupComparePanel extends HourglassPanel implements Data
                         // no data ready (should not happen)
                         return;
                     }
-                    Integer projectId = proteinSetComparePanel.getDataBox().getProjectId();
+                    long projectId = proteinSetComparePanel.getDataBox().getProjectId();
                     RSMTree tree = RSMTree.getTree().copyResultSetRootSubTree(rset, projectId);
 
                     Window window = SwingUtilities.getWindowAncestor(legendPanel);
@@ -197,13 +197,13 @@ public class RsetProteinGroupComparePanel extends HourglassPanel implements Data
             String proteinMatchName = proteinMatch.getAccession();
 
             ArrayList<ProteinMatch> proteinMatchArrayList = new ArrayList<>();
-            ArrayList<Integer> resultSetIdArrayList = new ArrayList<>();
+            ArrayList<Long> resultSetIdArrayList = new ArrayList<>();
             int size = selectedDatasetList.size();
             ArrayList<ResultSummary> selectedRsmList = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 ResultSummary rsm = selectedDatasetList.get(i).getTransientData().getResultSummary();
                 selectedRsmList.add(rsm);
-                Integer resultSetId = rsm.getResultSet().getId();
+                long resultSetId = rsm.getResultSet().getId();
                 resultSetIdArrayList.add(resultSetId);
                 ProteinMatch pm = proteinSetComparePanel.getProteinMatch(resultSetId);
                 proteinMatchArrayList.add(pm);

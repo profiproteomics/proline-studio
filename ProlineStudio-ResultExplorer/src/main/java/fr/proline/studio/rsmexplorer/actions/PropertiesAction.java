@@ -230,7 +230,7 @@ public class PropertiesAction extends AbstractRSMAction {
             propGroup.setName("Data Set");
             propGroup.setDisplayName("Data Set");
 
-            Property prop = new PropertySupport.Reflection<>(dataset, Integer.class, "getId", null);
+            Property prop = new PropertySupport.Reflection<>(dataset, Long.class, "getId", null);
             prop.setName("id");
             propGroup.put(prop);
             
@@ -243,7 +243,7 @@ public class PropertiesAction extends AbstractRSMAction {
         propGroup.setName(name);
         propGroup.setDisplayName(name);
 
-        Property prop = new PropertySupport.Reflection<>(rset, Integer.class, "getId", null);
+        Property prop = new PropertySupport.Reflection<>(rset, Long.class, "getId", null);
         prop.setName("ResultSet id");
         propGroup.put(prop);
         
@@ -310,7 +310,7 @@ public class PropertiesAction extends AbstractRSMAction {
         propGroup.setDisplayName("MSI Search");
 
         
-        Property prop = new PropertySupport.Reflection<>(msiSearch, Integer.class, "getId", null);
+        Property prop = new PropertySupport.Reflection<>(msiSearch, Long.class, "getId", null);
         prop.setName("MsiSearch id");
         propGroup.put(prop);
      
@@ -379,7 +379,7 @@ public class PropertiesAction extends AbstractRSMAction {
         propGroup.setName("Peaklist");
         propGroup.setDisplayName("Peaklist");
         
-        Property prop = new PropertySupport.Reflection<>(peaklist, Integer.class, "getId", null);
+        Property prop = new PropertySupport.Reflection<>(peaklist, Long.class, "getId", null);
         prop.setName("Peaklist id");
         propGroup.put(prop);
         
@@ -417,7 +417,7 @@ public class PropertiesAction extends AbstractRSMAction {
         propGroup.setName("Peaklist Software");
         propGroup.setDisplayName("Peaklist Software");
         
-        Property prop = new PropertySupport.Reflection<>(peaklistSoftware, Integer.class, "getId", null);
+        Property prop = new PropertySupport.Reflection<>(peaklistSoftware, Long.class, "getId", null);
         prop.setName("Peaklist Software id");
         propGroup.put(prop);
         
@@ -444,7 +444,7 @@ public class PropertiesAction extends AbstractRSMAction {
         propGroup.setName("Search Settings");
         propGroup.setDisplayName("Search Settings");
         
-        Property prop = new PropertySupport.Reflection<>(searchSetting, Integer.class, "getId", null);
+        Property prop = new PropertySupport.Reflection<>(searchSetting, Long.class, "getId", null);
         prop.setName("Search Settings id");
         propGroup.put(prop);
         
@@ -499,7 +499,7 @@ public class PropertiesAction extends AbstractRSMAction {
         propGroup.setName("Instrument Configuration");
         propGroup.setDisplayName("Instrument Configuration");
 
-        Property prop = new PropertySupport.Reflection<>(instrumentConfig, Integer.class, "getId", null);
+        Property prop = new PropertySupport.Reflection<>(instrumentConfig, Long.class, "getId", null);
         prop.setName("Instrument Configuration id");
         propGroup.put(prop);
 
@@ -528,7 +528,7 @@ public class PropertiesAction extends AbstractRSMAction {
         propGroup.setName("Enzyme"+enzyme.getName());
         propGroup.setDisplayName("Enzyme"+enzyme.getName());
         
-        Property prop = new PropertySupport.Reflection<>(enzyme, Integer.class, "getId", null);
+        Property prop = new PropertySupport.Reflection<>(enzyme, Long.class, "getId", null);
         prop.setName("Enzyme id");
         propGroup.put(prop);
         
@@ -553,7 +553,7 @@ public class PropertiesAction extends AbstractRSMAction {
         propGroup.setName("Seq Database" + seqDatabase.getName());
         propGroup.setDisplayName("Seq Database" + seqDatabase.getName());
 
-        Property prop = new PropertySupport.Reflection<>(seqDatabase, Integer.class, "getId", null);
+        Property prop = new PropertySupport.Reflection<>(seqDatabase, Long.class, "getId", null);
         prop.setName("Seq Database id");
         propGroup.put(prop);
         
@@ -602,7 +602,7 @@ public class PropertiesAction extends AbstractRSMAction {
         propGroup.setDisplayName("Identification Summary");
 
         
-        Property prop = new PropertySupport.Reflection<>(rsm, Integer.class, "getId", null);
+        Property prop = new PropertySupport.Reflection<>(rsm, Long.class, "getId", null);
         prop.setName("ResultSummary id");
         propGroup.put(prop);
         

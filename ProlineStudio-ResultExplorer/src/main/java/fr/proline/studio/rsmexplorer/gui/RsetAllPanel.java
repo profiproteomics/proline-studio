@@ -194,7 +194,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
             ResultSetTableModel model = (ResultSetTableModel) m_resultSetTable.getModel();
             
-            Integer projectId = m_dataBox.getProjectId();
+            long projectId = m_dataBox.getProjectId();
             
             int[] selectedRows = m_resultSetTable.getSelectedRows();
             int nbSelectedRset = selectedRows.length;
@@ -265,9 +265,9 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
         private ResultSet m_rset = null;
         private String m_name = null;
-        private Integer m_projectId = null;
+        private long m_projectId = -1;
 
-        public ResultsetPropertiesProvider(ResultSet rset, Integer projectId, String name) {
+        public ResultsetPropertiesProvider(ResultSet rset, long projectId, String name) {
             m_rset = rset;
             m_name = name;
             m_projectId = projectId;
@@ -348,7 +348,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         public Class getColumnClass(int col) {
             switch (col) {
                 case COLTYPE_RSET_ID:
-                    return Integer.class;
+                    return Long.class;
                 default:
                     return String.class;
             }
@@ -376,7 +376,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             ResultSet rset = m_resultSetList.get(rowIndex);
             switch (columnIndex) {
                 case COLTYPE_RSET_ID: {
-                    return rset.getId();
+                    return Long.valueOf(rset.getId());
                 }
                 case COLTYPE_RSET_NAME: {
                     return rset.getName();

@@ -337,10 +337,10 @@ public class PeptideMatchTableModel extends LazyTableModel {
         fireTableDataChanged();
     }
     
-    public int findRow(Integer proteinSetId) {
+    public int findRow(long proteinSetId) {
         int nb = peptideMatches.length;
         for (int i = 0; i < nb; i++) {
-            if (proteinSetId.intValue() == peptideMatches[i].getId().intValue()) {
+            if (proteinSetId == peptideMatches[i].getId()) {
                 return i;
             }
         }
@@ -348,8 +348,8 @@ public class PeptideMatchTableModel extends LazyTableModel {
 
     }
 
-    public void sortAccordingToModel(ArrayList<Integer> peptideMatchIds) {
-        HashSet<Integer> peptideMatchIdMap = new HashSet<>(peptideMatchIds.size());
+    public void sortAccordingToModel(ArrayList<Long> peptideMatchIds) {
+        HashSet<Long> peptideMatchIdMap = new HashSet<>(peptideMatchIds.size());
         peptideMatchIdMap.addAll(peptideMatchIds);
 
         int nb = peptideMatches.length;

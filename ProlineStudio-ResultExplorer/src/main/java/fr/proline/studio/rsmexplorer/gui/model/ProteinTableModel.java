@@ -19,7 +19,7 @@ public class ProteinTableModel extends AbstractTableModel {
     private static final String[] columnNames = {"Protein", "Same Set", "Score", "Peptides", "Mass"};
     private ProteinMatch[] sameSetMatches = null;
     private ProteinMatch[] subSetMatches = null;
-    private Integer rsmId = null;
+    private Long rsmId = null;
 
     public ProteinMatch getProteinMatch(int row) {
 
@@ -98,7 +98,7 @@ public class ProteinTableModel extends AbstractTableModel {
     }
     
 
-    public void setData(Integer rsmId, ProteinMatch[] sameSetMatches, ProteinMatch[] subSetMatches) {
+    public void setData(long rsmId, ProteinMatch[] sameSetMatches, ProteinMatch[] subSetMatches) {
         this.rsmId = rsmId;
         this.sameSetMatches = sameSetMatches;
         this.subSetMatches = subSetMatches;

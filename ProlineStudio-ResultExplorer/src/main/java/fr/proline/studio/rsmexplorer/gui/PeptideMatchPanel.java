@@ -261,7 +261,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
         String previousSearch = "";
         int searchIndex = 0;
-        ArrayList<Integer> peptideMatchIds = new ArrayList<>();
+        ArrayList<Long> peptideMatchIds = new ArrayList<>();
 
         public SearchButton() {
             
@@ -382,7 +382,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
         }
 
-        public void selectProteinSet(Integer proteinSetId, String searchText) {
+        public void selectProteinSet(Long proteinSetId, String searchText) {
             PeptideMatchTableModel tableModel = (PeptideMatchTableModel) getModel();
             int row = tableModel.findRow(proteinSetId);
             if (row == -1) {

@@ -284,10 +284,10 @@ public class PeptideInstanceTableModel extends LazyTableModel {
         fireTableDataChanged();
     }
     
-    public int findRow(Integer peptideInstanceId) {
+    public int findRow(long peptideInstanceId) {
         int nb = m_peptideInstances.length;
         for (int i = 0; i < nb; i++) {
-            if (peptideInstanceId.intValue() == m_peptideInstances[i].getId().intValue()) {
+            if (peptideInstanceId == m_peptideInstances[i].getId()) {
                 return i;
             }
         }
@@ -295,8 +295,8 @@ public class PeptideInstanceTableModel extends LazyTableModel {
 
     }
 
-    public void sortAccordingToModel(ArrayList<Integer> peptideMatchIds) {
-        HashSet<Integer> peptideMatchIdMap = new HashSet<>(peptideMatchIds.size());
+    public void sortAccordingToModel(ArrayList<Long> peptideMatchIds) {
+        HashSet<Long> peptideMatchIdMap = new HashSet<>(peptideMatchIds.size());
         peptideMatchIdMap.addAll(peptideMatchIds);
 
         int nb = m_peptideInstances.length;

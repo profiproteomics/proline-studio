@@ -58,7 +58,7 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
         return tableModel.getResultSummary(0);
     }
 
-    public ProteinMatch getProteinMatch(Integer resultSetId) {
+    public ProteinMatch getProteinMatch(Long resultSetId) {
         ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
         return tableModel.getProteinMatch(resultSetId);
     }
@@ -92,7 +92,7 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
         return rsm.getResultSet();
     }
 
-    public void setData(ArrayList<ProteinMatch> proteinMatchArray, HashMap<Integer, ArrayList<Integer>> rsmIdMap) {
+    public void setData(ArrayList<ProteinMatch> proteinMatchArray, HashMap<Long, ArrayList<Long>> rsmIdMap) {
 
         //previouslyProteinSelected = null;
 
@@ -152,14 +152,14 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
         private ArrayList<ProteinSet> proteinSetArray = null;
         private HashMap<String, ProteinStatus> proteinMatchNameStatusMap = null;
         private ArrayList<String> proteinNameList = null;
-        private HashMap<Integer, ProteinMatch> srcProteinMatchMap = null;
+        private HashMap<Long, ProteinMatch> srcProteinMatchMap = null;
         
         private HashMap<ProteinSet, HashMap<String, ProteinMatch>> proteinOfProteinSetsMap = null;
         
         // One column for protein name, other columns are for a ResultSummary
         public static final int COLTYPE_PROTEIN_NAME = 0;
 
-        public void setData(ArrayList<ProteinMatch> proteinMatchSrcArray, HashMap<Integer, ArrayList<Integer>> rsmMap) {
+        public void setData(ArrayList<ProteinMatch> proteinMatchSrcArray, HashMap<Long, ArrayList<Long>> rsmMap) {
 
 
             if ((proteinMatchSrcArray == null) || (proteinMatchSrcArray.isEmpty())) {
@@ -219,7 +219,7 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
                     
                     // if rsmMap != null, the user has selected resultSummary to display
                     if (rsmMap != null) {
-                        ArrayList<Integer> acceptedRsmList = rsmMap.get(proteinMatch.getResultSet().getId() );
+                        ArrayList<Long> acceptedRsmList = rsmMap.get(proteinMatch.getResultSet().getId() );
 
                         if (!acceptedRsmList.contains(rsm.getId() )) {
                             continue;
@@ -335,7 +335,7 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
             return proteinSetArray.get(i);
         }
         
-        public ProteinMatch getProteinMatch(Integer resultSetId) {
+        public ProteinMatch getProteinMatch(Long resultSetId) {
             return srcProteinMatchMap.get(resultSetId);
         }
 

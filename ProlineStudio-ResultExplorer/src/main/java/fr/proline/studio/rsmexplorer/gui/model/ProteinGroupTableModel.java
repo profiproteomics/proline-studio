@@ -83,7 +83,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
     public Object getValueAt(int row, int col) {
         // Retrieve Protein Set
         ProteinSet proteinSet = proteinSets[row];
-        Integer rsmId = proteinSet.getResultSummary().getId();
+        long rsmId = proteinSet.getResultSummary().getId();
 
         switch (col) {
             case COLTYPE_PROTEIN_GROUPS_NAME: {
@@ -208,7 +208,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
             ProteinSet proteinSet = proteinSets[i];
             ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
             if (proteinMatch != null) {
-                Integer rsmId = proteinSet.getResultSummary().getId();
+                long rsmId = proteinSet.getResultSummary().getId();
                 double score = proteinMatch.getTransientData().getPeptideSet(rsmId).getScore();
                 if (score > maxScore) {
                     maxScore = score;
@@ -238,10 +238,10 @@ public class ProteinGroupTableModel extends LazyTableModel {
         return proteinSets[0].getResultSummary();
     }
 
-    public int findRow(Integer proteinSetId) {
+    public int findRow(long proteinSetId) {
         int nb = proteinSets.length;
         for (int i=0;i<nb;i++) {
-            if (proteinSetId.intValue() == proteinSets[i].getId().intValue()) {
+            if (proteinSetId == proteinSets[i].getId()) {
                 return i;
             }
         }
@@ -250,8 +250,8 @@ public class ProteinGroupTableModel extends LazyTableModel {
     }
     
     
-    public void sortAccordingToModel(ArrayList<Integer> proteinSetIds) {
-        HashSet<Integer> proteinSetIdMap = new HashSet<Integer>(proteinSetIds.size());
+    public void sortAccordingToModel(ArrayList<Long> proteinSetIds) {
+        HashSet<Long> proteinSetIdMap = new HashSet<>(proteinSetIds.size());
         proteinSetIdMap.addAll(proteinSetIds);
         
         int nb = proteinSets.length;

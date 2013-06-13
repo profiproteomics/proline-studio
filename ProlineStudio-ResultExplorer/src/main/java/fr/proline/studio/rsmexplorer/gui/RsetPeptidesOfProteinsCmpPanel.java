@@ -125,7 +125,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
         private ArrayList<Boolean> hasPeptideList = null;
 
         public PeptideCompare(int size) {
-            hasPeptideList = new ArrayList<Boolean>(size);
+            hasPeptideList = new ArrayList<>(size);
         }
 
         public void clear() {
@@ -151,11 +151,11 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
 
     public static class PeptideCmpTableModel extends AbstractTableModel {
 
-        private HashMap<Integer, ProteinMatch> rsmToProteinMatchMap = null;
+        private HashMap<Long, ProteinMatch> rsmToProteinMatchMap = null;
         
         private ArrayList<ProteinMatch> proteinMatchArray;
         private ArrayList<ResultSummary> rsmArray;
-        private HashMap<Integer, PeptideMatch> peptideMatchMap = new HashMap<Integer, PeptideMatch>();
+        private HashMap<Long, PeptideMatch> peptideMatchMap = new HashMap<>();
         private List<PeptideMatch> peptideMatchList = null;
         
         private PeptideCompare peptideCompare = null;
@@ -180,7 +180,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
             }
             
             if (rsmToProteinMatchMap == null) {
-                rsmToProteinMatchMap = new HashMap<Integer, ProteinMatch>();
+                rsmToProteinMatchMap = new HashMap<>();
             } else {
                 rsmToProteinMatchMap.clear();
             }
@@ -191,9 +191,9 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
                     continue;
                 }
                 ProteinMatch.TransientData data = pm.getTransientData();
-                Set<Integer> rsmIdSet = data.getRecordedRsmId();
+                Set<Long> rsmIdSet = data.getRecordedRsmId();
 
-                Iterator<Integer> it = rsmIdSet.iterator();
+                Iterator<Long> it = rsmIdSet.iterator();
                 while (it.hasNext()) {
 
                     rsmToProteinMatchMap.put(it.next(), pm);
@@ -205,7 +205,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
             int rsmSize = rsmArray.size();
             for (int i = 0; i < rsmSize; i++) {
                 
-                Integer rsmId = rsmArray.get(i).getId();
+                Long rsmId = rsmArray.get(i).getId();
                 ProteinMatch pm = rsmToProteinMatchMap.get(rsmId);
                 
                 if (pm == null) {
@@ -230,7 +230,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
             }
 
             Collection<PeptideMatch> peptideMatchCollection = peptideMatchMap.values();
-            peptideMatchList = new ArrayList<PeptideMatch>(peptideMatchCollection);
+            peptideMatchList = new ArrayList<>(peptideMatchCollection);
             Collections.sort(peptideMatchList, PeptideComparator.getInstance() );
             
             peptideCompare = new PeptideCompare(peptideMatchList.size());
@@ -287,7 +287,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
 
                     int rsmSize = rsmArray.size();
                     for (int i = 0; i < rsmSize; i++) {
-                        Integer rsmId = rsmArray.get(i).getId();
+                        Long rsmId = rsmArray.get(i).getId();
                         ProteinMatch pm = rsmToProteinMatchMap.get(rsmId);
                         PeptideSet pset = pm.getTransientData().getPeptideSet(rsmArray.get(i).getId());
                         PeptideInstance[] peptideInstanceArray = pset.getTransientPeptideInstances();
@@ -299,7 +299,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
                         boolean peptideFound = false;
                         for (int j=0;j<nbPeptides;j++) {
                             PeptideMatch p = peptideInstanceArray[j].getTransientData().getBestPeptideMatch();
-                            if (p.getId().intValue() == peptideMatchCur.getId().intValue()) {
+                            if (p.getId() == peptideMatchCur.getId()) {
                                 peptideFound = true;
                                 break;
                             }
@@ -348,7 +348,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
 
         private JPanel p = null;
         private GridBagConstraints c = new GridBagConstraints();
-        private ArrayList<SquareColorPanel> colorPanelArray = new ArrayList<SquareColorPanel>();
+        private ArrayList<SquareColorPanel> colorPanelArray = new ArrayList<>();
         private int nbActiveColorPanels = 0;
 
         @Override
@@ -358,13 +358,13 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
                 return super.getTableCellRendererComponent(table, "", isSelected, hasFocus, row, column);
             }
             
-            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            Component comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             
             PeptideCompare peptideCompare = (PeptideCompare) value;
 
             preparePanel(peptideCompare);
 
-            p.setBackground(c.getBackground());
+            p.setBackground(comp.getBackground());
             
             return p;
         }

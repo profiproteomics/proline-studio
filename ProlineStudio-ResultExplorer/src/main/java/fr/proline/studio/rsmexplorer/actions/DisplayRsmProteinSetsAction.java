@@ -20,7 +20,6 @@ import org.openide.util.NbBundle;
  */
 public class DisplayRsmProteinSetsAction extends AbstractRSMAction {
 
-    //private static DisplayProteinSetsAction instance = null;
     public DisplayRsmProteinSetsAction() {
         super(NbBundle.getMessage(DisplayRsmProteinSetsAction.class, "CTL_DisplayProteinSetsAction"));
     }

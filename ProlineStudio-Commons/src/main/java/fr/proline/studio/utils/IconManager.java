@@ -57,7 +57,9 @@ public class IconManager {
         VIAL_RSM_MERGED,
         ALL_IMPORTED,
         PROPERTIES,
-        ARROW_RIGHT_SMALL
+        ARROW_RIGHT_SMALL,
+        PLUS11,
+        MINUS11
     }
     private static HashMap<IconType, ImageIcon> iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> iconHourGlassMap = new HashMap<>();
@@ -208,7 +210,11 @@ public class IconManager {
                 return "fr/proline/studio/images/property.png"; 
             case ARROW_RIGHT_SMALL:
                 return "fr/proline/studio/images/arrow-right-small.png"; 
-            
+            case PLUS11:
+                return "fr/proline/studio/images/plus11x11.png";
+            case MINUS11:
+                return "fr/proline/studio/images/minus11x11.png";
+
         }
 
 

@@ -27,17 +27,17 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
         
         // Register Possible in parameters
         // One ProteinMatch
-        DataParameter inParameter = new DataParameter();
+        GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ProteinMatch.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One ProteinMatch
-        DataParameter outParameter = new DataParameter();
+        GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(ProteinMatch.class, true);
         registerOutParameter(outParameter);
     
-        outParameter = new DataParameter();
+        outParameter = new GroupParameter();
         outParameter.addParameter(ResultSummary.class, true);
         registerOutParameter(outParameter);
         
@@ -182,5 +182,5 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
         //JPM.TODO
         return super.getData(getArray, parameterType);
     }
-    
+
 }

@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 /**
  * Manage all databox and can find a databox which can be used
@@ -10,10 +11,15 @@ public class DataboxManager {
     
     private static DataboxManager m_databoxManager = null;
     
-    private AbstractDataBox[] m_dataBoxArray = { new DataBoxRsetAll(), new DataBoxRsetPeptide(), new DataBoxRsetPeptideSpectrum(),
-                                                 new DataBoxRsetProteinsForPeptideMatch(), new DataBoxRsmPeptide(), new DataBoxRsmPeptideInstances(),
-                                                 new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(), new DataBoxRsmProteinSet(true),
-                                                 new DataBoxRsmProteinSet(false), new DataBoxRsmProteinsOfProteinSet() };
+    
+    private AbstractDataBox[] m_dataBoxStartingArray = { new DataBoxRsetAll(), new DataBoxRsetPeptide(), 
+                                                 new DataBoxRsmPeptide(), new DataBoxRsmPeptideInstances(),
+                                                 new DataBoxRsmProteinSet().init(true) };
+    
+    private AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(),
+                                                 new DataBoxRsetProteinsForPeptideMatch(),
+                                                 new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(),
+                                                 new DataBoxRsmProteinSet().init(false), new DataBoxRsmProteinsOfProteinSet() };
     
     private DataboxManager() {
     }
@@ -25,24 +31,35 @@ public class DataboxManager {
         return m_databoxManager;
     }
     
-    public ArrayList<AbstractDataBox> findCompatibleDataboxList(ArrayList<DataParameter> outParameters) {
+    public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleStartingDataboxList(ArrayList<GroupParameter> outParameters) {
         
-        ArrayList<AbstractDataBox> compatibilityList = new ArrayList<>();
-        for (int i=0;i<m_dataBoxArray.length;i++) {
-            if (m_dataBoxArray[i].isCompatible(outParameters)) {
-                compatibilityList.add(m_dataBoxArray[i]);
+       TreeMap<ParameterDistance, AbstractDataBox> compatibilityList = new TreeMap<>();
+        for (int i=0;i<m_dataBoxStartingArray.length;i++) {
+            double averageDistance = m_dataBoxStartingArray[i].calculateParameterCompatibilityDistance(outParameters);
+            if (averageDistance >=0) {
+                compatibilityList.put(new ParameterDistance(averageDistance), m_dataBoxStartingArray[i]);
             }
         }
         
         return compatibilityList;
     }
     
-    public ArrayList<AbstractDataBox> findCompatibleDataboxList(AbstractDataBox previousDatabox) {
+    public TreeMap<ParameterDistance, AbstractDataBox> findCompatibleDataboxList(AbstractDataBox previousDatabox) {
         
-        ArrayList<AbstractDataBox> compatibilityList = new ArrayList<>();
-        for (int i=0;i<m_dataBoxArray.length;i++) {
-            if (previousDatabox.isCompatible(m_dataBoxArray[i])) {
-                compatibilityList.add(m_dataBoxArray[i]);
+        AvailableParameters avalaibleParameters = new AvailableParameters(previousDatabox);
+        
+        TreeMap<ParameterDistance, AbstractDataBox> compatibilityList = new TreeMap<>();
+        for (int i=0;i<m_dataBoxContinuingArray.length;i++) {
+
+            AbstractDataBox databox =  m_dataBoxContinuingArray[i];
+            if (databox.getClass().equals(previousDatabox.getClass())) {
+                // do not allow the same databox twice
+                continue;
+            }
+            
+            double averageDistance = previousDatabox.calculateParameterCompatibilityDistance(avalaibleParameters,databox);
+            if (averageDistance >=0) {
+                compatibilityList.put(new ParameterDistance(averageDistance), databox);
             }
         }
         

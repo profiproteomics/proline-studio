@@ -22,7 +22,7 @@ public class PeptideTableModel extends AbstractTableModel {
     public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 8;
     public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 9;
     public static final int COLTYPE_PEPTIDE_PTM = 10;
-    private static final String[] columnNames = {"Peptide", "Score", "Protein G. Matches", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
+    private static final String[] columnNames = {"Peptide", "Score", "Protein S. Matches", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
     private PeptideInstance[] peptideInstances = null;
 
     public PeptideInstance getPeptide(int row) {

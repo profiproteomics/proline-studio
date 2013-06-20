@@ -17,17 +17,17 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
 
         // Name of this databox
         name = "PSM";
-        description = "All PSM of an Identification Summary or coresponding to a Peptide Instance";
+        description = "All PSM of an Identification Summary or corresponding to a Peptide Instance";
         
         // Register Possible in parameters
         // One ResultSummary
-        DataParameter inParameter = new DataParameter();
+        GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ResultSummary.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple PeptideMatch
-        DataParameter outParameter = new DataParameter();
+        GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(PeptideMatch.class, true);
         registerOutParameter(outParameter);
 

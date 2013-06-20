@@ -21,8 +21,11 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
     private boolean m_forRSM;
     
     
-    public DataBoxRsmProteinSet(boolean forRSM) {
-
+    public DataBoxRsmProteinSet() { 
+        // each databox must have a default constructor
+    }
+    public DataBoxRsmProteinSet init(boolean forRSM) {
+      
         m_forRSM = forRSM;
        
          // Name of this databox
@@ -36,26 +39,29 @@ public class DataBoxRsmProteinSet extends AbstractDataBox {
         // Register Possible in parameters
         // One ResultSummary
         if (forRSM) {
-            DataParameter inParameter = new DataParameter();
+            GroupParameter inParameter = new GroupParameter();
             inParameter.addParameter(ResultSummary.class, false);
             registerInParameter(inParameter);
         } else {
             // or one PeptideInstance
-            DataParameter inParameter = new DataParameter();
+            GroupParameter inParameter = new GroupParameter();
             inParameter.addParameter(PeptideInstance.class, false);
             registerInParameter(inParameter);
         }
    
         // Register possible out parameters
         // One or Multiple ProteinSet
-        DataParameter outParameter = new DataParameter();
+        GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(ProteinSet.class, true);
         outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
-
-       
+  
+        return this;
     }
     
+    public boolean getForRSM() {
+        return m_forRSM;
+    }
 
     @Override
     public void createPanel() {

@@ -18,13 +18,14 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
         // Name of this databox
         name = "Spectrum";
+        description = "Spectrum of a Peptide";
 
         // Register in parameters
-        DataParameter inParameter = new DataParameter();
+        GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(PeptideMatch.class, false);
         registerInParameter(inParameter);
 
-        inParameter = new DataParameter();
+        inParameter = new GroupParameter();
         inParameter.addParameter(PeptideInstance.class, false);
         registerInParameter(inParameter);
 

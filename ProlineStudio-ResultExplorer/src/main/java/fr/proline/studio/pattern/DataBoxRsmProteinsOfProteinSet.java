@@ -27,16 +27,17 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
 
          // Name of this databox
         name = "Proteins";
+        description = "All Proteins of a Protein Set";
         
         // Register Possible in parameters
         // One ProteinSet
-        DataParameter inParameter = new DataParameter();
+        GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ProteinSet.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One ProteinMatch
-        DataParameter outParameter = new DataParameter();
+        GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(ProteinMatch.class, true);
         registerOutParameter(outParameter);
 

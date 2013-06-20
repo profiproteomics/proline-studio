@@ -2,14 +2,14 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataParameter;
+import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.pattern.DataboxManager;
+import fr.proline.studio.pattern.ParameterDistance;
 import fr.proline.studio.utils.DecoratedMarkerTable;
-import java.awt.Dialog;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Window;
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.TreeMap;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
@@ -26,16 +26,42 @@ public class DataBoxChooserDialog extends DefaultDialog {
     
     private DataBoxTable m_dataBoxTable = null;
     
-    public DataBoxChooserDialog(Window parent, ArrayList<DataParameter> outParameters) {
+    public DataBoxChooserDialog(Window parent, ArrayList<GroupParameter> outParameters) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-        ArrayList<AbstractDataBox> dataBoxList = DataboxManager.getDataboxManager().findCompatibleDataboxList(outParameters);
+        setSize(800,320);
+        
+        setButtonVisible(BUTTON_DEFAULT, false);
+        setResizable(true);
+        
+        TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleStartingDataboxList(outParameters);
 
-        initDialog(dataBoxList);
+        initDialog(dataBoxMap);
     }
     
-    private void initDialog(ArrayList<AbstractDataBox> dataBoxList) {
-        setTitle("Select Next Data Window");   
+    public DataBoxChooserDialog(Window parent, AbstractDataBox previousDatabox) {
+        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+
+        setSize(800,320);
+        
+        setButtonVisible(BUTTON_DEFAULT, false);
+        
+        TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(previousDatabox);
+
+        initDialog(dataBoxMap);
+    }
+
+    
+    public void pack() {
+        // forbid back by overloading the method
+    }
+            
+
+    
+
+    
+    private void initDialog(TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap) {
+        setTitle("Select a Data View");   
         
 
         JPanel internalPanel = new JPanel(new GridBagLayout());
@@ -43,7 +69,7 @@ public class DataBoxChooserDialog extends DefaultDialog {
         // create objects
         JScrollPane scrollPane = new JScrollPane();
         m_dataBoxTable = new DataBoxTable();
-        m_dataBoxTable.setModel(new DataBoxTableModel(dataBoxList));
+        m_dataBoxTable.setModel(new DataBoxTableModel(dataBoxMap));
         
         scrollPane.setViewportView(m_dataBoxTable);
         m_dataBoxTable.setFillsViewportHeight(true);
@@ -57,6 +83,7 @@ public class DataBoxChooserDialog extends DefaultDialog {
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
+        c.weighty = 1.0;
         internalPanel.add(scrollPane, c);
 
         setInternalComponent(internalPanel);
@@ -96,6 +123,8 @@ public class DataBoxChooserDialog extends DefaultDialog {
         public DataBoxTable() {
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         }
+        
+
     }
     
     private static class DataBoxTableModel extends AbstractTableModel {
@@ -106,8 +135,14 @@ public class DataBoxChooserDialog extends DefaultDialog {
         private ArrayList<AbstractDataBox> m_databoxList = null;
 
 
-        public DataBoxTableModel(ArrayList<AbstractDataBox> databoxList) {
-            m_databoxList = databoxList;
+        public DataBoxTableModel(TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap) {
+            
+            m_databoxList = new ArrayList<>(dataBoxMap.size());
+            Iterator<ParameterDistance> it = dataBoxMap.descendingKeySet().iterator();
+            while (it.hasNext()) {
+                m_databoxList.add(dataBoxMap.get(it.next()));
+            }
+            
         }
 
         public AbstractDataBox getDataBox(int row) {

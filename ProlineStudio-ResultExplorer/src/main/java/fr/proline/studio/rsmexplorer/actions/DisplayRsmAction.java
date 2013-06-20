@@ -29,7 +29,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction = new DisplayRsmPSMAction();
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction();
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction();
-        m_displayUserWindowAction = new DisplayUserWindowAction();
+        m_displayUserWindowAction = new DisplayUserWindowAction(true);
 
 
         JMenuItem displayRsmPSMItem = new JMenuItem(m_displayRsmPSMAction);

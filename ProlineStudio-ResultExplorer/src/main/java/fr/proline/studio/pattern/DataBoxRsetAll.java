@@ -27,13 +27,13 @@ public class DataBoxRsetAll extends AbstractDataBox{
         
         // Register Possible in parameters
         // One ResultSummary
-        DataParameter inParameter = new DataParameter();
+        GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(Project.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple PeptideMatch
-        DataParameter outParameter = new DataParameter();
+        GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(ResultSet.class, true);
         registerOutParameter(outParameter);
 

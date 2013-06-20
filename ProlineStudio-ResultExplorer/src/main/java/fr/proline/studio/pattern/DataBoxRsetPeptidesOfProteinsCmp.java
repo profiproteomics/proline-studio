@@ -26,7 +26,7 @@ public class DataBoxRsetPeptidesOfProteinsCmp extends AbstractDataBox {
         name = "Peptides of Proteins";
 
         // Register in parameters
-        DataParameter inParameter = new DataParameter();
+        GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ProteinMatch.class, false);
         inParameter.addParameter(ResultSummary.class, true);
         registerInParameter(inParameter);

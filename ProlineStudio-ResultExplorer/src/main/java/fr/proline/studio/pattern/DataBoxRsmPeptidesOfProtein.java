@@ -27,21 +27,22 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
 
         // Name of this databox
         name = "Peptides";
+        description = "All Peptides of a Protein Match";
         
         // Register Possible in parameters
         // One ProteinMatch AND one ResultSummary
-        DataParameter inParameter = new DataParameter();
+        GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ProteinMatch.class, false);
         inParameter.addParameter(ResultSummary.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple  PeptideInstance
-        DataParameter outParameter = new DataParameter();
+        GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(PeptideInstance.class, true);
         registerOutParameter(outParameter);
         
-        outParameter = new DataParameter();
+        outParameter = new GroupParameter();
         outParameter.addParameter(PeptideMatch.class, true);
         registerOutParameter(outParameter);
         

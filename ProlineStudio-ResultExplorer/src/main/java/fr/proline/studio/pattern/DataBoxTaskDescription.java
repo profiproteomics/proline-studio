@@ -16,7 +16,7 @@ public class DataBoxTaskDescription extends AbstractDataBox {
         
         // Register Possible in parameters
         // One TaskInfo
-        DataParameter inParameter = new DataParameter();
+        GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(TaskInfo.class, false);
         registerInParameter(inParameter);
     }

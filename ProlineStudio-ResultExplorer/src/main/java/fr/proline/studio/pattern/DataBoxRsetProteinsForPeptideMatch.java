@@ -20,16 +20,17 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
 
          // Name of this databox
         name = "Proteins";
+        description = "Proteins for a Peptide Match";
         
         // Register Possible in parameters
         // One PeptideMatch
-        DataParameter inParameter = new DataParameter();
+        GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(PeptideMatch.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple ProteinMatch
-        DataParameter outParameter = new DataParameter();
+        GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(ProteinMatch.class, true);
         registerOutParameter(outParameter);
 

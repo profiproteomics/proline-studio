@@ -27,8 +27,8 @@ public abstract class AbstractDataBox implements ChangeListener {
     protected DataBoxPanelInterface m_panel;
     
     // In and out Parameters Registered
-    private HashSet<DataParameter> m_inParameters = new HashSet<>();
-    private ArrayList<DataParameter> m_outParameters = new ArrayList<>();
+    private HashSet<GroupParameter> m_inParameters = new HashSet<>();
+    private ArrayList<GroupParameter> m_outParameters = new ArrayList<>();
     
     
     private long projectId = -1;
@@ -43,18 +43,26 @@ public abstract class AbstractDataBox implements ChangeListener {
     
     private int m_loadingId = 0;
     
-    protected void registerInParameter(DataParameter parameter) {
+    protected void registerInParameter(GroupParameter parameter) {
         m_inParameters.add(parameter);
     }
     
-    protected void registerOutParameter(DataParameter parameter)  {
+    protected void registerOutParameter(GroupParameter parameter)  {
         m_outParameters.add(parameter);
     }
     
+    public ArrayList<GroupParameter> getOutParameters() {
+        return m_outParameters;
+    }
+    
+    public HashSet<GroupParameter> getInParameters() {
+        return m_inParameters;
+    }
+    
     public boolean isDataDependant(Class dataType) {
-        Iterator<DataParameter> it = m_inParameters.iterator();
+        Iterator<GroupParameter> it = m_inParameters.iterator();
         while (it.hasNext()) {
-            DataParameter parameter = it.next();
+            GroupParameter parameter = it.next();
             if (parameter.isDataDependant(dataType)) {
                 return true;
             }
@@ -63,39 +71,31 @@ public abstract class AbstractDataBox implements ChangeListener {
     }
   
     
-    public boolean isCompatible(ArrayList<DataParameter> outParameters) {
-        Iterator<DataParameter> it = m_inParameters.iterator();
+    public double calculateParameterCompatibilityDistance(ArrayList<GroupParameter> outParameters) {
+        Iterator<GroupParameter> it = m_inParameters.iterator();
         while (it.hasNext()) {
-            DataParameter parameter = it.next();
+            GroupParameter parameter = it.next();
             
             if (parameter.isCompatibleWithOutParameter(outParameters)) {
-                return true;
+                return 0;
             }
         }
-        return false;
+        return -1;
     }
     
     
-    public boolean isCompatible(AbstractDataBox nextDataBox) {
+    public double calculateParameterCompatibilityDistance(AvailableParameters avalaibleParameters, AbstractDataBox nextDataBox) {
         
-        Iterator<DataParameter> it = nextDataBox.m_inParameters.iterator();
         
-        while (it.hasNext()) {
-            DataParameter parameter = it.next();
-            
-            if (parameter.isCompatibleWithOutParameter(m_outParameters)) {
-                return true;
-            }
-        }
-        if (previousDataBox != null) {
-            return previousDataBox.isCompatible(nextDataBox);
-        }
-        return false;
+        return avalaibleParameters.calculateParameterCompatibilityDistance(nextDataBox);
+
     }
     
     public void setNextDataBox(AbstractDataBox nextDataBox) {
         this.nextDataBox = nextDataBox;
-        nextDataBox.previousDataBox = this;
+        if (nextDataBox != null) {
+            nextDataBox.previousDataBox = this;
+        }
     }
     
     public abstract void createPanel();

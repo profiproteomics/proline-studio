@@ -34,15 +34,48 @@ public class SplittedPanelContainer extends JPanel {
      * Register a panel which will be put in the container panel
      * @param panel 
      */
-    public void registerPanel(JComponent panel) {
-        SplittedPanel splittedPanel = new SplittedPanel(panelArray.size(), panel, this);
+    public void registerPanel(JComponent panel, ArrayList<UserDefinedButton> userDefinedButtonList) {
+        SplittedPanel splittedPanel = new SplittedPanel(panelArray.size(), panel, this, userDefinedButtonList);
         panelArray.add(splittedPanel);
     }
 
+    public void registerAddedPanel(JComponent panel, ArrayList<UserDefinedButton> userDefinedButtonList) {
+        
+        // prepare the heights of components
+        int[] heights = getHeights();
+        int totalHeight = 0;
+        for (int i = 0; i < heights.length; i++) {
+            totalHeight += heights[i];
+        }
+        int heightOfNewPanel = totalHeight/(heights.length+1);
+        int decPanel = heightOfNewPanel/heights.length;
+
+        int[] newHeights = new int[heights.length + 1];
+        for (int i = 0; i < heights.length; i++) {
+            newHeights[i] = heights[i]-decPanel;
+        }
+        newHeights[heights.length] = heightOfNewPanel;
+        
+        
+        
+        SplittedPanel splittedPanel = new SplittedPanel(panelArray.size(), panel, this, userDefinedButtonList);
+        insertPanel(splittedPanel);
+        updateButtons();
+        
+        dispatchHeight(newHeights);
+    }
+    
+    public void removeLastPanel() {
+        removePanel(panelArray.size()-1, false);
+        updateButtons();
+    }
+    
     public void updateButtons() {
         int size = panelArray.size();
         for (int i=0;i<size;i++) {
-            panelArray.get(i).updateAssociationButtons();
+            SplittedPanel p = panelArray.get(i);
+            p.updateAssociationButtons();
+            p.updateUserDefinedButton(i==size-1);
         }
     }
     
@@ -70,7 +103,7 @@ public class SplittedPanelContainer extends JPanel {
         
         
         
-        SplittedPanel splittedPanel = new SplittedPanel(index, panel, this);
+        SplittedPanel splittedPanel = new SplittedPanel(index, panel, this, null);  //JPM.TODO ???
         for (int i=index;i<panelArray.size();i++) {
             panelArray.get(i).incIndex();
         }
@@ -136,6 +169,8 @@ public class SplittedPanelContainer extends JPanel {
             splitPaneArray.add(index, splitPane);
             
         }
+        
+        updateButtons();
         
         revalidate();
         repaint();
@@ -697,7 +732,7 @@ public class SplittedPanelContainer extends JPanel {
     /**
      * Icon Button with minimum margin
      */
-    private class MiniButton extends JButton {
+    private static class MiniButton extends JButton {
         public MiniButton(Icon icon) {
             super(icon);
             setMargin(new java.awt.Insets(0, 0, 0, 0));
@@ -744,52 +779,68 @@ public class SplittedPanelContainer extends JPanel {
      */
     private class SplittedPanel extends JPanel {
 
-        private JComponent embededPanel;
-        private SplittedPanelContainer container;
-        private int index;
+        private JComponent m_embededPanel;
+        private SplittedPanelContainer m_container;
+        private int m_index;
+        
+        private boolean m_last;
 
         // buttons
-        private JButton maximizeButton;
-        private JButton reduceButton;
-        private JButton minimizeButton;
-        private JButton associateButton;
-        private JButton dissociateButton;
-        private JPanel rightButtonPanel;
+        private JButton m_maximizeButton;
+        private JButton m_reduceButton;
+        private JButton m_minimizeButton;
+        private JButton m_associateButton;
+        private JButton m_dissociateButton;
+        private  ArrayList<UserDefinedButton> m_userDefinedButtonList = null;
+        private JPanel m_rightButtonPanel;
         
         
-        public SplittedPanel(int index, JComponent embededPanel, SplittedPanelContainer container) {
+        public SplittedPanel(int index, JComponent embededPanel, SplittedPanelContainer container, ArrayList<UserDefinedButton> userDefinedButtonList) {
             
-            this.embededPanel = embededPanel;
-            this.container = container;
-            this.index = index;
+            m_embededPanel = embededPanel;
+            m_container = container;
+            m_index = index;
+            m_userDefinedButtonList = userDefinedButtonList;
             setName(embededPanel.getName());
             initComponents();
         }
 
+        public void updateUserDefinedButton(boolean lastPanel) {
+            if (m_userDefinedButtonList == null) {
+                return;
+            }
+            
+            int nb = m_userDefinedButtonList.size();
+            for (int i=0;i<nb;i++) {
+                UserDefinedButton b = m_userDefinedButtonList.get(i);
+                b.setVisible(b.hasToBeVisible(lastPanel)); 
+            }
+        }
+        
         public JComponent getEmbededPanel() {
-            return embededPanel;
+            return m_embededPanel;
         }
         
         public void replaceEmbededPanel(JComponent embededPanel) {
-            if (embededPanel.equals(this.embededPanel)) {
+            if (embededPanel.equals(this.m_embededPanel)) {
                 return;
             }
             removeAll();
-            this.embededPanel = embededPanel;
+            this.m_embededPanel = embededPanel;
             setName(embededPanel.getName());
             initComponents();
         }
         
         public int getIndex() {
-            return index;
+            return m_index;
         }
         
         public void incIndex() {
-            index++;
+            m_index++;
         }
         
         public void decIndex() {
-            index--;
+            m_index--;
         }
         
         private void initComponents() {
@@ -801,20 +852,20 @@ public class SplittedPanelContainer extends JPanel {
             
             
             // Create Graphical Objects for rightButtonPanel
-            rightButtonPanel = new JPanel();
-            rightButtonPanel.setLayout(new GridBagLayout());
+            m_rightButtonPanel = new JPanel();
+            m_rightButtonPanel.setLayout(new GridBagLayout());
 
             ImageIcon maximizeIcon = IconManager.getIcon(IconManager.IconType.MAXIMIZE);
             
-            maximizeButton = new MiniButton(maximizeIcon);
-            maximizeButton.addActionListener(new java.awt.event.ActionListener() {
+            m_maximizeButton = new MiniButton(maximizeIcon);
+            m_maximizeButton.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    maximizeButton.setVisible(false);
-                    reduceButton.setVisible(true);
-                    minimizeButton.setVisible(false);
-                    container.maximize(_p);
+                    m_maximizeButton.setVisible(false);
+                    m_reduceButton.setVisible(true);
+                    m_minimizeButton.setVisible(false);
+                    m_container.maximize(_p);
                     
                     updateButtons();
                 }
@@ -822,45 +873,45 @@ public class SplittedPanelContainer extends JPanel {
             
             ImageIcon minimizeIcon = IconManager.getIcon(IconManager.IconType.MINIMIZE);
             
-            reduceButton = new MiniButton(minimizeIcon);
-            reduceButton.addActionListener(new java.awt.event.ActionListener() {
+            m_reduceButton = new MiniButton(minimizeIcon);
+            m_reduceButton.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    maximizeButton.setVisible(true);
-                    reduceButton.setVisible(false);
-                    minimizeButton.setVisible(true);
-                    container.reduce(_p);
+                    m_maximizeButton.setVisible(true);
+                    m_reduceButton.setVisible(false);
+                    m_minimizeButton.setVisible(true);
+                    m_container.reduce(_p);
                     
                     updateButtons();
                 }
             });
-            reduceButton.setVisible(false);
+            m_reduceButton.setVisible(false);
             
             ImageIcon deleteIcon = IconManager.getIcon(IconManager.IconType.DELETE);
             
             
-            minimizeButton = new MiniButton(deleteIcon);
-            minimizeButton.addActionListener(new java.awt.event.ActionListener() {
+            m_minimizeButton = new MiniButton(deleteIcon);
+            m_minimizeButton.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    maximizeButton.setVisible(true);
-                    reduceButton.setVisible(false);
-                    minimizeButton.setVisible(true);
+                    m_maximizeButton.setVisible(true);
+                    m_reduceButton.setVisible(false);
+                    m_minimizeButton.setVisible(true);
 
-                    container.minimize(_p);
+                    m_container.minimize(_p);
                     
                     updateButtons();
                 }
             });
             
-            associateButton = new MiniButton(IconManager.getIcon(IconManager.IconType.ASSOCIATE));
-            associateButton.addActionListener(new java.awt.event.ActionListener() {
+            m_associateButton = new MiniButton(IconManager.getIcon(IconManager.IconType.ASSOCIATE));
+            m_associateButton.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    container.associatePanelsAsTab(index);
+                    m_container.associatePanelsAsTab(m_index);
                     
                     updateButtons();
                 }
@@ -868,13 +919,13 @@ public class SplittedPanelContainer extends JPanel {
             
             
             final SplittedPanel _splittedPanel = this;
-            dissociateButton = new MiniButton(IconManager.getIcon(IconManager.IconType.DISSOCIATE));
-            dissociateButton.addActionListener(new java.awt.event.ActionListener() {
+            m_dissociateButton = new MiniButton(IconManager.getIcon(IconManager.IconType.DISSOCIATE));
+            m_dissociateButton.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
                     
-                    JTabbedPane tabbedPane = (JTabbedPane) embededPanel;
+                    JTabbedPane tabbedPane = (JTabbedPane) m_embededPanel;
                     int nbTabs = tabbedPane.getTabCount();
                     
                     JComponent lastComponent = (JComponent) tabbedPane.getComponentAt(nbTabs-1);
@@ -892,7 +943,7 @@ public class SplittedPanelContainer extends JPanel {
                     
                     _splittedPanel.repaint();
                     
-                    container.splitPanel(lastComponent, index+1);
+                    m_container.splitPanel(lastComponent, m_index+1);
                     
                     updateButtons();
                 }
@@ -905,21 +956,35 @@ public class SplittedPanelContainer extends JPanel {
             cButton.gridx = 0;
             cButton.gridy = 0;
             cButton.weighty = 0;
-            rightButtonPanel.add(maximizeButton, cButton);
+            m_rightButtonPanel.add(m_maximizeButton, cButton);
             cButton.gridy++;
-            rightButtonPanel.add(reduceButton, cButton);
+            m_rightButtonPanel.add(m_reduceButton, cButton);
             cButton.gridy++;
-            rightButtonPanel.add(minimizeButton, cButton);
+            m_rightButtonPanel.add(m_minimizeButton, cButton);
             cButton.gridy++;
-            rightButtonPanel.add(associateButton, cButton);
+            m_rightButtonPanel.add(m_associateButton, cButton);
             cButton.gridy++;
-            rightButtonPanel.add(dissociateButton, cButton);
+            m_rightButtonPanel.add(m_dissociateButton, cButton);
             cButton.weighty = 1;
             cButton.gridy++;
-            rightButtonPanel.add(Box.createVerticalBox(), cButton);
+            m_rightButtonPanel.add(Box.createVerticalBox(), cButton);
+            
+            // add user defined buttons
+            if (m_userDefinedButtonList != null) {
+                cButton.weighty = 0;
+
+                int nb = m_userDefinedButtonList.size();
+                for (int i = 0; i < nb; i++) {
+                    cButton.gridy++;
+                    UserDefinedButton b = m_userDefinedButtonList.get(i);
+                    m_rightButtonPanel.add(b, cButton);
+                }
+
+            }
+            
+            
 
 
-            // put left button panel in SplittedPanel
             GridBagConstraints c = new GridBagConstraints();
             c.gridx = 0;
             c.gridy = 0;
@@ -928,12 +993,12 @@ public class SplittedPanelContainer extends JPanel {
             c.fill = GridBagConstraints.BOTH;
 
            
-            add(embededPanel, c);
+            add(m_embededPanel, c);
 
             // put button in SplittedPanel
             c.gridx++;
             c.weightx = 0;
-            add(rightButtonPanel, c);
+            add(m_rightButtonPanel, c);
 
         }
 
@@ -943,17 +1008,17 @@ public class SplittedPanelContainer extends JPanel {
             // or if a panel has been iconified
             // we don't allow association button
             if (!iconifiedPanel.isEmpty() || aPanelMaximized) {
-                associateButton.setEnabled(false);
-                dissociateButton.setEnabled(false);
+                m_associateButton.setEnabled(false);
+                m_dissociateButton.setEnabled(false);
                 return;
             }
             
-            if (embededPanel instanceof JTabbedPane) {
-                associateButton.setEnabled(index>0);
-                dissociateButton.setEnabled(true);
+            if (m_embededPanel instanceof JTabbedPane) {
+                m_associateButton.setEnabled(m_index>0);
+                m_dissociateButton.setEnabled(true);
             } else {
-                associateButton.setEnabled(index>0);
-                dissociateButton.setEnabled(false);
+                m_associateButton.setEnabled(m_index>0);
+                m_dissociateButton.setEnabled(false);
             }
         }
         
@@ -1075,6 +1140,21 @@ public class SplittedPanelContainer extends JPanel {
         
 
         
+        
+    }
+    
+    public static class UserDefinedButton extends MiniButton {
+
+        public UserDefinedButton(Icon icon, ActionListener actionListener) {
+            super(icon);
+
+            addActionListener(actionListener);
+            
+        }
+
+        public boolean hasToBeVisible(boolean lastPanel) {
+            return lastPanel;
+        }
         
     }
     

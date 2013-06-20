@@ -129,25 +129,26 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             highlights[i] = HIGHLIGHT_NONE;
         }
         
-        if (peptideInstances == null) {
-            return;
-        }
-        
-        // highlight for non selected peptides
-        int nbPeptides = peptideInstances.length;
-        for (int i = 0; i < nbPeptides; i++) {
-            
-            if (peptideInstances[i].equals(selectedPeptide)) {
-                continue;
+        if (peptideInstances != null) {
+
+            // highlight for non selected peptides
+            int nbPeptides = peptideInstances.length;
+            for (int i = 0; i < nbPeptides; i++) {
+
+                if (peptideInstances[i].equals(selectedPeptide)) {
+                    continue;
+                }
+
+                Peptide p = peptideInstances[i].getTransientData().getBestPeptideMatch().getTransientData().getPeptide();
+                hightlight(p, false, highlights);
             }
-            
-            Peptide p = peptideInstances[i].getTransientData().getBestPeptideMatch().getTransientData().getPeptide();
-            hightlight(p, false, highlights);
         }
-        // highlight for selecte peptide (must be done last to override modifications
-        // of overlaping non selected peptides
-        hightlight(selectedPeptide.getTransientData().getBestPeptideMatch().getTransientData().getPeptide(), true, highlights);
         
+        if (selectedPeptide != null) {
+            // highlight for selected peptide (must be done last to override modifications
+            // of overlaping non selected peptides
+            hightlight(selectedPeptide.getTransientData().getBestPeptideMatch().getTransientData().getPeptide(), true, highlights);
+        }
 
        
         editorPane.setText(constructDisplayedSequence(sequence, highlights));

@@ -58,9 +58,7 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
             AbstractDataBox genericDatabox = dialog.getSelectedDataBox();
             try {
                 AbstractDataBox databox = (AbstractDataBox) genericDatabox.getClass().newInstance();
-                if (databox instanceof DataBoxRsmProteinSet) {
-                    ((DataBoxRsmProteinSet) databox).init(m_forRsm);
-                }
+
                 final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(databox.getName(), databox, false);
 
                 if (m_forRsm) {

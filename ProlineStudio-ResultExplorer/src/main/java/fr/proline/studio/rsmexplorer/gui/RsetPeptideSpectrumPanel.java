@@ -20,9 +20,11 @@ import org.slf4j.LoggerFactory;
 
 import fr.proline.core.utils.lzma.package$EasyLzma$;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.Graphics2D;
+import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -41,27 +43,27 @@ import org.jfree.data.xy.XYDataset;
  */
 public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxPanelInterface {
 
-    private AbstractDataBox dataBox;
+    private AbstractDataBox m_dataBox;
     
-    private DefaultXYDataset dataSet;
-    private JFreeChart chart;
+    private DefaultXYDataset m_dataSet;
+    private JFreeChart m_chart;
     
-    private PeptideMatch previousPeptideMatch = null;
+    private PeptideMatch m_previousPeptideMatch = null;
     
     /**
      * Creates new form RsetPeptideSpectrumPanel
      */
     public RsetPeptideSpectrumPanel() {
         
-        dataSet = new DefaultXYDataset();
-        chart = ChartFactory.createXYLineChart("", "m/z", "intensity", dataSet, PlotOrientation.VERTICAL, true, true, false);
+        m_dataSet = new DefaultXYDataset();
+        m_chart = ChartFactory.createXYLineChart("", "m/z", "intensity", m_dataSet, PlotOrientation.VERTICAL, true, true, false);
         
-        chart.removeLegend();
-        chart.setBackgroundPaint(Color.white);
-        TextTitle textTitle = chart.getTitle();
+        m_chart.removeLegend();
+        m_chart.setBackgroundPaint(Color.white);
+        TextTitle textTitle = m_chart.getTitle();
         textTitle.setFont(textTitle.getFont().deriveFont(Font.PLAIN, 10.0f));
 
-        XYPlot plot = (XYPlot) chart.getPlot();
+        XYPlot plot = (XYPlot) m_chart.getPlot();
         plot.getRangeAxis().setUpperMargin(0.2);
         
         plot.setBackgroundPaint(Color.white);
@@ -111,7 +113,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        spectrumPanel = new ChartPanel(chart, true);
+        spectrumPanel = new ChartPanel(m_chart, true);
 
         javax.swing.GroupLayout spectrumPanelLayout = new javax.swing.GroupLayout(spectrumPanel);
         spectrumPanel.setLayout(spectrumPanelLayout);
@@ -142,10 +144,10 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     
    public void setData(PeptideMatch peptideMatch) {
 
-       if (peptideMatch == previousPeptideMatch) {
+       if (peptideMatch == m_previousPeptideMatch) {
            return;
        }
-       previousPeptideMatch = peptideMatch;
+       m_previousPeptideMatch = peptideMatch;
        
         constructSpectrumChart(peptideMatch);
         
@@ -155,19 +157,19 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
         final String SERIES_NAME = "spectrumData";
         if (pm == null) {
-            dataSet.removeSeries(SERIES_NAME);
+            m_dataSet.removeSeries(SERIES_NAME);
             return;
         }
 
         MsQuery msQuery = pm.getTransientData().getIsMsQuerySet() ? pm.getMsQuery() : null;
         if (msQuery == null) {
-            dataSet.removeSeries(SERIES_NAME);
+            m_dataSet.removeSeries(SERIES_NAME);
             return;
         }
         
         Spectrum spectrum = msQuery.getTransientIsSpectrumSet() ? msQuery.getSpectrum() : null;
         if (spectrum == null) {
-            dataSet.removeSeries(SERIES_NAME);
+            m_dataSet.removeSeries(SERIES_NAME);
             return;
         }
 
@@ -210,12 +212,12 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             data[1][i] = intensityDoubleArray[i];
         }
 
-        dataSet.addSeries(SERIES_NAME, data);
+        m_dataSet.addSeries(SERIES_NAME, data);
 
 
         // Set title
         String title = "Query " + pm.getMsQuery().getInitialId() + " - " + pm.getTransientData().getPeptide().getSequence();
-        chart.setTitle(title);
+        m_chart.setTitle(title);
 
         // reset X/Y zooming
         ((ChartPanel) spectrumPanel).restoreAutoBounds();
@@ -224,8 +226,19 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.dataBox = dataBox;
+        this.m_dataBox = dataBox;
     }
+    
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getAddAction(splittedPanel);
+    }
+
     
     public static class XYStickRenderer extends AbstractXYItemRenderer {
 

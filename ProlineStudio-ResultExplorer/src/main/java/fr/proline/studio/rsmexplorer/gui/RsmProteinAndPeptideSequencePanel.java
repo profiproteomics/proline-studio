@@ -3,10 +3,12 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,7 +24,7 @@ import javax.swing.text.html.StyleSheet;
  */
 public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements DataBoxPanelInterface {
 
-    private AbstractDataBox dataBox;
+    private AbstractDataBox m_dataBox;
     
      
     /**
@@ -274,7 +276,17 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.dataBox = dataBox;
+        m_dataBox = dataBox;
+    }
+    
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getAddAction(splittedPanel);
     }
 
     @Override

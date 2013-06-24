@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.DecoratedMarkerTable;
@@ -11,6 +12,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionListener;
 import java.io.Serializable;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -151,6 +153,16 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
+    }
+
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getAddAction(splittedPanel);
     }
 
     private class LogTable extends DecoratedMarkerTable {

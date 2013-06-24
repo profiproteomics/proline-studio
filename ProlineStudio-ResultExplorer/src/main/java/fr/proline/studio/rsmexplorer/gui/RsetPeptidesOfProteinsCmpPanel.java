@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.gui.SquareColorPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -9,6 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.DecoratedTable;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.*;
 import java.util.List;
 import javax.swing.JPanel;
@@ -23,7 +25,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements DataBoxPanelInterface {
 
-    private AbstractDataBox dataBox;
+    private AbstractDataBox m_dataBox;
 
     /**
      * Creates new form RsetPeptidesOfProteinsCmpPanel
@@ -83,9 +85,20 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.dataBox = dataBox;
+        this.m_dataBox = dataBox;
     }
 
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getAddAction(splittedPanel);
+    }
+
+    
     public void setData(ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmArray) {
         ((PeptideCmpTableModel) table.getModel()).setData(proteinMatchArray, rsmArray);
         if ((proteinMatchArray == null) || (proteinMatchArray.isEmpty())) {
@@ -115,7 +128,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
 
 
 
-            dataBox.propagateDataChanged(Peptide.class);
+            m_dataBox.propagateDataChanged(Peptide.class);
 
         }
     }

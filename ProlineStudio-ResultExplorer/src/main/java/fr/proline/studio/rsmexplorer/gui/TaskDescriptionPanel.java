@@ -2,11 +2,13 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -239,6 +241,17 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
+    }
+
+    
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getAddAction(splittedPanel);
     }
     
 }

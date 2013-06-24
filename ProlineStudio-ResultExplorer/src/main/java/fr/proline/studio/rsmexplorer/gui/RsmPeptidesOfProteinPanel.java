@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
@@ -10,6 +11,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.utils.DecoratedTable;
+import java.awt.event.ActionListener;
 import javax.swing.event.ListSelectionEvent;
 /**
  *
@@ -17,9 +19,9 @@ import javax.swing.event.ListSelectionEvent;
  */
 public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBoxPanelInterface {
 
-    private AbstractDataBox dataBox;
+    private AbstractDataBox m_dataBox;
     
-    ProteinMatch currentProteinMatch = null;
+    ProteinMatch m_currentProteinMatch = null;
     
     /**
      * Creates new form RsmPeptidesOfProteinPanel
@@ -82,7 +84,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     
     public void setData(ProteinMatch proteinMatch, ResultSummary rsm) {
 
-        currentProteinMatch = proteinMatch;
+        m_currentProteinMatch = proteinMatch;
         
         if ((proteinMatch == null) || (rsm == null)) {
             ((PeptideTableModel) peptidesTable.getModel()).setData(null);
@@ -102,8 +104,19 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.dataBox = dataBox;
+        m_dataBox = dataBox;
     }
+    
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getAddAction(splittedPanel);
+    }
+
     
     private class PeptideTable extends DecoratedTable  {
         
@@ -125,7 +138,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             
 
             
-            dataBox.propagateDataChanged(PeptideInstance.class);
+            m_dataBox.propagateDataChanged(PeptideInstance.class);
 
         }
         

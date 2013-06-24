@@ -28,7 +28,7 @@
   <SubComponents>
     <Container class="javax.swing.JPanel" name="spectrumPanel">
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ChartPanel(chart, true);"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ChartPanel(m_chart, true);"/>
       </AuxValues>
 
       <Layout>

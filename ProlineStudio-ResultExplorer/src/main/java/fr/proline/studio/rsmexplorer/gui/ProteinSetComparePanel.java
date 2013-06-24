@@ -7,6 +7,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.*;
@@ -14,6 +15,7 @@ import javax.swing.*;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.IconManager;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,15 +35,15 @@ import org.jdesktop.swingx.renderer.DefaultTableRenderer;
  */
 public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPanelInterface {
 
-    private ProteinSetCmpTable table;
-    private AbstractDataBox dataBox;
+    private ProteinSetCmpTable m_table;
+    private AbstractDataBox m_dataBox;
 
     public ProteinSetComparePanel() {
         setLayout(new GridLayout());
 
 
-        table = new ProteinSetCmpTable();
-        JScrollPane scrollPane = new JScrollPane(table);
+        m_table = new ProteinSetCmpTable();
+        JScrollPane scrollPane = new JScrollPane(m_table);
 
 
         add(scrollPane);
@@ -49,24 +51,24 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
     }
 
     public ArrayList<ResultSummary> getResultSummaryList() {
-        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
+        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) m_table.getModel();
         return tableModel.getResultSummaryList();
     }
 
     public ResultSummary getFirstResultSummary() {
-        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
+        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) m_table.getModel();
         return tableModel.getResultSummary(0);
     }
 
     public ProteinMatch getProteinMatch(Long resultSetId) {
-        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
+        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) m_table.getModel();
         return tableModel.getProteinMatch(resultSetId);
     }
 
     public ArrayList<ProteinMatch> getSelectedProteinMatchArray() {
 
         // Retrieve Selected Row
-        int selectedRow = table.getSelectedRow();
+        int selectedRow = m_table.getSelectedRow();
 
         // nothing selected
         if (selectedRow == -1) {
@@ -74,17 +76,17 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
         }
 
         // convert according to the sorting
-        selectedRow = table.convertRowIndexToModel(selectedRow);
+        selectedRow = m_table.convertRowIndexToModel(selectedRow);
 
 
         // Retrieve ProteinSet selected
-        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
+        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) m_table.getModel();
 
         return tableModel.getProteinMatchArray(selectedRow);
     }
 
     public ResultSet getFirstResultSet() {
-        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) table.getModel();
+        ProteinSetCmpTableModel tableModel = (ProteinSetCmpTableModel) m_table.getModel();
         ResultSummary rsm = tableModel.getResultSummary(0);
         if (rsm == null) {
             return null;
@@ -96,22 +98,22 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
 
         //previouslyProteinSelected = null;
 
-        ProteinSetCmpTableModel tableModel = ((ProteinSetCmpTableModel) table.getModel());
+        ProteinSetCmpTableModel tableModel = ((ProteinSetCmpTableModel) m_table.getModel());
         tableModel.setData(proteinMatchArray, rsmIdMap);
 
         // select first data
         if (tableModel.getRowCount() > 0) {
-            table.getSelectionModel().setSelectionInterval(0, 0);
+            m_table.getSelectionModel().setSelectionInterval(0, 0);
         }
     }
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.dataBox = dataBox;
+        this.m_dataBox = dataBox;
     }
 
     public AbstractDataBox getDataBox() {
-        return dataBox;
+        return m_dataBox;
     }
 
     public class ProteinSetCmpTable extends DecoratedTable {
@@ -142,11 +144,21 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
 
             super.valueChanged(e);
 
-            dataBox.propagateDataChanged(ProteinMatch.class); //JPM.TODO
+            m_dataBox.propagateDataChanged(ProteinMatch.class); //JPM.TODO
 
         }
     }
 
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getAddAction(splittedPanel);
+    }
+    
     public class ProteinSetCmpTableModel extends AbstractTableModel {
 
         private ArrayList<ProteinSet> proteinSetArray = null;
@@ -288,7 +300,7 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
 
                             @Override
                             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                JTableHeader th = table.getTableHeader();
+                                JTableHeader th = m_table.getTableHeader();
                                 th.repaint();
                             }
                         };

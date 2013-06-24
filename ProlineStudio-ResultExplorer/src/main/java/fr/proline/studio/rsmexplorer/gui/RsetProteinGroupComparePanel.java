@@ -11,6 +11,7 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataBoxProteinSetsCmp;
@@ -30,9 +31,9 @@ import javax.swing.*;
  */
 public class RsetProteinGroupComparePanel extends HourglassPanel implements DataBoxPanelInterface {
 
-    private JPanel internalPanel;
-    private ProteinSetComparePanel proteinSetComparePanel;
-    private LegendPanel legendPanel;
+    private JPanel m_internalPanel;
+    private ProteinSetComparePanel m_proteinSetComparePanel;
+    private LegendPanel m_legendPanel;
 
     /**
      * Creates new form RsetProteinGroupComparePanel
@@ -49,9 +50,9 @@ public class RsetProteinGroupComparePanel extends HourglassPanel implements Data
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        internalPanel = new JPanel(new GridBagLayout());
-        internalPanel.setBackground(Color.white);
-        add(internalPanel, c);
+        m_internalPanel = new JPanel(new GridBagLayout());
+        m_internalPanel.setBackground(Color.white);
+        add(m_internalPanel, c);
 
 
         GridBagConstraints cInternal = new GridBagConstraints();
@@ -61,28 +62,38 @@ public class RsetProteinGroupComparePanel extends HourglassPanel implements Data
         cInternal.gridy = 0;
         cInternal.weightx = 1;
         cInternal.weighty = 1;
-        proteinSetComparePanel = new ProteinSetComparePanel();
-        internalPanel.add(proteinSetComparePanel, cInternal);
+        m_proteinSetComparePanel = new ProteinSetComparePanel();
+        m_internalPanel.add(m_proteinSetComparePanel, cInternal);
 
         cInternal.gridy++;
         cInternal.weighty = 0;
 
-        legendPanel = new LegendPanel();
-        internalPanel.add(legendPanel, cInternal);
+        m_legendPanel = new LegendPanel();
+        m_internalPanel.add(m_legendPanel, cInternal);
 
     }
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        proteinSetComparePanel.setDataBox(dataBox);
+        m_proteinSetComparePanel.setDataBox(dataBox);
+    }
+    
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_proteinSetComparePanel.getDataBox().getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return m_proteinSetComparePanel.getDataBox().getAddAction(splittedPanel);
     }
 
     public void setData(ArrayList<ProteinMatch> proteinMatchArray, HashMap<Long, ArrayList<Long>> rsmIdMap) {
-        proteinSetComparePanel.setData(proteinMatchArray, rsmIdMap);
+        m_proteinSetComparePanel.setData(proteinMatchArray, rsmIdMap);
     }
 
     public ProteinSetComparePanel getComparePanel() {
-        return proteinSetComparePanel;
+        return m_proteinSetComparePanel;
     }
 
     private class LegendPanel extends JPanel {
@@ -130,19 +141,19 @@ public class RsetProteinGroupComparePanel extends HourglassPanel implements Data
                 @Override
                 public void actionPerformed(ActionEvent e) {
 
-                    ResultSet rset = proteinSetComparePanel.getFirstResultSet();
+                    ResultSet rset = m_proteinSetComparePanel.getFirstResultSet();
                     if (rset == null) {
                         // no data ready (should not happen)
                         return;
                     }
-                    long projectId = proteinSetComparePanel.getDataBox().getProjectId();
+                    long projectId = m_proteinSetComparePanel.getDataBox().getProjectId();
                     RSMTree tree = RSMTree.getTree().copyResultSetRootSubTree(rset, projectId);
 
-                    Window window = SwingUtilities.getWindowAncestor(legendPanel);
+                    Window window = SwingUtilities.getWindowAncestor(m_legendPanel);
 
                     TreeSelectionDialog treeSelectionDialog = new TreeSelectionDialog(window, tree, "Select Result Summaries");
-                    treeSelectionDialog.setLocationRelativeTo(proteinSetComparePanel);
-                    treeSelectionDialog.setSelection(proteinSetComparePanel.getResultSummaryList());
+                    treeSelectionDialog.setLocationRelativeTo(m_proteinSetComparePanel);
+                    treeSelectionDialog.setSelection(m_proteinSetComparePanel.getResultSummaryList());
 
                     treeSelectionDialog.setVisible(true);
 
@@ -192,7 +203,7 @@ public class RsetProteinGroupComparePanel extends HourglassPanel implements Data
         private void updataData(ArrayList<Dataset> selectedDatasetList) {
 
        
-            DataBoxProteinSetsCmp dataBox = (DataBoxProteinSetsCmp) proteinSetComparePanel.getDataBox();
+            DataBoxProteinSetsCmp dataBox = (DataBoxProteinSetsCmp) m_proteinSetComparePanel.getDataBox();
             ProteinMatch proteinMatch = (ProteinMatch) dataBox.getData(false, ProteinMatch.class);
             String proteinMatchName = proteinMatch.getAccession();
 
@@ -205,7 +216,7 @@ public class RsetProteinGroupComparePanel extends HourglassPanel implements Data
                 selectedRsmList.add(rsm);
                 long resultSetId = rsm.getResultSet().getId();
                 resultSetIdArrayList.add(resultSetId);
-                ProteinMatch pm = proteinSetComparePanel.getProteinMatch(resultSetId);
+                ProteinMatch pm = m_proteinSetComparePanel.getProteinMatch(resultSetId);
                 proteinMatchArrayList.add(pm);
             }
 

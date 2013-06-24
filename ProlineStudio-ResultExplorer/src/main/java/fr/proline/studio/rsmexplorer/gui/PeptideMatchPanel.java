@@ -6,6 +6,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -244,16 +245,18 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         return internalPanel;
     }
 
-    /*@Override
-    public int getNumberOfButtons() {
-        ResultSet rset = (ResultSet) dataBox.getData(false, ResultSet.class);
-        if ((rset == null) || (rset.getDecoyResultSet() == null)) {
-            return 0;
-        }
-        return 1;
+    
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getRemoveAction(splittedPanel);
     }
 
-*/
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getAddAction(splittedPanel);
+    }
+
+
     
     
     

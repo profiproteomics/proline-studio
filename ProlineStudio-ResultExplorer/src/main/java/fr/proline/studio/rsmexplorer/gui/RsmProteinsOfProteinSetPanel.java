@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
@@ -12,6 +13,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.Color;
+import java.awt.event.ActionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 
@@ -23,8 +25,8 @@ import javax.swing.table.TableColumn;
  */
 public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface {
 
-    private AbstractDataBox dataBox;
-    private ProteinSet proteinSetCur = null;
+    private AbstractDataBox m_dataBox;
+    private ProteinSet m_proteinSetCur = null;
 
     /**
      * Creates new form RsmProteinsOfProteinSetPanel
@@ -68,10 +70,10 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
     public void setData(ProteinSet proteinSet, String searchedText) {
 
-        if (proteinSet == proteinSetCur) {
+        if (proteinSet == m_proteinSetCur) {
             return;
         }
-        proteinSetCur = proteinSet;
+        m_proteinSetCur = proteinSet;
 
         if (proteinSet == null) {
             clearData();
@@ -121,7 +123,17 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.dataBox = dataBox;
+        m_dataBox = dataBox;
+    }
+    
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getRemoveAction(splittedPanel);
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getAddAction(splittedPanel);
     }
 
     /**
@@ -191,7 +203,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
             super.valueChanged(e);
 
-            dataBox.propagateDataChanged(ProteinMatch.class);
+            m_dataBox.propagateDataChanged(ProteinMatch.class);
 
 
         }

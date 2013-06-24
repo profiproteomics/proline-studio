@@ -1,5 +1,8 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.SplittedPanelContainer;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,7 +18,7 @@ import javax.swing.event.ChangeListener;
  * 
  * @author JM235353
  */
-public abstract class AbstractDataBox implements ChangeListener {
+public abstract class AbstractDataBox implements ChangeListener, SplittedPanelContainer.UserActions {
    
     public enum DataBoxLayout {
       VERTICAL,
@@ -178,5 +181,18 @@ public abstract class AbstractDataBox implements ChangeListener {
     protected void setLoaded(int loadingId) {
         m_panel.setLoaded(loadingId);
     }
+    
+    
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        return new RemoveDataBoxActionListener(splittedPanel, this);
+    }
+        
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+        return new NextDataBoxActionListener(splittedPanel, this);
+    }
+    
+
 
 }

@@ -14,12 +14,12 @@ public class DataboxManager {
     
     private AbstractDataBox[] m_dataBoxStartingArray = { new DataBoxRsetAll(), new DataBoxRsetPeptide(), 
                                                  new DataBoxRsmPeptide(), new DataBoxRsmPeptideInstances(),
-                                                 new DataBoxRsmProteinSet().init(true) };
+                                                 new DataBoxRsmAllProteinSet() };
     
     private AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(),
                                                  new DataBoxRsetProteinsForPeptideMatch(),
                                                  new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(),
-                                                 new DataBoxRsmProteinSet().init(false), new DataBoxRsmProteinsOfProteinSet() };
+                                                 new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet() };
     
     private DataboxManager() {
     }

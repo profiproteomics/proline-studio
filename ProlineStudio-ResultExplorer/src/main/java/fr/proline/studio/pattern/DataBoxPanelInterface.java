@@ -1,11 +1,12 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.gui.SplittedPanelContainer;
 
 /**
  *
  * @author JM235353
  */
-public interface DataBoxPanelInterface {
+public interface DataBoxPanelInterface extends SplittedPanelContainer.UserActions {
     
     public void setDataBox(AbstractDataBox dataBox);
     

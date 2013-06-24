@@ -190,7 +190,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
-        return new NextDataBoxActionListener(splittedPanel, this);
+        return new AddDataBoxActionListener(splittedPanel, this);
     }
     
 

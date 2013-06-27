@@ -50,8 +50,8 @@ public class DataBoxRsetAll extends AbstractDataBox{
     }
 
     @Override
-    public void dataChanged(Class dataType) {
-        if (dataType == Project.class) {
+    public void dataChanged() {
+
             Project p = (m_project != null) ? m_project : (Project) previousDataBox.getData(false, Project.class);
 
             final ArrayList<ResultSet> resultSetArrayList = new ArrayList<>();
@@ -79,8 +79,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
             
             DatabaseRsetTask task = new DatabaseRsetTask(callback, p.getId(), resultSetArrayList);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-            
-        }
+
     }
     
         @Override
@@ -97,7 +96,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
     @Override
     public void setEntryData(Object data) {
         m_project = (Project) data;
-        dataChanged(Project.class);
+        dataChanged();
         
         ImportSearchResultAsRsetAction.addEventListener(m_project.getId(), this);
     }
@@ -110,7 +109,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
     
     @Override
     public void stateChanged(ChangeEvent e) {
-        dataChanged(Project.class);
+        dataChanged();
     }
     
 }

@@ -10,8 +10,8 @@ import java.awt.event.ActionListener;
  */
 public class RemoveDataBoxActionListener implements ActionListener {
 
-    SplittedPanelContainer m_splittedPanel;
-    AbstractDataBox m_previousDatabox;
+    private SplittedPanelContainer m_splittedPanel;
+    private AbstractDataBox m_previousDatabox;
 
     public RemoveDataBoxActionListener(SplittedPanelContainer splittedPanel, AbstractDataBox previousDatabox) {
         m_splittedPanel = splittedPanel;

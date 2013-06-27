@@ -12,7 +12,8 @@ public class DataBoxTaskDescription extends AbstractDataBox {
     public DataBoxTaskDescription() {
 
         // Name of this databox
-        name = "Task Description";
+        name = "Task";
+        description = "Task Description";
         
         // Register Possible in parameters
         // One TaskInfo
@@ -30,7 +31,7 @@ public class DataBoxTaskDescription extends AbstractDataBox {
     }
 
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
         TaskInfo taskInfo = (TaskInfo) previousDataBox.getData(false, TaskInfo.class);
         ((TaskDescriptionPanel)m_panel).setTaskInfo(taskInfo);
     }

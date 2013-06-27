@@ -48,7 +48,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     
 
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
         final PeptideMatch peptideMatch = (PeptideMatch) previousDataBox.getData(false, PeptideMatch.class);
 
         if (peptideMatch == null) {

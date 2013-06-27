@@ -7,7 +7,8 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinAndPeptideSequencePanel;
 
 /**
- *
+ * Databox : Protein Sequence + inner peptide sequence when peptide are given by
+ * a previous databox.
  * @author JM235353
  */
 public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
@@ -39,7 +40,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
     }
 
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
         ProteinMatch proteinMatch = (ProteinMatch) previousDataBox.getData(false, ProteinMatch.class);
         PeptideInstance selectedPeptide = (PeptideInstance) previousDataBox.getData(false, PeptideInstance.class);
         ResultSummary resultSummary = (ResultSummary) previousDataBox.getData(false, ResultSummary.class);

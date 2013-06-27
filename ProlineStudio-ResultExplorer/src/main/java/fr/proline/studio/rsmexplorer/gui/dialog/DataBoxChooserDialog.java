@@ -10,36 +10,40 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.AbstractTableModel;
 
 
 
 /**
- *
+ * Dialog to select a databox as a View to be added in a Window.
  * @author JM235353
  */
 public class DataBoxChooserDialog extends DefaultDialog {
 
     
-    private DataBoxTable m_dataBoxTable = null;
+    private JTextField m_titleTextField = null;
     
-    public DataBoxChooserDialog(Window parent, ArrayList<GroupParameter> outParameters) {
+    private DataBoxTable m_dataBoxTable = null;
+    private JRadioButton m_belowRadioButton;
+    private JRadioButton m_tabbedRadioButton;
+    private JRadioButton m_splittedRadioButton;
+    
+    public DataBoxChooserDialog(Window parent, ArrayList<GroupParameter> outParameters, boolean firstView) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-        setSize(800,320);
+        setSize(780,420);
         
         setButtonVisible(BUTTON_DEFAULT, false);
         setResizable(true);
         
         TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleStartingDataboxList(outParameters);
 
-        initDialog(dataBoxMap);
+        initDialog(dataBoxMap, firstView);
     }
     
-    public DataBoxChooserDialog(Window parent, AbstractDataBox previousDatabox) {
+    public DataBoxChooserDialog(Window parent, AbstractDataBox previousDatabox, boolean firstView) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setSize(800,320);
@@ -48,24 +52,70 @@ public class DataBoxChooserDialog extends DefaultDialog {
         
         TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(previousDatabox);
 
-        initDialog(dataBoxMap);
+        initDialog(dataBoxMap, firstView);
     }
 
     
+    @Override
     public void pack() {
-        // forbid back by overloading the method
+        // forbid pack by overloading the method
     }
             
-
-    
-
-    
-    private void initDialog(TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap) {
-        setTitle("Select a Data View");   
-        
+    private void initDialog(TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap, boolean firstView) {
+        setTitle(firstView ? "User Defined Window" : "Add a View");   
 
         JPanel internalPanel = new JPanel(new GridBagLayout());
 
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx=1.0;
+        if (firstView) {
+            JPanel windowPanel = createWindowPanel();
+            internalPanel.add(windowPanel, c);
+            c.gridy++;
+        }
+
+        c.weighty=1.0;
+        JPanel viewPanel = createViewsPanel(dataBoxMap, firstView);
+        internalPanel.add(viewPanel, c);
+
+        setInternalComponent(internalPanel);
+    }
+
+    private JPanel createWindowPanel() {
+        JPanel windowPanel = new JPanel(new GridBagLayout());
+        windowPanel.setBorder(BorderFactory.createTitledBorder(" Window Title "));
+
+        JLabel titleLabel = new JLabel("Title : ");
+        m_titleTextField = new JTextField();
+        
+         
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        windowPanel.add(titleLabel, c);
+        
+        c.gridx++;
+        c.weightx = 1.0;
+        windowPanel.add(m_titleTextField, c);
+        
+        return windowPanel;
+    }
+    
+    private JPanel createViewsPanel(TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap, boolean firstView) {
+         JPanel viewPanel = new JPanel(new GridBagLayout());
+        viewPanel.setBorder(BorderFactory.createTitledBorder(" Views "));
+        
+        
         // create objects
         JScrollPane scrollPane = new JScrollPane();
         m_dataBoxTable = new DataBoxTable();
@@ -75,6 +125,23 @@ public class DataBoxChooserDialog extends DefaultDialog {
         m_dataBoxTable.setFillsViewportHeight(true);
         
         
+        JLabel positionLabel = null;
+        if (!firstView) {
+            positionLabel = new JLabel("View Position : ");
+            m_belowRadioButton = new JRadioButton("Below");
+            m_belowRadioButton.setSelected(true);
+            m_tabbedRadioButton = new JRadioButton("Tabbed");
+            m_splittedRadioButton = new JRadioButton("Splitted");
+        }
+
+        
+        
+        // Group the radio buttons.
+        ButtonGroup group = new ButtonGroup();
+        group.add(m_belowRadioButton);
+        group.add(m_tabbedRadioButton);
+        group.add(m_splittedRadioButton);
+        
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -82,23 +149,49 @@ public class DataBoxChooserDialog extends DefaultDialog {
 
         c.gridx = 0;
         c.gridy = 0;
+        c.gridwidth = 4;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        internalPanel.add(scrollPane, c);
+        viewPanel.add(scrollPane, c);
 
-        setInternalComponent(internalPanel);
+        if (!firstView) {
+            c.weightx = 0.0;
+            c.weighty = 0.0;
+            c.gridwidth = 1;
+            c.gridx = 0;
+            c.gridy++;
+            viewPanel.add(positionLabel, c);
+            c.gridx++;
+            viewPanel.add(m_belowRadioButton, c);
+            c.gridx++;
+            viewPanel.add(m_tabbedRadioButton, c);
+            c.gridx++;
+            viewPanel.add(m_splittedRadioButton, c);
+
+        }
+        
+        return viewPanel;
     }
+
+    
+
  
     @Override
     protected boolean okCalled() {
         
-        int selectedRow = m_dataBoxTable.getSelectedRow();
+        if ((m_titleTextField != null) && (m_titleTextField.getText().trim().length() == 0)) {
+            setStatus(true, "You must fill a Window Title");
+             highlight(m_titleTextField);
+             return false;
+        }
         
+        int selectedRow = m_dataBoxTable.getSelectedRow();
         if (selectedRow == -1) {
-             setStatus(true, "You must select a Data Window");
+             setStatus(true, "You must select a View");
              highlight(m_dataBoxTable);
              return false;
         }
+        
 
         return true;
         
@@ -117,11 +210,56 @@ public class DataBoxChooserDialog extends DefaultDialog {
         return ((DataBoxTableModel)m_dataBoxTable.getModel()).getDataBox(selectedRow);
     }
 
+    public String getWndTitle() {
+        return m_titleTextField.getText();
+    }
+    
+    public boolean addBelow() {
+        return m_belowRadioButton.isSelected();
+    }
+    
+    public boolean addTabbed() {
+        return m_tabbedRadioButton.isSelected();
+    }
+    
+    public boolean addSplitted() {
+        return m_splittedRadioButton.isSelected();
+    }
     
     private class DataBoxTable extends DecoratedMarkerTable {
 
+        private String m_previouslySelectedWndTitle = null;
+        
         public DataBoxTable() {
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        }
+        
+        /**
+         * Called whenever the value of the selection changes.
+         *
+         * @param e the event that characterizes the change.
+         */
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+
+            super.valueChanged(e);
+
+            if (m_titleTextField != null) {
+                String text = m_titleTextField.getText().trim();
+                if ( (text.length() == 0) || ((m_previouslySelectedWndTitle!=null) && (text.compareTo(m_previouslySelectedWndTitle)==0)) ) {
+                    
+                    int selectedRow = getSelectedRow();
+                    if (selectedRow == -1) {
+                        return;
+                    }
+                    selectedRow = convertRowIndexToModel(selectedRow);
+                    
+                    String wndTitle = ((String) getModel().getValueAt(selectedRow, DataBoxTableModel.COLTYPE_NAME)).trim();
+                    m_titleTextField.setText(wndTitle);
+                    m_previouslySelectedWndTitle = wndTitle;
+                }
+            }
+            
         }
         
 

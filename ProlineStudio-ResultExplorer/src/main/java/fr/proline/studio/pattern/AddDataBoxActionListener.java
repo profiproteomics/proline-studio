@@ -15,8 +15,8 @@ import org.openide.windows.WindowManager;
  */
 public class AddDataBoxActionListener implements ActionListener {
 
-    SplittedPanelContainer m_splittedPanel;
-    AbstractDataBox m_previousDatabox;
+    private SplittedPanelContainer m_splittedPanel;
+    private AbstractDataBox m_previousDatabox;
 
     public AddDataBoxActionListener(SplittedPanelContainer splittedPanel, AbstractDataBox previousDatabox) {
         m_splittedPanel = splittedPanel;
@@ -25,7 +25,7 @@ public class AddDataBoxActionListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        DataBoxChooserDialog dialog = new DataBoxChooserDialog(WindowManager.getDefault().getMainWindow(), m_previousDatabox);
+        DataBoxChooserDialog dialog = new DataBoxChooserDialog(WindowManager.getDefault().getMainWindow(), m_previousDatabox, false);
         dialog.setLocationRelativeTo(WindowManager.getDefault().getMainWindow());
         dialog.setVisible(true);
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
@@ -40,19 +40,17 @@ public class AddDataBoxActionListener implements ActionListener {
             m_previousDatabox.setNextDataBox(genericDatabox);
 
 
-            RemoveDataBoxActionListener removeAction = new RemoveDataBoxActionListener(m_splittedPanel, m_previousDatabox);
-            AddDataBoxActionListener addAction = new AddDataBoxActionListener(m_splittedPanel, genericDatabox);
-            /*SplittedPanelContainer.UserDefinedButton removeBoxButton = new SplittedPanelContainer.UserDefinedButton(IconManager.getIcon(IconManager.IconType.MINUS11), removeAction);
-            SplittedPanelContainer.UserDefinedButton addBoxButton = new SplittedPanelContainer.UserDefinedButton(IconManager.getIcon(IconManager.IconType.PLUS11), addAction);
-            ArrayList<SplittedPanelContainer.UserDefinedButton> userButtonList = new ArrayList<>();
-            userButtonList.add(addBoxButton);
-            userButtonList.add(removeBoxButton);*/
-
             genericDatabox.createPanel();
 
-
-
-            m_splittedPanel.registerAddedPanel((JPanel) genericDatabox.getPanel());
+            // add the new panel to the window (below, as a tabb, or as splitted
+            if (dialog.addBelow()) {
+                m_splittedPanel.registerAddedPanel((JPanel) genericDatabox.getPanel());
+            } else if (dialog.addTabbed()) {
+                m_splittedPanel.registerAddedPanelAsTab((JPanel) genericDatabox.getPanel());
+            } else {
+                // splitted
+                m_splittedPanel.registerAddedPanelAsSplitted((JPanel) genericDatabox.getPanel());
+            }
 
             // update display of added databox
             final AbstractDataBox _genericDatabox = genericDatabox;
@@ -60,7 +58,7 @@ public class AddDataBoxActionListener implements ActionListener {
 
                 @Override
                 public void run() {
-                    _genericDatabox.dataChanged(null);
+                    _genericDatabox.dataChanged();
                 }
             });
 

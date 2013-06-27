@@ -41,7 +41,7 @@ public class DataBoxTaskList extends AbstractDataBox {
     }
 
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
         // never called
     }
     

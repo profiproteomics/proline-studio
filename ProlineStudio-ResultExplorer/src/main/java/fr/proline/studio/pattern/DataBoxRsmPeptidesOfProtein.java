@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.PeptideInstance;
@@ -16,7 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.RsmPeptidesOfProteinPanel;
 import java.util.ArrayList;
 
 /**
- *
+ * Databox : Peptides of a Protein
  * @author JM235353
  */
 public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
@@ -61,7 +57,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
     
 
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
         final ProteinMatch proteinMatch = (ProteinMatch) previousDataBox.getData(false, ProteinMatch.class);
         final ResultSummary rsm = (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
 

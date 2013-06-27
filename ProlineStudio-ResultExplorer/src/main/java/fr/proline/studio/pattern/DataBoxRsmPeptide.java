@@ -44,7 +44,7 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
     }
     
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
         
         final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
 
@@ -96,7 +96,7 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
     public void setEntryData(Object data) {
         if (data instanceof ResultSummary) {
             m_rsm = (ResultSummary) data;
-            dataChanged(ResultSummary.class);
+            dataChanged();
         }
     }
 }

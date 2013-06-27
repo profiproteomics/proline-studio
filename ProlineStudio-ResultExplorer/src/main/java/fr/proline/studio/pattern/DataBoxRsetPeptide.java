@@ -21,7 +21,8 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     public DataBoxRsetPeptide() {
 
         // Name of this databox
-        name = "Peptides";
+        name = "PSM";
+        description = "All PSM of a Search Result";
         
         // Register Possible in parameters
         // One ResultSummary
@@ -48,7 +49,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     }
     
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
         
         final ResultSet _rset = (rset!=null) ? rset : (ResultSet) previousDataBox.getData(false, ResultSet.class);
 
@@ -110,7 +111,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     public void setEntryData(Object data) {
         if (data instanceof ResultSet) {
             rset = (ResultSet) data;
-            dataChanged(ResultSet.class);
+            dataChanged();
         } else if (data instanceof ResultSummary) {
             rset = ((ResultSummary) data).getResultSet();
         }

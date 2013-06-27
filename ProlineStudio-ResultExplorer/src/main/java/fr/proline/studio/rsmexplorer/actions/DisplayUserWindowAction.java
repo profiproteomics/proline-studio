@@ -20,7 +20,7 @@ import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Action to display the dialog to choose a view (databox) for a user window
  * @author JM235353
  */
 public class DisplayUserWindowAction extends AbstractRSMAction {
@@ -51,7 +51,7 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
 
         final Dataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
 
-        DataBoxChooserDialog dialog = new DataBoxChooserDialog(WindowManager.getDefault().getMainWindow(), outParameters);
+        DataBoxChooserDialog dialog = new DataBoxChooserDialog(WindowManager.getDefault().getMainWindow(), outParameters, true);
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
@@ -59,7 +59,7 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
             try {
                 AbstractDataBox databox = (AbstractDataBox) genericDatabox.getClass().newInstance();
 
-                final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(databox.getName(), databox, false);
+                final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataSet.getName()+" "+dialog.getWndTitle(), databox, false);
 
                 if (m_forRsm) {
                     

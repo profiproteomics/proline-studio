@@ -38,11 +38,11 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(PeptideMatch.class, true);
-        registerInParameter(outParameter);
+        registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
         outParameter.addParameter(PeptideInstance.class, true);
-        registerInParameter(outParameter);
+        registerOutParameter(outParameter);
        
     }
     
@@ -56,7 +56,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     }
     
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
         
         final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
 
@@ -126,7 +126,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     public void setEntryData(Object data) {
         if (data instanceof ResultSummary) {
             m_rsm = (ResultSummary) data;
-            dataChanged(ResultSummary.class);
+            dataChanged();
         }
     }
 }

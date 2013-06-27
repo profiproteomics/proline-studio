@@ -54,7 +54,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     }
     
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
 
         final PeptideInstance _peptideInstance = (PeptideInstance) previousDataBox.getData(false, PeptideInstance.class);
 
@@ -123,6 +123,6 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         m_rsm = (ResultSummary) data;
-        dataChanged(ResultSummary.class);
+        dataChanged();
     }
 }

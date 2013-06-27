@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
 
@@ -16,7 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.RsmProteinsOfProteinSetPanel;
 
 
 /**
- *
+ * Databox : Proteins of a Protein Set
  * @author JM235353
  */
 public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
@@ -53,7 +49,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     }
     
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
         final ProteinSet proteinSet = (ProteinSet) previousDataBox.getData(false, ProteinSet.class);
 
         if (proteinSet == null) {

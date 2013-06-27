@@ -52,7 +52,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
     }
 
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
         final ProteinMatch proteinMatch = (ProteinMatch) previousDataBox.getData(false, ProteinMatch.class);
 
         if (proteinMatch == null) {

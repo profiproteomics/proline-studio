@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.studio.rsmexplorer.node.RSMNode;
@@ -10,12 +6,13 @@ import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Action with a Menu for the Display of Rset (Search Result)
  * @author JM235353
  */
 public class DisplayRsetAction extends AbstractRSMAction {
 
    private DisplayRsetPeptidesAction m_displayRsetPeptidesAction;
+   private DisplayUserWindowAction m_displayUserWindowAction;
 
    private JMenu m_menu;
     
@@ -28,10 +25,14 @@ public class DisplayRsetAction extends AbstractRSMAction {
         m_menu = new JMenu((String) getValue(NAME));
         
         m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction();
+        m_displayUserWindowAction = new DisplayUserWindowAction(false);
        
         JMenuItem displayRsetPeptidesItem = new JMenuItem(m_displayRsetPeptidesAction);
+        JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
         
         m_menu.add(displayRsetPeptidesItem);
+        m_menu.addSeparator();
+        m_menu.add(displayUserWindowItem);
 
         return m_menu;
     }
@@ -41,7 +42,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
         
         m_displayRsetPeptidesAction.updateEnabled(selectedNodes);
         
-        boolean isEnabled = m_displayRsetPeptidesAction.isEnabled();
+        boolean isEnabled = m_displayRsetPeptidesAction.isEnabled() || m_displayUserWindowAction.isEnabled();
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

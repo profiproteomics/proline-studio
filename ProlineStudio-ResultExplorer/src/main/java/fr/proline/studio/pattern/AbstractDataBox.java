@@ -103,7 +103,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     
     public abstract void createPanel();
     
-    public abstract void dataChanged(Class dataType);
+    public abstract void dataChanged();
     
     public Object getData(boolean getArray, Class parameterType) {
         if (previousDataBox != null) {
@@ -119,7 +119,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     public void propagateDataChanged(Class dataType) {
         if (nextDataBox != null) {
             if (nextDataBox.isDataDependant(dataType)) {
-                nextDataBox.dataChanged(dataType);
+                nextDataBox.dataChanged();
             }
             nextDataBox.propagateDataChanged(dataType);
         }

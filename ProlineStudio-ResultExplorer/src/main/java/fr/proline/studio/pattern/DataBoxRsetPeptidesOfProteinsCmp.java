@@ -46,7 +46,7 @@ public class DataBoxRsetPeptidesOfProteinsCmp extends AbstractDataBox {
     }
 
     @Override
-    public void dataChanged(Class dataType) {
+    public void dataChanged() {
 
         final List<ProteinMatch> proteinMatchList = (List<ProteinMatch>) previousDataBox.getData(true, ProteinMatch.class);
         List<ResultSummary> resultSummaryList = (List<ResultSummary>) previousDataBox.getData(true, ResultSummary.class);

@@ -11,11 +11,13 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 /**
- * Dialog to Rename a Project or a DataSet
+ * Dialog for a question yes/no or to get a text input
  * @author jm235353
  */
 public class OptionDialog extends DefaultDialog {
 
+    private boolean m_hasATextField;
+    
     private JTextField m_optionTextfield = null;
     
     private String m_message = null;
@@ -23,9 +25,28 @@ public class OptionDialog extends DefaultDialog {
    
     private boolean m_allowEmptyText = false;
 
+    public OptionDialog(Window parent, String title, String message) {
+        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+
+        m_hasATextField = false;
+        setStatusVisible(false);
+        
+        m_message = message;
+
+        setTitle(title);
+
+        setButtonVisible(BUTTON_DEFAULT, false);
+
+        initInternalPanel();
+
+
+    }
+    
     public OptionDialog(Window parent, String title, String message, String textForTextField) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
+        m_hasATextField = true;
+        
         m_message = message;
         m_textForTextField = textForTextField;
         
@@ -82,17 +103,18 @@ public class OptionDialog extends DefaultDialog {
         }
         
         
-        
-        JLabel textfieldLabel = new JLabel(m_textForTextField+" :");
-        m_optionTextfield = new JTextField(30);
+        if (m_hasATextField) {
+            JLabel textfieldLabel = new JLabel(m_textForTextField + " :");
+            m_optionTextfield = new JTextField(30);
 
-        c.gridx = 0;
-        renamePanel.add(textfieldLabel, c);
+            c.gridx = 0;
+            renamePanel.add(textfieldLabel, c);
 
 
-        c.gridx++;
-        c.weightx = 1.0;
-        renamePanel.add(m_optionTextfield, c);
+            c.gridx++;
+            c.weightx = 1.0;
+            renamePanel.add(m_optionTextfield, c);
+        }
 
         return renamePanel;
     }
@@ -101,14 +123,17 @@ public class OptionDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
         
-        String text = m_optionTextfield.getText();
-       
-        if ((!m_allowEmptyText) && (text.isEmpty())) {
-            setStatus(true, "You must fill the field "+m_textForTextField+".");
-            highlight(m_optionTextfield);
-            return false;
-        }
+        if (m_optionTextfield != null) {
 
+            String text = m_optionTextfield.getText();
+
+            if ((!m_allowEmptyText) && (text.isEmpty())) {
+                setStatus(true, "You must fill the field " + m_textForTextField + ".");
+                highlight(m_optionTextfield);
+                return false;
+            }
+        }
+    
         return true;
     }
     

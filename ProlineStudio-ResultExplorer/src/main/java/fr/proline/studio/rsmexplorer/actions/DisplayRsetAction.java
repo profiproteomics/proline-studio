@@ -13,6 +13,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
 
    private DisplayRsetPeptidesAction m_displayRsetPeptidesAction;
    private DisplayUserWindowAction m_displayUserWindowAction;
+   private DisplayRsetProteinMatchesAction m_displayRsetProteinMatchesAction;
 
    private JMenu m_menu;
     
@@ -25,12 +26,15 @@ public class DisplayRsetAction extends AbstractRSMAction {
         m_menu = new JMenu((String) getValue(NAME));
         
         m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction();
+        m_displayRsetProteinMatchesAction = new DisplayRsetProteinMatchesAction();
         m_displayUserWindowAction = new DisplayUserWindowAction(false);
        
         JMenuItem displayRsetPeptidesItem = new JMenuItem(m_displayRsetPeptidesAction);
+        JMenuItem displayRsetProteinMatchesItem = new JMenuItem(m_displayRsetProteinMatchesAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
         
         m_menu.add(displayRsetPeptidesItem);
+        m_menu.add(displayRsetProteinMatchesItem);
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);
 

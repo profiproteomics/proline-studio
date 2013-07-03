@@ -4,9 +4,9 @@ import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseProteinsFromPeptideMatchTask;
+import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.gui.RsetProteinsForPeptideMatchPanel;
+import fr.proline.studio.rsmexplorer.gui.RsetProteinsPanel;
 
 /**
  *
@@ -40,7 +40,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        RsetProteinsForPeptideMatchPanel p = new RsetProteinsForPeptideMatchPanel();
+        RsetProteinsPanel p = new RsetProteinsPanel();
         p.setName(name);
         p.setDataBox(this);
         m_panel = p;
@@ -52,7 +52,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
         final PeptideMatch peptideMatch = (PeptideMatch) previousDataBox.getData(false, PeptideMatch.class);
 
         if (peptideMatch == null) {
-            ((RsetProteinsForPeptideMatchPanel)m_panel).setData(null);
+            ((RsetProteinsPanel)m_panel).setDataPeptideMatch(null);
             m_peptideMatchCurId = -1;
             return;
         }
@@ -75,15 +75,17 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-
-                ((RsetProteinsForPeptideMatchPanel)m_panel).setData(peptideMatch);
-                
+                if (subTask == null) {
+                    ((RsetProteinsPanel)m_panel).setDataPeptideMatch(peptideMatch);
+                } else {
+                    ((RsetProteinsPanel) m_panel).dataUpdated(subTask, finished);
+                }
                 setLoaded(loadingId);
             }
         };
 
         // Load data if needed asynchronously
-        DatabaseProteinsFromPeptideMatchTask task = new DatabaseProteinsFromPeptideMatchTask(callback, getProjectId(), peptideMatch);
+        DatabaseProteinMatchesTask task = new DatabaseProteinMatchesTask(callback, getProjectId(), peptideMatch);
         Long taskId = task.getId();
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done
@@ -99,7 +101,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null && (parameterType.equals(ProteinMatch.class))) {
-            return ((RsetProteinsForPeptideMatchPanel)m_panel).getSelectedProteinMatch();
+            return ((RsetProteinsPanel)m_panel).getSelectedProteinMatch();
         }
         return super.getData(getArray, parameterType);
     }

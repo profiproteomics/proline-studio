@@ -12,7 +12,7 @@ public class DataboxManager {
     private static DataboxManager m_databoxManager = null;
     
     
-    private AbstractDataBox[] m_dataBoxStartingArray = { new DataBoxRsetAll(), new DataBoxRsetPeptide(), 
+    private AbstractDataBox[] m_dataBoxStartingArray = { new DataBoxRsetAll(), new DataBoxRsetPeptide(), new DataBoxRsetAllProteinMatch(),
                                                  new DataBoxRsmPeptide(), new DataBoxRsmPeptideInstances(),
                                                  new DataBoxRsmAllProteinSet() };
     

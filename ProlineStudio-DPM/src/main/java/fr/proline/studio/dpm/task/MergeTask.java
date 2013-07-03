@@ -20,16 +20,36 @@ import java.util.Map;
  */
 public class MergeTask extends AbstractServiceTask {
 
-    private List<Long> m_resultSetIdList = null;
+    private List<Long> m_rsetOrRsmIdList = null;
     private long m_projectId = -1;
     private Long[] m_resultSetId = null;
+    private Long[] m_resultSummaryId = null;
     
-    public MergeTask(AbstractServiceCallback callback, long projectId, List<Long> resultSetIdList, String parentName, Long[] resultSetId) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Merge on "+parentName, TASK_LIST_INFO));
-        m_resultSetIdList = resultSetIdList;
-        m_projectId = projectId;
-        m_resultSetId = resultSetId;
+    private int m_action;
+    
+    private static final int MERGE_RSM = 0;
+    private static final int MERGE_RSET = 1;
+    
+    public MergeTask(AbstractServiceCallback callback, long projectId) {
+        super(callback, false /*asynchronous*/, null);
+        m_projectId = projectId; 
     }
+    
+    public void initMergeRset(List<Long> resultSetIdList, String parentName, Long[] resultSetId) {
+        setTaskInfo(new TaskInfo("Merge Search Results on "+parentName, TASK_LIST_INFO));
+        m_rsetOrRsmIdList = resultSetIdList;
+        m_resultSetId = resultSetId;
+        m_action = MERGE_RSET;
+    }
+    
+    public void initMergeRsm(List<Long> resultSummaryIdList, String parentName, Long[] resultSetId, Long[] resultSummaryId) {
+        setTaskInfo(new TaskInfo("Merge Identification Summaries on "+parentName, TASK_LIST_INFO));
+        m_rsetOrRsmIdList = resultSummaryIdList;
+        m_resultSetId = resultSetId;
+        m_resultSummaryId = resultSummaryId;
+        m_action = MERGE_RSM;
+    }
+    
     
     @Override
     public boolean askService() {
@@ -44,11 +64,16 @@ public class MergeTask extends AbstractServiceTask {
 
             Map<String, Object> params = new HashMap<>();
             params.put("project_id", m_projectId);
-            params.put("result_set_ids",m_resultSetIdList);
+            if (m_action == MERGE_RSET) {
+                params.put("result_set_ids", m_rsetOrRsmIdList);
+            } else {
+                params.put("result_summary_ids", m_rsetOrRsmIdList);
+            }
             
             request.setParameters(params);
             
-            HttpResponse response = postRequest("dps.msi/merge_result_sets/"+request.getMethod()+getIdString(), request);
+            HttpResponse response = (m_action == MERGE_RSET) ? postRequest("dps.msi/merge_result_sets/"+request.getMethod()+getIdString(), request) :
+                                                               postRequest("dps.msi/merge_result_summaries/"+request.getMethod()+getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
             
@@ -110,8 +135,8 @@ public class MergeTask extends AbstractServiceTask {
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("dps.msi/merge_result_sets/" + request.getMethod() + getIdString(), request);
-
+            HttpResponse response = (m_action == MERGE_RSET) ? postRequest("dps.msi/merge_result_sets/"+request.getMethod()+getIdString(), request) :
+                                                               postRequest("dps.msi/merge_result_summaries/"+request.getMethod()+getIdString(), request);
             
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -158,13 +183,36 @@ public class MergeTask extends AbstractServiceTask {
                     }
                     
                     // retrieve resultSet id
-                    BigDecimal resultSetIdBD = (BigDecimal) resultMap.get("result");
-                    if (resultSetIdBD == null) {
-                        loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
-                        return ServiceState.STATE_FAILED;
+                    
+                    if (m_action == MERGE_RSET) {
+                        BigDecimal resultSetIdBD = (BigDecimal) resultMap.get("result");
+                        if (resultSetIdBD == null) {
+                            loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
+                            return ServiceState.STATE_FAILED;
+                        }
+
+
+
+                        m_resultSetId[0] = new Long(resultSetIdBD.longValue());
+                    } else {
+                        ArrayMap result = (ArrayMap) resultMap.get("result");
+                        
+                        BigDecimal resultSetIdBD = (BigDecimal) result.get("target_result_set_id");
+                        if (resultSetIdBD == null) {
+                            loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
+                            return ServiceState.STATE_FAILED;
+                        }
+                        m_resultSetId[0] = new Long(resultSetIdBD.longValue());
+                        
+                        BigDecimal resultSummaryIdBD = (BigDecimal) result.get("target_result_summary_id");
+                        if (resultSummaryIdBD == null) {
+                            loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSummary Id");
+                            return ServiceState.STATE_FAILED;
+                        }
+                        m_resultSummaryId[0] = new Long(resultSummaryIdBD.longValue());
                     }
                     
-                    m_resultSetId[0] = new Long(resultSetIdBD.longValue());
+
                     
                     return ServiceState.STATE_DONE;
                 } else {

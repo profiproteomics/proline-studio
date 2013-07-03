@@ -27,17 +27,7 @@ public class WindowBoxFactory {
     
     public static WindowBox getPeptidesWindowBox(String name, boolean isDecoy) {
         return getPeptidesForRsetOnlyWindowBox(name, isDecoy);
-        // create boxes
-       /* AbstractDataBox[] boxes = new AbstractDataBox[5];
-        boxes[0] = new DataBoxRsetPeptide();
-        boxes[1] = new DataBoxRsetPeptideSpectrum();
-        boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
-        boxes[2] = new DataBoxRsetProteinsForPeptideMatch();
-        boxes[3] = new DataBoxProteinSetsCmp();
-        boxes[4] = new DataBoxRsetPeptidesOfProteinsCmp();
-        boxes[4].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
-        
-        return new WindowBox( name, generatePanel(boxes), boxes[0] );*/
+
     }
     
     public static WindowBox getPeptidesForRsetOnlyWindowBox(String name, boolean isDecoy) {
@@ -48,6 +38,20 @@ public class WindowBoxFactory {
         boxes[1] = new DataBoxRsetPeptideSpectrum();
         boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         boxes[2] = new DataBoxRsetProteinsForPeptideMatch();
+        
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+        winBox.resetDefaultSize(); //JPM.WART
+        return winBox;
+        
+    }
+    
+    public static WindowBox getProteinMatchesForRsetWindowBox(String name, boolean isDecoy) {
+        
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxRsetAllProteinMatch();
+
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );

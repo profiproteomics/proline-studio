@@ -45,8 +45,10 @@ public class DisplayRsetAction extends AbstractRSMAction {
     public void updateEnabled(RSMNode[] selectedNodes) {
         
         m_displayRsetPeptidesAction.updateEnabled(selectedNodes);
+        m_displayRsetProteinMatchesAction.updateEnabled(selectedNodes);
+        m_displayUserWindowAction.updateEnabled(selectedNodes);
         
-        boolean isEnabled = m_displayRsetPeptidesAction.isEnabled() || m_displayUserWindowAction.isEnabled();
+        boolean isEnabled = m_displayRsetPeptidesAction.isEnabled() || m_displayRsetProteinMatchesAction.isEnabled() || m_displayUserWindowAction.isEnabled();
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

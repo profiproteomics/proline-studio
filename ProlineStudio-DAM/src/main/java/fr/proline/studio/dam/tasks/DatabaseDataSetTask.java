@@ -184,11 +184,12 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         action = REMOVE_VALIDATION_OF_DATASET;
     }
     
-    public void initModifyDatasetForMerge(Dataset dataset, Long resultSetId, TaskInfo taskInfo) {
+    public void initModifyDatasetForMerge(Dataset dataset, Long resultSetId, Long resultSummaryId, TaskInfo taskInfo) {
         setTaskInfo(taskInfo);
         setPriority(Priority.HIGH_2);
         this.dataset = dataset;
         this.resultSetId = resultSetId;
+        this.resultSummaryId = resultSummaryId;
         action = MODIFY_MERGED_DATASET;
     }
     
@@ -275,7 +276,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case REMOVE_VALIDATION_OF_DATASET:
                 return removeValidationOfDataset();
             case MODIFY_MERGED_DATASET:
-                return  modifyDatasetRset();
+                return  modifyDatasetRsetAndRsm();
             case EMPTY_TRASH:
                 return emptyTrash();
         }
@@ -682,7 +683,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
 
-    private boolean modifyDatasetRset() {
+    private boolean modifyDatasetRsetAndRsm() {
 
         synchronized (WRITE_DATASET_LOCK) {
 
@@ -694,6 +695,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
                 dataset.setResultSetId(resultSetId);
                 mergedDataset.setResultSetId(resultSetId);
+                
+                dataset.setResultSummaryId(resultSummaryId);
+                mergedDataset.setResultSummaryId(resultSummaryId);
 
                 entityManagerUDS.persist(mergedDataset);
 

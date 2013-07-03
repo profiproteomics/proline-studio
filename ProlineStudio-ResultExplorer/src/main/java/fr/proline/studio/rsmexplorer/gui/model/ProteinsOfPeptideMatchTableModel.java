@@ -3,13 +3,17 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.studio.utils.DataFormat;
+import fr.proline.studio.utils.LazyTable;
+import fr.proline.studio.utils.LazyTableModel;
 import javax.swing.table.AbstractTableModel;
+import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
+import fr.proline.studio.utils.LazyData;
 
 /**
  *
  * @author JM235353
  */
-public class ProteinsOfPeptideMatchTableModel extends AbstractTableModel {
+public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
 
     public static final int COLTYPE_PROTEIN_NAME           = 0;
     public static final int COLTYPE_PROTEIN_SCORE          = 1;
@@ -18,6 +22,10 @@ public class ProteinsOfPeptideMatchTableModel extends AbstractTableModel {
     private static final String[] columnNames = {"Protein", "Score", "Peptides", "Mass"};
     private ProteinMatch[] proteinMatchArray = null;
 
+    public ProteinsOfPeptideMatchTableModel(LazyTable table) {
+        super(table);
+    }
+    
     public ProteinMatch getProteinMatch(int row) {
 
         return proteinMatchArray[row];
@@ -43,7 +51,7 @@ public class ProteinsOfPeptideMatchTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return Integer.class;
             case COLTYPE_PROTEIN_MASS:
-                return Double.class;
+                return LazyData.class;
         }
         return null;
     }
@@ -69,15 +77,30 @@ public class ProteinsOfPeptideMatchTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return proteinMatch.getPeptideCount();
             case COLTYPE_PROTEIN_MASS:
+                LazyData lazyData = getLazyData(row,col);
+                
                 fr.proline.core.orm.msi.BioSequence bioSequenceMSI = proteinMatch.getTransientData().getBioSequenceMSI();
                 if (bioSequenceMSI != null) {
-                    return new Float(bioSequenceMSI.getMass());
+                    lazyData.setData(new Float(bioSequenceMSI.getMass()));
+                    return lazyData;
                 }
                 fr.proline.core.orm.pdi.BioSequence bioSequencePDI = proteinMatch.getTransientData().getBioSequencePDI();
                 if (bioSequencePDI != null) {
-                    return new Float(bioSequencePDI.getMass());
+                    lazyData.setData(new Float(bioSequencePDI.getMass()));
+                    return lazyData;
                 }
-                return null;
+                
+                boolean noBioSequenceFound = proteinMatch.getTransientData().getNoBioSequenceFound();
+                if (noBioSequenceFound) {
+                    lazyData.setData("");
+                    return lazyData;
+                }
+                
+                lazyData.setData(null);
+                    
+                givePriorityTo(taskId, row, col);
+                
+                return lazyData;
                 
         }
         return null; // should never happen
@@ -106,5 +129,20 @@ public class ProteinsOfPeptideMatchTableModel extends AbstractTableModel {
 
         return rowToBeSelected;
     }
+
+    @Override
+    public int getSubTaskId(int col) {
+        switch (col) {
+            case COLTYPE_PROTEIN_MASS:
+                return DatabaseProteinMatchesTask.SUB_TASK_BIOSEQUENCE;
+        }
+        return -1;
+    }
+    
+    public void dataUpdated() {
+        // no need to do an updateMinMax : scores are known at once
+        fireTableDataChanged();
+    }
+
     
 }

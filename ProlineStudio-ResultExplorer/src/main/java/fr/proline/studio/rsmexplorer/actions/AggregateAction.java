@@ -185,14 +185,13 @@ public class AggregateAction extends AbstractRSMAction {
             
             // we can add an aggregate only to a data set without a ResultSet or a ResultSummary
             if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
-                RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
-
-                if (!dataSetNode.hasResultSet() && !dataSetNode.hasResultSummary()) {
-                    continue;
-                } else {
+                
+                Dataset d = ((RSMDataSetNode) node).getDataset();
+                if (d.getType() != Dataset.DatasetType.AGGREGATE) {
                     setEnabled(false);
-                    return;
+                return;
                 }
+
             }
             
         }

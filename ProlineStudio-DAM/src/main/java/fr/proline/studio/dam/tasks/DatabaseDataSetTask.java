@@ -1,7 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.*;
 import fr.proline.core.orm.uds.repository.ExternalDbRepository;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
@@ -10,10 +9,7 @@ import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -460,6 +456,25 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         if (rsetId != null) {
             ResultSet rsetFound = entityManagerMSI.find(ResultSet.class, rsetId);
 
+            // force initialization of lazy data (data will be needed for the display of properties)
+            MsiSearch msiSearch = rsetFound.getMsiSearch();
+            if (msiSearch != null) {
+                SearchSetting searchSetting = msiSearch.getSearchSetting();
+                Set<fr.proline.core.orm.msi.Enzyme> enzymeSet = searchSetting.getEnzymes();
+                Iterator<fr.proline.core.orm.msi.Enzyme> it = enzymeSet.iterator();
+                while (it.hasNext()) {
+                    it.next();
+                }
+
+                Set<SearchSettingsSeqDatabaseMap> searchSettingsSeqDatabaseMapSet = searchSetting.getSearchSettingsSeqDatabaseMaps();
+                Iterator<SearchSettingsSeqDatabaseMap> itSeqDbMap = searchSettingsSeqDatabaseMapSet.iterator();
+                while (itSeqDbMap.hasNext()) {
+                    itSeqDbMap.next();
+
+                }
+            }
+            
+            
             d.getTransientData().setResultSet(rsetFound);
         }
 

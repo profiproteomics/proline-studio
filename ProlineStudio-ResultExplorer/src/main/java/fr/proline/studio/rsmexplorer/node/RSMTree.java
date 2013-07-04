@@ -785,10 +785,34 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         if (SwingUtilities.isRightMouseButton(e)) {
 
-           /* int row = getClosestRowForLocation(e.getX(), e.getY());
-            if (row != -1) {
-                setSelectionRow(row);
-            }*/ // JPM.BU : to be fix : it deselect other already selected nodes !
+            int[] selectedRows = getSelectionRows();
+            int nbSelectedRows = selectedRows.length;
+            if (nbSelectedRows == 0) {
+                // no row is selected, we select the current row
+                int row = getRowForLocation(e.getX(), e.getY());
+                if (row != -1) {
+                    setSelectionRow(row);
+                }
+            } else if (nbSelectedRows == 1) {
+                // one row is selected
+                int row = getRowForLocation(e.getX(), e.getY());
+                 if ((row!=-1) && (e.isShiftDown() || e.isControlDown())) {
+                     addSelectionRow(row);
+                 } else if ((row!=-1) && (row != selectedRows[0])) {
+                    // we change the selection
+                    setSelectionRow(row);
+                }
+            } else {
+                // multiple row are already selected
+                // if ctrl or shift is down, we add the row to the selection
+                if (e.isShiftDown() || e.isControlDown()) {
+                    int row = getRowForLocation(e.getX(), e.getY());
+                    if (row !=-1) {
+                        addSelectionRow(row);
+                    }
+                }
+            }
+
         } else if (e.getClickCount() == 2) {
             
             // display All imported rset on double click

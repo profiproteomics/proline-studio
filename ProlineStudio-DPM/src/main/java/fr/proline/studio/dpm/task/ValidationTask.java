@@ -191,7 +191,7 @@ public class ValidationTask extends AbstractServiceTask {
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("dps.msi/validate_result_set/"+request.getMethod()+getIdString(), request); //JPM.TODO
+            HttpResponse response = postRequest("dps.msi/validate_result_set/"+request.getMethod()+getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 

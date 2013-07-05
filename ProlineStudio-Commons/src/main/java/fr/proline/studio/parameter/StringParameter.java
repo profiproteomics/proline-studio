@@ -28,7 +28,7 @@ public class StringParameter extends AbstractParameter {
     public StringParameter(String key, String name, JComponent component, String defaultValue, Integer minChars, Integer maxChars) {
         super(key, name, String.class, component.getClass());
         this.defaultValue = defaultValue;
-        this.parameterComponent = component;
+        this.m_parameterComponent = component;
         this.minChars = minChars;
         this.maxChars = maxChars;
 
@@ -46,16 +46,16 @@ public class StringParameter extends AbstractParameter {
         }
         
 
-        if (parameterComponent !=null) {
-            if (graphicalType.equals(JTextField.class)) {
-                ((JTextField) parameterComponent).setText(startValue);
-                return parameterComponent;
+        if (m_parameterComponent !=null) {
+            if (m_graphicalType.equals(JTextField.class)) {
+                ((JTextField) m_parameterComponent).setText(startValue);
+                return m_parameterComponent;
             }
         }
         
         
         
-        if (graphicalType.equals(JTextField.class)) {
+        if (m_graphicalType.equals(JTextField.class)) {
 
             // --- TextField ---
 
@@ -64,7 +64,7 @@ public class StringParameter extends AbstractParameter {
             if (startValue != null) {
                 textField.setText(startValue);
             }
-            parameterComponent = textField;
+            m_parameterComponent = textField;
             return textField;
         }
 
@@ -78,8 +78,8 @@ public class StringParameter extends AbstractParameter {
             return; // should not happen
         }
 
-        if (graphicalType.equals(JTextField.class)) {
-            JTextField textField = (JTextField) parameterComponent;
+        if (m_graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) m_parameterComponent;
             textField.setText(defaultValue);
         }
     }
@@ -87,14 +87,14 @@ public class StringParameter extends AbstractParameter {
     @Override
     public ParameterError checkParameter() {
 
-        if (!used) {
+        if (!m_used) {
             return null;
         }
         
         String value = "";
         
-        if (graphicalType.equals(JTextField.class)) {
-            JTextField textField = (JTextField) parameterComponent;
+        if (m_graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) m_parameterComponent;
             value = textField.getText();
         }
         
@@ -103,16 +103,16 @@ public class StringParameter extends AbstractParameter {
         if (minChars != null) {
             if (length<minChars.intValue()) {
                 if (length == 0) {
-                    return new ParameterError(name+" field is not filled", parameterComponent);
+                    return new ParameterError(m_name+" field is not filled", m_parameterComponent);
                 } else  {
-                    return new ParameterError("Minimum length of "+name+" is "+minChars.intValue()+" characters", parameterComponent);
+                    return new ParameterError("Minimum length of "+m_name+" is "+minChars.intValue()+" characters", m_parameterComponent);
                 }
                 
             }
         }
         if (maxChars != null) {
             if (length>maxChars.intValue()) {
-                return new ParameterError(name+" exceeds "+minChars.intValue()+" characters", parameterComponent);
+                return new ParameterError(m_name+" exceeds "+minChars.intValue()+" characters", m_parameterComponent);
                 
             }
         }
@@ -128,8 +128,8 @@ public class StringParameter extends AbstractParameter {
 
     @Override
     public Object getObjectValue() {
-        if (graphicalType.equals(JTextField.class)) {
-           return ((JTextField) parameterComponent).getText();
+        if (m_graphicalType.equals(JTextField.class)) {
+           return ((JTextField) m_parameterComponent).getText();
         }
         return ""; // should not happen
     }

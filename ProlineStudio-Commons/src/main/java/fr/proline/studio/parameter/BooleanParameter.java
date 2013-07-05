@@ -1,23 +1,19 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.parameter;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
 /**
- *
+ * Parameter of type Boolean, displayed as a Checkbox
  * @author JM235353
  */
 public class BooleanParameter extends AbstractParameter {
 
-    private Boolean defaultValue;
+    private Boolean m_defaultValue;
 
     public BooleanParameter(String key, String name, Class graphicalType, Boolean defaultValue) {
         super(key, name, Boolean.class, graphicalType);
-        this.defaultValue = defaultValue;
+        this.m_defaultValue = defaultValue;
 
     }
 
@@ -33,11 +29,11 @@ public class BooleanParameter extends AbstractParameter {
             }
         }
         if (startValue == null) {
-            startValue = (defaultValue!=null) ? defaultValue : Boolean.TRUE;
+            startValue = (m_defaultValue!=null) ? m_defaultValue : Boolean.TRUE;
         }
 
         
-        if (graphicalType.equals(JCheckBox.class)) {
+        if (m_graphicalType.equals(JCheckBox.class)) {
 
             // --- TextField ---
 
@@ -46,7 +42,7 @@ public class BooleanParameter extends AbstractParameter {
             if (startValue != null) {
                 checkBox.setSelected(startValue);
             }
-            parameterComponent = checkBox;
+            m_parameterComponent = checkBox;
             return checkBox;
         }
 
@@ -56,13 +52,13 @@ public class BooleanParameter extends AbstractParameter {
     
     @Override
     public void initDefault() {
-        if (defaultValue == null) {
+        if (m_defaultValue == null) {
             return; // should not happen
         }
 
-        if (graphicalType.equals(JCheckBox.class)) {
-            JCheckBox checkBox = (JCheckBox) parameterComponent;
-            checkBox.setSelected(defaultValue);
+        if (m_graphicalType.equals(JCheckBox.class)) {
+            JCheckBox checkBox = (JCheckBox) m_parameterComponent;
+            checkBox.setSelected(m_defaultValue);
         }
     }
     
@@ -78,8 +74,8 @@ public class BooleanParameter extends AbstractParameter {
 
     @Override
     public Object getObjectValue() {
-        if (graphicalType.equals(JCheckBox.class)) {
-           return Boolean.valueOf(((JCheckBox) parameterComponent).isSelected());
+        if (m_graphicalType.equals(JCheckBox.class)) {
+           return Boolean.valueOf(((JCheckBox) m_parameterComponent).isSelected());
         }
         return ""; // should not happen
     }

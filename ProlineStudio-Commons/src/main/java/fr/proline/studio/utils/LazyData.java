@@ -5,39 +5,39 @@ package fr.proline.studio.utils;
  */
 public class LazyData implements Comparable<LazyData> {
 
-    private Comparable data = null;
+    private Comparable m_data = null;
 
     public LazyData() {
     }
 
     public void setData(Comparable data) {
-        this.data = data;
+        m_data = data;
     }
 
     public Object getData() {
-        return data;
+        return m_data;
     }
 
     @Override
     public int compareTo(LazyData o) {
-        if (data == null) {
-            if (o.data == null) {
+        if (m_data == null) {
+            if (o.m_data == null) {
                 return 0;
             } else {
                 return -1;
             }
         }
-        if (o.data == null) {
+        if (o.m_data == null) {
             return 1;
         }
 
-        return data.compareTo(o.data);
+        return m_data.compareTo(o.m_data);
     }
     
     @Override
     public String toString() {
-        if (data == null) 
+        if (m_data == null) 
             return super.toString();
-        return data.toString();
+        return m_data.toString();
     }
 }

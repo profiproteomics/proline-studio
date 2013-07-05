@@ -16,22 +16,22 @@ public class DefaultDialog extends javax.swing.JDialog {
     public static final int BUTTON_CANCEL = 1;
     public static final int BUTTON_DEFAULT = 2;
     
-    private JPanel internalPanel;
+    private JPanel m_internalPanel;
     
-    private JButton okButton;
-    private JButton cancelButton;
-    private JButton defaultButton;
+    private JButton m_okButton;
+    private JButton m_cancelButton;
+    private JButton m_defaultButton;
 
-    private JPanel statusPanel;
-    private JLabel statusLabel;
+    private JPanel m_statusPanel;
+    private JLabel m_statusLabel;
     
-    private BusyGlassPane busyGlassPane = null;
-    private HighlightGlassPane highlightGlassPane = null;
+    private BusyGlassPane m_busyGlassPane = null;
+    private HighlightGlassPane m_highlightGlassPane = null;
     
     
-    private boolean firstDisplay = true;
+    private boolean m_firstDisplay = true;
     
-    protected int buttonClicked = BUTTON_CANCEL;
+    protected int m_buttonClicked = BUTTON_CANCEL;
     
      
     /**
@@ -64,7 +64,7 @@ public class DefaultDialog extends javax.swing.JDialog {
 
         if (v) {
             // reinit button when dialog is opened
-            buttonClicked = BUTTON_CANCEL;
+            m_buttonClicked = BUTTON_CANCEL;
         }
         
         super.setVisible(v);
@@ -74,9 +74,9 @@ public class DefaultDialog extends javax.swing.JDialog {
     
     @Override
      public void pack() {
-         if (firstDisplay) {
+         if (m_firstDisplay) {
             super.pack();
-            firstDisplay = false;
+            m_firstDisplay = false;
          }
      }
     
@@ -85,7 +85,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     }
 
     public int getButtonClicked() {
-        return buttonClicked;
+        return m_buttonClicked;
     }
     
     
@@ -99,20 +99,20 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.weightx = 1;
         c.weighty = 1;
 
-        internalPanel.add(component, c);
+        m_internalPanel.add(component, c);
  
     }
 
     public void setButtonVisible(int buttonId, boolean visible) {
         switch (buttonId) {
             case BUTTON_OK:
-                okButton.setVisible(visible);
+                m_okButton.setVisible(visible);
                 break;
             case BUTTON_CANCEL:
-                cancelButton.setVisible(visible);
+                m_cancelButton.setVisible(visible);
                 break;
             case BUTTON_DEFAULT:
-                defaultButton.setVisible(visible);
+                m_defaultButton.setVisible(visible);
                 break;
                 
         }
@@ -121,13 +121,13 @@ public class DefaultDialog extends javax.swing.JDialog {
     protected void setButtonName(int buttonId, String name) {
         switch (buttonId) {
             case BUTTON_OK:
-                okButton.setText(name);
+                m_okButton.setText(name);
                 break;
             case BUTTON_CANCEL:
-                cancelButton.setText(name);
+                m_cancelButton.setText(name);
                 break;
             case BUTTON_DEFAULT:
-                defaultButton.setText(name);
+                m_defaultButton.setText(name);
                 break;
         }
     }
@@ -135,13 +135,13 @@ public class DefaultDialog extends javax.swing.JDialog {
     protected void setButtonIcon(int buttonId, Icon icon) {
         switch (buttonId) {
             case BUTTON_OK:
-                okButton.setIcon(icon);
+                m_okButton.setIcon(icon);
                 break;
             case BUTTON_CANCEL:
-                cancelButton.setIcon(icon);
+                m_cancelButton.setIcon(icon);
                 break;
             case BUTTON_DEFAULT:
-                defaultButton.setIcon(icon);
+                m_defaultButton.setIcon(icon);
                 break;
         }
     }
@@ -149,25 +149,25 @@ public class DefaultDialog extends javax.swing.JDialog {
     protected void doClick(int buttonId) {
         switch (buttonId) {
             case BUTTON_OK:
-                okButton.doClick();
+                m_okButton.doClick();
                 break;
             case BUTTON_CANCEL:
-                cancelButton.doClick();
+                m_cancelButton.doClick();
                 break;
             case BUTTON_DEFAULT:
-                defaultButton.doClick();
+                m_defaultButton.doClick();
                 break;
         }
     }
     
     protected void setStatusVisible(boolean visible) {
-        statusPanel.setVisible(visible);
+        m_statusPanel.setVisible(visible);
     }
     
     
     public void setStatus(boolean error, String text) {
         if (error) {
-            statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EXCLAMATION));
+            m_statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EXCLAMATION));
             
             if (statusStimer == null) {
                 final int DELAY_TO_ERASE_STATUS = 7000;
@@ -175,8 +175,8 @@ public class DefaultDialog extends javax.swing.JDialog {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
-                        statusLabel.setText("");
+                        m_statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
+                        m_statusLabel.setText("");
                     }
                     
                 });
@@ -189,9 +189,9 @@ public class DefaultDialog extends javax.swing.JDialog {
             }
             
         } else {
-            statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
+            m_statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
         }
-        statusLabel.setText(text);
+        m_statusLabel.setText(text);
         
 
     }
@@ -231,19 +231,19 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.weightx = 1;
         c.weighty = 1;
 
-        internalPanel = new JPanel();
-        internalPanel.setLayout(new GridBagLayout());
-        add(internalPanel, c);
+        m_internalPanel = new JPanel();
+        m_internalPanel.setLayout(new GridBagLayout());
+        add(m_internalPanel, c);
         
         JPanel buttonPanel = createButtonPanel();
         c.gridy++;
         c.weighty = 0;
         add(buttonPanel, c);
         
-        statusPanel = createStatusPanel();
+        m_statusPanel = createStatusPanel();
         c.gridy++;
         c.weightx = 1;
-        add(statusPanel, c);
+        add(m_statusPanel, c);
     }
   
     private JPanel createButtonPanel() {
@@ -260,13 +260,13 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.weightx = 0;
         c.weighty = 0;
         
-        okButton = new JButton(IconManager.getIcon(IconManager.IconType.OK));
-        okButton.setDefaultCapable(true);
-        getRootPane().setDefaultButton(okButton);
-        cancelButton = new JButton(IconManager.getIcon(IconManager.IconType.CANCEL));
-        defaultButton = new JButton(IconManager.getIcon(IconManager.IconType.DEFAULT));
+        m_okButton = new JButton(IconManager.getIcon(IconManager.IconType.OK));
+        m_okButton.setDefaultCapable(true);
+        getRootPane().setDefaultButton(m_okButton);
+        m_cancelButton = new JButton(IconManager.getIcon(IconManager.IconType.CANCEL));
+        m_defaultButton = new JButton(IconManager.getIcon(IconManager.IconType.DEFAULT));
         
-        buttonPanel.add(defaultButton, c);
+        buttonPanel.add(m_defaultButton, c);
         
         c.gridx++;
         c.weightx = 1;
@@ -274,29 +274,29 @@ public class DefaultDialog extends javax.swing.JDialog {
         
         c.gridx++;
         c.weightx = 0;
-        buttonPanel.add(okButton, c);
+        buttonPanel.add(m_okButton, c);
         
         c.gridx++;
-        buttonPanel.add(cancelButton, c);
+        buttonPanel.add(m_cancelButton, c);
         
-        okButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
-        okButton.addActionListener(new java.awt.event.ActionListener() {
+        m_okButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
+        m_okButton.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 okButtonActionPerformed();
             }
         });
 
-        cancelButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.cancelButton.text"));
-        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+        m_cancelButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.cancelButton.text"));
+        m_cancelButton.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelButtonActionPerformed();
             }
         });
 
-        defaultButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.defaultButton.text"));
-        defaultButton.addActionListener(new java.awt.event.ActionListener() {
+        m_defaultButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.defaultButton.text"));
+        m_defaultButton.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 defaultButtonActionPerformed();
@@ -309,21 +309,21 @@ public class DefaultDialog extends javax.swing.JDialog {
 
     private void cancelButtonActionPerformed() {                                             
         if (cancelCalled()) {
-            buttonClicked = BUTTON_CANCEL;
+            m_buttonClicked = BUTTON_CANCEL;
             setVisible(false);
         }
     }                                            
 
     private void okButtonActionPerformed() {                                         
         if (okCalled()) {
-            buttonClicked = BUTTON_OK;
+            m_buttonClicked = BUTTON_OK;
             setVisible(false);
         }
     }                                        
 
     private void defaultButtonActionPerformed() {                                         
         if (defaultCalled()) {
-            buttonClicked = BUTTON_DEFAULT;
+            m_buttonClicked = BUTTON_DEFAULT;
             setVisible(false);
         }
     } 
@@ -343,10 +343,10 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.weightx = 1;
         c.weighty = 0;
         
-        statusLabel = new JLabel(" ");
-        statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
+        m_statusLabel = new JLabel(" ");
+        m_statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
         
-        statusPanel.add(statusLabel, c);
+        statusPanel.add(m_statusLabel, c);
         
         
         return statusPanel;
@@ -424,31 +424,31 @@ public class DefaultDialog extends javax.swing.JDialog {
     
     public void setBusy(boolean busy) {
         
-        if (busyGlassPane == null) {
-            busyGlassPane = new BusyGlassPane();
+        if (m_busyGlassPane == null) {
+            m_busyGlassPane = new BusyGlassPane();
         }
         
-        setGlassPane(busyGlassPane);
+        setGlassPane(m_busyGlassPane);
         
         if (busy) {
-            busyGlassPane.setVisible(true);
+            m_busyGlassPane.setVisible(true);
             
         } else {
-            busyGlassPane.setVisible(false);
+            m_busyGlassPane.setVisible(false);
         }
     }
     
     public void highlight(Component c) {
         
-        if (highlightGlassPane == null) {
-            highlightGlassPane = new HighlightGlassPane();
+        if (m_highlightGlassPane == null) {
+            m_highlightGlassPane = new HighlightGlassPane();
         }
-        highlightGlassPane.setComponent(c);
+        m_highlightGlassPane.setComponent(c);
                 
-        setGlassPane(highlightGlassPane);
+        setGlassPane(m_highlightGlassPane);
         
         
-        highlightGlassPane.highlight();
+        m_highlightGlassPane.highlight();
         
 
     }
@@ -535,7 +535,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         
         public void highlight() {
             
-            highlightGlassPane.setVisible(true);
+            m_highlightGlassPane.setVisible(true);
             
             timeStart = System.currentTimeMillis();
 
@@ -547,7 +547,7 @@ public class DefaultDialog extends javax.swing.JDialog {
                     
                     long timeCur = System.currentTimeMillis();
                     if ((timeCur-timeStart)>ANIMATION_DELAY+DISPLAY_DELAY) {
-                        highlightGlassPane.setVisible(false);
+                        m_highlightGlassPane.setVisible(false);
                         animationTimer.setRepeats(false);
                     } else {
                         repaint();
@@ -567,8 +567,8 @@ public class DefaultDialog extends javax.swing.JDialog {
         @Override
         protected void processMouseEvent(MouseEvent e) {
             if (e.getID() == MouseEvent.MOUSE_CLICKED) {
-                statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
-                statusLabel.setText("");
+                m_statusLabel.setIcon(IconManager.getIcon(IconManager.IconType.EMPTY));
+                m_statusLabel.setText("");
             }
             super.processMouseEvent(e);
 

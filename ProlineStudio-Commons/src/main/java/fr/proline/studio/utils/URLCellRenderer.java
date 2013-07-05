@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.utils;
 
 import java.awt.Component;
@@ -11,9 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.URL;
 import java.util.prefs.Preferences;
-import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
@@ -22,14 +16,11 @@ import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Renderer for a Cell Table with an URL
  * @author CB205360
  */
 
 public class URLCellRenderer extends DefaultTableCellRenderer implements MouseListener {
-    
-    //public static final String HTMLAI_CLOSE = "</a></i></html>";
-    //public static final String HTMLIA_HREF = "<html><i><a href=";
 
     private String m_preferenceKey;
     private String m_defaultURLTemplate;

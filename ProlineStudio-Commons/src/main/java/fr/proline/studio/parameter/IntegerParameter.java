@@ -29,7 +29,7 @@ public class IntegerParameter extends AbstractParameter {
         this.defaultValue = defaultValue;
         this.minValue = minValue;
         this.maxValue = maxValue;
-        this.parameterComponent = component;
+        this.m_parameterComponent = component;
 
     }
 
@@ -48,16 +48,16 @@ public class IntegerParameter extends AbstractParameter {
             startValue = defaultValue;
         }
 
-        if (parameterComponent !=null) {
-            if (graphicalType.equals(JTextField.class)) {
-                ((JTextField) parameterComponent).setText(startValue.toString());
-                return parameterComponent;
+        if (m_parameterComponent !=null) {
+            if (m_graphicalType.equals(JTextField.class)) {
+                ((JTextField) m_parameterComponent).setText(startValue.toString());
+                return m_parameterComponent;
             }
         }
         
         
         
-        if (graphicalType.equals(JTextField.class)) {
+        if (m_graphicalType.equals(JTextField.class)) {
 
             // --- TextField ---
 
@@ -66,9 +66,9 @@ public class IntegerParameter extends AbstractParameter {
             if (startValue != null) {
                 textField.setText(startValue.toString());
             }
-            parameterComponent = textField;
+            m_parameterComponent = textField;
             return textField;
-        } else if (graphicalType.equals(JSlider.class)) {
+        } else if (m_graphicalType.equals(JSlider.class)) {
 
             // --- Slider ---
 
@@ -130,10 +130,10 @@ public class IntegerParameter extends AbstractParameter {
             sliderPanel.add(slider);
             sliderPanel.add(textField);
 
-            parameterComponent = slider;
+            m_parameterComponent = slider;
 
             return sliderPanel;
-        } else if (graphicalType.equals(JSpinner.class)) {
+        } else if (m_graphicalType.equals(JSpinner.class)) {
 
             // --- Spinner ---
 
@@ -141,7 +141,7 @@ public class IntegerParameter extends AbstractParameter {
             SpinnerNumberModel model = new SpinnerNumberModel(startValue, minValue, maxValue, new Integer(1));
             spinner.setModel(model);
 
-            parameterComponent = spinner;
+            m_parameterComponent = spinner;
 
             return spinner;
         }
@@ -156,14 +156,14 @@ public class IntegerParameter extends AbstractParameter {
             return; // should not happen
         }
 
-        if (graphicalType.equals(JTextField.class)) {
-            JTextField textField = (JTextField) parameterComponent;
+        if (m_graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) m_parameterComponent;
             textField.setText(defaultValue.toString());
-        } else if (graphicalType.equals(JSlider.class)) {
-            JSlider slider = (JSlider) parameterComponent;
+        } else if (m_graphicalType.equals(JSlider.class)) {
+            JSlider slider = (JSlider) m_parameterComponent;
             slider.setValue(defaultValue);
-        }  else if (graphicalType.equals(JSpinner.class)) {
-            JSpinner spinner = (JSpinner) parameterComponent;
+        }  else if (m_graphicalType.equals(JSpinner.class)) {
+            JSpinner spinner = (JSpinner) m_parameterComponent;
             spinner.setValue(defaultValue);
         }
     }
@@ -171,36 +171,36 @@ public class IntegerParameter extends AbstractParameter {
     @Override
     public ParameterError checkParameter() {
         
-        if (!used) {
+        if (!m_used) {
             return null;
         }
         
         Integer value = null;
         
-        if (graphicalType.equals(JTextField.class)) {
-            JTextField textField = (JTextField) parameterComponent;
+        if (m_graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) m_parameterComponent;
             try {
                 value = Integer.parseInt(textField.getText());
             } catch (NumberFormatException nfe) {
-                return new ParameterError(name+" is not a Integer", parameterComponent);
+                return new ParameterError(m_name+" is not a Integer", m_parameterComponent);
             }
-        } else if (graphicalType.equals(JSlider.class)) {
+        } else if (m_graphicalType.equals(JSlider.class)) {
             // with a slider, there can be no error
             return null;
-        } else if (graphicalType.equals(JSpinner.class)) {
+        } else if (m_graphicalType.equals(JSpinner.class)) {
             // with a slider, there can be no error
             return null;
         }
         
         if (minValue != null) {
             if (value < minValue) {
-                return new ParameterError(name+" must be greater than "+minValue.toString(), parameterComponent);
+                return new ParameterError(m_name+" must be greater than "+minValue.toString(), m_parameterComponent);
             }
         }
         
         if (maxValue != null) {
             if (value > maxValue) {
-                return new ParameterError(name+" must be lesser than "+maxValue.toString(), parameterComponent);
+                return new ParameterError(m_name+" must be lesser than "+maxValue.toString(), m_parameterComponent);
             }
         }
         
@@ -214,14 +214,14 @@ public class IntegerParameter extends AbstractParameter {
 
     @Override
     public Object getObjectValue() {
-        if (graphicalType.equals(JTextField.class)) {
-           return ((JTextField) parameterComponent).getText();
+        if (m_graphicalType.equals(JTextField.class)) {
+           return ((JTextField) m_parameterComponent).getText();
         }
-        if (graphicalType.equals(JSlider.class)) {
-           return ((JSlider) parameterComponent).getValue();
+        if (m_graphicalType.equals(JSlider.class)) {
+           return ((JSlider) m_parameterComponent).getValue();
         }
-        if (graphicalType.equals(JSpinner.class)) {
-           return ((JSpinner) parameterComponent).getValue();
+        if (m_graphicalType.equals(JSpinner.class)) {
+           return ((JSpinner) m_parameterComponent).getValue();
         }
         return ""; // should not happen
     }

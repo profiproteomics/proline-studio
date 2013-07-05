@@ -27,7 +27,7 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
         ACTION_SELECTING,
         ACTION_SCROLLING
     }
-    protected LastAction lastAction = LastAction.ACTION_NONE;
+    protected LastAction m_lastAction = LastAction.ACTION_NONE;
 
     public LazyTable(JScrollBar verticalScrollbar) {
 
@@ -47,7 +47,7 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
                 col = (col==-1) ? -1 : convertColumnIndexToModel(col);
                 
                 
-                lastAction = LastAction.ACTION_SORTING;
+                m_lastAction = LastAction.ACTION_SORTING;
 
                 ((LazyTableModel) getModel()).sortingChanged(col);
                 sortingChanged(col);
@@ -77,7 +77,7 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
     @Override
     public void adjustmentValueChanged(AdjustmentEvent e) {
 
-        lastAction = LastAction.ACTION_SCROLLING;
+        m_lastAction = LastAction.ACTION_SCROLLING;
 
         Long taskId = ((LazyTableModel) getModel()).getTaskId();
         if (taskId != null) {
@@ -95,7 +95,7 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
     public void valueChanged(ListSelectionEvent e) {
         super.valueChanged(e);
 
-        lastAction = LastAction.ACTION_SELECTING;
+        m_lastAction = LastAction.ACTION_SELECTING;
     }
 
     /**
@@ -106,11 +106,11 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
      */
     @Override
     public void scrollRowToVisible(int row) {
-        LastAction keepAction = lastAction;
+        LastAction keepAction = m_lastAction;
         try {
             super.scrollRowToVisible(row);
         } finally {
-            lastAction = keepAction;
+            m_lastAction = keepAction;
         }
     }
 
@@ -121,11 +121,11 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
      * @param row
      */
     public void setSelection(int row) {
-        LastAction keepAction = lastAction;
+        LastAction keepAction = m_lastAction;
         try {
             getSelectionModel().setSelectionInterval(row, row);
         } finally {
-            lastAction = keepAction;
+            m_lastAction = keepAction;
         }
     }
 }

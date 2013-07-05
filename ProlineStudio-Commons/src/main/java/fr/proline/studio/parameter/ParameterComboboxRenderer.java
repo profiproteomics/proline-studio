@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.parameter;
 
 import java.awt.Component;
@@ -10,7 +6,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 
 /**
- *
+ * Parameter to select an Object in a List
  * @author JM235353
  */
 public class ParameterComboboxRenderer<E> extends DefaultListCellRenderer {
@@ -30,7 +26,7 @@ public class ParameterComboboxRenderer<E> extends DefaultListCellRenderer {
                 return l;
             }
             
-            String display = null;
+            String display;
             if (m_paramToString != null) {
                 display = m_paramToString.toString((E) value);
             } else {

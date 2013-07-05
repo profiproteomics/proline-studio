@@ -12,6 +12,11 @@ import java.util.TreeMap;
 import javax.swing.*;
 import org.openide.windows.WindowManager;
 
+/**
+ * Bar which displays visible markers according to the visible part of the Component
+ * included in MarkerContainerPanel
+ * @author JM235353
+ */
 public class MarkerBar extends AbstractBar implements MouseListener, MouseMotionListener {
 
     private static final long serialVersionUID = 1L;
@@ -83,14 +88,14 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         g.setColor(Color.lightGray);
         g.drawRect(0, 0, getWidth()-1, getHeight()-1);
         
-        MarkerComponentInterface componentInterface = containerPanel.getMarkerComponentInterface();
+        MarkerComponentInterface componentInterface = m_containerPanel.getMarkerComponentInterface();
 
         int firstVisibleRow = componentInterface.getFirstVisibleRow();
         int lastVisibleRow = componentInterface.getLastVisibleRow();
 
         
  
-        TreeMap<Integer, ArrayList<AbstractMarker>> markerMap = containerPanel.getMarkerArray();
+        TreeMap<Integer, ArrayList<AbstractMarker>> markerMap = m_containerPanel.getMarkerArray();
         Iterator<Integer> itRow = markerMap.keySet().iterator();
         while (itRow.hasNext()) {
             Integer row = itRow.next();
@@ -110,7 +115,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
                 int y1 = componentInterface.getRowYStart(rowInt);
                 int y2 = componentInterface.getRowYStop(rowInt);
 
-                MarkerRendererInterface renderer = containerPanel.getRenderer(marker);
+                MarkerRendererInterface renderer = m_containerPanel.getRenderer(marker);
 
                 renderer.paint(AbstractBar.BarType.MARKER_BAR, g, 0, y1, getWidth(), y2 - y1);
             }
@@ -168,7 +173,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
     @Override
     public void mouseReleased(MouseEvent e) {
         
-        MarkerComponentInterface componentInterface = containerPanel.getMarkerComponentInterface();
+        MarkerComponentInterface componentInterface = m_containerPanel.getMarkerComponentInterface();
         rowClicked = componentInterface.getRowInModel(e.getY());
                 
         if (e.isPopupTrigger()) {
@@ -186,13 +191,13 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
 
         
         // remove all existing markers if they exist 
-        if (containerPanel.removeAllMarkers(rowClicked)) {
+        if (m_containerPanel.removeAllMarkers(rowClicked)) {
             return;
         }
         
         // add bookmark marker
         BookmarkMarker marker = new BookmarkMarker(rowClicked);
-        containerPanel.addMarker(marker);
+        m_containerPanel.addMarker(marker);
   
     }
     
@@ -202,10 +207,10 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        MarkerComponentInterface componentInterface = containerPanel.getMarkerComponentInterface();
+        MarkerComponentInterface componentInterface = m_containerPanel.getMarkerComponentInterface();
         int row = componentInterface.getRowInModel(e.getY());
         
-        AnnotationMarker marker = (AnnotationMarker) containerPanel.getMarker(row, DefaultMarker.ANNOTATION_MARKER);
+        AnnotationMarker marker = (AnnotationMarker) m_containerPanel.getMarker(row, DefaultMarker.ANNOTATION_MARKER);
         
         if (marker == null) {
             setToolTipText(null);
@@ -287,8 +292,8 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         @Override
         public void actionPerformed(ActionEvent e) {
             setLineNumbersDisplayed(!isLineNumbersDisplayed());
-            containerPanel.revalidate();
-            containerPanel.repaint();
+            m_containerPanel.revalidate();
+            m_containerPanel.repaint();
         }
 
         @Override
@@ -321,14 +326,14 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
             if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                 String description = dialog.getDescriptionField();
                 AnnotationMarker marker = new AnnotationMarker(rowClicked, description);
-                containerPanel.addMarker(marker);
+                m_containerPanel.addMarker(marker);
             }
 
         }
 
         @Override
         public void updateEnabled(int row) {
-            setEnabled(! containerPanel.hasMarker(row));
+            setEnabled(! m_containerPanel.hasMarker(row));
         }
         
         
@@ -345,12 +350,12 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
 
             // add bookmark marker
             BookmarkMarker marker = new BookmarkMarker(rowClicked);
-            containerPanel.addMarker(marker);
+            m_containerPanel.addMarker(marker);
         }
 
         @Override
         public void updateEnabled(int row) {
-            setEnabled(! containerPanel.hasMarker(row));
+            setEnabled(! m_containerPanel.hasMarker(row));
         }
     }
     
@@ -364,12 +369,12 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         public void actionPerformed(ActionEvent e) {
 
             BookmarkMarker marker = new BookmarkMarker(rowClicked);
-            containerPanel.removeAllMarkers(rowClicked);
+            m_containerPanel.removeAllMarkers(rowClicked);
         }
 
         @Override
         public void updateEnabled(int row) {
-            setEnabled(containerPanel.hasMarker(row));
+            setEnabled(m_containerPanel.hasMarker(row));
         }
         
     }
@@ -383,12 +388,12 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         @Override
         public void actionPerformed(ActionEvent e) {
 
-            containerPanel.removeAllMarkers();
+            m_containerPanel.removeAllMarkers();
         }
 
         @Override
         public void updateEnabled(int row) {
-            setEnabled(containerPanel.hasMarkers());
+            setEnabled(m_containerPanel.hasMarkers());
         }
     }
     

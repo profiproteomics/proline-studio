@@ -8,6 +8,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+/**
+ * Bar which displays all markers and allow to jump the selected
+ * marker in the Component included in MarkerContainerPanel
+ * 
+ * @author JM235353
+ */
 public class OverviewBar extends AbstractBar  implements MouseListener {
 
     private static final long serialVersionUID = 1L;
@@ -28,13 +34,13 @@ public class OverviewBar extends AbstractBar  implements MouseListener {
         g.setColor(Color.lightGray);
         g.drawRect(0, 0, getWidth()-1, getHeight()-1);
         
-        MarkerComponentInterface markerComponentInterface = containerPanel.getMarkerComponentInterface();
+        MarkerComponentInterface markerComponentInterface = m_containerPanel.getMarkerComponentInterface();
         
         double nbRows = (double) markerComponentInterface.getRowCount();
         double heightD = (double) getHeight();
         double h = heightD / nbRows;
 
-        TreeMap<Integer, ArrayList<AbstractMarker>> markerMap = containerPanel.getMarkerArray();
+        TreeMap<Integer, ArrayList<AbstractMarker>> markerMap = m_containerPanel.getMarkerArray();
         Iterator<Integer> itRow = markerMap.keySet().iterator();
         while (itRow.hasNext()) {
             Integer row = itRow.next();
@@ -47,7 +53,7 @@ public class OverviewBar extends AbstractBar  implements MouseListener {
                 
                 int y = (int) Math.round(((double) graphicalRow) * h);
 
-                MarkerRendererInterface renderer = containerPanel.getRenderer(marker);
+                MarkerRendererInterface renderer = m_containerPanel.getRenderer(marker);
 
                 renderer.paint(AbstractBar.BarType.OVERVIEW_BAR, g, 0, y, getWidth(), 4);
 
@@ -60,14 +66,14 @@ public class OverviewBar extends AbstractBar  implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        MarkerComponentInterface componentInterface = containerPanel.getMarkerComponentInterface();
+        MarkerComponentInterface componentInterface = m_containerPanel.getMarkerComponentInterface();
         int nbRows = componentInterface.getRowCount();
         
         int y = e.getY();
         int rowClicked = (int) Math.round(  ( ((double) y) / ((double) getHeight()) )*nbRows );
         
         // search for the nearest marker
-        int rowWithMarker = containerPanel.findNearestRowWithMarker(rowClicked);
+        int rowWithMarker = m_containerPanel.findNearestRowWithMarker(rowClicked);
         
         // calculate number of pixels between the row with marker and the row clicked
         // if the difference is less that 5 pixels, act as if the user has clicked on the marker

@@ -115,7 +115,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
                 PeptideMatch.TransientData data = peptideMatch.getTransientData();
                 Peptide peptide = data.getPeptide();
                 if ( peptide == null) {
-                    givePriorityTo(taskId, row, col);
+                    givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
                 } else {
                     lazyData.setData(peptide);
@@ -162,7 +162,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
                 PeptideMatch.TransientData data = peptideMatch.getTransientData();
                 Peptide peptide = data.getPeptide();
                 if ( peptide == null) {
-                    givePriorityTo(taskId, row, col);
+                    givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
                 } else {
                     Float calculatedMass = Float.valueOf((float) peptide.getCalculatedMass()) ;
@@ -220,7 +220,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
                 PeptideMatch.TransientData data = peptideMatch.getTransientData();
                 Peptide peptide = data.getPeptide();
                 if (peptide == null) {
-                    givePriorityTo(taskId, row, col);
+                    givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
                 } else {
                     String ptmString = peptide.getPtmString();
@@ -239,7 +239,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
 
     public void setData(Long taskId, PeptideInstance[] peptideInstances) {
         m_peptideInstances = peptideInstances;
-        this.taskId = taskId;
+        this.m_taskId = taskId;
         
         updateMinMax();
         
@@ -248,7 +248,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
     }
 
     private void updateMinMax() {
-        RelativePainterHighlighter.NumberRelativizer relativizer = table.getRelativizer();
+        RelativePainterHighlighter.NumberRelativizer relativizer = m_table.getRelativizer();
         if (relativizer == null) {
             return;
         }
@@ -302,7 +302,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
         int nb = m_peptideInstances.length;
         int iCur = 0;
         for (int iView = 0; iView < nb; iView++) {
-            int iModel = table.convertRowIndexToModel(iView);
+            int iModel = m_table.convertRowIndexToModel(iView);
             PeptideInstance ps = m_peptideInstances[iModel];
             if (peptideMatchIdMap.contains(ps.getId())) {
                 peptideMatchIds.set(iCur++, ps.getId());

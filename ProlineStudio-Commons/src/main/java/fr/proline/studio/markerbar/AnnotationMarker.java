@@ -1,28 +1,24 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.markerbar;
 
 /**
- *
+ * Marker with a Text
  * @author JM235353
  */
 public class AnnotationMarker extends DefaultMarker {
     
-    private String text = null;
+    private String m_text = null;
     
     public AnnotationMarker(int row, String text) {
         super(row, ANNOTATION_MARKER);
         
-        this.text = text;
+        m_text = text;
     }
     
     public String getText() {
-        return text;
+        return m_text;
     }
     
     public void setText(String text) {
-        this.text = text;
+        this.m_text = text;
     }
 }

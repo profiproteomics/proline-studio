@@ -10,35 +10,35 @@ import javax.swing.JPanel;
 import org.openide.util.NbPreferences;
 
 /**
- *
+ * List of Parameters; possibility to generate a panel from this list
  * @author jm235353
  */
 public class ParameterList extends ArrayList<AbstractParameter> {
 
-    private String name;
-    private JPanel parametersPanel;
+    private String m_name;
+    private JPanel m_parametersPanel;
 
     public ParameterList(String name) {
-        this.name = name;
+        m_name = name;
     }
 
     @Override
     public String toString() {
-        return name;
+        return m_name;
     }
 
     public JPanel getPanel() {
 
-        if (parametersPanel != null) {
-            return parametersPanel;
+        if (m_parametersPanel != null) {
+            return m_parametersPanel;
         }
 
         Preferences preferences = NbPreferences.root();
-        String prefixKey = name.replaceAll(" ", "_")+".";
+        String prefixKey = m_name.replaceAll(" ", "_")+".";
         
         
-        parametersPanel = new JPanel();
-        parametersPanel.setLayout(new GridBagLayout());
+        m_parametersPanel = new JPanel();
+        m_parametersPanel.setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -64,7 +64,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 JLabel l = new JLabel(parameter.getName() + " :");
 
                 l.setHorizontalAlignment(JLabel.RIGHT);
-                parametersPanel.add(l, c);
+                m_parametersPanel.add(l, c);
             }
             
             
@@ -73,18 +73,18 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             
             c.gridx = 1;
             c.weightx = 1;
-            parametersPanel.add(parameter.getComponent(parameterValue), c);
+            m_parametersPanel.add(parameter.getComponent(parameterValue), c);
 
             c.gridy++;
 
         }
 
-        return parametersPanel;
+        return m_parametersPanel;
     }
     
     public void completePanel(JPanel p, GridBagConstraints c) {
         Preferences preferences = NbPreferences.root();
-        String prefixKey = name.replaceAll(" ", "_")+".";
+        String prefixKey = m_name.replaceAll(" ", "_")+".";
         
          int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
@@ -115,7 +115,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     
     public void updateIsUsed() {
         Preferences preferences = NbPreferences.root();
-        String prefixKey = name.replaceAll(" ", "_") + ".";
+        String prefixKey = m_name.replaceAll(" ", "_") + ".";
 
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {
@@ -147,7 +147,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     
     public void saveParameters() {
         Preferences preferences = NbPreferences.root();
-        String prefixKey = name.replaceAll(" ", "_")+".";
+        String prefixKey = m_name.replaceAll(" ", "_")+".";
         
         int nbParameters = size();
         for (int i = 0; i < nbParameters; i++) {

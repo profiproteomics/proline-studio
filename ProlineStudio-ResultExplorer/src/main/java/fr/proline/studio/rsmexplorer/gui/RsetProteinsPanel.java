@@ -200,7 +200,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         
         public void dataUpdated(SubTask subTask, boolean finished) {
 
-            LastAction keepLastAction = lastAction;
+            LastAction keepLastAction = m_lastAction;
             try {
 
 
@@ -236,7 +236,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
             } finally {
 
-                lastAction = keepLastAction;
+                m_lastAction = keepLastAction;
 
             }
 

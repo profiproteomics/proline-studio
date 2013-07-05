@@ -4,55 +4,55 @@ import javax.swing.JComponent;
 import javax.swing.JTextField;
 
 /**
- *
+ * Parameter of type Double, displayed as a Textfield
  * @author jm235353
  */
 public class DoubleParameter extends AbstractParameter {
 
-    private Double minValue;
-    private Double maxValue;
-    private Double defaultValue;
+    private Double m_minValue;
+    private Double m_maxValue;
+    private Double m_defaultValue;
 
     public DoubleParameter(String key, String name, Class graphicalType, Double defaultValue, Double minValue, Double maxValue) {
         super(key, name, Double.class, graphicalType);
-        this.defaultValue = defaultValue;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
+        m_defaultValue = defaultValue;
+        m_minValue = minValue;
+        m_maxValue = maxValue;
 
     }
     
     public DoubleParameter(String key, String name, JComponent component, Double defaultValue, Double minValue, Double maxValue) {
         super(key, name, Double.class, component.getClass());
-        this.defaultValue = defaultValue;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-        this.parameterComponent = component;
+        m_defaultValue = defaultValue;
+        m_minValue = minValue;
+        m_maxValue = maxValue;
+        m_parameterComponent = component;
     }
 
     @Override
     public JComponent getComponent(Object value) {
 
-        if (parameterComponent != null) {
-            if (graphicalType.equals(JTextField.class)) {
+        if (m_parameterComponent != null) {
+            if (m_graphicalType.equals(JTextField.class)) {
                 if (value != null) {
-                    ((JTextField) parameterComponent).setText(value.toString());
-                } else if (defaultValue != null) {
-                    ((JTextField) parameterComponent).setText(defaultValue.toString());
+                    ((JTextField) m_parameterComponent).setText(value.toString());
+                } else if (m_defaultValue != null) {
+                    ((JTextField) m_parameterComponent).setText(m_defaultValue.toString());
                 }
 
-                return parameterComponent;
+                return m_parameterComponent;
             }
         }
         
         
-        if (graphicalType.equals(JTextField.class)) {
+        if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = new JTextField(3);
             if (value != null) {
                 textField.setText(value.toString());
-            } else if (defaultValue != null) {
-                textField.setText(defaultValue.toString());
+            } else if (m_defaultValue != null) {
+                textField.setText(m_defaultValue.toString());
             }
-            parameterComponent = textField;
+            m_parameterComponent = textField;
             return textField;
         }
 
@@ -61,43 +61,43 @@ public class DoubleParameter extends AbstractParameter {
     
     @Override
     public void initDefault() {
-        if (defaultValue == null) {
+        if (m_defaultValue == null) {
             return; // should not happen
         }
         
-        if (graphicalType.equals(JTextField.class)) {
-            JTextField textField = (JTextField) parameterComponent;
-            textField.setText(defaultValue.toString());
+        if (m_graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) m_parameterComponent;
+            textField.setText(m_defaultValue.toString());
         }
     }
 
     @Override
     public ParameterError checkParameter() {
         
-        if (!used) {
+        if (!m_used) {
             return null;
         }
         
         Double value = null;
         
-        if (graphicalType.equals(JTextField.class)) {
-            JTextField textField = (JTextField) parameterComponent;
+        if (m_graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) m_parameterComponent;
             try {
                 value = Double.parseDouble(textField.getText());
             } catch (NumberFormatException nfe) {
-                return new ParameterError(name+" is  not a Number", parameterComponent);
+                return new ParameterError(m_name+" is  not a Number", m_parameterComponent);
             }
         }
         
-        if (minValue != null) {
-            if (value < minValue) {
-                return new ParameterError(name+" must be greater than "+minValue.toString(), parameterComponent);
+        if (m_minValue != null) {
+            if (value < m_minValue) {
+                return new ParameterError(m_name+" must be greater than "+m_minValue.toString(), m_parameterComponent);
             }
         }
         
-        if (maxValue != null) {
-            if (value > maxValue) {
-                return new ParameterError(name+" must be lesser than "+maxValue.toString(), parameterComponent);
+        if (m_maxValue != null) {
+            if (value > m_maxValue) {
+                return new ParameterError(m_name+" must be lesser than "+m_maxValue.toString(), m_parameterComponent);
             }
         }
         
@@ -111,8 +111,8 @@ public class DoubleParameter extends AbstractParameter {
 
     @Override
     public Object getObjectValue() {
-        if (graphicalType.equals(JTextField.class)) {
-           return ((JTextField) parameterComponent).getText();
+        if (m_graphicalType.equals(JTextField.class)) {
+           return ((JTextField) m_parameterComponent).getText();
         }
         return ""; // should not happen
     }

@@ -3,36 +3,36 @@ package fr.proline.studio.parameter;
 import javax.swing.*;
 
 /**
- *
+ * Base class for All Parameters
  * @author jm235353
  */
 public abstract class AbstractParameter {
 
-    protected String key;
-    protected String name;
-    protected Class type;
-    protected Class graphicalType;
-    protected JComponent parameterComponent = null;
-    protected boolean used = true;
-    protected Object associatedData = null;
+    protected String m_key;
+    protected String m_name;
+    protected Class m_type;
+    protected Class m_graphicalType;
+    protected JComponent m_parameterComponent = null;
+    protected boolean m_used = true;
+    protected Object m_associatedData = null;
 
     protected AbstractParameter(String key, String name, Class type, Class graphicalType) {
-        this.key = key;
-        this.name = name;
-        this.type = type;
-        this.graphicalType = graphicalType;
+        m_key = key;
+        m_name = name;
+        m_type = type;
+        m_graphicalType = graphicalType;
     }
 
     public String getName() {
-        return name;
+        return m_name;
     }
     
     public String getKey() {
-        return key;
+        return m_key;
     }
 
     public JComponent getComponent() {
-        return parameterComponent;
+        return m_parameterComponent;
     }
     public abstract JComponent getComponent(Object value);
     public abstract void initDefault();
@@ -60,11 +60,11 @@ public abstract class AbstractParameter {
     }
     
     public boolean isUsed() {
-        return used;
+        return m_used;
     }
     
     public void setUsed(boolean used) {
-        this.used = used;
+        this.m_used = used;
     }
 
     
@@ -74,11 +74,11 @@ public abstract class AbstractParameter {
     }
 
     public void setAssociatedData(Object associatedData) {
-        this.associatedData = associatedData;
+        this.m_associatedData = associatedData;
     }
     
     public Object getAssociatedData() {
-        return associatedData;
+        return m_associatedData;
     }
     
 }

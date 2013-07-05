@@ -11,12 +11,12 @@ import java.text.DecimalFormatSymbols;
  */
 public class DataFormat {
     
-    private final static DecimalFormat decimalFormat = new DecimalFormat("###.##");
+    private final static DecimalFormat m_decimalFormat = new DecimalFormat("###.##");
     
     static {
-        DecimalFormatSymbols dfs = decimalFormat.getDecimalFormatSymbols();
+        DecimalFormatSymbols dfs = m_decimalFormat.getDecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
-        decimalFormat.setDecimalFormatSymbols(dfs);
+        m_decimalFormat.setDecimalFormatSymbols(dfs);
     }
     
     
@@ -30,10 +30,10 @@ public class DataFormat {
     
     public static String format(float f, int nbFractionDigits) {
         
-        decimalFormat.setMaximumFractionDigits(nbFractionDigits);
-        decimalFormat.setMinimumFractionDigits(nbFractionDigits);
+        m_decimalFormat.setMaximumFractionDigits(nbFractionDigits);
+        m_decimalFormat.setMinimumFractionDigits(nbFractionDigits);
         
-        return decimalFormat.format((double) f);
+        return m_decimalFormat.format((double) f);
     }
     
         public static String format(Double d, int nbFractionDigits) {
@@ -45,10 +45,10 @@ public class DataFormat {
     
     public static String format(double d, int nbFractionDigits) {
 
-        decimalFormat.setMaximumFractionDigits(nbFractionDigits);
-        decimalFormat.setMinimumFractionDigits(nbFractionDigits);
+        m_decimalFormat.setMaximumFractionDigits(nbFractionDigits);
+        m_decimalFormat.setMinimumFractionDigits(nbFractionDigits);
         
-        return decimalFormat.format((double) d);
+        return m_decimalFormat.format((double) d);
     }
     
     public static String format(Integer i) {

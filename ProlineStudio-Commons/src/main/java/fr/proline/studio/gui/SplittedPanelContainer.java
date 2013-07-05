@@ -17,15 +17,15 @@ import javax.swing.border.EmptyBorder;
  */
 public class SplittedPanelContainer extends JPanel {
 
-    private ArrayList<SplittedPanel> panelArray = new ArrayList<>(4);
-    private ArrayList<JSplitPane> splitPaneArray = new ArrayList<>(3);
+    private ArrayList<SplittedPanel> m_panelArray = new ArrayList<>(4);
+    private ArrayList<JSplitPane> m_splitPaneArray = new ArrayList<>(3);
 
     
-    private JPanel mainPanel;
-    private IconifiedPanel iconifiedPanel;
-    private JPanel containerPanel;
+    private JPanel m_mainPanel;
+    private IconifiedPanel m_iconifiedPanel;
+    private JPanel m_containerPanel;
     
-    private boolean aPanelMaximized = false;
+    private boolean m_aPanelMaximized = false;
     
     public SplittedPanelContainer() {   
     }
@@ -36,8 +36,8 @@ public class SplittedPanelContainer extends JPanel {
      */
     public void registerPanel(JComponent panel) {
 
-        SplittedPanel splittedPanel = new SplittedPanel(panelArray.size(), panel, this);
-        panelArray.add(splittedPanel);
+        SplittedPanel splittedPanel = new SplittedPanel(m_panelArray.size(), panel, this);
+        m_panelArray.add(splittedPanel);
     }
 
     public void registerAddedPanel(JComponent panel) {
@@ -59,7 +59,7 @@ public class SplittedPanelContainer extends JPanel {
         
         
         
-        SplittedPanel splittedPanel = new SplittedPanel(panelArray.size(), panel, this);
+        SplittedPanel splittedPanel = new SplittedPanel(m_panelArray.size(), panel, this);
         insertPanel(splittedPanel);
         updateButtons();
         
@@ -68,7 +68,7 @@ public class SplittedPanelContainer extends JPanel {
     
    public void registerAddedPanelAsTab(JComponent panel) {
 
-        SplittedPanel splittedBottomPanel = panelArray.get(panelArray.size()-1);
+        SplittedPanel splittedBottomPanel = m_panelArray.get(m_panelArray.size()-1);
         JComponent bottomComponent = splittedBottomPanel.getEmbededPanel();
 
         ArrayList<Component> components = new ArrayList<>();
@@ -114,7 +114,7 @@ public class SplittedPanelContainer extends JPanel {
    
    public void registerAddedPanelAsSplitted(JComponent panel) {
 
-        SplittedPanel splittedBottomPanel = panelArray.get(panelArray.size()-1);
+        SplittedPanel splittedBottomPanel = m_panelArray.get(m_panelArray.size()-1);
         JComponent bottomComponent = splittedBottomPanel.getEmbededPanel();
 
         JSplitPane sp = new JSplitPane();
@@ -136,7 +136,7 @@ public class SplittedPanelContainer extends JPanel {
     
     public void removeLastPanel() {
         
-        SplittedPanel splittedPanel = panelArray.get(panelArray.size()-1);
+        SplittedPanel splittedPanel = m_panelArray.get(m_panelArray.size()-1);
         JComponent c = splittedPanel.getEmbededPanel();
         
          if (c instanceof JTabbedPane) {
@@ -153,7 +153,7 @@ public class SplittedPanelContainer extends JPanel {
             JSplitPane splitPane = (JSplitPane) c;
             splittedPanel.replaceEmbededPanel((JComponent)splitPane.getLeftComponent() );
         } else {
-            removePanel(panelArray.size()-1, false);
+            removePanel(m_panelArray.size()-1, false);
         }
         
         revalidate();
@@ -163,9 +163,9 @@ public class SplittedPanelContainer extends JPanel {
     }
     
     public void updateButtons() {
-        int size = panelArray.size();
+        int size = m_panelArray.size();
         for (int i=0;i<size;i++) {
-            SplittedPanel p = panelArray.get(i);
+            SplittedPanel p = m_panelArray.get(i);
             p.updateAssociationButtons();
             
             
@@ -199,10 +199,10 @@ public class SplittedPanelContainer extends JPanel {
         
         
         SplittedPanel splittedPanel = new SplittedPanel(index, panel, this);
-        for (int i=index;i<panelArray.size();i++) {
-            panelArray.get(i).incIndex();
+        for (int i=index;i<m_panelArray.size();i++) {
+            m_panelArray.get(i).incIndex();
         }
-        panelArray.add(index, splittedPanel);
+        m_panelArray.add(index, splittedPanel);
         
         if (index ==0) {
             // in fact never called ! : index>=1 ; JPM.TODO : remove if it does not change
@@ -210,19 +210,19 @@ public class SplittedPanelContainer extends JPanel {
             
             JSplitPane splitPane = new JSplitPane();
             splitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-            splitPane.setTopComponent(panelArray.get(0));
-            splitPane.setBottomComponent(splitPaneArray.get(0));
+            splitPane.setTopComponent(m_panelArray.get(0));
+            splitPane.setBottomComponent(m_splitPaneArray.get(0));
             
-            splitPaneArray.add(0, splitPane);
+            m_splitPaneArray.add(0, splitPane);
             
-        } else if (index == panelArray.size()-1) {
+        } else if (index == m_panelArray.size()-1) {
             // panel added at the end
             
-            JPanel lastPanel = panelArray.get(panelArray.size()-2);
+            JPanel lastPanel = m_panelArray.get(m_panelArray.size()-2);
             
-            if (splitPaneArray.size()>0) {
+            if (m_splitPaneArray.size()>0) {
             
-                JSplitPane lastSplitPane = splitPaneArray.get(splitPaneArray.size()-1);
+                JSplitPane lastSplitPane = m_splitPaneArray.get(m_splitPaneArray.size()-1);
                 lastSplitPane.remove(lastPanel);
 
                 JSplitPane splitPane = new JSplitPane();
@@ -233,23 +233,23 @@ public class SplittedPanelContainer extends JPanel {
 
                 lastSplitPane.setBottomComponent(splitPane);
 
-                splitPaneArray.add(splitPane);
+                m_splitPaneArray.add(splitPane);
             } else {
                 JSplitPane splitPane = new JSplitPane();
                 splitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
                 splitPane.setTopComponent(lastPanel);
                 splitPane.setBottomComponent(splittedPanel);
             
-                splitPaneArray.add(splitPane);
+                m_splitPaneArray.add(splitPane);
                 
-                containerPanel.removeAll();
-                containerPanel.add(splitPane);
+                m_containerPanel.removeAll();
+                m_containerPanel.add(splitPane);
             }
             
         } else {
             // panel added in the middle
             
-            JSplitPane splitPaneParent = splitPaneArray.get(index-1);
+            JSplitPane splitPaneParent = m_splitPaneArray.get(index-1);
             Component    bottomComponent = splitPaneParent.getBottomComponent();
             splitPaneParent.remove(bottomComponent);
             
@@ -261,7 +261,7 @@ public class SplittedPanelContainer extends JPanel {
             
             splitPaneParent.setBottomComponent(splitPane);
             
-            splitPaneArray.add(index, splitPane);
+            m_splitPaneArray.add(index, splitPane);
             
         }
         
@@ -301,8 +301,8 @@ public class SplittedPanelContainer extends JPanel {
         
         
         
-        SplittedPanel splittedTopPanel = panelArray.get(bottomPanelIndex-1);
-        SplittedPanel splittedBottomPanel = panelArray.get(bottomPanelIndex);
+        SplittedPanel splittedTopPanel = m_panelArray.get(bottomPanelIndex-1);
+        SplittedPanel splittedBottomPanel = m_panelArray.get(bottomPanelIndex);
         
         JComponent topComponent = splittedTopPanel.getEmbededPanel();
         JComponent bottomComponent = splittedBottomPanel.getEmbededPanel();
@@ -383,11 +383,11 @@ public class SplittedPanelContainer extends JPanel {
 
         setLayout(new GridLayout(1, 1));
         
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new GridBagLayout());
-        add(mainPanel);
+        m_mainPanel = new JPanel();
+        m_mainPanel.setLayout(new GridBagLayout());
+        add(m_mainPanel);
 
-        iconifiedPanel = new IconifiedPanel();
+        m_iconifiedPanel = new IconifiedPanel();
         
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
@@ -395,32 +395,32 @@ public class SplittedPanelContainer extends JPanel {
         c.weightx = 1;
         c.weighty = 0;
         c.fill = GridBagConstraints.BOTH;
-        mainPanel.add(iconifiedPanel, c);
+        m_mainPanel.add(m_iconifiedPanel, c);
         
-        containerPanel = new JPanel();
-        containerPanel.setLayout(new GridLayout(1, 1));
+        m_containerPanel = new JPanel();
+        m_containerPanel.setLayout(new GridLayout(1, 1));
         
         c.gridy++;
         c.weighty = 1;
-        mainPanel.add(containerPanel, c);
+        m_mainPanel.add(m_containerPanel, c);
         
-        createPanel(containerPanel, 0);
+        createPanel(m_containerPanel, 0);
         
         updateButtons();
     }
 
     private JComponent createPanel(JComponent container, int indexPanel) {
 
-        if (indexPanel == panelArray.size() - 1) {
+        if (indexPanel == m_panelArray.size() - 1) {
             // there is only one panel left
-            container.add(panelArray.get(indexPanel));
+            container.add(m_panelArray.get(indexPanel));
         } else {
             // embed panel in split pane
             JSplitPane splitPane = new javax.swing.JSplitPane();
             splitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-            splitPane.setTopComponent(panelArray.get(indexPanel));
+            splitPane.setTopComponent(m_panelArray.get(indexPanel));
 
-            splitPaneArray.add(splitPane);
+            m_splitPaneArray.add(splitPane);
 
             JPanel bottomPanel = new JPanel();
             GridLayout layout = new GridLayout(1, 1);
@@ -442,25 +442,25 @@ public class SplittedPanelContainer extends JPanel {
         
         int insertIndex = 0;
         
-        int size = panelArray.size();
+        int size = m_panelArray.size();
         
         if (size == 0) {
             // First Panel to Be added : put it in the containerPanel
-            containerPanel.add(splittedPanel);
+            m_containerPanel.add(splittedPanel);
         } else {
             // look where the panel must be added
             int indexAtCreation = splittedPanel.getIndex();
             
             for (insertIndex = 0; insertIndex < size; insertIndex++) {
-                if (indexAtCreation < panelArray.get(insertIndex).getIndex()) {
+                if (indexAtCreation < m_panelArray.get(insertIndex).getIndex()) {
                     break;
                 }
             }
             
             if (insertIndex == 0) {
                 // insertion at the begining, directly in containerPanel
-                Component componentToKeep = containerPanel.getComponent(0);
-                containerPanel.remove(0);
+                Component componentToKeep = m_containerPanel.getComponent(0);
+                m_containerPanel.remove(0);
                 
                 // create a new SplitPane
                 JSplitPane splitPane = new javax.swing.JSplitPane();
@@ -469,18 +469,18 @@ public class SplittedPanelContainer extends JPanel {
                 splitPane.setBottomComponent(componentToKeep);
                 
                 // add splitpane to its new parent
-                containerPanel.add(splitPane);
+                m_containerPanel.add(splitPane);
                 
                 // insert split pane to the list
-                splitPaneArray.add(0, splitPane);
+                m_splitPaneArray.add(0, splitPane);
                 
             } else if (insertIndex == size) {
                 // insertion at the end
                 
                 if (size == 1) {
                     // only one component is present
-                    Component componentToKeep = containerPanel.getComponent(0);
-                    containerPanel.remove(0);
+                    Component componentToKeep = m_containerPanel.getComponent(0);
+                    m_containerPanel.remove(0);
                     
                     // create a new SplitPane
                     JSplitPane splitPane = new javax.swing.JSplitPane();
@@ -489,14 +489,14 @@ public class SplittedPanelContainer extends JPanel {
                     splitPane.setBottomComponent(splittedPanel);
                     
                     // add splitpane to its new parent
-                    containerPanel.add(splitPane);
+                    m_containerPanel.add(splitPane);
                     
                     // insert split pane to the list
-                    splitPaneArray.add(0, splitPane);
+                    m_splitPaneArray.add(0, splitPane);
                     
                 } else {
                     // at least two components, so at least one splitpane
-                    JSplitPane splitPaneParent = splitPaneArray.get(insertIndex-2);
+                    JSplitPane splitPaneParent = m_splitPaneArray.get(insertIndex-2);
                     Component componentToKeep = splitPaneParent.getBottomComponent();
                     splitPaneParent.setBottomComponent(null);
 
@@ -508,13 +508,13 @@ public class SplittedPanelContainer extends JPanel {
                     splitPaneParent.setBottomComponent(splitPane);
 
                     // insert split pane to the list
-                    splitPaneArray.add(insertIndex-1, splitPane);
+                    m_splitPaneArray.add(insertIndex-1, splitPane);
                 }
                 
                 
             } else {
                 // insertion in the middle
-                JSplitPane splitPaneParent = splitPaneArray.get(insertIndex-1);
+                JSplitPane splitPaneParent = m_splitPaneArray.get(insertIndex-1);
                 Component componentToKeep = splitPaneParent.getBottomComponent();
                 splitPaneParent.setBottomComponent(null);
 
@@ -526,14 +526,14 @@ public class SplittedPanelContainer extends JPanel {
                 splitPaneParent.setBottomComponent(splitPane);
 
                 // insert split pane to the list
-                splitPaneArray.add(insertIndex, splitPane);
+                m_splitPaneArray.add(insertIndex, splitPane);
             }
             
             
         }
         
         // insert panel to the list
-        panelArray.add(insertIndex, splittedPanel);
+        m_panelArray.add(insertIndex, splittedPanel);
         
         
         revalidate();
@@ -551,56 +551,56 @@ public class SplittedPanelContainer extends JPanel {
     private void removePanel(int index, boolean iconifyRemovedPanel) {
 
         // height of the panel removed
-        int height = panelArray.get(index).getHeight();
+        int height = m_panelArray.get(index).getHeight();
         
-        if (index<splitPaneArray.size()) {
-            JSplitPane splitPane = splitPaneArray.get(index);
+        if (index<m_splitPaneArray.size()) {
+            JSplitPane splitPane = m_splitPaneArray.get(index);
             Component componentKept = splitPane.getBottomComponent();
             splitPane.setTopComponent(null);
             splitPane.setBottomComponent(null);
             
             if (index>0) {
-                JSplitPane parentSplitPane = splitPaneArray.get(index-1);
+                JSplitPane parentSplitPane = m_splitPaneArray.get(index-1);
                 parentSplitPane.setBottomComponent(componentKept);
             } else {
-                containerPanel.remove(0);
-                containerPanel.add(componentKept);
+                m_containerPanel.remove(0);
+                m_containerPanel.add(componentKept);
             }
             
-            splitPaneArray.remove(index);
+            m_splitPaneArray.remove(index);
             
             
         } else {
             
             if (index>0) {
-                JSplitPane splitPane = splitPaneArray.get(index-1);
+                JSplitPane splitPane = m_splitPaneArray.get(index-1);
 
                 Component componentKept = splitPane.getTopComponent();
                 splitPane.setTopComponent(null);
                 splitPane.setBottomComponent(null);
 
                 if (index-2>=0) {
-                    JSplitPane parentSplitPane = splitPaneArray.get(index - 2);
+                    JSplitPane parentSplitPane = m_splitPaneArray.get(index - 2);
                     parentSplitPane.setBottomComponent(componentKept);
                 } else {
-                    containerPanel.remove(0);
-                    containerPanel.add(componentKept);
+                    m_containerPanel.remove(0);
+                    m_containerPanel.add(componentKept);
                 }
             
-                splitPaneArray.remove(index-1);
+                m_splitPaneArray.remove(index-1);
             } else {
-                containerPanel.remove(0);
+                m_containerPanel.remove(0);
             }           
         }
         
 
-        SplittedPanel splittedPanel = panelArray.remove(index);
-        for (int i=index;i<panelArray.size();i++) {
-            panelArray.get(i).decIndex();
+        SplittedPanel splittedPanel = m_panelArray.remove(index);
+        for (int i=index;i<m_panelArray.size();i++) {
+            m_panelArray.get(i).decIndex();
         }
         
         if (iconifyRemovedPanel) {
-            iconifiedPanel.addPanel(splittedPanel, height);
+            m_iconifiedPanel.addPanel(splittedPanel, height);
         }
         
         
@@ -642,9 +642,9 @@ public class SplittedPanelContainer extends JPanel {
     private void minimize(SplittedPanel panel) {
 
         // Calculation of height of each panel
-        int index = panelArray.indexOf(panel);
+        int index = m_panelArray.indexOf(panel);
         
-        boolean calculateNewHeight = (panelArray.size()>2);
+        boolean calculateNewHeight = (m_panelArray.size()>2);
         
         int[] newHeights = null;
         if (calculateNewHeight) {
@@ -707,8 +707,8 @@ public class SplittedPanelContainer extends JPanel {
             // look where the panel is added
             int indexAtCreation = splittedPanel.getIndex();
             int insertIndex;
-            for (insertIndex = 0; insertIndex < panelArray.size(); insertIndex++) {
-                if (indexAtCreation < panelArray.get(insertIndex).getIndex()) {
+            for (insertIndex = 0; insertIndex < m_panelArray.size(); insertIndex++) {
+                if (indexAtCreation < m_panelArray.get(insertIndex).getIndex()) {
                     break;
                 }
             }
@@ -735,9 +735,9 @@ public class SplittedPanelContainer extends JPanel {
      */
     private void maximize(SplittedPanel panel) {
         
-        aPanelMaximized = true;
+        m_aPanelMaximized = true;
         
-        int index = panelArray.indexOf(panel);
+        int index = m_panelArray.indexOf(panel);
         
         // save previous heights
         previousHeights = getHeights();
@@ -747,7 +747,7 @@ public class SplittedPanelContainer extends JPanel {
         remove(0);
         
         // remove splittedPanel from its parent
-        SplittedPanel panelToMaximize = panelArray.get(index);
+        SplittedPanel panelToMaximize = m_panelArray.get(index);
         previousPanelParent = panelToMaximize.getParent();
         previousPanelParent.remove(panelToMaximize);
         
@@ -768,7 +768,7 @@ public class SplittedPanelContainer extends JPanel {
      */
     private void reduce(SplittedPanel panelToReduce) {
         
-        aPanelMaximized = false;
+        m_aPanelMaximized = false;
         
         // remove splittedPanel maximized
         remove(0);
@@ -791,11 +791,11 @@ public class SplittedPanelContainer extends JPanel {
      * @return 
      */
     private int[] getHeights() {
-        int size = panelArray.size();
+        int size = m_panelArray.size();
         int[] heights = new int[size];
         
         for (int i=0;i<size;i++) {
-            heights[i] = panelArray.get(i).getHeight();
+            heights[i] = m_panelArray.get(i).getHeight();
         }
         
         return heights;
@@ -811,9 +811,9 @@ public class SplittedPanelContainer extends JPanel {
             @Override
             public void run() {
                 // set new height to split pane
-                int nbSplits = splitPaneArray.size();
+                int nbSplits = m_splitPaneArray.size();
                 for (int i = nbSplits - 1; i >= 0; i--) {
-                    splitPaneArray.get(i).setDividerLocation(heights[i]);
+                    m_splitPaneArray.get(i).setDividerLocation(heights[i]);
                 }
             }
         });
@@ -1106,7 +1106,7 @@ public class SplittedPanelContainer extends JPanel {
             // if a panel has been maximized,
             // or if a panel has been iconified
             // we don't allow association button
-            if (!iconifiedPanel.isEmpty() || aPanelMaximized) {
+            if (!m_iconifiedPanel.isEmpty() || m_aPanelMaximized) {
                 m_associateButton.setEnabled(false);
                 m_dissociateButton.setEnabled(false);
                 return;

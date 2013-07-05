@@ -1,5 +1,9 @@
 package fr.proline.studio.markerbar;
 
+/**
+ * Interface which must be extended by any Component included in a MarkerContainerPanel
+ * @author JM235353
+ */
 public interface MarkerComponentInterface {
 
     public int getRowCount();

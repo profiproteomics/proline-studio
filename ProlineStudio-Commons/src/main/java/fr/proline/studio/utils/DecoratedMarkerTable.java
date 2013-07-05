@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.utils;
 
 import fr.proline.studio.markerbar.MarkerComponentInterface;
@@ -17,14 +13,14 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.JTableHeader;
 
 /**
- *
+ * Table which can be used with marker bars (it inherits display an "histogram" on a column from DecoratedTable)
  * @author JM235353
  */
 public class DecoratedMarkerTable extends DecoratedTable implements MarkerComponentInterface, ChangeListener {
 
-    private int firstVisibleRow = -1;
-    private int lastVisibleRow = -1;
-    private JViewport viewport = null;
+    private int m_firstVisibleRow = -1;
+    private int m_lastVisibleRow = -1;
+    private JViewport m_viewport = null;
 
     public DecoratedMarkerTable() {
         getTableHeader().addMouseListener(new MouseAdapter() {
@@ -37,18 +33,18 @@ public class DecoratedMarkerTable extends DecoratedTable implements MarkerCompon
     }
     
     public void setViewport(JViewport viewport) {
-        this.viewport = viewport;
+        m_viewport = viewport;
         viewport.addChangeListener(this);
     }
 
     @Override
     public int getFirstVisibleRow() {
-        return firstVisibleRow;
+        return m_firstVisibleRow;
     }
 
     @Override
     public int getLastVisibleRow() {
-        return lastVisibleRow;
+        return m_lastVisibleRow;
     }
 
     @Override
@@ -59,7 +55,7 @@ public class DecoratedMarkerTable extends DecoratedTable implements MarkerCompon
     @Override
     public int getRowYStart(int row) {
 
-        Rectangle viewRect = viewport.getViewRect();
+        Rectangle viewRect = m_viewport.getViewRect();
         
         Rectangle r = getCellRect(row, 0, false);
 
@@ -75,7 +71,7 @@ public class DecoratedMarkerTable extends DecoratedTable implements MarkerCompon
     @Override
     public int getRowYStop(int row) {
         
-        Rectangle viewRect = viewport.getViewRect();
+        Rectangle viewRect = m_viewport.getViewRect();
         
         Rectangle r = getCellRect(row, 0, false);
 
@@ -93,18 +89,18 @@ public class DecoratedMarkerTable extends DecoratedTable implements MarkerCompon
     @Override
     public void stateChanged(ChangeEvent e) {
 
-        Rectangle viewRect = viewport.getViewRect();
+        Rectangle viewRect = m_viewport.getViewRect();
 
-        firstVisibleRow = rowAtPoint(new Point(0, viewRect.y));
-        if (firstVisibleRow == -1) {
-            lastVisibleRow = -1;
+        m_firstVisibleRow = rowAtPoint(new Point(0, viewRect.y));
+        if (m_firstVisibleRow == -1) {
+            m_lastVisibleRow = -1;
             return;
         }
 
-        lastVisibleRow = rowAtPoint(new Point(0, viewRect.y + viewRect.height - 1));
-        if (lastVisibleRow == -1) {
+        m_lastVisibleRow = rowAtPoint(new Point(0, viewRect.y + viewRect.height - 1));
+        if (m_lastVisibleRow == -1) {
             // Handle empty space below last row
-            lastVisibleRow = getModel().getRowCount() - 1;
+            m_lastVisibleRow = getModel().getRowCount() - 1;
         }
         //  System.out.println(firstVisibleRow + " " + lastVisibleRow);
         
@@ -114,7 +110,7 @@ public class DecoratedMarkerTable extends DecoratedTable implements MarkerCompon
     @Override
     public int getRowInModel(int y) {
         
-        Rectangle viewRect = viewport.getViewRect();
+        Rectangle viewRect = m_viewport.getViewRect();
         
         int headerHeight = 0;
         JTableHeader header = getTableHeader();

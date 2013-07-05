@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.utils;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -14,15 +10,15 @@ import javax.swing.table.AbstractTableModel;
  */
 public abstract class LazyTableModel extends AbstractTableModel {
     
-    protected LazyTable table;
-    protected Long taskId = null;
+    protected LazyTable m_table;
+    protected Long m_taskId = null;
     
     public LazyTableModel(LazyTable table) {
-        this.table = table;
+        m_table = table;
     }
 
     public Long getTaskId() {
-        return taskId;
+        return m_taskId;
     }
     
     /**
@@ -36,8 +32,8 @@ public abstract class LazyTableModel extends AbstractTableModel {
      */
     protected LazyData getLazyData(int row, int col) {
         
-        int sortedColumn = ((LazyTable) table).getSortedColumnIndex();
-        sortedColumn = (sortedColumn == -1) ? -1 : table.convertColumnIndexToModel(sortedColumn);
+        int sortedColumn = ((LazyTable) m_table).getSortedColumnIndex();
+        sortedColumn = (sortedColumn == -1) ? -1 : m_table.convertColumnIndexToModel(sortedColumn);
         
         if ( sortedColumn == col) {
             int nb = getRowCount();
@@ -66,7 +62,7 @@ public abstract class LazyTableModel extends AbstractTableModel {
      * @param col 
      */
     protected void givePriorityTo(Long taskId, int row, int col) {
-        int sortedCol = table.getSortedColumnIndex();
+        int sortedCol = m_table.getSortedColumnIndex();
         if (sortedCol ==-1) {
             AccessDatabaseThread.getAccessDatabaseThread().addPriorityIndex(taskId, row);
         } else {
@@ -83,7 +79,7 @@ public abstract class LazyTableModel extends AbstractTableModel {
     public void sortingChanged(int col) {
         int subTaskId = getSubTaskId(col);
         if (subTaskId != -1) {
-           AccessDatabaseThread.getAccessDatabaseThread().givePriorityToSubTask(taskId, subTaskId);
+           AccessDatabaseThread.getAccessDatabaseThread().givePriorityToSubTask(m_taskId, subTaskId);
         }
     }
     

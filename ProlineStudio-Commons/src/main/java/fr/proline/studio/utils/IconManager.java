@@ -61,8 +61,8 @@ public class IconManager {
         PLUS11,
         MINUS11
     }
-    private static HashMap<IconType, ImageIcon> iconMap = new HashMap<>();
-    private static HashMap<IconType, ImageIcon> iconHourGlassMap = new HashMap<>();
+    private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
+    private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
 
     
     public static Image getImage(IconType iconType) {
@@ -72,11 +72,11 @@ public class IconManager {
     
     public static ImageIcon getIcon(IconType iconType) {
 
-        ImageIcon icon = iconMap.get(iconType);
+        ImageIcon icon = m_iconMap.get(iconType);
         if (icon == null) {
             String path = getIconFilePath(iconType);
             icon = ImageUtilities.loadImageIcon(path, false);
-            iconMap.put(iconType, icon);
+            m_iconMap.put(iconType, icon);
         }
 
         return icon;
@@ -84,7 +84,7 @@ public class IconManager {
 
     public static ImageIcon getIconWithHourGlass(IconType iconType) {
 
-        ImageIcon iconWithHourGlass = iconHourGlassMap.get(iconType);
+        ImageIcon iconWithHourGlass = m_iconHourGlassMap.get(iconType);
         if (iconWithHourGlass == null) {
             String path = getIconFilePath(iconType);
             Image imSource = ImageUtilities.loadImage(path, false);
@@ -120,7 +120,7 @@ public class IconManager {
             im.getGraphics().drawImage(miniHourGlassImage, sourceWidth - miniHourGlassImage.getWidth(null), sourceHeight - miniHourGlassImage.getHeight(null), null);
 
             iconWithHourGlass = new ImageIcon(im);
-            iconHourGlassMap.put(iconType, iconWithHourGlass);
+            m_iconHourGlassMap.put(iconType, iconWithHourGlass);
         }
 
         return iconWithHourGlass;

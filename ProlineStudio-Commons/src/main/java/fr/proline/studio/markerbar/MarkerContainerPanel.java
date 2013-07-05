@@ -19,22 +19,22 @@ import javax.swing.JScrollPane;
  */
 public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
 
-    private TreeMap<Integer, ArrayList<AbstractMarker>> markers = new TreeMap<>();
-    private HashMap<Class, MarkerRendererInterface> renderers = new HashMap<>();
+    private TreeMap<Integer, ArrayList<AbstractMarker>> m_markers = new TreeMap<>();
+    private HashMap<Class, MarkerRendererInterface> m_renderers = new HashMap<>();
     private static final long serialVersionUID = 1L;
-    private MarkerComponentInterface markerComponent = null;
-    private static DefaultMarkerRenderer defaultRenderer = null;
+    private MarkerComponentInterface m_markerComponent = null;
+    private static DefaultMarkerRenderer m_defaultRenderer = null;
 
-    private OverviewBar overviewBar = null;
-    private MarkerBar markerBar = null;
+    private OverviewBar m_overviewBar = null;
+    private MarkerBar m_markerBar = null;
     
 
     
     public MarkerContainerPanel(JScrollPane sp, MarkerComponentInterface markerComponent) {
 
-        this.markerComponent = markerComponent;
-        markerBar = new MarkerBar(this);
-        overviewBar = new OverviewBar(this);
+        this.m_markerComponent = markerComponent;
+        m_markerBar = new MarkerBar(this);
+        m_overviewBar = new OverviewBar(this);
 
         markerComponent.addViewChangeListerner(this);
         
@@ -47,7 +47,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
         c.weightx = 0;
         c.weighty = 1;
         c.fill = GridBagConstraints.BOTH;
-        add(markerBar, c);
+        add(m_markerBar, c);
 
         c.gridx++;
         c.weightx = 1;
@@ -56,14 +56,14 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
 
         c.gridx++;
         c.weightx = 0;
-        add(overviewBar, c);
+        add(m_overviewBar, c);
 
 
         sp.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
 
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
-                markerBar.repaint();
+                m_markerBar.repaint();
             }
         });
         
@@ -77,34 +77,34 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     }
     
     public void addRenderer(Class c, MarkerRendererInterface renderer) {
-        renderers.put(c, renderer);
+        m_renderers.put(c, renderer);
     }
 
     public MarkerRendererInterface getRenderer(AbstractMarker marker) {
-        MarkerRendererInterface renderer = renderers.get(marker.getClass());
+        MarkerRendererInterface renderer = m_renderers.get(marker.getClass());
         if (renderer == null) {
-            if (defaultRenderer == null) {
-                defaultRenderer = new DefaultMarkerRenderer(Color.red);
+            if (m_defaultRenderer == null) {
+                m_defaultRenderer = new DefaultMarkerRenderer(Color.red);
             }
-            renderer = defaultRenderer;
+            renderer = m_defaultRenderer;
         }
         return renderer;
     }
 
     public MarkerComponentInterface getMarkerComponentInterface() {
-        return markerComponent;
+        return m_markerComponent;
     }
 
     public TreeMap<Integer, ArrayList<AbstractMarker>> getMarkerArray() {
-        return markers;
+        return m_markers;
     }
 
     public void addMarker(AbstractMarker marker) {
         Integer rowKey = Integer.valueOf(marker.getRow());
-        ArrayList<AbstractMarker> markersInRow = markers.get(rowKey);
+        ArrayList<AbstractMarker> markersInRow = m_markers.get(rowKey);
         if (markersInRow == null) {
             markersInRow = new ArrayList<AbstractMarker>(1);
-            markers.put(rowKey, markersInRow);
+            m_markers.put(rowKey, markersInRow);
         }
         markersInRow.add(marker);
         
@@ -112,7 +112,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     }
     
     public AbstractMarker getMarker(int row, int type) {
-        ArrayList<AbstractMarker> markersInRow = markers.get(row);
+        ArrayList<AbstractMarker> markersInRow = m_markers.get(row);
         if (markersInRow == null) {
             return null;
         }
@@ -130,7 +130,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     
     public boolean removeMarker(int row, int type) {
         
-        ArrayList<AbstractMarker> markersInRow = markers.get(row);
+        ArrayList<AbstractMarker> markersInRow = m_markers.get(row);
         if (markersInRow == null) {
             return false;
         }
@@ -143,7 +143,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
                 repaintBars();
                 
                 if (markersInRow.isEmpty()) {
-                    markers.remove(row);
+                    m_markers.remove(row);
                 }
                 
                 return true;
@@ -158,30 +158,30 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     
     public boolean removeAllMarkers(int row) {
 
-        ArrayList<AbstractMarker> markersInRow = markers.get(row);
+        ArrayList<AbstractMarker> markersInRow = m_markers.get(row);
         if (markersInRow == null) {
             return false;
         }
 
-        markers.remove(row);
+        m_markers.remove(row);
         repaintBars();
 
         return true;
     }
     
     public boolean removeAllMarkers() {
-        if (markers.isEmpty()) {
+        if (m_markers.isEmpty()) {
             return false;
         }
         
-        markers.clear();
+        m_markers.clear();
         repaintBars();
         
         return true;
     }
     
     public boolean hasMarker(int row) {
-        ArrayList<AbstractMarker> markersInRow = markers.get(row);
+        ArrayList<AbstractMarker> markersInRow = m_markers.get(row);
         if (markersInRow == null) {
             return false;
         }
@@ -189,7 +189,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     }
     
     public boolean hasMarkers() {
-        return !markers.isEmpty();
+        return !m_markers.isEmpty();
     }
     
     public int findNearestRowWithMarker(int rowInView) {
@@ -197,10 +197,10 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
         int minDistance = Integer.MAX_VALUE;
         Integer nearestRowKey = null;
         
-        Iterator<Integer> it = markers.keySet().iterator();
+        Iterator<Integer> it = m_markers.keySet().iterator();
         while (it.hasNext()) {
             Integer rowKey = it.next();
-            int row = markerComponent.convertRowIndexToView(rowKey.intValue());
+            int row = m_markerComponent.convertRowIndexToView(rowKey.intValue());
             int distance = Math.abs(rowInView-row);
             if (distance<minDistance) {
                 minDistance = distance;
@@ -211,7 +211,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
             return rowInView;
         }
         
-        return markerComponent.convertRowIndexToView(nearestRowKey.intValue());
+        return m_markerComponent.convertRowIndexToView(nearestRowKey.intValue());
         
 
         
@@ -220,11 +220,11 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     
     
     private void repaintBars() {
-        if (overviewBar != null) {
-            overviewBar.repaint();
+        if (m_overviewBar != null) {
+            m_overviewBar.repaint();
         }
-        if (markerBar != null) {
-            markerBar.repaint();
+        if (m_markerBar != null) {
+            m_markerBar.repaint();
         }
     }
 
@@ -234,7 +234,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     }
     
      public void setMaxLineNumber(int maxLineNumber) {
-         if ((markerBar != null) && (markerBar.setMaxLineNumber(maxLineNumber)) && (markerBar.isLineNumbersDisplayed()) ) {
+         if ((m_markerBar != null) && (m_markerBar.setMaxLineNumber(maxLineNumber)) && (m_markerBar.isLineNumbersDisplayed()) ) {
             revalidate();
             repaint();
          }

@@ -97,7 +97,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
 
                 if (proteinMatch == null) {
                     lazyData.setData(null);
-                    givePriorityTo(taskId, row, col);
+                    givePriorityTo(m_taskId, row, col);
                 } else {
                     lazyData.setData(proteinMatch.getAccession());
                 }
@@ -114,7 +114,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 if (proteinMatch == null) {
                     lazyData.setData(null);
                     
-                    givePriorityTo(taskId, row, col);
+                    givePriorityTo(m_taskId, row, col);
                 } else {
                     lazyData.setData( Float.valueOf(proteinMatch.getTransientData().getPeptideSet(rsmId).getScore()) );
                 }
@@ -133,7 +133,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 if ((sameSetCount == null) || (subSetCount == null)) {
                     // data is not already fetched
                     lazyData.setData(null);
-                    givePriorityTo(taskId, row, col);
+                    givePriorityTo(m_taskId, row, col);
                 } else {
                     
 
@@ -152,7 +152,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 if (proteinMatch == null) {
                     lazyData.setData(null);
                     
-                    givePriorityTo(taskId, row, col);
+                    givePriorityTo(m_taskId, row, col);
                 } else {
                     lazyData.setData( proteinMatch.getTransientData().getPeptideSet(rsmId).getPeptideCount() );
                 }
@@ -164,7 +164,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 Integer spectralCount = proteinSet.getTransientData().getSpectralCount();
                 lazyData.setData(spectralCount);
                 if (spectralCount == null) {
-                    givePriorityTo(taskId, row, col);
+                    givePriorityTo(m_taskId, row, col);
                 }
                 return lazyData;
             }
@@ -173,7 +173,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 Integer specificSpectralCount = proteinSet.getTransientData().getSpecificSpectralCount();
                 lazyData.setData(specificSpectralCount);
                 if (specificSpectralCount == null) {
-                    givePriorityTo(taskId, row, col);
+                    givePriorityTo(m_taskId, row, col);
                 }
                 return lazyData;
             }
@@ -189,7 +189,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
     
     public void setData(Long taskId, ProteinSet[] proteinSets) {
         this.proteinSets = proteinSets;
-        this.taskId = taskId;
+        this.m_taskId = taskId;
         
         updateMinMax();
         
@@ -197,7 +197,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
     }
     
     private void updateMinMax() {
-        RelativePainterHighlighter.NumberRelativizer relativizer = table.getRelativizer();
+        RelativePainterHighlighter.NumberRelativizer relativizer = m_table.getRelativizer();
         if (relativizer == null) {
             return;
         }
@@ -257,7 +257,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
         int nb = proteinSets.length;
         int iCur = 0;
         for (int iView=0;iView<nb;iView++) {
-            int iModel = table.convertRowIndexToModel(iView);
+            int iModel = m_table.convertRowIndexToModel(iView);
             ProteinSet ps = proteinSets[iModel];
             if (  proteinSetIdMap.contains(ps.getId())  ) {
                 proteinSetIds.set(iCur++,ps.getId());

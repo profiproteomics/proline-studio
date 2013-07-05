@@ -9,13 +9,13 @@ import javax.swing.ImageIcon;
 import org.jdesktop.swingx.util.PaintUtils;
 
 /**
- *
+ * To create and combine icons from a color palette
  * @author JM235353
  */
 public class CyclicColorPalette {
     private static Color[] palette = { Color.red, Color.blue, Color.green, Color.yellow, Color.pink, Color.cyan };
 
-    private static HashMap<String, ImageIcon> imageIconMap = null;
+    private static HashMap<String, ImageIcon> m_imageIconMap = null;
     
     public static Color getColor(int colorIndex) {
         int paletteSize = palette.length*2;
@@ -30,12 +30,12 @@ public class CyclicColorPalette {
         
         String registerKey = null;
         if (registerImage) {
-            if (sb == null) {
-                sb = new StringBuilder();
+            if (m_sb == null) {
+                m_sb = new StringBuilder();
             }
-            sb.append(width).append('x').append(height).append('x').append(colorIndex);
-            registerKey = sb.toString();
-            sb.setLength(0);
+            m_sb.append(width).append('x').append(height).append('x').append(colorIndex);
+            registerKey = m_sb.toString();
+            m_sb.setLength(0);
         
             ImageIcon imageIcon = getRegisteredIcon(registerKey);
             if (imageIcon != null) {
@@ -60,7 +60,7 @@ public class CyclicColorPalette {
         
         return imageIcon;
     }
-    private static StringBuilder sb = null;
+    private static StringBuilder m_sb = null;
     
     public static ImageIcon getCombinedImageIcon(Icon leftIcon, Icon rightIcon, int hGap, String registerKey) {
         
@@ -95,18 +95,18 @@ public class CyclicColorPalette {
     
     private static ImageIcon getRegisteredIcon(String registerKey) {
 
-        if (imageIconMap != null) {
-            return imageIconMap.get(registerKey);
+        if (m_imageIconMap != null) {
+            return m_imageIconMap.get(registerKey);
 
         }
         return null;
     }
 
     private static void registerIcon(String registerKey, ImageIcon i) {
-        if (imageIconMap == null) {
-            imageIconMap = new HashMap<String, ImageIcon>();
+        if (m_imageIconMap == null) {
+            m_imageIconMap = new HashMap<>();
         }
-        imageIconMap.put(registerKey, i);
+        m_imageIconMap.put(registerKey, i);
     }
 
     

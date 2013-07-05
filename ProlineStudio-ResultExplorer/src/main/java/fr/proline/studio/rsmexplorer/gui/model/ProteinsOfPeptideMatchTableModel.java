@@ -98,7 +98,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
                 
                 lazyData.setData(null);
                     
-                givePriorityTo(taskId, row, col);
+                givePriorityTo(m_taskId, row, col);
                 
                 return lazyData;
                 

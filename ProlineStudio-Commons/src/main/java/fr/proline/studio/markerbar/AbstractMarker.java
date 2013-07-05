@@ -1,33 +1,37 @@
 package fr.proline.studio.markerbar;
 
+/**
+ * Base Class for Markers
+ * @author JM235353
+ */
 public abstract class AbstractMarker {
 
-    private boolean visibleInMarkerBar;
-    private boolean visibleInOverviewBar;
-    private int row = -1;
-    private int type = -1;
+    private boolean m_visibleInMarkerBar;
+    private boolean m_visibleInOverviewBar;
+    private int m_row = -1;
+    private int m_type = -1;
 
     public AbstractMarker(int row, boolean visibleInMarkerBar, boolean visibleInOverviewBar, int type) {
-        this.row = row;
-        this.visibleInMarkerBar = visibleInMarkerBar;
-        this.visibleInOverviewBar = visibleInOverviewBar;
-        this.type = type;
+        m_row = row;
+        m_visibleInMarkerBar = visibleInMarkerBar;
+        m_visibleInOverviewBar = visibleInOverviewBar;
+        m_type = type;
     }
 
     public boolean isVisibleInMarkerBar() {
-        return visibleInMarkerBar;
+        return m_visibleInMarkerBar;
     }
 
     public boolean isVisibleInOverviewBar() {
-        return visibleInOverviewBar;
+        return m_visibleInOverviewBar;
     }
 
     public int getRow() {
-        return row;
+        return m_row;
     }
 
     
     public int getType() {
-        return type;
+        return m_type;
     }
 }

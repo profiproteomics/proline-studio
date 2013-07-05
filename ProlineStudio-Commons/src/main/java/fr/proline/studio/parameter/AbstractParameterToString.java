@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.parameter;
 
 /**
- *
+ * Base class to convert a Parameter to a String
  * @author JM235353
  */
 public abstract class AbstractParameterToString<E> {

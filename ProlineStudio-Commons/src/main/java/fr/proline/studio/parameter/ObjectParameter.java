@@ -38,7 +38,7 @@ public class ObjectParameter<E> extends AbstractParameter {
         }
         this.defaultIndex = defaultIndex;
         this.paramToString = paramToString;
-        this.parameterComponent = comboBox;
+        this.m_parameterComponent = comboBox;
         this.associatedObjects = associatedObjects;
         comboBox.setRenderer(new ParameterComboboxRenderer(paramToString));
 
@@ -47,29 +47,29 @@ public class ObjectParameter<E> extends AbstractParameter {
     @Override
     public JComponent getComponent(Object value) {
 
-        if (parameterComponent != null) {
-            if (graphicalType.equals(JComboBox.class)) {
+        if (m_parameterComponent != null) {
+            if (m_graphicalType.equals(JComboBox.class)) {
                 
-                JComboBox combobox = ((JComboBox) parameterComponent);
+                JComboBox combobox = ((JComboBox) m_parameterComponent);
 
                 if ((value == null) || (! selectItem(combobox, value))) {
                     combobox.setSelectedIndex(defaultIndex);
                 }
 
-                return parameterComponent;
+                return m_parameterComponent;
             }
         }
 
         
         
-        if (graphicalType.equals(JComboBox.class)) {
+        if (m_graphicalType.equals(JComboBox.class)) {
             JComboBox combobox = new JComboBox(objects);
             combobox.setRenderer(new ParameterComboboxRenderer(paramToString));
             
             if ((value == null) || (! selectItem(combobox, value))) {
                     combobox.setSelectedIndex(defaultIndex);
             }
-            parameterComponent = combobox;
+            m_parameterComponent = combobox;
             return combobox;
         }
 
@@ -94,19 +94,19 @@ public class ObjectParameter<E> extends AbstractParameter {
     
     @Override
     public void initDefault() {
-        ((JComboBox) parameterComponent).setSelectedIndex(defaultIndex);
+        ((JComboBox) m_parameterComponent).setSelectedIndex(defaultIndex);
     }
 
     @Override
     public ParameterError checkParameter() {
         
-        if (!used) {
+        if (!m_used) {
             return null;
         }
         
-        if (graphicalType.equals(JComboBox.class)) {
-            if (((JComboBox) parameterComponent).getSelectedItem() == null) {
-                return new ParameterError("Invalid Selection", parameterComponent);
+        if (m_graphicalType.equals(JComboBox.class)) {
+            if (((JComboBox) m_parameterComponent).getSelectedItem() == null) {
+                return new ParameterError("Invalid Selection", m_parameterComponent);
             }
         }
         
@@ -155,8 +155,8 @@ public class ObjectParameter<E> extends AbstractParameter {
     
     @Override
     public E getObjectValue() {
-        if (graphicalType.equals(JComboBox.class)) {
-            return (E) ((JComboBox) parameterComponent).getSelectedItem();
+        if (m_graphicalType.equals(JComboBox.class)) {
+            return (E) ((JComboBox) m_parameterComponent).getSelectedItem();
         }
         return null; // should not happen
     }
@@ -168,8 +168,8 @@ public class ObjectParameter<E> extends AbstractParameter {
             return getObjectValue();
         }
         
-        if (graphicalType.equals(JComboBox.class)) {
-            int index = ((JComboBox) parameterComponent).getSelectedIndex();
+        if (m_graphicalType.equals(JComboBox.class)) {
+            int index = ((JComboBox) m_parameterComponent).getSelectedIndex();
             if (index == -1) {
                 return null;
             }

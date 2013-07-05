@@ -24,9 +24,7 @@ package fr.proline.studio.utils;
 
 import java.awt.Component;
 import java.awt.Graphics2D;
-import java.awt.Point;
 
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.PainterHighlighter;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;

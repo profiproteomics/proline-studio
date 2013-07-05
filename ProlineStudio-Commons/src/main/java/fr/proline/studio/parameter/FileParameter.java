@@ -10,39 +10,39 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
- *
+ * Parameter of type File, displayed as a Textfield with a button to open a file browser.
  * @author jm235353
  */
 public class FileParameter extends AbstractParameter {
 
 
-    private String defaultValue;
-    private String fileFilterName;
-    private String fileFilterExtension;
+    private String m_defaultValue;
+    private String m_fileFilterName;
+    private String m_fileFilterExtension;
 
     public FileParameter(String key, String name, Class graphicalType, String defaultValue, String fileFilterName, String fileFilterExtension) {
         super(key, name, String.class, graphicalType);
-        this.defaultValue = defaultValue;
-        this.fileFilterName = fileFilterName;
-        this.fileFilterExtension = fileFilterExtension;
+        m_defaultValue = defaultValue;
+        m_fileFilterName = fileFilterName;
+        m_fileFilterExtension = fileFilterExtension;
     }
 
     @Override
     public JComponent getComponent(Object value) {
 
-        if (defaultValue == null) {
-            defaultValue = "";
+        if (m_defaultValue == null) {
+            m_defaultValue = "";
         }
 
 
-        if (graphicalType.equals(JTextField.class)) {
+        if (m_graphicalType.equals(JTextField.class)) {
 
             // --- Slider ---
             JPanel panel = new JPanel(new FlowLayout());
             
             
             final JTextField textField = new JTextField(30);
-            textField.setText(defaultValue);
+            textField.setText(m_defaultValue);
 
             final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
             addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
@@ -57,8 +57,8 @@ public class FileParameter extends AbstractParameter {
                 }*/
                 fchooser.setMultiSelectionEnabled(false);
                 
-                if (fileFilterName != null) {
-                    FileNameExtensionFilter filter = new FileNameExtensionFilter(fileFilterName, fileFilterExtension);
+                if (m_fileFilterName != null) {
+                    FileNameExtensionFilter filter = new FileNameExtensionFilter(m_fileFilterName, m_fileFilterExtension);
                     fchooser.addChoosableFileFilter(filter);
                 }
                 //fchooser.setFileFilter(defaultFilter);
@@ -75,7 +75,7 @@ public class FileParameter extends AbstractParameter {
             panel.add(textField);
             panel.add(addFileButton);
 
-            parameterComponent = textField;
+            m_parameterComponent = textField;
 
             return panel;
         }
@@ -85,13 +85,13 @@ public class FileParameter extends AbstractParameter {
     
     @Override
     public void initDefault() {
-        if (defaultValue == null) {
+        if (m_defaultValue == null) {
             return; // should not happen
         }
 
-        if (graphicalType.equals(JTextField.class)) {
-            JTextField textField = (JTextField) parameterComponent;
-            textField.setText(defaultValue.toString());
+        if (m_graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) m_parameterComponent;
+            textField.setText(m_defaultValue.toString());
         }
     }
     
@@ -100,16 +100,16 @@ public class FileParameter extends AbstractParameter {
         
         Integer value = null;
         
-        if (graphicalType.equals(JTextField.class)) {
-            JTextField textField = (JTextField) parameterComponent;
+        if (m_graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) m_parameterComponent;
             String path = textField.getText();
             File f = new File(path);
             if (! f.exists()) {
-                return new ParameterError(path+" file does not exist", parameterComponent);
+                return new ParameterError(path+" file does not exist", m_parameterComponent);
             } else if (f.isDirectory() ) {
-                return new ParameterError(path+" is a directory", parameterComponent);
+                return new ParameterError(path+" is a directory", m_parameterComponent);
             } else if (! f.canRead() ) {
-                return new ParameterError(path+" is not readable", parameterComponent);
+                return new ParameterError(path+" is not readable", m_parameterComponent);
             }
 
         }
@@ -126,16 +126,16 @@ public class FileParameter extends AbstractParameter {
 
     @Override
     public Object getObjectValue() {
-        if (graphicalType.equals(JTextField.class)) {
-           return ((JTextField) parameterComponent).getText();
+        if (m_graphicalType.equals(JTextField.class)) {
+           return ((JTextField) m_parameterComponent).getText();
         }
         return ""; // should not happen
     }
     
     @Override
     public void clean() {
-        if (graphicalType.equals(JTextField.class)) {
-            JTextField textField = (JTextField) parameterComponent;
+        if (m_graphicalType.equals(JTextField.class)) {
+            JTextField textField = (JTextField) m_parameterComponent;
             textField.setText("");
         }
     }

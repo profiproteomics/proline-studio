@@ -399,7 +399,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         
         public void dataUpdated(SubTask subTask, boolean finished) {
 
-            LastAction keepLastAction = lastAction;
+            LastAction keepLastAction = m_lastAction;
             try {
 
 
@@ -433,7 +433,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
             } finally {
 
-                lastAction = keepLastAction;
+                m_lastAction = keepLastAction;
 
             }
             

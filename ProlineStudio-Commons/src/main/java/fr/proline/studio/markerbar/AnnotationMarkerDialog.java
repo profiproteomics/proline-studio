@@ -16,18 +16,18 @@ import javax.swing.JTextField;
  */
 public class AnnotationMarkerDialog extends DefaultDialog {
  
-    private static AnnotationMarkerDialog singletonDialog = null;
+    private static AnnotationMarkerDialog m_singletonDialog = null;
     
-    private JTextField descriptionTextfield = null;
+    private JTextField m_descriptionTextfield = null;
     
     public static AnnotationMarkerDialog getDialog(Window parent) {
-        if (singletonDialog == null) {
-            singletonDialog = new AnnotationMarkerDialog(parent);
+        if (m_singletonDialog == null) {
+            m_singletonDialog = new AnnotationMarkerDialog(parent);
         }
 
-        singletonDialog.reinit(); 
+        m_singletonDialog.reinit(); 
         
-        return singletonDialog;
+        return m_singletonDialog;
     }
 
 
@@ -78,7 +78,7 @@ public class AnnotationMarkerDialog extends DefaultDialog {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
         JLabel renameLabel = new JLabel("Description :");
-        descriptionTextfield = new JTextField(30);
+        m_descriptionTextfield = new JTextField(30);
 
         c.gridx = 0;
         c.gridy = 0;
@@ -87,23 +87,23 @@ public class AnnotationMarkerDialog extends DefaultDialog {
 
         c.gridx++;
         c.weightx = 1.0;
-        renamePanel.add(descriptionTextfield, c);
+        renamePanel.add(m_descriptionTextfield, c);
 
         return renamePanel;
     }
     
     private void reinit() {
-        descriptionTextfield.setText("");
+        m_descriptionTextfield.setText("");
     }
     
     @Override
     protected boolean okCalled() {
         
-        String name = descriptionTextfield.getText();
+        String name = m_descriptionTextfield.getText();
        
         if (name.isEmpty()) {
             setStatus(true, "You must fill the description.");
-            highlight(descriptionTextfield);
+            highlight(m_descriptionTextfield);
             return false;
         }
 
@@ -112,11 +112,11 @@ public class AnnotationMarkerDialog extends DefaultDialog {
     
     
     public void setDescriptionField(String name) {
-        descriptionTextfield.setText(name);
+        m_descriptionTextfield.setText(name);
     }
     
     public String getDescriptionField() {
-        return descriptionTextfield.getText();
+        return m_descriptionTextfield.getText();
     }
 
 }

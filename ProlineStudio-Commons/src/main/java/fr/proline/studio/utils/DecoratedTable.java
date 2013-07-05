@@ -16,7 +16,7 @@ import org.jdesktop.swingx.util.PaintUtils;
  */
 public class DecoratedTable extends JXTable {
 
-    RelativePainterHighlighter.NumberRelativizer relativizer = null;
+    RelativePainterHighlighter.NumberRelativizer m_relativizer = null;
     
     public DecoratedTable() {
 
@@ -34,14 +34,14 @@ public class DecoratedTable extends JXTable {
         Color base = PaintUtils.setSaturation(Color.GREEN, .7f);
         MattePainter matte = new MattePainter(PaintUtils.setAlpha(base, 125));
         RelativePainterHighlighter highlighter = new RelativePainterHighlighter(matte);
-        relativizer = new RelativePainterHighlighter.NumberRelativizer(column, 0, 100);
-        highlighter.setRelativizer(relativizer);
+        m_relativizer = new RelativePainterHighlighter.NumberRelativizer(column, 0, 100);
+        highlighter.setRelativizer(m_relativizer);
         highlighter.setHighlightPredicate(new HighlightPredicate.ColumnHighlightPredicate(column));
         addHighlighter(highlighter);
 
     }
     
     public RelativePainterHighlighter.NumberRelativizer getRelativizer() {
-        return relativizer;
+        return m_relativizer;
     }
 }

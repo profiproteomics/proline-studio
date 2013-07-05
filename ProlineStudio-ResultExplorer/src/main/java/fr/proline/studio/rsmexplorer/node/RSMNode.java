@@ -26,20 +26,20 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
         DATA_ALL_IMPORTED,
         HOUR_GLASS
     }
-    private static Action[] actionInstance = null;
-    protected NodeTypes type;
+    private static Action[] m_actionInstance = null;
+    protected NodeTypes m_type;
 
-    protected boolean isChanging = false;
+    protected boolean m_isChanging = false;
 
-    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
     public RSMNode(/*Children children,*/ NodeTypes type, AbstractData data) {
         super(data);
-        this.type = type;
+        m_type = type;
     }
 
     public NodeTypes getType() {
-        return type;
+        return m_type;
     }
     
     public AbstractData getData() {
@@ -49,19 +49,19 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
     public abstract ImageIcon getIcon();
     
     public ImageIcon getIcon(IconManager.IconType iconType) {
-        if (isChanging) {
+        if (m_isChanging) {
             return IconManager.getIconWithHourGlass(iconType);
         }
         return IconManager.getIcon(iconType);
     }
     
     public boolean searchChildNodeOfAType(NodeTypes type) {
-        if (this.type == type) {
+        if (m_type == type) {
             return true;
         }
 
         /*
-         * Node[] nodes = this.getChildren().getNodes();
+         * Node[] nodes = getChildren().getNodes();
          *
          * for (Node nodeCur : nodes) { if (
          * ((RSMNode)nodeCur).searchChildNodeOfAType(type) ) { return true; }
@@ -91,11 +91,11 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
     }
     
     public void setIsChanging(boolean isChanging) {
-        this.isChanging = isChanging;
+        m_isChanging = isChanging;
     }
     
     public boolean isChanging() {
-        return isChanging;
+        return m_isChanging;
     }
     
     @Override

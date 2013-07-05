@@ -12,7 +12,7 @@ import org.openide.nodes.Sheet;
 
 
 /**
- *
+ * Node for All Imported Search Results (rset)
  * @author JM235353
  */
 public class RSMAllImportedNode extends RSMNode {

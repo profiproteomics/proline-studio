@@ -24,15 +24,15 @@ import javax.swing.tree.*;
  */
 public class RSMTree extends JTree implements TreeWillExpandListener, MouseListener {
 
-    private RSMTreeModel model;
-    private boolean isMainTree;
-    private static RSMTree instance = null;
+    private RSMTreeModel m_model;
+    private boolean m_isMainTree;
+    private static RSMTree m_instance = null;
 
     public static RSMTree getTree() {
-        if (instance == null) {
-            instance = new RSMTree();
+        if (m_instance == null) {
+            m_instance = new RSMTree();
         }
-        return instance;
+        return m_instance;
     }
 
     private RSMTree() {
@@ -45,7 +45,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         setDragEnabled(true);
         setDropMode(DropMode.ON_OR_INSERT);
         
-        isMainTree = true;
+        m_isMainTree = true;
 
         // Model of the tree
         RSMNode top = RSMChildFactory.createNode(new ParentData());
@@ -56,7 +56,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     private RSMTree(RSMNode top) {
 
-        isMainTree = false;
+        m_isMainTree = false;
 
         initTree(top);
 
@@ -65,8 +65,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     }
 
     private void initTree(RSMNode top) {
-        model = new RSMTreeModel(top);
-        setModel(model);
+        m_model = new RSMTreeModel(top);
+        setModel(m_model);
 
         // rendering of the tree
         putClientProperty("JTree.lineStyle", "Horizontal");
@@ -99,7 +99,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         long rsetId = rset.getId();
 
-        RSMDataSetNode rsetNode = findResultSetNode((RSMNode) model.getRoot(), rsetId, projectId);
+        RSMDataSetNode rsetNode = findResultSetNode((RSMNode) m_model.getRoot(), rsetId, projectId);
 
         if (rsetNode == null) {
             return null;
@@ -170,7 +170,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             return;
         }
 
-        RSMNode rootNode = (RSMNode) model.getRoot();
+        RSMNode rootNode = (RSMNode) m_model.getRoot();
         ArrayList<TreePath> selectedPathArray = new ArrayList<>(rsmArray.size());
 
         ArrayList<RSMNode> nodePath = new ArrayList<>();
@@ -238,8 +238,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     public void startLoading() {
         
         // add hourglass node
-        RSMNode root = (RSMNode) model.getRoot(); 
-        model.insertNodeInto(new RSMHourGlassNode(null), root, 0);
+        RSMNode root = (RSMNode) m_model.getRoot(); 
+        m_model.insertNodeInto(new RSMHourGlassNode(null), root, 0);
         
         
         
@@ -271,7 +271,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         if (nodeToLoad.getType() == RSMNode.NodeTypes.TREE_PARENT) {
             nodeToLoad.setIsChanging(true);
-            model.nodeChanged(nodeToLoad);
+            m_model.nodeChanged(nodeToLoad);
         }
         
         // Callback used only for the synchronization with the AccessDatabaseThread
@@ -292,7 +292,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                         
                         if (nodeToLoad.getType() == RSMNode.NodeTypes.TREE_PARENT) {
                             nodeToLoad.setIsChanging(false);
-                            model.nodeChanged(nodeToLoad);
+                            m_model.nodeChanged(nodeToLoad);
                         }
                         
                         dataLoaded(parentData, childrenList);
@@ -452,8 +452,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         for (int i=0;i<nbKeptNodes;i++) {
             RSMNode nodeCur = keptNodes.get(i);
             allParentNodeModified.add((RSMNode) nodeCur.getParent());
-            model.removeNodeFromParent(nodeCur);
-            model.insertNodeInto(nodeCur, trash, trash.getChildCount());
+            m_model.removeNodeFromParent(nodeCur);
+            m_model.insertNodeInto(nodeCur, trash, trash.getChildCount());
         }
 
         
@@ -517,7 +517,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             indexToInsert++;
         }
         
-        model.nodeStructureChanged(parentNode);
+        m_model.nodeStructureChanged(parentNode);
 
 
     }
@@ -833,7 +833,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (isMainTree && e.isPopupTrigger()) {
+        if (m_isMainTree && e.isPopupTrigger()) {
             triggerPopup(e);
         }
     }

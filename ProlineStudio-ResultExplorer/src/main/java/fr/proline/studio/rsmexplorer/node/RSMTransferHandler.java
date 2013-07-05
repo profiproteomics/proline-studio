@@ -27,12 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Class used for Drag and Drop of nodes
  * @author JM235353
  */
 public class RSMTransferHandler extends TransferHandler {
     
-    private Logger logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
     @Override
     public int getSourceActions(JComponent c) {
@@ -196,7 +196,7 @@ public class RSMTransferHandler extends TransferHandler {
                 }
             } catch (UnsupportedFlavorException | IOException e) {
                 // should never happen
-                logger.error(getClass().getSimpleName() + " DnD error ", e);
+                m_logger.error(getClass().getSimpleName() + " DnD error ", e);
                 return false;
             }
 
@@ -225,7 +225,7 @@ public class RSMTransferHandler extends TransferHandler {
 
             } catch (UnsupportedFlavorException | IOException e) {
                 // should never happen
-                logger.error(getClass().getSimpleName() + " DnD error ", e);
+                m_logger.error(getClass().getSimpleName() + " DnD error ", e);
                 return false;
             }
 

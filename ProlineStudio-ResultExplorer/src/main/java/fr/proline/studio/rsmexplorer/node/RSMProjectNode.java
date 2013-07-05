@@ -14,8 +14,6 @@ import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.nodes.Node.Property;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Node for the opened Projects
@@ -105,7 +103,7 @@ public class RSMProjectNode extends RSMNode {
             sheet.put(propGroup);
 
         } catch (NoSuchMethodException e) {
-            logger.error(getClass().getSimpleName() + " properties error ", e);
+            m_logger.error(getClass().getSimpleName() + " properties error ", e);
         }
         
         return sheet;

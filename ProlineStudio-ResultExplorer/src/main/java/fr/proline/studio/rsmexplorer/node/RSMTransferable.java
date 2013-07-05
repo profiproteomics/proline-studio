@@ -8,10 +8,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import javax.swing.tree.TreePath;
 
 /**
- *
+ * Wrapping of Data which is drag and dropped
  * @author JM235353
  */
 public class RSMTransferable implements Transferable, Serializable {

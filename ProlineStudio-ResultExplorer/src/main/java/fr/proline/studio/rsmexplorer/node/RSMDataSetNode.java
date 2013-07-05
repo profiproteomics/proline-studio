@@ -9,22 +9,11 @@ import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import fr.proline.studio.rsmexplorer.actions.PropertiesAction;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.SerializedPropertiesUtil;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
-import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
-import org.openide.nodes.Node.Property;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 /**
  * Node for Dataset

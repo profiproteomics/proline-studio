@@ -6,24 +6,24 @@ import java.awt.Dialog;
 import java.awt.Window;
 
 /**
- *
+ * Dialog to add an aggregate
  * @author JM235353
  */
 public class AddAggregateDialog extends DefaultDialog {
     
     
-    private static AddAggregateDialog singletonDialog = null;
+    private static AddAggregateDialog m_singletonDialog = null;
    
-    private AddAggregatePanel aggregatePanel = null;
+    private AddAggregatePanel m_aggregatePanel = null;
    
     public static AddAggregateDialog getDialog(Window parent) {
-        if (singletonDialog == null) {
-            singletonDialog = new AddAggregateDialog(parent);
+        if (m_singletonDialog == null) {
+            m_singletonDialog = new AddAggregateDialog(parent);
         }
 
-        singletonDialog.aggregatePanel.reinitialize();
+        m_singletonDialog.m_aggregatePanel.reinitialize();
         
-        return singletonDialog;
+        return m_singletonDialog;
     }
     
 
@@ -35,19 +35,19 @@ public class AddAggregateDialog extends DefaultDialog {
         setTitle("Add Aggregate");
 
 
-        aggregatePanel = new AddAggregatePanel();
+        m_aggregatePanel = new AddAggregatePanel();
 
-        setInternalComponent(aggregatePanel);
+        setInternalComponent(m_aggregatePanel);
     }
     
     @Override
     protected boolean okCalled() {
         
-        String name = aggregatePanel.getAggregateName();
+        String name = m_aggregatePanel.getAggregateName();
        
         if (name.isEmpty()) {
             setStatus(true, "You must fill the aggregate name.");
-            highlight(aggregatePanel.getNameTextfield());
+            highlight(m_aggregatePanel.getNameTextfield());
             return false;
         }
 
@@ -61,21 +61,21 @@ public class AddAggregateDialog extends DefaultDialog {
        
     @Override
     protected boolean defaultCalled() {
-        aggregatePanel.initDefaults();
+        m_aggregatePanel.initDefaults();
 
         return false;
     }
     
     public String getAggregateName() {
-        return aggregatePanel.getAggregateName();
+        return m_aggregatePanel.getAggregateName();
     }
     
     public int getNbAggregates() {
-       return aggregatePanel.getNbAggregates();
+       return m_aggregatePanel.getNbAggregates();
     }
     
     public Aggregation.ChildNature getAggregateType() {
-        return aggregatePanel.getAggregateType();
+        return m_aggregatePanel.getAggregateType();
     }
     
 }

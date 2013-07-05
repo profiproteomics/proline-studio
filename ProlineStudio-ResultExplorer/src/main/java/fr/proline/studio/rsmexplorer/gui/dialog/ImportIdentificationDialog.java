@@ -38,7 +38,7 @@ import org.openide.util.NbPreferences;
  */
 public class ImportIdentificationDialog extends DefaultDialog {
 
-    private static ImportIdentificationDialog singletonDialog = null;
+    private static ImportIdentificationDialog m_singletonDialog = null;
     
     private final static String[] PARSER_NAMES = {"Mascot", "Omssa"};
     private final static String[] FILE_EXTENSIONS = {"dat", "omx"};
@@ -51,40 +51,40 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private static final int CONCATENATED_DECOY_INDEX = 3;
     
     
-    private JList<File> fileList;
-    private JScrollPane fileListScrollPane;
+    private JList<File> m_fileList;
+    private JScrollPane m_fileListScrollPane;
 
-    private JButton addFileButton;
-    private JButton removeFileButton;
+    private JButton m_addFileButton;
+    private JButton m_removeFileButton;
     
 
-    private JComboBox parserComboBox;
-    private int previousParserIndex = -1;
-    private ParameterList sourceParameterList;
-    private StringParameter decoyRegexParameter;
+    private JComboBox m_parserComboBox;
+    private int m_previousParserIndex = -1;
+    private ParameterList m_sourceParameterList;
+    private StringParameter m_decoyRegexParameter;
 
     
-    private JComboBox instrumentsComboBox = null;
-    private JComboBox peaklistSoftwaresComboBox = null;
-    private JComboBox decoyComboBox = null;
-    private JLabel decoyAccessionRegexLabel = null;
-    private JTextField decoyRegexTextField = null;
-    private JButton regexButton;
+    private JComboBox m_instrumentsComboBox = null;
+    private JComboBox m_peaklistSoftwaresComboBox = null;
+    private JComboBox m_decoyComboBox = null;
+    private JLabel m_decoyAccessionRegexLabel = null;
+    private JTextField m_decoyRegexTextField = null;
+    private JButton m_regexButton;
     
-    private JPanel parserParametersPanel = null;
+    private JPanel m_parserParametersPanel = null;
 
 
-    private File defaultDirectory = null;
+    private File m_defaultDirectory = null;
     
 
     public static ImportIdentificationDialog getDialog(Window parent) {
-        if (singletonDialog == null) {
-            singletonDialog = new ImportIdentificationDialog(parent);
+        if (m_singletonDialog == null) {
+            m_singletonDialog = new ImportIdentificationDialog(parent);
         }
 
-        singletonDialog.reinitialize();
+        m_singletonDialog.reinitialize();
 
-        return singletonDialog;
+        return m_singletonDialog;
     }
 
     private ImportIdentificationDialog(Window parent) {
@@ -140,7 +140,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         JPanel parserPanel = createParserPanel();
         
         // create parameter panel
-        parserParametersPanel = createParametersPanel();
+        m_parserParametersPanel = createParametersPanel();
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -153,11 +153,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
         allParametersPanel.add(parserPanel, c);
         
         c.gridy++;
-        allParametersPanel.add(parserParametersPanel, c);
+        allParametersPanel.add(m_parserParametersPanel, c);
 
         
         // init the first parser parameters panel selected
-        parserComboBox.setSelectedIndex(0);
+        m_parserComboBox.setSelectedIndex(0);
         
         return allParametersPanel;
     }
@@ -168,8 +168,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
         JPanel fileSelectionPanel = new JPanel(new GridBagLayout());
         fileSelectionPanel.setBorder(BorderFactory.createTitledBorder(" Files Selection "));
 
-        fileList = new JList<>(new DefaultListModel());
-        fileListScrollPane = new JScrollPane(fileList) {
+        m_fileList = new JList<>(new DefaultListModel());
+        m_fileListScrollPane = new JScrollPane(m_fileList) {
 
             private Dimension preferredSize = new Dimension(360, 200);
 
@@ -179,10 +179,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }
         };
 
-        addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-        addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        removeFileButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
-        removeFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
+        m_addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_removeFileButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
+        m_removeFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
         // Placement of Objects for File Selection Panel
         GridBagConstraints c = new GridBagConstraints();
@@ -195,17 +195,17 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.gridheight = 3;
         c.weightx = 1.0;
         c.weighty = 1.0;
-        fileSelectionPanel.add(fileListScrollPane, c);
+        fileSelectionPanel.add(m_fileListScrollPane, c);
 
 
         c.gridx++;
         c.gridheight = 1;
         c.weightx = 0;
         c.weighty = 0;
-        fileSelectionPanel.add(addFileButton, c);
+        fileSelectionPanel.add(m_addFileButton, c);
 
         c.gridy++;
-        fileSelectionPanel.add(removeFileButton, c);
+        fileSelectionPanel.add(m_removeFileButton, c);
 
         c.gridy++;
         fileSelectionPanel.add(Box.createVerticalStrut(30), c);
@@ -213,24 +213,24 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
         // Actions on objects
 
-        fileList.addListSelectionListener(new ListSelectionListener() {
+        m_fileList.addListSelectionListener(new ListSelectionListener() {
 
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                boolean sometingSelected = (fileList.getSelectedIndex() != -1);
-                removeFileButton.setEnabled(sometingSelected);
+                boolean sometingSelected = (m_fileList.getSelectedIndex() != -1);
+                m_removeFileButton.setEnabled(sometingSelected);
             }
         });
 
 
-        addFileButton.addActionListener(new ActionListener() {
+        m_addFileButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 
                 JFileChooser fchooser = new JFileChooser();
-                if ((defaultDirectory!=null) && (defaultDirectory.isDirectory())) {
-                    fchooser.setCurrentDirectory(defaultDirectory);
+                if ((m_defaultDirectory!=null) && (m_defaultDirectory.isDirectory())) {
+                    fchooser.setCurrentDirectory(m_defaultDirectory);
                 }
                 fchooser.setMultiSelectionEnabled(true);
                 
@@ -245,15 +245,15 @@ public class ImportIdentificationDialog extends DefaultDialog {
                      */
                 }
                 //fchooser.setFileFilter(defaultFilter);
-                int result = fchooser.showOpenDialog(singletonDialog);
+                int result = fchooser.showOpenDialog(m_singletonDialog);
                 if (result == JFileChooser.APPROVE_OPTION) {
 
-                    boolean hasFilesPreviously = (fileList.getModel().getSize() != 0);
+                    boolean hasFilesPreviously = (m_fileList.getModel().getSize() != 0);
 
                     File[] files = fchooser.getSelectedFiles();
                     int nbFiles = files.length;
                     for (int i = 0; i < nbFiles; i++) {
-                        ((DefaultListModel) fileList.getModel()).addElement(files[i]);
+                        ((DefaultListModel) m_fileList.getModel()).addElement(files[i]);
                     }
 
                     // select Parser according to the extension of the first file
@@ -272,7 +272,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
                                 }
                             }
                             if (parserIndex >= 0) {
-                                parserComboBox.setSelectedIndex(parserIndex);
+                                m_parserComboBox.setSelectedIndex(parserIndex);
                             }
                         }
                     }
@@ -281,23 +281,23 @@ public class ImportIdentificationDialog extends DefaultDialog {
                         File f = files[0];
                         f = f.getParentFile();
                         if ((f!=null) && (f.isDirectory())) {
-                            defaultDirectory = f;
+                            m_defaultDirectory = f;
                         }
                     }
                 }
             }
         });
 
-        removeFileButton.addActionListener(new ActionListener() {
+        m_removeFileButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<File> selectedValues = fileList.getSelectedValuesList();
+                List<File> selectedValues = m_fileList.getSelectedValuesList();
                 Iterator<File> it = selectedValues.iterator();
                 while (it.hasNext()) {
-                    ((DefaultListModel) fileList.getModel()).removeElement(it.next());
+                    ((DefaultListModel) m_fileList.getModel()).removeElement(it.next());
                 }
-                removeFileButton.setEnabled(false);
+                m_removeFileButton.setEnabled(false);
             }
         });
 
@@ -311,7 +311,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
         JLabel parserLabel = new JLabel("Software Engine :");
         parserLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        parserComboBox = new JComboBox(createParameters());
+        m_parserComboBox = new JComboBox(createParameters());
         
 
         
@@ -328,10 +328,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.gridx++;
         c.gridwidth = 2;
         c.weightx = 1;
-        parserPanel.add(parserComboBox, c);
+        parserPanel.add(m_parserComboBox, c);
 
-        sourceParameterList = createSourceParameters();
-        sourceParameterList.updateIsUsed();
+        m_sourceParameterList = createSourceParameters();
+        m_sourceParameterList.updateIsUsed();
         
         c.gridx = 0;
         c.gridwidth = 1;
@@ -344,7 +344,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.gridx++;
         c.gridwidth = 2;
         c.weightx = 1;
-        parserPanel.add(instrumentsComboBox, c);
+        parserPanel.add(m_instrumentsComboBox, c);
         
         
         c.gridx = 0;
@@ -358,7 +358,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.gridx++;
         c.gridwidth = 2;
         c.weightx = 1;
-        parserPanel.add(peaklistSoftwaresComboBox, c);
+        parserPanel.add(m_peaklistSoftwaresComboBox, c);
         
         
         c.gridx = 0;
@@ -372,40 +372,40 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.gridx++;
         c.gridwidth = 2;
         c.weightx = 1;
-        parserPanel.add(decoyComboBox, c);
+        parserPanel.add(m_decoyComboBox, c);
         
         
         c.gridx = 0;
         c.gridwidth = 1;
         c.weightx = 0;
         c.gridy++;
-        decoyAccessionRegexLabel = new JLabel("Decoy Accesion Regex :");
-        decoyAccessionRegexLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        parserPanel.add(decoyAccessionRegexLabel, c);
+        m_decoyAccessionRegexLabel = new JLabel("Decoy Accesion Regex :");
+        m_decoyAccessionRegexLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        parserPanel.add(m_decoyAccessionRegexLabel, c);
         
         c.gridx++;
         c.weightx = 1;
-        parserPanel.add(decoyRegexTextField, c);
+        parserPanel.add(m_decoyRegexTextField, c);
         
         c.gridx++;
         c.weightx = 0;
-        regexButton = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));
-        regexButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        parserPanel.add(regexButton, c);
+        m_regexButton = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));
+        m_regexButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        parserPanel.add(m_regexButton, c);
         
         
 
             
-        parserComboBox.addActionListener(new ActionListener() {
+        m_parserComboBox.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                int parserIndex = parserComboBox.getSelectedIndex();
-                if (parserIndex == previousParserIndex) {
+                int parserIndex = m_parserComboBox.getSelectedIndex();
+                if (parserIndex == m_previousParserIndex) {
                     return;
                 }
 
-                previousParserIndex = parserIndex;
+                m_previousParserIndex = parserIndex;
 
                 initParameters();
 
@@ -415,7 +415,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         });
         
         
-        decoyComboBox.addActionListener(new ActionListener() {
+        m_decoyComboBox.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -423,14 +423,14 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }
         });
         
-        regexButton.addActionListener(new ActionListener() {
+        m_regexButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 
                 ArrayList<String> regexArrayList = readRegexArray(null);
-                SelectRegexDialog regexDialog = SelectRegexDialog.getDialog(singletonDialog, regexArrayList);
-                regexDialog.setLocationRelativeTo(regexButton);
+                SelectRegexDialog regexDialog = SelectRegexDialog.getDialog(m_singletonDialog, regexArrayList);
+                regexDialog.setLocationRelativeTo(m_regexButton);
                 regexDialog.setVisible(true);
                 if (regexDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                     
@@ -438,7 +438,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
                     
                     String selectedRegex = regexDialog.getSelectedRegex();
                     if (selectedRegex != null) {
-                        decoyRegexTextField.setText(selectedRegex);
+                        m_decoyRegexTextField.setText(selectedRegex);
                     }
                     regexArrayList = regexDialog.getRegexArrayList();
                     writeRegexArray(regexArrayList);
@@ -505,11 +505,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
     
     private void updateDecoyRegexEnabled() {
-        boolean enabled = (decoyComboBox.getSelectedIndex() == CONCATENATED_DECOY_INDEX);  
-        decoyRegexParameter.setUsed(enabled); // done anyway to be sure there is not a problem at initialization
-        decoyAccessionRegexLabel.setEnabled(enabled);
-        decoyRegexTextField.setEnabled(enabled);
-        regexButton.setEnabled(enabled);
+        boolean enabled = (m_decoyComboBox.getSelectedIndex() == CONCATENATED_DECOY_INDEX);  
+        m_decoyRegexParameter.setUsed(enabled); // done anyway to be sure there is not a problem at initialization
+        m_decoyAccessionRegexLabel.setEnabled(enabled);
+        m_decoyRegexTextField.setEnabled(enabled);
+        m_regexButton.setEnabled(enabled);
 
     }
 
@@ -526,7 +526,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
 
         // remove all parameters
-        parserParametersPanel.removeAll();
+        m_parserParametersPanel.removeAll();
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -538,8 +538,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.weightx = 1;
         c.weighty = 1;
         
-        ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
-        parserParametersPanel.add(parameterList.getPanel(), c);
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+        m_parserParametersPanel.add(parameterList.getPanel(), c);
 
       
     }
@@ -549,11 +549,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private void reinitialize() {
         
         // reinit of files selection
-        ((DefaultListModel) fileList.getModel()).removeAllElements();
-        removeFileButton.setEnabled(false);
+        ((DefaultListModel) m_fileList.getModel()).removeAllElements();
+        m_removeFileButton.setEnabled(false);
         
         // reinit of some parameters
-        ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
         parameterList.clean();
         
         updateDecoyRegexEnabled();
@@ -563,7 +563,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     protected boolean okCalled() {
 
 
-        ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
         
         // check global parameters
         if (!checkParameters()) {
@@ -571,7 +571,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         }
         
         // check source parameters
-        ParameterError error = sourceParameterList.checkParameters();
+        ParameterError error = m_sourceParameterList.checkParameters();
         
         
         // check specific parameters
@@ -597,7 +597,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
             // on windows, try to predict the path for identifications
             OSType osType = OSInfo.getOSType();
             if ((osType == OSType.WINDOWS_AMD64) || (osType == OSType.WINDOWS_X86)) {
-                File f = fileList.getModel().getElementAt(0);
+                File f = m_fileList.getModel().getElementAt(0);
                 try {
                     String path = f.getCanonicalPath();
                     int indexOfSeparator = path.indexOf(File.separatorChar);
@@ -628,17 +628,17 @@ public class ImportIdentificationDialog extends DefaultDialog {
         preferences.put("IdentificationParser", parserSelected);
         
         // save file path
-        if (defaultDirectory != null) {
-          preferences.put("UserIdentificationFilePath", defaultDirectory.getAbsolutePath());  
+        if (m_defaultDirectory != null) {
+          preferences.put("UserIdentificationFilePath", m_defaultDirectory.getAbsolutePath());  
         }
 
         
         // Save Other Parameters    
-        sourceParameterList.saveParameters();
+        m_sourceParameterList.saveParameters();
         parameterList.saveParameters();
         
-        if (decoyRegexTextField.isEnabled()) {
-            ArrayList<String> regexArrayList = readRegexArray(decoyRegexTextField.getText());
+        if (m_decoyRegexTextField.isEnabled()) {
+            ArrayList<String> regexArrayList = readRegexArray(m_decoyRegexTextField.getText());
             writeRegexArray(regexArrayList);
         }
 
@@ -653,7 +653,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
     @Override
     protected boolean defaultCalled() {
-        ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
         parameterList.initDefaults();
 
         return false;
@@ -662,10 +662,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private boolean checkParameters() {
         
         // check files selected
-        int nbFiles = fileList.getModel().getSize();
+        int nbFiles = m_fileList.getModel().getSize();
         if (nbFiles == 0) {
             setStatus(true, "You must select a file to import.");
-            highlight(fileList);
+            highlight(m_fileList);
             return false;
         }
         
@@ -696,7 +696,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
 
         // select the parser
-        parserComboBox.setSelectedIndex(parserIndex);
+        m_parserComboBox.setSelectedIndex(parserIndex);
         
         
         // Prefered User File Path
@@ -704,7 +704,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         if (filePath != null) {
             File f = new File(filePath);
             if (f.isDirectory()) {
-                defaultDirectory = f;
+                m_defaultDirectory = f;
             }
         } else {
             // User Server File Path for Prefered User File Path
@@ -712,7 +712,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
             if (serverFilePath != null) {
                 File f = new File(serverFilePath);
                 if (f.isDirectory()) {
-                    defaultDirectory = f;
+                    m_defaultDirectory = f;
                 }
             }
         }
@@ -722,7 +722,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
     public File[] getFilePaths() {
         
-        DefaultListModel model = ((DefaultListModel) fileList.getModel());
+        DefaultListModel model = ((DefaultListModel) m_fileList.getModel());
         int nbFiles = model.getSize();
         File[] filePaths = new File[nbFiles];
         for (int i=0;i<nbFiles;i++) {
@@ -733,28 +733,28 @@ public class ImportIdentificationDialog extends DefaultDialog {
     }
     
     public HashMap<String, String> getParserArguments() {
-        ParameterList parameterList = (ParameterList) parserComboBox.getSelectedItem();
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
         return parameterList.getValues();
     }
 
     public long getInstrumentId() {
         
-        InstrumentConfiguration instrument = (InstrumentConfiguration) sourceParameterList.getParameter("instrument").getObjectValue(); 
+        InstrumentConfiguration instrument = (InstrumentConfiguration) m_sourceParameterList.getParameter("instrument").getObjectValue(); 
         return instrument.getId();
     }
     
     public long getPeaklistSoftwareId() {
-        PeaklistSoftware peaklistSoftware = (PeaklistSoftware) sourceParameterList.getParameter("peaklist_software").getObjectValue();  
+        PeaklistSoftware peaklistSoftware = (PeaklistSoftware) m_sourceParameterList.getParameter("peaklist_software").getObjectValue();  
         return peaklistSoftware.getId();
     }
     
     public String getParserId() {
-        return PARSER_IDS[parserComboBox.getSelectedIndex()];
+        return PARSER_IDS[m_parserComboBox.getSelectedIndex()];
     }
 
     public String getDecoyRegex() {
-        if (decoyRegexTextField.isEnabled()) {
-            return decoyRegexTextField.getText();
+        if (m_decoyRegexTextField.isEnabled()) {
+            return m_decoyRegexTextField.getText();
         }
         return null;
     }
@@ -804,22 +804,22 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }  
         };
         
-        instrumentsComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray());
-        ObjectParameter<InstrumentConfiguration> instrumentParameter = new ObjectParameter<>("instrument", "Instrument", instrumentsComboBox, UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray(), null, -1, instrumentToString);
+        m_instrumentsComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray());
+        ObjectParameter<InstrumentConfiguration> instrumentParameter = new ObjectParameter<>("instrument", "Instrument", m_instrumentsComboBox, UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray(), null, -1, instrumentToString);
         parameterList.add(instrumentParameter);
         
-        peaklistSoftwaresComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray());
-        ObjectParameter<PeaklistSoftware> peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", peaklistSoftwaresComboBox, UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray(), null, -1, softwareToString);
+        m_peaklistSoftwaresComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray());
+        ObjectParameter<PeaklistSoftware> peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", m_peaklistSoftwaresComboBox, UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray(), null, -1, softwareToString);
         parameterList.add(peaklistParameter);
         
-        decoyComboBox = new JComboBox(DECOY_VALUES);
-        ObjectParameter<String> decoyParameter = new ObjectParameter<>("decoy_accession", "Decoy", decoyComboBox, DECOY_VALUES, DECOY_VALUES_ASSOCIATED_KEYS, 0, null);
+        m_decoyComboBox = new JComboBox(DECOY_VALUES);
+        ObjectParameter<String> decoyParameter = new ObjectParameter<>("decoy_accession", "Decoy", m_decoyComboBox, DECOY_VALUES, DECOY_VALUES_ASSOCIATED_KEYS, 0, null);
         parameterList.add(decoyParameter);
 
-        decoyRegexTextField = new JTextField(20);
-        decoyRegexParameter = new StringParameter("decoy_accession", "Decoy Accession", decoyRegexTextField, "", new Integer(2), null);
-        decoyRegexParameter.setUsed(false);
-        parameterList.add(decoyRegexParameter);
+        m_decoyRegexTextField = new JTextField(20);
+        m_decoyRegexParameter = new StringParameter("decoy_accession", "Decoy Accession", m_decoyRegexTextField, "", new Integer(2), null);
+        m_decoyRegexParameter.setUsed(false);
+        parameterList.add(m_decoyRegexParameter);
         
         
         return parameterList;

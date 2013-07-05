@@ -9,24 +9,24 @@ import java.awt.Window;
 import javax.swing.*;
 
 /**
- *
+ * Dialog to Connect to the server
  * @author jm235353
  */
 public class ServerConnectionDialog extends DefaultDialog {
     
-    private JTextField serverURLTextField;
-    private JTextField userTextField;
-    private JPasswordField passwordField;
-    private JCheckBox rememberPasswordCheckBox;
+    private JTextField m_serverURLTextField;
+    private JTextField m_userTextField;
+    private JPasswordField m_passwordField;
+    private JCheckBox m_rememberPasswordCheckBox;
     
-    private static ServerConnectionDialog singletonDialog = null;
+    private static ServerConnectionDialog m_singletonDialog = null;
     
     public static ServerConnectionDialog getDialog(Window parent) {
-        if (singletonDialog == null) {
-            singletonDialog = new ServerConnectionDialog(parent);
+        if (m_singletonDialog == null) {
+            m_singletonDialog = new ServerConnectionDialog(parent);
         }
 
-        return singletonDialog;
+        return m_singletonDialog;
     }
     
     private ServerConnectionDialog(Window parent) {
@@ -75,7 +75,7 @@ public class ServerConnectionDialog extends DefaultDialog {
         URLPanel.setBorder(BorderFactory.createTitledBorder(" Server Parameter "));
         
         JLabel serverLabel = new JLabel("Server Host :");
-        serverURLTextField = new JTextField(30);
+        m_serverURLTextField = new JTextField(30);
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -90,7 +90,7 @@ public class ServerConnectionDialog extends DefaultDialog {
         
         c.gridx = 1;
         c.weightx = 1;
-        URLPanel.add(serverURLTextField, c);
+        URLPanel.add(m_serverURLTextField, c);
         
 
 
@@ -104,10 +104,10 @@ public class ServerConnectionDialog extends DefaultDialog {
         loginPanel.setBorder(BorderFactory.createTitledBorder(" User Parameters "));
         
         JLabel userLabel = new JLabel("Project User :");
-        userTextField = new JTextField(30);
+        m_userTextField = new JTextField(30);
         JLabel passwordLabel = new JLabel("Password :");
-        passwordField = new JPasswordField();
-        rememberPasswordCheckBox = new JCheckBox("Remember Password");
+        m_passwordField = new JPasswordField();
+        m_rememberPasswordCheckBox = new JCheckBox("Remember Password");
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -122,7 +122,7 @@ public class ServerConnectionDialog extends DefaultDialog {
         
         c.gridx = 1;
         c.weightx = 1;
-        loginPanel.add(userTextField, c);
+        loginPanel.add(m_userTextField, c);
         
         c.gridy++;
         c.gridx = 0;
@@ -131,10 +131,10 @@ public class ServerConnectionDialog extends DefaultDialog {
         
          c.gridx = 1;
         c.weightx = 1;
-        loginPanel.add(passwordField, c);
+        loginPanel.add(m_passwordField, c);
         
         c.gridy++;
-        loginPanel.add(rememberPasswordCheckBox, c);
+        loginPanel.add(m_rememberPasswordCheckBox, c);
 
         
         return loginPanel;
@@ -145,12 +145,12 @@ public class ServerConnectionDialog extends DefaultDialog {
 
         ServerConnectionManager serverConnectionManager = ServerConnectionManager.getServerConnectionManager();
 
-        serverURLTextField.setText(serverConnectionManager.getServerURL());
-        userTextField.setText(serverConnectionManager.getProjectUser());
+        m_serverURLTextField.setText(serverConnectionManager.getServerURL());
+        m_userTextField.setText(serverConnectionManager.getProjectUser());
         
         String password = serverConnectionManager.getDatabasePassword();
-        passwordField.setText(password);
-        rememberPasswordCheckBox.setSelected(!password.isEmpty());
+        m_passwordField.setText(password);
+        m_rememberPasswordCheckBox.setSelected(!password.isEmpty());
 
     }
     
@@ -182,22 +182,22 @@ public class ServerConnectionDialog extends DefaultDialog {
 
 
         
-        String serverURL = serverURLTextField.getText();
+        String serverURL = m_serverURLTextField.getText();
         if (serverURL.isEmpty()) {
             setStatus(true, "You must fill the Server URL");
-            highlight(serverURLTextField);
+            highlight(m_serverURLTextField);
             return false;
         }
         if (serverURL.length() <= "http://".length()) {
             setStatus(true, "The Server URL is incorrect");
-            highlight(serverURLTextField);
+            highlight(m_serverURLTextField);
             return false;
         }
         
-        String user = userTextField.getText();
+        String user = m_userTextField.getText();
         if (user.isEmpty()) {
             setStatus(true, "You must fill the Project User");
-            highlight(userTextField);
+            highlight(m_userTextField);
             return false;
         }
 
@@ -211,16 +211,16 @@ public class ServerConnectionDialog extends DefaultDialog {
     
         setBusy(true);
         
-        String serverURL = serverURLTextField.getText();
+        String serverURL = m_serverURLTextField.getText();
         if (! serverURL.endsWith("/")) {
             //JPM.WART : server URL must ends with a "/"
             // if the user forgets it, the error is really strange (exception with no message reported)
             serverURL = serverURL+"/";
-            serverURLTextField.setText(serverURL);
+            m_serverURLTextField.setText(serverURL);
         }
         
-        String projectUser  = userTextField.getText();
-        String password = new String(passwordField.getPassword());
+        String projectUser  = m_userTextField.getText();
+        String password = new String(m_passwordField.getPassword());
         
         
         
@@ -234,7 +234,7 @@ public class ServerConnectionDialog extends DefaultDialog {
                 if (serverManager.isConnectionFailed() ) {
                     String connectionError = serverManager.getConnectionError();
                     setStatus(true, connectionError);
-                    JOptionPane.showMessageDialog(singletonDialog, connectionError, "Database Connection Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(m_singletonDialog, connectionError, "Database Connection Error", JOptionPane.ERROR_MESSAGE);
                 } else if (serverManager.isConnectionDone()) {
                     storeDefaults();
                     setVisible(false);     
@@ -253,11 +253,11 @@ public class ServerConnectionDialog extends DefaultDialog {
     private void storeDefaults() {
         ServerConnectionManager serverManager = ServerConnectionManager.getServerConnectionManager();
 
-        serverManager.setServerURL(serverURLTextField.getText());
-        serverManager.setProjectUser(userTextField.getText());
+        serverManager.setServerURL(m_serverURLTextField.getText());
+        serverManager.setProjectUser(m_userTextField.getText());
 
-        if (rememberPasswordCheckBox.isSelected()) {
-            serverManager.setDatabasePassword(new String(passwordField.getPassword()));
+        if (m_rememberPasswordCheckBox.isSelected()) {
+            serverManager.setDatabasePassword(new String(m_passwordField.getPassword()));
         }
 
         

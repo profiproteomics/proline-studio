@@ -10,26 +10,26 @@ import javax.swing.*;
  */
 public class AddProjectDialog extends DefaultDialog {
     
-    private static AddProjectDialog singletonDialog = null;
+    private static AddProjectDialog m_singletonDialog = null;
 
-    private JTextField nameTextField;
-    private JTextArea descriptionTextArea;
+    private JTextField m_nameTextField;
+    private JTextArea m_descriptionTextArea;
     
     public static AddProjectDialog getDialog(Window parent) {
-        if (singletonDialog == null) {
-            singletonDialog = new AddProjectDialog(parent);
+        if (m_singletonDialog == null) {
+            m_singletonDialog = new AddProjectDialog(parent);
         }
 
-        singletonDialog.reinitialize();
+        m_singletonDialog.reinitialize();
         
-        return singletonDialog;
+        return m_singletonDialog;
     }
 
     public void reinitialize() {
 
         // reinit fields
-        nameTextField.setText("");
-        descriptionTextArea.setText("");
+        m_nameTextField.setText("");
+        m_descriptionTextArea.setText("");
     }
     
     private AddProjectDialog(Window parent) {
@@ -76,11 +76,11 @@ public class AddProjectDialog extends DefaultDialog {
         projectParametersPanel.setBorder(BorderFactory.createTitledBorder(" Project Parameters "));
         
         JLabel projectNameLabel = new JLabel("Name :");
-        nameTextField = new JTextField(30);
+        m_nameTextField = new JTextField(30);
         
         JLabel projectDescriptionLabel = new JLabel("Description :");
-        descriptionTextArea = new JTextArea();
-        JScrollPane desciptionScrollPane = new JScrollPane(descriptionTextArea) {
+        m_descriptionTextArea = new JTextArea();
+        JScrollPane desciptionScrollPane = new JScrollPane(m_descriptionTextArea) {
 
             private Dimension preferredSize = new Dimension(360, 200);
 
@@ -104,7 +104,7 @@ public class AddProjectDialog extends DefaultDialog {
         
         c.gridx = 1;
         c.weightx = 1;
-        projectParametersPanel.add(nameTextField, c);
+        projectParametersPanel.add(m_nameTextField, c);
         
         c.gridx = 0;
         c.gridy++;
@@ -137,28 +137,28 @@ public class AddProjectDialog extends DefaultDialog {
     }
     
     private boolean checkParameters() {
-        String name = nameTextField.getText();
+        String name = m_nameTextField.getText();
         if (name.isEmpty()) {
             setStatus(true, "You must fill the Project Name.");
-            highlight(nameTextField);
+            highlight(m_nameTextField);
             return false;
         }
         if (name.length()>250) {
             setStatus(true, "Project Name must not exceed 250 characters.");
-            highlight(nameTextField);
+            highlight(m_nameTextField);
             return false;
         }
         
-        String description = descriptionTextArea.getText();
+        String description = m_descriptionTextArea.getText();
         if (description.isEmpty()) {
             setStatus(true, "You must fill the Project Description.");
-            highlight(descriptionTextArea);
+            highlight(m_descriptionTextArea);
             return false;
         }
         
         if (description.length()>1000) {
             setStatus(true, "Description must not exceed 1000 characters.");
-            highlight(nameTextField);
+            highlight(m_nameTextField);
             return false;
         }
         
@@ -166,11 +166,11 @@ public class AddProjectDialog extends DefaultDialog {
     }
  
     public String getProjectName() {
-        return nameTextField.getText();
+        return m_nameTextField.getText();
     }
     
     public String getProjectDescription() {
-        return descriptionTextArea.getText();
+        return m_descriptionTextArea.getText();
     }
     
     

@@ -6,7 +6,6 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 
 import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.MouseAdapter;
@@ -14,12 +13,12 @@ import java.awt.event.MouseEvent;
 import javax.swing.*;
 
 /**
- *
+ * Panel used in Add Aggregate Dialog
  * @author JM235353
  */
 public class AddAggregatePanel extends javax.swing.JPanel {
 
-    private static Aggregation.ChildNature[] aggregateTypes = { Aggregation.ChildNature.BIOLOGICAL_GROUP, Aggregation.ChildNature.BIOLOGICAL_SAMPLE, Aggregation.ChildNature.SAMPLE_ANALYSIS, Aggregation.ChildNature.OTHER };
+    private static Aggregation.ChildNature[] m_aggregateTypes = { Aggregation.ChildNature.BIOLOGICAL_GROUP, Aggregation.ChildNature.BIOLOGICAL_SAMPLE, Aggregation.ChildNature.SAMPLE_ANALYSIS, Aggregation.ChildNature.OTHER };
     
     /**
      * Creates new form AddAggregatePanel
@@ -47,7 +46,7 @@ public class AddAggregatePanel extends javax.swing.JPanel {
         nameLabel = new javax.swing.JLabel();
         nameTextfield = new javax.swing.JTextField();
         typeLabel = new javax.swing.JLabel();
-        typeCombobox = new JComboBox(aggregateTypes);
+        typeCombobox = new JComboBox(m_aggregateTypes);
         typeCombobox.setRenderer(new DataSetComboboxRenderer());
         multipleAggregateCheckBox = new javax.swing.JCheckBox();
         nbAggregateSpinner = new javax.swing.JSpinner();

@@ -19,8 +19,8 @@ import javax.swing.tree.TreePath;
  */
 public class TreeSelectionDialog extends DefaultDialog {
     
-    private RSMTree tree = null;
-    private ArrayList<Dataset> selectedDatasetList = null;
+    private RSMTree m_tree = null;
+    private ArrayList<Dataset> m_selectedDatasetList = null;
     
     public TreeSelectionDialog(Window parent, RSMTree tree, String title) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
@@ -30,7 +30,7 @@ public class TreeSelectionDialog extends DefaultDialog {
         
         setStatusVisible(false);
         
-        this.tree = tree;
+        this.m_tree = tree;
         
         setTitle(title);
         
@@ -42,12 +42,12 @@ public class TreeSelectionDialog extends DefaultDialog {
     }
     
     public void setSelection(ArrayList<ResultSummary> rsmArray) {
-        tree.setSelection(rsmArray);
+        m_tree.setSelection(rsmArray);
     }
     
     public ArrayList<Dataset> getSelectedDatasetList() {
-        ArrayList<Dataset> returnedList = selectedDatasetList;
-        selectedDatasetList = null; // avoid a potential memory leak
+        ArrayList<Dataset> returnedList = m_selectedDatasetList;
+        m_selectedDatasetList = null; // avoid a potential memory leak
         
         return returnedList;
     }
@@ -55,14 +55,14 @@ public class TreeSelectionDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
         
-        TreePath[] paths = tree.getSelectionPaths();
+        TreePath[] paths = m_tree.getSelectionPaths();
 
         if (paths == null || paths.length == 0) {
             showSelectionError();
             return false;
         }
 
-        selectedDatasetList = new ArrayList<Dataset>();
+        m_selectedDatasetList = new ArrayList<>();
 
         
         int size = paths.length;
@@ -71,10 +71,10 @@ public class TreeSelectionDialog extends DefaultDialog {
             if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
 
-                selectedDatasetList.add(dataSetNode.getDataset());
+                m_selectedDatasetList.add(dataSetNode.getDataset());
             }
         }
-        if (selectedDatasetList.isEmpty()) {
+        if (m_selectedDatasetList.isEmpty()) {
             showSelectionError();
             return false;
         }
@@ -86,13 +86,13 @@ public class TreeSelectionDialog extends DefaultDialog {
     
     @Override
     protected boolean cancelCalled() {
-        selectedDatasetList = null;
+        m_selectedDatasetList = null;
 
         return true;
     }
     
     private void showSelectionError() {
-        JOptionPane.showMessageDialog(tree, "You must at least select one Result Summary.", "Warning", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(m_tree, "You must at least select one Result Summary.", "Warning", JOptionPane.ERROR_MESSAGE);
     }
     
     

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dpm.task;
 
 import com.google.api.client.http.HttpResponse;
@@ -15,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * Service to Merge ResultSet or ResultSummaries
  * @author JM235353
  */
 public class MergeTask extends AbstractServiceTask {
@@ -58,7 +54,7 @@ public class MergeTask extends AbstractServiceTask {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
 
-            request.setId(id);
+            request.setId(m_id);
             request.setMethod("run_job");
 
 
@@ -83,20 +79,20 @@ public class MergeTask extends AbstractServiceTask {
                 String message = (String) errorMap.get("message");
 
                 if (message != null) {
-                    errorMessage = message;
+                    m_errorMessage = message;
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (errorMessage == null) {
-                        errorMessage = data;
+                    if (m_errorMessage == null) {
+                        m_errorMessage = data;
                     } else {
-                        errorMessage = errorMessage+"\n"+data;
+                        m_errorMessage = m_errorMessage+"\n"+data;
                     }
                 }
                 
-                if (errorMessage != null) {
-                    loggerWebcore.error(getClass().getSimpleName() + " failed : "+errorMessage);
+                if (m_errorMessage != null) {
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : "+m_errorMessage);
                 }
                 
                 return false;
@@ -104,14 +100,14 @@ public class MergeTask extends AbstractServiceTask {
             
             BigDecimal jobId = (BigDecimal) jsonResult.get("result");
             if (jobId != null) {
-                id = jobId.intValue();
+                m_id = jobId.intValue();
             } else {
-                loggerProline.error(getClass().getSimpleName() + " failed : job id not defined");
+                m_loggerProline.error(getClass().getSimpleName() + " failed : job id not defined");
             }
 
         } catch (Exception e) {
-            errorMessage = e.getMessage();
-            loggerProline.error(getClass().getSimpleName() + " failed", e);
+            m_errorMessage = e.getMessage();
+            m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return false;
         }
 
@@ -127,11 +123,11 @@ public class MergeTask extends AbstractServiceTask {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
 
-            request.setId(idIncrement++);
+            request.setId(m_idIncrement++);
             request.setMethod("get_job_status");
 
             Map<String, Object> params = new HashMap<>();
-            params.put("job_id", id);
+            params.put("job_id", m_id);
 
             request.setParameters(params);
 
@@ -144,18 +140,18 @@ public class MergeTask extends AbstractServiceTask {
 
             if (errorMap != null) {
 
-                errorMessage = (String) errorMap.get("message");
-                if (errorMessage == null) {
-                    errorMessage = "";
+                m_errorMessage = (String) errorMap.get("message");
+                if (m_errorMessage == null) {
+                    m_errorMessage = "";
                 }
                 
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    errorMessage = errorMessage+"\n"+data;
+                    m_errorMessage = m_errorMessage+"\n"+data;
                 }
                 
-                loggerWebcore.error(getClass().getSimpleName() + " failed "+errorMessage);
+                m_loggerWebcore.error(getClass().getSimpleName() + " failed "+m_errorMessage);
                 return ServiceState.STATE_FAILED; // should not happen !
             }
             
@@ -187,7 +183,7 @@ public class MergeTask extends AbstractServiceTask {
                     if (m_action == MERGE_RSET) {
                         BigDecimal resultSetIdBD = (BigDecimal) resultMap.get("result");
                         if (resultSetIdBD == null) {
-                            loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
+                            m_loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
                             return ServiceState.STATE_FAILED;
                         }
 
@@ -199,14 +195,14 @@ public class MergeTask extends AbstractServiceTask {
                         
                         BigDecimal resultSetIdBD = (BigDecimal) result.get("target_result_set_id");
                         if (resultSetIdBD == null) {
-                            loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
+                            m_loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
                             return ServiceState.STATE_FAILED;
                         }
                         m_resultSetId[0] = new Long(resultSetIdBD.longValue());
                         
                         BigDecimal resultSummaryIdBD = (BigDecimal) result.get("target_result_summary_id");
                         if (resultSummaryIdBD == null) {
-                            loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSummary Id");
+                            m_loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSummary Id");
                             return ServiceState.STATE_FAILED;
                         }
                         m_resultSummaryId[0] = new Long(resultSummaryIdBD.longValue());
@@ -216,19 +212,19 @@ public class MergeTask extends AbstractServiceTask {
                     
                     return ServiceState.STATE_DONE;
                 } else {
-                    errorMessage = (String) resultMap.get("message");
-                    if (errorMessage == null) {
-                        errorMessage = "";
+                    m_errorMessage = (String) resultMap.get("message");
+                    if (m_errorMessage == null) {
+                        m_errorMessage = "";
                     }
-                    loggerWebcore.error(getClass().getSimpleName() + " failed "+errorMessage);
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed "+m_errorMessage);
                     return ServiceState.STATE_FAILED;
                 }
                 
             }
             
         } catch (Exception e) {
-            errorMessage = e.getMessage();
-            loggerProline.error(getClass().getSimpleName() + " failed", e);
+            m_errorMessage = e.getMessage();
+            m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return ServiceState.STATE_FAILED; // should not happen !
         }
 

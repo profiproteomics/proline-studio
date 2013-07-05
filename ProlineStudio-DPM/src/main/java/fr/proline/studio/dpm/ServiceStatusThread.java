@@ -8,25 +8,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Thread used to check the state of the running services thanks to a polling evert ten seconds
  * @author jm235353
  */
 public class ServiceStatusThread extends Thread {
     
     private final static int DELAY_BETWEEN_POLLING = 10000;
     
-    private TaskInfo currentTaskInfo = null;
+    private TaskInfo m_currentTaskInfo = null;
     
-    private static ServiceStatusThread instance;
+    private static ServiceStatusThread m_instance;
     
-    private LinkedList<AbstractServiceTask> taskList = new LinkedList<AbstractServiceTask>();
+    private LinkedList<AbstractServiceTask> m_taskList = new LinkedList<>();
     
     public static ServiceStatusThread getServiceStatusThread() {
-        if (instance == null) {
-            instance = new ServiceStatusThread();
-            instance.start();
+        if (m_instance == null) {
+            m_instance = new ServiceStatusThread();
+            m_instance.start();
         }
-        return instance;
+        return m_instance;
     }
     
     private static Logger logger = LoggerFactory.getLogger("ProlineStudio.DPM");
@@ -43,7 +43,7 @@ public class ServiceStatusThread extends Thread {
         try {
             while (true) {
                 
-                currentTaskInfo = null;
+                m_currentTaskInfo = null;
                 updateStatusDisplay();
                 
                 Thread.sleep(DELAY_BETWEEN_POLLING);
@@ -51,13 +51,13 @@ public class ServiceStatusThread extends Thread {
                 AbstractServiceTask task = null;
                 synchronized (this) {
 
-                    if (!taskList.isEmpty()) {
-                        task = taskList.poll();
-                        currentTaskInfo = task.getTaskInfo();
+                    if (!m_taskList.isEmpty()) {
+                        task = m_taskList.poll();
+                        m_currentTaskInfo = task.getTaskInfo();
                         updateStatusDisplay();
                     } else {
                         // taskList is empty, we stop to do polling
-                        currentTaskInfo = null;
+                        m_currentTaskInfo = null;
                         updateStatusDisplay();
                         wait();
                     }
@@ -87,7 +87,7 @@ public class ServiceStatusThread extends Thread {
 
         } catch (Throwable t) {
             logger.debug("Unexpected exception in main loop of AccessServiceThread", t);
-            instance = null; // reset thread
+            m_instance = null; // reset thread
         }
 
     }
@@ -101,7 +101,7 @@ public class ServiceStatusThread extends Thread {
 
         // task is queued
         synchronized (this) {
-            taskList.add(task);
+            m_taskList.add(task);
             
             // wake up the thread if it is waiting
             notifyAll();
@@ -113,13 +113,13 @@ public class ServiceStatusThread extends Thread {
     public void updateStatusDisplay() {
 
         synchronized (this) {
-            int taskListSize = taskList.size();
+            int taskListSize = m_taskList.size();
             TaskInfo taskInfoToDisplay = null;
-            if (currentTaskInfo !=null) {
+            if (m_currentTaskInfo !=null) {
                 taskListSize++;
-                taskInfoToDisplay = currentTaskInfo;
+                taskInfoToDisplay = m_currentTaskInfo;
             } else if (taskListSize>0) {
-                taskInfoToDisplay = taskList.peek().getTaskInfo();
+                taskInfoToDisplay = m_taskList.peek().getTaskInfo();
             }
             String status;
             if (taskInfoToDisplay != null) {

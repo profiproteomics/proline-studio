@@ -22,26 +22,26 @@ import org.openide.util.NbPreferences;
  */
 public class ImportIdentificationTask extends AbstractServiceTask {
 
-    private String parserId;
-    private HashMap<String, String> parserArguments;
-    private String canonicalFilePath;
-    private String decoyRegex;
-    private long instrumentId;
-    private long peaklistSoftwareId;
-    private long projectId;
-    private Long[] resultSetId = null;
+    private String m_parserId;
+    private HashMap<String, String> m_parserArguments;
+    private String m_canonicalFilePath;
+    private String m_decoyRegex;
+    private long m_instrumentId;
+    private long m_peaklistSoftwareId;
+    private long m_projectId;
+    private Long[] m_resultSetId = null;
     
     public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String canonicalFilePath, String decoyRegex, long instrumentId, long peaklistSoftwareId, long projectId, Long[] resultSetId) {
         super(callback, false /*asynchronous*/, new TaskInfo("Import Identification "+canonicalFilePath, TASK_LIST_INFO));
         
-        this.parserId = parserId;
-        this.parserArguments = parserArguments;
-        this.canonicalFilePath = canonicalFilePath;
-        this.decoyRegex = decoyRegex;
-        this.instrumentId = instrumentId;
-        this.peaklistSoftwareId = peaklistSoftwareId;
-        this.projectId = projectId;
-        this.resultSetId = resultSetId;
+        m_parserId = parserId;
+        m_parserArguments = parserArguments;
+        m_canonicalFilePath = canonicalFilePath;
+        m_decoyRegex = decoyRegex;
+        m_instrumentId = instrumentId;
+        m_peaklistSoftwareId = peaklistSoftwareId;
+        m_projectId = projectId;
+        m_resultSetId = resultSetId;
     }
     
     @Override
@@ -50,12 +50,12 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
             
-            request.setId(id);
+            request.setId(m_id);
             request.setMethod("run_job");
             
             
             Map<String, Object> params = new HashMap<>();
-	    params.put("project_id", projectId);
+	    params.put("project_id", m_projectId);
             
             List args = new ArrayList();
             
@@ -75,8 +75,8 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                 
                 // if canonicalFilePath="D:\\dir1\dir2\foo.dat" and serverFilePath="D:\\dir1\";
                 // then canonicalFilePath="dir2\foo.dat"
-                if (canonicalFilePath.startsWith(serverFilePath)) {
-                    canonicalFilePath = canonicalFilePath.substring(serverFilePath.length());
+                if (m_canonicalFilePath.startsWith(serverFilePath)) {
+                    m_canonicalFilePath = m_canonicalFilePath.substring(serverFilePath.length());
                 }
             }
             
@@ -84,21 +84,21 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             
             // add the file to parse
             Map<String, Object> resultfile = new HashMap<>();
-            resultfile.put("path", canonicalFilePath);  // files must be accessible from web-core by the same path
-            resultfile.put("format", parserId);
-            if (decoyRegex != null) {
-                resultfile.put("decoy_strategy", decoyRegex);
+            resultfile.put("path", m_canonicalFilePath);  // files must be accessible from web-core by the same path
+            resultfile.put("format", m_parserId);
+            if (m_decoyRegex != null) {
+                resultfile.put("decoy_strategy", m_decoyRegex);
             }
             args.add(resultfile);
             params.put("result_files", args);
 
             
             
-            params.put("instrument_config_id", instrumentId);
-            params.put("peaklist_software_id", peaklistSoftwareId);
+            params.put("instrument_config_id", m_instrumentId);
+            params.put("peaklist_software_id", m_peaklistSoftwareId);
 
             // parser arguments
-            params.put("importer_properties", parserArguments);
+            params.put("importer_properties", m_parserArguments);
             
             request.setParameters(params);
 
@@ -112,20 +112,20 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                 String message = (String) errorMap.get("message");
 
                 if (message != null) {
-                    errorMessage = message;
+                    m_errorMessage = message;
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (errorMessage == null) {
-                        errorMessage = data;
+                    if (m_errorMessage == null) {
+                        m_errorMessage = data;
                     } else {
-                        errorMessage = errorMessage+"\n"+data;
+                        m_errorMessage = m_errorMessage+"\n"+data;
                     }
                 }
                 
-                if (errorMessage != null) {
-                    loggerWebcore.error(getClass().getSimpleName() + " failed : "+errorMessage);
+                if (m_errorMessage != null) {
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : "+m_errorMessage);
                 }
                 
                 return false;
@@ -133,17 +133,17 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             
             BigDecimal jobId = (BigDecimal) jsonResult.get("result");
             if (jobId != null) {
-                id = jobId.intValue();
+                m_id = jobId.intValue();
             } else {
-                loggerProline.error(getClass().getSimpleName() + " failed : job id not defined");
+                m_loggerProline.error(getClass().getSimpleName() + " failed : job id not defined");
             }
             
 
 
 
         } catch (Exception e) {
-            errorMessage = e.getMessage();
-            loggerProline.error(getClass().getSimpleName() + " failed", e);
+            m_errorMessage = e.getMessage();
+            m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return false;
         }
 
@@ -158,11 +158,11 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
             
-            request.setId(idIncrement++);
+            request.setId(m_idIncrement++);
             request.setMethod("get_job_status");
             
             Map<String, Object> params = new HashMap<>();
-	    params.put("job_id", id);
+	    params.put("job_id", m_id);
 
             request.setParameters(params);
 
@@ -174,18 +174,18 @@ public class ImportIdentificationTask extends AbstractServiceTask {
 
             if (errorMap != null) {
 
-                errorMessage = (String) errorMap.get("message");
-                if (errorMessage == null) {
-                    errorMessage = "";
+                m_errorMessage = (String) errorMap.get("message");
+                if (m_errorMessage == null) {
+                    m_errorMessage = "";
                 }
                 
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    errorMessage = errorMessage+"\n"+data;
+                    m_errorMessage = m_errorMessage+"\n"+data;
                 }
                 
-                loggerWebcore.error(getClass().getSimpleName() + " failed "+errorMessage);
+                m_loggerWebcore.error(getClass().getSimpleName() + " failed "+m_errorMessage);
                 return ServiceState.STATE_FAILED; // should not happen !
             }
             
@@ -214,7 +214,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
 
                     ArrayList returnedValues = (ArrayList) resultMap.get("result");
                     if ((returnedValues == null) || (returnedValues.isEmpty()))  {
-                        loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
+                        m_loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
                         return ServiceState.STATE_FAILED;
                     }
                     
@@ -223,19 +223,19 @@ public class ImportIdentificationTask extends AbstractServiceTask {
                     // retrieve resultSet id
                     BigDecimal resultSetIdBD = (BigDecimal) returnedValuesMap.get("target_result_set_id");
                     if (resultSetIdBD == null) {
-                        loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
+                        m_loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSet Id");
                         return ServiceState.STATE_FAILED;
                     }
                     
-                    resultSetId[0] = new Long(resultSetIdBD.longValue());
+                    m_resultSetId[0] = new Long(resultSetIdBD.longValue());
                     
                     return ServiceState.STATE_DONE;
                 } else {
-                    errorMessage = (String) resultMap.get("message");
-                    if (errorMessage == null) {
-                        errorMessage = "";
+                    m_errorMessage = (String) resultMap.get("message");
+                    if (m_errorMessage == null) {
+                        m_errorMessage = "";
                     }
-                    loggerWebcore.error(getClass().getSimpleName() + " failed "+errorMessage);
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed "+m_errorMessage);
                     return ServiceState.STATE_FAILED;
                 }
                 
@@ -244,8 +244,8 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             
 
         } catch (Exception e) {
-            errorMessage = e.getMessage();
-            loggerProline.error(getClass().getSimpleName() + " failed", e);
+            m_errorMessage = e.getMessage();
+            m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return ServiceState.STATE_FAILED; // should not happen !
         }
                

@@ -15,13 +15,13 @@ import java.util.Map;
  */
 public class CreateUserTask extends AbstractServiceTask {
 
-    private String name;
+    private String m_name;
 
     
     public CreateUserTask(AbstractServiceCallback callback, String name) {
         super(callback, true /*synchronous*/, new TaskInfo("Create User "+name, TASK_LIST_INFO));
         
-        this.name = name;
+        m_name = name;
 
     }
     
@@ -33,10 +33,10 @@ public class CreateUserTask extends AbstractServiceTask {
         try {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
-            request.setId(id);
+            request.setId(m_id);
             request.setMethod("create");
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put("login", name);
+            params.put("login", m_name);
             request.setParameters(params);
 
             HttpResponse response = postRequest("admin/user_account/"+request.getMethod()+getIdString(), request);
@@ -49,15 +49,15 @@ public class CreateUserTask extends AbstractServiceTask {
                 String message = (String) errorMap.get("message");
                 
                 if (message != null) {
-                    errorMessage = message;
+                    m_errorMessage = message;
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (errorMessage == null) {
-                        errorMessage = data;
+                    if (m_errorMessage == null) {
+                        m_errorMessage = data;
                     } else {
-                        errorMessage = errorMessage+"\n"+data;
+                        m_errorMessage = m_errorMessage+"\n"+data;
                     }
                 }
                 
@@ -67,8 +67,8 @@ public class CreateUserTask extends AbstractServiceTask {
             // JPM.TODO : check result
             
         } catch (Exception e) {
-            errorMessage = e.getMessage();
-            loggerProline.error(getClass().getSimpleName()+" failed", e);
+            m_errorMessage = e.getMessage();
+            m_loggerProline.error(getClass().getSimpleName()+" failed", e);
             return false;
         }
         

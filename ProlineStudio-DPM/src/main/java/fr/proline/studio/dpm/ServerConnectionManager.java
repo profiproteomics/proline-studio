@@ -31,26 +31,26 @@ public class ServerConnectionManager {
     public static final int CONNECTION_DONE = 5;
     
     private int connectionState = NOT_CONNECTED;
-    private String connectionError = null;
+    private String m_connectionError = null;
     
     private String m_serverURL;
     private String m_projectUser;
     private String m_databasePassword;
     
     
-    private String previousServerURL = "";
-    private String previousProjectUser = "";
-    private String previousDatabsePassword = "";
-    private int previousErrorId = -1;
+    private String m_previousServerURL = "";
+    private String m_previousProjectUser = "";
+    private String m_previousDatabsePassword = "";
+    private int m_previousErrorId = -1;
     
     
-    private static ServerConnectionManager connectionManager = null;
+    private static ServerConnectionManager m_connectionManager = null;
 
     public static synchronized ServerConnectionManager getServerConnectionManager() {
-        if (connectionManager == null) {
-            connectionManager = new ServerConnectionManager();
+        if (m_connectionManager == null) {
+            m_connectionManager = new ServerConnectionManager();
         }
-        return connectionManager;
+        return m_connectionManager;
     }
 
     public ServerConnectionManager() {
@@ -95,19 +95,19 @@ public class ServerConnectionManager {
        
        // check if the user has not already tried to connect with the same parameters
        // and the project user was unknown
-       if ((previousServerURL.compareTo(serverURL) ==0 ) &&
-           (previousDatabsePassword.compareTo(databasePassword) ==0 ) &&
-           (previousErrorId == DatabaseConnectionTask.ERROR_USER_UNKNOWN)) {
+       if ((m_previousServerURL.compareTo(serverURL) ==0 ) &&
+           (m_previousDatabsePassword.compareTo(databasePassword) ==0 ) &&
+           (m_previousErrorId == DatabaseConnectionTask.ERROR_USER_UNKNOWN)) {
            // special case, we only check the project user
            tryProjectUser(connectionCallback, projectUser);
            return;
        }
        
        // keep settings used to try to connect
-       previousServerURL = serverURL;
-       previousDatabsePassword = databasePassword;
-       previousProjectUser = projectUser;
-       previousErrorId = -1;
+       m_previousServerURL = serverURL;
+       m_previousDatabsePassword = databasePassword;
+       m_previousProjectUser = projectUser;
+       m_previousErrorId = -1;
        
      
        
@@ -130,7 +130,7 @@ public class ServerConnectionManager {
                    tryDatabaseConnection(connectionCallback, databaseProperties, projectUser);
                } else {
                    setConnectionState(CONNECTION_SERVER_FAILED);
-                   connectionError = getErrorMessage();
+                   m_connectionError = getErrorMessage();
                    if (connectionCallback != null) {
                        connectionCallback.run();
                    }
@@ -165,10 +165,10 @@ public class ServerConnectionManager {
                     setConnectionState(CONNECTION_DONE);
                 } else {
                     
-                    previousErrorId = getErrorId();
+                    m_previousErrorId = getErrorId();
                     
                     setConnectionState(CONNECTION_DATABASE_FAILED);
-                    connectionError = getErrorMessage();
+                    m_connectionError = getErrorMessage();
 
                 }
                 
@@ -210,13 +210,13 @@ public class ServerConnectionManager {
                     connectionToPdiDB();
                 } else {
                     
-                    previousErrorId = getErrorId();
+                    m_previousErrorId = getErrorId();
                     
                     setConnectionState(CONNECTION_DATABASE_FAILED);
-                    connectionError = getErrorMessage();
+                    m_connectionError = getErrorMessage();
                     
                     //JPM.TODO : WART if no user has been created
-                    if ((connectionError!= null) && (connectionError.indexOf("dupierris")!=-1)) {
+                    if ((m_connectionError!= null) && (m_connectionError.indexOf("dupierris")!=-1)) {
                         // we create the user dupierris
                         
                         //CreateProjectTask.postUserRequest();
@@ -306,6 +306,6 @@ public class ServerConnectionManager {
     }
 
     public String getConnectionError() {
-        return connectionError;
+        return m_connectionError;
     }
 }

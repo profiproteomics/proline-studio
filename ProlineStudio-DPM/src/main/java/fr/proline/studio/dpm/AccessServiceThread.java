@@ -10,16 +10,16 @@ import org.slf4j.LoggerFactory;
  * @author jm235353
  */
 public class AccessServiceThread extends Thread {
-    private static AccessServiceThread instance;
+    private static AccessServiceThread m_instance;
     
-    private LinkedList<AbstractServiceTask> taskList = new LinkedList<>();
+    private LinkedList<AbstractServiceTask> m_taskList = new LinkedList<>();
     
     public static AccessServiceThread getAccessServiceThread() {
-        if (instance == null) {
-            instance = new AccessServiceThread();
-            instance.start();
+        if (m_instance == null) {
+            m_instance = new AccessServiceThread();
+            m_instance.start();
         }
-        return instance;
+        return m_instance;
     }
     
     private AccessServiceThread() {
@@ -39,8 +39,8 @@ public class AccessServiceThread extends Thread {
                     while (true) {
 
                         // look for a task to be done
-                        if (!taskList.isEmpty()) {
-                            task = taskList.poll();
+                        if (!m_taskList.isEmpty()) {
+                            task = m_taskList.poll();
                             break;
                         }
                         wait();
@@ -77,7 +77,7 @@ public class AccessServiceThread extends Thread {
 
         } catch (Throwable t) {
             LoggerFactory.getLogger("ProlineStudio.DPM").debug("Unexpected exception in main loop of AccessServiceThread", t);
-            instance = null; // reset thread
+            m_instance = null; // reset thread
         }
 
     }
@@ -93,7 +93,7 @@ public class AccessServiceThread extends Thread {
         
         // task is queued
         synchronized (this) {
-            taskList.add(task);
+            m_taskList.add(task);
             notifyAll();
         }
     }

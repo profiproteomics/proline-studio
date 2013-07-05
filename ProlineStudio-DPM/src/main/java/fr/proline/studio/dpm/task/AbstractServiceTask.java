@@ -28,29 +28,29 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
     };
     
     // callback is called by the AccessServiceThread when the service is done
-    protected AbstractServiceCallback callback;
+    protected AbstractServiceCallback m_callback;
     
     
-    protected int id;
-    protected boolean synchronous;
-    protected String errorMessage = null;
+    protected int m_id;
+    protected boolean m_synchronous;
+    protected String m_errorMessage = null;
     
-    protected static int idIncrement = 0;
+    protected static int m_idIncrement = 0;
     
-    protected static String baseURL = "";
+    protected static String m_baseURL = "";
     
-    protected static final Logger loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
-    protected static final Logger loggerWebcore = LoggerFactory.getLogger("ProlineWebCore");
+    protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
+    protected static final Logger m_loggerWebcore = LoggerFactory.getLogger("ProlineWebCore");
     
     public static final String TASK_LIST_INFO = "Services";
     
     public AbstractServiceTask(AbstractServiceCallback callback, boolean synchronous, TaskInfo taskInfo) {
         super(taskInfo);
         
-        this.callback = callback;
-        this.synchronous = synchronous;
+        m_callback = callback;
+        m_synchronous = synchronous;
         
-        id = idIncrement++;
+        m_id = m_idIncrement++;
     }
     
     /**
@@ -70,15 +70,15 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
      * Method called by the AccessServiceThread to know if this service is asynchronous
      */
     public boolean isSynchronous() {
-        return synchronous;
+        return m_synchronous;
     }
     
     protected HttpResponse postRequest(String serviceURL, JsonRpcRequest rpcRequest) throws IOException {
-        return postRequest(baseURL, serviceURL, rpcRequest);
+        return postRequest(m_baseURL, serviceURL, rpcRequest);
     }
     protected HttpResponse postRequest(String serverURL, String serviceURL, JsonRpcRequest rpcRequest) throws IOException {
        
-        baseURL = serverURL;
+        m_baseURL = serverURL;
         
         //JPM.TODO : create some of the following classes only the first time
         // -> transport, factory, JacksonFactory, JsonObjectParser
@@ -111,38 +111,38 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
      * @param success boolean indicating if the fetch has succeeded
      */
     public void callback(final boolean success) {
-        if (callback == null) {
+        if (m_callback == null) {
             
-            getTaskInfo().setFinished(success, errorMessage, false);
+            getTaskInfo().setFinished(success, m_errorMessage, false);
             
             return;
         }
 
-        callback.setTaskInfo(m_taskInfo);
-        callback.setErrorMessage(errorMessage);
+        m_callback.setTaskInfo(m_taskInfo);
+        m_callback.setErrorMessage(m_errorMessage);
         
-        if (callback.mustBeCalledInAWT()) {
+        if (m_callback.mustBeCalledInAWT()) {
             // Callback must be executed in the Graphical thread (AWT)
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    callback.run(success);
-                    getTaskInfo().setFinished(success, errorMessage, false);
+                    m_callback.run(success);
+                    getTaskInfo().setFinished(success, m_errorMessage, false);
                 }
             });
         } else {
             // Method called in the current thread
             // In this case, we assume the execution is fast.
-            callback.run(success);
-            getTaskInfo().setFinished(success, errorMessage, false);
+            m_callback.run(success);
+            getTaskInfo().setFinished(success, m_errorMessage, false);
         }
 
 
     }
     
     protected String getIdString() {
-        return "?request_id="+id;
+        return "?request_id="+m_id;
     }
     
 }

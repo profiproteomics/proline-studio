@@ -18,17 +18,17 @@ import java.util.Map;
  */
 public class ServerConnectionTask extends AbstractServiceTask {
 
-    private String serverURL;
-    private String password;
-    private HashMap<Object, Object> databaseProperties;  // out parameter
+    private String m_serverURL;
+    private String m_password;
+    private HashMap<Object, Object> m_databaseProperties;  // out parameter
 
     
     public ServerConnectionTask(AbstractServiceCallback callback, String serverURL, String password, HashMap<Object, Object> databaseProperties) {
         super(callback, true /*synchronous*/, new TaskInfo("Connection to Server "+serverURL, TASK_LIST_INFO));
         
-        this.serverURL = serverURL;
-        this.password = password;
-        this.databaseProperties = databaseProperties;
+        m_serverURL = serverURL;
+        m_password = password;
+        m_databaseProperties = databaseProperties;
     }
     
     
@@ -42,7 +42,7 @@ public class ServerConnectionTask extends AbstractServiceTask {
         try {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
-            request.setId(id);
+            request.setId(m_id);
             request.setMethod("template"); 
             
             Map<String, Object> params = new HashMap<>();
@@ -51,11 +51,11 @@ public class ServerConnectionTask extends AbstractServiceTask {
 
             HttpResponse response;
             try {
-                response = postRequest(serverURL, "admin/connection/"+request.getMethod()+getIdString(), request); //JPM.TODO
+                response = postRequest(m_serverURL, "admin/connection/"+request.getMethod()+getIdString(), request); //JPM.TODO
             } catch (Exception e) {
-                errorMessage = "Server Connection Failed.";
-                loggerProline.error(getClass().getSimpleName()+" failed", errorMessage);
-                loggerProline.error(getClass().getSimpleName()+" failed", e);
+                m_errorMessage = "Server Connection Failed.";
+                m_loggerProline.error(getClass().getSimpleName()+" failed", m_errorMessage);
+                m_loggerProline.error(getClass().getSimpleName()+" failed", e);
                 return false;
             }
             
@@ -67,15 +67,15 @@ public class ServerConnectionTask extends AbstractServiceTask {
                 String message = (String) errorMap.get("message");
                 
                 if (message != null) {
-                    errorMessage = message;
+                    m_errorMessage = message;
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (errorMessage == null) {
-                        errorMessage = data;
+                    if (m_errorMessage == null) {
+                        m_errorMessage = data;
                     } else {
-                        errorMessage = errorMessage+"\n"+data;
+                        m_errorMessage = m_errorMessage+"\n"+data;
                     }
                 }
                 
@@ -85,7 +85,7 @@ public class ServerConnectionTask extends AbstractServiceTask {
             // retrieve database parameters
             ArrayMap result = (ArrayMap) jsonResult.get("result");
             if (result == null) {
-                errorMessage = "Internal Error : Dabasase Parameters not returned";
+                m_errorMessage = "Internal Error : Dabasase Parameters not returned";
                 return false;
             }
             
@@ -94,23 +94,23 @@ public class ServerConnectionTask extends AbstractServiceTask {
             String databaseURL = (String) result.get("javax.persistence.jdbc.url");
       
             if ((databaseUser == null) || (databaseDriver == null) || (databaseURL == null)) {
-                errorMessage = "Internal Error : Dabasase Parameters uncomplete";
+                m_errorMessage = "Internal Error : Dabasase Parameters uncomplete";
                 return false;
             }
             
-            databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY, databaseUser);
-            databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, password);
-            databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, databaseDriver);
-            databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, databaseURL);
+            m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY, databaseUser);
+            m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, m_password);
+            m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, databaseDriver);
+            m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, databaseURL);
 
    
             
         } catch (Exception e) {
-            errorMessage = e.getMessage();
-            if (errorMessage == null) {
-                errorMessage = "Connection to Server failed";
+            m_errorMessage = e.getMessage();
+            if (m_errorMessage == null) {
+                m_errorMessage = "Connection to Server failed";
             }
-            loggerProline.error(getClass().getSimpleName()+" failed", e);
+            m_loggerProline.error(getClass().getSimpleName()+" failed", e);
             return false;
         }
 

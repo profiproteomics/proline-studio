@@ -8,8 +8,8 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
  */
 public abstract class AbstractServiceCallback {
     
-    private String errorMessage = null;
-    private TaskInfo taskInfo = null;
+    private String m_errorMessage = null;
+    private TaskInfo m_taskInfo = null;
      
      
     /**
@@ -29,17 +29,17 @@ public abstract class AbstractServiceCallback {
     public abstract void run(boolean success);
     
     public String getErrorMessage() {
-        return errorMessage;
+        return m_errorMessage;
     }
     public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+        this.m_errorMessage = errorMessage;
     }   
     
     public TaskInfo getTaskInfo() {
-        return taskInfo;
+        return m_taskInfo;
     }
     
     public void setTaskInfo(TaskInfo taskInfo) {
-        this.taskInfo = taskInfo;
+        this.m_taskInfo = taskInfo;
     }
 }

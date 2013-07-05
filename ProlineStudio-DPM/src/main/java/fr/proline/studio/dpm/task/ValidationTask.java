@@ -17,17 +17,17 @@ import java.util.Map;
  */
 public class ValidationTask extends AbstractServiceTask {
 
-    private Dataset dataset = null;
-    String description;
-    HashMap<String, String> argumentsMap;
-    Integer[] resultSummaryId = null;
+    private Dataset m_dataset = null;
+    String m_description;
+    HashMap<String, String> m_argumentsMap;
+    Integer[] m_resultSummaryId = null;
     
     public ValidationTask(AbstractServiceCallback callback, Dataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId) {
         super(callback, false /*asynchronous*/, new TaskInfo("Validation of Search Result "+dataset.getName(), TASK_LIST_INFO));
-        this.dataset = dataset;
-        this.description = description;
-        this.argumentsMap = argumentsMap;
-        this.resultSummaryId = resultSummaryId;
+        m_dataset = dataset;
+        m_description = description;
+        m_argumentsMap = argumentsMap;
+        m_resultSummaryId = resultSummaryId;
     }
     
     @Override
@@ -36,78 +36,78 @@ public class ValidationTask extends AbstractServiceTask {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
             
-            request.setId(id);
+            request.setId(m_id);
             request.setMethod("run_job");
             
             
             Map<String, Object> params = new HashMap<>();
-	    params.put("project_id", dataset.getProject().getId());  
-            params.put("result_set_id", dataset.getResultSetId() );
-            params.put("description", description ); //JPM.TODO : string is ""
+	    params.put("project_id", m_dataset.getProject().getId());  
+            params.put("result_set_id", m_dataset.getResultSetId() );
+            params.put("description", m_description ); //JPM.TODO : string is ""
              
             // Peptide Pre-Filters
             ArrayList pepFilters = new ArrayList();
             
-            if (argumentsMap.containsKey("RANK")) {
+            if (m_argumentsMap.containsKey("RANK")) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", "RANK");
-                filterCfg.put("threshold", Integer.valueOf(argumentsMap.get("RANK")) );
+                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("RANK")) );
                 pepFilters.add(filterCfg);
             }
-            if (argumentsMap.containsKey("SCORE")) {
+            if (m_argumentsMap.containsKey("SCORE")) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", "SCORE");
-                filterCfg.put("threshold", Float.valueOf(argumentsMap.get("SCORE")));
+                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("SCORE")));
                 pepFilters.add(filterCfg);
             }
-            if (argumentsMap.containsKey("MASCOT_EVALUE")) {
+            if (m_argumentsMap.containsKey("MASCOT_EVALUE")) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", "MASCOT_EVALUE");
-                filterCfg.put("threshold", Float.valueOf(argumentsMap.get("MASCOT_EVALUE")));
+                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("MASCOT_EVALUE")));
                 pepFilters.add(filterCfg);
             }
-            if (argumentsMap.containsKey("PEP_SEQ_LENGTH")) {
+            if (m_argumentsMap.containsKey("PEP_SEQ_LENGTH")) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", "PEP_SEQ_LENGTH");
-                filterCfg.put("threshold", Integer.valueOf(argumentsMap.get("PEP_SEQ_LENGTH")));
+                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("PEP_SEQ_LENGTH")));
                 pepFilters.add(filterCfg);
             }
-            if (argumentsMap.containsKey("SCORE_IT_P-VALUE")) {
+            if (m_argumentsMap.containsKey("SCORE_IT_P-VALUE")) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", "SCORE_IT_P-VALUE");
-                filterCfg.put("threshold", Float.valueOf(argumentsMap.get("SCORE_IT_P-VALUE")));
+                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("SCORE_IT_P-VALUE")));
                 pepFilters.add(filterCfg);
             }
-            if (argumentsMap.containsKey("SCORE_HT_P-VALUE")) {
+            if (m_argumentsMap.containsKey("SCORE_HT_P-VALUE")) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", "SCORE_HT_P-VALUE");
-                filterCfg.put("threshold", Float.valueOf(argumentsMap.get("SCORE_HT_P-VALUE")));
+                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("SCORE_HT_P-VALUE")));
                 pepFilters.add(filterCfg);
             }
             params.put("pep_match_filters",pepFilters);
             
             // Peptide Validator
-            if (argumentsMap.containsKey("expected_fdr")) {
+            if (m_argumentsMap.containsKey("expected_fdr")) {
                 HashMap pepMatchValidator = new HashMap();
-                pepMatchValidator.put("parameter", argumentsMap.get("expected_fdr_parameter"));
-                pepMatchValidator.put("expected_fdr", argumentsMap.get("expected_fdr"));
+                pepMatchValidator.put("parameter", m_argumentsMap.get("expected_fdr_parameter"));
+                pepMatchValidator.put("expected_fdr", m_argumentsMap.get("expected_fdr"));
                 params.put("pep_match_validator_config", pepMatchValidator);
             }
 
             
             
-            if (argumentsMap.containsKey("use_td_competition")) {
-                params.put("use_td_competition", Boolean.parseBoolean(argumentsMap.get("use_td_competition")) );
+            if (m_argumentsMap.containsKey("use_td_competition")) {
+                params.put("use_td_competition", Boolean.parseBoolean(m_argumentsMap.get("use_td_competition")) );
             }
                 
                 
             // Protein Pre-Filters
             ArrayList proteinFilters = new ArrayList();
             
-            if (argumentsMap.containsKey("SPECIFIC_PEP")) {
+            if (m_argumentsMap.containsKey("SPECIFIC_PEP")) {
                 HashMap filterCfg = new HashMap();
                 filterCfg.put("parameter", "SPECIFIC_PEP");
-                filterCfg.put("threshold", Integer.valueOf(argumentsMap.get("SPECIFIC_PEP")) );
+                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("SPECIFIC_PEP")) );
                 proteinFilters.add(filterCfg);
             }
             
@@ -115,10 +115,10 @@ public class ValidationTask extends AbstractServiceTask {
             
             
             // protein parameters
-            if (argumentsMap.containsKey("protein_expected_fdr")) {
+            if (m_argumentsMap.containsKey("protein_expected_fdr")) {
                 HashMap protSetValidator = new HashMap();
                 protSetValidator.put("parameter", "SCORE");
-                protSetValidator.put("expected_fdr", argumentsMap.get("protein_expected_fdr"));
+                protSetValidator.put("expected_fdr", m_argumentsMap.get("protein_expected_fdr"));
                 protSetValidator.put("validation_method","PROTEIN_SET_RULES");
                 params.put("prot_set_validator_config", protSetValidator);
             }
@@ -136,20 +136,20 @@ public class ValidationTask extends AbstractServiceTask {
                 String message = (String) errorMap.get("message");
 
                 if (message != null) {
-                    errorMessage = message;
+                    m_errorMessage = message;
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (errorMessage == null) {
-                        errorMessage = data;
+                    if (m_errorMessage == null) {
+                        m_errorMessage = data;
                     } else {
-                        errorMessage = errorMessage+"\n"+data;
+                        m_errorMessage = m_errorMessage+"\n"+data;
                     }
                 }
                 
-                if (errorMessage != null) {
-                    loggerWebcore.error(getClass().getSimpleName() + " failed : "+errorMessage);
+                if (m_errorMessage != null) {
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : "+m_errorMessage);
                 }
                 
                 return false;
@@ -158,16 +158,16 @@ public class ValidationTask extends AbstractServiceTask {
             
             BigDecimal jobId = (BigDecimal) jsonResult.get("result");
             if (jobId != null) {
-                id = jobId.intValue();
+                m_id = jobId.intValue();
             } else {
-                loggerProline.error(getClass().getSimpleName() + " failed : id not defined");
+                m_loggerProline.error(getClass().getSimpleName() + " failed : id not defined");
             }
 
 
 
         } catch (Exception e) {
-            errorMessage = e.getMessage();
-            loggerProline.error(getClass().getSimpleName() + " failed", e);
+            m_errorMessage = e.getMessage();
+            m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return false;
         }
 
@@ -183,11 +183,11 @@ public class ValidationTask extends AbstractServiceTask {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
             
-            request.setId(idIncrement++);
+            request.setId(m_idIncrement++);
             request.setMethod("get_job_status");
             
             Map<String, Object> params = new HashMap<>();
-	    params.put("job_id", id);
+	    params.put("job_id", m_id);
 
             request.setParameters(params);
 
@@ -199,19 +199,19 @@ public class ValidationTask extends AbstractServiceTask {
 
             if (errorMap != null) {
 
-                errorMessage = (String) errorMap.get("message");
+                m_errorMessage = (String) errorMap.get("message");
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (errorMessage == null) {
-                        errorMessage = data;
+                    if (m_errorMessage == null) {
+                        m_errorMessage = data;
                     } else {
-                        errorMessage = errorMessage+"\n"+data;
+                        m_errorMessage = m_errorMessage+"\n"+data;
                     }
                 }
                 
-                if (errorMessage != null) {
-                    loggerWebcore.error(getClass().getSimpleName() + " failed : " + errorMessage);
+                if (m_errorMessage != null) {
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : " + m_errorMessage);
                 }
                 
                 return ServiceState.STATE_FAILED; // should not happen !
@@ -242,19 +242,19 @@ public class ValidationTask extends AbstractServiceTask {
                     // retrieve resultSummary id
                     BigDecimal resultSummaryIdBD = (BigDecimal) resultMap.get("result");
                     if (resultSummaryIdBD == null) {
-                        loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSummary Id");
+                        m_loggerProline.error(getClass().getSimpleName() + " failed : No returned ResultSummary Id");
                         return ServiceState.STATE_FAILED;
                     }
 
-                    resultSummaryId[0] = new Integer(resultSummaryIdBD.intValue());
+                    m_resultSummaryId[0] = new Integer(resultSummaryIdBD.intValue());
 
                     return ServiceState.STATE_DONE;
                 } else {
-                    errorMessage = (String) resultMap.get("message");
+                    m_errorMessage = (String) resultMap.get("message");
                     
                     
-                    if (errorMessage != null) {
-                        loggerWebcore.error(getClass().getSimpleName() + " failed : " + errorMessage);
+                    if (m_errorMessage != null) {
+                        m_loggerWebcore.error(getClass().getSimpleName() + " failed : " + m_errorMessage);
                     }
                 
                     
@@ -266,8 +266,8 @@ public class ValidationTask extends AbstractServiceTask {
             
 
         } catch (Exception e) {
-            errorMessage = e.getMessage();
-            loggerProline.error(getClass().getSimpleName() + " failed", e);
+            m_errorMessage = e.getMessage();
+            m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return ServiceState.STATE_FAILED; // should not happen !
         }
                

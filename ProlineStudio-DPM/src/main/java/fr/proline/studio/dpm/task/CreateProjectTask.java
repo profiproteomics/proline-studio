@@ -22,18 +22,18 @@ import javax.persistence.EntityManager;
  */
 public class CreateProjectTask extends AbstractServiceTask {
 
-    private String name;
-    private String description;
-    private long ownerId;
-    private ProjectData projectData;
+    private String m_name;
+    private String m_description;
+    private long m_ownerId;
+    private ProjectData m_projectData;
     
     public CreateProjectTask(AbstractServiceCallback callback, String name, String description, long ownerId, ProjectData projectData) {
         super(callback, true /*synchronous*/, new TaskInfo("Add Project named "+name, TASK_LIST_INFO));
         
-        this.name = name;
-        this.description = description;
-        this.ownerId = ownerId;
-        this.projectData = projectData;
+        m_name = name;
+        m_description = description;
+        m_ownerId = ownerId;
+        m_projectData = projectData;
     }
     
     @Override
@@ -44,12 +44,12 @@ public class CreateProjectTask extends AbstractServiceTask {
         try {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
-            request.setId(id);
+            request.setId(m_id);
             request.setMethod("create");
             Map<String, Object> params = new HashMap<>();
-            params.put("name", name);
-            params.put("description", description);
-            params.put("owner_id", ownerId);
+            params.put("name", m_name);
+            params.put("description", m_description);
+            params.put("owner_id", m_ownerId);
             request.setParameters(params);
 
             HttpResponse response = postRequest("admin/project/"+request.getMethod()+getIdString(), request);
@@ -58,33 +58,33 @@ public class CreateProjectTask extends AbstractServiceTask {
 
             ArrayMap errorMap = (ArrayMap) jsonResult.get("error");
             
-            errorMessage = null;
+            m_errorMessage = null;
             if (errorMap != null) {
                 String message = (String) errorMap.get("message");
                 
                 if (message != null) {
-                    errorMessage = message;
+                    m_errorMessage = message;
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (errorMessage == null) {
-                        errorMessage = data;
+                    if (m_errorMessage == null) {
+                        m_errorMessage = data;
                     } else {
-                        errorMessage = errorMessage+"\n"+data;
+                        m_errorMessage = m_errorMessage+"\n"+data;
                     }
                 }
                 
                 
                  //JPM.WART : Web core returns an error and the project id !!!
-                loggerWebcore.error(getClass().getSimpleName()+errorMessage);
+                m_loggerWebcore.error(getClass().getSimpleName()+m_errorMessage);
                // return false; 
             }
 
             idProject = (BigDecimal) jsonResult.get("result");
             if (idProject == null) {
-                if (errorMessage == null) { //JPM.WART
-                    errorMessage = "Internal Error : Project Id not found";
+                if (m_errorMessage == null) { //JPM.WART
+                    m_errorMessage = "Internal Error : Project Id not found";
                 }
                 return false;
             }
@@ -92,8 +92,8 @@ public class CreateProjectTask extends AbstractServiceTask {
             
             
         } catch (Exception e) {
-            errorMessage = e.getMessage();
-            loggerProline.error(getClass().getSimpleName()+" failed", e);
+            m_errorMessage = e.getMessage();
+            m_loggerProline.error(getClass().getSimpleName()+" failed", e);
             return false;
         }
         
@@ -104,7 +104,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             Project p = entityManagerUDS.find(Project.class, new Integer(idProject.intValue()));
 
             if (p == null) {
-                errorMessage = "Internal Error : ";
+                m_errorMessage = "Internal Error : ";
                 return false;
             }
 
@@ -125,12 +125,12 @@ public class CreateProjectTask extends AbstractServiceTask {
 
             entityManagerUDS.persist(trashDataset);
             
-            projectData.setProject(p);
+            m_projectData.setProject(p);
             
             entityManagerUDS.getTransaction().commit();
 
         } catch (Exception e) {
-            loggerProline.error(getClass().getSimpleName() + " failed", e);
+            m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return false;
         } finally {
             entityManagerUDS.close();

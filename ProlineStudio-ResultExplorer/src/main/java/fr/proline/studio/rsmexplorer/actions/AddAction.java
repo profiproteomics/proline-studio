@@ -7,7 +7,7 @@ import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Add Action (menu for sub-actions identification and aggregation)
  * @author JM235353
  */
 public class AddAction extends AbstractRSMAction {

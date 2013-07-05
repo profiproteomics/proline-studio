@@ -19,7 +19,7 @@ import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Add Aggregate action
  * @author JM235353
  */
 public class AggregateAction extends AbstractRSMAction {

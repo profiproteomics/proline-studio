@@ -6,12 +6,12 @@ import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Action for the menu to display data for Identification Summary
  * @author JM235353
  */
 public class DisplayRsmAction extends AbstractRSMAction {
 
-    private  DisplayRsmPSMAction m_displayRsmPSMAction;
+    private DisplayRsmPSMAction m_displayRsmPSMAction;
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
     private DisplayUserWindowAction m_displayUserWindowAction;

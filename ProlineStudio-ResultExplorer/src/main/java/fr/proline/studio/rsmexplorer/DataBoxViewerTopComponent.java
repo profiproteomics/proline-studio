@@ -4,12 +4,10 @@ import fr.proline.studio.pattern.WindowBox;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import org.openide.windows.TopComponent;
 
 /**
- *
+ * TopComponent for a windox box with databoxes
  * @author JM235353
  */
 public class DataBoxViewerTopComponent extends TopComponent {

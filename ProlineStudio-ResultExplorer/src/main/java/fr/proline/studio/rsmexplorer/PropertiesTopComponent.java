@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.gui.HourglassPanel;
@@ -13,10 +9,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import org.openide.explorer.propertysheet.PropertySheet;
 import org.openide.windows.TopComponent;
-import org.openide.nodes.Node;
 
 /**
- *
+ * Top Component to display properties
  * @author JM235353
  */
 public class PropertiesTopComponent extends TopComponent {

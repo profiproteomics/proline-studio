@@ -18,12 +18,10 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Display PSM of Identification Summary (Rsm)
  * @author JM235353
  */
 public class DisplayRsmPSMAction extends AbstractRSMAction {
-
-   //private static ProteinGroupsAction instance = null;
 
    public DisplayRsmPSMAction() {
        super(NbBundle.getMessage(DisplayRsmPeptidesAction.class, "CTL_DisplayRsmPSMAction"));

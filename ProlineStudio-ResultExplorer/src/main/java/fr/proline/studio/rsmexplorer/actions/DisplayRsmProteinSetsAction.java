@@ -15,7 +15,7 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Display Protein Sets of an Identification Summary (rsm)
  * @author JM235353
  */
 public class DisplayRsmProteinSetsAction extends AbstractRSMAction {

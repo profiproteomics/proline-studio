@@ -17,7 +17,7 @@ import org.openide.windows.WindowManager;
 
 
 /**
- * Top component which displays something.
+ * Top component to dispay the RSM Tree.
  */
 @ConvertAsProperties(dtd = "-//fr.proline.studio.rsmexplorer//RSMExplorer//EN",
 autostore = false)

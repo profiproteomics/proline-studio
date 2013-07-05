@@ -6,7 +6,7 @@ import fr.proline.studio.rsmexplorer.node.RSMTree;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Delete a dataset Action
  * @author JM235353
  */
 public class DeleteAction extends AbstractRSMAction {

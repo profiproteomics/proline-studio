@@ -17,12 +17,10 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * 
  * @author JM235353
  */
 public class DisplayRsmPeptidesAction extends AbstractRSMAction {
-
-   //private static ProteinGroupsAction instance = null;
 
    public DisplayRsmPeptidesAction() {
        super(NbBundle.getMessage(DisplayRsmPeptidesAction.class, "CTL_DisplayRsmPeptidesAction"));

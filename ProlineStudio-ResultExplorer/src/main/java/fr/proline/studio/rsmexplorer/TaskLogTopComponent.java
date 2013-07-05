@@ -8,7 +8,7 @@ import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 
 /**
- *
+ * Top Component for logs of tasks and services
  * @author JM235353
  */
 

@@ -12,7 +12,7 @@ import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Action to display a window with all Search Results (rset)
  * @author JM235353
  */
 public class DisplayAllRsetAction extends AbstractRSMAction {

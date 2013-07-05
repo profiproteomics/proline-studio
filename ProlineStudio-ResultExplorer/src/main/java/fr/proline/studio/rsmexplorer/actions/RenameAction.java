@@ -11,12 +11,11 @@ import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Action to Rename a dataset
  * @author JM235353
  */
 public class RenameAction extends AbstractRSMAction {
 
-    //private static RenameAction instance = null;
     public RenameAction() {
         super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"));
     }

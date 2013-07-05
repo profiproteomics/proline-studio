@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.uds.Dataset;
@@ -16,7 +12,7 @@ import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Action to empty the Trash
  * @author JM235353
  */
 public class EmptyTrashAction extends AbstractRSMAction {

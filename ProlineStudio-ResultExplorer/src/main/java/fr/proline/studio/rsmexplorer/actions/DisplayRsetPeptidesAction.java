@@ -17,7 +17,7 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Display PSM of Search Result (rset)
  * @author JM235353
  */
 public class DisplayRsetPeptidesAction extends AbstractRSMAction {

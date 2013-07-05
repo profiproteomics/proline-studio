@@ -2,14 +2,8 @@ package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.Dataset;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
-import fr.proline.studio.dam.tasks.DatabaseRsetProperties;
-import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.utils.PropertiesProviderInterface;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
@@ -26,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * Display of the properties of a rset and rsm
  * @author JM235353
  */
 public class PropertiesAction extends AbstractRSMAction {

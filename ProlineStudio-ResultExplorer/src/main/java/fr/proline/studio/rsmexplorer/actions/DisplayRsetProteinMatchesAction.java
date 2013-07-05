@@ -17,12 +17,10 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Display Protein Matches of a Search Result (rset)
  * @author JM235353
  */
 public class DisplayRsetProteinMatchesAction extends AbstractRSMAction {
-
-   //private static ProteinGroupsAction instance = null;
 
    public DisplayRsetProteinMatchesAction() {
        super(NbBundle.getMessage(DisplayRsetPeptidesAction.class, "CTL_DisplayProteinMatchesAction"));

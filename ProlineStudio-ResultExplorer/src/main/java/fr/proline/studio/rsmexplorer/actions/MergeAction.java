@@ -20,7 +20,7 @@ import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Action to Merge data from a set of Search Results (rset) or Identification Summaries (rsm)
  * @author JM235353
  */
 public class MergeAction extends AbstractRSMAction {

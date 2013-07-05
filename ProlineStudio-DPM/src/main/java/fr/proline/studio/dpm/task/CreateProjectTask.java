@@ -101,7 +101,7 @@ public class CreateProjectTask extends AbstractServiceTask {
         try {
             entityManagerUDS.getTransaction().begin();
         
-            Project p = entityManagerUDS.find(Project.class, new Integer(idProject.intValue()));
+            Project p = entityManagerUDS.find(Project.class, Long.valueOf(idProject.longValue()));
 
             if (p == null) {
                 m_errorMessage = "Internal Error : ";

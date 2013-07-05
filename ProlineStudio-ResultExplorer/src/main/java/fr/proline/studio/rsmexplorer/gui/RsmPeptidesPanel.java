@@ -32,7 +32,7 @@ import org.openide.windows.TopComponent;
 
 
 /**
- *
+ * Panel for Peptides
  * @author JM235353
  */
 public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInterface {

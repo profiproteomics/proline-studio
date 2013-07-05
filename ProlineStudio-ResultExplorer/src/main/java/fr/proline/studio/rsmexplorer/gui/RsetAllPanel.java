@@ -36,7 +36,7 @@ import org.openide.nodes.Sheet;
 import org.openide.util.NbBundle;
 
 /**
- *
+ * Panel to display all Search Results (rset) imported
  * @author JM235353
  */
 public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterface {

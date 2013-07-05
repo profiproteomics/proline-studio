@@ -30,7 +30,7 @@ import javax.swing.table.TableCellRenderer;
 import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 
 /**
- *
+ * Panel to compare Protein Sets
  * @author JM235353
  */
 public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPanelInterface {
@@ -109,7 +109,7 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.m_dataBox = dataBox;
+        m_dataBox = dataBox;
     }
 
     public AbstractDataBox getDataBox() {

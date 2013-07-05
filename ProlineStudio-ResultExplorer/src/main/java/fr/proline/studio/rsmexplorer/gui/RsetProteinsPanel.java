@@ -25,7 +25,7 @@ import javax.swing.table.TableColumn;
 import fr.proline.studio.dam.tasks.*;
 
 /**
- *
+ * Panel for Protein Matches
  * @author JM235353
  */
 public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInterface {
@@ -116,7 +116,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.m_dataBox = dataBox;
+        m_dataBox = dataBox;
     }
 
     @Override

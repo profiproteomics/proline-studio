@@ -26,7 +26,7 @@ import java.util.HashMap;
 import javax.swing.*;
 
 /**
- *
+ * Panel to compare Protein Sets
  * @author JM235353
  */
 public class RsetProteinGroupComparePanel extends HourglassPanel implements DataBoxPanelInterface {

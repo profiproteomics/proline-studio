@@ -19,7 +19,7 @@ import javax.swing.text.html.StyleSheet;
 
 
 /**
- *
+ * Panel to display the sequence of a Protein and the sequences of its Peptides found
  * @author JM235353
  */
 public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements DataBoxPanelInterface {

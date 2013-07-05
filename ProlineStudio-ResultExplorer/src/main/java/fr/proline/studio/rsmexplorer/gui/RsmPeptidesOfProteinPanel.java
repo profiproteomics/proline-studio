@@ -13,8 +13,9 @@ import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.utils.DecoratedTable;
 import java.awt.event.ActionListener;
 import javax.swing.event.ListSelectionEvent;
+
 /**
- *
+ * Panel for Peptides of a Protein 
  * @author JM235353
  */
 public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBoxPanelInterface {

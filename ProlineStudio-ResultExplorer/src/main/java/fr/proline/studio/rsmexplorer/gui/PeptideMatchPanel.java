@@ -30,7 +30,7 @@ import org.openide.util.ImageUtilities;
 import org.openide.windows.TopComponent;
 
 /**
- *
+ * Panel for Peptide Matches
  * @author JM235353
  */
 public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInterface {

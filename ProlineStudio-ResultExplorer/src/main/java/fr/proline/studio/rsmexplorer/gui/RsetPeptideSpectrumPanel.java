@@ -226,7 +226,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.m_dataBox = dataBox;
+        m_dataBox = dataBox;
     }
     
     @Override

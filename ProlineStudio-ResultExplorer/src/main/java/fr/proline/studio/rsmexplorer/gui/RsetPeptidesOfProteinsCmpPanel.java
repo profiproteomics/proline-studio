@@ -20,7 +20,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- *
+ * Panel to compare Peptides of different proteins
  * @author JM235353
  */
 public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements DataBoxPanelInterface {
@@ -85,7 +85,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
-        this.m_dataBox = dataBox;
+        m_dataBox = dataBox;
     }
 
     @Override

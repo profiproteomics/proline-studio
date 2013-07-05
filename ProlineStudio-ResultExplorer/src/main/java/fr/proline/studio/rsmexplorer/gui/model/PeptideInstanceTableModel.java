@@ -26,7 +26,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 8; 
     //public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
     public static final int COLTYPE_PEPTIDE_PTM = 9;
-    private static final String[] columnNames = {"Peptide", "Score", "Mass Calc.", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
+    private static final String[] m_columnNames = {"Peptide", "Score", "Mass Calc.", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
     private PeptideInstance[] m_peptideInstances = null;
 
     
@@ -42,12 +42,12 @@ public class PeptideInstanceTableModel extends LazyTableModel {
     
     @Override
     public int getColumnCount() {
-        return columnNames.length;
+        return m_columnNames.length;
     }
 
     @Override
     public String getColumnName(int col) {
-        return columnNames[col];
+        return m_columnNames[col];
     }
 
     @Override

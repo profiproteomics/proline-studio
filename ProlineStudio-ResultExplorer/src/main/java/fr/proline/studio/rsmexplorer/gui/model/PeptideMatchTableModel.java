@@ -25,10 +25,10 @@ public class PeptideMatchTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
     public static final int COLTYPE_PEPTIDE_PTM = 9;
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 10;
-    private static final String[] columnNamesRset = {"Peptide", "Score", "MsQuery", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM"};
-    private static final String[] columnNamesRsm =  {"Peptide", "Score", "MsQuery", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM", "Protein Sets"};
+    private static final String[] m_columnNamesRset = {"Peptide", "Score", "MsQuery", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM"};
+    private static final String[] m_columnNamesRsm =  {"Peptide", "Score", "MsQuery", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM", "Protein Sets"};
     
-    private PeptideMatch[] peptideMatches = null;
+    private PeptideMatch[] m_peptideMatches = null;
 
     private boolean m_forRSM;
     
@@ -40,16 +40,16 @@ public class PeptideMatchTableModel extends LazyTableModel {
     
     
     public PeptideMatch getPeptideMatch(int row) {
-        return peptideMatches[row];
+        return m_peptideMatches[row];
 
     }
     
     @Override
     public int getColumnCount() {
         if (m_forRSM) {
-            return columnNamesRsm.length;
+            return m_columnNamesRsm.length;
         } else {
-            return columnNamesRset.length;
+            return m_columnNamesRset.length;
         }
         
     }
@@ -57,9 +57,9 @@ public class PeptideMatchTableModel extends LazyTableModel {
     @Override
     public String getColumnName(int col) {
         if (m_forRSM) {
-            return columnNamesRsm[col];
+            return m_columnNamesRsm[col];
         } else {
-            return columnNamesRset[col];
+            return m_columnNamesRset[col];
         }
     }
 
@@ -115,16 +115,16 @@ public class PeptideMatchTableModel extends LazyTableModel {
     
     @Override
     public int getRowCount() {
-        if (peptideMatches == null) {
+        if (m_peptideMatches == null) {
             return 0;
         }
-        return peptideMatches.length;
+        return m_peptideMatches.length;
     }
 
     @Override
     public Object getValueAt(int row, int col) {
         // Retrieve Protein Set
-        PeptideMatch peptideMatch = peptideMatches[row];
+        PeptideMatch peptideMatch = m_peptideMatches[row];
 
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
@@ -291,7 +291,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
     }
 
     public void setData(Long taskId, PeptideMatch[] peptideMatches) {
-        this.peptideMatches = peptideMatches;
+        this.m_peptideMatches = peptideMatches;
         this.m_taskId = taskId;
         
         updateMinMax();
@@ -309,7 +309,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
         double maxScore = 0;
         int size = getRowCount();
         for (int i = 0; i < size; i++) {
-            PeptideMatch peptideMatch = peptideMatches[i];
+            PeptideMatch peptideMatch = m_peptideMatches[i];
             double score = peptideMatch.getScore();
             if (score > maxScore) {
                 maxScore = score;
@@ -320,14 +320,14 @@ public class PeptideMatchTableModel extends LazyTableModel {
     }
     
     public PeptideMatch[] getPeptideMatches() {
-        return peptideMatches;
+        return m_peptideMatches;
     }
     
     public ResultSet getResultSet() {
-        if ((peptideMatches == null) || (peptideMatches.length == 0)) {
+        if ((m_peptideMatches == null) || (m_peptideMatches.length == 0)) {
             return null;
         }
-        return peptideMatches[0].getResultSet();
+        return m_peptideMatches[0].getResultSet();
     }
 
     public void dataUpdated() {
@@ -338,9 +338,9 @@ public class PeptideMatchTableModel extends LazyTableModel {
     }
     
     public int findRow(long proteinSetId) {
-        int nb = peptideMatches.length;
+        int nb = m_peptideMatches.length;
         for (int i = 0; i < nb; i++) {
-            if (proteinSetId == peptideMatches[i].getId()) {
+            if (proteinSetId == m_peptideMatches[i].getId()) {
                 return i;
             }
         }
@@ -352,11 +352,11 @@ public class PeptideMatchTableModel extends LazyTableModel {
         HashSet<Long> peptideMatchIdMap = new HashSet<>(peptideMatchIds.size());
         peptideMatchIdMap.addAll(peptideMatchIds);
 
-        int nb = peptideMatches.length;
+        int nb = m_peptideMatches.length;
         int iCur = 0;
         for (int iView = 0; iView < nb; iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
-            PeptideMatch ps = peptideMatches[iModel];
+            PeptideMatch ps = m_peptideMatches[iModel];
             if (peptideMatchIdMap.contains(ps.getId())) {
                 peptideMatchIds.set(iCur++, ps.getId());
             }

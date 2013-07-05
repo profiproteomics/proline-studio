@@ -2,15 +2,13 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 
 import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.studio.utils.DataFormat;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
-import javax.swing.table.AbstractTableModel;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
 import fr.proline.studio.utils.LazyData;
 
 /**
- *
+ * Table Model for Peptide Matches
  * @author JM235353
  */
 public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
@@ -19,8 +17,8 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
     public static final int COLTYPE_PROTEIN_SCORE          = 1;
     public static final int COLTYPE_PROTEIN_PEPTIDES_COUNT = 2;
     public static final int COLTYPE_PROTEIN_MASS           = 3;
-    private static final String[] columnNames = {"Protein", "Score", "Peptides", "Mass"};
-    private ProteinMatch[] proteinMatchArray = null;
+    private static final String[] m_columnNames = {"Protein", "Score", "Peptides", "Mass"};
+    private ProteinMatch[] m_proteinMatchArray = null;
 
     public ProteinsOfPeptideMatchTableModel(LazyTable table) {
         super(table);
@@ -28,17 +26,17 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
     
     public ProteinMatch getProteinMatch(int row) {
 
-        return proteinMatchArray[row];
+        return m_proteinMatchArray[row];
     }
 
     @Override
     public int getColumnCount() {
-        return columnNames.length;
+        return m_columnNames.length;
     }
 
     @Override
     public String getColumnName(int col) {
-        return columnNames[col];
+        return m_columnNames[col];
     }
 
     @Override
@@ -58,10 +56,10 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
 
     @Override
     public int getRowCount() {
-        if (proteinMatchArray == null) {
+        if (m_proteinMatchArray == null) {
             return 0;
         }
-        return proteinMatchArray.length;
+        return m_proteinMatchArray.length;
     }
 
     @Override
@@ -107,7 +105,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
     }
 
     public void setData(ProteinMatch[] proteinMatchArray) {
-        this.proteinMatchArray = proteinMatchArray;
+        this.m_proteinMatchArray = proteinMatchArray;
         fireTableDataChanged();
         
 

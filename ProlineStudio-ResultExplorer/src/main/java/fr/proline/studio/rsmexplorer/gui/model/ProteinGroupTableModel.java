@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
- *
+ * Table Model for Protein Sets
  * @author JM235353
  */
 public class ProteinGroupTableModel extends LazyTableModel {
@@ -21,8 +21,8 @@ public class ProteinGroupTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDES_COUNT = 3;
     public static final int COLTYPE_SPECTRAL_COUNT = 4;
     public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 5;
-    private static final String[] columnNames = {"Protein Set", "Score", "Proteins", "Peptides", "Spectral Count", "Specific Spectral Count"};
-    private ProteinSet[] proteinSets = null;
+    private static final String[] m_columnNames = {"Protein Set", "Score", "Proteins", "Peptides", "Spectral Count", "Specific Spectral Count"};
+    private ProteinSet[] m_proteinSets = null;
     
 
     
@@ -35,12 +35,12 @@ public class ProteinGroupTableModel extends LazyTableModel {
     
     @Override
     public int getColumnCount() {
-        return columnNames.length;
+        return m_columnNames.length;
     }
 
     @Override
     public String getColumnName(int col) {
-        return columnNames[col];
+        return m_columnNames[col];
     }
 
     @Override
@@ -73,16 +73,16 @@ public class ProteinGroupTableModel extends LazyTableModel {
     
     @Override
     public int getRowCount() {
-        if (proteinSets == null) {
+        if (m_proteinSets == null) {
             return 0;
         }
-        return proteinSets.length;
+        return m_proteinSets.length;
     }
 
     @Override
     public Object getValueAt(int row, int col) {
         // Retrieve Protein Set
-        ProteinSet proteinSet = proteinSets[row];
+        ProteinSet proteinSet = m_proteinSets[row];
         long rsmId = proteinSet.getResultSummary().getId();
 
         switch (col) {
@@ -188,7 +188,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
      
     
     public void setData(Long taskId, ProteinSet[] proteinSets) {
-        this.proteinSets = proteinSets;
+        this.m_proteinSets = proteinSets;
         this.m_taskId = taskId;
         
         updateMinMax();
@@ -205,7 +205,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
         double maxScore = 0;
         int size = getRowCount();
         for (int i = 0; i < size; i++) {
-            ProteinSet proteinSet = proteinSets[i];
+            ProteinSet proteinSet = m_proteinSets[i];
             ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
             if (proteinMatch != null) {
                 long rsmId = proteinSet.getResultSummary().getId();
@@ -227,21 +227,21 @@ public class ProteinGroupTableModel extends LazyTableModel {
     }
 
     public ProteinSet getProteinSet(int i) {
-        return proteinSets[i];
+        return m_proteinSets[i];
     }
     
     public ResultSummary getResultSummary() {
-        if ((proteinSets == null) || (proteinSets.length == 0)) {
+        if ((m_proteinSets == null) || (m_proteinSets.length == 0)) {
             return null;
         }
         
-        return proteinSets[0].getResultSummary();
+        return m_proteinSets[0].getResultSummary();
     }
 
     public int findRow(long proteinSetId) {
-        int nb = proteinSets.length;
+        int nb = m_proteinSets.length;
         for (int i=0;i<nb;i++) {
-            if (proteinSetId == proteinSets[i].getId()) {
+            if (proteinSetId == m_proteinSets[i].getId()) {
                 return i;
             }
         }
@@ -254,11 +254,11 @@ public class ProteinGroupTableModel extends LazyTableModel {
         HashSet<Long> proteinSetIdMap = new HashSet<>(proteinSetIds.size());
         proteinSetIdMap.addAll(proteinSetIds);
         
-        int nb = proteinSets.length;
+        int nb = m_proteinSets.length;
         int iCur = 0;
         for (int iView=0;iView<nb;iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
-            ProteinSet ps = proteinSets[iModel];
+            ProteinSet ps = m_proteinSets[iModel];
             if (  proteinSetIdMap.contains(ps.getId())  ) {
                 proteinSetIds.set(iCur++,ps.getId());
             }

@@ -22,22 +22,22 @@ public class PeptideTableModel extends AbstractTableModel {
     public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 8;
     public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 9;
     public static final int COLTYPE_PEPTIDE_PTM = 10;
-    private static final String[] columnNames = {"Peptide", "Score", "Protein S. Matches", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
-    private PeptideInstance[] peptideInstances = null;
+    private static final String[] m_columnNames = {"Peptide", "Score", "Protein S. Matches", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
+    private PeptideInstance[] m_peptideInstances = null;
 
     public PeptideInstance getPeptide(int row) {
-        return peptideInstances[row];
+        return m_peptideInstances[row];
 
     }
     
     @Override
     public int getColumnCount() {
-        return columnNames.length;
+        return m_columnNames.length;
     }
 
     @Override
     public String getColumnName(int col) {
-        return columnNames[col];
+        return m_columnNames[col];
     }
 
     @Override
@@ -65,16 +65,16 @@ public class PeptideTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        if (peptideInstances == null) {
+        if (m_peptideInstances == null) {
             return 0;
         }
-        return peptideInstances.length;
+        return m_peptideInstances.length;
     }
 
     @Override
     public Object getValueAt(int row, int col) {
         // Retrieve Protein Set
-        PeptideInstance peptideInstance = peptideInstances[row];
+        PeptideInstance peptideInstance = m_peptideInstances[row];
 
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
@@ -194,13 +194,13 @@ public class PeptideTableModel extends AbstractTableModel {
     }
 
     public void setData(PeptideInstance[] peptideInstances) {
-        this.peptideInstances = peptideInstances;
+        this.m_peptideInstances = peptideInstances;
         fireTableDataChanged();
 
     }
 
     public PeptideInstance[] getPeptideInstances() {
-        return peptideInstances;
+        return m_peptideInstances;
     }
 
     

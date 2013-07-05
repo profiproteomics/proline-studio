@@ -6,7 +6,7 @@ import fr.proline.studio.utils.DataFormat;
 import javax.swing.table.AbstractTableModel;
 
 /**
- *
+ * Table Model for Proteins
  * @author JM235353
  */
 public class ProteinTableModel extends AbstractTableModel {
@@ -16,28 +16,28 @@ public class ProteinTableModel extends AbstractTableModel {
     public static final int COLTYPE_PROTEIN_SCORE          = 2;
     public static final int COLTYPE_PROTEIN_PEPTIDES_COUNT = 3;
     public static final int COLTYPE_PROTEIN_MASS           = 4;
-    private static final String[] columnNames = {"Protein", "Same Set", "Score", "Peptides", "Mass"};
-    private ProteinMatch[] sameSetMatches = null;
-    private ProteinMatch[] subSetMatches = null;
+    private static final String[] m_columnNames = {"Protein", "Same Set", "Score", "Peptides", "Mass"};
+    private ProteinMatch[] m_sameSetMatches = null;
+    private ProteinMatch[] m_subSetMatches = null;
     private Long rsmId = null;
 
     public ProteinMatch getProteinMatch(int row) {
 
-        int sameSetNb = sameSetMatches.length;
+        int sameSetNb = m_sameSetMatches.length;
         if (row < sameSetNb) {
-            return sameSetMatches[row];
+            return m_sameSetMatches[row];
         }
-        return subSetMatches[row - sameSetNb];
+        return m_subSetMatches[row - sameSetNb];
     }
 
     @Override
     public int getColumnCount() {
-        return columnNames.length;
+        return m_columnNames.length;
     }
 
     @Override
     public String getColumnName(int col) {
-        return columnNames[col];
+        return m_columnNames[col];
     }
 
     @Override
@@ -58,10 +58,10 @@ public class ProteinTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        if (sameSetMatches == null) {
+        if (m_sameSetMatches == null) {
             return 0;
         }
-        return sameSetMatches.length + subSetMatches.length;
+        return m_sameSetMatches.length + m_subSetMatches.length;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class ProteinTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_NAME:
                 return proteinMatch.getAccession();
             case COLTYPE_SAMESET_SUBSET:
-                if (row<sameSetMatches.length) {
+                if (row<m_sameSetMatches.length) {
                     return Boolean.TRUE;
                 } else {
                     return Boolean.FALSE;
@@ -100,8 +100,8 @@ public class ProteinTableModel extends AbstractTableModel {
 
     public void setData(long rsmId, ProteinMatch[] sameSetMatches, ProteinMatch[] subSetMatches) {
         this.rsmId = rsmId;
-        this.sameSetMatches = sameSetMatches;
-        this.subSetMatches = subSetMatches;
+        this.m_sameSetMatches = sameSetMatches;
+        this.m_subSetMatches = subSetMatches;
         fireTableDataChanged();
         
 

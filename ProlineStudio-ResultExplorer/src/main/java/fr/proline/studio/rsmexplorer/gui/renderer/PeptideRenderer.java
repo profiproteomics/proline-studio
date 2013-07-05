@@ -18,7 +18,7 @@ public class PeptideRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-        String displayString = null;
+        String displayString;
         
         if (value == null) {
             displayString = "";

@@ -10,7 +10,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * Renderer to correctly format doubles
  * @author JM235353
  */
 public class DoubleRenderer implements TableCellRenderer  {

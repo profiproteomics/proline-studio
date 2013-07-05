@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.renderer;
 import fr.proline.studio.utils.DataFormat;
 import java.awt.Component;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 /**

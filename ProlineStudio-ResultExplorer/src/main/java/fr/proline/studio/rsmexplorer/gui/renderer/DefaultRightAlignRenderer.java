@@ -8,11 +8,10 @@ import java.awt.Component;
 import java.io.Serializable;
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * This renderer encapsulates another renderer and force to display the text to the right
  * @author JM235353
  */
 public class DefaultRightAlignRenderer implements TableCellRenderer, Serializable {

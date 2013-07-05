@@ -8,6 +8,10 @@ import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
 
+/**
+ * Databox : All PSM of an Identification Summary or corresponding to a Peptide Instance
+ * @author JM235353
+ */
 public class DataBoxRsmPeptide extends AbstractDataBox {
 
     
@@ -16,8 +20,8 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
     public DataBoxRsmPeptide() {
 
         // Name of this databox
-        name = "PSM";
-        description = "All PSM of an Identification Summary or corresponding to a Peptide Instance";
+        m_name = "PSM";
+        m_description = "All PSM of an Identification Summary or corresponding to a Peptide Instance";
         
         // Register Possible in parameters
         // One ResultSummary
@@ -38,7 +42,7 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
     @Override
     public void createPanel() {
         PeptideMatchPanel p = new PeptideMatchPanel(true);
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -46,7 +50,7 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
+        final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

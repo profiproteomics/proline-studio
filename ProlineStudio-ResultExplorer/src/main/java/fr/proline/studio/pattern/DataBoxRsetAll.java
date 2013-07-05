@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import javax.swing.event.ChangeEvent;
 
 /**
- *
+ * Databox for all Rset of a project
  * @author JM235353
  */
 public class DataBoxRsetAll extends AbstractDataBox{
@@ -23,7 +23,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
     public DataBoxRsetAll() {
 
         // Name of this databox
-        name = "Search Results";
+        m_name = "Search Results";
         
         // Register Possible in parameters
         // One ResultSummary
@@ -42,7 +42,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
     @Override
     public void createPanel() {
         RsetAllPanel p = new RsetAllPanel();
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
         
@@ -52,7 +52,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
     @Override
     public void dataChanged() {
 
-            Project p = (m_project != null) ? m_project : (Project) previousDataBox.getData(false, Project.class);
+            Project p = (m_project != null) ? m_project : (Project) m_previousDataBox.getData(false, Project.class);
 
             final ArrayList<ResultSet> resultSetArrayList = new ArrayList<>();
             

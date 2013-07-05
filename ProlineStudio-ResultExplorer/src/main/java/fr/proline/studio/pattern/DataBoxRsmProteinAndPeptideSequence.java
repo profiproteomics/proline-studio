@@ -16,8 +16,8 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
     public DataBoxRsmProteinAndPeptideSequence() {
 
         // Name of this databox
-        name = "Protein Sequence";
-        description = "Protein Sequence and its Peptides Sequences";
+        m_name = "Protein Sequence";
+        m_description = "Protein Sequence and its Peptides Sequences";
         
         // Register in parameters
         GroupParameter inParameter = new GroupParameter();
@@ -34,16 +34,16 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsmProteinAndPeptideSequencePanel p = new RsmProteinAndPeptideSequencePanel();
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
 
     @Override
     public void dataChanged() {
-        ProteinMatch proteinMatch = (ProteinMatch) previousDataBox.getData(false, ProteinMatch.class);
-        PeptideInstance selectedPeptide = (PeptideInstance) previousDataBox.getData(false, PeptideInstance.class);
-        ResultSummary resultSummary = (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
+        ProteinMatch proteinMatch = (ProteinMatch) m_previousDataBox.getData(false, ProteinMatch.class);
+        PeptideInstance selectedPeptide = (PeptideInstance) m_previousDataBox.getData(false, PeptideInstance.class);
+        ResultSummary resultSummary = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
        
         
         if ((proteinMatch == null) || (selectedPeptide == null) || (resultSummary == null)) {

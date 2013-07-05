@@ -3,7 +3,7 @@ package fr.proline.studio.pattern;
 import java.util.ArrayList;
 
 /**
- *
+ * Group of parameters
  * @author JM235353
  */
 public class GroupParameter  {

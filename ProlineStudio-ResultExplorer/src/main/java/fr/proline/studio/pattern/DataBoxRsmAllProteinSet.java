@@ -22,8 +22,8 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
     public DataBoxRsmAllProteinSet() { 
 
          // Name of this databox
-        name = "Protein Set";
-        description = "All Protein Sets of an Identification Summary";
+        m_name = "Protein Set";
+        m_description = "All Protein Sets of an Identification Summary";
 
         // Register Possible in parameters
         // One ResultSummary
@@ -45,7 +45,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsmProteinSetPanel p = new RsmProteinSetPanel(true);
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -54,7 +54,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
     public void dataChanged() {
 
 
-        final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
+        final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
         final int loadingId = setLoading();
 

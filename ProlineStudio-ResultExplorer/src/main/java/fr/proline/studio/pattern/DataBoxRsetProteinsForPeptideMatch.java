@@ -9,7 +9,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsetProteinsPanel;
 
 /**
- *
+ * Databox : Proteins for a Peptide Match
  * @author JM235353
  */
 public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
@@ -19,8 +19,8 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     public DataBoxRsetProteinsForPeptideMatch() {
 
          // Name of this databox
-        name = "Proteins";
-        description = "Proteins for a Peptide Match";
+        m_name = "Proteins";
+        m_description = "Proteins for a Peptide Match";
         
         // Register Possible in parameters
         // One PeptideMatch
@@ -41,7 +41,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsetProteinsPanel p = new RsetProteinsPanel();
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -49,7 +49,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final PeptideMatch peptideMatch = (PeptideMatch) previousDataBox.getData(false, PeptideMatch.class);
+        final PeptideMatch peptideMatch = (PeptideMatch) m_previousDataBox.getData(false, PeptideMatch.class);
 
         if (peptideMatch == null) {
             ((RsetProteinsPanel)m_panel).setDataPeptideMatch(null);

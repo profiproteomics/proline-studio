@@ -3,8 +3,7 @@ package fr.proline.studio.pattern;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import java.awt.Image;
 import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+
 
 /**
  * A window box contains a set of Databox and can be display by a DataBoxViewerTopComponent

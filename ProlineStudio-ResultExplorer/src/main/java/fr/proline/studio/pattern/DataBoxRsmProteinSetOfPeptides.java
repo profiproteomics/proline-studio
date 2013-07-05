@@ -23,8 +23,8 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     public DataBoxRsmProteinSetOfPeptides() { 
 
          // Name of this databox
-        name = "Protein Set";
-        description = "All Protein Sets coresponding to a Peptide Instance";
+        m_name = "Protein Set";
+        m_description = "All Protein Sets coresponding to a Peptide Instance";
 
         // Register Possible in parameters
         // One ResultSummary
@@ -48,7 +48,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsmProteinSetPanel p = new RsmProteinSetPanel(false);
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -56,7 +56,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final PeptideInstance _peptideInstance = (PeptideInstance) previousDataBox.getData(false, PeptideInstance.class);
+        final PeptideInstance _peptideInstance = (PeptideInstance) m_previousDataBox.getData(false, PeptideInstance.class);
 
 
         if (_peptideInstance == null) {

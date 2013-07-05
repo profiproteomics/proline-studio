@@ -19,8 +19,8 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
     public DataBoxRsetAllProteinMatch() {
         
         // Name of this databox
-        name = "Protein";
-        description = "All Proteins of a Search Result";
+        m_name = "Protein";
+        m_description = "All Proteins of a Search Result";
         
         // Register Possible in parameters
         // One PeptideMatch
@@ -38,7 +38,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsetProteinsPanel p = new RsetProteinsPanel();
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -46,7 +46,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final ResultSet _rset = (m_rset != null) ? m_rset : (ResultSet) previousDataBox.getData(false, ResultSet.class);
+        final ResultSet _rset = (m_rset != null) ? m_rset : (ResultSet) m_previousDataBox.getData(false, ResultSet.class);
 
         final int loadingId = setLoading();
 

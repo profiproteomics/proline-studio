@@ -22,8 +22,8 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     public DataBoxRsmProteinsOfProteinSet() {
 
          // Name of this databox
-        name = "Proteins";
-        description = "All Proteins of a Protein Set";
+        m_name = "Proteins";
+        m_description = "All Proteins of a Protein Set";
         
         // Register Possible in parameters
         // One ProteinSet
@@ -43,14 +43,14 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsmProteinsOfProteinSetPanel p = new RsmProteinsOfProteinSetPanel();
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
     
     @Override
     public void dataChanged() {
-        final ProteinSet proteinSet = (ProteinSet) previousDataBox.getData(false, ProteinSet.class);
+        final ProteinSet proteinSet = (ProteinSet) m_previousDataBox.getData(false, ProteinSet.class);
 
         if (proteinSet == null) {
             ((RsmProteinsOfProteinSetPanel)m_panel).setData(null, null);

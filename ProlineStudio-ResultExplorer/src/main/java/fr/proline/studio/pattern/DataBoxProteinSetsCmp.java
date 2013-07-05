@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- *
+ * Databox for Protein Sets
  * @author JM235353
  */
 public class DataBoxProteinSetsCmp extends AbstractDataBox {
@@ -22,7 +22,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
     public DataBoxProteinSetsCmp() {
 
         // Name of this databox
-        name = "Protein Sets";
+        m_name = "Protein Sets";
 
         
         // Register Possible in parameters
@@ -46,14 +46,14 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsetProteinGroupComparePanel p = new RsetProteinGroupComparePanel();
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
 
     @Override
     public void dataChanged() {
-        final ProteinMatch proteinMatch = (ProteinMatch) previousDataBox.getData(false, ProteinMatch.class);
+        final ProteinMatch proteinMatch = (ProteinMatch) m_previousDataBox.getData(false, ProteinMatch.class);
 
         if (proteinMatch == null) {
             ((RsetProteinGroupComparePanel)m_panel).setData(null, null);

@@ -9,7 +9,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsetPeptideSpectrumPanel;
 
 /**
- *
+ * Databox for a Spectrum
  * @author JM235353
  */
 public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
@@ -17,8 +17,8 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
     public DataBoxRsetPeptideSpectrum() {
 
         // Name of this databox
-        name = "Spectrum";
-        description = "Spectrum of a Peptide";
+        m_name = "Spectrum";
+        m_description = "Spectrum of a Peptide";
 
         // Register in parameters
         GroupParameter inParameter = new GroupParameter();
@@ -36,14 +36,14 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsetPeptideSpectrumPanel p = new RsetPeptideSpectrumPanel();
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
 
     @Override
     public void dataChanged() {
-        final PeptideMatch peptideMatch = (PeptideMatch) previousDataBox.getData(false, PeptideMatch.class);
+        final PeptideMatch peptideMatch = (PeptideMatch) m_previousDataBox.getData(false, PeptideMatch.class);
 
         if (peptideMatch == null) {
             ((RsetPeptideSpectrumPanel) m_panel).setData(null);

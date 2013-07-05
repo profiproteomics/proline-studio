@@ -14,7 +14,7 @@ import fr.proline.studio.rsmexplorer.gui.RsmPeptidesPanel;
 
 
 /**
- * 
+ *  Databox : All Peptides of an Identification Summary
  * @author JM235353
  */
 public class DataBoxRsmPeptideInstances extends AbstractDataBox {
@@ -25,8 +25,8 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     public DataBoxRsmPeptideInstances() {
 
         // Name of this databox
-        name = "Peptides";
-        description = "All Peptides of an Identification Summary";
+        m_name = "Peptides";
+        m_description = "All Peptides of an Identification Summary";
         
         // Register Possible in parameters
         // One ResultSummary
@@ -50,7 +50,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsmPeptidesPanel p = new RsmPeptidesPanel();
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -58,7 +58,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
+        final ResultSummary _rsm = (m_rsm!=null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
         final int loadingId = setLoading();
         

@@ -10,19 +10,19 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
 
 /**
- *
+ * Databox for all PSM of a ResultSet (Search Result)
  * @author JM235353
  */
 public class DataBoxRsetPeptide extends AbstractDataBox {
 
     
-    ResultSet rset = null;
+    private ResultSet m_rset = null;
     
     public DataBoxRsetPeptide() {
 
         // Name of this databox
-        name = "PSM";
-        description = "All PSM of a Search Result";
+        m_name = "PSM";
+        m_description = "All PSM of a Search Result";
         
         // Register Possible in parameters
         // One ResultSummary
@@ -43,7 +43,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     @Override
     public void createPanel() {
         PeptideMatchPanel p = new PeptideMatchPanel(false);
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -51,7 +51,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     @Override
     public void dataChanged() {
         
-        final ResultSet _rset = (rset!=null) ? rset : (ResultSet) previousDataBox.getData(false, ResultSet.class);
+        final ResultSet _rset = (m_rset!=null) ? m_rset : (ResultSet) m_previousDataBox.getData(false, ResultSet.class);
 
         final int loadingId = setLoading();
         
@@ -99,8 +99,8 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
                 return ((PeptideMatchPanel)m_panel).getSelectedPeptideMatch();
             }
             if (parameterType.equals(ResultSet.class)) {
-                if (rset != null) {
-                    return rset;
+                if (m_rset != null) {
+                    return m_rset;
                 }
             }
         }
@@ -110,10 +110,10 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         if (data instanceof ResultSet) {
-            rset = (ResultSet) data;
+            m_rset = (ResultSet) data;
             dataChanged();
         } else if (data instanceof ResultSummary) {
-            rset = ((ResultSummary) data).getResultSet();
+            m_rset = ((ResultSummary) data).getResultSet();
         }
     }
 }

@@ -34,7 +34,7 @@ public class AvailableParameters {
             }
         }
         
-        AbstractDataBox previousDataBox = box.previousDataBox;
+        AbstractDataBox previousDataBox = box.m_previousDataBox;
         if (previousDataBox != null) {
             initAvailableParameters(previousDataBox, depth+1);
         }

@@ -1,36 +1,36 @@
 package fr.proline.studio.pattern;
 
 /**
- *
+ * Definition of a parameter exhanged between databoxes
  * @author JM235353
  */
 public class DataParameter {
 
-    private Class c;
-    private boolean isList;
+    private Class m_c;
+    private boolean m_isList;
 
     public DataParameter(Class c, boolean isList) {
-        this.c = c;
-        this.isList = isList;
+        m_c = c;
+        m_isList = isList;
     }
 
     @Override
     public boolean equals(Object p) {
         if (p instanceof DataParameter) {
-            return c.equals(((DataParameter)p).c);
+            return m_c.equals(((DataParameter)p).m_c);
         }
         return false;
     }
     
     public boolean equalsData(Class dataC) {
-        return c.equals(dataC);
+        return m_c.equals(dataC);
     }
 
     public boolean isCompatibleWithOutParameter(DataParameter outParameter) {
-        if (!c.equals(outParameter.c)) {
+        if (!m_c.equals(outParameter.m_c)) {
             return false;
         }
-        if (isList && !outParameter.isList) {
+        if (m_isList && !outParameter.m_isList) {
             return false;
         }
         return true;
@@ -39,7 +39,7 @@ public class DataParameter {
     
     @Override
     public int hashCode() {
-        return c.hashCode();
+        return m_c.hashCode();
     }
     
 }

@@ -22,8 +22,8 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
     public DataBoxRsmPeptidesOfProtein() {
 
         // Name of this databox
-        name = "Peptides";
-        description = "All Peptides of a Protein Match";
+        m_name = "Peptides";
+        m_description = "All Peptides of a Protein Match";
         
         // Register Possible in parameters
         // One ProteinMatch AND one ResultSummary
@@ -50,7 +50,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
      @Override
     public void createPanel() {
         RsmPeptidesOfProteinPanel p = new RsmPeptidesOfProteinPanel();
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -58,8 +58,8 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final ProteinMatch proteinMatch = (ProteinMatch) previousDataBox.getData(false, ProteinMatch.class);
-        final ResultSummary rsm = (ResultSummary) previousDataBox.getData(false, ResultSummary.class);
+        final ProteinMatch proteinMatch = (ProteinMatch) m_previousDataBox.getData(false, ProteinMatch.class);
+        final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
         if (proteinMatch == null) {
             ((RsmPeptidesOfProteinPanel) m_panel).setData(null, null);

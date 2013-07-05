@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
 /**
- *
+ * Used for the calculation of a distance between two databoxes
  * @author JM235353
  */
 public class ParameterDistance implements Comparable {

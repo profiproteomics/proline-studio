@@ -19,7 +19,7 @@ public class DataBoxTaskList extends AbstractDataBox {
     public DataBoxTaskList() {
 
         // Name of this databox
-        name = "Tasks Log";
+        m_name = "Tasks Log";
         
 
         
@@ -34,7 +34,7 @@ public class DataBoxTaskList extends AbstractDataBox {
     @Override
     public void createPanel() {
         TasksPanel p = new TasksPanel();
-        p.setName(name);
+        p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
     

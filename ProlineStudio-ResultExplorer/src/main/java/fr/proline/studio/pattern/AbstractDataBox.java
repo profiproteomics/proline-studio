@@ -34,15 +34,15 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     private ArrayList<GroupParameter> m_outParameters = new ArrayList<>();
     
     
-    private long projectId = -1;
+    private long m_projectId = -1;
     
-    protected String name;
-    protected String description = "";
+    protected String m_name;
+    protected String m_description = "";
     
-    private DataBoxLayout layout = DataBoxLayout.VERTICAL;
+    private DataBoxLayout m_layout = DataBoxLayout.VERTICAL;
     
-    protected AbstractDataBox nextDataBox = null;
-    protected AbstractDataBox previousDataBox = null;
+    protected AbstractDataBox m_nextDataBox = null;
+    protected AbstractDataBox m_previousDataBox = null;
     
     private int m_loadingId = 0;
     
@@ -95,9 +95,9 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     }
     
     public void setNextDataBox(AbstractDataBox nextDataBox) {
-        this.nextDataBox = nextDataBox;
+        this.m_nextDataBox = nextDataBox;
         if (nextDataBox != null) {
-            nextDataBox.previousDataBox = this;
+            nextDataBox.m_previousDataBox = this;
         }
     }
     
@@ -106,8 +106,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     public abstract void dataChanged();
     
     public Object getData(boolean getArray, Class parameterType) {
-        if (previousDataBox != null) {
-            return previousDataBox.getData(getArray, parameterType);
+        if (m_previousDataBox != null) {
+            return m_previousDataBox.getData(getArray, parameterType);
         }
         return null;
     }
@@ -117,25 +117,25 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     }
     
     public void propagateDataChanged(Class dataType) {
-        if (nextDataBox != null) {
-            if (nextDataBox.isDataDependant(dataType)) {
-                nextDataBox.dataChanged();
+        if (m_nextDataBox != null) {
+            if (m_nextDataBox.isDataDependant(dataType)) {
+                m_nextDataBox.dataChanged();
             }
-            nextDataBox.propagateDataChanged(dataType);
+            m_nextDataBox.propagateDataChanged(dataType);
         }
         
     }
     
     public void setProjectId(long projectId) {
-        this.projectId = projectId;
+        this.m_projectId = projectId;
     }
     
     public long getProjectId() {
-        if (projectId!=-1) {
-            return projectId;
+        if (m_projectId!=-1) {
+            return m_projectId;
         }
-        if (previousDataBox != null) {
-            return previousDataBox.getProjectId();
+        if (m_previousDataBox != null) {
+            return m_previousDataBox.getProjectId();
         }
         return -1; // should not happen
         
@@ -146,19 +146,19 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     }
     
     public void setLayout(DataBoxLayout layout) {
-        this.layout = layout;
+        this.m_layout = layout;
     }
     
     public DataBoxLayout getLayout() {
-        return layout;
+        return m_layout;
     }
     
     public String getName() {
-        return name;
+        return m_name;
     }
     
     public String getDescription() {
-        return description;
+        return m_description;
     }
     
     public void windowClosed() {

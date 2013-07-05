@@ -22,10 +22,10 @@ public abstract class AbstractData {
         //RESULT_SUMMARY,
         ALL_IMPORTED
     }
-    protected String name;
-    protected DataTypes dataType;
+    protected String m_name;
+    protected DataTypes m_dataType;
     // by default, any data can have children when corresponding node is expanded
-    protected boolean hasChildren = true;
+    protected boolean m_hasChildren = true;
 
     /**
      * Returns if the corresponding Node will have Children when it will be
@@ -34,11 +34,11 @@ public abstract class AbstractData {
      * @return
      */
     public boolean hasChildren() {
-        return hasChildren;
+        return m_hasChildren;
     }
 
     public void setHasChildren(boolean hasChildren) {
-        this.hasChildren = hasChildren;
+        this.m_hasChildren = hasChildren;
     }
     
     /**
@@ -59,6 +59,6 @@ public abstract class AbstractData {
 
 
     public DataTypes getDataType() {
-        return dataType;
+        return m_dataType;
     }
 }

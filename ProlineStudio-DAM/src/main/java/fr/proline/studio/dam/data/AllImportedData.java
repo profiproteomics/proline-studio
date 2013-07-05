@@ -1,20 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam.data;
 
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import java.util.List;
 
 /**
- *
+ *  Data for All Imported Node
  * @author JM235353
  */
 public class AllImportedData extends AbstractData {
 
     public AllImportedData() {
-        dataType = AbstractData.DataTypes.ALL_IMPORTED;
+        m_dataType = AbstractData.DataTypes.ALL_IMPORTED;
     }
     
     

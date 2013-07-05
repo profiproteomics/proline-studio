@@ -10,39 +10,39 @@ import java.util.List;
  */
 public class SubTask implements Comparable<SubTask> {
 
-    private int subTaskId;
-    private int startIndex;
-    private int stopIndex;
-    private boolean highPriority = false;
-    //private boolean allSubtaskFinished = false;
+    private int m_subTaskId;
+    private int m_startIndex;
+    private int m_stopIndex;
+    private boolean m_highPriority = false;
+
 
     public SubTask(int subTaskId, int startIndex, int stopIndex) {
-        this.subTaskId = subTaskId;
-        this.startIndex = startIndex;
-        this.stopIndex = stopIndex;
+        m_subTaskId = subTaskId;
+        m_startIndex = startIndex;
+        m_stopIndex = stopIndex;
     }
 
     public List getSubList(List l) {
-        if ((startIndex == 0) && (stopIndex == (l.size() - 1))) {
+        if ((m_startIndex == 0) && (m_stopIndex == (l.size() - 1))) {
             return l;
         }
-        return l.subList(startIndex, stopIndex + 1);
+        return l.subList(m_startIndex, m_stopIndex + 1);
     }
 
     public int getSubTaskId() {
-        return subTaskId;
+        return m_subTaskId;
     }
 
     public int getStartIndex() {
-        return startIndex;
+        return m_startIndex;
     }
 
     public int getStopIndex() {
-        return stopIndex;
+        return m_stopIndex;
     }
 
     public boolean hasIndex(int index) {
-        return ((index >= startIndex) && (index <= stopIndex));
+        return ((index >= m_startIndex) && (index <= m_stopIndex));
     }
 
     public boolean hasCommonIndexes(int start, int stop) {
@@ -50,11 +50,11 @@ public class SubTask implements Comparable<SubTask> {
     }
 
     public boolean isHighPriority() {
-        return highPriority;
+        return m_highPriority;
     }
 
     public void setHighPriority(boolean highPriority) {
-        this.highPriority = highPriority;
+        m_highPriority = highPriority;
     }
 
     /*public boolean isAllSubtaskFinished() {
@@ -62,22 +62,22 @@ public class SubTask implements Comparable<SubTask> {
     }*/
 
     /*public void setAllSubtaskFinished(boolean allSubtaskFinished) {
-        this.allSubtaskFinished = allSubtaskFinished;
+        allSubtaskFinished = allSubtaskFinished;
     }*/
     
     @Override
     public int compareTo(SubTask o) {
-        if (highPriority && !o.highPriority) {
+        if (m_highPriority && !o.m_highPriority) {
             return -1;
-        } else if (!highPriority && o.highPriority) {
+        } else if (!m_highPriority && o.m_highPriority) {
             return 1;
         }
 
-        int diffIndex = (startIndex - o.startIndex); // low index have a higher priority than big index
+        int diffIndex = (m_startIndex - o.m_startIndex); // low index have a higher priority than big index
         if (diffIndex != 0) {
             return diffIndex;
         }
 
-        return subTaskId - o.subTaskId; // low subTaskId have a higher priority than big subTaskId
+        return m_subTaskId - o.m_subTaskId; // low subTaskId have a higher priority than big subTaskId
     }
 }

@@ -13,26 +13,26 @@ import java.util.PriorityQueue;
 public class SubTaskManager {
 
     // Priority Queue for Sub Tasks
-    private PriorityQueue<SubTask> subTasks = new PriorityQueue<>();
+    private PriorityQueue<SubTask> m_subTasks = new PriorityQueue<>();
     // We keep a count of remaining SubTasks of each type
-    private int[] subTaskCount;
+    private int[] m_subTaskCount;
     // Current Task
-    private SubTask currentTask = null;
+    private SubTask m_currentTask = null;
 
     public SubTaskManager(int nbDifferentSubTaskTypes) {
-        subTaskCount = new int[nbDifferentSubTaskTypes];
+        m_subTaskCount = new int[nbDifferentSubTaskTypes];
     }
 
     public synchronized boolean isEmpty() {
-        return subTasks.isEmpty();
+        return m_subTasks.isEmpty();
     }
 
     public synchronized SubTask getCurrentTask() {
-        return currentTask;
+        return m_currentTask;
     }
 
     public synchronized void setCurrentTask(SubTask currentTask) {
-        this.currentTask = currentTask;
+        this.m_currentTask = currentTask;
     }
 
     public synchronized SubTask sliceATaskAndGetFirst(int subTaskId, int arrayLength, int range) {
@@ -50,8 +50,8 @@ public class SubTaskManager {
             if (i == 0) {
                 firstTask = new SubTask(subTaskId, indexStart, indexEnd);
             } else {
-                subTasks.offer(new SubTask(subTaskId, indexStart, indexEnd));
-                subTaskCount[subTaskId]++;
+                m_subTasks.offer(new SubTask(subTaskId, indexStart, indexEnd));
+                m_subTaskCount[subTaskId]++;
             }
 
             i = indexEnd + 1;
@@ -66,13 +66,13 @@ public class SubTaskManager {
      * @return
      */
     public synchronized SubTask getNextSubTask() {
-        if (subTasks.size() == 0) {
-            currentTask = null;
+        if (m_subTasks.size() == 0) {
+            m_currentTask = null;
         } else {
-            currentTask = subTasks.poll();
-            subTaskCount[currentTask.getSubTaskId()]--;
+            m_currentTask = m_subTasks.poll();
+            m_subTaskCount[m_currentTask.getSubTaskId()]--;
         }
-        return currentTask;
+        return m_currentTask;
 
     }
 
@@ -86,9 +86,9 @@ public class SubTaskManager {
      */
     public synchronized void givePriorityTo(int subTaskId, int indexStart, int indexEnd) {
 
-        if ((subTaskId != -1) && subTaskCount[subTaskId] > 0) {
+        if ((subTaskId != -1) && m_subTaskCount[subTaskId] > 0) {
             // priority is given first to a subTask type
-            Iterator<SubTask> it = subTasks.iterator();
+            Iterator<SubTask> it = m_subTasks.iterator();
             while (it.hasNext()) {
                 SubTask st = it.next();
                 boolean highPriority = (st.getSubTaskId() == subTaskId);
@@ -98,7 +98,7 @@ public class SubTaskManager {
             }
         } else {
             // priority is given to the range of indexes
-            Iterator<SubTask> it = subTasks.iterator();
+            Iterator<SubTask> it = m_subTasks.iterator();
             while (it.hasNext()) {
                 SubTask st = it.next();
                 boolean highPriority = st.hasCommonIndexes(indexStart, indexEnd);
@@ -113,12 +113,12 @@ public class SubTaskManager {
         int nb = subTaskTmp.size();
         if (nb > 0) {
             for (int i = 0; i < nb; i++) {
-                subTasks.remove(subTaskTmp.get(i));
+                m_subTasks.remove(subTaskTmp.get(i));
             }
             for (int i = 0; i < nb; i++) {
                 SubTask task = subTaskTmp.get(i);
                 task.setHighPriority(!task.isHighPriority());
-                subTasks.offer(task);
+                m_subTasks.offer(task);
             }
 
 
@@ -132,7 +132,7 @@ public class SubTaskManager {
      */
     public synchronized void resetPriority() {
 
-        Iterator<SubTask> it = subTasks.iterator();
+        Iterator<SubTask> it = m_subTasks.iterator();
         while (it.hasNext()) {
             SubTask sb = it.next();
             if (sb.isHighPriority()) {
@@ -143,12 +143,12 @@ public class SubTaskManager {
         int nb = subTaskTmp.size();
         if (nb > 0) {
             for (int i = 0; i < nb; i++) {
-                subTasks.remove(subTaskTmp.get(i));
+                m_subTasks.remove(subTaskTmp.get(i));
             }
             for (int i = 0; i < nb; i++) {
                 SubTask task = subTaskTmp.get(i);
                 task.setHighPriority(false);
-                subTasks.offer(task);
+                m_subTasks.offer(task);
             }
 
             subTaskTmp.clear();

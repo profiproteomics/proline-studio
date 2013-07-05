@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam;
 
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -10,7 +6,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Thread which executes a task
  * @author JM235353
  */
 public class AccessDatabaseWorkerThread extends Thread {

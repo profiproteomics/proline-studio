@@ -10,7 +10,7 @@ import javax.persistence.TypedQuery;
 
 
 /**
- *
+ * Load Protein Matches for a Rset or for a PeptideMatch
  * @author JM235353
  */
 public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
@@ -110,7 +110,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataSubTask() {
-        SubTask slice = subTaskManager.getNextSubTask();
+        SubTask slice = m_subTaskManager.getNextSubTask();
         if (slice == null) {
             return true; // nothing to do : should not happen
         }
@@ -131,7 +131,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -171,7 +171,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
              *
              */
             // slice the task and get the first one
-            SubTask subTask = subTaskManager.sliceATaskAndGetFirst(SUB_TASK_BIOSEQUENCE, m_proteinMatchIds.size(), SLICE_SIZE);
+            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_BIOSEQUENCE, m_proteinMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
             fetchBiosequence(entityManagerMSI, subTask);
@@ -180,7 +180,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             
             entityManagerMSI.getTransaction().commit();
         } catch (RuntimeException e) {
-            logger.error(getClass().getSimpleName() + " failed", e);
+            m_logger.error(getClass().getSimpleName() + " failed", e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -219,7 +219,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
              *
              */
             // slice the task and get the first one
-            SubTask subTask = subTaskManager.sliceATaskAndGetFirst(SUB_TASK_BIOSEQUENCE, m_proteinMatchIds.size(), SLICE_SIZE);
+            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_BIOSEQUENCE, m_proteinMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
             fetchBiosequence(entityManagerMSI, subTask);
@@ -228,7 +228,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             
             entityManagerMSI.getTransaction().commit();
         } catch  (RuntimeException e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();

@@ -10,7 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 /**
- *
+ * Load all Rset of a project
  * @author JM235353
  */
 public class DatabaseRsetTask extends AbstractDatabaseTask {
@@ -46,7 +46,7 @@ public class DatabaseRsetTask extends AbstractDatabaseTask {
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();

@@ -1,26 +1,22 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam.taskinfo;
 
 /**
- *
+ * Base class for Tasks and Services
  * @author JM235353
  */
 public abstract class AbstractLongTask {
     
-    protected TaskInfo taskInfo = null;
+    protected TaskInfo m_taskInfo = null;
 
     public AbstractLongTask(TaskInfo taskInfo) {
-        this.taskInfo = taskInfo;
+        m_taskInfo = taskInfo;
     }
 
     public void setTaskInfo(TaskInfo taskInfo) {
-        this.taskInfo = taskInfo;
+        m_taskInfo = taskInfo;
     }
     
     public TaskInfo getTaskInfo() {
-        return taskInfo;
+        return m_taskInfo;
     }
 }

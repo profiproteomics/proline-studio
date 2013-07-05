@@ -2,7 +2,6 @@ package fr.proline.studio.dam;
 
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.PriorityChangement;
-import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import java.util.HashMap;
@@ -19,17 +18,17 @@ import org.slf4j.LoggerFactory;
  */
 public class AccessDatabaseThread extends Thread {
 
-    private static AccessDatabaseThread instance;
-    private PriorityQueue<AbstractDatabaseTask> actions;
-    private HashMap<Long, AbstractDatabaseTask> actionMap;
-    private HashMap<Long, PriorityChangement> priorityChangements;
+    private static AccessDatabaseThread m_instance;
+    private PriorityQueue<AbstractDatabaseTask> m_actions;
+    private HashMap<Long, AbstractDatabaseTask> m_actionMap;
+    private HashMap<Long, PriorityChangement> m_priorityChangements;
 
     private AccessDatabaseWorkerPool m_workerPool = null;
     
     private AccessDatabaseThread() {
-        actions = new PriorityQueue<>();
-        actionMap = new HashMap<>();
-        priorityChangements = new HashMap<>();
+        m_actions = new PriorityQueue<>();
+        m_actionMap = new HashMap<>();
+        m_priorityChangements = new HashMap<>();
         
         m_workerPool = AccessDatabaseWorkerPool.getWorkerPool();
 
@@ -37,11 +36,11 @@ public class AccessDatabaseThread extends Thread {
     }
 
     public static AccessDatabaseThread getAccessDatabaseThread() {
-        if (instance == null) {
-            instance = new AccessDatabaseThread();
-            instance.start();
+        if (m_instance == null) {
+            m_instance = new AccessDatabaseThread();
+            m_instance.start();
         }
-        return instance;
+        return m_instance;
     }
 
     /**
@@ -57,24 +56,24 @@ public class AccessDatabaseThread extends Thread {
                     while (true) {
 
                         // Management of the changement of priorities
-                        if (!priorityChangements.isEmpty()) {
-                            Iterator<Long> it = priorityChangements.keySet().iterator();
+                        if (!m_priorityChangements.isEmpty()) {
+                            Iterator<Long> it = m_priorityChangements.keySet().iterator();
                             while (it.hasNext()) {
                                 Long taskId = it.next();
-                                PriorityChangement priorityChangement = priorityChangements.get(taskId);
+                                PriorityChangement priorityChangement = m_priorityChangements.get(taskId);
                                 AbstractDatabaseTask task = priorityChangement.getTask();
 
-                                if (actions.contains(task)) {
-                                    actions.remove(task);
+                                if (m_actions.contains(task)) {
+                                    m_actions.remove(task);
                                     task.applyPriorityChangement(priorityChangement);
-                                    actions.offer(task);
+                                    m_actions.offer(task);
                                 }
                             }
                         }
 
                         // look for a task to be done
-                        if (!actions.isEmpty()) {
-                            action = actions.poll();
+                        if (!m_actions.isEmpty()) {
+                            action = m_actions.poll();
                             break;
                         }
                         wait();
@@ -108,7 +107,7 @@ public class AccessDatabaseThread extends Thread {
 
         } catch (Throwable t) {
             LoggerFactory.getLogger("ProlineStudio.DAM").debug("Unexpected exception in main loop of AccessDatabaseThread", t);
-            instance = null; // reset thread
+            m_instance = null; // reset thread
         }
 
     }
@@ -118,12 +117,12 @@ public class AccessDatabaseThread extends Thread {
             // check if subtasks need to be done
             if (task.hasSubTasksToBeDone()) {
                 // put back action in the queue for subtasks
-                actions.add(task);
+                m_actions.add(task);
 
             } else {
                 // action completely finished
-                actionMap.remove(task.getId());
-                priorityChangements.remove(task.getId());
+                m_actionMap.remove(task.getId());
+                m_priorityChangements.remove(task.getId());
                 
                 String errorMessage = task.getErrorMessage();
                 task.getTaskInfo().setFinished((errorMessage==null), errorMessage, true);
@@ -175,23 +174,23 @@ public class AccessDatabaseThread extends Thread {
         
         // action is queued
         synchronized (this) {
-            actions.add(task);
-            actionMap.put(task.getId(), task);
+            m_actions.add(task);
+            m_actionMap.put(task.getId(), task);
             notifyAll();
         }
     }
 
     public final void removeTask(Long taskId) {
         synchronized (this) {
-            AbstractDatabaseTask task = actionMap.get(taskId);
+            AbstractDatabaseTask task = m_actionMap.get(taskId);
             if (task == null) {
                 // task is already finished
                 return;
             }
-            boolean isActionRegistered = actions.remove(task);
+            boolean isActionRegistered = m_actions.remove(task);
             if (isActionRegistered) {
                 // action was not running, remove it from map
-                actionMap.remove(taskId);
+                m_actionMap.remove(taskId);
                 // remove iis info from TaskInfoManager
                 TaskInfoManager.getTaskInfoManager().cancel(task.getTaskInfo());
             }
@@ -208,16 +207,16 @@ public class AccessDatabaseThread extends Thread {
      */
     public void addPriorityIndex(Long taskId, int index) {
         synchronized (this) {
-            AbstractDatabaseTask task = actionMap.get(taskId);
+            AbstractDatabaseTask task = m_actionMap.get(taskId);
             if (task == null) {
                 // task is already finished
                 return;
             }
-            PriorityChangement priorityChangement = priorityChangements.get(taskId);
+            PriorityChangement priorityChangement = m_priorityChangements.get(taskId);
             if (priorityChangement == null) {
                 priorityChangement = new PriorityChangement(task);
                 priorityChangement.setIndex(index);
-                priorityChangements.put(taskId, priorityChangement);
+                m_priorityChangements.put(taskId, priorityChangement);
             } else {
                 priorityChangement.addIndex(index);
             }
@@ -234,15 +233,15 @@ public class AccessDatabaseThread extends Thread {
      */
     public void setPriorityIndex(Long taskId, int index) {
         synchronized (this) {
-            AbstractDatabaseTask task = actionMap.get(taskId);
+            AbstractDatabaseTask task = m_actionMap.get(taskId);
             if (task == null) {
                 // task is already finished
                 return;
             }
-            PriorityChangement priorityChangement = priorityChangements.get(taskId);
+            PriorityChangement priorityChangement = m_priorityChangements.get(taskId);
             if (priorityChangement == null) {
                 priorityChangement = new PriorityChangement(task);
-                priorityChangements.put(taskId, priorityChangement);
+                m_priorityChangements.put(taskId, priorityChangement);
             }
             priorityChangement.setIndex(index);
 
@@ -260,15 +259,15 @@ public class AccessDatabaseThread extends Thread {
      */
     public void givePriorityToSubTask(Long taskId, int subTaskId) {
         synchronized (this) {
-            AbstractDatabaseTask task = actionMap.get(taskId);
+            AbstractDatabaseTask task = m_actionMap.get(taskId);
             if (task == null) {
                 // task is already finished
                 return;
             }
-            PriorityChangement priorityChangement = priorityChangements.get(taskId);
+            PriorityChangement priorityChangement = m_priorityChangements.get(taskId);
             if (priorityChangement == null) {
                 priorityChangement = new PriorityChangement(task);
-                priorityChangements.put(taskId, priorityChangement);
+                m_priorityChangements.put(taskId, priorityChangement);
             }
 
             priorityChangement.setSubTask(subTaskId);
@@ -286,7 +285,7 @@ public class AccessDatabaseThread extends Thread {
     public void clearIndexPriorityTo(Long taskId) {
         synchronized (this) {
 
-            PriorityChangement priorityChangement = priorityChangements.get(taskId);
+            PriorityChangement priorityChangement = m_priorityChangements.get(taskId);
 
             if (priorityChangement == null) {
                 return; // nothing to do
@@ -296,12 +295,12 @@ public class AccessDatabaseThread extends Thread {
                 // we clear only indexes
                 priorityChangement.clearIndex();
             } else {
-                priorityChangements.remove(taskId);
+                m_priorityChangements.remove(taskId);
                 AbstractDatabaseTask task = priorityChangement.getTask();
-                boolean isActionRegistered = actions.remove(task);
+                boolean isActionRegistered = m_actions.remove(task);
                 task.resetPriority();
                 if (isActionRegistered) {
-                    actions.offer(task);
+                    m_actions.offer(task);
                 }
 
             }

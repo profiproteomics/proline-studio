@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam.data;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -18,9 +14,9 @@ import java.util.List;
 public class ParentData extends AbstractData {
 
     public ParentData() {
-        dataType = DataTypes.MAIN;
+        m_dataType = DataTypes.MAIN;
         
-        hasChildren = false;
+        m_hasChildren = false;
     }
 
     @Override

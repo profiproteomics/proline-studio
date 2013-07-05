@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.Enzyme;
@@ -17,7 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 /**
- *
+ * Load Properties for a Dataset
  * @author JM235353
  */
 public class DatabaseRsetProperties extends AbstractDatabaseTask {
@@ -85,7 +81,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();

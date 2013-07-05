@@ -26,21 +26,21 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
         HIGH_3, // actions to be done fast, but priority higher
         TOP        // action which needs to be done first
     };
-    protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.DAM.Task");
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.DAM.Task");
     // callback is called by the AccessDatabaseThread when the data is fetched
-    protected AbstractDatabaseCallback callback;
+    protected AbstractDatabaseCallback m_callback;
     // default priority of the task
-    protected Priority defaultPriority;
+    protected Priority m_defaultPriority;
     // current priority of the task
     // can be higer than defaultPriority if a task
     // must be done fast because the user waits for it
-    protected Priority currentPriority;
+    protected Priority m_currentPriority;
     // id of the action
-    protected Long id;
-    private static long idIncrement = 0;
+    protected Long m_id;
+    private static long m_idIncrement = 0;
 
-    protected String errorMessage = null;
-    protected int errorId = -1;
+    protected String m_errorMessage = null;
+    protected int m_errorId = -1;
     
     protected AbstractDatabaseTask m_consecutiveTask = null;
     
@@ -58,15 +58,15 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
 
     public AbstractDatabaseTask(AbstractDatabaseCallback callback, Priority priority, TaskInfo taskInfo) {
         super(taskInfo);
-        this.callback = callback;
-        this.defaultPriority = priority;
-        this.currentPriority = priority;
+        m_callback = callback;
+        m_defaultPriority = priority;
+        m_currentPriority = priority;
 
-        idIncrement++;
-        if (idIncrement == Long.MAX_VALUE) {
-            idIncrement = 0;
+        m_idIncrement++;
+        if (m_idIncrement == Long.MAX_VALUE) {
+            m_idIncrement = 0;
         }
-        id = idIncrement;
+        m_id = m_idIncrement;
 
     }
 
@@ -88,7 +88,7 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
      * @return
      */
     public Long getId() {
-        return id;
+        return m_id;
     }
 
     /**
@@ -97,12 +97,12 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
      * @return
      */
     public Priority getCurrentPriority() {
-        return currentPriority;
+        return m_currentPriority;
     }
 
     public void setPriority(Priority priority) {
-        defaultPriority = priority;
-        currentPriority = priority;
+        m_defaultPriority = priority;
+        m_currentPriority = priority;
     }
     
     
@@ -111,7 +111,7 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
     }
 
     public void resetPriority() {
-        currentPriority = defaultPriority;
+        m_currentPriority = m_defaultPriority;
     }
 
     /**
@@ -119,27 +119,27 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
      */
     public void incrementPriority() {
 
-        switch (defaultPriority) {
+        switch (m_defaultPriority) {
             case LOW:
-                currentPriority = Priority.NORMAL_1;
+                m_currentPriority = Priority.NORMAL_1;
                 break;
             case NORMAL_1:
-                currentPriority = Priority.NORMAL_2;
+                m_currentPriority = Priority.NORMAL_2;
                 break;
             case NORMAL_2:
-                currentPriority = Priority.NORMAL_3;
+                m_currentPriority = Priority.NORMAL_3;
                 break;
             case NORMAL_3:
-                currentPriority = Priority.HIGH_1;
+                m_currentPriority = Priority.HIGH_1;
                 break;
             case HIGH_1:
-                currentPriority = Priority.HIGH_2;
+                m_currentPriority = Priority.HIGH_2;
                 break;
             case HIGH_2:
-                currentPriority = Priority.HIGH_3;
+                m_currentPriority = Priority.HIGH_3;
                 break;
             case HIGH_3:
-                currentPriority = Priority.TOP;
+                m_currentPriority = Priority.TOP;
                 break;
         }
     }
@@ -149,23 +149,23 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
      */
     public void speedUpPriority() {
 
-        switch (defaultPriority) {
+        switch (m_defaultPriority) {
             case LOW:
-                currentPriority = Priority.NORMAL_3;
+                m_currentPriority = Priority.NORMAL_3;
                 break;
             case NORMAL_1:
-                currentPriority = Priority.HIGH_1;
+                m_currentPriority = Priority.HIGH_1;
                 break;
             case NORMAL_2:
-                currentPriority = Priority.HIGH_2;
+                m_currentPriority = Priority.HIGH_2;
                 break;
             case NORMAL_3:
-                currentPriority = Priority.HIGH_3;
+                m_currentPriority = Priority.HIGH_3;
                 break;
             case HIGH_1:
             case HIGH_2:
             case HIGH_3:
-                currentPriority = Priority.TOP;
+                m_currentPriority = Priority.TOP;
                 break;
         }
     }
@@ -200,29 +200,29 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
      * @param success boolean indicating if the fetch has succeeded
      */
     public void callback(final boolean success, final boolean finished) {
-        if (callback == null) {
+        if (m_callback == null) {
             
-            getTaskInfo().setFinished(success, errorMessage, true);
+            getTaskInfo().setFinished(success, m_errorMessage, true);
             
             return;
         }
 
-        callback.setErrorMessage(errorMessage, errorId);
+        m_callback.setErrorMessage(m_errorMessage, m_errorId);
         
-        if (callback.mustBeCalledInAWT()) {
+        if (m_callback.mustBeCalledInAWT()) {
             // Callback must be executed in the Graphical thread (AWT)
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    callback.run(success, id, null, finished);
+                    m_callback.run(success, m_id, null, finished);
                     getTaskInfo().setFinished(success, getErrorMessage(), true);
                 }
             });
         } else {
             // Method called in the current thread
             // In this case, we assume the execution is fast.
-            callback.run(success, id, null, finished);
+            m_callback.run(success, m_id, null, finished);
             getTaskInfo().setFinished(success, getErrorMessage(), true);
         }
 
@@ -239,13 +239,13 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
     public int compareTo(AbstractDatabaseTask task) {
 
         // first we compare on priority
-        long diff = task.currentPriority.ordinal() - currentPriority.ordinal();
+        long diff = task.m_currentPriority.ordinal() - m_currentPriority.ordinal();
         if (diff != 0) {
             return (diff) > 0 ? 1 : -1;
         }
 
         // for equal priority, we compare on id : priority is given to older id == smaller
-        diff = id - task.id;
+        diff = m_id - task.m_id;
         if (diff == 0) {
             return 0;
         }
@@ -253,6 +253,6 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
     }
     
     public String getErrorMessage() {
-        return errorMessage;
+        return m_errorMessage;
     }
 }

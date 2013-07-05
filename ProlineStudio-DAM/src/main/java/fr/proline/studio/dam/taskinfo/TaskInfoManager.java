@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 /**
- *
+ * Management of all informations about task (finished or not)
  * @author JM235353
  */
 public class TaskInfoManager {

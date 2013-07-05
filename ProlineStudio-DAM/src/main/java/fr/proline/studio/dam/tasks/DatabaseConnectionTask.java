@@ -1,9 +1,5 @@
 package fr.proline.studio.dam.tasks;
 
-
-
-
-
 import fr.proline.core.orm.uds.*;
 
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
@@ -138,8 +134,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     IDatabaseConnector udsConn = DatabaseConnectorFactory.createDatabaseConnectorInstance(ProlineDatabaseType.UDS, m_databaseProperties);
                     DataStoreConnectorFactory.getInstance().initialize(udsConn);
                 } catch (Exception e) {
-                    logger.error(getClass().getSimpleName() + " failed", e);
-                    errorMessage = e.getMessage();
+                    m_logger.error(getClass().getSimpleName() + " failed", e);
+                    m_errorMessage = e.getMessage();
                     DataStoreConnectorFactory.getInstance().closeAll();
                     return false;
                 }
@@ -159,8 +155,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     entityManagerUDS.getTransaction().commit();
 
                 } catch (Exception e) {
-                    errorMessage = "Unable to load UserAccount from UDS";
-                    logger.error(getClass().getSimpleName() + " failed", e);
+                    m_errorMessage = "Unable to load UserAccount from UDS";
+                    m_logger.error(getClass().getSimpleName() + " failed", e);
                     entityManagerUDS.getTransaction().rollback();
                     DataStoreConnectorFactory.getInstance().closeAll();
                     return false;
@@ -197,7 +193,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     
                     String message = e.getMessage();
                     if ((message == null) || (message.indexOf("connection already exists") == -1)) { //JPM.WART : avoid error because the connection already exist
-                        logger.error(getClass().getSimpleName() + " failed to add UDS connection to Services ", e);
+                        m_logger.error(getClass().getSimpleName() + " failed to add UDS connection to Services ", e);
                     }
                 }
                 
@@ -229,8 +225,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
                     entityManagerPS.close();
                 } catch (Exception e) {
-                    logger.error(getClass().getSimpleName() + " failed", e);
-                    errorMessage = e.getMessage();
+                    m_logger.error(getClass().getSimpleName() + " failed", e);
+                    m_errorMessage = e.getMessage();
                     return false;
                 }
             } else if (action == PDI_CONNECTION) {
@@ -240,8 +236,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     entityManagerPDI.close();
 
                 } catch (Exception e) {
-                    logger.error(getClass().getSimpleName() + " failed", e);
-                    errorMessage = e.getMessage();
+                    m_logger.error(getClass().getSimpleName() + " failed", e);
+                    m_errorMessage = e.getMessage();
                     return false;
                 }
             }
@@ -264,9 +260,9 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             }
         }
         if (!foundUser) {
-            errorMessage = "Project User " + m_projectUser + " is unknown";
+            m_errorMessage = "Project User " + m_projectUser + " is unknown";
             //DataStoreConnectorFactory.getInstance().closeAll();
-            errorId = ERROR_USER_UNKNOWN;
+            m_errorId = ERROR_USER_UNKNOWN;
             return false;
         }
 
@@ -287,8 +283,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().commit();
 
         } catch (Exception e) {
-            errorMessage = "Unable to load Instrument Configurations from UDS";
-            logger.error(getClass().getSimpleName() + " failed", e);
+            m_errorMessage = "Unable to load Instrument Configurations from UDS";
+            m_logger.error(getClass().getSimpleName() + " failed", e);
             entityManagerUDS.getTransaction().rollback();
             DataStoreConnectorFactory.getInstance().closeAll();
             return false;
@@ -305,8 +301,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().commit();
 
         } catch (Exception e) {
-            errorMessage = "Unable to load Peaklist Softwares from UDS";
-            logger.error(getClass().getSimpleName() + " failed", e);
+            m_errorMessage = "Unable to load Peaklist Softwares from UDS";
+            m_logger.error(getClass().getSimpleName() + " failed", e);
             entityManagerUDS.getTransaction().rollback();
             DataStoreConnectorFactory.getInstance().closeAll();
             return false;
@@ -323,8 +319,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().commit();
 
         } catch (Exception e) {
-            errorMessage = "Unable to load Aggregates from UDS";
-            logger.error(getClass().getSimpleName() + " failed", e);
+            m_errorMessage = "Unable to load Aggregates from UDS";
+            m_logger.error(getClass().getSimpleName() + " failed", e);
             entityManagerUDS.getTransaction().rollback();
             DataStoreConnectorFactory.getInstance().closeAll();
             return false;

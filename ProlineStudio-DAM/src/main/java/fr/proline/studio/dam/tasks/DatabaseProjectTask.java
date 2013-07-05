@@ -18,12 +18,12 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseProjectTask extends AbstractDatabaseTask {
 
-    private String user = null;
-    private long projectId = -1;
-    private List<AbstractData> list = null;
-    private String name = null;
+    private String m_user = null;
+    private long m_projectId = -1;
+    private List<AbstractData> m_list = null;
+    private String m_name = null;
 
-    private int action;
+    private int m_action;
     
     private final static int LOAD_PROJECT   = 0;
     private final static int RENAME_PROJECT = 1;
@@ -40,10 +40,10 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
      */
     public void initLoadProject(String user, List<AbstractData> list) {
         setTaskInfo(new TaskInfo("Load Projects for User "+user, TASK_LIST_INFO));
-        this.user = user;
-        this.list = list;
+        this.m_user = user;
+        this.m_list = list;
         
-        action = LOAD_PROJECT;
+        m_action = LOAD_PROJECT;
     }
     
     /**
@@ -53,10 +53,10 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
      */
     public void initRenameProject(long projectId, String name) {
         setTaskInfo(new TaskInfo("Rename Project to "+name, TASK_LIST_INFO));
-        this.projectId = projectId;
-        this.name = name;
+        this.m_projectId = projectId;
+        this.m_name = name;
         
-        action = RENAME_PROJECT;
+        m_action = RENAME_PROJECT;
     }
     
 
@@ -68,7 +68,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
 
     @Override
     public boolean fetchData() {
-        switch (action) {
+        switch (m_action) {
             case LOAD_PROJECT:
                 return loadProject();
             case RENAME_PROJECT:
@@ -84,7 +84,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().begin();
 
             TypedQuery<Project> projectQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.Project p, fr.proline.core.orm.uds.UserAccount user WHERE p.owner.id=user.id AND user.login=:user ORDER BY p.name ASC", Project.class);
-            projectQuery.setParameter("user", user);
+            projectQuery.setParameter("user", m_user);
             List<Project> projectList = projectQuery.getResultList();
 
 
@@ -96,7 +96,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
                 ProjectData projectDataCur = new ProjectData(projectCur);
                 projectDataCur.setHasChildren(true); // always has a Trash
                 //projectMap.put(projectIdCur, projectDataCur);
-                list.add(projectDataCur);
+                m_list.add(projectDataCur);
             }
             
             
@@ -120,7 +120,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().commit();
 
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName() + " failed", e);
+            m_logger.error(getClass().getSimpleName() + " failed", e);
             entityManagerUDS.getTransaction().rollback();
         }
 
@@ -142,14 +142,14 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
 
             String hqlUpdate = "UPDATE Project p set p.name= :name where p.id = :projectId";
             Query renameQuery = entityManagerUDS.createQuery(hqlUpdate);
-            renameQuery.setParameter("projectId", projectId);
-            renameQuery.setParameter("name", name);
+            renameQuery.setParameter("projectId", m_projectId);
+            renameQuery.setParameter("name", m_name);
             renameQuery.executeUpdate();
 
             entityManagerUDS.getTransaction().commit();
 
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName() + " failed", e);
+            m_logger.error(getClass().getSimpleName() + " failed", e);
             entityManagerUDS.getTransaction().rollback();
             return false;
         } finally {

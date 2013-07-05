@@ -14,40 +14,40 @@ import java.util.List;
  */
 public class ProjectData extends AbstractData {
 
-    private Project project = null;
-    private String temporaryName = null;
+    private Project m_project = null;
+    private String m_temporaryName = null;
 
     public ProjectData(Project project) {
-        dataType = AbstractData.DataTypes.PROJECT;
-        this.project = project;
+        m_dataType = AbstractData.DataTypes.PROJECT;
+        m_project = project;
     }
     
     public ProjectData(String temporaryName) {
-        dataType = AbstractData.DataTypes.PROJECT;
-        this.temporaryName = temporaryName;
+        m_dataType = AbstractData.DataTypes.PROJECT;
+        m_temporaryName = temporaryName;
     }
     
     
 
     @Override
     public String getName() {
-        if (project != null) {
-            return project.getName();
+        if (m_project != null) {
+            return m_project.getName();
         }
-        if (temporaryName != null) {
-            return temporaryName;
+        if (m_temporaryName != null) {
+            return m_temporaryName;
         }
         
         return "";
     }
     
     public void setProject(Project project) {
-        this.project = project;
-        temporaryName = null;
+        this.m_project = project;
+        m_temporaryName = null;
     }
     
     public Project getProject() {
-        return project;
+        return m_project;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class ProjectData extends AbstractData {
         list.add(new AllImportedData());
         
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-        task.initLoadParentDataset(project, list);
+        task.initLoadParentDataset(m_project, list);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }

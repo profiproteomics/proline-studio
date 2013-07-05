@@ -5,7 +5,6 @@ import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
-import fr.proline.studio.dam.*;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.*;
 import javax.persistence.EntityManager;
@@ -20,13 +19,13 @@ import javax.persistence.Query;
  */
 public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
     
-    private long projectId = -1;
-    private ProteinSet proteinSet = null;
+    private long m_projectId = -1;
+    private ProteinSet m_proteinSet = null;
 
     public DatabaseProteinsFromProteinSetTask(AbstractDatabaseCallback callback, long projectId, ProteinSet proteinSet) {
         super(callback, Priority.NORMAL_3, new TaskInfo("Load Proteins of a Protein Set "+getProteinSetName(proteinSet), TASK_LIST_INFO));
-        this.projectId = projectId;
-        this.proteinSet = proteinSet;        
+        m_projectId = projectId;
+        m_proteinSet = proteinSet;        
     }
     
     private static String getProteinSetName(ProteinSet proteinSet) {
@@ -46,23 +45,23 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
 
     @Override
     public boolean needToFetch() {
-        return (proteinSet.getTransientData().getSameSet() == null);
+        return (m_proteinSet.getTransientData().getSameSet() == null);
             
     }
     
     @Override
     public boolean fetchData() {
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
         try {
             
             entityManagerMSI.getTransaction().begin();
             
-            fetchProteins(entityManagerMSI, proteinSet);
+            fetchProteins(entityManagerMSI, m_proteinSet);
             
             entityManagerMSI.getTransaction().commit();
         } catch  (RuntimeException e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();

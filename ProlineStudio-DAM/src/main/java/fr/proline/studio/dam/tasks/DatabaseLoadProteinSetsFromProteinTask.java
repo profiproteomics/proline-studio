@@ -12,43 +12,43 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**
- *
+ * Task to load Protein Sets for a Protein Match
  * @author JM235353
  */
 public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask {
 
-    private long projectId = -1;
-    private ArrayList<ProteinMatch> proteinMatchArray = null;
-    private ArrayList<Long> resultSetIdArray = null;
-    private String proteinMatchName = null;
+    private long m_projectId = -1;
+    private ArrayList<ProteinMatch> m_proteinMatchArray = null;
+    private ArrayList<Long> m_resultSetIdArray = null;
+    private String m_proteinMatchName = null;
     
     public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, long projectId, ProteinMatch proteinMatch) {
         super(callback, Priority.NORMAL_3, new TaskInfo("Load Protein Sets for Protein Match "+proteinMatch.getAccession(), TASK_LIST_INFO));
-        this.projectId = projectId;
-        this.proteinMatchArray = new ArrayList<>(1);
-        this.proteinMatchArray.add(proteinMatch);        
+        m_projectId = projectId;
+        m_proteinMatchArray = new ArrayList<>(1);
+        m_proteinMatchArray.add(proteinMatch);        
     }
     
     public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, long projectId, ArrayList<ProteinMatch> proteinMatchArray) {
         super(callback, Priority.NORMAL_3, new TaskInfo("Load Protein Sets for multiple Protein Matches", TASK_LIST_INFO));
-        this.projectId = projectId;
-        this.proteinMatchArray = proteinMatchArray;        
+        m_projectId = projectId;
+        m_proteinMatchArray = proteinMatchArray;        
     }
     
     public DatabaseLoadProteinSetsFromProteinTask(AbstractDatabaseCallback callback, long projectId, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<Long> resultSetIdArray, String proteinMatchName ) {
         super(callback, Priority.NORMAL_3, new TaskInfo("Load Protein Match from its name "+proteinMatchName, TASK_LIST_INFO));
-        this.projectId = projectId;
-        this.proteinMatchArray = proteinMatchArray;   
-        this.resultSetIdArray = resultSetIdArray;
-        this.proteinMatchName = proteinMatchName;
+        m_projectId = projectId;
+        m_proteinMatchArray = proteinMatchArray;   
+        m_resultSetIdArray = resultSetIdArray;
+        m_proteinMatchName = proteinMatchName;
         
     }
     
     @Override
     public boolean needToFetch() {
-        int size = proteinMatchArray.size();
+        int size = m_proteinMatchArray.size();
         for (int i=0;i<size;i++) {
-            if (proteinMatchArray.get(i).getTransientData().getProteinSetArray() == null) {
+            if (m_proteinMatchArray.get(i).getTransientData().getProteinSetArray() == null) {
                 return true;
             }
         }
@@ -59,22 +59,22 @@ public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask
     @Override
     public boolean fetchData() {
 
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
 
-            int size = proteinMatchArray.size();
+            int size = m_proteinMatchArray.size();
             for (int i=0;i<size;i++) {
-                ProteinMatch proteinMatch = proteinMatchArray.get(i);
+                ProteinMatch proteinMatch = m_proteinMatchArray.get(i);
                 if (proteinMatch == null) {
                     // we need to load this proteinMatch from its name and its resultSetId
-                    Long resultSetId = resultSetIdArray.get(i);
-                    proteinMatch = fetchAProteinMatch(entityManagerMSI, proteinMatchName, resultSetId); // JPM.TODO : was used for DataBoxProteinSetsCmp : no longer used : remove it or repare it
+                    Long resultSetId = m_resultSetIdArray.get(i);
+                    proteinMatch = fetchAProteinMatch(entityManagerMSI, m_proteinMatchName, resultSetId); // JPM.TODO : was used for DataBoxProteinSetsCmp : no longer used : remove it or repare it
                     if (proteinMatch == null) {
                         continue;
                     } else {
-                        proteinMatchArray.set(i, proteinMatch);
+                        m_proteinMatchArray.set(i, proteinMatch);
                     }
                 }
                 
@@ -88,14 +88,14 @@ public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();
         }
 
         // clean up protein match not found if needed
-        while (proteinMatchArray.remove(null)) {}
+        while (m_proteinMatchArray.remove(null)) {}
         
         
         return true;

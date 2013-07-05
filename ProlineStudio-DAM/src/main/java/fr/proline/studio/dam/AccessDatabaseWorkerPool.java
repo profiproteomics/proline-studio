@@ -1,14 +1,14 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam;
 
 
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 
 /**
- *
+ * Pool of Threads.
+ * There are three different thread.
+ * The High one can be only used by high priority tasks
+ * The Normal one can be used by high priority tasks and Normal Tasks
+ * The Low one can be used by all tasks
  * @author JM235353
  */
 public class AccessDatabaseWorkerPool {

@@ -13,7 +13,7 @@ import javax.swing.SwingUtilities;
 public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
     
     // Manager of the subtasks
-    protected SubTaskManager subTaskManager;
+    protected SubTaskManager m_subTaskManager;
     
     public AbstractDatabaseSlicerTask(AbstractDatabaseCallback callback) {
         super(callback, null);
@@ -21,16 +21,16 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
     
     public AbstractDatabaseSlicerTask(AbstractDatabaseCallback callback, int subTaskCount, TaskInfo taskInfo) {
         super(callback, taskInfo);
-        subTaskManager = new SubTaskManager(subTaskCount);
+        m_subTaskManager = new SubTaskManager(subTaskCount);
     }
     public AbstractDatabaseSlicerTask(AbstractDatabaseCallback callback, int subTaskCount, Priority priority, TaskInfo taskInfo) {
         super(callback, priority, taskInfo);
-        subTaskManager = new SubTaskManager(subTaskCount);
+        m_subTaskManager = new SubTaskManager(subTaskCount);
     }
     
     public void init(int subTaskCount, TaskInfo taskInfo) {
         setTaskInfo(taskInfo);
-        subTaskManager = new SubTaskManager(subTaskCount);
+        m_subTaskManager = new SubTaskManager(subTaskCount);
     }
     
     /**
@@ -39,7 +39,7 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
      */
     @Override
     public boolean hasSubTasksToBeDone() {
-        return !subTaskManager.isEmpty();
+        return !m_subTaskManager.isEmpty();
     }
     
 
@@ -47,15 +47,15 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
     public void applyPriorityChangement(PriorityChangement priorityChangement) {
         super.applyPriorityChangement(priorityChangement);
         
-        subTaskManager.givePriorityTo(priorityChangement.getSubTaskId(), priorityChangement.getStartIndex(), priorityChangement.getStopIndex());
+        m_subTaskManager.givePriorityTo(priorityChangement.getSubTaskId(), priorityChangement.getStartIndex(), priorityChangement.getStopIndex());
         
     }
 
     
     @Override
     public void resetPriority() {
-        currentPriority = defaultPriority;
-        subTaskManager.resetPriority();
+        m_currentPriority = m_defaultPriority;
+        m_subTaskManager.resetPriority();
     }
     
     
@@ -65,28 +65,28 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
      */
     @Override
     public void callback(final boolean success, final boolean finished) {
-        if (callback == null) {
+        if (m_callback == null) {
             return;
         }
 
-        final SubTask taskDone = subTaskManager.getCurrentTask();
+        final SubTask taskDone = m_subTaskManager.getCurrentTask();
         /*if (taskDone != null) {
             taskDone.setAllSubtaskFinished(!hasSubTasksToBeDone());
         }*/
         
-        if (callback.mustBeCalledInAWT()) {
+        if (m_callback.mustBeCalledInAWT()) {
             // Callback must be executed in the Graphical thread (AWT)
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    callback.run(success, id, taskDone, finished);
+                    m_callback.run(success, m_id, taskDone, finished);
                 }
             });
         } else {
             // Method called in the current thread
             // In this case, we assume the execution is fast.
-            callback.run(success, id, taskDone, finished);
+            m_callback.run(success, m_id, taskDone, finished);
         }
 
 

@@ -16,37 +16,37 @@ import javax.persistence.TypedQuery;
  */
 public class DatabaseSearchPeptideMatchTask extends AbstractDatabaseTask {
   
-    private long projectId = -1;
-    private ResultSet rset = null;
-    private String        searchString = null;
-    private ArrayList<Long>     searchResult = null;
+    private long m_projectId = -1;
+    private ResultSet m_rset = null;
+    private String        m_searchString = null;
+    private ArrayList<Long>     m_searchResult = null;
     
     public DatabaseSearchPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset, String searchString, ArrayList<Long> searchResult) {
         super(callback, Priority.HIGH_1, new TaskInfo("Search Peptide Match "+searchString, TASK_LIST_INFO));
-        this.projectId = projectId;
-        this.rset = rset;       
-        this.searchString = searchString;
-        this.searchResult = searchResult;
+        m_projectId = projectId;
+        m_rset = rset;       
+        m_searchString = searchString;
+        m_searchResult = searchResult;
     }
     
     @Override
     public boolean fetchData() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
         try {
             entityManagerMSI.getTransaction().begin();
             
             // Search peptideMatches with the searched name
             TypedQuery<Long> searchQuery = entityManagerMSI.createQuery("SELECT pm.id FROM fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id AND p.sequence LIKE :search ORDER BY pm.msQuery.initialId ASC, p.sequence ASC", Long.class);
-            searchQuery.setParameter("search", "%"+searchString+"%");
-            searchQuery.setParameter("rsetId", rset.getId());
+            searchQuery.setParameter("search", "%"+m_searchString+"%");
+            searchQuery.setParameter("rsetId", m_rset.getId());
             List<Long> peptideMatchIdList = searchQuery.getResultList();
 
-            searchResult.clear();
-            searchResult.addAll(peptideMatchIdList);
+            m_searchResult.clear();
+            m_searchResult.addAll(peptideMatchIdList);
 
             entityManagerMSI.getTransaction().commit();
         } catch  (RuntimeException e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();

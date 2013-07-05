@@ -118,7 +118,7 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
             return;
         }
 
-        callback.setTaskInfo(taskInfo);
+        callback.setTaskInfo(m_taskInfo);
         callback.setErrorMessage(errorMessage);
         
         if (callback.mustBeCalledInAWT()) {

@@ -37,16 +37,16 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     private static final int LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE = 1;
     private static final int LOAD_PROTEIN_SET_NUMBER = 2;
     
-    private long projectId = -1;
-    private ResultSummary rsm = null;
-    private PeptideInstance peptideInstance = null;
-    private Dataset dataset = null;
+    private long m_projectId = -1;
+    private ResultSummary m_rsm = null;
+    private PeptideInstance m_peptideInstance = null;
+    private Dataset m_dataset = null;
 
     
     // data kept for sub tasks
-    private ArrayList<Long> proteinMatchIds = null;
-    private HashMap<Long, ProteinSet> proteinSetMap = null;
-    private ArrayList<Long> proteinSetIds = null;
+    private ArrayList<Long> m_proteinMatchIds = null;
+    private HashMap<Long, ProteinSet> m_proteinSetMap = null;
+    private ArrayList<Long> m_proteinSetIds = null;
 
     public DatabaseProteinSetsTask(AbstractDatabaseCallback callback) {
         super(callback);
@@ -55,22 +55,22 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     
     public void initLoadProteinSets(long projectId, ResultSummary rsm) {
         init(SUB_TASK_COUNT, new TaskInfo("Load Protein Sets of Identification Summary "+rsm.getId(), TASK_LIST_INFO));
-        this.projectId = projectId;
-        this.rsm = rsm;
+        m_projectId = projectId;
+        m_rsm = rsm;
         action = LOAD_PROTEIN_SET_FOR_RSM;
     }
     
     public void initCountProteinSets(Dataset dataset) {
         init(SUB_TASK_COUNT, new TaskInfo("Count Number of Protein Sets of Identification Summary "+dataset.getName(), TASK_LIST_INFO));
-        this.dataset = dataset;
+        m_dataset = dataset;
         action = LOAD_PROTEIN_SET_NUMBER;
     }
 
     public void initLoadProteinSetForPeptideInstance(long projectId, PeptideInstance peptideInstance) {        
         init(SUB_TASK_COUNT, new TaskInfo("Load Protein Sets for Peptide Instance "+peptideInstance.getId(), TASK_LIST_INFO));
-        this.projectId = projectId;
-        this.peptideInstance = peptideInstance;
-        this.rsm = peptideInstance.getResultSummary();
+        m_projectId = projectId;
+        m_peptideInstance = peptideInstance;
+        m_rsm = peptideInstance.getResultSummary();
         action = LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE; 
     }
 
@@ -78,12 +78,12 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     public boolean needToFetch() {
         switch (action) {
             case LOAD_PROTEIN_SET_FOR_RSM:
-                return (rsm.getTransientData().getProteinSetArray() == null);
+                return (m_rsm.getTransientData().getProteinSetArray() == null);
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
-                return (peptideInstance.getTransientData().getProteinSetArray() == null);
+                return (m_peptideInstance.getTransientData().getProteinSetArray() == null);
             case LOAD_PROTEIN_SET_NUMBER:
-                rsm = dataset.getTransientData().getResultSummary();
-                return (rsm.getTransientData().getNumberOfProteinSet() == null);
+                m_rsm = m_dataset.getTransientData().getResultSummary();
+                return (m_rsm.getTransientData().getNumberOfProteinSet() == null);
         }
         return false; // should not happen
     }
@@ -119,12 +119,12 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataMainTaskForRSM() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
 
-            Long rsmId = rsm.getId();
+            Long rsmId = m_rsm.getId();
 
             // Load Protein Sets
             // SELECT ps FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC
@@ -136,22 +136,22 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
 
             ProteinSet[] proteinSetArray = proteinSets.toArray(new ProteinSet[proteinSets.size()]);
-            rsm.getTransientData().setProteinSetArray(proteinSetArray);
+            m_rsm.getTransientData().setProteinSetArray(proteinSetArray);
 
-            proteinSetMap = new HashMap<>();
+            m_proteinSetMap = new HashMap<>();
             for (int i = 0; i < proteinSetArray.length; i++) {
                 ProteinSet proteinSetCur = proteinSetArray[i];
-                proteinSetMap.put(proteinSetCur.getId(), proteinSetCur);
+                m_proteinSetMap.put(proteinSetCur.getId(), proteinSetCur);
             }
 
 
 
             // Retrieve Protein Match Ids
-            proteinMatchIds = new ArrayList<>(proteinSetArray.length);
+            m_proteinMatchIds = new ArrayList<>(proteinSetArray.length);
 
             int nbProteinSets = proteinSetArray.length;
             for (int i = 0; i < nbProteinSets; i++) {
-                proteinMatchIds.add(i, proteinSetArray[i].getProteinMatchId());
+                m_proteinMatchIds.add(i, proteinSetArray[i].getProteinMatchId());
                 proteinSetArray[i].getResultSummary(); // force fetch of lazy data
             }
 
@@ -161,7 +161,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
              *
              */
             // slice the task and get the first one
-            SubTask subTask = subTaskManager.sliceATaskAndGetFirst(SUB_TASK_TYPICAL_PROTEIN, proteinMatchIds.size(), SLICE_SIZE);
+            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_TYPICAL_PROTEIN, m_proteinMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
             typicalProteinMatch(entityManagerMSI, subTask);
@@ -183,7 +183,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
              *
              */
             // slice the task and get the first one
-            subTask = subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRAL_COUNT, proteinMatchIds.size(), SLICE_SIZE);
+            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
             spectralCount(entityManagerMSI, subTask);
@@ -203,7 +203,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
              *
              */
             // slice the task and get the first one
-            subTask = subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECIFIC_SPECTRAL_COUNT, proteinMatchIds.size(), SLICE_SIZE);
+            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECIFIC_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
             specificSpectralCount(entityManagerMSI, subTask);
@@ -221,18 +221,18 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
              * Calculate SameSet and Subset counts
              */
             // prepare the list of ProteinSet Ids
-            proteinSetIds = new ArrayList<>(proteinSetArray.length);
+            m_proteinSetIds = new ArrayList<>(proteinSetArray.length);
 
             int nb = proteinSetArray.length;
             for (int i = 0; i < nb; i++) {
-                proteinSetIds.add(i, proteinSetArray[i].getId());
+                m_proteinSetIds.add(i, proteinSetArray[i].getId());
             }
 
             // slice the task and get the first one
-            subTask = subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, proteinSetIds.size(), SLICE_SIZE);
+            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, m_proteinSetIds.size(), SLICE_SIZE);
 
             // execute the first slice now
-            sameSetAndSubSetCount(entityManagerMSI, proteinSetIds, subTask);
+            sameSetAndSubSetCount(entityManagerMSI, m_proteinSetIds, subTask);
 
 
            /* timeStop = System.currentTimeMillis(); delta = ((double) (timeStop-timeStart))/1000; 
@@ -243,15 +243,15 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();
         }
 
         // set priority as low for the possible sub tasks
-        defaultPriority = Priority.LOW;
-        currentPriority = Priority.LOW;
+        m_defaultPriority = Priority.LOW;
+        m_currentPriority = Priority.LOW;
 
         return true;
     }
@@ -259,25 +259,25 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     private boolean fetchDataMainTaskForPSetNumber() {
         
         
-        projectId = dataset.getProject().getId();
+        m_projectId = m_dataset.getProject().getId();
         
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
 
-            Long rsmId = rsm.getId();
+            Long rsmId = m_rsm.getId();
 
             // Count Protein Sets
             TypedQuery<Long> countProteinSetsQuery = entityManagerMSI.createQuery("SELECT count(ps) FROM ProteinSet ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true", Long.class);
             countProteinSetsQuery.setParameter("rsmId", rsmId);
             Long proteinSetNumber = countProteinSetsQuery.getSingleResult();
 
-            rsm.getTransientData().setNumberOfProteinSet(Integer.valueOf(proteinSetNumber.intValue()));
+            m_rsm.getTransientData().setNumberOfProteinSet(Integer.valueOf(proteinSetNumber.intValue()));
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -289,12 +289,12 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     
     
     private boolean fetchDataMainTaskForPeptideInstance() {
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerMSI.getTransaction().begin();
 
-            Long pepInstanceId = peptideInstance.getId();
+            Long pepInstanceId = m_peptideInstance.getId();
 
             // Load Protein Sets
             // SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY prots.score DESC
@@ -303,22 +303,22 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
             
             ProteinSet[] proteinSetArray = proteinSets.toArray(new ProteinSet[proteinSets.size()]);
-            peptideInstance.getTransientData().setProteinSetArray(proteinSetArray);
+            m_peptideInstance.getTransientData().setProteinSetArray(proteinSetArray);
             
             
 
-            proteinSetMap = new HashMap<>();
+            m_proteinSetMap = new HashMap<>();
             for (int i = 0; i < proteinSetArray.length; i++) {
                 ProteinSet proteinSetCur = proteinSetArray[i];
-                proteinSetMap.put(proteinSetCur.getId(), proteinSetCur);
+                m_proteinSetMap.put(proteinSetCur.getId(), proteinSetCur);
             }
 
             // Retrieve Protein Match Ids
-            proteinMatchIds = new ArrayList<>(proteinSetArray.length);
+            m_proteinMatchIds = new ArrayList<>(proteinSetArray.length);
 
             int nbProteinSets = proteinSetArray.length;
             for (int i = 0; i < nbProteinSets; i++) {
-                proteinMatchIds.add(i, proteinSetArray[i].getProteinMatchId());
+                m_proteinMatchIds.add(i, proteinSetArray[i].getProteinMatchId());
             }
 
             /**
@@ -326,7 +326,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
              *
              */
             // slice the task and get the first one
-            SubTask subTask = subTaskManager.sliceATaskAndGetFirst(SUB_TASK_TYPICAL_PROTEIN, proteinMatchIds.size(), SLICE_SIZE); // do not really slice : work on all ids
+            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_TYPICAL_PROTEIN, m_proteinMatchIds.size(), SLICE_SIZE); // do not really slice : work on all ids
 
             // execute the first slice now
             typicalProteinMatch(entityManagerMSI, subTask);
@@ -342,7 +342,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
              *
              */
             // slice the task and get the first one
-            subTask = subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRAL_COUNT, proteinMatchIds.size(), SLICE_SIZE);
+            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
             spectralCount(entityManagerMSI, subTask);
@@ -353,7 +353,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
              *
              */
             // slice the task and get the first one
-            subTask = subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECIFIC_SPECTRAL_COUNT, proteinMatchIds.size(), SLICE_SIZE);
+            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECIFIC_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
 
             // execute the request now
             specificSpectralCount(entityManagerMSI, subTask);
@@ -364,31 +364,31 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
              * Calculate SameSet and Subset counts
              */
             // prepare the list of ProteinSet Ids
-            proteinSetIds = new ArrayList<>(proteinSetArray.length);
+            m_proteinSetIds = new ArrayList<>(proteinSetArray.length);
 
             int nb = proteinSetArray.length;
             for (int i = 0; i < nb; i++) {
-                proteinSetIds.add(i, proteinSetArray[i].getId());
+                m_proteinSetIds.add(i, proteinSetArray[i].getId());
             }
 
             // slice the task and get the first one
-            subTask = subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, proteinSetIds.size(), SLICE_SIZE);
+            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, m_proteinSetIds.size(), SLICE_SIZE);
 
             // execute the request now
-            sameSetAndSubSetCount(entityManagerMSI, proteinSetIds, subTask);
+            sameSetAndSubSetCount(entityManagerMSI, m_proteinSetIds, subTask);
 
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();
         }
 
         // set priority as low for the possible sub tasks
-        defaultPriority = Priority.LOW;
-        currentPriority = Priority.LOW;
+        m_defaultPriority = Priority.LOW;
+        m_currentPriority = Priority.LOW;
 
         return true;
     }
@@ -401,11 +401,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataSubTaskFor() {
-        SubTask slice = subTaskManager.getNextSubTask();
+        SubTask slice = m_subTaskManager.getNextSubTask();
         if (slice == null) {
             return true; // nothing to do : should not happen
         }
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
         
         try {
 
@@ -422,7 +422,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
                     specificSpectralCount(entityManagerMSI, slice);
                     break;
                 case SUB_TASK_SAMESET_SUBSET_COUNT:
-                    sameSetAndSubSetCount(entityManagerMSI, proteinSetIds, slice);
+                    sameSetAndSubSetCount(entityManagerMSI, m_proteinSetIds, slice);
                     break;
 
             }
@@ -430,7 +430,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName()+" failed", e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -449,16 +449,16 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         ProteinSet[] proteinSetArray = null;
         if (action == LOAD_PROTEIN_SET_FOR_RSM) {
-            proteinSetArray = rsm.getTransientData().getProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
         } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
-            proteinSetArray = peptideInstance.getTransientData().getProteinSetArray();
+            proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
         }
         
-        List sliceOfProteinMatchIds = subTask.getSubList(proteinMatchIds);
+        List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
 
         Query typicalProteinQuery = entityManagerMSI.createQuery("SELECT pm, pepset FROM PeptideSetProteinMatchMap pset_to_pm JOIN pset_to_pm.proteinMatch as pm JOIN pset_to_pm.peptideSet as pepset WHERE pm.id IN (:listId) AND pset_to_pm.resultSummary.id=:rsmId");
         typicalProteinQuery.setParameter("listId", sliceOfProteinMatchIds);
-        typicalProteinQuery.setParameter("rsmId", rsm.getId());
+        typicalProteinQuery.setParameter("rsmId", m_rsm.getId());
 
         List<Object[]> typicalProteinMatches = typicalProteinQuery.getResultList();
         HashMap<Long, ProteinMatch> typicalProteinMap = new HashMap<>();
@@ -467,7 +467,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             Object[] resCur = itTypical.next();
             ProteinMatch pmCur = (ProteinMatch) resCur[0];
             PeptideSet peptideSet = (PeptideSet) resCur[1];
-            pmCur.getTransientData().setPeptideSet(rsm.getId(), peptideSet);
+            pmCur.getTransientData().setPeptideSet(m_rsm.getId(), peptideSet);
             typicalProteinMap.put(pmCur.getId(), pmCur);
         }
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
@@ -488,12 +488,12 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         ProteinSet[] proteinSetArray = null;
         if (action == LOAD_PROTEIN_SET_FOR_RSM) {
-            proteinSetArray = rsm.getTransientData().getProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
         } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
-            proteinSetArray = peptideInstance.getTransientData().getProteinSetArray();
+            proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
         }
         
-        List sliceOfProteinMatchIds = subTask.getSubList(proteinMatchIds);
+        List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
 
 
         HashMap<Long, Integer> spectralCountMap = new HashMap<>();
@@ -506,7 +506,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         Query spectralCountQuery = entityManagerMSI.createQuery(spectralCountQueryString);
         spectralCountQuery.setParameter("proteinMatchIds", sliceOfProteinMatchIds);
-        spectralCountQuery.setParameter("rsmId", rsm.getId());
+        spectralCountQuery.setParameter("rsmId", m_rsm.getId());
 
         List<Object[]> spectralCountRes = spectralCountQuery.getResultList();
         Iterator<Object[]> spectralCountResIt = spectralCountRes.iterator();
@@ -538,12 +538,12 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         ProteinSet[] proteinSetArray = null;
         if (action == LOAD_PROTEIN_SET_FOR_RSM) {
-            proteinSetArray = rsm.getTransientData().getProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
         } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
-            proteinSetArray = peptideInstance.getTransientData().getProteinSetArray();
+            proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
         }
         
-        List sliceOfProteinMatchIds = subTask.getSubList(proteinMatchIds);
+        List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
 
 
         HashMap<Long, Integer> spectralCountMap = new HashMap<>();
@@ -558,7 +558,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         Query specificSpectralCountQuery = entityManagerMSI.createQuery(specificSpectralCountQueryString);
         specificSpectralCountQuery.setParameter("proteinMatchIds", sliceOfProteinMatchIds);
-        specificSpectralCountQuery.setParameter("rsmId", rsm.getId());
+        specificSpectralCountQuery.setParameter("rsmId", m_rsm.getId());
 
         List<Object[]> specificSpectralCountRes = specificSpectralCountQuery.getResultList();
         Iterator<Object[]> specificSpectralCountResIt = specificSpectralCountRes.iterator();
@@ -624,7 +624,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         while (sameSetCountResIt.hasNext()) {
             Object[] cur = sameSetCountResIt.next();
             Long proteinSetId = (Long) cur[0];
-            ProteinSet proteinSet = proteinSetMap.get(proteinSetId);
+            ProteinSet proteinSet = m_proteinSetMap.get(proteinSetId);
             int sameSetCount = ((Long) cur[1]).intValue();
             proteinSet.getTransientData().setSameSetCount(sameSetCount);
         }
@@ -641,13 +641,13 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         String allCountQueryString = "SELECT ps.id, count(pm) FROM ProteinMatch pm, ProteinSetProteinMatchItem ps_to_pm, ProteinSet ps WHERE  ps_to_pm.proteinSet.id IN (:proteinSetIds) AND ps_to_pm.proteinSet.id = ps.id AND ps_to_pm.proteinMatch.id=pm.id AND ps_to_pm.resultSummary.id=:rsmId GROUP BY ps";
         Query allCountQuery = entityManagerMSI.createQuery(allCountQueryString);
         allCountQuery.setParameter("proteinSetIds", sliceOfProteinSetIds);
-        allCountQuery.setParameter("rsmId", rsm.getId());
+        allCountQuery.setParameter("rsmId", m_rsm.getId());
         List<Object[]> allCountRes = allCountQuery.getResultList();
         Iterator<Object[]> allCountResIt = allCountRes.iterator();
         while (allCountResIt.hasNext()) {
             Object[] cur = allCountResIt.next();
             Long proteinSetId = (Long) cur[0];
-            ProteinSet proteinSet = proteinSetMap.get(proteinSetId);
+            ProteinSet proteinSet = m_proteinSetMap.get(proteinSetId);
             int allCount = ((Long) cur[1]).intValue();
             ProteinSet.TransientData data = proteinSet.getTransientData();
             data.setSubSetCount(allCount - data.getSameSetCount());

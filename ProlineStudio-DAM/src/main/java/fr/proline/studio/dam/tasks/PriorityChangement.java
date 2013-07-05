@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam.tasks;
 
 /**
@@ -16,50 +12,50 @@ package fr.proline.studio.dam.tasks;
 
 public class PriorityChangement {
 
-    private AbstractDatabaseTask task;
-    private int startIndex = -1;
-    private int stopIndex = -1;
-    private int subTaskId = -1;
+    private AbstractDatabaseTask m_task;
+    private int m_startIndex = -1;
+    private int m_stopIndex = -1;
+    private int m_subTaskId = -1;
 
     public PriorityChangement(AbstractDatabaseTask task) {
-        this.task = task;
+        m_task = task;
     }
 
     public void setIndex(int index) {
-        this.startIndex = index;
-        this.stopIndex = index;
+        m_startIndex = index;
+        m_stopIndex = index;
     }
 
     public void setSubTask(int subTaskId) {
-        this.subTaskId = subTaskId;
+        m_subTaskId = subTaskId;
     }
 
     public AbstractDatabaseTask getTask() {
-        return task;
+        return m_task;
     }
 
     public void addIndex(int index) {
-        if (startIndex > index) {
-            startIndex = index;
-        } else if (stopIndex < index) {
-            stopIndex = index;
+        if (m_startIndex > index) {
+            m_startIndex = index;
+        } else if (m_stopIndex < index) {
+            m_stopIndex = index;
         }
 
     }
 
     public void clearIndex() {
-        startIndex = -1;
-        stopIndex  = -1;
+        m_startIndex = -1;
+        m_stopIndex  = -1;
     }
     public int getStartIndex() {
-        return startIndex;
+        return m_startIndex;
     }
 
     public int getStopIndex() {
-        return stopIndex;
+        return m_stopIndex;
     }
     
     public int getSubTaskId() {
-        return subTaskId;
+        return m_subTaskId;
     }
 }

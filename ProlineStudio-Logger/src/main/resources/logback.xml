@@ -37,7 +37,10 @@
   <logger name="fr.proline" level="DEBUG">
   </logger>
 
-  <logger name="org.hibernate" level="INFO">
+  <logger name="com.thierry" level="OFF">
+  </logger>
+  
+  <logger name="org.hibernate" level="OFF">
   </logger>
 
 

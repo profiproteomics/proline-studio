@@ -65,8 +65,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         setPriority(Priority.TOP);
         
         m_databaseProperties = databaseProperties;
-        m_databaseProperties.put("hibernate.show_sql", Boolean.TRUE);
-        m_databaseProperties.put("hibernate.format_sql", Boolean.TRUE);
+//        m_databaseProperties.put("hibernate.show_sql", Boolean.TRUE);
+//        m_databaseProperties.put("hibernate.format_sql", Boolean.TRUE);
         
         m_projectUser = projectUser;
         

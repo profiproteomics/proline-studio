@@ -1,7 +1,17 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.*;
-import fr.proline.core.orm.uds.*;
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.MsiSearch;
+import fr.proline.core.orm.msi.SearchSetting;
+import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.ExternalDb;
+import fr.proline.core.orm.uds.IdentificationDataset;
+import fr.proline.core.orm.msi.SearchSettingsSeqDatabaseMap;
+import fr.proline.core.orm.msi.Enzyme;
+
 import fr.proline.core.orm.uds.repository.ExternalDbRepository;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.repository.ProlineDatabaseType;
@@ -460,8 +470,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             MsiSearch msiSearch = rsetFound.getMsiSearch();
             if (msiSearch != null) {
                 SearchSetting searchSetting = msiSearch.getSearchSetting();
-                Set<fr.proline.core.orm.msi.Enzyme> enzymeSet = searchSetting.getEnzymes();
-                Iterator<fr.proline.core.orm.msi.Enzyme> it = enzymeSet.iterator();
+                Set<Enzyme> enzymeSet = searchSetting.getEnzymes();
+                Iterator<Enzyme> it = enzymeSet.iterator();
                 while (it.hasNext()) {
                     it.next();
                 }
@@ -648,7 +658,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
                 m_dataset.setResultSummaryId(m_resultSummaryId);
                 mergedDataset.setResultSummaryId(m_resultSummaryId);
-
+                                       
                 entityManagerUDS.persist(mergedDataset);
 
                 entityManagerUDS.getTransaction().commit();
@@ -680,6 +690,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
                 m_dataset.setResultSummaryId(null);
                 mergedDataset.setResultSummaryId(null);
+                
+                m_dataset.getTransientData().setResultSummary(null);                          
+                mergedDataset.getTransientData().setResultSummary(null);
 
                 entityManagerUDS.persist(mergedDataset);
 
@@ -789,7 +802,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 ArrayList<Dataset> datasetList = databaseObjectsToModify.get(parentObject);
 
                 int nbDataset = datasetList.size();
-                ArrayList<Dataset> mergedDatasetList = new ArrayList<>(nbDataset);
+                ArrayList<Dataset> mergedDatasetList = new ArrayList<Dataset>(nbDataset);
 
                 for (int i = 0; i < nbDataset; i++) {
                     Dataset dataset = datasetList.get(i);

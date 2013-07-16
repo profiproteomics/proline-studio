@@ -264,7 +264,6 @@ public class SerializedPropertiesUtil {
             for (int i=0;i<nbMap;i++) {
                 Object key = listOfKeyMap.get(i);
                 StringBuilder keyName = new StringBuilder(key.toString());
-                System.out.println(" keyName "+keyName+" => "+(Collections.frequency(listOfKeyMap, key) > 1));
                 if(propIndex.containsKey(key)) {
                     keyName.append("#").append(propIndex.get(key).toString());
                     propIndex.put(key,propIndex.get(key)+1);

@@ -2,6 +2,8 @@ package fr.proline.studio.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -257,11 +259,22 @@ public class SerializedPropertiesUtil {
         }
 
         if (listOfMaps!=null) {
+            Map<Object,Integer> propIndex = new HashMap<Object,Integer>();
             int nbMap = listOfMaps.size();
             for (int i=0;i<nbMap;i++) {
                 Object key = listOfKeyMap.get(i);
+                StringBuilder keyName = new StringBuilder(key.toString());
+                System.out.println(" keyName "+keyName+" => "+(Collections.frequency(listOfKeyMap, key) > 1));
+                if(propIndex.containsKey(key)) {
+                    keyName.append("#").append(propIndex.get(key).toString());
+                    propIndex.put(key,propIndex.get(key)+1);
+                } else if(Collections.frequency(listOfKeyMap, key) > 1){
+                    keyName.append("#1");
+                    propIndex.put(key,2);
+                } 
+                    
                 Map map = listOfMaps.get(i);
-                String propName = (name ==null) ? key.toString() : name+" / "+key.toString();
+                String propName = (name ==null) ? keyName.toString() : name+" / "+keyName.toString();
                 addProperties(propGroup, propName, map);
             }
         }

@@ -26,8 +26,8 @@ public class ValidationDialog extends DefaultDialog {
 
     private static ValidationDialog m_singletonDialog = null;
     
-    private final static String[] FDR_ESTIMATOR_VALUES = {null, "Default", "Competition Based"};
-    private final static String[] FDR_ESTIMATOR_VALUES_ASSOCIATED_KEYS = {null, "false", "true"};
+//    private final static String[] FDR_ESTIMATOR_VALUES = {null, "Default", "Competition Based"};
+//    private final static String[] FDR_ESTIMATOR_VALUES_ASSOCIATED_KEYS = {null, "false", "true"};
     private final static String[] FDR_ON_VALUES = {null, "Score", "e-Value", "Identity p-Value", "Homology p-Value"};
     private final static String[] FDR_ON_VALUES_ASSOCIATED_KEYS = {null, "SCORE", "MASCOT_EVALUE", "SCORE_IT_P-VALUE", "SCORE_HT_P-VALUE"};
     
@@ -51,7 +51,7 @@ public class ValidationDialog extends DefaultDialog {
     private JLabel m_fdrLabel = null;
     private JTextField m_fdrTextField = null;
     private JLabel m_fdrPercentageLabel = null;
-    private JComboBox m_fdrEstimatorComboBox = null;
+//    private JComboBox m_fdrEstimatorComboBox = null;
     private JLabel m_proteinFdrLabel = null;
     private JTextField m_proteinFdrTextField = null;
     private JLabel m_proteinFdrPercentageLabel = null;
@@ -174,8 +174,8 @@ public class ValidationDialog extends DefaultDialog {
         c.gridy++;
         psmPanel.add(createFDRFilterPanel(), c);
 
-        c.gridy++;
-        psmPanel.add(createFDREstimatorPanel(), c);
+//        c.gridy++;
+//        psmPanel.add(createFDREstimatorPanel(), c);
 
         return psmPanel;
     }
@@ -388,30 +388,30 @@ public class ValidationDialog extends DefaultDialog {
         m_fdrOnValueParameter.setUsed(enabled);
     }
 
-    private JPanel createFDREstimatorPanel() {
-        JPanel fdrEstimatorPanel = new JPanel(new GridBagLayout());
-
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-
-
-        c.gridx = 0;
-        c.gridy = 0;
-        fdrEstimatorPanel.add(new JLabel("FDR Estimator"), c);
-
-        c.gridx++;
-        fdrEstimatorPanel.add(m_fdrEstimatorComboBox, c);
-
-        c.gridx++;
-        c.weightx = 1.0;
-        fdrEstimatorPanel.add(Box.createHorizontalBox(), c);
-
-        return fdrEstimatorPanel;
-    }
+//    private JPanel createFDREstimatorPanel() {
+//        JPanel fdrEstimatorPanel = new JPanel(new GridBagLayout());
+//
+//
+//        GridBagConstraints c = new GridBagConstraints();
+//        c.anchor = GridBagConstraints.NORTHWEST;
+//        c.fill = GridBagConstraints.BOTH;
+//        c.insets = new java.awt.Insets(5, 5, 5, 5);
+//
+//
+//
+//        c.gridx = 0;
+//        c.gridy = 0;
+//        fdrEstimatorPanel.add(new JLabel("FDR Estimator"), c);
+//
+//        c.gridx++;
+//        fdrEstimatorPanel.add(m_fdrEstimatorComboBox, c);
+//
+//        c.gridx++;
+//        c.weightx = 1.0;
+//        fdrEstimatorPanel.add(Box.createHorizontalBox(), c);
+//
+//        return fdrEstimatorPanel;
+//    }
 
     private JPanel createProteinSetFilterPanel() {
         JPanel proteinSetFilterPanel = new JPanel(new GridBagLayout());
@@ -683,9 +683,9 @@ public class ValidationDialog extends DefaultDialog {
         m_fdrOnValueParameter.setUsed(false);
         m_parameterList.add(m_fdrOnValueParameter);
 
-        m_fdrEstimatorComboBox = new JComboBox(FDR_ESTIMATOR_VALUES);
-        ObjectParameter<String> fdrEstimatorParameter = new ObjectParameter<>("use_td_competition", "FDR Estimator", m_fdrEstimatorComboBox, FDR_ESTIMATOR_VALUES, FDR_ESTIMATOR_VALUES_ASSOCIATED_KEYS, 0, null);
-        m_parameterList.add(fdrEstimatorParameter);
+//        m_fdrEstimatorComboBox = new JComboBox(FDR_ESTIMATOR_VALUES);
+//        ObjectParameter<String> fdrEstimatorParameter = new ObjectParameter<>("use_td_competition", "FDR Estimator", m_fdrEstimatorComboBox, FDR_ESTIMATOR_VALUES, FDR_ESTIMATOR_VALUES_ASSOCIATED_KEYS, 0, null);
+//        m_parameterList.add(fdrEstimatorParameter);
 
         m_proteinFdrTextField = new JTextField(5);
         m_proteinFdrFilterParameter = new DoubleParameter("protein_expected_fdr", "Protein FDR", m_proteinFdrTextField, new Double(5), new Double(0), new Double(10));

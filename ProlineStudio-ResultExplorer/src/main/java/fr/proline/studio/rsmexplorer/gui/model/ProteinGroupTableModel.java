@@ -21,7 +21,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDES_COUNT = 3;
     public static final int COLTYPE_SPECTRAL_COUNT = 4;
     public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 5;
-    private static final String[] m_columnNames = {"Protein Set", "Score", "Proteins", "Peptides", "Spectral Count", "Specific Spectral Count"};
+    private static final String[] m_columnNames = {"Protein Set", "Score", "Proteins", "Peptides", "Peptide Match Count", "Specific Peptide Match Count"};
     private ProteinSet[] m_proteinSets = null;
     
 

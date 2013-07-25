@@ -96,6 +96,7 @@
             <publicPackage>fr.profi.jdbc.easy</publicPackage>
             <publicPackage>fr.proline.api.service</publicPackage>
             <publicPackage>fr.proline.context</publicPackage>
+            <publicPackage>fr.proline.core.algo.msi</publicPackage>
             <publicPackage>fr.proline.core.algo.msq</publicPackage>
             <publicPackage>fr.proline.core.dal.*</publicPackage>
             <publicPackage>fr.proline.core.om.builder</publicPackage>

@@ -110,6 +110,57 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         return new RSMTree(rsetNode);
 
     }
+    
+    
+    public RSMTree copyDataSetRootSubTree(Dataset dset, long projectId) {
+
+        long dsetId = dset.getId();
+
+        RSMDataSetNode dsetNode = findDataSetNode((RSMNode) m_model.getRoot(), dsetId, projectId);
+
+        if (dsetNode == null) {
+            return null;
+        }
+
+//        dsetNode = findResultSetNodeRootParent(dsetNode);
+
+        return new RSMTree(dsetNode);
+
+    }
+
+     private RSMDataSetNode findDataSetNode(RSMNode node, long dsetId, long projectId) {
+
+        int nbChildren = node.getChildCount();
+
+        for (int i = 0; i < nbChildren; i++) {
+            RSMNode childNode = (RSMNode) node.getChildAt(i);
+            RSMNode.NodeTypes childType = childNode.getType();
+            if (childType == RSMNode.NodeTypes.DATA_SET) {
+                RSMDataSetNode dataSetNode = ((RSMDataSetNode) childNode);
+                Long datasetId = dataSetNode.getDataset().getId();
+
+                if ((datasetId != null) && (datasetId.longValue() == dsetId)) {
+                    return dataSetNode;
+                }
+                
+            } else if (childType == RSMNode.NodeTypes.PROJECT) {
+                RSMProjectNode projectNode = ((RSMProjectNode) childNode);
+                if (projectNode.getProject().getId() != projectId) {
+                    // we are not in the right project
+                    continue;
+                }
+            }
+            if (!childNode.isLeaf()) {
+                RSMDataSetNode dataSetNode = findDataSetNode(childNode, dsetId, projectId);
+                if (dataSetNode != null) {
+                    return dataSetNode;
+                }
+            }
+
+        }
+
+        return null;
+    }
 
     private RSMDataSetNode findResultSetNode(RSMNode node, long rsetId, long projectId) {
 
@@ -458,7 +509,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         
 
-        HashMap<Object, ArrayList<Dataset>> databaseObjectsToModify = new HashMap<>();
+        HashMap<Object, ArrayList<Dataset>> databaseObjectsToModify = new HashMap<Object, ArrayList<Dataset>>();
 
         Iterator<RSMNode> it = allParentNodeModified.iterator();
         while (it.hasNext()) {
@@ -480,7 +531,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
             // get new Dataset children
             int nb = parentNode.getChildCount();
-            ArrayList<Dataset> datasetList = new ArrayList<>(nb);
+            ArrayList<Dataset> datasetList = new ArrayList<Dataset>(nb);
             for (int i = 0; i < nb; i++) {
                 // we are sure that it is a Dataset
                 RSMNode childNode = ((RSMNode) parentNode.getChildAt(i));
@@ -720,7 +771,9 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 ValidateAction validateAction = new ValidateAction();
                 mainActions.add(validateAction);
                 
-
+                CompareWithSCAction computeSCAction = new CompareWithSCAction();
+                mainActions.add(computeSCAction); 
+                        
                 mainActions.add(null);  // separator
 
                 RenameAction renameAction = new RenameAction();

@@ -21,6 +21,7 @@ public class TreeSelectionDialog extends DefaultDialog {
     
     private RSMTree m_tree = null;
     private ArrayList<Dataset> m_selectedDatasetList = null;
+    private ArrayList<RSMDataSetNode> m_selectedRSMDSNodeList = null;
     
     public TreeSelectionDialog(Window parent, RSMTree tree, String title) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
@@ -48,7 +49,14 @@ public class TreeSelectionDialog extends DefaultDialog {
     public ArrayList<Dataset> getSelectedDatasetList() {
         ArrayList<Dataset> returnedList = m_selectedDatasetList;
         m_selectedDatasetList = null; // avoid a potential memory leak
-        
+        m_selectedRSMDSNodeList = null;
+        return returnedList;
+    }
+    
+    public ArrayList<RSMDataSetNode> getSelectedRSMDSNodeList() {
+        ArrayList<RSMDataSetNode> returnedList = m_selectedRSMDSNodeList;
+        m_selectedDatasetList = null; // avoid a potential memory leak
+        m_selectedRSMDSNodeList = null;
         return returnedList;
     }
     
@@ -62,8 +70,8 @@ public class TreeSelectionDialog extends DefaultDialog {
             return false;
         }
 
-        m_selectedDatasetList = new ArrayList<>();
-
+        m_selectedDatasetList = new ArrayList<Dataset>();
+        m_selectedRSMDSNodeList = new ArrayList<RSMDataSetNode>();
         
         int size = paths.length;
         for (int i=0;i<size;i++) {
@@ -72,6 +80,7 @@ public class TreeSelectionDialog extends DefaultDialog {
                 RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
 
                 m_selectedDatasetList.add(dataSetNode.getDataset());
+                m_selectedRSMDSNodeList.add(dataSetNode);
             }
         }
         if (m_selectedDatasetList.isEmpty()) {
@@ -87,12 +96,12 @@ public class TreeSelectionDialog extends DefaultDialog {
     @Override
     protected boolean cancelCalled() {
         m_selectedDatasetList = null;
-
+        m_selectedRSMDSNodeList = null;
         return true;
     }
     
     private void showSelectionError() {
-        JOptionPane.showMessageDialog(m_tree, "You must at least select one Result Summary.", "Warning", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(m_tree, "You must at least select one Aggregate.", "Warning", JOptionPane.ERROR_MESSAGE);
     }
     
     

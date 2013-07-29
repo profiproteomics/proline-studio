@@ -75,6 +75,8 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
         // Select the first row
         m_proteinTable.getSelectionModel().setSelectionInterval(0, 0);
+        
+        m_markerContainerPanel.setMaxLineNumber(proteinMatchArray.length);
     }
 
     public void setDataPeptideMatch(PeptideMatch peptideMatch) {
@@ -102,6 +104,8 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
         // Select the first row
         m_proteinTable.getSelectionModel().setSelectionInterval(0, 0);
+        
+        m_markerContainerPanel.setMaxLineNumber(proteinMatchArray.length);
 
     }
     

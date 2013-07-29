@@ -22,7 +22,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ProteinMatch.class, false);
-        //inParameter.addParameter(PeptideInstance.class, false); 
+        inParameter.addParameter(PeptideInstance.class, false, false /* parameter is not compulsory */); 
         inParameter.addParameter(ResultSummary.class, false); // needs a ProteinMatch and a ResultSummary (PeptideInstance is optionnal)
         registerInParameter(inParameter);
 
@@ -46,7 +46,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         ResultSummary resultSummary = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
        
         
-        if ((proteinMatch == null) || (selectedPeptide == null) || (resultSummary == null)) {
+        if ((proteinMatch == null) || (resultSummary == null)) {
             ((RsmProteinAndPeptideSequencePanel) m_panel).setData(null, null, null);
             return;
         }

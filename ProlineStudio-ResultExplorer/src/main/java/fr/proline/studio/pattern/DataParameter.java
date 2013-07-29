@@ -8,10 +8,16 @@ public class DataParameter {
 
     private Class m_c;
     private boolean m_isList;
+    private boolean m_isCompulsory;
 
+    
     public DataParameter(Class c, boolean isList) {
+        this(c, isList, true);
+    }
+    public DataParameter(Class c, boolean isList, boolean isCompulsory) {
         m_c = c;
         m_isList = isList;
+        m_isCompulsory = isCompulsory;
     }
 
     @Override
@@ -35,6 +41,10 @@ public class DataParameter {
         }
         return true;
 
+    }
+    
+    public boolean isCompulsory() {
+        return m_isCompulsory;
     }
     
     @Override

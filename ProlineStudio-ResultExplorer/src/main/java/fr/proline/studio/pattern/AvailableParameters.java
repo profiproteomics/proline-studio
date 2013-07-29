@@ -53,6 +53,9 @@ public class AvailableParameters {
             int distanceCur = 0;
             for (int i=0;i<parameterList.size();i++) {
                 DataParameter parameter = parameterList.get(i);
+                if (!parameter.isCompulsory()) {
+                    continue;
+                }
                 Integer distanceCurI = m_availableParametersMap.get(parameter);
                 if (distanceCurI == null) {
                     distanceCur = -1;

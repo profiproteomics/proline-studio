@@ -13,6 +13,10 @@ public class GroupParameter  {
     public void addParameter(Class c, boolean isList) {
         m_parameterList.add(new DataParameter(c, isList));
     }
+    
+    public void addParameter(Class c, boolean isList, boolean isCompulsory) {
+        m_parameterList.add(new DataParameter(c, isList, isCompulsory));
+    }
 
     public ArrayList<DataParameter> getParameterList() {
         return m_parameterList;
@@ -36,6 +40,9 @@ public class GroupParameter  {
         for (int i=0;i<nbInParameters;i++) {
             DataParameter inParameter = m_parameterList.get(i);
             
+            if (! inParameter.isCompulsory()) {
+                continue;
+            }
             
             boolean compatibleOutParameterFound = false;
             for (int j=0;j<nbOutParameters;j++) {

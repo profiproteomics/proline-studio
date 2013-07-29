@@ -1,7 +1,8 @@
 package fr.proline.studio.pattern;
 
 
-import fr.proline.core.orm.msi.*;
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadSpectrumsTask;

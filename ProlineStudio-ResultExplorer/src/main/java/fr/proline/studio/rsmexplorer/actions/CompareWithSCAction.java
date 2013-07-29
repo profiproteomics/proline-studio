@@ -32,7 +32,8 @@ import org.slf4j.LoggerFactory;
 public class CompareWithSCAction extends AbstractRSMAction {
  
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-
+    protected TreeSelectionDialog treeSelectionDialog;
+  
     public CompareWithSCAction() {
         super(NbBundle.getMessage(CompareWithSCAction.class, "CTL_CompareWithSCAction"));
     }
@@ -42,14 +43,7 @@ public class CompareWithSCAction extends AbstractRSMAction {
      
         // Onlt Ref should be selected to compute SC         
         final RSMDataSetNode datasetNode = (RSMDataSetNode) selectedNodes[0];
-        
-        //Create Child Tree to select RSM to compute SC for
-        final RSMTree childTree = RSMTree.getTree().copyDataSetRootSubTree(datasetNode.getDataset(),  datasetNode.getDataset().getProject().getId());
-        final TreeSelectionDialog treeSelectionDialog = new TreeSelectionDialog(WindowManager.getDefault().getMainWindow(), childTree, "Select Result Summaries for Spectral Count");
-        treeSelectionDialog.setLocation(x, y);
-        treeSelectionDialog.setBusy(true);
-        treeSelectionDialog.setVisible(true);
-        
+                 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override
@@ -59,15 +53,17 @@ public class CompareWithSCAction extends AbstractRSMAction {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                m_logger.debug(" Choose RSM for Weighted SC");
+//                treeSelectionDialog.setBusy(false);
 
                 // check if we can compute SC
                 String error = null;
                 ArrayList<Long> resultSummaryIdList = new ArrayList<>();                
-                treeSelectionDialog.setBusy(false);
                 
                 if (treeSelectionDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                    ArrayList<RSMDataSetNode> selectedDSNodes = treeSelectionDialog.getSelectedRSMDSNodeList();
                    for(RSMDataSetNode dsNode : selectedDSNodes){
+                       //TODO : Verif pas père + fils sélectionnés : Que père ou que fils
                         if (!dsNode.hasResultSummary()) {
                             error = " Spectral Count is not possible on Search result ("+ dsNode.getDataset().getName() +").  Identification Summary should be created first";
                             break;                       
@@ -91,10 +87,19 @@ public class CompareWithSCAction extends AbstractRSMAction {
                 askComputeSCService(datasetNode,resultSummaryIdList);
             }
         };
-               
         
-
+            //Create Child Tree to select RSM to compute SC for
+        final RSMTree childTree = RSMTree.getTree().copyDataSetRootSubTree(datasetNode.getDataset(),  datasetNode.getDataset().getProject().getId());
+        treeSelectionDialog = new TreeSelectionDialog(WindowManager.getDefault().getMainWindow(), childTree, "Select Result Summaries for Spectral Count");
+        treeSelectionDialog.setLocation(x, y);   
+//        treeSelectionDialog.setBusy(true);  
+        treeSelectionDialog.setVisible(true);  
+        
         RSMTree.getTree().loadInBackground(datasetNode, callback);
+
+        
+       
+
     
     }
     
@@ -124,7 +129,8 @@ public class CompareWithSCAction extends AbstractRSMAction {
                     m_log2.debug(" Service Success. Result = ------------  ");
                     m_log2.debug(_spCountJSON[0]);
                     m_log2.debug(" Service Success. END Result = ------------  ");
-
+                    refNode.setIsChanging(false);
+                    treeModel.nodeChanged(refNode);
                 } else {
                     //JPM.TODO : manage error with errorMessage
                     refNode.setIsChanging(false);

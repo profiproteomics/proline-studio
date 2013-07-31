@@ -296,6 +296,12 @@ public class PeptideInstanceTableModel extends LazyTableModel {
     }
 
     public void sortAccordingToModel(ArrayList<Long> peptideMatchIds) {
+        
+        if (m_peptideInstances == null) {
+            // data not loaded 
+            return;
+        }
+        
         HashSet<Long> peptideMatchIdMap = new HashSet<>(peptideMatchIds.size());
         peptideMatchIdMap.addAll(peptideMatchIds);
 

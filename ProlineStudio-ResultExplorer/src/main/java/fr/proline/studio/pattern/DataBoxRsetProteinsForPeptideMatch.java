@@ -40,7 +40,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        RsetProteinsPanel p = new RsetProteinsPanel();
+        RsetProteinsPanel p = new RsetProteinsPanel(false);
         p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;

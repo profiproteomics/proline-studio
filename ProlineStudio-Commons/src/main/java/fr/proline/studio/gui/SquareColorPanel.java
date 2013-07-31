@@ -20,7 +20,7 @@ public class SquareColorPanel extends JPanel {
     }
 
     public void setColor(Color c) {
-        this.m_color = c;
+        m_color = c;
     }
 
     @Override

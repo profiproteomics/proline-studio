@@ -32,7 +32,7 @@ public class SubTaskManager {
     }
 
     public synchronized void setCurrentTask(SubTask currentTask) {
-        this.m_currentTask = currentTask;
+        m_currentTask = currentTask;
     }
 
     public synchronized SubTask sliceATaskAndGetFirst(int subTaskId, int arrayLength, int range) {

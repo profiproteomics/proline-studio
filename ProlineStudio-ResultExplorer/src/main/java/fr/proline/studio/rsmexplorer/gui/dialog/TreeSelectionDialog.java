@@ -31,7 +31,7 @@ public class TreeSelectionDialog extends DefaultDialog {
         
         setStatusVisible(false);
         
-        this.m_tree = tree;
+        m_tree = tree;
         
         setTitle(title);
         

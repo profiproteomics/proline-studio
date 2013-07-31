@@ -902,11 +902,11 @@ public class SplittedPanelContainer extends JPanel {
         }
         
         public void replaceEmbededPanel(JComponent embededPanel) {
-            if (embededPanel.equals(this.m_embededPanel)) {
+            if (embededPanel.equals(m_embededPanel)) {
                 return;
             }
             removeAll();
-            this.m_embededPanel = embededPanel;
+            m_embededPanel = embededPanel;
             setName(embededPanel.getName());
             initComponents();
         }

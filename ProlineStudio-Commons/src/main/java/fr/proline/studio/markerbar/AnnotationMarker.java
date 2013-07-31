@@ -19,6 +19,6 @@ public class AnnotationMarker extends DefaultMarker {
     }
     
     public void setText(String text) {
-        this.m_text = text;
+        m_text = text;
     }
 }

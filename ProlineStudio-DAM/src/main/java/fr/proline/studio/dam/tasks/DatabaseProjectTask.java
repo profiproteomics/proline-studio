@@ -40,8 +40,8 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
      */
     public void initLoadProject(String user, List<AbstractData> list) {
         setTaskInfo(new TaskInfo("Load Projects for User "+user, TASK_LIST_INFO));
-        this.m_user = user;
-        this.m_list = list;
+        m_user = user;
+        m_list = list;
         
         m_action = LOAD_PROJECT;
     }
@@ -53,8 +53,8 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
      */
     public void initRenameProject(long projectId, String name) {
         setTaskInfo(new TaskInfo("Rename Project to "+name, TASK_LIST_INFO));
-        this.m_projectId = projectId;
-        this.m_name = name;
+        m_projectId = projectId;
+        m_name = name;
         
         m_action = RENAME_PROJECT;
     }

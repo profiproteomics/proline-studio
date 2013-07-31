@@ -32,7 +32,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     
     public MarkerContainerPanel(JScrollPane sp, MarkerComponentInterface markerComponent) {
 
-        this.m_markerComponent = markerComponent;
+        m_markerComponent = markerComponent;
         m_markerBar = new MarkerBar(this);
         m_overviewBar = new OverviewBar(this);
 

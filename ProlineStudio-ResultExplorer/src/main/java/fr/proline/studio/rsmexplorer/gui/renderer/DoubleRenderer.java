@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.renderer;
 
 import fr.proline.studio.utils.DataFormat;
@@ -15,10 +11,10 @@ import javax.swing.table.TableCellRenderer;
  */
 public class DoubleRenderer implements TableCellRenderer  {
     
-    TableCellRenderer defaultRenderer;
+    private TableCellRenderer m_defaultRenderer;
     
     public DoubleRenderer(TableCellRenderer defaultRenderer) {
-        this.defaultRenderer = defaultRenderer;
+        m_defaultRenderer = defaultRenderer;
     }
     
     @Override
@@ -30,7 +26,7 @@ public class DoubleRenderer implements TableCellRenderer  {
 
         
 
-        return defaultRenderer.getTableCellRendererComponent(table, formatedValue, isSelected, hasFocus, row, column);
+        return m_defaultRenderer.getTableCellRendererComponent(table, formatedValue, isSelected, hasFocus, row, column);
 
     }
 }

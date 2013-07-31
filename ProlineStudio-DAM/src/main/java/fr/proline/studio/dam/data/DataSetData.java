@@ -38,7 +38,7 @@ public class DataSetData extends AbstractData {
     }
     
     public void setDataset(Dataset dataset) {
-        this.m_dataset = dataset;
+        m_dataset = dataset;
         m_temporaryName = null;
     }
     

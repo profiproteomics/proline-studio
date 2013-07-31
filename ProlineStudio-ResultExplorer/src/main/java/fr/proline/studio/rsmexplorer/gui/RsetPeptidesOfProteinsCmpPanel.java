@@ -166,27 +166,27 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
 
         private HashMap<Long, ProteinMatch> rsmToProteinMatchMap = null;
         
-        private ArrayList<ProteinMatch> proteinMatchArray;
-        private ArrayList<ResultSummary> rsmArray;
-        private HashMap<Long, PeptideMatch> peptideMatchMap = new HashMap<>();
-        private List<PeptideMatch> peptideMatchList = null;
+        private ArrayList<ProteinMatch> m_proteinMatchArray;
+        private ArrayList<ResultSummary> m_rsmArray;
+        private HashMap<Long, PeptideMatch> m_peptideMatchMap = new HashMap<>();
+        private List<PeptideMatch> m_peptideMatchList = null;
         
-        private PeptideCompare peptideCompare = null;
+        private PeptideCompare m_peptideCompare = null;
         
         public static final int COLTYPE_PEPTIDE_NAME = 0;
         public static final int COLTYPE_RSM_PRESENCE = 1;
 
-        private static final String[] columnNames = {"Peptide", "Rsm"};
+        private static final String[] m_columnNames = {"Peptide", "Rsm"};
     
         
         public void setData(ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmArray) {
             
-            this.proteinMatchArray = proteinMatchArray;
-            this.rsmArray = rsmArray;
+            m_proteinMatchArray = proteinMatchArray;
+            m_rsmArray = rsmArray;
 
             if ((proteinMatchArray == null) || (proteinMatchArray.isEmpty())) {
-                peptideMatchList = null;
-                peptideMatchMap.clear();
+                m_peptideMatchList = null;
+                m_peptideMatchMap.clear();
                 
                 fireTableStructureChanged();
                 return;
@@ -214,7 +214,7 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
             }
             
 
-            peptideMatchMap.clear();
+            m_peptideMatchMap.clear();
             int rsmSize = rsmArray.size();
             for (int i = 0; i < rsmSize; i++) {
                 
@@ -238,15 +238,15 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
                  int nbPeptides = peptideInstances.length;
                 for (int j = 0; j < nbPeptides; j++) {
                     PeptideMatch peptideMatch = peptideInstances[j].getTransientData().getBestPeptideMatch();
-                    peptideMatchMap.put(peptideMatch.getId(), peptideMatch);
+                    m_peptideMatchMap.put(peptideMatch.getId(), peptideMatch);
                 }
             }
 
-            Collection<PeptideMatch> peptideMatchCollection = peptideMatchMap.values();
-            peptideMatchList = new ArrayList<>(peptideMatchCollection);
-            Collections.sort(peptideMatchList, PeptideComparator.getInstance() );
+            Collection<PeptideMatch> peptideMatchCollection = m_peptideMatchMap.values();
+            m_peptideMatchList = new ArrayList<>(peptideMatchCollection);
+            Collections.sort(m_peptideMatchList, PeptideComparator.getInstance() );
             
-            peptideCompare = new PeptideCompare(peptideMatchList.size());
+            m_peptideCompare = new PeptideCompare(m_peptideMatchList.size());
 
             fireTableStructureChanged();
             
@@ -265,44 +265,44 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
         
         @Override
         public int getRowCount() {
-            if (peptideMatchList == null) {
+            if (m_peptideMatchList == null) {
                 return 0;
             }
-            return peptideMatchList.size();
+            return m_peptideMatchList.size();
         }
 
         @Override
         public int getColumnCount() {
-            return columnNames.length;
+            return m_columnNames.length;
         }
 
         @Override
         public String getColumnName(int col) {
-            return columnNames[col];
+            return m_columnNames[col];
         }
         
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            if (peptideMatchList == null) {
+            if (m_peptideMatchList == null) {
                 return null;
             }
             switch (columnIndex) {
                 case COLTYPE_PEPTIDE_NAME: {
-                    PeptideMatch peptideMatch = peptideMatchList.get(rowIndex);
+                    PeptideMatch peptideMatch = m_peptideMatchList.get(rowIndex);
                     Peptide p = peptideMatch.getTransientData().getPeptide();
                     return p;
                 }
                 case COLTYPE_RSM_PRESENCE: {
-                    peptideCompare.clear();
+                    m_peptideCompare.clear();
                     
-                    PeptideMatch peptideMatchCur = peptideMatchList.get(rowIndex);
+                    PeptideMatch peptideMatchCur = m_peptideMatchList.get(rowIndex);
 
 
-                    int rsmSize = rsmArray.size();
+                    int rsmSize = m_rsmArray.size();
                     for (int i = 0; i < rsmSize; i++) {
-                        Long rsmId = rsmArray.get(i).getId();
+                        Long rsmId = m_rsmArray.get(i).getId();
                         ProteinMatch pm = rsmToProteinMatchMap.get(rsmId);
-                        PeptideSet pset = pm.getTransientData().getPeptideSet(rsmArray.get(i).getId());
+                        PeptideSet pset = pm.getTransientData().getPeptideSet(m_rsmArray.get(i).getId());
                         PeptideInstance[] peptideInstanceArray = pset.getTransientPeptideInstances();
                         if (peptideInstanceArray == null) {
                             System.out.println("peptideInstanceArray null");
@@ -317,10 +317,10 @@ public class RsetPeptidesOfProteinsCmpPanel extends HourglassPanel implements Da
                                 break;
                             }
                         }
-                        peptideCompare.addHasPeptide(peptideFound);
+                        m_peptideCompare.addHasPeptide(peptideFound);
                     }
                     
-                   return peptideCompare;
+                   return m_peptideCompare;
                 }
             }
             return null;

@@ -33,7 +33,7 @@ public abstract class AbstractDatabaseCallback {
         return m_errorId;
     }
     public void setErrorMessage(String errorMessage, int errorId) {
-        this.m_errorMessage = errorMessage;
-        this.m_errorId = errorId;
+        m_errorMessage = errorMessage;
+        m_errorId = errorId;
     }
 }

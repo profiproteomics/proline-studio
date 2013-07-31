@@ -32,7 +32,7 @@ public abstract class AbstractServiceCallback {
         return m_errorMessage;
     }
     public void setErrorMessage(String errorMessage) {
-        this.m_errorMessage = errorMessage;
+        m_errorMessage = errorMessage;
     }   
     
     public TaskInfo getTaskInfo() {
@@ -40,6 +40,6 @@ public abstract class AbstractServiceCallback {
     }
     
     public void setTaskInfo(TaskInfo taskInfo) {
-        this.m_taskInfo = taskInfo;
+        m_taskInfo = taskInfo;
     }
 }

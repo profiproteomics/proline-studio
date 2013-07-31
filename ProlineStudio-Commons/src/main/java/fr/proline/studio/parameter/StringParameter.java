@@ -13,24 +13,24 @@ import javax.swing.event.DocumentListener;
 public class StringParameter extends AbstractParameter {
 
 
-    private String defaultValue;
-    private Integer minChars;
-    private Integer maxChars;
+    private String m_defaultValue;
+    private Integer m_minChars;
+    private Integer m_maxChars;
 
     public StringParameter(String key, String name, Class graphicalType, String defaultValue, Integer minChars, Integer maxChars) {
         super(key, name, String.class, graphicalType);
-        this.defaultValue = defaultValue;
-        this.minChars = minChars;
-        this.maxChars = maxChars;
+        m_defaultValue = defaultValue;
+        m_minChars = minChars;
+        m_maxChars = maxChars;
         
     }
     
     public StringParameter(String key, String name, JComponent component, String defaultValue, Integer minChars, Integer maxChars) {
         super(key, name, String.class, component.getClass());
-        this.defaultValue = defaultValue;
-        this.m_parameterComponent = component;
-        this.minChars = minChars;
-        this.maxChars = maxChars;
+        m_defaultValue = defaultValue;
+        m_parameterComponent = component;
+        m_minChars = minChars;
+        m_maxChars = maxChars;
 
     }
 
@@ -42,7 +42,7 @@ public class StringParameter extends AbstractParameter {
             startValue = value.toString();
         }
         if (startValue == null) {
-            startValue = (defaultValue!= null) ? defaultValue : "";
+            startValue = (m_defaultValue!= null) ? m_defaultValue : "";
         }
         
 
@@ -74,13 +74,13 @@ public class StringParameter extends AbstractParameter {
     
     @Override
     public void initDefault() {
-        if (defaultValue == null) {
+        if (m_defaultValue == null) {
             return; // should not happen
         }
 
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
-            textField.setText(defaultValue);
+            textField.setText(m_defaultValue);
         }
     }
     
@@ -100,19 +100,19 @@ public class StringParameter extends AbstractParameter {
         
         
         int length = value.length();
-        if (minChars != null) {
-            if (length<minChars.intValue()) {
+        if (m_minChars != null) {
+            if (length<m_minChars.intValue()) {
                 if (length == 0) {
                     return new ParameterError(m_name+" field is not filled", m_parameterComponent);
                 } else  {
-                    return new ParameterError("Minimum length of "+m_name+" is "+minChars.intValue()+" characters", m_parameterComponent);
+                    return new ParameterError("Minimum length of "+m_name+" is "+m_minChars.intValue()+" characters", m_parameterComponent);
                 }
                 
             }
         }
-        if (maxChars != null) {
-            if (length>maxChars.intValue()) {
-                return new ParameterError(m_name+" exceeds "+minChars.intValue()+" characters", m_parameterComponent);
+        if (m_maxChars != null) {
+            if (length>m_maxChars.intValue()) {
+                return new ParameterError(m_name+" exceeds "+m_minChars.intValue()+" characters", m_parameterComponent);
                 
             }
         }

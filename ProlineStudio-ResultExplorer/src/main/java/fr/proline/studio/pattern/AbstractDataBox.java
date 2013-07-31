@@ -95,7 +95,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     }
     
     public void setNextDataBox(AbstractDataBox nextDataBox) {
-        this.m_nextDataBox = nextDataBox;
+        m_nextDataBox = nextDataBox;
         if (nextDataBox != null) {
             nextDataBox.m_previousDataBox = this;
         }
@@ -127,7 +127,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     }
     
     public void setProjectId(long projectId) {
-        this.m_projectId = projectId;
+        m_projectId = projectId;
     }
     
     public long getProjectId() {
@@ -146,7 +146,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     }
     
     public void setLayout(DataBoxLayout layout) {
-        this.m_layout = layout;
+        m_layout = layout;
     }
     
     public DataBoxLayout getLayout() {

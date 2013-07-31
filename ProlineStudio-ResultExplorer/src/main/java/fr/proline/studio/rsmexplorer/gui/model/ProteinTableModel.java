@@ -19,7 +19,7 @@ public class ProteinTableModel extends AbstractTableModel {
     private static final String[] m_columnNames = {"Protein", "Same Set", "Score", "Peptides", "Mass"};
     private ProteinMatch[] m_sameSetMatches = null;
     private ProteinMatch[] m_subSetMatches = null;
-    private Long rsmId = null;
+    private Long m_rsmId = null;
 
     public ProteinMatch getProteinMatch(int row) {
 
@@ -79,10 +79,10 @@ public class ProteinTableModel extends AbstractTableModel {
                     return Boolean.FALSE;
                 }
             case COLTYPE_PROTEIN_SCORE:
-                Float score = Float.valueOf(proteinMatch.getTransientData().getPeptideSet(rsmId).getScore() );
+                Float score = Float.valueOf(proteinMatch.getTransientData().getPeptideSet(m_rsmId).getScore() );
                 return score;
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
-                return proteinMatch.getTransientData().getPeptideSet(rsmId).getPeptideCount();
+                return proteinMatch.getTransientData().getPeptideSet(m_rsmId).getPeptideCount();
             case COLTYPE_PROTEIN_MASS:
                 fr.proline.core.orm.msi.BioSequence bioSequenceMSI = proteinMatch.getTransientData().getBioSequenceMSI();
                 if (bioSequenceMSI != null) {
@@ -99,9 +99,9 @@ public class ProteinTableModel extends AbstractTableModel {
     
 
     public void setData(long rsmId, ProteinMatch[] sameSetMatches, ProteinMatch[] subSetMatches) {
-        this.rsmId = rsmId;
-        this.m_sameSetMatches = sameSetMatches;
-        this.m_subSetMatches = subSetMatches;
+        m_rsmId = rsmId;
+        m_sameSetMatches = sameSetMatches;
+        m_subSetMatches = subSetMatches;
         fireTableDataChanged();
         
 

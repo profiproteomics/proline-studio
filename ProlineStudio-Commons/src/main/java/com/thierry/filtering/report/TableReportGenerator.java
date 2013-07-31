@@ -11,30 +11,30 @@ import javax.swing.table.TableCellRenderer;
 
 public class TableReportGenerator {
 
-    private JTable table;
+    private JTable m_table;
 
     public TableReportGenerator(JTable table) {
-        this.table = table;
+        m_table = table;
     }
 
     private Component getRendererComponent(int row, int column) {
-        TableCellRenderer renderer = table.getCellRenderer(row, column);
-        return table.prepareRenderer(renderer, row, column);
+        TableCellRenderer renderer = m_table.getCellRenderer(row, column);
+        return m_table.prepareRenderer(renderer, row, column);
     }
 
     public String generateFullReport(ReportBuilder builder) {
-        ListSelectionModel previousModel = table.getSelectionModel();
+        ListSelectionModel previousModel = m_table.getSelectionModel();
         try {
-            table.setSelectionModel(previousModel.getClass().newInstance());
+            m_table.setSelectionModel(previousModel.getClass().newInstance());
             builder.open();
             builder.startTable();
 
-            int columnCount = table.getColumnCount();
-            int rowCount = table.getRowCount();
+            int columnCount = m_table.getColumnCount();
+            int rowCount = m_table.getRowCount();
 
             builder.startTableHeader();
             for (int i = 0; i < columnCount; i++) {
-                builder.addColumnHeader(table.getColumnName(i));
+                builder.addColumnHeader(m_table.getColumnName(i));
             }
             builder.endTableHeader();
 
@@ -53,24 +53,24 @@ public class TableReportGenerator {
         } catch (IllegalAccessException e) {
             return null;
         } finally {
-            if (table != null) {
-                table.setSelectionModel(previousModel);
+            if (m_table != null) {
+                m_table.setSelectionModel(previousModel);
             }
         }
     }
 
     public String getSelection(ReportBuilder builder) {
-        ListSelectionModel previousModel = table.getSelectionModel();
-        int[] rows = table.getSelectedRows();
+        ListSelectionModel previousModel = m_table.getSelectionModel();
+        int[] rows = m_table.getSelectedRows();
         try {
-            table.setSelectionModel(previousModel.getClass().newInstance());
-            int columnCount = table.getColumnCount();
+            m_table.setSelectionModel(previousModel.getClass().newInstance());
+            int columnCount = m_table.getColumnCount();
             builder.open();
             builder.startTable();
 
             builder.startTableHeader();
             for (int i = 0; i < columnCount; i++) {
-                builder.addColumnHeader(table.getColumnName(i));
+                builder.addColumnHeader(m_table.getColumnName(i));
             }
             builder.endTableHeader();
             
@@ -89,8 +89,8 @@ public class TableReportGenerator {
         } catch (IllegalAccessException e) {
             return null;
         } finally {
-            if (table != null) {
-                table.setSelectionModel(previousModel);
+            if (m_table != null) {
+                m_table.setSelectionModel(previousModel);
             }
         }
     }

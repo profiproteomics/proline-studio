@@ -94,7 +94,7 @@ public class UDSDataManager  {
     }
     
     public void setProjectUser(UserAccount projectUser) {
-        this.m_projectUser = projectUser;
+        m_projectUser = projectUser;
     }
     
     public UserAccount getProjectUser() {
@@ -106,14 +106,14 @@ public class UDSDataManager  {
     }
 
     public void setUdsJdbcDriver(String jdbcDriver) {
-        this.m_jdbcDriver = jdbcDriver;
+        m_jdbcDriver = jdbcDriver;
     }
     public String getUdsJdbcDriver() {
         return m_jdbcDriver;
     }
 
     public void setUdsJdbcURL(String jdbcURL) {
-        this.m_jdbcURL = jdbcURL;
+        m_jdbcURL = jdbcURL;
     }
 
     public String getUdsJdbcURL() {

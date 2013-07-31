@@ -194,7 +194,7 @@ public class PeptideTableModel extends AbstractTableModel {
     }
 
     public void setData(PeptideInstance[] peptideInstances) {
-        this.m_peptideInstances = peptideInstances;
+        m_peptideInstances = peptideInstances;
         fireTableDataChanged();
 
     }

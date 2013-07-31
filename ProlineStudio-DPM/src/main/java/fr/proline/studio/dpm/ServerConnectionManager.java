@@ -30,7 +30,7 @@ public class ServerConnectionManager {
     public static final int CONNECTION_DATABASE_FAILED = 4;
     public static final int CONNECTION_DONE = 5;
     
-    private int connectionState = NOT_CONNECTED;
+    private int m_connectionState = NOT_CONNECTED;
     private String m_connectionError = null;
     
     private String m_serverURL;
@@ -289,20 +289,20 @@ public class ServerConnectionManager {
     
     
     public synchronized boolean isConnectionFailed() {
-        return ((connectionState == CONNECTION_SERVER_FAILED) || (connectionState == CONNECTION_DATABASE_FAILED));
+        return ((m_connectionState == CONNECTION_SERVER_FAILED) || (m_connectionState == CONNECTION_DATABASE_FAILED));
     }
     public synchronized boolean isConnectionAsked() {
-        return ((connectionState == CONNECTION_SERVER_ASKED) || (connectionState == CONNECTION_DATABASE_ASKED));
+        return ((m_connectionState == CONNECTION_SERVER_ASKED) || (m_connectionState == CONNECTION_DATABASE_ASKED));
     }
     public synchronized boolean isConnectionDone() {
-        return (connectionState == CONNECTION_DONE);
+        return (m_connectionState == CONNECTION_DONE);
     }
     public synchronized boolean isNotConnected() {
-        return (connectionState == NOT_CONNECTED);
+        return (m_connectionState == NOT_CONNECTED);
     }
 
     public synchronized void setConnectionState(int connectionState) {
-        this.connectionState = connectionState;
+        m_connectionState = connectionState;
     }
 
     public String getConnectionError() {

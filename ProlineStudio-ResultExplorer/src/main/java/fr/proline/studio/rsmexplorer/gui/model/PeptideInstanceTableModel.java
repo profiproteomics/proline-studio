@@ -239,7 +239,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
 
     public void setData(Long taskId, PeptideInstance[] peptideInstances) {
         m_peptideInstances = peptideInstances;
-        this.m_taskId = taskId;
+        m_taskId = taskId;
         
         updateMinMax();
         

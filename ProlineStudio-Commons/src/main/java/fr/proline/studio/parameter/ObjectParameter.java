@@ -13,33 +13,33 @@ import javax.swing.*;
  */
 public class ObjectParameter<E> extends AbstractParameter {
 
-    private E[] objects;
-    private Object[] associatedObjects = null;
-    private int defaultIndex;
-    private AbstractParameterToString<E> paramToString = null;
+    private E[] m_objects;
+    private Object[] m_associatedObjects = null;
+    private int m_defaultIndex;
+    private AbstractParameterToString<E> m_paramToString = null;
 
 
     public ObjectParameter(String key, String name, E[] objects, int defaultIndex, AbstractParameterToString<E> paramToString) {
         super(key, name, Integer.class, JComboBox.class);
-        this.objects = objects;
+        m_objects = objects;
         if ((defaultIndex<0) || (defaultIndex>=objects.length)) {
             defaultIndex = 0;
         }
-        this.defaultIndex = defaultIndex;
-        this.paramToString = paramToString;
+        m_defaultIndex = defaultIndex;
+        m_paramToString = paramToString;
         
     }
     
     public ObjectParameter(String key, String name, JComboBox comboBox, E[] objects, Object[] associatedObjects, int defaultIndex, AbstractParameterToString<E> paramToString) {
         super(key, name, Integer.class, JComboBox.class);
-        this.objects = objects;
+        m_objects = objects;
         if ((defaultIndex < 0) || (defaultIndex >= objects.length)) {
             defaultIndex = 0;
         }
-        this.defaultIndex = defaultIndex;
-        this.paramToString = paramToString;
-        this.m_parameterComponent = comboBox;
-        this.associatedObjects = associatedObjects;
+        m_defaultIndex = defaultIndex;
+        m_paramToString = paramToString;
+        m_parameterComponent = comboBox;
+        m_associatedObjects = associatedObjects;
         comboBox.setRenderer(new ParameterComboboxRenderer(paramToString));
 
     }
@@ -53,7 +53,7 @@ public class ObjectParameter<E> extends AbstractParameter {
                 JComboBox combobox = ((JComboBox) m_parameterComponent);
 
                 if ((value == null) || (! selectItem(combobox, value))) {
-                    combobox.setSelectedIndex(defaultIndex);
+                    combobox.setSelectedIndex(m_defaultIndex);
                 }
 
                 return m_parameterComponent;
@@ -63,11 +63,11 @@ public class ObjectParameter<E> extends AbstractParameter {
         
         
         if (m_graphicalType.equals(JComboBox.class)) {
-            JComboBox combobox = new JComboBox(objects);
-            combobox.setRenderer(new ParameterComboboxRenderer(paramToString));
+            JComboBox combobox = new JComboBox(m_objects);
+            combobox.setRenderer(new ParameterComboboxRenderer(m_paramToString));
             
             if ((value == null) || (! selectItem(combobox, value))) {
-                    combobox.setSelectedIndex(defaultIndex);
+                    combobox.setSelectedIndex(m_defaultIndex);
             }
             m_parameterComponent = combobox;
             return combobox;
@@ -94,7 +94,7 @@ public class ObjectParameter<E> extends AbstractParameter {
     
     @Override
     public void initDefault() {
-        ((JComboBox) m_parameterComponent).setSelectedIndex(defaultIndex);
+        ((JComboBox) m_parameterComponent).setSelectedIndex(m_defaultIndex);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class ObjectParameter<E> extends AbstractParameter {
 
     @Override
     public String getStringValue() {
-        if (associatedObjects == null) {
+        if (m_associatedObjects == null) {
             E item = getObjectValue();
         
             return getStringValue(item);
@@ -133,18 +133,18 @@ public class ObjectParameter<E> extends AbstractParameter {
             return "";
         }
 
-        if (paramToString != null) {
-            return paramToString.toString(item);
+        if (m_paramToString != null) {
+            return m_paramToString.toString(item);
         }
 
         return item.toString();
     }
 
     private String getStringValue(JComboBox comboBox, int index) {
-        if (associatedObjects == null) {
+        if (m_associatedObjects == null) {
             return getStringValue( (E) comboBox.getItemAt(index) );
         } else {
-            Object associatedObject = associatedObjects[index];
+            Object associatedObject = m_associatedObjects[index];
             if (associatedObject == null) {
                 return "";
             } else {
@@ -164,7 +164,7 @@ public class ObjectParameter<E> extends AbstractParameter {
 
     public Object getAssociatedObjectValue() {
         
-        if (associatedObjects == null) {
+        if (m_associatedObjects == null) {
             return getObjectValue();
         }
         
@@ -173,7 +173,7 @@ public class ObjectParameter<E> extends AbstractParameter {
             if (index == -1) {
                 return null;
             }
-            return associatedObjects[index];
+            return m_associatedObjects[index];
         }
         return null; // should not happen
     }

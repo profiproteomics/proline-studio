@@ -103,12 +103,12 @@ public class TableSelection implements Transferable, ClipboardOwner {
     }
 
     protected static final Logger logger = LoggerFactory.getLogger("ProlineStudio.Commons");
-    private JTable table;
-    private String textReport;
-    private String htmlReport;
+    private JTable m_table;
+    private String m_textReport;
+    private String m_htmlReport;
     
     public TableSelection(JTable table) {
-        this.table = table;
+        m_table = table;
     }
 
     public DataFlavor[] getTransferDataFlavors() {
@@ -151,9 +151,9 @@ public class TableSelection implements Transferable, ClipboardOwner {
 
     private String getHTMLStringSelection() {
         logger.debug("HTMLReport requested");
-        if (htmlReport == null)
-            htmlReport = new TableReportGenerator(table).getSelection(new HTMLReportBuilder());
-        return htmlReport;
+        if (m_htmlReport == null)
+            m_htmlReport = new TableReportGenerator(m_table).getSelection(new HTMLReportBuilder());
+        return m_htmlReport;
     }
 
     private Object getTransferData(DataFlavor flavor, String transfered) throws UnsupportedFlavorException {
@@ -169,9 +169,9 @@ public class TableSelection implements Transferable, ClipboardOwner {
 
     private String getTextStringSelection() {
         logger.debug("Text Report Requested ... ");
-        if (textReport == null)
-            textReport = new TableReportGenerator(table).getSelection(new TextReportBuilder());
-        return textReport;
+        if (m_textReport == null)
+            m_textReport = new TableReportGenerator(m_table).getSelection(new TextReportBuilder());
+        return m_textReport;
     }
 
     public void lostOwnership(Clipboard clipboard, Transferable contents) {

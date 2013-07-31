@@ -291,8 +291,8 @@ public class PeptideMatchTableModel extends LazyTableModel {
     }
 
     public void setData(Long taskId, PeptideMatch[] peptideMatches) {
-        this.m_peptideMatches = peptideMatches;
-        this.m_taskId = taskId;
+        m_peptideMatches = peptideMatches;
+        m_taskId = taskId;
         
         updateMinMax();
         

@@ -13,7 +13,7 @@ public class BooleanParameter extends AbstractParameter {
 
     public BooleanParameter(String key, String name, Class graphicalType, Boolean defaultValue) {
         super(key, name, Boolean.class, graphicalType);
-        this.m_defaultValue = defaultValue;
+        m_defaultValue = defaultValue;
 
     }
 

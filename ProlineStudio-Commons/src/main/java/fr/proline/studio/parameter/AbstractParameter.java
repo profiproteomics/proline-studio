@@ -64,7 +64,7 @@ public abstract class AbstractParameter {
     }
     
     public void setUsed(boolean used) {
-        this.m_used = used;
+        m_used = used;
     }
 
     
@@ -74,7 +74,7 @@ public abstract class AbstractParameter {
     }
 
     public void setAssociatedData(Object associatedData) {
-        this.m_associatedData = associatedData;
+        m_associatedData = associatedData;
     }
     
     public Object getAssociatedData() {

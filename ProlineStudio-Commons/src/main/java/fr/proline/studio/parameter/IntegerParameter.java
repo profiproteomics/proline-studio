@@ -12,24 +12,24 @@ import javax.swing.event.DocumentListener;
  */
 public class IntegerParameter extends AbstractParameter {
 
-    private Integer minValue;
-    private Integer maxValue;
-    private Integer defaultValue;
+    private Integer m_minValue;
+    private Integer m_maxValue;
+    private Integer m_defaultValue;
 
     public IntegerParameter(String key, String name, Class graphicalType, Integer defaultValue, Integer minValue, Integer maxValue) {
         super(key, name, Integer.class, graphicalType);
-        this.defaultValue = defaultValue;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
+        m_defaultValue = defaultValue;
+        m_minValue = minValue;
+        m_maxValue = maxValue;
 
     }
     
     public IntegerParameter(String key, String name, JComponent component, Integer defaultValue, Integer minValue, Integer maxValue) {
         super(key, name, Integer.class, component.getClass());
-        this.defaultValue = defaultValue;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-        this.m_parameterComponent = component;
+        m_defaultValue = defaultValue;
+        m_minValue = minValue;
+        m_maxValue = maxValue;
+        m_parameterComponent = component;
 
     }
 
@@ -45,7 +45,7 @@ public class IntegerParameter extends AbstractParameter {
             }
         }
         if (startValue == null) {
-            startValue = defaultValue;
+            startValue = m_defaultValue;
         }
 
         if (m_parameterComponent !=null) {
@@ -77,7 +77,7 @@ public class IntegerParameter extends AbstractParameter {
 
             
             
-            final JSlider slider = new JSlider(minValue, maxValue, startValue);
+            final JSlider slider = new JSlider(m_minValue, m_maxValue, startValue);
             slider.setPaintTicks(true);
             final JTextField textField = new JTextField(3);
             textField.setText(String.valueOf(startValue));
@@ -138,7 +138,7 @@ public class IntegerParameter extends AbstractParameter {
             // --- Spinner ---
 
             JSpinner spinner = new JSpinner();
-            SpinnerNumberModel model = new SpinnerNumberModel(startValue, minValue, maxValue, new Integer(1));
+            SpinnerNumberModel model = new SpinnerNumberModel(startValue, m_minValue, m_maxValue, new Integer(1));
             spinner.setModel(model);
 
             m_parameterComponent = spinner;
@@ -152,19 +152,19 @@ public class IntegerParameter extends AbstractParameter {
     
     @Override
     public void initDefault() {
-        if (defaultValue == null) {
+        if (m_defaultValue == null) {
             return; // should not happen
         }
 
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
-            textField.setText(defaultValue.toString());
+            textField.setText(m_defaultValue.toString());
         } else if (m_graphicalType.equals(JSlider.class)) {
             JSlider slider = (JSlider) m_parameterComponent;
-            slider.setValue(defaultValue);
+            slider.setValue(m_defaultValue);
         }  else if (m_graphicalType.equals(JSpinner.class)) {
             JSpinner spinner = (JSpinner) m_parameterComponent;
-            spinner.setValue(defaultValue);
+            spinner.setValue(m_defaultValue);
         }
     }
     
@@ -192,15 +192,15 @@ public class IntegerParameter extends AbstractParameter {
             return null;
         }
         
-        if (minValue != null) {
-            if (value < minValue) {
-                return new ParameterError(m_name+" must be greater than "+minValue.toString(), m_parameterComponent);
+        if (m_minValue != null) {
+            if (value < m_minValue) {
+                return new ParameterError(m_name+" must be greater than "+m_minValue.toString(), m_parameterComponent);
             }
         }
         
-        if (maxValue != null) {
-            if (value > maxValue) {
-                return new ParameterError(m_name+" must be lesser than "+maxValue.toString(), m_parameterComponent);
+        if (m_maxValue != null) {
+            if (value > m_maxValue) {
+                return new ParameterError(m_name+" must be lesser than "+m_maxValue.toString(), m_parameterComponent);
             }
         }
         

@@ -8,20 +8,20 @@ import javax.swing.JComponent;
  */
 public class ParameterError {
     
-    private String errorMessage;
-    private JComponent parameterComponent;
+    private String m_errorMessage;
+    private JComponent m_parameterComponent;
     
     public ParameterError(String errorMessage, JComponent parameterComponent) {
-        this.errorMessage = errorMessage;
-        this.parameterComponent = parameterComponent;
+        m_errorMessage = errorMessage;
+        m_parameterComponent = parameterComponent;
     }
     
     public String getErrorMessage() {
-        return errorMessage;
+        return m_errorMessage;
     }
     
     public JComponent getParameterComponent() {
-        return parameterComponent;
+        return m_parameterComponent;
     }
     
 }

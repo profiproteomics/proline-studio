@@ -42,7 +42,7 @@ public class ProjectData extends AbstractData {
     }
     
     public void setProject(Project project) {
-        this.m_project = project;
+        m_project = project;
         m_temporaryName = null;
     }
     

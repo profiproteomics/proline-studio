@@ -831,24 +831,24 @@ public class ImportIdentificationDialog extends DefaultDialog {
      */
     public static class SelectRegexDialog extends DefaultDialog {
         
-        private static SelectRegexDialog selectRegexSingletonDialog = null;
+        private static SelectRegexDialog m_selectRegexSingletonDialog = null;
         
-        private JList<String> regexList;
-        private JScrollPane regexListScrollPane;
-        private JButton removeRegexButton;
+        private JList<String> m_regexList;
+        private JScrollPane m_regexListScrollPane;
+        private JButton m_removeRegexButton;
         
         
-        private String selectedRegex = null;
-        private ArrayList<String> regexArrayList = null;
+        private String m_selectedRegex = null;
+        private ArrayList<String> m_regexArrayList = null;
         
         public static SelectRegexDialog getDialog(JDialog parent, ArrayList<String> regexArrayList) {
-            if (selectRegexSingletonDialog == null) {
-                selectRegexSingletonDialog = new SelectRegexDialog(parent);
+            if (m_selectRegexSingletonDialog == null) {
+                m_selectRegexSingletonDialog = new SelectRegexDialog(parent);
             }
-            selectRegexSingletonDialog.initData(regexArrayList);
+            m_selectRegexSingletonDialog.initData(regexArrayList);
             
             
-            return selectRegexSingletonDialog;
+            return m_selectRegexSingletonDialog;
         }
         
         private SelectRegexDialog(JDialog parent) {
@@ -865,9 +865,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
         }
         
         private void initData(ArrayList<String> regexArrayList) {
-            this.regexArrayList = regexArrayList;
+            m_regexArrayList = regexArrayList;
             
-            DefaultListModel<String> model = (DefaultListModel<String>) regexList.getModel();
+            DefaultListModel<String> model = (DefaultListModel<String>) m_regexList.getModel();
             model.clear();
             
             int nb = regexArrayList.size();
@@ -910,19 +910,19 @@ public class ImportIdentificationDialog extends DefaultDialog {
             JPanel regexSelectionPanel = new JPanel(new GridBagLayout());
             regexSelectionPanel.setBorder(BorderFactory.createTitledBorder(" Regex Selection "));
             
-            regexList = new JList<>(new DefaultListModel<String>());
+            m_regexList = new JList<>(new DefaultListModel<String>());
             
             // double clicking on regex -> select it and click on ok button
-            regexList.addMouseListener(new MouseAdapter() {
+            m_regexList.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (e.getClickCount() == 2) {
-                        selectRegexSingletonDialog.doClick(DefaultDialog.BUTTON_OK);
+                        m_selectRegexSingletonDialog.doClick(DefaultDialog.BUTTON_OK);
                     }
                 }
             });
             
-            regexListScrollPane = new JScrollPane(regexList) {
+            m_regexListScrollPane = new JScrollPane(m_regexList) {
                 
                 private Dimension preferredSize = new Dimension(280, 140);
                 
@@ -933,8 +933,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
             };
             
             
-            removeRegexButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
-            removeRegexButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+            m_removeRegexButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
+            m_removeRegexButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
             // Placement of Objects for Regex Selection Panel
             GridBagConstraints c = new GridBagConstraints();
@@ -947,14 +947,14 @@ public class ImportIdentificationDialog extends DefaultDialog {
             c.gridheight = 3;
             c.weightx = 1.0;
             c.weighty = 1.0;
-            regexSelectionPanel.add(regexListScrollPane, c);
+            regexSelectionPanel.add(m_regexListScrollPane, c);
             
             
             c.gridx++;
             c.gridheight = 1;
             c.weightx = 0;
             c.weighty = 0;
-            regexSelectionPanel.add(removeRegexButton, c);
+            regexSelectionPanel.add(m_removeRegexButton, c);
             
             c.gridy++;
             regexSelectionPanel.add(Box.createVerticalStrut(30), c);
@@ -962,27 +962,27 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
             // Actions on objects
 
-            regexList.addListSelectionListener(new ListSelectionListener() {
+            m_regexList.addListSelectionListener(new ListSelectionListener() {
                 
                 @Override
                 public void valueChanged(ListSelectionEvent e) {
-                    boolean sometingSelected = (regexList.getSelectedIndex() != -1);
-                    removeRegexButton.setEnabled(sometingSelected);
+                    boolean sometingSelected = (m_regexList.getSelectedIndex() != -1);
+                    m_removeRegexButton.setEnabled(sometingSelected);
                 }
             });
             
             
             
-            removeRegexButton.addActionListener(new ActionListener() {
+            m_removeRegexButton.addActionListener(new ActionListener() {
                 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    List<String> selectedValues = regexList.getSelectedValuesList();
+                    List<String> selectedValues = m_regexList.getSelectedValuesList();
                     Iterator<String> it = selectedValues.iterator();
                     while (it.hasNext()) {
-                        ((DefaultListModel) regexList.getModel()).removeElement(it.next());
+                        ((DefaultListModel) m_regexList.getModel()).removeElement(it.next());
                     }
-                    removeRegexButton.setEnabled(false);
+                    m_removeRegexButton.setEnabled(false);
                 }
             });
             
@@ -992,17 +992,17 @@ public class ImportIdentificationDialog extends DefaultDialog {
         
         @Override
         protected boolean okCalled() {
-            selectedRegex = regexList.getSelectedValue();
+            m_selectedRegex = m_regexList.getSelectedValue();
             
-            DefaultListModel<String> model = (DefaultListModel<String>) regexList.getModel();
+            DefaultListModel<String> model = (DefaultListModel<String>) m_regexList.getModel();
             int size = model.getSize();
-            if (regexArrayList == null) {
-                regexArrayList = new ArrayList<>(size);
+            if (m_regexArrayList == null) {
+                m_regexArrayList = new ArrayList<>(size);
             } else {
-                regexArrayList.clear();
+                m_regexArrayList.clear();
             }
             for (int i=0;i<size;i++) {
-                regexArrayList.add(model.elementAt(i));
+                m_regexArrayList.add(model.elementAt(i));
             }
 
             return true;
@@ -1010,17 +1010,17 @@ public class ImportIdentificationDialog extends DefaultDialog {
         
         @Override
         protected boolean cancelCalled() {
-            selectedRegex = null;
+            m_selectedRegex = null;
             return true;
         }
 
 
         public String getSelectedRegex() {
-            return selectedRegex;
+            return m_selectedRegex;
         }
         
         public ArrayList<String> getRegexArrayList() {
-            return regexArrayList;
+            return m_regexArrayList;
         }
     }
 }

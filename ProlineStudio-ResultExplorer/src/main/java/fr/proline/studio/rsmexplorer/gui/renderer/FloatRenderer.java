@@ -11,10 +11,10 @@ import javax.swing.table.TableCellRenderer;
  */
 public class FloatRenderer implements TableCellRenderer {
     
-    TableCellRenderer defaultRenderer;
+    private TableCellRenderer m_defaultRenderer;
     
     public FloatRenderer(TableCellRenderer defaultRenderer) {
-        this.defaultRenderer = defaultRenderer;
+        m_defaultRenderer = defaultRenderer;
     }
     
     @Override
@@ -25,7 +25,7 @@ public class FloatRenderer implements TableCellRenderer {
 
         
 
-        return defaultRenderer.getTableCellRendererComponent(table, formatedValue, isSelected, hasFocus, row, column);
+        return m_defaultRenderer.getTableCellRendererComponent(table, formatedValue, isSelected, hasFocus, row, column);
 
     }
 }

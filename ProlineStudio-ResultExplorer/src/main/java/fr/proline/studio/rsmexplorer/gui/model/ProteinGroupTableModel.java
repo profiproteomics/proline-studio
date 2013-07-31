@@ -188,8 +188,8 @@ public class ProteinGroupTableModel extends LazyTableModel {
      
     
     public void setData(Long taskId, ProteinSet[] proteinSets) {
-        this.m_proteinSets = proteinSets;
-        this.m_taskId = taskId;
+        m_proteinSets = proteinSets;
+        m_taskId = taskId;
         
         updateMinMax();
         

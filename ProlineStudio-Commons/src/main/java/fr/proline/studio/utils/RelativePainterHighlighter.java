@@ -34,7 +34,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 @SuppressWarnings("unchecked")
 public class RelativePainterHighlighter extends PainterHighlighter {
     // the fixed value to compare against (should be Comparable)
-    private Relativizer relativizer;
+    private Relativizer m_relativizer;
     
     public RelativePainterHighlighter() {
         this(null);
@@ -58,18 +58,18 @@ public class RelativePainterHighlighter extends PainterHighlighter {
      * @param maxValue the maxValue to set
      */
     public void setRelativizer(Relativizer relativizer) {
-        this.relativizer = relativizer;
+        m_relativizer = relativizer;
         fireStateChanged();
     }
 
     public Relativizer getRelativizer() {
-        return relativizer;
+        return m_relativizer;
     }
     
     @Override
     protected Component doHighlight(Component component,
             ComponentAdapter adapter) {
-        float xPercent = relativizer.getRelativeValue(adapter);
+        float xPercent = m_relativizer.getRelativeValue(adapter);
         getPainter().setXFactor(xPercent);
         getPainter().setVisible(xPercent != Relativizer.ZERO);
         return super.doHighlight(component, adapter);
@@ -94,7 +94,7 @@ public class RelativePainterHighlighter extends PainterHighlighter {
     @Override
     protected boolean canHighlight(Component component,
             ComponentAdapter adapter) {
-        return relativizer != null && super.canHighlight(component, adapter);
+        return m_relativizer != null && super.canHighlight(component, adapter);
     }
     
 //------------------- Relativizer
@@ -117,30 +117,30 @@ public class RelativePainterHighlighter extends PainterHighlighter {
 
     public static class NumberRelativizer implements Relativizer {
 
-        private Number min;
-        private Number max;
-        private int valueColumn;
+        private Number m_min;
+        private Number m_max;
+        private int m_valueColumn;
         
 
         public NumberRelativizer(int column, Number min, Number max) {
-            this.min = min;
-            this.max = max;
-            this.valueColumn = column;
+            m_min = min;
+            m_max = max;
+            m_valueColumn = column;
         }
 
         public void setMin(Number min) {
-            this.min = min;
+            m_min = min;
         }
         
         public void setMax(Number max) {
-            this.max = max;
+            m_max = max;
         }
         
         @Override
         public float getRelativeValue(ComponentAdapter adapter) {
             
             float floatValue;
-            Object value = adapter.getValue(valueColumn);
+            Object value = adapter.getValue(m_valueColumn);
             if (value instanceof LazyData) {
                 value = ((LazyData) value).getData();
             }
@@ -150,7 +150,7 @@ public class RelativePainterHighlighter extends PainterHighlighter {
                 floatValue = ((Number) value).floatValue();
             }
 
-            float percent = floatValue / max.floatValue()-min.floatValue();
+            float percent = floatValue / m_max.floatValue()-m_min.floatValue();
             
             return percent;
    
@@ -166,10 +166,10 @@ public class RelativePainterHighlighter extends PainterHighlighter {
     
     public static class RelativePainter<T> extends AbstractLayoutPainter<T> {
 
-        private Painter<? super T> painter;
-        private double xFactor;
-        private double yFactor;
-        private boolean visible;
+        private Painter<? super T> m_painter;
+        private double m_xFactor;
+        private double m_yFactor;
+        private boolean m_visible;
 
         public RelativePainter() {
             this(null);
@@ -178,28 +178,28 @@ public class RelativePainterHighlighter extends PainterHighlighter {
         
         
         public RelativePainter(Painter<? super T> delegate) {
-            this.painter = delegate;
+            m_painter = delegate;
             setHorizontalAlignment(HorizontalAlignment.RIGHT);
         }
         
         public RelativePainter(Painter<? super T> delegate, double xPercent) {
             this(delegate);
-            xFactor = xPercent;
+            m_xFactor = xPercent;
             setHorizontalAlignment(HorizontalAlignment.RIGHT);
         }
         public void setPainter(Painter<? super T> painter) {
             Object old = getPainter();
-            this.painter = painter;
+            m_painter = painter;
             firePropertyChange("painter", old, getPainter());
         }
         
         public Painter<? super T> getPainter() {
-            return painter;
+            return m_painter;
         }
         
         public void setXFactor(double xPercent) {
             double old = getXFactor();
-            this.xFactor = xPercent;
+            m_xFactor = xPercent;
             firePropertyChange("xFactor", old, getXFactor());
         }
         
@@ -207,32 +207,32 @@ public class RelativePainterHighlighter extends PainterHighlighter {
          * @return
          */
         public double getXFactor() {
-            return xFactor;
+            return m_xFactor;
         }
 
         public void setYFactor(double yPercent) {
-            this.yFactor = yPercent;
+            m_yFactor = yPercent;
         }
         @Override
         protected void doPaint(Graphics2D g, T object, int width, int height) {
-            if (painter == null) return;
+            if (m_painter == null) return;
             // use epsilon
-            if (xFactor != 0.0) {
+            if (m_xFactor != 0.0) {
                 int oldWidth = width;
-                width = (int) (xFactor * width);
+                width = (int) (m_xFactor * width);
                 if (getHorizontalAlignment() == HorizontalAlignment.RIGHT) {
                     g.translate(oldWidth - width, 0);
                 }
             }
-            if (yFactor != 0.0) {
+            if (m_yFactor != 0.0) {
                 int oldHeight = height;
-                height = (int) (yFactor * height);
+                height = (int) (m_yFactor * height);
                 if (getVerticalAlignment() == VerticalAlignment.BOTTOM) {
                     g.translate(0, oldHeight - height);
                 }
             }
             
-            painter.paint(g, object, width, height);
+            m_painter.paint(g, object, width, height);
         }
 
         /**
@@ -241,7 +241,7 @@ public class RelativePainterHighlighter extends PainterHighlighter {
          */
         @Override
         public boolean isVisible() {
-            return visible;
+            return m_visible;
         }
 
 
@@ -252,7 +252,7 @@ public class RelativePainterHighlighter extends PainterHighlighter {
         @Override
         public void setVisible(boolean visible) {
             if (isVisible() == visible) return;
-            this.visible = visible;
+            m_visible = visible;
             firePropertyChange("visible", !visible, isVisible());
         }
         

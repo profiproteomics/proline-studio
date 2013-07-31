@@ -38,7 +38,7 @@ public abstract class AbstractData {
     }
 
     public void setHasChildren(boolean hasChildren) {
-        this.m_hasChildren = hasChildren;
+        m_hasChildren = hasChildren;
     }
     
     /**

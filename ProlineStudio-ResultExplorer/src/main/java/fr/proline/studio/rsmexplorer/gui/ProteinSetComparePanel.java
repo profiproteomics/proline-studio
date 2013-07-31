@@ -539,10 +539,10 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
      */
     public class RsmOrProteinHeaderRenderer extends DefaultTableCellRenderer {
 
-        private TableCellRenderer defaultRenderer = null;
+        private TableCellRenderer m_defaultRenderer = null;
         
         public RsmOrProteinHeaderRenderer(TableCellRenderer defaultRenderer) {
-            this.defaultRenderer = defaultRenderer;
+            m_defaultRenderer = defaultRenderer;
         }
         
         
@@ -556,7 +556,7 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
 
             // Specific case for the first column which is not a ResultSummary but a Protein Name
             if (columnConverted == ProteinSetCmpTableModel.COLTYPE_PROTEIN_NAME ) {
-                return defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                return m_defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             }
             
             
@@ -581,7 +581,7 @@ public class ProteinSetComparePanel extends HourglassPanel implements DataBoxPan
             }
             
             
-            JLabel label = (JLabel) defaultRenderer.getTableCellRendererComponent(table, columnName, isSelected, hasFocus, row, column);
+            JLabel label = (JLabel) m_defaultRenderer.getTableCellRendererComponent(table, columnName, isSelected, hasFocus, row, column);
             
             
             

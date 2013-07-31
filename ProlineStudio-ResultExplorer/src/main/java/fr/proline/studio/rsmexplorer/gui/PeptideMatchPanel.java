@@ -38,6 +38,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     private AbstractDataBox m_dataBox;
 
     private boolean m_forRSM;
+    private boolean m_startingPanel;
     
     private PeptideMatchTable m_peptideMatchTable;
     private JScrollPane m_scrollPane;
@@ -48,11 +49,10 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     
     private JButton m_decoyButton;
 
-    /**
-     * Creates new form RsetPeptideMatchPanel
-     */
-    public PeptideMatchPanel(boolean forRSM) {
+
+    public PeptideMatchPanel(boolean forRSM, boolean startingPanel) {
         m_forRSM = forRSM;
+        m_startingPanel = startingPanel;
         initComponents();
 
     }
@@ -65,15 +65,17 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     public void setData(long taskId, PeptideMatch[] peptideMatches, boolean finished) {
         
         // update toolbar
-        if (m_forRSM) {
-            ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
-            if (rsm != null) {
-                m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
-            }
-        } else {
-            ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
-            if (rset != null) {
-                m_decoyButton.setEnabled(rset.getDecoyResultSet() != null);
+        if (m_startingPanel) {
+            if (m_forRSM) {
+                ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                if (rsm != null) {
+                    m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
+                }
+            } else {
+                ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
+                if (rset != null) {
+                    m_decoyButton.setEnabled(rset.getDecoyResultSet() != null);
+                }
             }
         }
         
@@ -133,12 +135,19 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     }
 
     private void initComponents() {
-        JToolBar toolbar = initToolbar();
-        JPanel internalPanel = createInternalPanel();
         
         setLayout(new BorderLayout());
-        add(toolbar, BorderLayout.WEST);
+        
+        if (m_startingPanel) {
+            JToolBar toolbar = initToolbar();
+            add(toolbar, BorderLayout.WEST);
+        }
+        
+        JPanel internalPanel = createInternalPanel();
         add(internalPanel, BorderLayout.CENTER);
+        
+        
+        
     }
     
     private JToolBar initToolbar() {
@@ -211,37 +220,42 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 	m_peptideMatchTable.setFillsViewportHeight(true);
 	m_peptideMatchTable.setViewport(m_scrollPane.getViewport());
         
-        m_searchButton = new SearchButton();
+        if (m_startingPanel) {
+            m_searchButton = new SearchButton();
 
-        m_searchTextField = new JTextField(16) {
-            @Override
-            public Dimension getMinimumSize() {
-                return super.getPreferredSize();
-            }
-            
-        };
 
-                c.gridx = 0;
+            m_searchTextField = new JTextField(16) {
+
+                @Override
+                public Dimension getMinimumSize() {
+                    return super.getPreferredSize();
+                }
+            };
+        }
+        
+        c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
         internalPanel.add(m_markerContainerPanel, c);
         
-        c.gridx = 0;
-        c.gridy++;
-        c.weighty = 0;
-        c.weightx = 1;
-        c.gridwidth = 1;
-        internalPanel.add(Box.createHorizontalGlue(), c);
-        
-        c.gridx++;
-        c.weightx = 0;
-        internalPanel.add(m_searchTextField, c);
-        
-        c.gridx++;
-        internalPanel.add(m_searchButton, c);
-        
+        if (m_startingPanel) {
+            // Search available only when the panel is the first of the window
+            c.gridx = 0;
+            c.gridy++;
+            c.weighty = 0;
+            c.weightx = 1;
+            c.gridwidth = 1;
+            internalPanel.add(Box.createHorizontalGlue(), c);
+
+            c.gridx++;
+            c.weightx = 0;
+            internalPanel.add(m_searchTextField, c);
+
+            c.gridx++;
+            internalPanel.add(m_searchButton, c);
+        }
         return internalPanel;
     }
 

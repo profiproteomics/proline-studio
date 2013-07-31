@@ -49,8 +49,9 @@ public class WindowBoxFactory {
     public static WindowBox getProteinMatchesForRsetWindowBox(String name, boolean isDecoy) {
         
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataBoxRsetAllProteinMatch();
+        boxes[1] = new DataboxRsetPeptidesOfProtein();
 
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;

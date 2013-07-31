@@ -6,6 +6,8 @@ import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
 import fr.proline.studio.utils.LazyData;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Table Model for Peptide Matches
@@ -105,7 +107,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
     }
 
     public void setData(ProteinMatch[] proteinMatchArray) {
-        this.m_proteinMatchArray = proteinMatchArray;
+        m_proteinMatchArray = proteinMatchArray;
         fireTableDataChanged();
         
 
@@ -128,6 +130,17 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
         return rowToBeSelected;
     }
 
+    public int findRow(long proteinMatchId) {
+        int nb = m_proteinMatchArray.length;
+        for (int i = 0; i < nb; i++) {
+            if (proteinMatchId == m_proteinMatchArray[i].getId()) {
+                return i;
+            }
+        }
+        return -1;
+
+    }
+    
     @Override
     public int getSubTaskId(int col) {
         switch (col) {
@@ -142,5 +155,27 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
         fireTableDataChanged();
     }
 
+    
+    public void sortAccordingToModel(ArrayList<Long> proteinMatchIds) {
+        
+        if (m_proteinMatchArray == null) {
+            // data not loaded 
+            return;
+        }
+        
+        HashSet<Long> proteinMatchIdMap = new HashSet<>(proteinMatchIds.size());
+        proteinMatchIdMap.addAll(proteinMatchIds);
+
+        int nb = m_proteinMatchArray.length;
+        int iCur = 0;
+        for (int iView = 0; iView < nb; iView++) {
+            int iModel = m_table.convertRowIndexToModel(iView);
+            ProteinMatch pm = m_proteinMatchArray[iModel];
+            if (proteinMatchIdMap.contains(pm.getId())) {
+                proteinMatchIds.set(iCur++, pm.getId());
+            }
+        }
+
+    }
     
 }

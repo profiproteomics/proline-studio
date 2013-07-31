@@ -12,7 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.RsmPeptidesOfProteinPanel;
 import java.util.ArrayList;
 
 /**
- * Databox : Peptides of a Protein
+ * Databox : Peptides of a Protein in a Rsm
  * @author JM235353
  */
 public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {

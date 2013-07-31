@@ -251,6 +251,12 @@ public class ProteinGroupTableModel extends LazyTableModel {
     
     
     public void sortAccordingToModel(ArrayList<Long> proteinSetIds) {
+        
+        if (m_proteinSets == null) {
+            // data not loaded 
+            return;
+        }
+        
         HashSet<Long> proteinSetIdMap = new HashSet<>(proteinSetIds.size());
         proteinSetIdMap.addAll(proteinSetIds);
         

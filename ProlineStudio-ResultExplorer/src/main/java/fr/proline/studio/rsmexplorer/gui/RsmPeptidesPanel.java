@@ -32,7 +32,7 @@ import org.openide.windows.TopComponent;
 
 
 /**
- * Panel for Peptides
+ * Panel for Peptides Instances
  * @author JM235353
  */
 public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInterface {
@@ -48,9 +48,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     
     private JButton m_decoyButton;
     
-    /**
-     * Creates new form RsetPeptideMatchPanel
-     */
+
     public RsmPeptidesPanel() {
         initComponents();
 

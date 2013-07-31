@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.ResultSummary;

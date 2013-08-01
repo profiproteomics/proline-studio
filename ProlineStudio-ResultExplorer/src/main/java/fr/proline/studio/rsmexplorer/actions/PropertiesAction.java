@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.actions;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
+import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.lang.reflect.InvocationTargetException;
@@ -96,6 +97,14 @@ public class PropertiesAction extends AbstractRSMAction {
             if ((type!=RSMNode.NodeTypes.PROJECT) && (type!=RSMNode.NodeTypes.DATA_SET)) {
                 setEnabled(false);
                 return;
+            }
+            
+            if (type == RSMNode.NodeTypes.DATA_SET) {
+                RSMDataSetNode datasetNode = (RSMDataSetNode) node;
+                if (!datasetNode.hasResultSet() && !datasetNode.hasResultSummary()) {
+                    setEnabled(false);
+                    return;
+                }
             }
             
             currentType = type;

@@ -5,6 +5,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.repository.AbstractDatabaseConnector;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,8 +54,8 @@ public class ServerConnectionTask extends AbstractServiceTask {
             try {
                 response = postRequest(m_serverURL, "admin/connection/"+request.getMethod()+getIdString(), request); //JPM.TODO
             } catch (Exception e) {
-                m_errorMessage = "Server Connection Failed.";
-                m_loggerProline.error(getClass().getSimpleName()+" failed", m_errorMessage);
+                m_taskError = new TaskError("Server Connection Failed.");
+                m_loggerProline.error(getClass().getSimpleName()+" failed", m_taskError.getErrorTitle());
                 m_loggerProline.error(getClass().getSimpleName()+" failed", e);
                 return false;
             }
@@ -64,18 +65,19 @@ public class ServerConnectionTask extends AbstractServiceTask {
             ArrayMap errorMap = (ArrayMap) jsonResult.get("error");
             
             if (errorMap != null) {
-                String message = (String) errorMap.get("message");
                 
+                String message = (String) errorMap.get("message");
+
                 if (message != null) {
-                    m_errorMessage = message;
+                    m_taskError = new TaskError(message);
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (m_errorMessage == null) {
-                        m_errorMessage = data;
+                    if (m_taskError == null) {
+                        m_taskError = new TaskError(data);
                     } else {
-                        m_errorMessage = m_errorMessage+"\n"+data;
+                        m_taskError.setErrorText(data);
                     }
                 }
                 
@@ -85,7 +87,7 @@ public class ServerConnectionTask extends AbstractServiceTask {
             // retrieve database parameters
             ArrayMap result = (ArrayMap) jsonResult.get("result");
             if (result == null) {
-                m_errorMessage = "Internal Error : Dabasase Parameters not returned";
+                m_taskError = new TaskError("Internal Error : Dabasase Parameters not returned");
                 return false;
             }
             
@@ -94,7 +96,7 @@ public class ServerConnectionTask extends AbstractServiceTask {
             String databaseURL = (String) result.get("javax.persistence.jdbc.url");
       
             if ((databaseUser == null) || (databaseDriver == null) || (databaseURL == null)) {
-                m_errorMessage = "Internal Error : Dabasase Parameters uncomplete";
+                 m_taskError = new TaskError("Internal Error : Dabasase Parameters uncomplete");
                 return false;
             }
             
@@ -106,10 +108,8 @@ public class ServerConnectionTask extends AbstractServiceTask {
    
             
         } catch (Exception e) {
-            m_errorMessage = e.getMessage();
-            if (m_errorMessage == null) {
-                m_errorMessage = "Connection to Server failed";
-            }
+            m_taskError = new TaskError(e);
+
             m_loggerProline.error(getClass().getSimpleName()+" failed", e);
             return false;
         }

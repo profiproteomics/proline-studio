@@ -26,7 +26,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
     private int m_id;
     
     private boolean m_success;
-    private String m_errorMessage = null;
+    private TaskError m_taskError = null;
     
     private static int INC_ID = 0;
     
@@ -39,7 +39,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
         m_id = INC_ID++;
         
         m_success = true;
-        m_errorMessage = null;
+        m_taskError = null;
         
         m_askTimestamp = System.currentTimeMillis();
     }
@@ -50,7 +50,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
         m_state = src.m_state;
         m_id = src.m_id;
         m_success = src.m_success;
-        m_errorMessage = src.m_errorMessage;
+        m_taskError = src.m_taskError;
         m_askTimestamp = src.m_askTimestamp;
         m_startTimestamp = src.m_startTimestamp;
         m_endTimestamp = src.m_endTimestamp;
@@ -72,7 +72,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
         
     }
     
-    public void setFinished(boolean success, String errorMessage, boolean saveTimestamp) {
+    public void setFinished(boolean success, TaskError taskError, boolean saveTimestamp) {
         if (m_updateState == STATE_FINISHED) {
             // already finished : so afterwards little modification of database will not be taken in account
             saveTimestamp = false;
@@ -87,7 +87,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
             }
         }
         m_success = success;
-        m_errorMessage = errorMessage;
+        m_taskError = taskError;
 
         TaskInfoManager.getTaskInfoManager().update(this);
     }
@@ -120,15 +120,13 @@ public class TaskInfo implements Comparable<TaskInfo> {
         return m_success;
     }
     
-    public String getErrorMessage() {
-        if (m_errorMessage == null) {
-            return "";
-        }
-        return m_errorMessage;
+    public TaskError getTaskError() {
+
+        return m_taskError;
     }
     
-    public boolean hasErrorMessage() {
-        return (m_errorMessage != null);
+    public boolean hasTaskError() {
+        return (m_taskError != null);
     }
     
     public int getId() {
@@ -189,7 +187,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
         dest.m_state = m_state;
         dest.m_id = m_id;
         dest.m_success = m_success;
-        dest.m_errorMessage = m_errorMessage;
+        dest.m_taskError = m_taskError;
         dest.m_askTimestamp = m_askTimestamp;
         dest.m_startTimestamp = m_startTimestamp;
         dest.m_endTimestamp = m_endTimestamp;

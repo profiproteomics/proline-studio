@@ -2,6 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.*;
 import javax.persistence.EntityManager;
@@ -132,6 +133,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -181,6 +183,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().commit();
         } catch (RuntimeException e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -229,6 +232,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().commit();
         } catch  (RuntimeException e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             return false;
         } finally {
             entityManagerMSI.close();

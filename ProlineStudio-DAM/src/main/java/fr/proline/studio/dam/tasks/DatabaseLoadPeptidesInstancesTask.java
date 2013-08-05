@@ -3,6 +3,7 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -143,6 +144,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -175,6 +177,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -190,6 +193,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             return false;
         }
         
@@ -203,6 +207,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
                 entityManagerPS.getTransaction().commit();
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
                 return false;
             } finally {
                 entityManagerPS.close();

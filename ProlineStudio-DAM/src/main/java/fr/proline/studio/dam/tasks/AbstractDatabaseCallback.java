@@ -1,5 +1,7 @@
 package fr.proline.studio.dam.tasks;
 
+import fr.proline.studio.dam.taskinfo.TaskError;
+
 
 /**
  * Class is used to execute code when an AbstractDatabaseTask is finished
@@ -7,7 +9,7 @@ package fr.proline.studio.dam.tasks;
  */
 public abstract class AbstractDatabaseCallback {
     
-    private String m_errorMessage = null;
+    private TaskError m_taskError = null;
     private int m_errorId = -1;
     
     /**
@@ -26,14 +28,14 @@ public abstract class AbstractDatabaseCallback {
      */
     public abstract void run(boolean success, long taskId, SubTask subTask, boolean finished);
     
-    public String getErrorMessage() {
-        return m_errorMessage;
+    public TaskError getTaskError() {
+        return m_taskError;
     }
     public int getErrorId() {
         return m_errorId;
     }
-    public void setErrorMessage(String errorMessage, int errorId) {
-        m_errorMessage = errorMessage;
+    public void setErrorMessage(TaskError taskError, int errorId) {
+        m_taskError = taskError;
         m_errorId = errorId;
     }
 }

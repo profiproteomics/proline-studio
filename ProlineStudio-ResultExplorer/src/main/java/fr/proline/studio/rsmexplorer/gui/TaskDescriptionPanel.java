@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -191,7 +192,9 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         
         m_taskTextfield.setText(taskInfo.getTaskDescription());
         
-        m_errorTextArea.setText(taskInfo.getErrorMessage());
+        TaskError taskError = taskInfo.getTaskError();
+        String errorString = (taskError==null) ? "" : taskError.toString();
+        m_errorTextArea.setText(errorString);
         
         m_askTimeTextfield.setText(formatTime(taskInfo.getAskTimestamp()));
         

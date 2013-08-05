@@ -18,6 +18,7 @@ import fr.proline.repository.ProlineDatabaseType;
 import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.*;
 import javax.persistence.EntityManager;
@@ -382,6 +383,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             entityManagerUDS.getTransaction().rollback();
             return false;
         } finally {
@@ -416,6 +418,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             entityManagerUDS.getTransaction().rollback();
             return false;
         } finally {
@@ -452,6 +455,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
             return false;
         } finally {
             entityManagerMSI.close();
@@ -520,6 +524,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             entityManagerUDS.getTransaction().rollback();
             return false;
         } finally {
@@ -546,6 +551,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             entityManagerUDS.getTransaction().rollback();
             return false;
         } finally {
@@ -582,6 +588,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
                 entityManagerUDS.getTransaction().rollback();
                 return false;
             } finally {
@@ -665,6 +672,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
                 entityManagerUDS.getTransaction().rollback();
                 return false;
             } finally {
@@ -700,6 +708,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
                 entityManagerUDS.getTransaction().rollback();
                 return false;
             } finally {
@@ -733,6 +742,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
                 entityManagerUDS.getTransaction().rollback();
                 return false;
             } finally {

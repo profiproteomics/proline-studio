@@ -1,5 +1,6 @@
 package fr.proline.studio.dam;
 
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.PriorityChangement;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
@@ -124,8 +125,8 @@ public class AccessDatabaseThread extends Thread {
                 m_actionMap.remove(task.getId());
                 m_priorityChangements.remove(task.getId());
                 
-                String errorMessage = task.getErrorMessage();
-                task.getTaskInfo().setFinished((errorMessage==null), errorMessage, true);
+                TaskError taskError = task.getTaskError();
+                task.getTaskInfo().setFinished((taskError==null), taskError, true);
             }
             
             if (task.hasConsecutiveTask()) {

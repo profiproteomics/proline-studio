@@ -4,6 +4,7 @@ import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ProjectData;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProjectTask;
 import fr.proline.studio.dam.tasks.SubTask;

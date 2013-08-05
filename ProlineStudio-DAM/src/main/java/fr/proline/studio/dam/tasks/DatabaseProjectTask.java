@@ -4,6 +4,7 @@ import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.Iterator;
 import java.util.List;
@@ -121,6 +122,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
             entityManagerUDS.getTransaction().rollback();
         }
 
@@ -150,6 +152,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
             entityManagerUDS.getTransaction().rollback();
             return false;
         } finally {

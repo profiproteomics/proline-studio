@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fr.proline.studio.dam.taskinfo.AbstractLongTask;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 
 /**
@@ -33,7 +34,7 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
     
     protected int m_id;
     protected boolean m_synchronous;
-    protected String m_errorMessage = null;
+    protected TaskError m_taskError = null;
     
     protected static int m_idIncrement = 0;
     
@@ -113,13 +114,13 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
     public void callback(final boolean success) {
         if (m_callback == null) {
             
-            getTaskInfo().setFinished(success, m_errorMessage, false);
+            getTaskInfo().setFinished(success, m_taskError, false);
             
             return;
         }
 
         m_callback.setTaskInfo(m_taskInfo);
-        m_callback.setErrorMessage(m_errorMessage);
+        m_callback.setTaskError(m_taskError);
         
         if (m_callback.mustBeCalledInAWT()) {
             // Callback must be executed in the Graphical thread (AWT)
@@ -128,14 +129,14 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
                 @Override
                 public void run() {
                     m_callback.run(success);
-                    getTaskInfo().setFinished(success, m_errorMessage, false);
+                    getTaskInfo().setFinished(success, m_taskError, false);
                 }
             });
         } else {
             // Method called in the current thread
             // In this case, we assume the execution is fast.
             m_callback.run(success);
-            getTaskInfo().setFinished(success, m_errorMessage, false);
+            getTaskInfo().setFinished(success, m_taskError, false);
         }
 
 

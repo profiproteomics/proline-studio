@@ -338,7 +338,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 l.setHorizontalAlignment(JLabel.LEFT);
 
                 TaskInfo taskInfo = ((LogTableModel) table.getModel()).getTaskInfo(row);
-                if (taskInfo.hasErrorMessage()) {
+                if (taskInfo.hasTaskError()) {
                     l.setForeground(Color.red);
                 } else {
                     if (isSelected) {

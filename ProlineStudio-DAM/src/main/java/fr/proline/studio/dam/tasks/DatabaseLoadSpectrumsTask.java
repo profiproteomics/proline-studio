@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -82,6 +83,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             return false;
         } finally {
             entityManagerMSI.close();

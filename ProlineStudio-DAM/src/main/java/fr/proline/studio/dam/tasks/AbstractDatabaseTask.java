@@ -1,6 +1,7 @@
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.studio.dam.taskinfo.AbstractLongTask;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
     protected Long m_id;
     private static long m_idIncrement = 0;
 
-    protected String m_errorMessage = null;
+    protected TaskError m_taskError = null;
     protected int m_errorId = -1;
     
     protected AbstractDatabaseTask m_consecutiveTask = null;
@@ -202,12 +203,12 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
     public void callback(final boolean success, final boolean finished) {
         if (m_callback == null) {
             
-            getTaskInfo().setFinished(success, m_errorMessage, true);
+            getTaskInfo().setFinished(success, m_taskError, true);
             
             return;
         }
 
-        m_callback.setErrorMessage(m_errorMessage, m_errorId);
+        m_callback.setErrorMessage(m_taskError, m_errorId);
         
         if (m_callback.mustBeCalledInAWT()) {
             // Callback must be executed in the Graphical thread (AWT)
@@ -216,14 +217,14 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
                 @Override
                 public void run() {
                     m_callback.run(success, m_id, null, finished);
-                    getTaskInfo().setFinished(success, getErrorMessage(), true);
+                    getTaskInfo().setFinished(success, getTaskError(), true);
                 }
             });
         } else {
             // Method called in the current thread
             // In this case, we assume the execution is fast.
             m_callback.run(success, m_id, null, finished);
-            getTaskInfo().setFinished(success, getErrorMessage(), true);
+            getTaskInfo().setFinished(success, getTaskError(), true);
         }
 
 
@@ -252,7 +253,7 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
         return (diff) > 0 ? 1 : -1;
     }
     
-    public String getErrorMessage() {
-        return m_errorMessage;
+    public TaskError getTaskError() {
+        return m_taskError;
     }
 }

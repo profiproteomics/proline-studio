@@ -4,6 +4,7 @@ import com.google.api.client.http.*;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,19 +48,20 @@ public class CreateUserTask extends AbstractServiceTask {
             
             if (errorMap != null) {
                 String message = (String) errorMap.get("message");
-                
+
                 if (message != null) {
-                    m_errorMessage = message;
+                    m_taskError = new TaskError(message);
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (m_errorMessage == null) {
-                        m_errorMessage = data;
+                    if (m_taskError == null) {
+                        m_taskError = new TaskError(data);
                     } else {
-                        m_errorMessage = m_errorMessage+"\n"+data;
+                        m_taskError.setErrorText(data);
                     }
                 }
+
                 
                 return false;
             }
@@ -67,7 +69,7 @@ public class CreateUserTask extends AbstractServiceTask {
             // JPM.TODO : check result
             
         } catch (Exception e) {
-            m_errorMessage = e.getMessage();
+            m_taskError = new TaskError(e);
             m_loggerProline.error(getClass().getSimpleName()+" failed", e);
             return false;
         }

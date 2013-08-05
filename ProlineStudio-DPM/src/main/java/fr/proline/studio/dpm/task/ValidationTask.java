@@ -5,6 +5,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -136,20 +137,20 @@ public class ValidationTask extends AbstractServiceTask {
                 String message = (String) errorMap.get("message");
 
                 if (message != null) {
-                    m_errorMessage = message;
+                    m_taskError = new TaskError(message);
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (m_errorMessage == null) {
-                        m_errorMessage = data;
+                    if (m_taskError == null) {
+                        m_taskError = new TaskError(data);
                     } else {
-                        m_errorMessage = m_errorMessage+"\n"+data;
+                        m_taskError.setErrorText(data);
                     }
                 }
                 
-                if (m_errorMessage != null) {
-                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : "+m_errorMessage);
+                if (m_taskError != null) {
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : "+m_taskError.toString());
                 }
                 
                 return false;
@@ -166,7 +167,7 @@ public class ValidationTask extends AbstractServiceTask {
 
 
         } catch (Exception e) {
-            m_errorMessage = e.getMessage();
+            m_taskError = new TaskError(e);
             m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return false;
         }
@@ -199,19 +200,23 @@ public class ValidationTask extends AbstractServiceTask {
 
             if (errorMap != null) {
 
-                m_errorMessage = (String) errorMap.get("message");
+                String message = (String) errorMap.get("message");
+
+                if (message != null) {
+                    m_taskError = new TaskError(message);
+                }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (m_errorMessage == null) {
-                        m_errorMessage = data;
+                    if (m_taskError == null) {
+                        m_taskError = new TaskError(data);
                     } else {
-                        m_errorMessage = m_errorMessage+"\n"+data;
+                        m_taskError.setErrorText(data);
                     }
                 }
                 
-                if (m_errorMessage != null) {
-                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : " + m_errorMessage);
+                if (m_taskError != null) {
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : "+m_taskError.toString());
                 }
                 
                 return ServiceState.STATE_FAILED; // should not happen !
@@ -250,11 +255,12 @@ public class ValidationTask extends AbstractServiceTask {
 
                     return ServiceState.STATE_DONE;
                 } else {
-                    m_errorMessage = (String) resultMap.get("message");
+                    String errorMessage = (String) resultMap.get("message");
                     
                     
-                    if (m_errorMessage != null) {
-                        m_loggerWebcore.error(getClass().getSimpleName() + " failed : " + m_errorMessage);
+                    if (errorMessage != null) {
+                        m_taskError = new TaskError(errorMessage);
+                        m_loggerWebcore.error(getClass().getSimpleName() + " failed : " + errorMessage);
                     }
                 
                     
@@ -266,7 +272,7 @@ public class ValidationTask extends AbstractServiceTask {
             
 
         } catch (Exception e) {
-            m_errorMessage = e.getMessage();
+            m_taskError = new TaskError(e);
             m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return ServiceState.STATE_FAILED; // should not happen !
         }

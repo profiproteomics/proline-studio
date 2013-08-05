@@ -4,6 +4,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -79,20 +80,20 @@ public class MergeTask extends AbstractServiceTask {
                 String message = (String) errorMap.get("message");
 
                 if (message != null) {
-                    m_errorMessage = message;
+                    m_taskError = new TaskError(message);
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (m_errorMessage == null) {
-                        m_errorMessage = data;
+                    if (m_taskError == null) {
+                        m_taskError = new TaskError(data);
                     } else {
-                        m_errorMessage = m_errorMessage+"\n"+data;
+                        m_taskError.setErrorText(data);
                     }
                 }
                 
-                if (m_errorMessage != null) {
-                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : "+m_errorMessage);
+                if (m_taskError != null) {
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : "+m_taskError.toString());
                 }
                 
                 return false;
@@ -106,7 +107,7 @@ public class MergeTask extends AbstractServiceTask {
             }
 
         } catch (Exception e) {
-            m_errorMessage = e.getMessage();
+             m_taskError = new TaskError(e);
             m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return false;
         }
@@ -140,18 +141,25 @@ public class MergeTask extends AbstractServiceTask {
 
             if (errorMap != null) {
 
-                m_errorMessage = (String) errorMap.get("message");
-                if (m_errorMessage == null) {
-                    m_errorMessage = "";
+                String message = (String) errorMap.get("message");
+
+                if (message != null) {
+                    m_taskError = new TaskError(message);
                 }
-                
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    m_errorMessage = m_errorMessage+"\n"+data;
+                    if (m_taskError == null) {
+                        m_taskError = new TaskError(data);
+                    } else {
+                        m_taskError.setErrorText(data);
+                    }
                 }
                 
-                m_loggerWebcore.error(getClass().getSimpleName() + " failed "+m_errorMessage);
+                if (m_taskError != null) {
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed : "+m_taskError.toString());
+                }
+                
                 return ServiceState.STATE_FAILED; // should not happen !
             }
             
@@ -212,18 +220,18 @@ public class MergeTask extends AbstractServiceTask {
                     
                     return ServiceState.STATE_DONE;
                 } else {
-                    m_errorMessage = (String) resultMap.get("message");
-                    if (m_errorMessage == null) {
-                        m_errorMessage = "";
+                    String errorMessage = (String) resultMap.get("message");
+                    if (errorMessage == null) {
+                        errorMessage = "";
                     }
-                    m_loggerWebcore.error(getClass().getSimpleName() + " failed "+m_errorMessage);
+                    m_loggerWebcore.error(getClass().getSimpleName() + " failed "+errorMessage);
                     return ServiceState.STATE_FAILED;
                 }
                 
             }
             
         } catch (Exception e) {
-            m_errorMessage = e.getMessage();
+            m_taskError = new TaskError(e);
             m_loggerProline.error(getClass().getSimpleName() + " failed", e);
             return ServiceState.STATE_FAILED; // should not happen !
         }

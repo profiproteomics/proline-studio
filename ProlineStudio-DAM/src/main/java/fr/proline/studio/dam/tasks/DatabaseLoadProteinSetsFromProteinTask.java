@@ -3,6 +3,7 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -89,6 +90,7 @@ public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             return false;
         } finally {
             entityManagerMSI.close();

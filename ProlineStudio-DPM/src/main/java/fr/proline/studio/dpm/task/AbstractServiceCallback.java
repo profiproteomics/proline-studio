@@ -1,5 +1,6 @@
 package fr.proline.studio.dpm.task;
 
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 
 /**
@@ -8,7 +9,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
  */
 public abstract class AbstractServiceCallback {
     
-    private String m_errorMessage = null;
+    private TaskError m_taskError = null;
     private TaskInfo m_taskInfo = null;
      
      
@@ -28,11 +29,11 @@ public abstract class AbstractServiceCallback {
      */
     public abstract void run(boolean success);
     
-    public String getErrorMessage() {
-        return m_errorMessage;
+    public TaskError getTaskError() {
+        return m_taskError;
     }
-    public void setErrorMessage(String errorMessage) {
-        m_errorMessage = errorMessage;
+    public void setTaskError(TaskError taskError) {
+        m_taskError = taskError;
     }   
     
     public TaskInfo getTaskInfo() {

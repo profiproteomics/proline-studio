@@ -13,6 +13,7 @@ import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import javax.persistence.EntityManager;
 
@@ -58,33 +59,33 @@ public class CreateProjectTask extends AbstractServiceTask {
 
             ArrayMap errorMap = (ArrayMap) jsonResult.get("error");
             
-            m_errorMessage = null;
+            m_taskError = null;
             if (errorMap != null) {
                 String message = (String) errorMap.get("message");
                 
                 if (message != null) {
-                    m_errorMessage = message;
+                    m_taskError = new TaskError(message);
                 }
                 
                 String data = (String) errorMap.get("data");
                 if (data != null) {
-                    if (m_errorMessage == null) {
-                        m_errorMessage = data;
+                    if (m_taskError == null) {
+                        m_taskError = new TaskError(data);
                     } else {
-                        m_errorMessage = m_errorMessage+"\n"+data;
+                        m_taskError.setErrorText(data);
                     }
                 }
                 
                 
                  //JPM.WART : Web core returns an error and the project id !!!
-                m_loggerWebcore.error(getClass().getSimpleName()+m_errorMessage);
+                m_loggerWebcore.error(getClass().getSimpleName()+m_taskError.toString());
                // return false; 
             }
 
             idProject = (BigDecimal) jsonResult.get("result");
             if (idProject == null) {
-                if (m_errorMessage == null) { //JPM.WART
-                    m_errorMessage = "Internal Error : Project Id not found";
+                if (m_taskError == null) { //JPM.WART
+                    m_taskError = new TaskError("Internal Error : Project Id not found");
                 }
                 return false;
             }
@@ -92,7 +93,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             
             
         } catch (Exception e) {
-            m_errorMessage = e.getMessage();
+            m_taskError = new TaskError(e);
             m_loggerProline.error(getClass().getSimpleName()+" failed", e);
             return false;
         }
@@ -104,7 +105,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             Project p = entityManagerUDS.find(Project.class, Long.valueOf(idProject.longValue()));
 
             if (p == null) {
-                m_errorMessage = "Internal Error : ";
+                m_taskError = new TaskError("Internal Error : Project not Found");
                 return false;
             }
 

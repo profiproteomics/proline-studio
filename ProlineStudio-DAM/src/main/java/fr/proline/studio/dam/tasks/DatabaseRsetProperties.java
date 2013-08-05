@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.SearchSetting;
 import fr.proline.core.orm.msi.SearchSettingsSeqDatabaseMap;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.Iterator;
 import java.util.Set;
@@ -82,6 +83,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
             return false;
         } finally {
             entityManagerMSI.close();

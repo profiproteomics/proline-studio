@@ -1,6 +1,7 @@
 package fr.proline.studio.dpm;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseConnectionTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -31,7 +32,7 @@ public class ServerConnectionManager {
     public static final int CONNECTION_DONE = 5;
     
     private int m_connectionState = NOT_CONNECTED;
-    private String m_connectionError = null;
+    private TaskError m_connectionError = null;
     
     private String m_serverURL;
     private String m_projectUser;
@@ -130,7 +131,7 @@ public class ServerConnectionManager {
                    tryDatabaseConnection(connectionCallback, databaseProperties, projectUser);
                } else {
                    setConnectionState(CONNECTION_SERVER_FAILED);
-                   m_connectionError = getErrorMessage();
+                   m_connectionError = getTaskError();
                    if (connectionCallback != null) {
                        connectionCallback.run();
                    }
@@ -168,7 +169,7 @@ public class ServerConnectionManager {
                     m_previousErrorId = getErrorId();
                     
                     setConnectionState(CONNECTION_DATABASE_FAILED);
-                    m_connectionError = getErrorMessage();
+                    m_connectionError = getTaskError();
 
                 }
                 
@@ -213,10 +214,10 @@ public class ServerConnectionManager {
                     m_previousErrorId = getErrorId();
                     
                     setConnectionState(CONNECTION_DATABASE_FAILED);
-                    m_connectionError = getErrorMessage();
+                    m_connectionError = getTaskError();
                     
                     //JPM.TODO : WART if no user has been created
-                    if ((m_connectionError!= null) && (m_connectionError.indexOf("dupierris")!=-1)) {
+                    if ((m_connectionError!= null) && (m_connectionError.getErrorTitle().indexOf("dupierris")!=-1)) {
                         // we create the user dupierris
                         
                         //CreateProjectTask.postUserRequest();
@@ -305,7 +306,7 @@ public class ServerConnectionManager {
         m_connectionState = connectionState;
     }
 
-    public String getConnectionError() {
+    public TaskError getConnectionError() {
         return m_connectionError;
     }
 }

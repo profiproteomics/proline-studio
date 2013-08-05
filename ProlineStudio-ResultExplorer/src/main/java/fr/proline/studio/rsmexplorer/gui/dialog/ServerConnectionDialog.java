@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Dialog;
@@ -232,8 +233,8 @@ public class ServerConnectionDialog extends DefaultDialog {
                 
                 ServerConnectionManager serverManager = ServerConnectionManager.getServerConnectionManager();
                 if (serverManager.isConnectionFailed() ) {
-                    String connectionError = serverManager.getConnectionError();
-                    setStatus(true, connectionError);
+                    TaskError connectionError = serverManager.getConnectionError();
+                    setStatus(true, connectionError.getErrorTitle());
                     JOptionPane.showMessageDialog(m_singletonDialog, connectionError, "Database Connection Error", JOptionPane.ERROR_MESSAGE);
                 } else if (serverManager.isConnectionDone()) {
                     storeDefaults();

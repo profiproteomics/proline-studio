@@ -4,6 +4,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -201,4 +202,156 @@ public class ComputeSCTask extends AbstractServiceTask {
         return ServiceState.STATE_WAITING;
         
     }
+
+
+public static class WSCResultData {
+    
+    final String rootPropName  = "\"SpectralCountResult\"";
+    final String rsmIDPropName  = "\"rsm_id\"";
+    final String protSCsListPropName = "\"proteins_spectral_counts\"";
+    final String protACPropName ="\"protein_accession\"";
+    final String bscPropName  = "\"bsc\"";
+    final String sscPropName  = "\"ssc\"";
+    final String wscPropName  = "\"wsc\"";
+            
+    private Map<Long, Map<String, SpectralCountsStruct>> scsByProtByRSMId;
+    private Dataset m_refDS;
+    private List<Dataset> m_datasetRSMs;
+            
+    public WSCResultData(Dataset refDataset, List<Dataset> datasets,  String spectralCountResult) {
+        m_refDS = refDataset;
+        m_datasetRSMs = datasets;
+        scsByProtByRSMId = new HashMap<>();
+        try {
+            initData(spectralCountResult);
+        }catch(Exception e){
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    } 
+    
+    public ResultSummary getRSMReference(){
+        return m_refDS.getTransientData().getResultSummary();
+    }
+    
+    public Dataset getDataSetReference(){
+        return m_refDS;
+    }
+    
+    public List<Dataset> getComputedSCDatasets (){
+        return m_datasetRSMs;
+    }
+    
+    public Map<String, SpectralCountsStruct> getRsmSCResult(Long rsmId){
+        return scsByProtByRSMId.get(rsmId);
+    }
+    
+    
+    /**
+     * Parse SC Result to created formatted data 
+     * m_scResult is formatted as :
+     * "{"SpectralCountResult":{[
+     * {
+     * "rsm_id":Long,
+     * "proteins_spectral_counts":[
+     * { "protein_accession"=Acc,"bsc"=Float,"ssc"=Float,"wsc"=Float},
+     * {...}
+     * ]
+     * },
+     * {
+     * "rsm_id"...
+     * }
+     * ]}}"
+     *    
+     */
+    private void initData(String scResult) {
+        //first 27 char are constant
+        String parsingSC = scResult.substring(27);
+        
+        String[] rsmEntries = parsingSC.split("\\{"+rsmIDPropName);
+        for(String rsmEntry : rsmEntries){ //{"rsm_id":Long,"proteins_spectral_counts":[...
+            if(rsmEntry.isEmpty())
+                continue;
+            String rsmSCResult=rsmEntry.substring(rsmEntry.indexOf(":")+1);
+                    //ToDO : Verify rsmId belongs to m_datasetRSMs ?
+            Long rsmId = Long.parseLong(rsmSCResult.substring(0, rsmSCResult.indexOf(",")).trim()); 
+                    
+            Map<String, SpectralCountsStruct> rsmSCRst =  parseRsmSC(rsmSCResult.substring(rsmSCResult.indexOf(protSCsListPropName)));
+            scsByProtByRSMId.put(rsmId, rsmSCRst);
+        }
+    }
+    
+    /**
+     * Parse one RSM Sc entry
+     *
+     * 
+     * "proteins_spectral_counts":[
+     * { "protein_accession"=Acc,"bsc"=Float,"ssc"=Float,"wsc"=Float},
+     * {...}
+     * ]
+     *},
+     * 
+     * @return Map of spectralCounts for each Protein Matches
+     */
+     
+    private Map<String, SpectralCountsStruct> parseRsmSC(String rsmsSCResult){
+        m_logger.debug(" parseRsmSC :   "+rsmsSCResult);
+                
+        //"proteins_spectral_counts":[{"protein_accession"=MyProt,"bsc"=123.6,"ssc"=45.6,"wsc"=55.5}, {"protein_accession"=OtherProt,"bsc"=17.2,"ssc"=2.6,"wsc"=1.5} ]
+        Map<String, SpectralCountsStruct> scByProtAcc = new HashMap<>();
+
+        //Remove "proteins_spectral_counts":[
+        String protEntries =rsmsSCResult.substring(rsmsSCResult.indexOf("[")+1);
+        protEntries = protEntries.substring(0,protEntries.indexOf("]"));
+        
+        String[] protAccEntries = protEntries.split("}"); //Each ProtAcc entry
+        int protIndex = 0;
+        for(String protAcc : protAccEntries){        
+            //For each protein ...            
+            String[] protAccPropertiesEntries = protAcc.split(","); //Get properties list : Acc / bsc / ssc / wsc 
+            String protAccStr= null;
+            Float bsc = null;
+            Float ssc= null;
+            Float wsc= null;
+            for(String protProperty  : protAccPropertiesEntries){ //Should create 2 entry : key -> value 
+               String[] propKeyValues  = protProperty.split("="); //split prop key / value 
+               if(propKeyValues[0].contains(protACPropName))
+                   protAccStr = propKeyValues[1];
+               if(propKeyValues[0].contains(bscPropName))
+                   bsc = Float.valueOf(propKeyValues[1]);
+               if(propKeyValues[0].contains(sscPropName))
+                   ssc = Float.valueOf(propKeyValues[1]);
+               if(propKeyValues[0].contains(wscPropName))
+                   wsc = Float.valueOf(propKeyValues[1]);                   
+            }
+            if(bsc==null ||ssc ==null ||wsc == null||protAccStr==null)
+                throw new IllegalArgumentException("Invalid Spectral Count result. Value missing : "+protAcc);
+            scByProtAcc.put(protAccStr, new SpectralCountsStruct(bsc, ssc, wsc));
+            protIndex++;
+        }
+      
+        return scByProtAcc;
+        
+    }
+
+           
+}
+ 
+ public static class SpectralCountsStruct{
+     Float m_basicSC;
+     Float m_specificSC;
+     Float m_weightedSC;
+     
+     public SpectralCountsStruct(Float bsc, Float ssc, Float wsc){
+         this.m_basicSC = bsc;
+         this.m_specificSC = ssc;
+         this.m_weightedSC = wsc;
+     }
+     
+     public Float getBsc(){return m_basicSC;}
+     
+     public Float getSsc(){return m_specificSC;}
+     
+     public Float getWsc(){return m_weightedSC;}
+     
+ }
 }

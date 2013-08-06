@@ -12,6 +12,9 @@ import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.ComputeSCTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.dialog.TreeSelectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
@@ -42,8 +45,8 @@ public class CompareWithSCAction extends AbstractRSMAction {
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) { 
      
         // Onlt Ref should be selected to compute SC         
-        final RSMDataSetNode datasetNode = (RSMDataSetNode) selectedNodes[0];
-                 
+        final RSMDataSetNode refDatasetNode = (RSMDataSetNode) selectedNodes[0];
+
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override
@@ -58,12 +61,16 @@ public class CompareWithSCAction extends AbstractRSMAction {
 
                 // check if we can compute SC
                 String error = null;
-                ArrayList<Long> resultSummaryIdList = new ArrayList<>();                
+                ArrayList<Dataset> datasetsComputeRsmSCList = new ArrayList<>();                
                 
                 if (treeSelectionDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                    ArrayList<RSMDataSetNode> selectedDSNodes = treeSelectionDialog.getSelectedRSMDSNodeList();
+                   //A Voir :) 
+//                   if(selectedDSNodes.contains(refDatasetNode) && selectedDSNodes.size()>1) 
+//                        error = " Spectral Count is not possible on reference Node and some of its child";
+                       
                    for(RSMDataSetNode dsNode : selectedDSNodes){
-                       //TODO : Verif pas père + fils sélectionnés : Que père ou que fils
+                       //TODO : Verif pas père + fils sélectionnés : Que père ou que fils ?!? 
                         if (!dsNode.hasResultSummary()) {
                             error = " Spectral Count is not possible on Search result ("+ dsNode.getDataset().getName() +").  Identification Summary should be created first";
                             break;                       
@@ -72,9 +79,9 @@ public class CompareWithSCAction extends AbstractRSMAction {
                             error = " Spectral Count is not possible while import or validation is on going. (Search result "+ dsNode.getDataset().getName() +")";
                             break;  
                         }
-                        resultSummaryIdList.add(dsNode.getResultSummaryId());
+                        datasetsComputeRsmSCList.add(dsNode.getDataset());
                    }
-                } else {
+                } else { //Cancel / Close was clicked
                     return;                                                
                 }
 
@@ -82,28 +89,25 @@ public class CompareWithSCAction extends AbstractRSMAction {
                     JOptionPane.showMessageDialog(RSMTree.getTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-
-                m_logger.debug(" Will Compute SC on "+resultSummaryIdList.size()+" RSMs. Ids: "+resultSummaryIdList);
-                askComputeSCService(datasetNode,resultSummaryIdList);
+                
+                m_logger.debug(" Will Compute SC on "+datasetsComputeRsmSCList.size()+" RSMs : "+datasetsComputeRsmSCList);
+                askComputeSCService(refDatasetNode,  datasetsComputeRsmSCList);
             }
         };
         
             //Create Child Tree to select RSM to compute SC for
-        final RSMTree childTree = RSMTree.getTree().copyDataSetRootSubTree(datasetNode.getDataset(),  datasetNode.getDataset().getProject().getId());
+        final RSMTree childTree = RSMTree.getTree().copyDataSetRootSubTree(refDatasetNode.getDataset(),  refDatasetNode.getDataset().getProject().getId());
         treeSelectionDialog = new TreeSelectionDialog(WindowManager.getDefault().getMainWindow(), childTree, "Select Result Summaries for Spectral Count");
         treeSelectionDialog.setLocation(x, y);   
 //        treeSelectionDialog.setBusy(true);  
         treeSelectionDialog.setVisible(true);  
         
-        RSMTree.getTree().loadInBackground(datasetNode, callback);
-
-        
-       
+        RSMTree.getTree().loadInBackground(refDatasetNode, callback);
 
     
     }
     
-     private void askComputeSCService(final RSMDataSetNode refNode, final List<Long> rsmIdList) {
+     private void askComputeSCService(final RSMDataSetNode refNode, final List<Dataset> dsRsmList) {
 
         final Dataset dataset = refNode.getDataset();
         m_logger.debug(" -------- Run Compute SC service for  "+refNode.getDataset().getName());
@@ -116,7 +120,6 @@ public class CompareWithSCAction extends AbstractRSMAction {
         final String[] _spCountJSON = new String[1];
         
         AbstractServiceCallback callback = new AbstractServiceCallback() {
-            protected final Logger m_log2 = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
             
             @Override
             public boolean mustBeCalledInAWT() {
@@ -126,25 +129,44 @@ public class CompareWithSCAction extends AbstractRSMAction {
             @Override
             public void run(boolean success) {
                 if (success) {
-                    m_log2.debug(" Service Success. Result = ------------  ");
-                    m_log2.debug(_spCountJSON[0]);
-                    m_log2.debug(" Service Success. END Result = ------------  ");
-                    refNode.setIsChanging(false);
-                    treeModel.nodeChanged(refNode);
-                } else {
+                    openWSCPanel(refNode, dsRsmList, _spCountJSON[0], treeModel);                   
+                } else {    
                     //JPM.TODO : manage error with errorMessage
                     refNode.setIsChanging(false);
-                    m_log2.debug(" Service ERROR ");
                     treeModel.nodeChanged(refNode);
                 }
             }
         };
-
-        ComputeSCTask task = new ComputeSCTask(callback,  dataset, rsmIdList, _spCountJSON);
+                      
+        List<Long> rsmIds = new ArrayList<>(dsRsmList.size());
+        for(Dataset ds :dsRsmList ){
+            rsmIds.add(ds.getResultSummaryId());
+        }        
+                
+        ComputeSCTask task = new ComputeSCTask(callback,  dataset, rsmIds, _spCountJSON);
 
         AccessServiceThread.getAccessServiceThread().addTask(task);
     }
 
+     private void openWSCPanel(final RSMDataSetNode datasetNode,  final List<Dataset> dsRsmList, String scResultAsJson,final DefaultTreeModel treeModel){
+      
+        m_logger.debug(" Service Success. Result = ------------  ");
+        m_logger.debug(scResultAsJson);
+        m_logger.debug(" Service Success. END Result = ------------  ");
+
+        ComputeSCTask.WSCResultData scResult = new ComputeSCTask.WSCResultData(datasetNode.getDataset(), dsRsmList, scResultAsJson);
+        WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox(datasetNode.getDataset().getName()+" WSC", false) ;
+        wbox.setEntryData(datasetNode.getDataset().getProject().getId(), scResult);
+
+         // open a window to display the window box
+        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+        win.open();
+        win.requestActive();            
+
+        datasetNode.setIsChanging(false);
+        treeModel.nodeChanged(datasetNode);
+     }
+     
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
         

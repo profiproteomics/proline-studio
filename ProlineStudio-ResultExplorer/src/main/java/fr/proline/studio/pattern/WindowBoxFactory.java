@@ -61,6 +61,20 @@ public class WindowBoxFactory {
         
     }
     
+    public static WindowBox getRsmWSCWindowBox(String name, boolean isDecoy) {
+        
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxRsmWSC();
+
+        
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+        winBox.resetDefaultSize(); //JPM.WART
+        return winBox;
+        
+    }
+    
     public static WindowBox getRsmPSMWindowBox(String name, boolean isDecoy) {
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];

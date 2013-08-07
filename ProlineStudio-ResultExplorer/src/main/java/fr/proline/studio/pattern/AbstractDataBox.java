@@ -1,5 +1,7 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import java.awt.event.ActionListener;
@@ -34,6 +36,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     private ArrayList<GroupParameter> m_outParameters = new ArrayList<>();
     
     
+    private ArrayList<Long> m_taskList = new ArrayList<>();
+    
     private long m_projectId = -1;
     
     protected String m_name;
@@ -45,6 +49,35 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     protected AbstractDataBox m_previousDataBox = null;
     
     private int m_loadingId = 0;
+    
+    
+    protected void deleteThis() {
+        
+        // cancel task possibily running
+        AccessDatabaseThread.getAccessDatabaseThread().removeTasks(m_taskList);
+        
+        // delete next data box
+        if (m_nextDataBox != null) {
+            m_nextDataBox.deleteThis();
+        }
+        m_nextDataBox = null;
+        
+        // cut reference to panel
+        m_panel = null;
+    }
+    
+    /**
+     * A task must be registered, so it can be cancelled
+     * (a DataBox must not directly call AccessDatabaseThread.getAccessDatabaseThread().addTask()
+     * method
+     * @param task 
+     */
+    protected void registerTask(AbstractDatabaseTask task) {
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        m_taskList.add(task.getId());
+        
+    }
+ 
     
     protected void registerInParameter(GroupParameter parameter) {
         m_inParameters.add(parameter);
@@ -162,6 +195,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     }
     
     public void windowClosed() {
+        deleteThis();
     }
     
     public void windowOpened() {    

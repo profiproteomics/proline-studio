@@ -75,7 +75,7 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
         
 
         // ask asynchronous loading of data
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptideMatchTask(callback, getProjectId(), _rsm));
+        registerTask(new DatabaseLoadPeptideMatchTask(callback, getProjectId(), _rsm));
 
        
         

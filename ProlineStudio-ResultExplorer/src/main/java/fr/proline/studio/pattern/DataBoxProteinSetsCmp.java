@@ -114,7 +114,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
                     
                     }
                     
-                    AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(this, getProjectId(), proteinMatchParameterArray, resultSummaryParameterArray));
+                    registerTask(new DatabaseLoadPeptidesInstancesTask(this, getProjectId(), proteinMatchParameterArray, resultSummaryParameterArray));
                     return;
                 }
 
@@ -150,7 +150,7 @@ public class DataBoxProteinSetsCmp extends AbstractDataBox {
         };
 
         // Load data if needed asynchronously
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadProteinSetsFromProteinTask(callback, getProjectId(), proteinMatchArray, resultSetIdArray, proteinMatchName));
+        registerTask(new DatabaseLoadProteinSetsFromProteinTask(callback, getProjectId(), proteinMatchArray, resultSetIdArray, proteinMatchName));
 
 
     }

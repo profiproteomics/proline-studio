@@ -73,7 +73,7 @@ public class DataBoxRsetPeptidesOfProteinsCmp extends AbstractDataBox {
 
 
         // ask asynchronous loading of data
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseLoadPeptidesInstancesTask(callback, getProjectId(), proteinMatchArrayList, resultSummaryArrayList));
+        registerTask(new DatabaseLoadPeptidesInstancesTask(callback, getProjectId(), proteinMatchArrayList, resultSummaryArrayList));
 
 
     }

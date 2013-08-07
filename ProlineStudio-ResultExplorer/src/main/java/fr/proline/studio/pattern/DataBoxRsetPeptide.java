@@ -86,7 +86,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
             AccessDatabaseThread.getAccessDatabaseThread().removeTask(m_previousTaskId);
         }
         m_previousTaskId = taskId;
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        registerTask(task);
 
           
     }

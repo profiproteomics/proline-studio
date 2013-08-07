@@ -78,7 +78,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
             // ask asynchronous loading of data
             
             DatabaseRsetTask task = new DatabaseRsetTask(callback, p.getId(), resultSetArrayList);
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+            registerTask(task);
 
     }
     
@@ -104,6 +104,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
     @Override
     public void windowClosed() {
         ImportSearchResultAsRsetAction.removeEventListener(m_project.getId(), this);
+        super.windowClosed();
     }
 
     

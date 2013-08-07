@@ -71,6 +71,22 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
 
     }
 
+    /**
+     * called when a task is aborted.
+     * It is important in the case of tasks with subtask
+     * to clean the data loaded (and not let partially loaded data)
+     */
+    public abstract void abortTask();
+    
+    
+    public void deleteThis() {
+        m_callback = null;
+        if (m_consecutiveTask != null) {
+            m_consecutiveTask.deleteThis();
+            m_consecutiveTask = null;
+        }
+    }
+    
     public void setConsecutiveTask(AbstractDatabaseTask task) {
         m_consecutiveTask = task;
     }

@@ -37,6 +37,11 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
     
 
     @Override
+    public void abortTask() {
+        // nothing to do for task which are not inherited from AbstractDatabaseSlicerTask 
+    }
+    
+    @Override
     public boolean needToFetch() {
         if (m_rset == null) {
             m_rset = m_dataset.getTransientData().getResultSet();

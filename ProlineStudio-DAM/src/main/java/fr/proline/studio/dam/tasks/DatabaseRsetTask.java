@@ -25,6 +25,10 @@ public class DatabaseRsetTask extends AbstractDatabaseTask {
         m_resultSetArrayList = resultSetArrayList;
     }
     
+    @Override
+    public void abortTask() {
+        // nothing to do for task which are not inherited from AbstractDatabaseSlicerTask 
+    }
 
     @Override
     public boolean needToFetch() {

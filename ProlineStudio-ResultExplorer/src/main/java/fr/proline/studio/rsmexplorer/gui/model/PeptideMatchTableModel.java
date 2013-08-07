@@ -66,6 +66,8 @@ public class PeptideMatchTableModel extends LazyTableModel {
     @Override
     public Class getColumnClass(int col) {
         
+        return LazyData.class;
+        /*
         switch (col) {
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_MSQUERY:
@@ -85,7 +87,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
             
             default:
                 return String.class;
-        }
+        }*/
         
     }
 
@@ -94,7 +96,8 @@ public class PeptideMatchTableModel extends LazyTableModel {
     public int getSubTaskId(int col) {
  
         switch (col) {
-
+            case COLTYPE_PEPTIDE_MISSED_CLIVAGE: // no data read at all (we only have the id of the PeptideMatch)
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_PEPTIDE_MATCH;
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_PTM:
@@ -126,11 +129,17 @@ public class PeptideMatchTableModel extends LazyTableModel {
         // Retrieve Protein Set
         PeptideMatch peptideMatch = m_peptideMatches[row];
 
+        LazyData lazyData = getLazyData(row,col);
+        
+        if (peptideMatch == null) {
+            givePriorityTo(m_taskId, row, COLTYPE_PEPTIDE_MISSED_CLIVAGE); // no data att all : need to read PeptideMatch like for the COLTYPE_PEPTIDE_MISSED_CLIVAGE column
+            lazyData.setData(null);
+            return lazyData;
+        }
+        
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
-                
-                LazyData lazyData = getLazyData(row,col);
-                
+
                 PeptideMatch.TransientData data = peptideMatch.getTransientData();
                 Peptide peptide = data.getPeptide();
                 if ( peptide == null) {
@@ -144,13 +153,13 @@ public class PeptideMatchTableModel extends LazyTableModel {
             }
             case COLTYPE_PEPTIDE_SCORE: {
                 // Retrieve typical Peptide Match
+
                 Float score = Float.valueOf((float) peptideMatch.getScore()) ;
-                return score;
+                lazyData.setData(score);
+                return lazyData;
             }
             case COLTYPE_PEPTIDE_MSQUERY: {
-                
-                LazyData lazyData = getLazyData(row,col);
-                
+
                 PeptideMatch.TransientData data = peptideMatch.getTransientData();
                 if (!data.getIsMsQuerySet()) {
                     givePriorityTo(m_taskId, row, col);
@@ -166,18 +175,20 @@ public class PeptideMatchTableModel extends LazyTableModel {
             }
 
             case COLTYPE_PEPTIDE_CHARGE: {
-                return peptideMatch.getCharge();
+                lazyData.setData(peptideMatch.getCharge());
+                return lazyData;
             }
              
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
-                return Float.valueOf((float) peptideMatch.getExperimentalMoz()) ;
+                lazyData.setData(Float.valueOf((float) peptideMatch.getExperimentalMoz()));
+                return lazyData;
             }
             case COLTYPE_PEPTIDE_DELTA_MOZ: {
-                return Float.valueOf((float) peptideMatch.getDeltaMoz()) ;
+                lazyData.setData(Float.valueOf((float) peptideMatch.getDeltaMoz()));
+                return  lazyData;
             }
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
-                LazyData lazyData = getLazyData(row,col);
-                
+
                 PeptideMatch.TransientData data = peptideMatch.getTransientData();
                 Peptide peptide = data.getPeptide();
                 if ( peptide == null) {
@@ -192,7 +203,8 @@ public class PeptideMatchTableModel extends LazyTableModel {
  
             }
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: {
-                return peptideMatch.getMissedCleavage();
+                lazyData.setData(Float.valueOf(peptideMatch.getMissedCleavage()));
+                return lazyData;
             }
             /*case COLTYPE_PEPTIDE_RETENTION_TIME: { //JPM.TODO : can not do it for the moment: Retention Time is on Peptide Instance
                 
@@ -222,10 +234,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
                 return lazyData;
             }*/
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
-                
-                
-                LazyData lazyData = getLazyData(row,col);
-                
+
                 PeptideMatch.TransientData data = peptideMatch.getTransientData();
                 if (!data.getIsMsQuerySet()) {
                     givePriorityTo(m_taskId, row, COLTYPE_PEPTIDE_MSQUERY);
@@ -255,7 +264,6 @@ public class PeptideMatchTableModel extends LazyTableModel {
 
             }
             case COLTYPE_PEPTIDE_PTM: {
-                LazyData lazyData = getLazyData(row, col);
 
                 PeptideMatch.TransientData data = peptideMatch.getTransientData();
                 Peptide peptide = data.getPeptide();
@@ -274,7 +282,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
                 return lazyData;
             }
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: {
-                LazyData lazyData = getLazyData(row, col);
+
                 PeptideMatch.TransientData data = peptideMatch.getTransientData();
                 String proteinSetNames = data.getProteinSetStringList();
                 if (proteinSetNames == null) {
@@ -310,6 +318,9 @@ public class PeptideMatchTableModel extends LazyTableModel {
         int size = getRowCount();
         for (int i = 0; i < size; i++) {
             PeptideMatch peptideMatch = m_peptideMatches[i];
+            if (peptideMatch == null) {
+                continue;
+            }
             double score = peptideMatch.getScore();
             if (score > maxScore) {
                 maxScore = score;

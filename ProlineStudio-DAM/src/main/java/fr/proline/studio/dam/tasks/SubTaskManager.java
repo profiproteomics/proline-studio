@@ -23,6 +23,10 @@ public class SubTaskManager {
         m_subTaskCount = new int[nbDifferentSubTaskTypes];
     }
 
+    public synchronized void deleteThis() {
+        m_subTasks.clear();
+    }
+    
     public synchronized boolean isEmpty() {
         return m_subTasks.isEmpty();
     }

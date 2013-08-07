@@ -5,6 +5,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.PriorityChangement;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.PriorityQueue;
@@ -183,20 +184,39 @@ public class AccessDatabaseThread extends Thread {
 
     public final void removeTask(Long taskId) {
         synchronized (this) {
-            AbstractDatabaseTask task = m_actionMap.get(taskId);
-            if (task == null) {
-                // task is already finished
-                return;
-            }
-            boolean isActionRegistered = m_actions.remove(task);
-            if (isActionRegistered) {
-                // action was not running, remove it from map
-                m_actionMap.remove(taskId);
-                // remove iis info from TaskInfoManager
-                TaskInfoManager.getTaskInfoManager().cancel(task.getTaskInfo());
+            removeTaskImpl(taskId);
+        }
+    }
+
+    public final void removeTasks(ArrayList<Long> taskIds) {
+        synchronized (this) {
+            int nb = taskIds.size();
+            for (int i = 0; i < nb; i++) {
+                removeTask(taskIds.get(i));
             }
         }
     }
+    
+    private void removeTaskImpl(Long taskId) {
+        AbstractDatabaseTask task = m_actionMap.get(taskId);
+        if (task == null) {
+            // task is already finished
+            return;
+        }
+        boolean isActionRegistered = m_actions.remove(task);
+        if (isActionRegistered) {
+            // action was not running, remove it from map
+            m_actionMap.remove(taskId);
+            // remove iis info from TaskInfoManager
+            TaskInfoManager.getTaskInfoManager().cancel(task.getTaskInfo());
+        }
+        if (!task.getTaskInfo().isFinished()) {
+            task.abortTask();
+        }
+        
+        task.deleteThis();
+    }
+
     
     
     /**

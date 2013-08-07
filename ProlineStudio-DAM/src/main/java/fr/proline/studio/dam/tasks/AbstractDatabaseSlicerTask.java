@@ -33,6 +33,12 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
         m_subTaskManager = new SubTaskManager(subTaskCount);
     }
     
+    @Override
+    public void deleteThis() {
+        super.deleteThis();
+        m_subTaskManager.deleteThis();
+    }
+    
     /**
      * Return if there are remaining Sub Tasks to be done
      * @return 

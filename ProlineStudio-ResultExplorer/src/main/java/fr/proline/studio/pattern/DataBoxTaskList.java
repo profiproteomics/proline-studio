@@ -64,6 +64,7 @@ public class DataBoxTaskList extends AbstractDataBox {
     @Override
     public void windowClosed() {
          m_updateTimer.stop();
+         super.windowClosed();
     }
     
     @Override

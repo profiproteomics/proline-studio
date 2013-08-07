@@ -208,7 +208,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     }
     
 
-    
+    @Override
+    public void abortTask() {
+        // nothing to do for task which are not inherited from AbstractDatabaseSlicerTask 
+    }
   
     @Override
     public boolean needToFetch() {
@@ -247,6 +250,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         return true; // should never be called
     }
+    
+    
+    
     private boolean needToFetchRsetAndRsm(Dataset dataset) {
        if ((dataset.getResultSetId() != null) && (dataset.getTransientData().getResultSet() == null)) {
            // need to fetch a result set

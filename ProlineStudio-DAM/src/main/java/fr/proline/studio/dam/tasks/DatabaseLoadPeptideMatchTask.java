@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 
 /**
@@ -21,12 +22,13 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     // used to slice the task in sub tasks
     private static final int SLICE_SIZE = 100;
     // different possible subtasks
-    public static final int SUB_TASK_PEPTIDE = 0;
-    public static final int SUB_TASK_MSQUERY = 1;
-    public static final int SUB_TASK_SPECTRUM = 2;
-    public static final int SUB_TASK_PROTEINSET_NAME_LIST = 3;
-    public static final int SUB_TASK_COUNT_RSET = 3; // <<----- get in sync // SUB_TASK_PROTEINSET_NAME_LIST not used for RSET
-    public static final int SUB_TASK_COUNT_RSM = 4; // <<----- get in sync
+    public static final int SUB_TASK_PEPTIDE_MATCH = 0;
+    public static final int SUB_TASK_PEPTIDE = 1;
+    public static final int SUB_TASK_MSQUERY = 2;
+    public static final int SUB_TASK_SPECTRUM = 3;
+    public static final int SUB_TASK_PROTEINSET_NAME_LIST = 4;
+    public static final int SUB_TASK_COUNT_RSET = 5; // <<----- get in sync // SUB_TASK_PROTEINSET_NAME_LIST not used for RSET
+    public static final int SUB_TASK_COUNT_RSM = 5; // <<----- get in sync
     
     private long m_projectId = -1;
     private ResultSet m_rset = null;
@@ -66,10 +68,27 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     }
 
     @Override
+    // must be implemented for all AbstractDatabaseSlicerTask 
+    public void abortTask() {
+        switch (m_action) {
+            case LOAD_ALL_RSET:
+                m_rset.getTransientData().setPeptideMatchIds(null);
+                break;
+            case LOAD_ALL_RSM:
+                m_rsm.getTransientData().setPeptideMatches(null);
+                break;
+            case LOAD_PEPTIDES_FOR_PROTEIN_RSET:
+                m_proteinMatch.getTransientData().setPeptideMatches(null);
+                break;
+        }
+    }
+    
+    
+    @Override
     public boolean needToFetch() {
         switch (m_action) {
             case LOAD_ALL_RSET:
-                return (m_rset.getTransientData().getPeptideMatches() == null);
+                return (m_rset.getTransientData().getPeptideMatchIds() == null);
             case LOAD_ALL_RSM:
                 return (m_rsm.getTransientData().getPeptideMatches() == null);
             case LOAD_PEPTIDES_FOR_PROTEIN_RSET:
@@ -106,21 +125,39 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
 
             entityManagerMSI.getTransaction().begin();
 
-            ArrayList<PeptideMatch> peptideMatches;
+            /*ArrayList<PeptideMatch> peptideMatches;
             PeptideMatch[] peptideMatchArray;
-            
+            */
   
             Long rsetId = m_rset.getId();
 
+            TypedQuery<Long> peptideMatchIdQuery = entityManagerMSI.createQuery("SELECT pm.id FROM PeptideMatch pm, Peptide p, MsQuery msq WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id AND pm.msQuery=msq ORDER BY msq.initialId ASC, p.sequence ASC", Long.class);
+            peptideMatchIdQuery.setParameter("rsetId", rsetId);
+            List<Long> peptideMatchIds = peptideMatchIdQuery.getResultList();
+            
+            
+            m_peptideMatchIds = new ArrayList<>(peptideMatchIds);
+            long[] peptideMatchIdsArray = new long[m_peptideMatchIds.size()];
+            for (int i = 0; i < peptideMatchIdsArray.length; i++) {
+                peptideMatchIdsArray[i] = m_peptideMatchIds.get(i).longValue();
+            }       
+            m_rset.getTransientData().setPeptideMatchIds(peptideMatchIdsArray);
+            
+            
+            int nb = peptideMatchIds.size();
+            PeptideMatch[] peptideMatchArray = new PeptideMatch[nb];
+            m_rset.getTransientData().setPeptideMatches(peptideMatchArray);
+            
+            
             // Load Peptide Match order by query id and Peptide name
             // (pm.msQuery is fetch because it is declared as lazy and it is needed later)
             // SELECT pm, pm.msQuery FROM PeptideMatch pm, Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id ORDER BY pm.msQuery.initialId ASC, p.sequence ASC
-            Query peptideMatchQuery = entityManagerMSI.createQuery("SELECT pm, pm.msQuery FROM PeptideMatch pm, Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id ORDER BY pm.msQuery.initialId ASC, p.sequence ASC");
+            /*Query peptideMatchQuery = entityManagerMSI.createQuery("SELECT pm, pm.msQuery FROM PeptideMatch pm, Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id ORDER BY pm.msQuery.initialId ASC, p.sequence ASC");
             peptideMatchQuery.setParameter("rsetId", rsetId);
             //List<PeptideMatch> peptideMatches = peptideMatchQuery.getResultList();
-            List<Object[]> resultList = peptideMatchQuery.getResultList();
+            List<Object[]> resultList = peptideMatchQuery.getResultList();*/
 
-            peptideMatches = new ArrayList<>(resultList.size());
+            /*peptideMatches = new ArrayList<>(resultList.size());
             peptideMatchArray = new PeptideMatch[resultList.size()];
             Iterator<Object[]> it = resultList.iterator();
             int index = 0;
@@ -130,13 +167,13 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 peptideMatchArray[index++] = pm;
                 peptideMatches.add(pm);
                 // resCur[1] : (pm.msQuery is fetch because it is declared as lazy and it is needed later)
-            }
+            }*/
 
-            m_rset.getTransientData().setPeptideMatches(peptideMatchArray);
+            //m_rset.getTransientData().setPeptideMatches(peptideMatchArray);
 
  
             // Retrieve Peptide Match Ids and create map of PeptideMatch in the same time
-            int nb = peptideMatchArray.length;
+            /*int nb = peptideMatchArray.length;
             m_peptideMatchIds = new ArrayList<>(nb);
             m_peptideMatchMap = new HashMap<>();
             for (int i = 0; i < nb; i++) {
@@ -144,15 +181,22 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 Long pmId = pm.getId();
                 m_peptideMatchIds.add(i, pmId);
                 m_peptideMatchMap.put(pmId, pm);
-            }
+            }*/
             
+            /**
+             * PeptideMatches
+             */
+            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE_MATCH, m_peptideMatchIds.size(), SLICE_SIZE);
+            
+            // execute the first slice now
+            fetchPeptideMatch(entityManagerMSI, subTask);
             
             /**
              * Peptide for each PeptideMatch
              *
              */
             // slice the task and get the first one
-            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE, peptideMatches.size(), SLICE_SIZE);
+            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE, m_peptideMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
             fetchPeptide(entityManagerMSI, subTask);
@@ -162,7 +206,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
              *
              */
             // slice the task and get the first one
-            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, peptideMatches.size(), SLICE_SIZE);
+            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, m_peptideMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
             fetchMsQuery(entityManagerMSI, subTask);
@@ -173,7 +217,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
              *
              */
             // slice the task and get the first one
-            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRUM, peptideMatches.size(), SLICE_SIZE);
+            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRUM, m_peptideMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
             fetchSpectrum(entityManagerMSI, subTask);           
@@ -413,6 +457,9 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().begin();
 
             switch (slice.getSubTaskId()) {
+                case SUB_TASK_PEPTIDE_MATCH:
+                    fetchPeptideMatch(entityManagerMSI, slice);
+                    break;
                 case SUB_TASK_PEPTIDE:
                     fetchPeptide(entityManagerMSI, slice);
                     break;
@@ -440,6 +487,43 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         return true;
     }
     
+    
+    /**
+     * Retrieve Peptide Match for a Sub Task
+     *
+     * @param entityManagerMSI
+     * @param slice
+     */
+    private void fetchPeptideMatch(EntityManager entityManagerMSI, SubTask subTask) {
+
+        List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
+
+        // Load Peptide Matches
+        Query peptideMatchQuery = entityManagerMSI.createQuery("SELECT pm, pm.msQuery FROM PeptideMatch pm WHERE pm.id IN (:listId) ");
+        peptideMatchQuery.setParameter("listId", sliceOfPeptideMatchIds);
+        List<Object[]> resultList = peptideMatchQuery.getResultList();
+        
+        
+        if (m_peptideMatchMap == null) {
+            m_peptideMatchMap = new HashMap<>();
+        }
+        
+        PeptideMatch[] peptideMatches = m_rset.getTransientData().getPeptideMatches();
+        
+        
+        int i = subTask.getStartIndex();
+        Iterator<Object[]> it = resultList.iterator();
+        while (it.hasNext()) {
+            Object[] res = it.next();
+            PeptideMatch peptideMatch = (PeptideMatch) res[0];
+            MsQuery msQuery = (MsQuery) res[1];
+            peptideMatches[i] = peptideMatch;
+            m_peptideMatchMap.put(m_peptideMatchIds.get(i), peptideMatch);
+            i++;
+        }
+
+
+    }
     
     /**
      * Retrieve Peptide for a Sub Task

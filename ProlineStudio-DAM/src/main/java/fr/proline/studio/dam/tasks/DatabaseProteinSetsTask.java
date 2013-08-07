@@ -75,6 +75,23 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         action = LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE; 
     }
 
+    
+    @Override
+    // must be implemented for all AbstractDatabaseSlicerTask 
+    public void abortTask() {
+        switch (action) {
+            case LOAD_PROTEIN_SET_FOR_RSM:
+                m_rsm.getTransientData().setProteinSetArray(null);
+                break;
+            case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
+                m_peptideInstance.getTransientData().setProteinSetArray(null);
+                break;
+            case LOAD_PROTEIN_SET_NUMBER:
+                m_rsm.getTransientData().setNumberOfProteinSet(null);
+                break;
+        }
+    }
+    
     @Override
     public boolean needToFetch() {
         switch (action) {

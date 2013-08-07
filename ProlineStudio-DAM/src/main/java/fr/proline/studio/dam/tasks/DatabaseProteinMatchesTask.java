@@ -69,6 +69,20 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
         return name;
     }
     
+    
+    @Override
+    // must be implemented for all AbstractDatabaseSlicerTask 
+    public void abortTask() {
+        switch (m_action) {
+            case LOAD_ALL_PROTEINS_OF_RSET:
+                m_rset.getTransientData().setProteinMatches(null);
+                break;
+            case LOAD_PROTEINS_FROM_PEPTIDE_MATCH:
+                m_peptideMatch.getTransientData().setProteinMatches(null);
+                break;
+        }
+    }
+    
     @Override
     public boolean needToFetch() {
         

@@ -46,6 +46,11 @@ public class DatabaseLoadProteinSetsFromProteinTask extends AbstractDatabaseTask
     }
     
     @Override
+    public void abortTask() {
+        // nothing to do for task which are not inherited from AbstractDatabaseSlicerTask 
+    }
+    
+    @Override
     public boolean needToFetch() {
         int size = m_proteinMatchArray.size();
         for (int i=0;i<size;i++) {

@@ -60,6 +60,26 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         }
         
         PeptideInstance[] peptideInstances = peptideSet.getTransientPeptideInstances();
+        
+        // check that the selectedPeptide found in previous databox is really a peptide of the proteinMatch (they
+        // can come from different databoxes)
+        if (peptideInstances == null) {
+            selectedPeptide = null;
+        } else if (selectedPeptide!=null) {
+        
+            boolean foundPeptide = false;
+            for (int i=0;i<peptideInstances.length;i++) {
+                if (peptideInstances[i].getId() == selectedPeptide.getId()) {
+                    foundPeptide = true;
+                    break;
+                }
+            }
+            if (!foundPeptide) {
+                selectedPeptide = null;
+            }
+        } 
+        
+        
         ((RsmProteinAndPeptideSequencePanel) m_panel).setData(proteinMatch, selectedPeptide, peptideInstances);
     }
 }

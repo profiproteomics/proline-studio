@@ -86,7 +86,9 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
 
                 @Override
                 public void run() {
-                    m_callback.run(success, m_id, taskDone, finished);
+                    if (m_callback != null) {
+                        m_callback.run(success, m_id, taskDone, finished);
+                    }
                 }
             });
         } else {

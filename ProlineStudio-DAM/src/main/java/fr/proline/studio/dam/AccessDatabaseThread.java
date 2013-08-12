@@ -1,6 +1,7 @@
 package fr.proline.studio.dam;
 
 import fr.proline.studio.dam.taskinfo.TaskError;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.PriorityChangement;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
@@ -24,6 +25,7 @@ public class AccessDatabaseThread extends Thread {
     private PriorityQueue<AbstractDatabaseTask> m_actions;
     private HashMap<Long, AbstractDatabaseTask> m_actionMap;
     private HashMap<Long, PriorityChangement> m_priorityChangements;
+    private ArrayList<Long> m_abortedActionIdList;
 
     private AccessDatabaseWorkerPool m_workerPool = null;
     
@@ -31,6 +33,7 @@ public class AccessDatabaseThread extends Thread {
         m_actions = new PriorityQueue<>();
         m_actionMap = new HashMap<>();
         m_priorityChangements = new HashMap<>();
+        m_abortedActionIdList = new ArrayList<>();
         
         m_workerPool = AccessDatabaseWorkerPool.getWorkerPool();
 
@@ -57,6 +60,34 @@ public class AccessDatabaseThread extends Thread {
 
                     while (true) {
 
+                        // Management of aborted task
+                        if (!m_abortedActionIdList.isEmpty()) {
+                            int nbAbortedTask = m_abortedActionIdList.size();
+                            for (int i=0;i<nbAbortedTask;i++) {
+                                Long taskId = m_abortedActionIdList.get(i);
+                                AbstractDatabaseTask taskToStop = m_actionMap.remove(taskId);
+                                if (taskToStop == null) {
+                                    continue;
+                                }
+                                if (m_actions.contains(taskToStop)) {
+                                    m_actions.remove(taskToStop);
+                                    
+                                    //TaskInfoManager.getTaskInfoManager().cancel(abortedTask.getTaskInfo());
+                                    
+                                    TaskInfo info = taskToStop.getTaskInfo();
+                                    if (info.isWaiting()) {
+                                        // task has not already started, cancel it
+                                        TaskInfoManager.getTaskInfoManager().cancel(info);
+                                    } else {
+                                        taskToStop.abortTask();
+                                    }
+
+                                    taskToStop.deleteThis();
+                                }
+                            }
+                            m_abortedActionIdList.clear();
+                        }
+                        
                         // Management of the changement of priorities
                         if (!m_priorityChangements.isEmpty()) {
                             Iterator<Long> it = m_priorityChangements.keySet().iterator();
@@ -182,27 +213,30 @@ public class AccessDatabaseThread extends Thread {
         }
     }
 
-    public final void removeTask(Long taskId) {
+    public final void abortTask(Long taskId) {
         synchronized (this) {
-            removeTaskImpl(taskId);
+            abortTaskImpl(taskId);
         }
     }
 
-    public final void removeTasks(ArrayList<Long> taskIds) {
+    public final void abortTasks(ArrayList<Long> taskIds) {
         synchronized (this) {
             int nb = taskIds.size();
             for (int i = 0; i < nb; i++) {
-                removeTask(taskIds.get(i));
+                abortTask(taskIds.get(i));
             }
         }
     }
     
-    private void removeTaskImpl(Long taskId) {
+    private void abortTaskImpl(Long taskId) {
         AbstractDatabaseTask task = m_actionMap.get(taskId);
         if (task == null) {
             // task is already finished
             return;
         }
+        m_abortedActionIdList.add(taskId);
+        
+        /*
         boolean isActionRegistered = m_actions.remove(task);
         if (isActionRegistered) {
             // action was not running, remove it from map
@@ -210,11 +244,11 @@ public class AccessDatabaseThread extends Thread {
             // remove iis info from TaskInfoManager
             TaskInfoManager.getTaskInfoManager().cancel(task.getTaskInfo());
         }
-        if (!task.getTaskInfo().isFinished()) {
+        if ((!task.getTaskInfo().isFinished()) && (!task.getTaskInfo().isAborted())) {
             task.abortTask();
         }
         
-        task.deleteThis();
+        task.deleteThis();*/
     }
 
     

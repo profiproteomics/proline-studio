@@ -76,7 +76,9 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
      * It is important in the case of tasks with subtask
      * to clean the data loaded (and not let partially loaded data)
      */
-    public abstract void abortTask();
+    public void abortTask() {
+        getTaskInfo().setAborted();
+    }
     
     
     public void deleteThis() {

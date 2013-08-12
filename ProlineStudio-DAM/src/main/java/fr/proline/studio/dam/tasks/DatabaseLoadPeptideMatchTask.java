@@ -70,6 +70,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     @Override
     // must be implemented for all AbstractDatabaseSlicerTask 
     public void abortTask() {
+        super.abortTask();
         switch (m_action) {
             case LOAD_ALL_RSET:
                 m_rset.getTransientData().setPeptideMatchIds(null);
@@ -584,6 +585,22 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         
         List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
 
+        //JPM.REMOVE
+        /*
+         * TEST FOR MEMORY USAGE
+         * 
+         * Iterator<Long> it = ((List<Long>) sliceOfPeptideMatchIds).iterator();
+        while (it.hasNext()) {
+            Long peptideMatchId = it.next();
+            PeptideMatch peptideMatch = m_peptideMatchMap.get(peptideMatchId);
+            MsQuery q = peptideMatch.getMsQuery();
+            q.setTransientIsSpectrumSet(true);
+            q.setSpectrum(null);
+        }*/
+        
+        
+        //JPM.PUTBACK
+        
         Query msQueryQuery = entityManagerMSI.createQuery("SELECT pm.id, s FROM PeptideMatch pm,MsQuery msq, Spectrum s WHERE pm.id IN (:listId) AND pm.msQuery=msq AND msq.spectrum.id=s.id");
         msQueryQuery.setParameter("listId", sliceOfPeptideMatchIds);
 

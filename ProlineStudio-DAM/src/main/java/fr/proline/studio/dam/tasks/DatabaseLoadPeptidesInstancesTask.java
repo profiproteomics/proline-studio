@@ -57,12 +57,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         m_rsm = rsm;
         m_action = LOAD_PEPTIDE_INSTANCES_FOR_RSM;
     }
-    
 
-    @Override
-    public void abortTask() {
-        // nothing to do for task which are not inherited from AbstractDatabaseSlicerTask 
-    }
     
     
     @Override

@@ -73,6 +73,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
     @Override
     // must be implemented for all AbstractDatabaseSlicerTask 
     public void abortTask() {
+        super.abortTask();
         switch (m_action) {
             case LOAD_ALL_PROTEINS_OF_RSET:
                 m_rset.getTransientData().setProteinMatches(null);

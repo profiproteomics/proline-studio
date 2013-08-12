@@ -79,6 +79,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     @Override
     // must be implemented for all AbstractDatabaseSlicerTask 
     public void abortTask() {
+        super.abortTask();
         switch (action) {
             case LOAD_PROTEIN_SET_FOR_RSM:
                 m_rsm.getTransientData().setProteinSetArray(null);

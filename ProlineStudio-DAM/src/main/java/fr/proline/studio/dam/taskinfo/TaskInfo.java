@@ -9,6 +9,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
     public final static int STATE_WAITING = 0;
     public final static int STATE_RUNNING = 1;
     public final static int STATE_FINISHED = 2;
+    public final static int STATE_ABORTED = 3;
 
 
     private String m_taskDescription = null;
@@ -59,7 +60,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
     
     public void setRunning(boolean saveTimestamp) {
         
-        if ((m_state == STATE_RUNNING) || (m_updateState == STATE_RUNNING) || (m_updateState == STATE_FINISHED)) {
+        if ((m_state == STATE_RUNNING) || (m_updateState == STATE_RUNNING) || (m_updateState == STATE_FINISHED) || (m_updateState == STATE_ABORTED)) {
             // already running (or service finished, so afterwards little modification of database will not be taken in account)
             return;
         }
@@ -72,7 +73,17 @@ public class TaskInfo implements Comparable<TaskInfo> {
         
     }
     
+    public void setAborted() {
+        m_updateState = STATE_ABORTED;
+        TaskInfoManager.getTaskInfoManager().update(this);
+    }
+    
     public void setFinished(boolean success, TaskError taskError, boolean saveTimestamp) {
+        
+        if (m_updateState == STATE_ABORTED) {
+            return;
+        }
+        
         if (m_updateState == STATE_FINISHED) {
             // already finished : so afterwards little modification of database will not be taken in account
             saveTimestamp = false;
@@ -114,6 +125,10 @@ public class TaskInfo implements Comparable<TaskInfo> {
     
     public boolean isFinished() {
         return m_state == STATE_FINISHED;
+    }
+    
+    public boolean isAborted() {
+        return m_state == STATE_ABORTED;
     }
     
     public boolean isSuccess() {
@@ -173,7 +188,19 @@ public class TaskInfo implements Comparable<TaskInfo> {
 
     @Override
     public int compareTo(TaskInfo o) {
-        int cmp = m_state-o.m_state;
+        
+        // STATE_ABORTED and STATE_FINISHED are put at the same level for the sorting
+        int state = m_state;
+        if (state == STATE_ABORTED) {
+            state = STATE_FINISHED;
+        }
+        
+        int o_state = o.m_state;
+        if (o_state == STATE_ABORTED) {
+            o_state = STATE_FINISHED;
+        }
+        
+        int cmp = state-o_state;
         if (cmp != 0) {
            return cmp; 
         }

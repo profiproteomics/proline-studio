@@ -50,4 +50,10 @@ public class TaskLogTopComponent extends DataBoxViewerTopComponent {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
+    
+    
+    @Override
+    protected void componentClosed() {
+    }
+    
 }

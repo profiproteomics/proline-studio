@@ -193,7 +193,15 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_taskTextfield.setText(taskInfo.getTaskDescription());
         
         TaskError taskError = taskInfo.getTaskError();
-        String errorString = (taskError==null) ? "" : taskError.toString();
+        String errorString;
+        if (taskError != null) {
+             errorString = taskError.toString();
+        } else if (taskInfo.isAborted()) {
+            errorString = "Task stopped by the User.";
+        } else {
+            errorString = "";
+        }
+
         m_errorTextArea.setText(errorString);
         
         m_askTimeTextfield.setText(formatTime(taskInfo.getAskTimestamp()));

@@ -54,16 +54,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     protected void deleteThis() {
         
         // cancel task possibily running
-        AccessDatabaseThread.getAccessDatabaseThread().removeTasks(m_taskList);
+        AccessDatabaseThread.getAccessDatabaseThread().abortTasks(m_taskList);
         
-        // delete next data box
-        if (m_nextDataBox != null) {
-            m_nextDataBox.deleteThis();
-        }
-        m_nextDataBox = null;
-        
-        // cut reference to panel
-        m_panel = null;
     }
     
     /**

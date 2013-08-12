@@ -206,12 +206,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_dataset = trashDataset;
         m_action = EMPTY_TRASH;
     }
-    
 
-    @Override
-    public void abortTask() {
-        // nothing to do for task which are not inherited from AbstractDatabaseSlicerTask 
-    }
   
     @Override
     public boolean needToFetch() {

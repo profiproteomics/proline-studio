@@ -50,6 +50,7 @@ public class IconManager {
         PLUS,
         CROSS_SMALL7,
         CROSS_SMALL16,
+        CROSS_BLUE_SMALL16,
         DOCUMENT_LIST,
         WEB_LINK,
         TRASH,
@@ -194,6 +195,8 @@ public class IconManager {
                 return "fr/proline/studio/images/cross-small7x7.png";
             case CROSS_SMALL16:
                 return "fr/proline/studio/images/cross-small16x16.png";
+            case CROSS_BLUE_SMALL16:
+                return "fr/proline/studio/images/cross-smallblue16x16.png";
             case DOCUMENT_LIST:
                 return "fr/proline/studio/images/document-list.png";
             case WEB_LINK:

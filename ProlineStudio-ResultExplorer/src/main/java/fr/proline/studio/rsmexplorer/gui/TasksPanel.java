@@ -314,6 +314,8 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 } else {
                     setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
                 }
+            } else if (task.isAborted()) {
+                setIcon(IconManager.getIcon(IconManager.IconType.CROSS_BLUE_SMALL16));
             }
 
             return this;

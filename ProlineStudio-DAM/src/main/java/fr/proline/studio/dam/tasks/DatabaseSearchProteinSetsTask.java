@@ -70,10 +70,6 @@ public class DatabaseSearchProteinSetsTask extends AbstractDatabaseTask {
         return true;
     }
 
-    @Override
-    public void abortTask() {
-        // nothing to do for task which are not inherited from AbstractDatabaseSlicerTask 
-    }
     
     @Override
     public boolean needToFetch() {

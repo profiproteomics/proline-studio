@@ -96,7 +96,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         Long taskId = task.getId();
         if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done
-            AccessDatabaseThread.getAccessDatabaseThread().removeTask(m_previousTaskId);
+            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
         }
         m_previousTaskId = taskId;
         registerTask(task);

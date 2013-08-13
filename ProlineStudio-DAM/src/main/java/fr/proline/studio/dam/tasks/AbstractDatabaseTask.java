@@ -71,6 +71,10 @@ public abstract class AbstractDatabaseTask extends AbstractLongTask implements C
 
     }
 
+    public void updatePercentage() {
+        // nothing to do
+    }
+    
     /**
      * called when a task is aborted.
      * It is important in the case of tasks with subtask

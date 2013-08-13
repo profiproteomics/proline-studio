@@ -249,13 +249,13 @@ public class PeptideMatchTableModel extends LazyTableModel {
                     } else {
                         Spectrum spectrum = msQuery.getTransientIsSpectrumSet() ? msQuery.getSpectrum() : null;
                         if (spectrum == null) {
-                            lazyData.setData(Float.valueOf(Float.NaN)); //JPM.WART : value loaded, but there is no result in database
+                            lazyData.setData("");
                         } else {
                             Float precursorIntensity = spectrum.getPrecursorIntensity();
                             if (precursorIntensity != null) {
                                 lazyData.setData(precursorIntensity);
                             } else {
-                                lazyData.setData(Float.valueOf(Float.NaN)); //JPM.WART : value loaded, but there is no result in database
+                                lazyData.setData("");
                             }
                         }
                     }  

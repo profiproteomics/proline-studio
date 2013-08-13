@@ -59,6 +59,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
         m_startTimestamp = src.m_startTimestamp;
         m_endTimestamp = src.m_endTimestamp;
         m_duration = src.m_duration;
+        m_percentage = src.m_percentage;
     }
     
     public void setRunning(boolean saveTimestamp) {

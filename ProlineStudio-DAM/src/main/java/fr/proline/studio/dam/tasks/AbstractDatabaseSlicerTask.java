@@ -34,6 +34,13 @@ public abstract class AbstractDatabaseSlicerTask extends AbstractDatabaseTask {
     }
     
     @Override
+    public void updatePercentage() {
+        float percentage = m_subTaskManager.getAccomplishedPercentage();
+        m_taskInfo.setPercentage(percentage);
+    }
+    
+    
+    @Override
     public void deleteThis() {
         super.deleteThis();
         m_subTaskManager.deleteThis();

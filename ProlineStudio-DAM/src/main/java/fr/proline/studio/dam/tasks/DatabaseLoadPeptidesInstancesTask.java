@@ -146,6 +146,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
+            entityManagerMSI.getTransaction().rollback();
             return false;
         } finally {
             entityManagerMSI.close();
@@ -179,6 +180,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
+            entityManagerMSI.getTransaction().rollback();
             return false;
         } finally {
             entityManagerMSI.close();
@@ -209,6 +211,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
                 m_taskError = new TaskError(e);
+                entityManagerPS.getTransaction().rollback();
                 return false;
             } finally {
                 entityManagerPS.close();

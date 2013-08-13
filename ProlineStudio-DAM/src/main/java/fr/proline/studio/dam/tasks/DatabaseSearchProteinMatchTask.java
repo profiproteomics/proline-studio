@@ -49,6 +49,7 @@ public class DatabaseSearchProteinMatchTask extends AbstractDatabaseTask {
         } catch  (RuntimeException e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
+            entityManagerMSI.getTransaction().rollback();
             return false;
         } finally {
             entityManagerMSI.close();

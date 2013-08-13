@@ -132,6 +132,7 @@ public class CreateProjectTask extends AbstractServiceTask {
 
         } catch (Exception e) {
             m_loggerProline.error(getClass().getSimpleName() + " failed", e);
+            entityManagerUDS.getTransaction().rollback();
             return false;
         } finally {
             entityManagerUDS.close();

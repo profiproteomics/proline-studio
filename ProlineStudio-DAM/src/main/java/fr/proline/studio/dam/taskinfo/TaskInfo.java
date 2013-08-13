@@ -22,6 +22,9 @@ public class TaskInfo implements Comparable<TaskInfo> {
     private long m_startTimestamp = -1;
     private long m_endTimestamp = -1;
     
+    private float m_percentage = 0;
+    
+    
     private long m_duration = -1; // used for services where there is no start or end time
     
     private int m_id;
@@ -73,8 +76,18 @@ public class TaskInfo implements Comparable<TaskInfo> {
         
     }
     
+    public void setPercentage(float percentage) {
+        m_percentage = percentage;
+        TaskInfoManager.getTaskInfoManager().update(this, false);
+    }
+    
+    public float getPercentage() {
+        return m_percentage;
+    }
+    
     public void setAborted() {
         m_updateState = STATE_ABORTED;
+        m_percentage = 0;
         TaskInfoManager.getTaskInfoManager().update(this);
     }
     
@@ -97,6 +110,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
                 m_endTimestamp = System.currentTimeMillis();
             }
         }
+        m_percentage = 100;
         m_success = success;
         m_taskError = taskError;
 
@@ -219,6 +233,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
         dest.m_startTimestamp = m_startTimestamp;
         dest.m_endTimestamp = m_endTimestamp;
         dest.m_duration = m_duration;
+        dest.m_percentage = m_percentage;
     }
     
     @Override

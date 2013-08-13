@@ -6,6 +6,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.utils.DecoratedMarkerTable;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.*;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 
 /**
@@ -173,7 +175,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 
-
+            displayColumnAsPercentage(LogTableModel.COLTYPE_PERCENTAGE, AbstractLayoutPainter.HorizontalAlignment.LEFT);
+            getRelativizer().setMin(0);
+            getRelativizer().setMax(100);
+            
+            setDefaultRenderer(Float.class, new PercentageRenderer( getDefaultRenderer(String.class)) );
         }
 
         /**
@@ -202,7 +208,8 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         public static final int COLTYPE_TASKINFO_ID = 1;
         public static final int COLTYPE_TASKINFO_CATEGORY = 2;
         public static final int COLTYPE_DESCRIPTION = 3;
-        private static final String[] columnNames = {"", "id", "Category", "Task Description"};
+        public static final int COLTYPE_PERCENTAGE = 4;
+        private static final String[] columnNames = {"", "id", "Category", "Task Description", "Realization"};
         private ArrayList<TaskInfo> m_taskInfoList = null;
 
         public boolean updateData() {
@@ -248,6 +255,8 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 case COLTYPE_TASKINFO_CATEGORY:
                 case COLTYPE_DESCRIPTION:
                     return String.class;
+                case COLTYPE_PERCENTAGE:
+                    return Float.class;
             }
             return null; // should not happen
         }
@@ -285,6 +294,18 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 }
                 case COLTYPE_DESCRIPTION: {
                     return taskInfo.getTaskDescription();
+                }
+                case COLTYPE_PERCENTAGE: {
+                    if (taskInfo.isRunning()) {
+                        float percentage = taskInfo.getPercentage();
+                        if ((percentage<0.001) || (percentage>99.999)) {
+                            return Float.NaN;
+                        }
+                       return percentage;
+                    } else {
+                        return Float.NaN;
+                    }
+                    
                 }
 
             }

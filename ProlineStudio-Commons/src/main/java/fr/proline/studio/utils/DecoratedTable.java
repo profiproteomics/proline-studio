@@ -5,6 +5,7 @@ import java.awt.Color;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.util.PaintUtils;
 
@@ -30,10 +31,15 @@ public class DecoratedTable extends JXTable {
     }
 
     public void displayColumnAsPercentage(int column) {
+        displayColumnAsPercentage(column, AbstractLayoutPainter.HorizontalAlignment.RIGHT);
+    }
+    public void displayColumnAsPercentage(int column, AbstractLayoutPainter.HorizontalAlignment alignment) {
         // Display of the Score Column as a percentage
         Color base = PaintUtils.setSaturation(Color.GREEN, .7f);
         MattePainter matte = new MattePainter(PaintUtils.setAlpha(base, 125));
         RelativePainterHighlighter highlighter = new RelativePainterHighlighter(matte);
+        highlighter.setHorizontalAlignment(alignment);
+
         m_relativizer = new RelativePainterHighlighter.NumberRelativizer(column, 0, 100);
         highlighter.setRelativizer(m_relativizer);
         highlighter.setHighlightPredicate(new HighlightPredicate.ColumnHighlightPredicate(column));

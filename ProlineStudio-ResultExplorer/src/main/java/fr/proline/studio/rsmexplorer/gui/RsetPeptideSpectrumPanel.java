@@ -178,6 +178,12 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         byte[] massByteArray = spectrum.getMozList(); //package$EasyLzma$.MODULE$.uncompress(spectrum.getMozList());
 
         
+        if ((intensityByteArray == null) || (massByteArray == null)) {
+            // should not happen
+            m_dataSet.removeSeries(SERIES_NAME);
+            return;
+        }
+        
         
         ByteBuffer intensityByteBuffer = ByteBuffer.wrap(intensityByteArray).order(ByteOrder.LITTLE_ENDIAN);
         FloatBuffer intensityFloatBuffer = intensityByteBuffer.asFloatBuffer();

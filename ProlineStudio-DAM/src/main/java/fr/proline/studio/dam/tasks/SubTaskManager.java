@@ -19,6 +19,8 @@ public class SubTaskManager {
     // Current Task
     private SubTask m_currentTask = null;
 
+    private int m_maxSlicesNumber;
+    
     public SubTaskManager(int nbDifferentSubTaskTypes) {
         m_subTaskCount = new int[nbDifferentSubTaskTypes];
     }
@@ -61,9 +63,16 @@ public class SubTaskManager {
             i = indexEnd + 1;
         }
 
+        m_maxSlicesNumber = m_subTasks.size();
+        
         return firstTask;
     }
 
+    public synchronized float getAccomplishedPercentage() {
+        int nbTask = m_subTasks.size();
+        return 100.0f-100.0f*(((float)nbTask)/m_maxSlicesNumber);
+    }
+    
     /**
      * Get The next SubTask to be done
      *

@@ -124,9 +124,9 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
             entityManagerUDS.getTransaction().rollback();
+        } finally {
+            entityManagerUDS.close();
         }
-
-        entityManagerUDS.close();
 
         // initialize the MSI DB in batch //JPM.TODO ??? remove
         //DatabaseConnectionTask msiConnection = new DatabaseConnectionTask(null, projectId);

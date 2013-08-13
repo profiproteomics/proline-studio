@@ -7,6 +7,7 @@ import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
@@ -76,18 +77,29 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
            
             spectrumQuery.setParameter("MsQueryId", msQuery.getId());
 
-            Spectrum s = spectrumQuery.getSingleResult();
+            /*Spectrum s = spectrumQuery.getSingleResult();
             msQuery.setSpectrum(s);
+            msQuery.setTransientIsSpectrumSet(true);*/
+  
+            List<Spectrum> spectrums = spectrumQuery.getResultList();
+            if (spectrums.isEmpty()) {
+                msQuery.setSpectrum(null);
+            } else {
+                msQuery.setSpectrum(spectrums.get(0));
+            }
             msQuery.setTransientIsSpectrumSet(true);
-            
+
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
+            entityManagerMSI.getTransaction().rollback();
             return false;
         } finally {
+
             entityManagerMSI.close();
+
         }
 
  

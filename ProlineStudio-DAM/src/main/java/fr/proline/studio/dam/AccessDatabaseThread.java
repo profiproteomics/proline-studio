@@ -150,6 +150,7 @@ public class AccessDatabaseThread extends Thread {
             // check if subtasks need to be done
             if (task.hasSubTasksToBeDone()) {
                 // put back action in the queue for subtasks
+                task.updatePercentage();
                 m_actions.add(task);
 
             } else {

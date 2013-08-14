@@ -154,7 +154,9 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
             }
 
         }
-        if (!accessionToProteinMap.isEmpty()) {
+        
+        // No longer look in the PDI : takes too much time, there can not be an Index on accession
+        /*if (!accessionToProteinMap.isEmpty()) {
             
             Set<String> accessionSet = accessionToProteinMap.keySet();
             List<String> accessionList = new ArrayList<>(accessionSet.size());
@@ -182,7 +184,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
             } finally {
                 entityManagerPDI.close();
             }
-        }
+        }*/ 
 
 
         ProteinMatch[] sameSetArray = sameSet.toArray(new ProteinMatch[sameSet.size()]);

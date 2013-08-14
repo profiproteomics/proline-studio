@@ -84,11 +84,11 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
                     lazyData.setData(new Float(bioSequenceMSI.getMass()));
                     return lazyData;
                 }
-                fr.proline.core.orm.pdi.BioSequence bioSequencePDI = proteinMatch.getTransientData().getBioSequencePDI();
+                /*fr.proline.core.orm.pdi.BioSequence bioSequencePDI = proteinMatch.getTransientData().getBioSequencePDI();
                 if (bioSequencePDI != null) {
                     lazyData.setData(new Float(bioSequencePDI.getMass()));
                     return lazyData;
-                }
+                }*/
                 
                 boolean noBioSequenceFound = proteinMatch.getTransientData().getNoBioSequenceFound();
                 if (noBioSequenceFound) {

@@ -108,7 +108,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
 
     public void setData(ProteinMatch pm, PeptideInstance selectedPeptide, PeptideInstance[] peptideInstances) {
         
-        if ((pm == null) || ((pm.getTransientData().getBioSequenceMSI() == null) && (pm.getTransientData().getBioSequencePDI() == null))) {
+        if ((pm == null) || ((pm.getTransientData().getBioSequenceMSI() == null) /*&& (pm.getTransientData().getBioSequencePDI() == null)*/ )) {
             editorPane.setText("Protein Sequence not avaible in database");
 
             return;
@@ -119,9 +119,9 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         fr.proline.core.orm.msi.BioSequence bioSequenceMSI = pm.getTransientData().getBioSequenceMSI();
         if (pm.getTransientData().getBioSequenceMSI() != null) {
             sequence = pm.getTransientData().getBioSequenceMSI().getSequence();
-        } else if (pm.getTransientData().getBioSequencePDI() != null) {
+        } /* else if (pm.getTransientData().getBioSequencePDI() != null) {
             sequence = pm.getTransientData().getBioSequencePDI().getSequence();
-        } 
+        } */
         
         
         int sequenceLength = sequence.length();

@@ -41,7 +41,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
     
     private static int UDS_CONNECTION = 0;
     private static int MSI_CONNECTION = 1;
-    private static int PDI_CONNECTION = 3;
+    //private static int PDI_CONNECTION = 3;
     private static int UDS_USER_TEST  = 4;
           
     
@@ -91,13 +91,13 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * Connection to PDI
      * @param projectId 
      */
-    public void initConnectionToPDI() {
+    /*public void initConnectionToPDI() {
         setTaskInfo(new TaskInfo("Connection to PDI Database", TASK_LIST_INFO));
         setPriority(Priority.TOP);
 
         
         action = PDI_CONNECTION;
-    }
+    }*/
     
     /**
      * to check if the project user is known in the database
@@ -232,7 +232,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     m_taskError = new TaskError(e);
                     return false;
                 }
-            } else if (action == PDI_CONNECTION) {
+            } /*else if (action == PDI_CONNECTION) {
                 try {
                     // MSI Connection
                     EntityManager entityManagerPDI = DataStoreConnectorFactory.getInstance().getPdiDbConnector().getEntityManagerFactory().createEntityManager();
@@ -243,7 +243,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     m_taskError = new TaskError(e);
                     return false;
                 }
-            }
+            }*/
         
         return true;
     }

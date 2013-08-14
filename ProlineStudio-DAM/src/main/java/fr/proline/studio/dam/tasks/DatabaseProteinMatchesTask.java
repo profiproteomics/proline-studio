@@ -305,6 +305,8 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
 
         }
 
+        // No longer look in the PDI : takes too much time, there can not be an Index on accession
+        /*
         if (!accessionToProteinMap.isEmpty()) {
 
             Set<String> accessionSet = accessionToProteinMap.keySet();
@@ -331,10 +333,15 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
                 }
 
                 entityManagerPDI.getTransaction().commit();
+            } catch  (RuntimeException e) {
+                m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
+                entityManagerPDI.getTransaction().rollback();
+                return;
             } finally {
                 entityManagerPDI.close();
             }
-        }
+        }*/
 
 
     }

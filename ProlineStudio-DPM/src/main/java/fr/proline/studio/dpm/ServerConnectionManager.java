@@ -208,7 +208,7 @@ public class ServerConnectionManager {
                     setConnectionState(CONNECTION_DONE);
                     
                     // ask connection to PDI
-                    connectionToPdiDB();
+                    //connectionToPdiDB();
                 } else {
                     
                     m_previousErrorId = getErrorId();
@@ -241,7 +241,7 @@ public class ServerConnectionManager {
    }
    
    
-   private void connectionToPdiDB() {
+  /* private void connectionToPdiDB() {
         
        // ask for the connection
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -261,7 +261,7 @@ public class ServerConnectionManager {
         DatabaseConnectionTask connectionTask = new DatabaseConnectionTask(callback);
         connectionTask.initConnectionToPDI();
         AccessDatabaseThread.getAccessDatabaseThread().addTask(connectionTask); 
-   }
+   }*/
    
    public String getServerURL() {
        return m_serverURL;

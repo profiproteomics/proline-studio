@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.BioSequence;
 import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.studio.utils.DataFormat;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -88,10 +87,10 @@ public class ProteinTableModel extends AbstractTableModel {
                 if (bioSequenceMSI != null) {
                     return new Float(bioSequenceMSI.getMass());
                 }
-                fr.proline.core.orm.pdi.BioSequence bioSequencePDI = proteinMatch.getTransientData().getBioSequencePDI();
+                /*fr.proline.core.orm.pdi.BioSequence bioSequencePDI = proteinMatch.getTransientData().getBioSequencePDI();
                 if (bioSequencePDI != null) {
                     return new Float(bioSequencePDI.getMass());
-                }
+                }*/
                 return null;
         }
         return null; // should never happen

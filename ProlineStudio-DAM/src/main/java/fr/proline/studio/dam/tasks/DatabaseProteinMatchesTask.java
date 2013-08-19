@@ -17,7 +17,7 @@ import javax.persistence.TypedQuery;
 public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
     
     // used to slice the task in sub tasks
-    private static final int SLICE_SIZE = 100;
+    private static final int SLICE_SIZE = 1000;
     
         // different possible subtasks
     public static final int SUB_TASK_BIOSEQUENCE = 0;

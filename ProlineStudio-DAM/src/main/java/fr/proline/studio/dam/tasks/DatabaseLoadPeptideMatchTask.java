@@ -4,6 +4,8 @@ import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+/*import java.sql.Connection;
+import java.sql.PreparedStatement; JDBC TEST*/
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,7 +22,7 @@ import javax.persistence.TypedQuery;
 public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     
     // used to slice the task in sub tasks
-    private static final int SLICE_SIZE = 100;
+    private static final int SLICE_SIZE = 1000;
     // different possible subtasks
     public static final int SUB_TASK_PEPTIDE_MATCH = 0;
     public static final int SUB_TASK_PEPTIDE = 1;
@@ -53,7 +55,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         m_action = LOAD_ALL_RSET;
     }
     public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset, ProteinMatch proteinMatch) {
-        super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Peptide Matches for Search Result " + rset.getId(), TASK_LIST_INFO));
+        super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Peptide Matches for Protein Match " + proteinMatch.getAccession() , TASK_LIST_INFO));
         m_projectId = projectId;
         m_rset = rset;
         m_proteinMatch = proteinMatch;
@@ -120,7 +122,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
 
     
     public boolean fetchAllRsetMainTask() {
-        
+
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
         try {
 
@@ -221,13 +223,15 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRUM, m_peptideMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
-            fetchSpectrum(entityManagerMSI, subTask);           
+            fetchSpectrum(entityManagerMSI, subTask/*, DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getDataSource().getConnection()*/);           
             
 
             entityManagerMSI.getTransaction().commit();
+            
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
+            entityManagerMSI.getTransaction().rollback();
             return false;
         } finally {
             entityManagerMSI.close();
@@ -315,13 +319,14 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRUM, peptideMatches.size(), SLICE_SIZE);
 
             // execute the first slice now
-            fetchSpectrum(entityManagerMSI, subTask);
+            fetchSpectrum(entityManagerMSI, subTask /*, DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getDataSource().getConnection()*/);
 
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
+            entityManagerMSI.getTransaction().rollback();
             return false;
         } finally {
             entityManagerMSI.close();
@@ -410,7 +415,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRUM, peptideMatches.size(), SLICE_SIZE);
 
             // execute the first slice now
-            fetchSpectrum(entityManagerMSI, subTask);           
+            fetchSpectrum(entityManagerMSI, subTask /*, DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getDataSource().getConnection()*/);     
             
 
             /**
@@ -428,6 +433,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
+            entityManagerMSI.getTransaction().rollback();
             return false;
         } finally {
             entityManagerMSI.close();
@@ -447,8 +453,8 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
      * @return
      */
     private boolean fetchDataSubTask() {
-        SubTask slice = m_subTaskManager.getNextSubTask();
-        if (slice == null) {
+        SubTask subTask = m_subTaskManager.getNextSubTask();
+        if (subTask == null) {
             return true; // nothing to do : should not happen
         }
 
@@ -457,21 +463,21 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
 
             entityManagerMSI.getTransaction().begin();
 
-            switch (slice.getSubTaskId()) {
+            switch (subTask.getSubTaskId()) {
                 case SUB_TASK_PEPTIDE_MATCH:
-                    fetchPeptideMatch(entityManagerMSI, slice);
+                    fetchPeptideMatch(entityManagerMSI, subTask);
                     break;
                 case SUB_TASK_PEPTIDE:
-                    fetchPeptide(entityManagerMSI, slice);
+                    fetchPeptide(entityManagerMSI, subTask);
                     break;
                 case SUB_TASK_MSQUERY:
-                    fetchMsQuery(entityManagerMSI, slice);
+                    fetchMsQuery(entityManagerMSI, subTask);
                     break;
                 case SUB_TASK_SPECTRUM:
-                    fetchSpectrum(entityManagerMSI, slice);
+                   fetchSpectrum(entityManagerMSI, subTask /*, DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getDataSource().getConnection()*/);
                     break;
                 case SUB_TASK_PROTEINSET_NAME_LIST:
-                    fetchProteinSetName(entityManagerMSI, slice);
+                    fetchProteinSetName(entityManagerMSI, subTask);
                     break;
             }
 
@@ -480,6 +486,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
+            entityManagerMSI.getTransaction().rollback();
             return false;
         } finally {
             entityManagerMSI.close();
@@ -563,7 +570,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     private void fetchMsQuery(EntityManager entityManagerMSI, SubTask subTask) {
 
 
-        List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
+       List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
 
         Query msQueryQuery = entityManagerMSI.createQuery("SELECT pm.id, msq FROM PeptideMatch pm,MsQuery msq WHERE pm.id IN (:listId) AND pm.msQuery=msq");
         msQueryQuery.setParameter("listId", sliceOfPeptideMatchIds);
@@ -579,32 +586,48 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             peptideMatch.getTransientData().setIsMsQuerySet(true);
             peptideMatch.setMsQuery(q);
         }
+        
+        /*List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
+
+        Query msQueryQuery = entityManagerMSI.createQuery("SELECT pm.id, msq.id, msq.initialId FROM PeptideMatch pm,MsQuery msq WHERE pm.id IN (:listId) AND pm.msQuery=msq");
+        msQueryQuery.setParameter("listId", sliceOfPeptideMatchIds);
+
+
+        List<Object[]> msQueries = msQueryQuery.getResultList();
+        Iterator<Object[]> it = msQueries.iterator();
+        while (it.hasNext()) {
+            Object[] resCur = it.next();
+            Long peptideMatchId = (Long) resCur[0];
+            
+            Long msQueryId = (Long) resCur[1];
+            Integer msQueryInitialId = (Integer) resCur[2];
+            MsQuery q = new MsQuery();
+            q.setId(msQueryId);
+            q.setInitialId(msQueryInitialId);
+            PeptideMatch peptideMatch = m_peptideMatchMap.get(peptideMatchId);
+            peptideMatch.getTransientData().setIsMsQuerySet(true);
+            peptideMatch.setMsQuery(q);
+        }*/
+        
+
+		
+        
     }
     
-    private void fetchSpectrum(EntityManager entityManagerMSI, SubTask subTask) {
+    private void fetchSpectrum(EntityManager entityManagerMSI, SubTask subTask /*, Connection connection SQL TEST*/) throws Exception {
+        
+        try {
         
         List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
 
-        //JPM.REMOVE
-        /*
-         * TEST FOR MEMORY USAGE
-         * 
-         * Iterator<Long> it = ((List<Long>) sliceOfPeptideMatchIds).iterator();
-        while (it.hasNext()) {
-            Long peptideMatchId = it.next();
-            PeptideMatch peptideMatch = m_peptideMatchMap.get(peptideMatchId);
-            MsQuery q = peptideMatch.getMsQuery();
-            q.setTransientIsSpectrumSet(true);
-            q.setSpectrum(null);
-        }*/
-        
         
         //JPM.PUTBACK
         
         Query msQueryQuery = entityManagerMSI.createQuery("SELECT pm.id, s FROM PeptideMatch pm,MsQuery msq, Spectrum s WHERE pm.id IN (:listId) AND pm.msQuery=msq AND msq.spectrum.id=s.id");
+        
+
         msQueryQuery.setParameter("listId", sliceOfPeptideMatchIds);
 
-        int i = subTask.getStartIndex();
         List<Object[]> msQueries = msQueryQuery.getResultList();
         Iterator<Object[]> it = msQueries.iterator();
         while (it.hasNext()) {
@@ -616,6 +639,140 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             q.setTransientIsSpectrumSet(true);
             q.setSpectrum(spectrum);
         }
+        
+        /*
+        Query msQueryQuery = entityManagerMSI.createQuery("SELECT pm.id, s.id, s.firstCycle, s.firstScan, s.firstTime, s.instrumentConfigId, s.intensityList, s.isSummed, s.lastCycle, s.lastScan, s.lastTime, s.mozList, s.peakCount, s.peaklistId, s.precursorCharge, s.precursorIntensity, s.precursorMoz, s.serializedProperties, s.title FROM PeptideMatch pm,MsQuery msq, Spectrum s WHERE pm.id IN (:listId) AND pm.msQuery=msq AND msq.spectrum.id=s.id");
+        msQueryQuery.setParameter("listId", sliceOfPeptideMatchIds);
+
+
+        List<Object[]> msQueries = msQueryQuery.getResultList();
+        Iterator<Object[]> it = msQueries.iterator();
+        while (it.hasNext()) {
+            Object[] resCur = it.next();
+            
+            Long peptideMatchId = (Long) resCur[0];
+            Long spectrumId = (Long) resCur[1];
+            Integer firstCycle = (Integer) resCur[2];
+            Integer firstScan = (Integer) resCur[3];
+            Float firstTime = (Float) resCur[4];
+            Long instrumentConfigId = (Long) resCur[5];
+            byte[] intensityList = (byte[]) resCur[6];
+            Boolean isSummed = (Boolean) resCur[7];
+            Integer lastCycle = (Integer) resCur[8];
+            Integer lastScan = (Integer) resCur[9];
+            Float lastTime = (Float) resCur[10];
+            byte[] mozList = (byte[]) resCur[11];
+            Integer peakCount = (Integer) resCur[12];
+            Long peaklistId = (Long) resCur[13];
+            Integer precursorCharge = (Integer) resCur[14];
+            Float precursorIntensity = (Float) resCur[15];
+            Double precursorMoz = (Double) resCur[16];
+            String serializedProperties = (String) resCur[17];
+            String title = (String) resCur[18];
+
+            Spectrum spectrum = new Spectrum();
+            spectrum.setId(spectrumId);
+            spectrum.setFirstCycle(firstCycle);
+            spectrum.setFirstScan(firstScan);
+            spectrum.setFirstTime(firstTime);
+            spectrum. setInstrumentConfigId(instrumentConfigId);
+            spectrum.setIntensityList(intensityList);
+            spectrum.setIsSummed(isSummed);
+            spectrum.setLastCycle(lastCycle);
+            spectrum.setLastScan(lastScan);
+            spectrum.setLastTime(lastTime);
+            spectrum.setMozList(mozList);
+            spectrum.setPeakCount(peakCount);
+            spectrum.setPeaklistId(peaklistId);
+            spectrum.setPrecursorCharge(precursorCharge);
+            spectrum.setPrecursorIntensity(precursorIntensity);
+            spectrum.setPrecursorMoz(precursorMoz);
+            spectrum.setSerializedProperties(serializedProperties);
+            spectrum.setTitle(title);
+            
+            
+            PeptideMatch peptideMatch = m_peptideMatchMap.get(peptideMatchId);
+            MsQuery q = peptideMatch.getMsQuery();
+            q.setTransientIsSpectrumSet(true);
+            q.setSpectrum(spectrum);
+        }*/
+        
+        /*int nb = sliceOfPeptideMatchIds.size();
+        //String selectSQL = "SELECT pm.id, s.id, s.first_cycle, s.first_scan, s.first_time, s.instrument_config_id, s.intensity_list, s.is_summed, s.last_cycle, s.last_scan, s.last_time, s.moz_list, s.peak_count, s.peaklist_id, s.precursor_charge, s.precursor_intensity, s.precursor_moz, s.serialized_properties, s.title FROM peptide_match pm,ms_query msq, spectrum s WHERE pm.ms_query_id=msq.id AND msq.spectrum_id=s.id AND pm.id IN (";
+        
+        String selectSQL = "SELECT pm.id, s.id, s.precursor_intensity FROM peptide_match pm,ms_query msq, spectrum s WHERE pm.ms_query_id=msq.id AND msq.spectrum_id=s.id AND pm.id IN (";
+        int capacity = selectSQL.length()+2*nb;
+        StringBuilder sb = new StringBuilder(capacity);
+        sb.append(selectSQL);
+        for (int i=0;i<nb;i++) {
+            if (i<nb-1) {
+                sb.append("?,");
+            } else {
+                sb.append("?)");
+            }
+        }
+        
+        PreparedStatement preparedStatement = connection.prepareStatement(sb.toString());
+        for (int i=0;i<nb;i++) {
+            preparedStatement.setLong(i+1, (Long) sliceOfPeptideMatchIds.get(i));
+        }
+        
+        java.sql.ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                Long peptideMatchId = rs.getLong(1);
+                Long spectrumId = rs.getLong(2);
+                /*Integer firstCycle = rs.getInt(3);
+                Integer firstScan = rs.getInt(4);
+                Float firstTime = rs.getFloat(5);
+                Long instrumentConfigId = rs.getLong(6);
+                byte[] intensityList = rs.getBytes(7);
+                Boolean isSummed = rs.getBoolean(8);
+                Integer lastCycle = rs.getInt(9);
+                Integer lastScan = rs.getInt(10);
+                Float lastTime = rs.getFloat(11);
+                byte[] mozList = rs.getBytes(12);
+                Integer peakCount = rs.getInt(13);
+                Long peaklistId = rs.getLong(14);
+                Integer precursorCharge = rs.getInt(15);*/
+                /*Float precursorIntensity = rs.getFloat(3);
+                /*Double precursorMoz = rs.getDouble(17);
+                String serializedProperties = rs.getString(18);
+                String title = rs.getString(19);*/
+                
+                
+                /*Spectrum spectrum = new Spectrum();
+                spectrum.setId(spectrumId);
+                /*spectrum.setFirstCycle(firstCycle);
+                spectrum.setFirstScan(firstScan);
+                spectrum.setFirstTime(firstTime);
+                spectrum.setInstrumentConfigId(instrumentConfigId);
+                spectrum.setIntensityList(intensityList);
+                spectrum.setIsSummed(isSummed);
+                spectrum.setLastCycle(lastCycle);
+                spectrum.setLastScan(lastScan);
+                spectrum.setLastTime(lastTime);
+                spectrum.setMozList(mozList);
+                spectrum.setPeakCount(peakCount);
+                spectrum.setPeaklistId(peaklistId);
+                spectrum.setPrecursorCharge(precursorCharge);*/
+                /*spectrum.setPrecursorIntensity(precursorIntensity);
+                /*spectrum.setPrecursorMoz(precursorMoz);
+                spectrum.setSerializedProperties(serializedProperties);
+                spectrum.setTitle(title);*/
+
+/*
+                PeptideMatch peptideMatch = m_peptideMatchMap.get(peptideMatchId);
+                MsQuery q = peptideMatch.getMsQuery();
+                q.setTransientIsSpectrumSet(true);
+                q.setSpectrum(spectrum);
+            }*/
+         
+        
+ 
+        } finally {
+            //connection.close();
+        }
+        
     }
     
  

@@ -168,13 +168,9 @@ public class PeptideTableModel extends AbstractTableModel {
                 if (peptideMatch != null) {
                     MsQuery msQuery = peptideMatch.getMsQuery();
                     if (msQuery != null) {
-                        Spectrum spectrum = msQuery.getSpectrum();
-                        if (spectrum != null) {
-                            Float precursorIntensity = spectrum.getPrecursorIntensity();
-                            if (precursorIntensity != null) {
-                                return precursorIntensity;
-                            }
-                        }
+                        Float precursorIntensity = msQuery.getTransientPrecursorIntensity();
+                        return precursorIntensity;
+
                     }
                 }
                 return null;

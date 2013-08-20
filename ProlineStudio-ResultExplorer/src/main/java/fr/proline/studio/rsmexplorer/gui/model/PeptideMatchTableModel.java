@@ -108,7 +108,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
              * case COLTYPE_PEPTIDE_RETENTION_TIME:
              */
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
-                return DatabaseLoadPeptideMatchTask.SUB_TASK_SPECTRUM;
+                return DatabaseLoadPeptideMatchTask.SUB_TASK_MSQUERY;
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
                 return DatabaseLoadPeptideMatchTask.SUB_TASK_PROTEINSET_NAME_LIST;
 
@@ -242,22 +242,11 @@ public class PeptideMatchTableModel extends LazyTableModel {
                     
                 } else {
                     MsQuery msQuery = peptideMatch.getMsQuery();
-                    
-                    if (!msQuery.getTransientIsSpectrumSet()) {
-                        givePriorityTo(m_taskId, row, col);
-                        lazyData.setData(null);
+                    Float precursorIntenstity = msQuery.getTransientPrecursorIntensity();
+                    if (precursorIntenstity == null) {
+                        lazyData.setData("");
                     } else {
-                        Spectrum spectrum = msQuery.getTransientIsSpectrumSet() ? msQuery.getSpectrum() : null;
-                        if (spectrum == null) {
-                            lazyData.setData("");
-                        } else {
-                            Float precursorIntensity = spectrum.getPrecursorIntensity();
-                            if (precursorIntensity != null) {
-                                lazyData.setData(precursorIntensity);
-                            } else {
-                                lazyData.setData("");
-                            }
-                        }
+                        lazyData.setData(precursorIntenstity);
                     }  
                 }
                 return lazyData;

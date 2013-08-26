@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import fr.proline.studio.dam.taskinfo.AbstractLongTask;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 
 /**
  * Superclass for all Task which wants to access to a web-core service and looks for
@@ -90,6 +92,17 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
         JsonHttpContent content = new JsonHttpContent(new JacksonFactory(), rpcRequest.getParameters());
         HttpRequest httpRequest = factory.buildPostRequest(new GenericUrl(serverURL + serviceURL), content);
 
+        if (m_taskInfo.getRequestURL() == null) {
+            m_taskInfo.setRequestURL(httpRequest.getUrl().toString());
+        }
+        
+        if (m_taskInfo.getRequestContent() == null) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            content.writeTo(baos);
+            m_taskInfo.setRequestContent(baos.toString(Charset.defaultCharset().name()));
+            baos.close();            
+        }
+        
         httpRequest.setConnectTimeout(0);
         httpRequest.setReadTimeout(0);
         

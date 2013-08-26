@@ -507,9 +507,9 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
 
         // Load Peptide Matches
-        Query peptideMatchQuery = entityManagerMSI.createQuery("SELECT pm FROM PeptideMatch pm WHERE pm.id IN (:listId) ");
+        TypedQuery peptideMatchQuery = entityManagerMSI.createQuery("SELECT pm FROM PeptideMatch pm WHERE pm.id IN (:listId)",PeptideMatch.class);
         peptideMatchQuery.setParameter("listId", sliceOfPeptideMatchIds);
-        List<Object[]> resultList = peptideMatchQuery.getResultList();
+        List<PeptideMatch> resultList = peptideMatchQuery.getResultList();
         
         
         if (m_peptideMatchMap == null) {
@@ -520,10 +520,9 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         
         
         int i = subTask.getStartIndex();
-        Iterator<Object[]> it = resultList.iterator();
+        Iterator<PeptideMatch> it = resultList.iterator();
         while (it.hasNext()) {
-            Object[] res = it.next();
-            PeptideMatch peptideMatch = (PeptideMatch) res[0];
+            PeptideMatch peptideMatch = it.next();
             peptideMatches[i] = peptideMatch;
             m_peptideMatchMap.put(peptideMatch.getId(), peptideMatch);
             i++;

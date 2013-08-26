@@ -9,11 +9,15 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.*;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 
 /**
  * Panel to display information about a specific task
@@ -30,6 +34,10 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
     private JTextField m_endTimeTextfield;
     private JTextField m_deltaEndTimeTextfield;
     private JTextArea m_errorTextArea;
+    private JButton m_requestButton; 
+    
+    private String m_requestContent;
+    private String m_requestURL;
     
     public TaskDescriptionPanel() {
         initComponents();
@@ -56,6 +64,15 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         
         JPanel errorPanel = createErrorPanel();
         
+        m_requestButton = new JButton("...");
+        m_requestButton.setMargin(new Insets(0, 5, 0, 5));
+        m_requestButton.setAction(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showRequestDetailsDialog();
+            }
+        });
+        m_requestButton.setEnabled(false);
         
         // --- add objects
         c.gridx = 0;
@@ -66,15 +83,67 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         c.gridx++;
         add(m_taskTextfield, c);
 
+        c.weightx = 0;
+        c.gridx++;
+        add(m_requestButton, c);
+        
+        c.weightx = 1;
         c.gridx = 0 ;
         c.gridy++;
-        c.gridwidth = 2;
+        c.gridwidth = 3;
         add(timePanel, c);
         
         c.gridy++;
         c.weighty = 1;
         add(errorPanel, c);
 
+    }
+    
+    public void showRequestDetailsDialog() {
+        
+        JPanel requestPanel = new JPanel(new GridBagLayout());
+      
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        JTextField requestURLTextfield = new JTextField();
+        requestURLTextfield.setText(m_requestURL);
+        
+        JTextArea requestContentTextarea = new JTextArea();
+        requestContentTextarea.setText(m_requestContent);
+        requestContentTextarea.setEditable(false);
+        requestContentTextarea.setLineWrap(true);
+
+        // --- add objects
+        c.gridx = 0;
+        c.gridy = 0;
+        requestPanel.add(new JLabel("URL:"), c);
+        c.gridx++;
+        c.weightx = 1;
+        requestPanel.add(requestURLTextfield, c);
+        
+        c.gridx = 0;
+        c.gridy++;
+        c.weightx = 0;
+        requestPanel.add(new JLabel("Content:"), c);
+        c.gridx++;
+        c.weightx = 1;
+        c.weighty = 1;
+        requestPanel.add(new JScrollPane(requestContentTextarea), c);
+  
+         NotifyDescriptor nd = new NotifyDescriptor(
+                requestPanel, // instance of your panel
+                "Request details", // title of the dialog
+                NotifyDescriptor.PLAIN_MESSAGE, // it is Yes/No dialog ...
+                NotifyDescriptor.PLAIN_MESSAGE, // ... of a question type => a question mark icon
+                null,
+                null
+        );
+         
+         DialogDisplayer.getDefault().notify(nd);
+         
     }
     
     public JPanel createTimePanel() {
@@ -211,7 +280,11 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         
         m_endTimeTextfield.setText(formatTime(taskInfo.getEndTimestamp()));
         m_deltaEndTimeTextfield.setText(formatDeltaTime(taskInfo.getDuration()));
-         
+        
+        m_requestContent = taskInfo.getRequestContent();
+        m_requestURL = taskInfo.getRequestURL();
+        
+        m_requestButton.setEnabled((m_requestURL != null) && (!m_requestURL.isEmpty()));
 
     }
     
@@ -223,6 +296,9 @@ public class TaskDescriptionPanel extends HourglassPanel implements DataBoxPanel
         m_deltaStartTimeTextfield.setText("");
         m_endTimeTextfield.setText("");
         m_deltaEndTimeTextfield.setText("");
+        m_requestContent = null;
+        m_requestURL = null;
+        m_requestButton.setEnabled(false);
     }
     
     

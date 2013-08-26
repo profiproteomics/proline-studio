@@ -8,7 +8,9 @@ import fr.proline.studio.dam.data.ParentData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.gui.DatasetAction;
 import fr.proline.studio.rsmexplorer.actions.*;
+import fr.proline.studio.utils.ActionRegistry;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -115,7 +117,6 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     public RSMTree copyDataSetRootSubTree(Dataset dset, long projectId) {
 
         long dsetId = dset.getId();
-
         RSMDataSetNode dsetNode = findDataSetNode((RSMNode) m_model.getRoot(), dsetId, projectId);
 
         if (dsetNode == null) {
@@ -138,7 +139,6 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             if (childType == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode dataSetNode = ((RSMDataSetNode) childNode);
                 Long datasetId = dataSetNode.getDataset().getId();
-
                 if ((datasetId != null) && (datasetId.longValue() == dsetId)) {
                     return dataSetNode;
                 }
@@ -736,7 +736,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                     }
                 }
             }
-            
+ 
             popup = allImportedPopup;
             actions = allImportedActions;
             
@@ -794,7 +794,13 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                         mainPopup.add(action.getPopupPresenter());
                     }
                 }
-
+                //mainPopup.add(new DoItAction());
+                List<Action> additionalActions = ActionRegistry.getInstance().getActions(Dataset.class);
+                if(additionalActions != null) {
+                    for (Action action : additionalActions)
+                        mainPopup.add(new DatasetWrapperAction(((DatasetAction)action)));
+                }                
+                
             }
             
             popup = mainPopup;

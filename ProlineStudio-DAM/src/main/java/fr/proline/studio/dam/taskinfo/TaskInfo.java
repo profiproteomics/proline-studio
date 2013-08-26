@@ -14,6 +14,8 @@ public class TaskInfo implements Comparable<TaskInfo> {
 
     private String m_taskDescription = null;
     private String m_idList = null;
+    private String m_requestContent = null;
+    private String m_requestURL = null;
     
     private int m_state;
     private int m_updateState = -1;
@@ -49,17 +51,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
     }
 
     public TaskInfo(TaskInfo src) {
-        m_taskDescription = src.m_taskDescription;
-        m_idList = src.m_idList;
-        m_state = src.m_state;
-        m_id = src.m_id;
-        m_success = src.m_success;
-        m_taskError = src.m_taskError;
-        m_askTimestamp = src.m_askTimestamp;
-        m_startTimestamp = src.m_startTimestamp;
-        m_endTimestamp = src.m_endTimestamp;
-        m_duration = src.m_duration;
-        m_percentage = src.m_percentage;
+        copy(src, this);
     }
     
     public void setRunning(boolean saveTimestamp) {
@@ -84,6 +76,14 @@ public class TaskInfo implements Comparable<TaskInfo> {
     
     public float getPercentage() {
         return m_percentage;
+    }
+
+    public void setRequestContent(String m_requestContent) {
+        this.m_requestContent = m_requestContent;
+    }
+
+    public void setRequestURL(String m_requestURL) {
+        this.m_requestURL = m_requestURL;
     }
     
     public void setAborted() {
@@ -171,6 +171,14 @@ public class TaskInfo implements Comparable<TaskInfo> {
     public String getTaskDescription() {
         return m_taskDescription;
     }
+
+    public String getRequestContent() {
+        return m_requestContent;
+    }
+
+    public String getRequestURL() {
+        return m_requestURL;
+    }
     
     public long getAskTimestamp() {
         return m_askTimestamp;
@@ -224,17 +232,23 @@ public class TaskInfo implements Comparable<TaskInfo> {
     }
     
     public void copyData(TaskInfo dest) {
-        dest.m_taskDescription = m_taskDescription;
-        dest.m_idList = m_idList;
-        dest.m_state = m_state;
-        dest.m_id = m_id;
-        dest.m_success = m_success;
-        dest.m_taskError = m_taskError;
-        dest.m_askTimestamp = m_askTimestamp;
-        dest.m_startTimestamp = m_startTimestamp;
-        dest.m_endTimestamp = m_endTimestamp;
-        dest.m_duration = m_duration;
-        dest.m_percentage = m_percentage;
+        copy(this, dest);
+    }
+    
+    public static void copy(TaskInfo from, TaskInfo to) {
+        to.m_taskDescription = from.m_taskDescription;
+        to.m_idList = from.m_idList;
+        to.m_state = from.m_state;
+        to.m_id = from.m_id;
+        to.m_success = from.m_success;
+        to.m_taskError = from.m_taskError;
+        to.m_askTimestamp = from.m_askTimestamp;
+        to.m_startTimestamp = from.m_startTimestamp;
+        to.m_endTimestamp = from.m_endTimestamp;
+        to.m_duration = from.m_duration;
+        to.m_percentage = from.m_percentage;
+        to.m_requestContent = from.m_requestContent;
+        to.m_requestURL = from.m_requestURL;        
     }
     
     @Override

@@ -25,7 +25,6 @@ public class ComputeSCTask extends AbstractServiceTask {
     List<Long> m_resultSummaryIds = null;
     
     String[] m_spCountJSONResult;
-    protected static final Logger m_logger =  LoggerFactory.getLogger("ProlineStudio.DPM.Task");
     
     public ComputeSCTask(AbstractServiceCallback callback, Dataset refDataset, List<Long> resultSummaryIds,  String[] spectralCountResultList) {
         super(callback, false /*asynchronous*/, new TaskInfo("Compute Spectral Count based on "+refDataset.getName(), TASK_LIST_INFO));
@@ -50,7 +49,7 @@ public class ComputeSCTask extends AbstractServiceTask {
             params.put("ref_result_summary_id", m_refDataset.getResultSummaryId() );
             params.put("compute_result_summary_ids", m_resultSummaryIds );                         
             request.setParameters(params);
-            m_logger.debug("Will postRequest with params  project_id "+m_refDataset.getProject().getId()+" ; ref_result_summary_id "+m_refDataset.getResultSummaryId()+" ; compute_result_summary_ids "+m_resultSummaryIds);
+            m_loggerProline.debug("Will postRequest with params  project_id "+m_refDataset.getProject().getId()+" ; ref_result_summary_id "+m_refDataset.getResultSummaryId()+" ; compute_result_summary_ids "+m_resultSummaryIds);
             HttpResponse response = postRequest("dps.msq/compute_relative_sc/"+request.getMethod()+getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
@@ -294,7 +293,7 @@ public static class WSCResultData {
      */
      
     private Map<String, SpectralCountsStruct> parseRsmSC(String rsmsSCResult){
-        m_logger.debug(" parseRsmSC :   "+rsmsSCResult);
+        m_loggerProline.debug(" parseRsmSC :   "+rsmsSCResult);
                 
         //"proteins_spectral_counts":[{"protein_accession"=MyProt,"bsc"=123.6,"ssc"=45.6,"wsc"=55.5}, {"protein_accession"=OtherProt,"bsc"=17.2,"ssc"=2.6,"wsc"=1.5} ]
         Map<String, SpectralCountsStruct> scByProtAcc = new HashMap<>();

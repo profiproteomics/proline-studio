@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.ProteinMatch;
+
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dpm.task.ComputeSCTask;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -175,7 +176,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
             super.valueChanged(e);
 
-            m_dataBox.propagateDataChanged(ProteinMatch.class);
+            m_dataBox.propagateDataChanged(DProteinMatch.class);
 
 
         }

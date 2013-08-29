@@ -1,8 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.PeptideMatch;
-import fr.proline.core.orm.msi.ProteinMatch;
+
 import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -120,7 +121,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         return "";
     }
     
-    public ProteinMatch getSelectedProteinMatch() {
+    public DProteinMatch getSelectedProteinMatch() {
 
 
         // Retrieve Selected Row
@@ -144,7 +145,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         return tableModel.getProteinMatch(selectedRow);
     }
     
-    public void setDataProteinMatchArray(ProteinMatch[] proteinMatchArray) {
+    public void setDataProteinMatchArray(DProteinMatch[] proteinMatchArray) {
         // Modify the Model
         ((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()).setData(proteinMatchArray);
 
@@ -161,7 +162,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         }
     }
 
-    public void setDataPeptideMatch(PeptideMatch peptideMatch) {
+    public void setDataPeptideMatch(DPeptideMatch peptideMatch) {
 
         if (peptideMatch == null) {
             clearData();
@@ -177,7 +178,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
 
 
-        ProteinMatch[] proteinMatchArray = peptideMatch.getTransientData().getProteinMatches();
+        DProteinMatch[] proteinMatchArray = peptideMatch.getProteinMatches();
 
 
 
@@ -399,7 +400,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                 return;
             }
             
-            m_dataBox.propagateDataChanged(ProteinMatch.class);
+            m_dataBox.propagateDataChanged(DProteinMatch.class);
 
         }
         

@@ -27,7 +27,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
         // Register possible out parameters
         // One or Multiple ProteinMatch
 //        GroupParameter outParameter = new GroupParameter();
-//        outParameter.addParameter(ProteinMatch.class, true);
+//        outParameter.addParameter(DProteinMatch.class, true);
 //        registerOutParameter(outParameter);
     }
     

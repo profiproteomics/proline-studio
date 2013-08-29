@@ -1,13 +1,14 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
+import java.util.Arrays;
 
 /**
  * Databox for all PSM of a ResultSet (Search Result)
@@ -33,7 +34,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
         // Register possible out parameters
         // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(PeptideMatch.class, true);
+        outParameter.addParameter(DPeptideMatch.class, true);
         registerOutParameter(outParameter);
 
        
@@ -67,8 +68,11 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
                 
                if (subTask == null) {
 
-                    PeptideMatch[] peptideMatchArray = _rset.getTransientData().getPeptideMatches();
-                    ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, finished);
+
+                    DPeptideMatch[] peptideMatchArray = _rset.getTransientData().getDPeptideMatches();
+                    long[] peptideMatchIdArray = _rset.getTransientData().getPeptideMatchIds();
+                    
+                    ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);
                } else {
                     ((PeptideMatchPanel)m_panel).dataUpdated(subTask, finished);
                }
@@ -95,7 +99,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
-            if (parameterType.equals(PeptideMatch.class)) {
+            if (parameterType.equals(DPeptideMatch.class)) {
                 return ((PeptideMatchPanel)m_panel).getSelectedPeptideMatch();
             }
             if (parameterType.equals(ResultSet.class)) {

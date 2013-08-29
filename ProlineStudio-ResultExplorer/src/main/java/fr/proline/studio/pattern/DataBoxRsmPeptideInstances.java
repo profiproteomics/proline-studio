@@ -2,9 +2,9 @@ package fr.proline.studio.pattern;
 
 
 
-import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
@@ -37,7 +37,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         // Register possible out parameters
         // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(PeptideMatch.class, true);
+        outParameter.addParameter(DPeptideMatch.class, true);
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
@@ -106,12 +106,12 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
             if (parameterType.equals(PeptideInstance.class)) {
                 return ((RsmPeptidesPanel)m_panel).getSelectedPeptideInstance();
             }
-            if (parameterType.equals(PeptideMatch.class)) {
+            if (parameterType.equals(DPeptideMatch.class)) {
                 PeptideInstance pi = ((RsmPeptidesPanel)m_panel).getSelectedPeptideInstance();
                 if (pi == null) {
                     return null;
                 }
-                return pi.getTransientData().getBestPeptideMatch();
+                return pi.getTransientData().getBestDPeptideMatch();
             }
             if (parameterType.equals(ResultSummary.class)) {
                 if (m_rsm != null) {

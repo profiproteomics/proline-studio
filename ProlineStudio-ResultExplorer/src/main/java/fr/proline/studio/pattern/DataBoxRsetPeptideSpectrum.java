@@ -2,7 +2,7 @@ package fr.proline.studio.pattern;
 
 
 import fr.proline.core.orm.msi.PeptideInstance;
-import fr.proline.core.orm.msi.PeptideMatch;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadSpectrumsTask;
@@ -23,7 +23,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
         // Register in parameters
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(PeptideMatch.class, false);
+        inParameter.addParameter(DPeptideMatch.class, false);
         registerInParameter(inParameter);
 
         inParameter = new GroupParameter();
@@ -44,15 +44,15 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final PeptideMatch peptideMatch = (PeptideMatch) m_previousDataBox.getData(false, PeptideMatch.class);
+        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
 
         if (peptideMatch == null) {
             ((RsetPeptideSpectrumPanel) m_panel).setData(null);
             return;
         }
 
-        boolean needToLoadData = ((!peptideMatch.getTransientData().getIsMsQuerySet())
-                || (!peptideMatch.getMsQuery().getTransientIsSpectrumSet()));
+        boolean needToLoadData = ((!peptideMatch.isMsQuerySet())
+                || (!peptideMatch.getMsQuery().isSpectrumSet()));
 
         if (needToLoadData) {
 

@@ -1,8 +1,9 @@
 package fr.proline.studio.pattern;
 
 
-import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.core.orm.msi.ProteinSet;
+
+import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsFromProteinSetTask;
@@ -28,13 +29,13 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
         // Register Possible in parameters
         // One ProteinSet
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ProteinSet.class, false);
+        inParameter.addParameter(DProteinSet.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One ProteinMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ProteinMatch.class, true);
+        outParameter.addParameter(DProteinMatch.class, true);
         registerOutParameter(outParameter);
 
        
@@ -50,7 +51,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     
     @Override
     public void dataChanged() {
-        final ProteinSet proteinSet = (ProteinSet) m_previousDataBox.getData(false, ProteinSet.class);
+        final DProteinSet proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
 
         if (proteinSet == null) {
             ((RsmProteinsOfProteinSetPanel)m_panel).setData(null, null);
@@ -103,7 +104,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     
     @Override
     public Object getData(boolean getArray, Class parameterType) {
-        if (parameterType!= null && (parameterType.equals(ProteinMatch.class))) {
+        if (parameterType!= null && (parameterType.equals(DProteinMatch.class))) {
             return ((RsmProteinsOfProteinSetPanel) m_panel).getSelectedProteinMatch();
         }
         return super.getData(getArray, parameterType);

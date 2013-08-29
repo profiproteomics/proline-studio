@@ -1,7 +1,8 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.PeptideMatch;
-import fr.proline.core.orm.msi.ProteinMatch;
+
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
@@ -25,13 +26,13 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
         // Register Possible in parameters
         // One PeptideMatch
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(PeptideMatch.class, false);
+        inParameter.addParameter(DPeptideMatch.class, false);
         registerInParameter(inParameter);
         
         // Register possible out parameters
         // One or Multiple ProteinMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ProteinMatch.class, true);
+        outParameter.addParameter(DProteinMatch.class, true);
         registerOutParameter(outParameter);
 
        
@@ -49,7 +50,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final PeptideMatch peptideMatch = (PeptideMatch) m_previousDataBox.getData(false, PeptideMatch.class);
+        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
 
         if (peptideMatch == null) {
             ((RsetProteinsPanel)m_panel).setDataPeptideMatch(null);
@@ -100,7 +101,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     
     @Override
     public Object getData(boolean getArray, Class parameterType) {
-        if (parameterType!= null && (parameterType.equals(ProteinMatch.class))) {
+        if (parameterType!= null && (parameterType.equals(DProteinMatch.class))) {
             return ((RsetProteinsPanel)m_panel).getSelectedProteinMatch();
         }
         return super.getData(getArray, parameterType);

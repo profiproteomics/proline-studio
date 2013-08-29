@@ -18,6 +18,7 @@ public class DataboxManager {
     
     private AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(),
                                                  new DataBoxRsetProteinsForPeptideMatch(),
+                                                 new DataboxRsetPeptidesOfProtein(),
                                                  new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(),
                                                  new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet(), new DataBoxTaskDescription() };
     

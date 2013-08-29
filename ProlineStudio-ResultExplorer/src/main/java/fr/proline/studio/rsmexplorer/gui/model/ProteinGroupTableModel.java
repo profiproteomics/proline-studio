@@ -1,9 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.orm.msi.PeptideSet;
-import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.core.orm.msi.ProteinSet;
-import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.utils.*;
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
     public static final int COLTYPE_SPECTRAL_COUNT = 4;
     public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 5;
     private static final String[] m_columnNames = {"Protein Set", "Score", "Proteins", "Peptides", "Peptide Match Count", "Specific Peptide Match Count"};
-    private ProteinSet[] m_proteinSets = null;
+    private DProteinSet[] m_proteinSets = null;
     
 
     
@@ -82,8 +80,8 @@ public class ProteinGroupTableModel extends LazyTableModel {
     @Override
     public Object getValueAt(int row, int col) {
         // Retrieve Protein Set
-        ProteinSet proteinSet = m_proteinSets[row];
-        long rsmId = proteinSet.getResultSummary().getId();
+        DProteinSet proteinSet = m_proteinSets[row];
+        long rsmId = proteinSet.getResultSummaryId();
 
         switch (col) {
             case COLTYPE_PROTEIN_GROUPS_NAME: {
@@ -93,7 +91,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 LazyData lazyData = getLazyData(row,col);
                 
                 // Retrieve typical Protein Match
-                ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
+                DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
 
                 if (proteinMatch == null) {
                     lazyData.setData(null);
@@ -109,14 +107,14 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 LazyData lazyData = getLazyData(row,col);
                 
                 // Retrieve typical Protein Match
-                ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
+                DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
                 
                 if (proteinMatch == null) {
                     lazyData.setData(null);
                     
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    lazyData.setData( Float.valueOf(proteinMatch.getTransientData().getPeptideSet(rsmId).getScore()) );
+                    lazyData.setData( Float.valueOf(proteinMatch.getPeptideSet(rsmId).getScore()) );
                 }
                 return lazyData;
             }
@@ -127,8 +125,8 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 
                 LazyData lazyData = getLazyData(row,col);
                 
-                Integer sameSetCount = proteinSet.getTransientData().getSameSetCount();
-                Integer subSetCount = proteinSet.getTransientData().getSubSetCount();
+                Integer sameSetCount = proteinSet.getSameSetCount();
+                Integer subSetCount = proteinSet.getSubSetCount();
                 
                 if ((sameSetCount == null) || (subSetCount == null)) {
                     // data is not already fetched
@@ -147,21 +145,21 @@ public class ProteinGroupTableModel extends LazyTableModel {
                 LazyData lazyData = getLazyData(row,col);
                 
                 // Retrieve typical Protein Match
-                ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
+                DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
                 
                 if (proteinMatch == null) {
                     lazyData.setData(null);
                     
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    lazyData.setData( proteinMatch.getTransientData().getPeptideSet(rsmId).getPeptideCount() );
+                    lazyData.setData( proteinMatch.getPeptideSet(rsmId).getPeptideCount() );
                 }
                 return lazyData;
    
             }
             case COLTYPE_SPECTRAL_COUNT: {
                 LazyData lazyData = getLazyData(row,col);
-                Integer spectralCount = proteinSet.getTransientData().getSpectralCount();
+                Integer spectralCount = proteinSet.getSpectralCount();
                 lazyData.setData(spectralCount);
                 if (spectralCount == null) {
                     givePriorityTo(m_taskId, row, col);
@@ -170,7 +168,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
             }
             case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
                 LazyData lazyData = getLazyData(row,col);
-                Integer specificSpectralCount = proteinSet.getTransientData().getSpecificSpectralCount();
+                Integer specificSpectralCount = proteinSet.getSpecificSpectralCount();
                 lazyData.setData(specificSpectralCount);
                 if (specificSpectralCount == null) {
                     givePriorityTo(m_taskId, row, col);
@@ -187,7 +185,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
 
      
     
-    public void setData(Long taskId, ProteinSet[] proteinSets) {
+    public void setData(Long taskId, DProteinSet[] proteinSets) {
         m_proteinSets = proteinSets;
         m_taskId = taskId;
         
@@ -205,11 +203,11 @@ public class ProteinGroupTableModel extends LazyTableModel {
         double maxScore = 0;
         int size = getRowCount();
         for (int i = 0; i < size; i++) {
-            ProteinSet proteinSet = m_proteinSets[i];
-            ProteinMatch proteinMatch = proteinSet.getTransientData().getTypicalProteinMatch();
+            DProteinSet proteinSet = m_proteinSets[i];
+            DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
             if (proteinMatch != null) {
-                long rsmId = proteinSet.getResultSummary().getId();
-                double score = proteinMatch.getTransientData().getPeptideSet(rsmId).getScore();
+                long rsmId = proteinSet.getResultSummaryId();
+                double score = proteinMatch.getPeptideSet(rsmId).getScore();
                 if (score > maxScore) {
                     maxScore = score;
                 }
@@ -226,16 +224,16 @@ public class ProteinGroupTableModel extends LazyTableModel {
         fireTableDataChanged();
     }
 
-    public ProteinSet getProteinSet(int i) {
+    public DProteinSet getProteinSet(int i) {
         return m_proteinSets[i];
     }
     
-    public ResultSummary getResultSummary() {
+    public Long getResultSummaryId() {
         if ((m_proteinSets == null) || (m_proteinSets.length == 0)) {
             return null;
         }
         
-        return m_proteinSets[0].getResultSummary();
+        return m_proteinSets[0].getResultSummaryId();
     }
 
     public int findRow(long proteinSetId) {
@@ -264,7 +262,7 @@ public class ProteinGroupTableModel extends LazyTableModel {
         int iCur = 0;
         for (int iView=0;iView<nb;iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
-            ProteinSet ps = m_proteinSets[iModel];
+            DProteinSet ps = m_proteinSets[iModel];
             if (  proteinSetIdMap.contains(ps.getId())  ) {
                 proteinSetIds.set(iCur++,ps.getId());
             }

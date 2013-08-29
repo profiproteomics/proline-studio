@@ -18,14 +18,14 @@ import javax.persistence.TypedQuery;
 public class DatabaseSearchPeptideMatchTask extends AbstractDatabaseTask {
   
     private long m_projectId = -1;
-    private ResultSet m_rset = null;
+    private long m_rsetId = -1;
     private String        m_searchString = null;
     private ArrayList<Long>     m_searchResult = null;
     
-    public DatabaseSearchPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset, String searchString, ArrayList<Long> searchResult) {
+    public DatabaseSearchPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, long rsetId, String searchString, ArrayList<Long> searchResult) {
         super(callback, Priority.HIGH_1, new TaskInfo("Search Peptide Match "+searchString, TASK_LIST_INFO));
         m_projectId = projectId;
-        m_rset = rset;       
+        m_rsetId = rsetId;       
         m_searchString = searchString;
         m_searchResult = searchResult;
     }
@@ -39,7 +39,7 @@ public class DatabaseSearchPeptideMatchTask extends AbstractDatabaseTask {
             // Search peptideMatches with the searched name
             TypedQuery<Long> searchQuery = entityManagerMSI.createQuery("SELECT pm.id FROM fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pm.resultSet.id=:rsetId AND pm.peptideId=p.id AND p.sequence LIKE :search ORDER BY pm.msQuery.initialId ASC, p.sequence ASC", Long.class);
             searchQuery.setParameter("search", "%"+m_searchString+"%");
-            searchQuery.setParameter("rsetId", m_rset.getId());
+            searchQuery.setParameter("rsetId", m_rsetId);
             List<Long> peptideMatchIdList = searchQuery.getResultList();
 
             m_searchResult.clear();

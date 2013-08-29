@@ -2,8 +2,9 @@ package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.MsQuery;
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -19,19 +20,19 @@ import javax.persistence.TypedQuery;
 public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
 
     private long m_projectId = -1;
-    private PeptideMatch m_peptideMatch = null;
+    private DPeptideMatch m_peptideMatch = null;
 
-    public DatabaseLoadSpectrumsTask(AbstractDatabaseCallback callback, long projectId, PeptideMatch peptideMatch) {
+    public DatabaseLoadSpectrumsTask(AbstractDatabaseCallback callback, long projectId, DPeptideMatch peptideMatch) {
         super(callback, new TaskInfo("Load Spectrum for Peptide Match "+getPeptideName(peptideMatch), TASK_LIST_INFO));
         m_projectId = projectId;
         m_peptideMatch = peptideMatch;
     }
 
-    private static String getPeptideName(PeptideMatch peptideMatch) {
+    private static String getPeptideName(DPeptideMatch peptideMatch) {
 
         String name;
 
-        Peptide peptide = peptideMatch.getTransientData().getPeptide();
+        Peptide peptide = peptideMatch.getPeptide();
         if (peptide != null) {
             name = peptide.getSequence();
         } else {
@@ -44,8 +45,8 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
     
     @Override
     public boolean needToFetch() {
-        return ((! m_peptideMatch.getTransientData().getIsMsQuerySet()) ||
-                (! m_peptideMatch.getMsQuery().getTransientIsSpectrumSet()));
+        return ((! m_peptideMatch.isMsQuerySet()) ||
+                (! m_peptideMatch.getMsQuery().isSpectrumSet()));
     }
 
     @Override
@@ -56,30 +57,26 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
 
             entityManagerMSI.getTransaction().begin();
 
-            // Load MsQuery if needed
-            if (! m_peptideMatch.getTransientData().getIsMsQuerySet()) {
+            // Load DMsQuery if needed
+            if (! m_peptideMatch.isMsQuerySet()) {
 
-               TypedQuery<MsQuery> msQueryQuery = entityManagerMSI.createQuery("SELECT ms FROM fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.MsQuery ms WHERE pm.msQuery=ms AND pm.id=:peptideMatchId", MsQuery.class);
-           
+               TypedQuery<DMsQuery> msQueryQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DMsQuery(pm.id, msq.id, msq.initialId, s.precursorIntensity) FROM fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.MsQuery msq, Spectrum s WHERE pm.msQuery=msq AND pm.id=:peptideMatchId AND msq.spectrum=s", DMsQuery.class);
+               
                msQueryQuery.setParameter("peptideMatchId", m_peptideMatch.getId());
 
-                MsQuery msq = msQueryQuery.getSingleResult();
+                DMsQuery msq = msQueryQuery.getSingleResult();
                 m_peptideMatch.setMsQuery(msq);
-                m_peptideMatch.getTransientData().setIsMsQuerySet(true);
-                
+
             }
             
 
             // Load Spectrum
-            MsQuery msQuery = m_peptideMatch.getMsQuery();
+            DMsQuery msQuery = m_peptideMatch.getMsQuery();
             
             TypedQuery<Spectrum> spectrumQuery = entityManagerMSI.createQuery("SELECT sp FROM fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp WHERE ms.spectrum=sp AND ms.id=:MsQueryId", Spectrum.class);
            
             spectrumQuery.setParameter("MsQueryId", msQuery.getId());
 
-            /*Spectrum s = spectrumQuery.getSingleResult();
-            msQuery.setSpectrum(s);
-            msQuery.setTransientIsSpectrumSet(true);*/
   
             List<Spectrum> spectrums = spectrumQuery.getResultList();
             if (spectrums.isEmpty()) {
@@ -87,9 +84,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
             } else {
                 msQuery.setSpectrum(spectrums.get(0));
             }
-            msQuery.setTransientIsSpectrumSet(true);
-
-            
+ 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);

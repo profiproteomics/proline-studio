@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.renderer;
 
-import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.core.orm.msi.dto.DMsQuery;
 import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -19,7 +19,7 @@ public class MsQueryRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-        MsQuery msQuery = (MsQuery) value;
+        DMsQuery msQuery = (DMsQuery) value;
 
         return super.getTableCellRendererComponent(table, msQuery.getInitialId(), isSelected, hasFocus, row, column);
     }

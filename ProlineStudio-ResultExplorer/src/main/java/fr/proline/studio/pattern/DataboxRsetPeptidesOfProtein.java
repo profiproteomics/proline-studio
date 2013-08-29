@@ -1,8 +1,10 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.PeptideMatch;
-import fr.proline.core.orm.msi.ProteinMatch;
+
+
 import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
@@ -26,14 +28,14 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
         // Register Possible in parameters
         // One ProteinMatch AND one ResultSet
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ProteinMatch.class, false);
+        inParameter.addParameter(DProteinMatch.class, false);
         inParameter.addParameter(ResultSet.class, false);
         registerInParameter(inParameter);
 
         // Register possible out parameters
         // One or Multiple  PeptideInstance
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(PeptideMatch.class, true);
+        outParameter.addParameter(DPeptideMatch.class, true);
         registerOutParameter(outParameter);
 
 
@@ -51,11 +53,11 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
     public void dataChanged() {
         
 
-        final ProteinMatch proteinMatch = (ProteinMatch) m_previousDataBox.getData(false, ProteinMatch.class);
+        final DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
         final ResultSet rset = (ResultSet) m_previousDataBox.getData(false, ResultSet.class);
 
         if (proteinMatch == null) {
-            ((PeptideMatchPanel) m_panel).setData(-1, null, true);
+            ((PeptideMatchPanel) m_panel).setData(-1, null, null, true);
              m_proteinMatchCurId = -1;
             return;
         }
@@ -81,8 +83,9 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
 
                if (subTask == null) {
 
-                    PeptideMatch[] peptideMatchArray = proteinMatch.getTransientData().getPeptideMatches();
-                    ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, finished);
+                    DPeptideMatch[] peptideMatchArray = proteinMatch.getPeptideMatches();
+                    long[] peptideMatchIdArray = proteinMatch.getPeptideMatchesId();
+                    ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);
                } else {
                     ((PeptideMatchPanel)m_panel).dataUpdated(subTask, finished);
                }
@@ -103,5 +106,14 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
 
     }
     private Long m_previousTaskId = null;
+    
+    
+        @Override
+    public Object getData(boolean getArray, Class parameterType) {
+        if (parameterType!= null && (parameterType.equals(DPeptideMatch.class))) {
+            return ((PeptideMatchPanel)m_panel).getSelectedPeptideMatch();
+        }
+        return super.getData(getArray, parameterType);
+    }
     
 }

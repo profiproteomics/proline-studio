@@ -1,7 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.ProteinMatch;
-import fr.proline.core.orm.msi.ProteinSet;
+
+
+import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -26,7 +28,7 @@ import javax.swing.table.TableColumn;
 public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
-    private ProteinSet m_proteinSetCur = null;
+    private DProteinSet m_proteinSetCur = null;
 
     /**
      * Creates new form RsmProteinsOfProteinSetPanel
@@ -43,7 +45,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
     }
 
-    public ProteinMatch getSelectedProteinMatch() {
+    public DProteinMatch getSelectedProteinMatch() {
 
         ProteinTable table = (ProteinTable) proteinTable;
 
@@ -68,7 +70,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         return tableModel.getProteinMatch(selectedRow);
     }
 
-    public void setData(ProteinSet proteinSet, String searchedText) {
+    public void setData(DProteinSet proteinSet, String searchedText) {
 
         if (proteinSet == m_proteinSetCur) {
             return;
@@ -80,14 +82,12 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
             return;
         }
 
-        ProteinSet.TransientData proteinSetData = proteinSet.getTransientData();
-
         // retrieve sameset and subset
-        ProteinMatch[] sameSetArray = proteinSetData.getSameSet();
-        ProteinMatch[] subSetArray = proteinSetData.getSubSet();
+        DProteinMatch[] sameSetArray = proteinSet.getSameSet();
+        DProteinMatch[] subSetArray = proteinSet.getSubSet();
 
         // retrieve Typical Protein Match
-        ProteinMatch typicalProtein = proteinSetData.getTypicalProteinMatch();
+        DProteinMatch typicalProtein = proteinSet.getTypicalProteinMatch();
 
         
         if (typicalProtein == null) {
@@ -106,7 +106,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
 
         // Modify the Model
-        ((ProteinTableModel) proteinTable.getModel()).setData(proteinSet.getResultSummary().getId(), sameSetArray, subSetArray);
+        ((ProteinTableModel) proteinTable.getModel()).setData(proteinSet.getResultSummaryId(), sameSetArray, subSetArray);
 
         // Select the Row
         int row = ((ProteinTableModel) proteinTable.getModel()).findRowToSelect(searchedText);
@@ -203,7 +203,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
             super.valueChanged(e);
 
-            m_dataBox.propagateDataChanged(ProteinMatch.class);
+            m_dataBox.propagateDataChanged(DProteinMatch.class);
 
 
         }

@@ -1,6 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.*;
+
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.SequenceMatchPK;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -106,9 +111,9 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     private final int HIGHLIGHT_OTHER_MODIFICATION         = 0x10;
     
 
-    public void setData(ProteinMatch pm, PeptideInstance selectedPeptide, PeptideInstance[] peptideInstances) {
+    public void setData(DProteinMatch pm, PeptideInstance selectedPeptide, PeptideInstance[] peptideInstances) {
         
-        if ((pm == null) || ((pm.getTransientData().getBioSequenceMSI() == null) /*&& (pm.getTransientData().getBioSequencePDI() == null)*/ )) {
+        if ((pm == null) || (pm.getBioSequence() == null)) {
             editorPane.setText("Protein Sequence not avaible in database");
 
             return;
@@ -116,12 +121,10 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         
         
         String sequence = null;
-        fr.proline.core.orm.msi.BioSequence bioSequenceMSI = pm.getTransientData().getBioSequenceMSI();
-        if (pm.getTransientData().getBioSequenceMSI() != null) {
-            sequence = pm.getTransientData().getBioSequenceMSI().getSequence();
-        } /* else if (pm.getTransientData().getBioSequencePDI() != null) {
-            sequence = pm.getTransientData().getBioSequencePDI().getSequence();
-        } */
+        fr.proline.core.orm.msi.BioSequence bioSequenceMSI = pm.getBioSequence();
+        if (pm.getBioSequence() != null) {
+            sequence = pm.getBioSequence().getSequence();
+        }
         
         
         int sequenceLength = sequence.length();
@@ -141,7 +144,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
                     continue;
                 }
 
-                Peptide p = peptideInstances[i].getTransientData().getBestPeptideMatch().getTransientData().getPeptide();
+                Peptide p = ((DPeptideMatch)peptideInstances[i].getTransientData().getBestDPeptideMatch()).getPeptide();
                 hightlight(p, false, highlights);
             }
         }
@@ -149,7 +152,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         if (selectedPeptide != null) {
             // highlight for selected peptide (must be done last to override modifications
             // of overlaping non selected peptides
-            hightlight(selectedPeptide.getTransientData().getBestPeptideMatch().getTransientData().getPeptide(), true, highlights);
+            hightlight(((DPeptideMatch)selectedPeptide.getTransientData().getBestDPeptideMatch()).getPeptide(), true, highlights);
         }
 
        

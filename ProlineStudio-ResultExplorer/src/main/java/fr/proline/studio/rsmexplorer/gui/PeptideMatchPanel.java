@@ -1,6 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.*;
+
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
@@ -62,7 +67,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         m_dataBox = dataBox;
     }
 
-    public void setData(long taskId, PeptideMatch[] peptideMatches, boolean finished) {
+    public void setData(long taskId, DPeptideMatch[] peptideMatches, long[] peptideMatchesId, boolean finished) {
         
         // update toolbar
         if (m_startingPanel) {
@@ -79,7 +84,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             }
         }
         
-        ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).setData(taskId, peptideMatches);
+        ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).setData(taskId, peptideMatches, peptideMatchesId);
 
         // select the first row
         if ((peptideMatches != null) && (peptideMatches.length > 0)) {
@@ -111,7 +116,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         return "";
     }
     
-    public PeptideMatch getSelectedPeptideMatch() {
+    public DPeptideMatch getSelectedPeptideMatch() {
 
         PeptideMatchTable table = ((PeptideMatchTable) m_peptideMatchTable);
 
@@ -349,11 +354,11 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                     }
                 };
 
-                ResultSet rset = ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).getResultSet();
+                long rsetId = ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).getResultSetId();
 
                 
                 // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideMatchTask(callback, m_dataBox.getProjectId(), rset, searchText, peptideMatchIds));
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideMatchTask(callback, m_dataBox.getProjectId(), rsetId, searchText, peptideMatchIds));
 
                 m_searchButton.setEnabled(false);
             }
@@ -371,7 +376,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         public PeptideMatchTable() {
             super(m_scrollPane.getVerticalScrollBar());
             setDefaultRenderer(Peptide.class, new PeptideRenderer());
-            setDefaultRenderer(MsQuery.class, new MsQueryRenderer());
+            setDefaultRenderer(DMsQuery.class, new MsQueryRenderer());
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class))  );
             
@@ -395,7 +400,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
 
 
-            m_dataBox.propagateDataChanged(PeptideMatch.class);
+            m_dataBox.propagateDataChanged(DPeptideMatch.class);
 
         }
 

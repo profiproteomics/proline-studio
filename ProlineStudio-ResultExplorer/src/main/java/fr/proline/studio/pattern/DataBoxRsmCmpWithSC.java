@@ -1,11 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.ProteinMatch;
+
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
 
 /**
@@ -30,7 +27,7 @@ public class DataBoxRsmCmpWithSC extends AbstractDataBox {
         // Register possible out parameters
         // One or Multiple ProteinMatches
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ProteinMatch.class, true);
+        outParameter.addParameter(DProteinMatch.class, true);
         outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
 
@@ -40,7 +37,7 @@ public class DataBoxRsmCmpWithSC extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
-            if (parameterType.equals(ProteinMatch.class)) {
+            if (parameterType.equals(DProteinMatch.class)) {
 //                return ((RsmProteinSetPanel)m_panel).getSelectedProteinSet();
             }
             
@@ -53,6 +50,7 @@ public class DataBoxRsmCmpWithSC extends AbstractDataBox {
         return super.getData(getArray, parameterType);
     }
     
+    @Override
     public void createPanel(){
         RsmProteinSetPanel p = new RsmProteinSetPanel(true);
         p.setName(m_name);
@@ -60,6 +58,7 @@ public class DataBoxRsmCmpWithSC extends AbstractDataBox {
         m_panel = p;
     }
     
+    @Override
     public void dataChanged(){
         
         final ResultSummary _rsm = (m_rsm != null) ? m_rsm : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);

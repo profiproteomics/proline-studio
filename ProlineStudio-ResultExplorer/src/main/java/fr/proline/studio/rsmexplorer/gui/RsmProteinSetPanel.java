@@ -1,8 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
-import fr.proline.core.orm.msi.ProteinSet;
+
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.gui.HourglassPanel;
@@ -58,7 +59,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     }
 
-    public void setData(Long taskId, ProteinSet[] proteinSets, boolean finished) {
+    public void setData(Long taskId, DProteinSet[] proteinSets, boolean finished) {
         
         // update toolbar
         if (m_forRSM) {
@@ -86,7 +87,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         ((ProteinGroupTable) m_proteinGroupTable).dataUpdated(subTask, finished);
     }
 
-    public ProteinSet getSelectedProteinSet() {
+    public DProteinSet getSelectedProteinSet() {
 
         // Retrieve Selected Row
         int selectedRow = m_proteinGroupTable.getSelectedRow();
@@ -342,11 +343,11 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                     }
                 };
 
-                ResultSummary rsm = ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).getResultSummary();
+                Long rsmId = ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).getResultSummaryId();
 
 
                 // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchProteinSetsTask(callback, m_dataBox.getProjectId() ,rsm, searchText, proteinSetIds));
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchProteinSetsTask(callback, m_dataBox.getProjectId() ,rsmId, searchText, proteinSetIds));
 
                 m_searchButton.setEnabled(false);
             }
@@ -360,7 +361,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
          * @param e the event that characterizes the change.
          */
 
-        ProteinSet proteinSetSelected = null;
+        DProteinSet proteinSetSelected = null;
         
         
         public ProteinGroupTable() {
@@ -384,7 +385,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 return;
             }
  
-            m_dataBox.propagateDataChanged(ProteinSet.class);
+            m_dataBox.propagateDataChanged(DProteinSet.class);
 
         }
         

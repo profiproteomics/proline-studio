@@ -1,6 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.orm.msi.*;
+
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.utils.DataFormat;
 import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
@@ -79,30 +84,30 @@ public class PeptideTableModel extends AbstractTableModel {
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
                 // Retrieve typical Peptide Match
-                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
                 if (peptideMatch == null) {
                     return null;
                 }
-                return peptideMatch.getTransientData().getPeptide();
+                return peptideMatch.getPeptide();
             }
             case COLTYPE_PEPTIDE_SCORE: {
                 // Retrieve typical Peptide Match
-                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
                 if (peptideMatch == null) {
                     return null; // should never happen   
                 }
                 return peptideMatch.getScore();
             }
             case COLTYPE_PROTEIN_GROUPS_MATCHES: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
                 if (peptideMatch == null) {
                     return ""; // should never happen   
                 }
-                Peptide p = peptideMatch.getTransientData().getPeptide();
+                Peptide p = peptideMatch.getPeptide();
                 if (p == null) {
                     return "";
                 }
-                ArrayList<ProteinSet> proteinSetList = p.getTransientData().getProteinSetArray();
+                ArrayList<DProteinSet> proteinSetList = p.getTransientData().getDProteinSetArray();
                 if (proteinSetList == null) {
                     return "";
                 }
@@ -112,7 +117,7 @@ public class PeptideTableModel extends AbstractTableModel {
                 display.append(nbProteinGroups);
                 display.append(" (");
                 for (int i = 0; i < nbProteinGroups; i++) {
-                    display.append(proteinSetList.get(i).getTransientData().getTypicalProteinMatch().getAccession());
+                    display.append(((DProteinSet)proteinSetList.get(i)).getTypicalProteinMatch().getAccession());
                     if (i + 1 < nbProteinGroups) {
                         display.append(',');
                     }
@@ -123,30 +128,30 @@ public class PeptideTableModel extends AbstractTableModel {
 
             }
             case COLTYPE_PEPTIDE_CHARGE: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
                 if (peptideMatch == null) {
                     return ""; // should never happen   
                 }
                 return DataFormat.format(peptideMatch.getCharge());
             }
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
                 if (peptideMatch == null) {
                     return null; // should never happen   
                 }
                 return Double.valueOf(peptideMatch.getExperimentalMoz());
             }
             case COLTYPE_PEPTIDE_DELTA_MOZ: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
                 if (peptideMatch == null) {
                     return null; // should never happen   
                 }
                 return Double.valueOf(peptideMatch.getDeltaMoz());
             }
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
                 if (peptideMatch != null) {
-                    Peptide p = peptideMatch.getTransientData().getPeptide();
+                    Peptide p = peptideMatch.getPeptide();
                     if (p != null) {
                         return p.getCalculatedMass();
                     }
@@ -154,7 +159,7 @@ public class PeptideTableModel extends AbstractTableModel {
                 return null;
             }
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
                 if (peptideMatch == null) {
                     return null;
                 }
@@ -164,11 +169,11 @@ public class PeptideTableModel extends AbstractTableModel {
                 return peptideInstance.getElutionTime();
             }
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
                 if (peptideMatch != null) {
-                    MsQuery msQuery = peptideMatch.getMsQuery();
+                    DMsQuery msQuery = peptideMatch.getMsQuery();
                     if (msQuery != null) {
-                        Float precursorIntensity = msQuery.getTransientPrecursorIntensity();
+                        Float precursorIntensity = msQuery.getPrecursorIntensity();
                         return precursorIntensity;
 
                     }
@@ -176,9 +181,9 @@ public class PeptideTableModel extends AbstractTableModel {
                 return null;
             }
             case COLTYPE_PEPTIDE_PTM: {
-                PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
                 if (peptideMatch != null) {
-                    Peptide p = peptideMatch.getTransientData().getPeptide();
+                    Peptide p = peptideMatch.getPeptide();
                     if (p != null) {
                         return p.getPtmString();
                     }

@@ -2,13 +2,14 @@ package fr.proline.studio.pattern;
 
 
 import fr.proline.core.orm.msi.PeptideInstance;
-import fr.proline.core.orm.msi.ProteinSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
+import java.util.Arrays;
 
 /**
  * Databox for the list of Protein Sets of a Rsm
@@ -35,7 +36,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
         // Register possible out parameters
         // One or Multiple ProteinSet
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ProteinSet.class, true);
+        outParameter.addParameter(DProteinSet.class, true);
         outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
 
@@ -70,7 +71,8 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
 
                 if (subTask == null) {
 
-                    ProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
+
+                    DProteinSet[] proteinSetArray = _rsm.getTransientData().getDProteinSetArray();
                     ((RsmProteinSetPanel) m_panel).setData(taskId, proteinSetArray, finished);
                 } else {
                     ((RsmProteinSetPanel) m_panel).dataUpdated(subTask, finished);
@@ -100,7 +102,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
-            if (parameterType.equals(ProteinSet.class)) {
+            if (parameterType.equals(DProteinSet.class)) {
                 return ((RsmProteinSetPanel)m_panel).getSelectedProteinSet();
             }
             if (parameterType.equals(ResultSummary.class)) {

@@ -1,12 +1,14 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.ProteinMatch;
+
 import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.rsmexplorer.gui.RsetProteinsPanel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
 import fr.proline.studio.dam.tasks.SubTask;
+
 
 /**
  * All Protein Matches of a Search Result
@@ -19,7 +21,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
     public DataBoxRsetAllProteinMatch() {
         
         // Name of this databox
-        m_name = "Protein";
+        m_name = "Proteins";
         m_description = "All Proteins of a Search Result";
         
         // Register Possible in parameters
@@ -31,7 +33,8 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
         // Register possible out parameters
         // One or Multiple ProteinMatch
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(ProteinMatch.class, true);
+        outParameter.addParameter(DProteinMatch.class, true);
+        outParameter.addParameter(ResultSet.class, false);
         registerOutParameter(outParameter);
     }
     
@@ -62,7 +65,9 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
 
                 if (subTask == null) {
 
-                    ProteinMatch[] proteinMatchArray = _rset.getTransientData().getProteinMatches();
+                    DProteinMatch[] proteinMatchArray = _rset.getTransientData().getDProteinMatches();
+                    
+                    
                     ((RsetProteinsPanel) m_panel).setDataProteinMatchArray(proteinMatchArray);
                     //((RsetProteinsPanel) m_panel).setData(taskId, proteinMatchArray, finished);
                 } else {
@@ -90,7 +95,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
-            if (parameterType.equals(ProteinMatch.class)) {
+            if (parameterType.equals(DProteinMatch.class)) {
                 return ((RsetProteinsPanel)m_panel).getSelectedProteinMatch();
             }
             if (parameterType.equals(ResultSet.class)) {

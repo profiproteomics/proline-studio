@@ -1,6 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.proline.core.orm.msi.*;
+
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideSet;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -22,7 +27,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
 
     private AbstractDataBox m_dataBox;
     
-    ProteinMatch m_currentProteinMatch = null;
+    DProteinMatch m_currentProteinMatch = null;
     
     /**
      * Creates new form RsmPeptidesOfProteinPanel
@@ -83,14 +88,14 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         
     }
     
-    public void setData(ProteinMatch proteinMatch, ResultSummary rsm) {
+    public void setData(DProteinMatch proteinMatch, ResultSummary rsm) {
 
         m_currentProteinMatch = proteinMatch;
         
         if ((proteinMatch == null) || (rsm == null)) {
             ((PeptideTableModel) peptidesTable.getModel()).setData(null);
         } else {
-            PeptideSet peptideSet = proteinMatch.getTransientData().getPeptideSet(rsm.getId());
+            PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
             PeptideInstance[] peptideInstances = peptideSet.getTransientPeptideInstances();
 
             ((PeptideTableModel) peptidesTable.getModel()).setData(peptideInstances);

@@ -1,6 +1,16 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.*;
+
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideSet;
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.SequenceMatch;
+import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
@@ -26,13 +36,13 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     private final static int LOAD_PEPTIDE_INSTANCES_FOR_RSM   = 1;
     
     private long m_projectId = -1;
-    private ProteinMatch m_proteinMatch = null;
-    private ArrayList<ProteinMatch> m_proteinMatchArray = null;
+    private DProteinMatch m_proteinMatch = null;
+    private ArrayList<DProteinMatch> m_proteinMatchArray = null;
     private ArrayList<ResultSummary> m_rsmList = null;
     
     private ResultSummary m_rsm = null;
 
-    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, long projectId, ProteinMatch proteinMatch, ArrayList<ResultSummary> rsmList) {
+    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, long projectId, DProteinMatch proteinMatch, ArrayList<ResultSummary> rsmList) {
         super(callback, new TaskInfo("Load Peptide Sets for Protein Match "+proteinMatch.getAccession(), TASK_LIST_INFO));
         m_projectId = projectId;
         m_proteinMatch = proteinMatch;
@@ -42,7 +52,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         
     }
     
-    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, long projectId, ArrayList<ProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmList) {
+    public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, long projectId, ArrayList<DProteinMatch> proteinMatchArray, ArrayList<ResultSummary> rsmList) {
         super(callback, new TaskInfo("Load Peptide Sets for multiple Protein Matches", TASK_LIST_INFO));
         m_projectId = projectId;
         m_proteinMatch = null;
@@ -67,7 +77,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
                 int size = m_rsmList.size();
                 for (int i = 0; i < size; i++) {
                     ResultSummary rsm = m_rsmList.get(i);
-                    ProteinMatch pm = (m_proteinMatchArray != null) ? m_proteinMatchArray.get(i) : m_proteinMatch;
+                    DProteinMatch pm = (m_proteinMatchArray != null) ? m_proteinMatchArray.get(i) : m_proteinMatch;
                     if (needToFetch(pm, rsm)) {
                         return true;
                     }
@@ -84,11 +94,11 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         return false; // should not be called
     }
     
-    private boolean needToFetch(ProteinMatch proteinMatch, ResultSummary rsm) {
+    private boolean needToFetch(DProteinMatch proteinMatch, ResultSummary rsm) {
         if (proteinMatch == null) {
             return false;
         }
-        PeptideSet peptideSet = proteinMatch.getTransientData().getPeptideSet(rsm.getId());
+        PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
         if (peptideSet == null) {
             return true;
         }
@@ -119,7 +129,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
             ArrayList<PeptideInstance> peptideInstanceList = new ArrayList<>();
 
-            Query peptideInstancesQuery = entityManagerMSI.createQuery("SELECT pi, pm, p FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pi.resultSummary.id=:rsmId AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id ORDER BY pm.score DESC");
+            Query peptideInstancesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pi.resultSummary.id=:rsmId AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id ORDER BY pm.score DESC");
             peptideInstancesQuery.setParameter("rsmId", m_rsm.getId());
 
             List l = peptideInstancesQuery.getResultList();
@@ -127,13 +137,22 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             while (itPeptidesQuery.hasNext()) {
                 Object[] resCur = itPeptidesQuery.next();
                 PeptideInstance pi = (PeptideInstance) resCur[0];
-                PeptideMatch pm = (PeptideMatch) resCur[1];
-                Peptide p = (Peptide) resCur[2];
+                
+                Long pmId = (Long) resCur[1];
+                Integer pmCharge = (Integer) resCur[2];
+                Float pmDeltaMoz = (Float) resCur[3];
+                Double pmExperimentalMoz = (Double) resCur[4];
+                Integer pmMissedCleavage = (Integer) resCur[5];
+                Float pmScore = (Float) resCur[6];
+                Long pmResultSetId = (Long) resCur[7];
+                DPeptideMatch pm = new DPeptideMatch(pmId, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId);
+                
+                Peptide p = (Peptide) resCur[8];
 
 
-                pi.getTransientData().setBestPeptideMatch(pm);
+                pi.getTransientData().setBestDPeptideMatch(pm);
 
-                pm.getTransientData().setPeptide(p);
+                pm.setPeptide(p);
 
                 peptideInstanceList.add(pi);
             }
@@ -168,7 +187,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             int size = m_rsmList.size();
             for (int i = 0; i < size; i++) {
                 ResultSummary rsm = m_rsmList.get(i);
-                ProteinMatch pm = (m_proteinMatchArray != null) ? m_proteinMatchArray.get(i) : m_proteinMatch;
+                DProteinMatch pm = (m_proteinMatchArray != null) ? m_proteinMatchArray.get(i) : m_proteinMatch;
                 if (!needToFetch(pm, rsm)) {
                     continue;
                 }
@@ -221,21 +240,22 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         return true;
     }
     
-    private void fetchPeptideData(EntityManager entityManagerMSI, ResultSummary rsm, ProteinMatch proteinMatch, HashMap<Long, Peptide> peptideMap) {
+    private void fetchPeptideData(EntityManager entityManagerMSI, ResultSummary rsm, DProteinMatch proteinMatch, HashMap<Long, Peptide> peptideMap) {
 
         // Retrieve peptideSet of a proteinMatch
-        PeptideSet peptideSet = proteinMatch.getTransientData().getPeptideSet(rsm.getId());
+        PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
         if (peptideSet == null) {
             TypedQuery<PeptideSet> peptideSetQuery = entityManagerMSI.createQuery("SELECT ps FROM PeptideSet ps, PeptideSetProteinMatchMap ps_to_pm WHERE ps_to_pm.id.proteinMatchId=:proteinMatchId AND ps_to_pm.id.peptideSetId=ps.id AND ps_to_pm.resultSummary.id=:rsmId", PeptideSet.class);
             peptideSetQuery.setParameter("proteinMatchId", proteinMatch.getId());
             peptideSetQuery.setParameter("rsmId", rsm.getId());
             peptideSet = peptideSetQuery.getSingleResult();
-            proteinMatch.getTransientData().setPeptideSet(rsm.getId(), peptideSet);
+            proteinMatch.setPeptideSet(rsm.getId(), peptideSet);
         }
 
+        //JPM.TODO : speed up the peptidesQuery
+        
         // Retrieve the list of PeptideInstance, PeptideMatch, Peptide, MSQuery, Spectrum of a PeptideSet
-        // MSQuery and Spectrum are loaded to force lazy fetch.
-        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm, p, sm, ms, sp  FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem ps_to_pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.SequenceMatch as sm, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ORDER BY pm.score DESC");
+        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p, sm, ms.id, ms.initialId, sp  FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem ps_to_pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.SequenceMatch as sm, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ORDER BY pm.score DESC");
 
         peptidesQuery.setParameter("peptideSetId", peptideSet.getId());
         peptidesQuery.setParameter("proteinMatchId", proteinMatch.getId());
@@ -246,21 +266,34 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         while (itPeptidesQuery.hasNext()) {
             Object[] resCur = itPeptidesQuery.next();
             PeptideInstance pi = (PeptideInstance) resCur[0];
-            PeptideMatch pm = (PeptideMatch) resCur[1];
-            Peptide p = (Peptide) resCur[2];
+            
+            Long pmId = (Long) resCur[1];
+            Integer pmCharge = (Integer) resCur[2];
+            Float pmDeltaMoz = (Float) resCur[3];
+            Double pmExperimentalMoz = (Double) resCur[4];
+            Integer pmMissedCleavage = (Integer) resCur[5];
+            Float pmScore = (Float) resCur[6];
+            Long pmResultSetId = (Long) resCur[7];
+            DPeptideMatch pm = new DPeptideMatch(pmId, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId);
 
-            SequenceMatch sm = (SequenceMatch) resCur[3];
-            MsQuery msq = (MsQuery) resCur[4];
-            Spectrum sp = (Spectrum) resCur[5];
+            Peptide p = (Peptide) resCur[8];
 
-            pi.getTransientData().setBestPeptideMatch(pm);
+            SequenceMatch sm = (SequenceMatch) resCur[9];
+            Long msqId = (Long) resCur[10];
+            Integer msqInitialId = (Integer) resCur[11];
+            
+            Spectrum sp = (Spectrum) resCur[12];
+            
+            DMsQuery msq = new DMsQuery(pmId, msqId, msqInitialId, sp.getPrecursorIntensity());
+
+            pi.getTransientData().setBestDPeptideMatch(pm);
 
 
             p.getTransientData().setSequenceMatch(sm);
 
-            PeptideMatch.TransientData pmData = pm.getTransientData();
-            pmData.setPeptide(p);
-            pmData.setIsMsQuerySet(true);
+
+            pm.setPeptide(p);
+            pm.setMsQuery(msq);
 
             peptideInstanceList.add(pi);
         }
@@ -271,13 +304,13 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
         
         for (int i = 0; i < nbPeptides; i++) {
-            peptideMap.put(peptideInstances[i].getPeptideId(), peptideInstances[i].getTransientData().getBestPeptideMatch().getTransientData().getPeptide());
+            peptideMap.put(peptideInstances[i].getPeptideId(), ((DPeptideMatch)peptideInstances[i].getTransientData().getBestDPeptideMatch()).getPeptide());
         }
 
 
         // Retrieve the list of Protein Sets of Peptides
         // typical ProteinMatch is loaded in the same time, to avoid lazy fetch 
-        Query proteinGroupsQuery = entityManagerMSI.createQuery("SELECT ps, p, pm FROM fr.proline.core.orm.msi.ProteinMatch pm, fr.proline.core.orm.msi.ProteinSet ps, fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.Peptide p WHERE ps.typicalProteinMatchId=pm.id AND pm.id=sm.id.proteinMatchId AND p.id=sm.id.peptideId AND p.id IN (:peptideIds) AND sm.resultSetId=:rsetId AND ps.resultSummary.id=:rsmId AND ps.isValidated=true");
+        Query proteinGroupsQuery = entityManagerMSI.createQuery("SELECT ps.id, p, pm.id, pm.accession, pm.score, pm.peptideCount, pm.description, pm.bioSequenceId FROM fr.proline.core.orm.msi.ProteinMatch pm, fr.proline.core.orm.msi.ProteinSet ps, fr.proline.core.orm.msi.SequenceMatch sm, fr.proline.core.orm.msi.Peptide p WHERE ps.typicalProteinMatchId=pm.id AND pm.id=sm.id.proteinMatchId AND p.id=sm.id.peptideId AND p.id IN (:peptideIds) AND sm.resultSetId=:rsetId AND ps.resultSummary.id=:rsmId AND ps.isValidated=true");
         proteinGroupsQuery.setParameter("rsmId", rsm.getId());
         proteinGroupsQuery.setParameter("rsetId", rsm.getResultSet().getId());
         proteinGroupsQuery.setParameter("peptideIds", peptideMap.keySet());
@@ -285,20 +318,30 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         Iterator<Object[]> itProteinGroupsQuery = l.iterator();
         while (itProteinGroupsQuery.hasNext()) {
             Object[] resCur = itProteinGroupsQuery.next();
-            ProteinSet ps = (ProteinSet) resCur[0];
+            Long proteinSetId = (Long) resCur[0];
             Peptide p = (Peptide) resCur[1];
-            ProteinMatch pm = (ProteinMatch) resCur[2];
-            ProteinSet.TransientData data = ps.getTransientData();
-            if (data.getTypicalProteinMatch() == null) {
-                data.setTypicalProteinMatch(pm);
-            }
+            
+            
+            
+            Long proteinMatchId = (Long) resCur[2];
+            String accession = (String) resCur[3];
+            Float score = (Float) resCur[4];
+            Integer peptideCount = (Integer) resCur[5];
+            String description = (String) resCur[6];
+            Long bioSequenceId = (Long) resCur[7];
 
-            ArrayList<ProteinSet> proteinSetArray = p.getTransientData().getProteinSetArray();
+            DProteinMatch pm = new DProteinMatch(proteinMatchId, accession, score, peptideCount, rsm.getResultSet().getId(), description, bioSequenceId);
+            
+            DProteinSet proteinSet = new DProteinSet(proteinSetId, proteinMatchId, rsm.getId());
+
+            proteinSet.setTypicalProteinMatch(pm);
+
+            ArrayList<DProteinSet> proteinSetArray = p.getTransientData().getDProteinSetArray();
             if (proteinSetArray == null) {
                 proteinSetArray = new ArrayList<>();
-                p.getTransientData().setProteinSetArray(proteinSetArray);
+                p.getTransientData().setDProteinSetArray(proteinSetArray);
             }
-            proteinSetArray.add(ps);
+            proteinSetArray.add(proteinSet);
         }
 
     }

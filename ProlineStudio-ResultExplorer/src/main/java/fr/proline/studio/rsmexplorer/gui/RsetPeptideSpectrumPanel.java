@@ -1,9 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
-import fr.proline.core.orm.msi.MsQuery;
-import fr.proline.core.orm.msi.PeptideMatch;
+import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -48,7 +49,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     private DefaultXYDataset m_dataSet;
     private JFreeChart m_chart;
     
-    private PeptideMatch m_previousPeptideMatch = null;
+    private DPeptideMatch m_previousPeptideMatch = null;
     
     /**
      * Creates new form RsetPeptideSpectrumPanel
@@ -142,7 +143,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     // End of variables declaration//GEN-END:variables
 
     
-   public void setData(PeptideMatch peptideMatch) {
+   public void setData(DPeptideMatch peptideMatch) {
 
        if (peptideMatch == m_previousPeptideMatch) {
            return;
@@ -153,7 +154,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
     }
     
-    private void constructSpectrumChart(PeptideMatch pm) {
+    private void constructSpectrumChart(DPeptideMatch pm) {
 
         final String SERIES_NAME = "spectrumData";
         if (pm == null) {
@@ -161,14 +162,20 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             return;
         }
 
-        MsQuery msQuery = pm.getTransientData().getIsMsQuerySet() ? pm.getMsQuery() : null;
+        DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
         if (msQuery == null) {
             m_dataSet.removeSeries(SERIES_NAME);
             return;
         }
         
-        Spectrum spectrum = msQuery.getTransientIsSpectrumSet() ? msQuery.getSpectrum() : null;
+        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
         if (spectrum == null) {
+            m_dataSet.removeSeries(SERIES_NAME);
+            return;
+        }
+        
+        Peptide p = pm.getPeptide();
+        if (p== null) {
             m_dataSet.removeSeries(SERIES_NAME);
             return;
         }
@@ -222,7 +229,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
 
         // Set title
-        String title = "Query " + pm.getMsQuery().getInitialId() + " - " + pm.getTransientData().getPeptide().getSequence();
+        String title = "Query " + pm.getMsQuery().getInitialId() + " - " + pm.getPeptide().getSequence();
         m_chart.setTitle(title);
 
         // reset X/Y zooming

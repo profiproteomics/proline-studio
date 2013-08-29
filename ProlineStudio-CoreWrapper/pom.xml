@@ -114,6 +114,7 @@
             <publicPackage>fr.proline.core.om.storer.ps</publicPackage>
             <publicPackage>fr.proline.core.om.utils</publicPackage>
             <publicPackage>fr.proline.core.orm.msi</publicPackage>
+            <publicPackage>fr.proline.core.orm.msi.dto</publicPackage>
             <publicPackage>fr.proline.core.orm.msi.repository</publicPackage>
             <publicPackage>fr.proline.core.orm.pdi</publicPackage>
             <publicPackage>fr.proline.core.orm.pdi.repository</publicPackage>

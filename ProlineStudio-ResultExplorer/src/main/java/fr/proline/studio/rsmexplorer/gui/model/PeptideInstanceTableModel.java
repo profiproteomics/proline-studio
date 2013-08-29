@@ -1,6 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.orm.msi.*;
+
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.utils.*;
 import java.util.ArrayList;
@@ -105,15 +109,14 @@ public class PeptideInstanceTableModel extends LazyTableModel {
     public Object getValueAt(int row, int col) {
         // Retrieve Protein Set
         PeptideInstance peptideInstance = m_peptideInstances[row];
-        PeptideMatch peptideMatch = peptideInstance.getTransientData().getBestPeptideMatch();
+        DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
 
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
                 
                 LazyData lazyData = getLazyData(row,col);
-                
-                PeptideMatch.TransientData data = peptideMatch.getTransientData();
-                Peptide peptide = data.getPeptide();
+
+                Peptide peptide = peptideMatch.getPeptide();
                 if ( peptide == null) {
                     givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
@@ -158,9 +161,8 @@ public class PeptideInstanceTableModel extends LazyTableModel {
             }
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
                 LazyData lazyData = getLazyData(row,col);
-                
-                PeptideMatch.TransientData data = peptideMatch.getTransientData();
-                Peptide peptide = data.getPeptide();
+
+                Peptide peptide = peptideMatch.getPeptide();
                 if ( peptide == null) {
                     givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
@@ -217,8 +219,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
             case COLTYPE_PEPTIDE_PTM: {
                 LazyData lazyData = getLazyData(row, col);
 
-                PeptideMatch.TransientData data = peptideMatch.getTransientData();
-                Peptide peptide = data.getPeptide();
+                Peptide peptide = peptideMatch.getPeptide();
                 if (peptide == null) {
                     givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
@@ -257,7 +258,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
         int size = getRowCount();
         for (int i = 0; i < size; i++) {
             PeptideInstance peptideInstance = m_peptideInstances[i];
-            double score = peptideInstance.getTransientData().getBestPeptideMatch().getScore();
+            double score = ((DPeptideMatch)peptideInstance.getTransientData().getBestDPeptideMatch()).getScore();
             if (score > maxScore) {
                 maxScore = score;
             }

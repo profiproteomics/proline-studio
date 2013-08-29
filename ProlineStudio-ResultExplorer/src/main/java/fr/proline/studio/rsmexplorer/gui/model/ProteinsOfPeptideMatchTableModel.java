@@ -1,7 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 
-import fr.proline.core.orm.msi.ProteinMatch;
+
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
@@ -20,13 +21,13 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
     public static final int COLTYPE_PROTEIN_PEPTIDES_COUNT = 2;
     public static final int COLTYPE_PROTEIN_MASS           = 3;
     private static final String[] m_columnNames = {"Protein", "Score", "Peptides", "Mass"};
-    private ProteinMatch[] m_proteinMatchArray = null;
+    private DProteinMatch[] m_proteinMatchArray = null;
 
     public ProteinsOfPeptideMatchTableModel(LazyTable table) {
         super(table);
     }
     
-    public ProteinMatch getProteinMatch(int row) {
+    public DProteinMatch getProteinMatch(int row) {
 
         return m_proteinMatchArray[row];
     }
@@ -67,7 +68,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
     @Override
     public Object getValueAt(int row, int col) {
 
-        ProteinMatch proteinMatch = getProteinMatch(row);
+        DProteinMatch proteinMatch = getProteinMatch(row);
 
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
@@ -79,19 +80,11 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
             case COLTYPE_PROTEIN_MASS:
                 LazyData lazyData = getLazyData(row,col);
                 
-                fr.proline.core.orm.msi.BioSequence bioSequenceMSI = proteinMatch.getTransientData().getBioSequenceMSI();
+                fr.proline.core.orm.msi.BioSequence bioSequenceMSI = proteinMatch.getBioSequence();
                 if (bioSequenceMSI != null) {
                     lazyData.setData(new Float(bioSequenceMSI.getMass()));
                     return lazyData;
-                }
-                /*fr.proline.core.orm.pdi.BioSequence bioSequencePDI = proteinMatch.getTransientData().getBioSequencePDI();
-                if (bioSequencePDI != null) {
-                    lazyData.setData(new Float(bioSequencePDI.getMass()));
-                    return lazyData;
-                }*/
-                
-                boolean noBioSequenceFound = proteinMatch.getTransientData().getNoBioSequenceFound();
-                if (noBioSequenceFound) {
+                } else if (proteinMatch.isBiosequenceSet()) {
                     lazyData.setData("");
                     return lazyData;
                 }
@@ -106,7 +99,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
         return null; // should never happen
     }
 
-    public void setData(ProteinMatch[] proteinMatchArray) {
+    public void setData(DProteinMatch[] proteinMatchArray) {
         m_proteinMatchArray = proteinMatchArray;
         fireTableDataChanged();
         
@@ -170,7 +163,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
         int iCur = 0;
         for (int iView = 0; iView < nb; iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
-            ProteinMatch pm = m_proteinMatchArray[iModel];
+            DProteinMatch pm = m_proteinMatchArray[iModel];
             if (proteinMatchIdMap.contains(pm.getId())) {
                 proteinMatchIds.set(iCur++, pm.getId());
             }

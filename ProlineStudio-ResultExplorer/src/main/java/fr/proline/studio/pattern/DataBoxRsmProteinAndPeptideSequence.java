@@ -2,8 +2,8 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideSet;
-import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinAndPeptideSequencePanel;
 
 /**
@@ -21,7 +21,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         
         // Register in parameters
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ProteinMatch.class, false);
+        inParameter.addParameter(DProteinMatch.class, false);
         inParameter.addParameter(PeptideInstance.class, false, false /* parameter is not compulsory */); 
         inParameter.addParameter(ResultSummary.class, false); // needs a ProteinMatch and a ResultSummary (PeptideInstance is optionnal)
         registerInParameter(inParameter);
@@ -41,7 +41,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        ProteinMatch proteinMatch = (ProteinMatch) m_previousDataBox.getData(false, ProteinMatch.class);
+        DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
         PeptideInstance selectedPeptide = (PeptideInstance) m_previousDataBox.getData(false, PeptideInstance.class);
         ResultSummary resultSummary = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
        
@@ -50,10 +50,8 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
             ((RsmProteinAndPeptideSequencePanel) m_panel).setData(null, null, null);
             return;
         }
-        
-        ProteinMatch.TransientData data = proteinMatch.getTransientData();
 
-        PeptideSet peptideSet = (data!=null) ? data.getPeptideSet(resultSummary.getId()) : null;
+        PeptideSet peptideSet = proteinMatch.getPeptideSet(resultSummary.getId());
         if (peptideSet == null) {
             ((RsmProteinAndPeptideSequencePanel) m_panel).setData(null, null, null);
             return;

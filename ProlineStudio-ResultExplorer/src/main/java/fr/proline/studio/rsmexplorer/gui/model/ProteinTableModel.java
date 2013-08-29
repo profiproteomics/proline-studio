@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.BioSequence;
-import fr.proline.core.orm.msi.ProteinMatch;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -16,11 +16,11 @@ public class ProteinTableModel extends AbstractTableModel {
     public static final int COLTYPE_PROTEIN_PEPTIDES_COUNT = 3;
     public static final int COLTYPE_PROTEIN_MASS           = 4;
     private static final String[] m_columnNames = {"Protein", "Same Set", "Score", "Peptides", "Mass"};
-    private ProteinMatch[] m_sameSetMatches = null;
-    private ProteinMatch[] m_subSetMatches = null;
+    private DProteinMatch[] m_sameSetMatches = null;
+    private DProteinMatch[] m_subSetMatches = null;
     private Long m_rsmId = null;
 
-    public ProteinMatch getProteinMatch(int row) {
+    public DProteinMatch getProteinMatch(int row) {
 
         int sameSetNb = m_sameSetMatches.length;
         if (row < sameSetNb) {
@@ -66,7 +66,7 @@ public class ProteinTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int col) {
         // Retrieve Protein Match
-        ProteinMatch proteinMatch = getProteinMatch(row);
+        DProteinMatch proteinMatch = getProteinMatch(row);
 
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
@@ -78,12 +78,12 @@ public class ProteinTableModel extends AbstractTableModel {
                     return Boolean.FALSE;
                 }
             case COLTYPE_PROTEIN_SCORE:
-                Float score = Float.valueOf(proteinMatch.getTransientData().getPeptideSet(m_rsmId).getScore() );
+                Float score = Float.valueOf(proteinMatch.getPeptideSet(m_rsmId).getScore() );
                 return score;
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
-                return proteinMatch.getTransientData().getPeptideSet(m_rsmId).getPeptideCount();
+                return proteinMatch.getPeptideSet(m_rsmId).getPeptideCount();
             case COLTYPE_PROTEIN_MASS:
-                fr.proline.core.orm.msi.BioSequence bioSequenceMSI = proteinMatch.getTransientData().getBioSequenceMSI();
+                fr.proline.core.orm.msi.BioSequence bioSequenceMSI = proteinMatch.getBioSequence();
                 if (bioSequenceMSI != null) {
                     return new Float(bioSequenceMSI.getMass());
                 }
@@ -97,7 +97,7 @@ public class ProteinTableModel extends AbstractTableModel {
     }
     
 
-    public void setData(long rsmId, ProteinMatch[] sameSetMatches, ProteinMatch[] subSetMatches) {
+    public void setData(long rsmId, DProteinMatch[] sameSetMatches, DProteinMatch[] subSetMatches) {
         m_rsmId = rsmId;
         m_sameSetMatches = sameSetMatches;
         m_subSetMatches = subSetMatches;

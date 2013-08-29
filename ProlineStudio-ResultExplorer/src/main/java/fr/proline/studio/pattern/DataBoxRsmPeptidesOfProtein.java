@@ -1,9 +1,9 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.PeptideInstance;
-import fr.proline.core.orm.msi.PeptideMatch;
-import fr.proline.core.orm.msi.ProteinMatch;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
@@ -28,7 +28,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         // Register Possible in parameters
         // One ProteinMatch AND one ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ProteinMatch.class, false);
+        inParameter.addParameter(DProteinMatch.class, false);
         inParameter.addParameter(ResultSummary.class, false);
         registerInParameter(inParameter);
         
@@ -39,7 +39,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
-        outParameter.addParameter(PeptideMatch.class, true);
+        outParameter.addParameter(DPeptideMatch.class, true);
         registerOutParameter(outParameter);
         
        
@@ -58,7 +58,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final ProteinMatch proteinMatch = (ProteinMatch) m_previousDataBox.getData(false, ProteinMatch.class);
+        final DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
         final ResultSummary rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
 
         if (proteinMatch == null) {
@@ -108,10 +108,10 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null && (parameterType.equals(PeptideInstance.class))) {
             return ((RsmPeptidesOfProteinPanel)m_panel).getSelectedPeptide();
-        } else if (parameterType!= null && (parameterType.equals(PeptideMatch.class))) {
+        } else if (parameterType!= null && (parameterType.equals(DPeptideMatch.class))) {
             PeptideInstance pi = ((RsmPeptidesOfProteinPanel)m_panel).getSelectedPeptide();
             if (pi != null) {
-                return pi.getTransientData().getBestPeptideMatch();
+                return pi.getTransientData().getBestDPeptideMatch();
             }
         }
         return super.getData(getArray, parameterType);

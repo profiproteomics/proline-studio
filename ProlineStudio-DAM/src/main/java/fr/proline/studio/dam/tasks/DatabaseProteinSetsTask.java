@@ -1,14 +1,15 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.*;
+
+import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -46,7 +47,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     
     // data kept for sub tasks
     private ArrayList<Long> m_proteinMatchIds = null;
-    private HashMap<Long, ProteinSet> m_proteinSetMap = null;
+    private HashMap<Long, DProteinSet> m_proteinSetMap = null;
     private ArrayList<Long> m_proteinSetIds = null;
 
     public DatabaseProteinSetsTask(AbstractDatabaseCallback callback) {
@@ -82,10 +83,10 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         super.abortTask();
         switch (action) {
             case LOAD_PROTEIN_SET_FOR_RSM:
-                m_rsm.getTransientData().setProteinSetArray(null);
+                m_rsm.getTransientData().setDProteinSetArray(null);
                 break;
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
-                m_peptideInstance.getTransientData().setProteinSetArray(null);
+                m_peptideInstance.getTransientData().setDProteinSetArray(null);
                 break;
             case LOAD_PROTEIN_SET_NUMBER:
                 m_rsm.getTransientData().setNumberOfProteinSet(null);
@@ -97,9 +98,9 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     public boolean needToFetch() {
         switch (action) {
             case LOAD_PROTEIN_SET_FOR_RSM:
-                return (m_rsm.getTransientData().getProteinSetArray() == null);
+                return (m_rsm.getTransientData().getDProteinSetArray() == null);
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
-                return (m_peptideInstance.getTransientData().getProteinSetArray() == null);
+                return (m_peptideInstance.getTransientData().getDProteinSetArray() == null);
             case LOAD_PROTEIN_SET_NUMBER:
                 m_rsm = m_dataset.getTransientData().getResultSummary();
                 return (m_rsm.getTransientData().getNumberOfProteinSet() == null);
@@ -147,19 +148,19 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             // Load Protein Sets
             // SELECT ps FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC
-            TypedQuery<ProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC", ProteinSet.class);
+            TypedQuery<DProteinSet> proteinSetsQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.typicalProteinMatchId ,ps.resultSummary.id) FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC", DProteinSet.class);
             
             proteinSetsQuery.setParameter("rsmId", rsmId);
             
            
-            List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
+            List<DProteinSet> proteinSets = proteinSetsQuery.getResultList();
 
-            ProteinSet[] proteinSetArray = proteinSets.toArray(new ProteinSet[proteinSets.size()]);
-            m_rsm.getTransientData().setProteinSetArray(proteinSetArray);
+            DProteinSet[] proteinSetArray = proteinSets.toArray(new DProteinSet[proteinSets.size()]);
+            m_rsm.getTransientData().setDProteinSetArray(proteinSetArray);
 
             m_proteinSetMap = new HashMap<>();
             for (int i = 0; i < proteinSetArray.length; i++) {
-                ProteinSet proteinSetCur = proteinSetArray[i];
+                DProteinSet proteinSetCur = proteinSetArray[i];
                 m_proteinSetMap.put(proteinSetCur.getId(), proteinSetCur);
             }
 
@@ -171,7 +172,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             int nbProteinSets = proteinSetArray.length;
             for (int i = 0; i < nbProteinSets; i++) {
                 m_proteinMatchIds.add(i, proteinSetArray[i].getProteinMatchId());
-                proteinSetArray[i].getResultSummary(); // force fetch of lazy data
+                //proteinSetArray[i].getResultSummary(); // force fetch of lazy data //JPM.TODO ?
             }
 
 
@@ -321,18 +322,18 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
             // Load Protein Sets
             // SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY prots.score DESC
-            TypedQuery proteinSetsQuery = entityManagerMSI.createQuery("SELECT prots FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY peps.score DESC", ProteinSet.class);
+            TypedQuery proteinSetsQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(prots.id, prots.typicalProteinMatchId ,prots.resultSummary.id) FROM fr.proline.core.orm.msi.ProteinSet prots, fr.proline.core.orm.msi.PeptideSet peps, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem peps_to_pepi WHERE peps.proteinSet=prots AND peps.id=peps_to_pepi.id.peptideSetId AND peps_to_pepi.id.peptideInstanceId=:peptideInstanceId AND prots.isValidated=true ORDER BY peps.score DESC", DProteinSet.class);
             proteinSetsQuery.setParameter("peptideInstanceId", pepInstanceId);
-            List<ProteinSet> proteinSets = proteinSetsQuery.getResultList();
+            List<DProteinSet> proteinSets = proteinSetsQuery.getResultList();
             
-            ProteinSet[] proteinSetArray = proteinSets.toArray(new ProteinSet[proteinSets.size()]);
-            m_peptideInstance.getTransientData().setProteinSetArray(proteinSetArray);
+            DProteinSet[] proteinSetArray = proteinSets.toArray(new DProteinSet[proteinSets.size()]);
+            m_peptideInstance.getTransientData().setDProteinSetArray(proteinSetArray);
             
             
 
             m_proteinSetMap = new HashMap<>();
             for (int i = 0; i < proteinSetArray.length; i++) {
-                ProteinSet proteinSetCur = proteinSetArray[i];
+                DProteinSet proteinSetCur = proteinSetArray[i];
                 m_proteinSetMap.put(proteinSetCur.getId(), proteinSetCur);
             }
 
@@ -474,32 +475,32 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      */
     private void typicalProteinMatch(EntityManager entityManagerMSI, SubTask subTask) {
 
-        ProteinSet[] proteinSetArray = null;
+        DProteinSet[] proteinSetArray = null;
         if (action == LOAD_PROTEIN_SET_FOR_RSM) {
-            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData().getDProteinSetArray();
+            
+            
         } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
-            proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
+
+            proteinSetArray = m_peptideInstance.getTransientData().getDProteinSetArray();
         }
         
         List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
 
-        Query typicalProteinQuery = entityManagerMSI.createQuery("SELECT pm, pepset FROM PeptideSetProteinMatchMap pset_to_pm JOIN pset_to_pm.proteinMatch as pm JOIN pset_to_pm.peptideSet as pepset WHERE pm.id IN (:listId) AND pset_to_pm.resultSummary.id=:rsmId");
+        TypedQuery<DProteinMatch> typicalProteinQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession, pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pm.bioSequenceId, pepset) FROM PeptideSetProteinMatchMap pset_to_pm JOIN pset_to_pm.proteinMatch as pm JOIN pset_to_pm.peptideSet as pepset WHERE pm.id IN (:listId) AND pset_to_pm.resultSummary.id=:rsmId", DProteinMatch.class);
         typicalProteinQuery.setParameter("listId", sliceOfProteinMatchIds);
         typicalProteinQuery.setParameter("rsmId", m_rsm.getId());
 
-        List<Object[]> typicalProteinMatches = typicalProteinQuery.getResultList();
-        HashMap<Long, ProteinMatch> typicalProteinMap = new HashMap<>();
-        Iterator<Object[]> itTypical = typicalProteinMatches.iterator();
+        List<DProteinMatch> typicalProteinMatches = typicalProteinQuery.getResultList();
+        HashMap<Long, DProteinMatch> typicalProteinMap = new HashMap<>();
+        Iterator<DProteinMatch> itTypical = typicalProteinMatches.iterator();
         while (itTypical.hasNext()) {
-            Object[] resCur = itTypical.next();
-            ProteinMatch pmCur = (ProteinMatch) resCur[0];
-            PeptideSet peptideSet = (PeptideSet) resCur[1];
-            pmCur.getTransientData().setPeptideSet(m_rsm.getId(), peptideSet);
+            DProteinMatch pmCur = itTypical.next();
             typicalProteinMap.put(pmCur.getId(), pmCur);
         }
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
-            ProteinSet proteinSetCur = proteinSetArray[i];
-            proteinSetCur.getTransientData().setTypicalProteinMatch(typicalProteinMap.get(proteinSetCur.getProteinMatchId()));
+            DProteinSet proteinSetCur = proteinSetArray[i];
+            proteinSetCur.setTypicalProteinMatch(typicalProteinMap.get(proteinSetCur.getProteinMatchId()));
         }
     }
 
@@ -513,11 +514,13 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      */
     private void spectralCount(EntityManager entityManagerMSI, SubTask subTask) {
 
-        ProteinSet[] proteinSetArray = null;
+        DProteinSet[] proteinSetArray = null;
         if (action == LOAD_PROTEIN_SET_FOR_RSM) {
-            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
+
+            proteinSetArray = m_rsm.getTransientData().getDProteinSetArray();
         } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
-            proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
+
+            proteinSetArray = m_peptideInstance.getTransientData().getDProteinSetArray();
         }
         
         List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
@@ -545,12 +548,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         }
 
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
-            ProteinSet proteinSetCur = proteinSetArray[i];
-            ProteinSet.TransientData proteinSetData = proteinSetCur.getTransientData();
+            DProteinSet proteinSetCur = proteinSetArray[i];
 
             Integer spectralCount = spectralCountMap.get(proteinSetCur.getProteinMatchId());
             if (spectralCount != null) {  // should not happen
-                proteinSetData.setSpectralCount(spectralCount);
+                proteinSetCur.setSpectralCount(spectralCount);
             }
         }
     }
@@ -563,11 +565,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
      */
     private void specificSpectralCount(EntityManager entityManagerMSI, SubTask subTask) {
 
-        ProteinSet[] proteinSetArray = null;
+        DProteinSet[] proteinSetArray = null;
         if (action == LOAD_PROTEIN_SET_FOR_RSM) {
-            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData().getDProteinSetArray();
         } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
-            proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
+            proteinSetArray = m_peptideInstance.getTransientData().getDProteinSetArray();
         }
         
         List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
@@ -610,12 +612,11 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         
 
         for (int i = subTask.getStartIndex(); i <= subTask.getStopIndex(); i++) {
-            ProteinSet proteinSetCur = proteinSetArray[i];
-            ProteinSet.TransientData proteinSetData = proteinSetCur.getTransientData();
+            DProteinSet proteinSetCur = proteinSetArray[i];
 
             Integer specificSpectralCount = spectralCountMap.get(proteinSetCur.getProteinMatchId());
             if (specificSpectralCount != null) {  // should not happen
-                proteinSetData.setSpecificSpectralCount(specificSpectralCount);
+                proteinSetCur.setSpecificSpectralCount(specificSpectralCount);
             }
         }
 
@@ -651,9 +652,9 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         while (sameSetCountResIt.hasNext()) {
             Object[] cur = sameSetCountResIt.next();
             Long proteinSetId = (Long) cur[0];
-            ProteinSet proteinSet = m_proteinSetMap.get(proteinSetId);
+            DProteinSet proteinSet = m_proteinSetMap.get(proteinSetId);
             int sameSetCount = ((Long) cur[1]).intValue();
-            proteinSet.getTransientData().setSameSetCount(sameSetCount);
+            proteinSet.setSameSetCount(sameSetCount);
         }
 
         // All proteins in Protein Set count query
@@ -674,10 +675,9 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         while (allCountResIt.hasNext()) {
             Object[] cur = allCountResIt.next();
             Long proteinSetId = (Long) cur[0];
-            ProteinSet proteinSet = m_proteinSetMap.get(proteinSetId);
+            DProteinSet proteinSet = m_proteinSetMap.get(proteinSetId);
             int allCount = ((Long) cur[1]).intValue();
-            ProteinSet.TransientData data = proteinSet.getTransientData();
-            data.setSubSetCount(allCount - data.getSameSetCount());
+            proteinSet.setSubSetCount(allCount - proteinSet.getSameSetCount());
         }
 
     }

@@ -77,11 +77,11 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         switch (m_action) {
             case LOAD_ALL_RSET:
                 m_rset.getTransientData().setPeptideMatchIds(null);
-                m_rset.getTransientData().setDPeptideMatches(null);
+                m_rset.getTransientData().setPeptideMatches(null);
                 break;
             case LOAD_ALL_RSM:
-                m_rsm.getTransientData().setDPeptideMatches(null);
-                m_rsm.getTransientData().setDPeptideMatchesId(null);
+                m_rsm.getTransientData().setPeptideMatches(null);
+                m_rsm.getTransientData().setPeptideMatchesId(null);
                 break;
             case LOAD_PEPTIDES_FOR_PROTEIN_RSET:
                 m_proteinMatch.setPeptideMatches(null);
@@ -97,7 +97,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             case LOAD_ALL_RSET:
                 return (m_rset.getTransientData().getPeptideMatchIds() == null);
             case LOAD_ALL_RSM:
-                return (m_rsm.getTransientData().getDPeptideMatches() == null);
+                return (m_rsm.getTransientData().getPeptideMatches() == null);
             case LOAD_PEPTIDES_FOR_PROTEIN_RSET:
                 return (m_proteinMatch.getPeptideMatches() == null);
         }
@@ -152,7 +152,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             
             int nb = peptideMatchIds.size();
             DPeptideMatch[] peptideMatchArray = new DPeptideMatch[nb];
-            m_rset.getTransientData().setDPeptideMatches(peptideMatchArray);
+            m_rset.getTransientData().setPeptideMatches(peptideMatchArray);
             
 
             
@@ -323,8 +323,8 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 // resCur[1] : (pm.msQuery is fetch because it is declared as lazy and it is needed later)
             }
 
-            m_rsm.getTransientData().setDPeptideMatches(peptideMatchArray);
-            m_rsm.getTransientData().setDPeptideMatchesId(peptideMatchIdsArray);
+            m_rsm.getTransientData().setPeptideMatches(peptideMatchArray);
+            m_rsm.getTransientData().setPeptideMatchesId(peptideMatchIdsArray);
             
                 
             // Retrieve Peptide Match Ids and create map of PeptideMatch in the same time
@@ -456,7 +456,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         }
         
 
-        DPeptideMatch[] peptideMatches = m_rset.getTransientData().getDPeptideMatches();
+        DPeptideMatch[] peptideMatches = m_rset.getTransientData().getPeptideMatches();
         
         //int i = subTask.getStartIndex();
         Iterator<DPeptideMatch> it = resultList.iterator();

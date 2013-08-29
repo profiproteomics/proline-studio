@@ -144,7 +144,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
                     continue;
                 }
 
-                Peptide p = ((DPeptideMatch)peptideInstances[i].getTransientData().getBestDPeptideMatch()).getPeptide();
+                Peptide p = ((DPeptideMatch)peptideInstances[i].getTransientData().getBestPeptideMatch()).getPeptide();
                 hightlight(p, false, highlights);
             }
         }
@@ -152,7 +152,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         if (selectedPeptide != null) {
             // highlight for selected peptide (must be done last to override modifications
             // of overlaping non selected peptides
-            hightlight(((DPeptideMatch)selectedPeptide.getTransientData().getBestDPeptideMatch()).getPeptide(), true, highlights);
+            hightlight(((DPeptideMatch)selectedPeptide.getTransientData().getBestPeptideMatch()).getPeptide(), true, highlights);
         }
 
        

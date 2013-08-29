@@ -65,7 +65,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
 
                 if (subTask == null) {
 
-                    DProteinMatch[] proteinMatchArray = _rset.getTransientData().getDProteinMatches();
+                    DProteinMatch[] proteinMatchArray = _rset.getTransientData().getProteinMatches();
                     
                     
                     ((RsetProteinsPanel) m_panel).setDataProteinMatchArray(proteinMatchArray);

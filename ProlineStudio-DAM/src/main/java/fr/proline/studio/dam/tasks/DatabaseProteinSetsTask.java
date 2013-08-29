@@ -83,10 +83,10 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         super.abortTask();
         switch (action) {
             case LOAD_PROTEIN_SET_FOR_RSM:
-                m_rsm.getTransientData().setDProteinSetArray(null);
+                m_rsm.getTransientData().setProteinSetArray(null);
                 break;
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
-                m_peptideInstance.getTransientData().setDProteinSetArray(null);
+                m_peptideInstance.getTransientData().setProteinSetArray(null);
                 break;
             case LOAD_PROTEIN_SET_NUMBER:
                 m_rsm.getTransientData().setNumberOfProteinSet(null);
@@ -98,9 +98,9 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     public boolean needToFetch() {
         switch (action) {
             case LOAD_PROTEIN_SET_FOR_RSM:
-                return (m_rsm.getTransientData().getDProteinSetArray() == null);
+                return (m_rsm.getTransientData().getProteinSetArray() == null);
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
-                return (m_peptideInstance.getTransientData().getDProteinSetArray() == null);
+                return (m_peptideInstance.getTransientData().getProteinSetArray() == null);
             case LOAD_PROTEIN_SET_NUMBER:
                 m_rsm = m_dataset.getTransientData().getResultSummary();
                 return (m_rsm.getTransientData().getNumberOfProteinSet() == null);
@@ -156,7 +156,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             List<DProteinSet> proteinSets = proteinSetsQuery.getResultList();
 
             DProteinSet[] proteinSetArray = proteinSets.toArray(new DProteinSet[proteinSets.size()]);
-            m_rsm.getTransientData().setDProteinSetArray(proteinSetArray);
+            m_rsm.getTransientData().setProteinSetArray(proteinSetArray);
 
             m_proteinSetMap = new HashMap<>();
             for (int i = 0; i < proteinSetArray.length; i++) {
@@ -327,7 +327,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             List<DProteinSet> proteinSets = proteinSetsQuery.getResultList();
             
             DProteinSet[] proteinSetArray = proteinSets.toArray(new DProteinSet[proteinSets.size()]);
-            m_peptideInstance.getTransientData().setDProteinSetArray(proteinSetArray);
+            m_peptideInstance.getTransientData().setProteinSetArray(proteinSetArray);
             
             
 
@@ -477,12 +477,12 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         DProteinSet[] proteinSetArray = null;
         if (action == LOAD_PROTEIN_SET_FOR_RSM) {
-            proteinSetArray = m_rsm.getTransientData().getDProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
             
             
         } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
 
-            proteinSetArray = m_peptideInstance.getTransientData().getDProteinSetArray();
+            proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
         }
         
         List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
@@ -517,10 +517,10 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         DProteinSet[] proteinSetArray = null;
         if (action == LOAD_PROTEIN_SET_FOR_RSM) {
 
-            proteinSetArray = m_rsm.getTransientData().getDProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
         } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
 
-            proteinSetArray = m_peptideInstance.getTransientData().getDProteinSetArray();
+            proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
         }
         
         List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
@@ -567,9 +567,9 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
 
         DProteinSet[] proteinSetArray = null;
         if (action == LOAD_PROTEIN_SET_FOR_RSM) {
-            proteinSetArray = m_rsm.getTransientData().getDProteinSetArray();
+            proteinSetArray = m_rsm.getTransientData().getProteinSetArray();
         } else if (action == LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE) {
-            proteinSetArray = m_peptideInstance.getTransientData().getDProteinSetArray();
+            proteinSetArray = m_peptideInstance.getTransientData().getProteinSetArray();
         }
         
         List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);

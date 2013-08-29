@@ -94,7 +94,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
         
          switch (m_action) {
             case LOAD_ALL_PROTEINS_OF_RSET:
-                return (m_rset.getTransientData().getDProteinMatches() == null);
+                return (m_rset.getTransientData().getProteinMatches() == null);
             case LOAD_PROTEINS_FROM_PEPTIDE_MATCH:
                 return (m_peptideMatch.getProteinMatches() == null);
         }
@@ -178,7 +178,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             int nbProteins = proteinMatchList.size();
             DProteinMatch[] proteins = proteinMatchList.toArray(new DProteinMatch[nbProteins]);
 
-            m_rset.getTransientData().setDProteinMatches(proteins);
+            m_rset.getTransientData().setProteinMatches(proteins);
 
             m_proteinMatchIds = new ArrayList<>(nbProteins);
             m_proteinMatchMap = new HashMap<>(nbProteins);

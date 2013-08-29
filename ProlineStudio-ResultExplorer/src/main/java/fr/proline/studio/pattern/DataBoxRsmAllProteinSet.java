@@ -72,7 +72,7 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
                 if (subTask == null) {
 
 
-                    DProteinSet[] proteinSetArray = _rsm.getTransientData().getDProteinSetArray();
+                    DProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
                     ((RsmProteinSetPanel) m_panel).setData(taskId, proteinSetArray, finished);
                 } else {
                     ((RsmProteinSetPanel) m_panel).dataUpdated(subTask, finished);

@@ -111,7 +111,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                 if (pi == null) {
                     return null;
                 }
-                return pi.getTransientData().getBestDPeptideMatch();
+                return pi.getTransientData().getBestPeptideMatch();
             }
             if (parameterType.equals(ResultSummary.class)) {
                 if (m_rsm != null) {

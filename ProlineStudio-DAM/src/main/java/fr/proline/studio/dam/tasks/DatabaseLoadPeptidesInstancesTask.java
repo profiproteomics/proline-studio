@@ -150,7 +150,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
                 Peptide p = (Peptide) resCur[8];
 
 
-                pi.getTransientData().setBestDPeptideMatch(pm);
+                pi.getTransientData().setBestPeptideMatch(pm);
 
                 pm.setPeptide(p);
 
@@ -286,7 +286,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             
             DMsQuery msq = new DMsQuery(pmId, msqId, msqInitialId, sp.getPrecursorIntensity());
 
-            pi.getTransientData().setBestDPeptideMatch(pm);
+            pi.getTransientData().setBestPeptideMatch(pm);
 
 
             p.getTransientData().setSequenceMatch(sm);
@@ -304,7 +304,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
         
         for (int i = 0; i < nbPeptides; i++) {
-            peptideMap.put(peptideInstances[i].getPeptideId(), ((DPeptideMatch)peptideInstances[i].getTransientData().getBestDPeptideMatch()).getPeptide());
+            peptideMap.put(peptideInstances[i].getPeptideId(), ((DPeptideMatch)peptideInstances[i].getTransientData().getBestPeptideMatch()).getPeptide());
         }
 
 
@@ -336,10 +336,10 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
             proteinSet.setTypicalProteinMatch(pm);
 
-            ArrayList<DProteinSet> proteinSetArray = p.getTransientData().getDProteinSetArray();
+            ArrayList<DProteinSet> proteinSetArray = p.getTransientData().getProteinSetArray();
             if (proteinSetArray == null) {
                 proteinSetArray = new ArrayList<>();
-                p.getTransientData().setDProteinSetArray(proteinSetArray);
+                p.getTransientData().setProteinSetArray(proteinSetArray);
             }
             proteinSetArray.add(proteinSet);
         }

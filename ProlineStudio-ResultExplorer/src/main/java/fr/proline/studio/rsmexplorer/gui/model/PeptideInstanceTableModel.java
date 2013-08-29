@@ -109,7 +109,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
     public Object getValueAt(int row, int col) {
         // Retrieve Protein Set
         PeptideInstance peptideInstance = m_peptideInstances[row];
-        DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestDPeptideMatch();
+        DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
 
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
@@ -258,7 +258,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {
         int size = getRowCount();
         for (int i = 0; i < size; i++) {
             PeptideInstance peptideInstance = m_peptideInstances[i];
-            double score = ((DPeptideMatch)peptideInstance.getTransientData().getBestDPeptideMatch()).getScore();
+            double score = ((DPeptideMatch)peptideInstance.getTransientData().getBestPeptideMatch()).getScore();
             if (score > maxScore) {
                 maxScore = score;
             }

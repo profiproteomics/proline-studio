@@ -65,8 +65,8 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
                 
                if (subTask == null) {
 
-                    DPeptideMatch[] peptideMatchArray = _rsm.getTransientData().getDPeptideMatches();
-                    long[] peptideMatchIdArray = _rsm.getTransientData().getDPeptideMatchesId();
+                    DPeptideMatch[] peptideMatchArray = _rsm.getTransientData().getPeptideMatches();
+                    long[] peptideMatchIdArray = _rsm.getTransientData().getPeptideMatchesId();
                     ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);
                } else {
                     ((PeptideMatchPanel)m_panel).dataUpdated(subTask, finished);

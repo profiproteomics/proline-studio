@@ -69,7 +69,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
                if (subTask == null) {
 
 
-                    DPeptideMatch[] peptideMatchArray = _rset.getTransientData().getDPeptideMatches();
+                    DPeptideMatch[] peptideMatchArray = _rset.getTransientData().getPeptideMatches();
                     long[] peptideMatchIdArray = _rset.getTransientData().getPeptideMatchIds();
                     
                     ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);

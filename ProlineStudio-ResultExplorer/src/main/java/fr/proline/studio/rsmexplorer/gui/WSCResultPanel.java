@@ -41,7 +41,6 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     public WSCResultPanel() {
         initComponents();
 
-//        ((DecoratedTable) proteinTable).displayColumnAsPercentage(WSCProteinTableModel.COLTYPE_);
         TableColumn accColumn = proteinTable.getColumnModel().getColumn(WSCProteinTableModel.COLTYPE_PROTEIN_NAME);
         URLCellRenderer renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", WSCProteinTableModel.COLTYPE_PROTEIN_NAME);
         accColumn.setCellRenderer(renderer);
@@ -74,7 +73,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 //        return tableModel.getProteinMatch(selectedRow);
 //    }
 
-    public void setData(ComputeSCTask.WSCResultData scResult, String searchedText) {
+    public void setData(ComputeSCTask.WSCResultData scResult) {
 
         if (scResult == m_weightedSCResult) {
             return;
@@ -94,9 +93,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         // Modify the Model
         ((WSCProteinTableModel) proteinTable.getModel()).setData(scResult);
 
-        // Select the Row
-        int row = ((WSCProteinTableModel) proteinTable.getModel()).findRowToSelect(searchedText);
-        proteinTable.getSelectionModel().setSelectionInterval(row, row);
+
 
     }
 
@@ -162,8 +159,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         public ProteinTable() {
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(Float.class)) ) );
             setDefaultRenderer(Boolean.class, new BooleanRenderer());
-            
-        
+
         }
         
         /**

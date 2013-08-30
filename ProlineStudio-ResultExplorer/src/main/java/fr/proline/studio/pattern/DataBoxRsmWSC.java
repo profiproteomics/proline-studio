@@ -1,8 +1,13 @@
 package fr.proline.studio.pattern;
 
 
+import fr.proline.core.orm.uds.Dataset;
+import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.ComputeSCTask;
 import fr.proline.studio.rsmexplorer.gui.WSCResultPanel;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * RSM Weighted Spectral Count result
@@ -10,7 +15,8 @@ import fr.proline.studio.rsmexplorer.gui.WSCResultPanel;
  */
 public class DataBoxRsmWSC extends AbstractDataBox {
 
-    private ComputeSCTask.WSCResultData m_wscResult;
+    private Dataset m_refDataset = null;
+    private ArrayList<Dataset> m_datasetRsms = null;
     
     public DataBoxRsmWSC() {
         
@@ -23,12 +29,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ComputeSCTask.WSCResultData.class, false);
         registerInParameter(inParameter);
-        
-        // Register possible out parameters
-        // One or Multiple ProteinMatch
-//        GroupParameter outParameter = new GroupParameter();
-//        outParameter.addParameter(DProteinMatch.class, true);
-//        registerOutParameter(outParameter);
+
     }
     
     @Override
@@ -42,38 +43,58 @@ public class DataBoxRsmWSC extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        final ComputeSCTask.WSCResultData _scResult = (m_wscResult != null) ? m_wscResult : (ComputeSCTask.WSCResultData) m_previousDataBox.getData(false, ComputeSCTask.WSCResultData.class);
-        if (_scResult == null) {
-            ((WSCResultPanel)m_panel).setData(null, null);
-            m_wscResult = null;
-            return;
-        }
+        final int loadingId = setLoading(true); 
         
+        // used as out parameter for the service
+        final String[] _spCountJSON = new String[1];
         
-        m_wscResult = _scResult;
-        
-        final int loadingId = setLoading();        
-        
-        ((WSCResultPanel)m_panel).setData(m_wscResult, null); //JPM.TODO
-        setLoaded(loadingId);
+        AbstractServiceCallback callback = new AbstractServiceCallback() {
+            
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success) {
+                if (success) {
+                    
+                    String scResultAsJson = _spCountJSON[0];
+                    ComputeSCTask.WSCResultData scResult = new ComputeSCTask.WSCResultData(m_refDataset, m_datasetRsms, scResultAsJson);
+                    
+                    ((WSCResultPanel)m_panel).setData(scResult);                  
+                } else {
+                    ((WSCResultPanel)m_panel).setData(null);
+                }
+                
+                setLoaded(loadingId);
+            }
+        };
+                      
+        List<Long> rsmIds = new ArrayList<>(m_datasetRsms.size());
+        for(Dataset ds :m_datasetRsms ){
+            rsmIds.add(ds.getResultSummaryId());
+        }              
+        ComputeSCTask task = new ComputeSCTask(callback,  m_refDataset, rsmIds, _spCountJSON);
+
+        AccessServiceThread.getAccessServiceThread().addTask(task);
+ 
+
     }
     
     
     @Override
-    public Object getData(boolean getArray, Class parameterType) {
-        if (parameterType!= null ) {
-            if (parameterType.equals(ComputeSCTask.WSCResultData.class)) {
-                if (m_wscResult != null) {
-                    return m_wscResult;
-                }
-            }
-        }
-        return super.getData(getArray, parameterType);
-    }
-    
-        @Override
     public void setEntryData(Object data) {
-        m_wscResult = (ComputeSCTask.WSCResultData) data;
+        
+        ArrayList<Dataset> datasetArray = (ArrayList) data;
+        m_refDataset = datasetArray.get(0);
+        
+        int nb = datasetArray.size()-1;
+        m_datasetRsms = new ArrayList<>(nb);
+        for (int i=1;i<=nb;i++) {
+            m_datasetRsms.add((Dataset) datasetArray.get(i));
+        }
+
         dataChanged();
     }
     

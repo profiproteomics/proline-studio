@@ -17,18 +17,18 @@ public class WSCProteinTableModel extends AbstractTableModel {
     public static final int COLTYPE_WSC             = 3;
     private static final String[] m_columnNames = {"Protein", "Basic SC", "Specific SC", "Weighted SC"};
 
-    private ComputeSCTask.WSCResultData wscResult = null;
-    private List<String> protMatchNames = new ArrayList();
+    private ComputeSCTask.WSCResultData m_wscResult = null;
+    private List<String> m_protMatchNames = new ArrayList();
     
     public String getProteinMatchAccession(int row) {
-        return protMatchNames.get(row);
+        return m_protMatchNames.get(row);
     }
 
     @Override
     public int getColumnCount() {
-        if(wscResult ==null)
+        if (m_wscResult ==null)
             return 1;
-        return 1 + (wscResult.getComputedSCDatasets().size()*3);        
+        return 1 + (m_wscResult.getComputedSCDatasets().size()*3);        
     }
 
     @Override
@@ -49,7 +49,7 @@ public class WSCProteinTableModel extends AbstractTableModel {
                     break;                
                 }            
               StringBuilder sb = new StringBuilder();
-              sb.append(wscResult.getComputedSCDatasets().get(currentRSMNbr-1).getName());
+              sb.append(m_wscResult.getComputedSCDatasets().get(currentRSMNbr-1).getName());
               sb.append("_").append(m_columnNames[colSuffixIndex]);
               return sb.toString();
             }           
@@ -68,7 +68,7 @@ public class WSCProteinTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {      
-        return protMatchNames.size();
+        return m_protMatchNames.size();
     }
 
     @Override
@@ -82,8 +82,8 @@ public class WSCProteinTableModel extends AbstractTableModel {
                 
             default: {
               int currentRSMNbr = (col%3==0) ? col/3 : (col/3)+1;
-              Long rsmID =wscResult.getComputedSCDatasets().get(currentRSMNbr-1).getResultSummaryId();
-              Map<String, ComputeSCTask.SpectralCountsStruct> rsmResult =  wscResult.getRsmSCResult(rsmID);
+              Long rsmID =m_wscResult.getComputedSCDatasets().get(currentRSMNbr-1).getResultSummaryId();
+              Map<String, ComputeSCTask.SpectralCountsStruct> rsmResult =  m_wscResult.getRsmSCResult(rsmID);
               ComputeSCTask.SpectralCountsStruct searchedProtSC = rsmResult.get(proteinMatchName);
               int modulo = col%3;
               switch (modulo){
@@ -101,32 +101,17 @@ public class WSCProteinTableModel extends AbstractTableModel {
     
 
     public void setData(ComputeSCTask.WSCResultData wscResult) {
-        this.wscResult = wscResult;
+        m_wscResult = wscResult;
         
         Set<String> names = new HashSet();
-        List<Dataset> dss = this.wscResult.getComputedSCDatasets();
-        for(Dataset ds :dss) {
-           names.addAll(this.wscResult.getRsmSCResult(ds.getResultSummaryId()).keySet());
+        List<Dataset> dss = m_wscResult.getComputedSCDatasets();
+        for (Dataset ds :dss) {
+           names.addAll(m_wscResult.getRsmSCResult(ds.getResultSummaryId()).keySet());
         }
-        protMatchNames = new ArrayList(names);    
+        m_protMatchNames = new ArrayList(names);    
         fireTableStructureChanged();
     }
     
-    public int findRowToSelect(String searchedText) {
-        int rowToBeSelected = 0;
-        if ((searchedText != null) && (searchedText.length() > 0)) {
 
-            String searchedTextUpper = searchedText.toUpperCase();
-
-            for (int row = 0; row < getRowCount(); row++) {
-                String proteinName = ((String) getValueAt(row, COLTYPE_PROTEIN_NAME)).toUpperCase();
-                if (proteinName.indexOf(searchedTextUpper) != -1) {
-                    rowToBeSelected = row;
-                }
-            }
-        }
-
-        return rowToBeSelected;
-    }
     
 }

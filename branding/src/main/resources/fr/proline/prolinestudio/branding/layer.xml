@@ -29,6 +29,7 @@
             <file name="org-openide-actions-ToolsAction.shadow_hidden"/>
         </folder>
         <folder name="View">
+            <file name="org-netbeans-core-actions-HTMLViewAction.shadow_hidden"/> 
             <file name="org-netbeans-modules-editor-NbCodeFoldingAction.instance_hidden"/>
         </folder>
         <folder name="Window">
@@ -40,10 +41,8 @@
     <folder name="Toolbars">
         <file name="Build_hidden"/>
         <file name="Debugging.xml_hidden"/>
-        <folder name="File">
-            <file name="org-netbeans-modules-project-ui-NewProject.shadow_hidden"/>
-            <file name="org-netbeans-modules-project-ui-OpenProject.shadow_hidden"/>
-        </folder>
+        <folder name="File_hidden"/>
+        <folder name="UndoRedo_hidden"/>
         <folder name="Memory">
             <file name="org-netbeans-modules-profiler-actions-SelfSamplerAction.shadow_hidden"/>
         </folder>

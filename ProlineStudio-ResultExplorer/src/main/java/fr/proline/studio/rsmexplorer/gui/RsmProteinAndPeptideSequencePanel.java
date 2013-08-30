@@ -292,15 +292,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         return m_dataBox.getAddAction(splittedPanel);
     }
 
-    @Override
-    public void setLoading(int id) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
-    @Override
-    public void setLoaded(int id) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
     
 
 }

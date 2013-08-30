@@ -23,6 +23,8 @@ public class TreeSelectionDialog extends DefaultDialog {
     private ArrayList<Dataset> m_selectedDatasetList = null;
     private ArrayList<RSMDataSetNode> m_selectedRSMDSNodeList = null;
     
+    private boolean m_userSetSize = false;
+    
     public TreeSelectionDialog(Window parent, RSMTree tree, String title) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
      
@@ -30,6 +32,8 @@ public class TreeSelectionDialog extends DefaultDialog {
         setButtonVisible(BUTTON_DEFAULT, false);
         
         setStatusVisible(false);
+        
+        setResizable(true);
         
         m_tree = tree;
         
@@ -41,6 +45,23 @@ public class TreeSelectionDialog extends DefaultDialog {
         setInternalComponent(scrollPane);
  
     }
+    
+    public TreeSelectionDialog(Window parent, RSMTree tree, String title, int width, int height) {
+        this(parent, tree, title);
+        
+        setSize(width, height);
+        m_userSetSize = true;
+    }
+    
+    @Override
+    public void pack() {
+        if (m_userSetSize) {
+            // forbid pack by overloading the method
+            return;
+        }
+        super.pack();
+    }
+    
     
     public void setSelection(ArrayList<ResultSummary> rsmArray) {
         m_tree.setSelection(rsmArray);
@@ -70,8 +91,8 @@ public class TreeSelectionDialog extends DefaultDialog {
             return false;
         }
 
-        m_selectedDatasetList = new ArrayList<Dataset>();
-        m_selectedRSMDSNodeList = new ArrayList<RSMDataSetNode>();
+        m_selectedDatasetList = new ArrayList<>();
+        m_selectedRSMDSNodeList = new ArrayList<>();
         
         int size = paths.length;
         for (int i=0;i<size;i++) {
@@ -101,7 +122,7 @@ public class TreeSelectionDialog extends DefaultDialog {
     }
     
     private void showSelectionError() {
-        JOptionPane.showMessageDialog(m_tree, "You must at least select one Aggregate.", "Warning", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(m_tree, "You must at least select one Identification Summary.", "Warning", JOptionPane.ERROR_MESSAGE);
     }
     
     

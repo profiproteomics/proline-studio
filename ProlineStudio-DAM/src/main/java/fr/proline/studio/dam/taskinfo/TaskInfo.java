@@ -235,7 +235,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
         copy(this, dest);
     }
     
-    public static void copy(TaskInfo from, TaskInfo to) {
+    private static void copy(TaskInfo from, TaskInfo to) {
         to.m_taskDescription = from.m_taskDescription;
         to.m_idList = from.m_idList;
         to.m_state = from.m_state;

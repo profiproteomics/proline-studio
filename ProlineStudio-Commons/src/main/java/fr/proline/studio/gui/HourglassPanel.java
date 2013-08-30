@@ -18,12 +18,18 @@ import javax.swing.Timer;
 public class HourglassPanel extends JPanel implements ActionListener {
     
     private boolean m_loading = false;
+    private boolean m_calculating = false;
     
     private int m_id = -1;
 
-    public void setLoading(int id) {
+    public void setLoading(int id, boolean calculating) {
         m_id = id;
+        m_calculating = calculating;
         setLoading(true);
+    }
+    
+    public void setLoading(int id) {
+       setLoading(id, false);
     }
     
     public void setLoaded(int id) {
@@ -83,8 +89,11 @@ public class HourglassPanel extends JPanel implements ActionListener {
         }
         g.setFont(m_loadingFont);
         g.setColor(Color.black);
-        g.drawString("Loading Data...", PAD+INTERNAL_PAD*2+ICON_WIDTH, height-BOX_HEIGHT-PAD+INTERNAL_PAD+m_fontAscent);
-        
+        if (m_calculating) {
+            g.drawString("Calculating...", PAD+INTERNAL_PAD*2+ICON_WIDTH, height-BOX_HEIGHT-PAD+INTERNAL_PAD+m_fontAscent);
+        } else {
+            g.drawString("Loading Data...", PAD+INTERNAL_PAD*2+ICON_WIDTH, height-BOX_HEIGHT-PAD+INTERNAL_PAD+m_fontAscent);
+        }
         
     }
     private static Font m_loadingFont = null;

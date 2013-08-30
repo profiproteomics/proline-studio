@@ -11,6 +11,7 @@ public interface DataBoxPanelInterface extends SplittedPanelContainer.UserAction
     public void setDataBox(AbstractDataBox dataBox);
     
     public void setLoading(int id);
+    public void setLoading(int id, boolean calculating);
     
     public void setLoaded(int id);
 }

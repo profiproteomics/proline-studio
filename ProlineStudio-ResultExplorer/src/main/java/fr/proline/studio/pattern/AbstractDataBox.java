@@ -198,6 +198,12 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     }
     
     
+    protected int setLoading(boolean andCalculating) {
+        final int loadingId = m_loadingId++;
+        m_panel.setLoading(loadingId, andCalculating);
+        return loadingId;
+    }
+    
     protected int setLoading() {
         final int loadingId = m_loadingId++;
         m_panel.setLoading(loadingId);

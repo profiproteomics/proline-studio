@@ -23,15 +23,19 @@ import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
+import fr.proline.studio.search.AbstractSearch;
+import fr.proline.studio.search.SearchFloatingPanel;
+import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.LazyTable;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import org.openide.util.ImageUtilities;
 import org.openide.windows.TopComponent;
 
 /**
@@ -47,13 +51,14 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     
     private PeptideMatchTable m_peptideMatchTable;
     private JScrollPane m_scrollPane;
-    private JButton m_searchButton;
-    private JTextField m_searchTextField;
     
     private MarkerContainerPanel m_markerContainerPanel;
     
     private JButton m_decoyButton;
 
+    private SearchFloatingPanel m_searchPanel;
+    private JToggleButton m_searchToggleButton;
+    
 
     public PeptideMatchPanel(boolean forRSM, boolean startingPanel) {
         m_forRSM = forRSM;
@@ -142,68 +147,119 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     private void initComponents() {
         
         setLayout(new BorderLayout());
+
+        m_searchPanel = new SearchFloatingPanel(new Search());
+        final JPanel peptideMatch = createPeptideMatchPanel();
+        m_searchPanel.setToggleButton(m_searchToggleButton);
         
-        if (m_startingPanel) {
-            JToolBar toolbar = initToolbar();
-            add(toolbar, BorderLayout.WEST);
-        }
+        final JLayeredPane layeredPane = new JLayeredPane();
+
+        layeredPane.addComponentListener(new ComponentListener() {
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                final Component c = e.getComponent();
+
+                peptideMatch.setBounds(0, 0, c.getWidth(), c.getHeight());
+                layeredPane.revalidate();
+                layeredPane.repaint();
+
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+            }
+        });
+        add(layeredPane, BorderLayout.CENTER);
         
-        JPanel internalPanel = createInternalPanel();
-        add(internalPanel, BorderLayout.CENTER);
-        
-        
-        
+        layeredPane.add(peptideMatch, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(m_searchPanel, JLayeredPane.PALETTE_LAYER);
+
     }
     
     private JToolBar initToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
         
-        IconManager.IconType iconType = (m_forRSM) ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSET_DECOY;
-        m_decoyButton = new JButton(IconManager.getIcon(iconType));
-        m_decoyButton.setToolTipText("Display Decoy Data"); 
-        m_decoyButton.setEnabled(false);
+        if (m_startingPanel) {
+            IconManager.IconType iconType = (m_forRSM) ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSET_DECOY;
+            m_decoyButton = new JButton(IconManager.getIcon(iconType));
+            m_decoyButton.setToolTipText("Display Decoy Data");
+            m_decoyButton.setEnabled(false);
 
 
-        
-        m_decoyButton.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
-                WindowBox wbox;
-                if (m_forRSM) {
-                    ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
-                    ResultSummary decoyRsm = rsm.getDecotResultSummary();
-                    if (decoyRsm == null) {
-                        return;
+            m_decoyButton.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+
+                    WindowBox wbox;
+                    if (m_forRSM) {
+                        ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                        ResultSummary decoyRsm = rsm.getDecotResultSummary();
+                        if (decoyRsm == null) {
+                            return;
+                        }
+                        wbox = WindowBoxFactory.getRsmPSMWindowBox("Decoy " + getTopComponentName(), true);
+                        wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
+
+                    } else {
+                        ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
+                        ResultSet decoyRset = rset.getDecoyResultSet();
+                        if (decoyRset == null) {
+                            return;
+                        }
+                        wbox = WindowBoxFactory.getPeptidesForRsetOnlyWindowBox("Decoy " + getTopComponentName(), true);
+                        wbox.setEntryData(m_dataBox.getProjectId(), decoyRset);
                     }
-                    wbox = WindowBoxFactory.getRsmPSMWindowBox("Decoy " + getTopComponentName(), true);
-                    wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
-                    
-                } else {
-                     ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
-                    ResultSet decoyRset = rset.getDecoyResultSet();
-                    if (decoyRset == null) {
-                        return;
-                    }
-                    wbox = WindowBoxFactory.getPeptidesForRsetOnlyWindowBox("Decoy " + getTopComponentName(), true);
-                    wbox.setEntryData(m_dataBox.getProjectId(), decoyRset);
+
+                    // open a window to display the window box
+                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                    win.open();
+                    win.requestActive();
                 }
-
-                // open a window to display the window box
-                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                win.open();
-                win.requestActive();
-            }
-        });
-        
+            });
+        }
 
         
-        toolbar.add(m_decoyButton);
+        // Search Button
+        m_searchToggleButton = new SearchToggleButton(m_searchPanel);
+        
+        if (m_startingPanel) {
+            toolbar.add(m_decoyButton);
+        }
+        toolbar.add(m_searchToggleButton);
+        
         return toolbar;
     }
-                       
+             
+    
+    private JPanel createPeptideMatchPanel() {
+        JPanel peptideMatchPanel = new JPanel();
+        peptideMatchPanel.setBounds(0, 0, 500, 400);
+
+        peptideMatchPanel.setLayout(new BorderLayout());
+
+        JPanel internalPanel = createInternalPanel();
+        peptideMatchPanel.add(internalPanel, BorderLayout.CENTER);
+
+        JToolBar toolbar = initToolbar();
+        peptideMatchPanel.add(toolbar, BorderLayout.WEST);
+
+
+        return peptideMatchPanel;
+
+    }
+    
     private JPanel createInternalPanel() {
 
         JPanel internalPanel = new JPanel();
@@ -225,19 +281,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 	m_peptideMatchTable.setFillsViewportHeight(true);
 	m_peptideMatchTable.setViewport(m_scrollPane.getViewport());
         
-        if (m_startingPanel) {
-            m_searchButton = new SearchButton();
 
-
-            m_searchTextField = new JTextField(16) {
-
-                @Override
-                public Dimension getMinimumSize() {
-                    return super.getPreferredSize();
-                }
-            };
-        }
-        
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
@@ -245,22 +289,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         c.gridwidth = 3;
         internalPanel.add(m_markerContainerPanel, c);
         
-        if (m_startingPanel) {
-            // Search available only when the panel is the first of the window
-            c.gridx = 0;
-            c.gridy++;
-            c.weighty = 0;
-            c.weightx = 1;
-            c.gridwidth = 1;
-            internalPanel.add(Box.createHorizontalGlue(), c);
 
-            c.gridx++;
-            c.weightx = 0;
-            internalPanel.add(m_searchTextField, c);
-
-            c.gridx++;
-            internalPanel.add(m_searchButton, c);
-        }
         return internalPanel;
     }
 
@@ -275,31 +304,14 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         return m_dataBox.getAddAction(splittedPanel);
     }
 
-
-    
-    
-    
-    private class SearchButton extends JButton {
+    private class Search extends AbstractSearch {
 
         String previousSearch = "";
         int searchIndex = 0;
         ArrayList<Long> peptideMatchIds = new ArrayList<>();
 
-        public SearchButton() {
-            
-            setIcon(new javax.swing.ImageIcon(ImageUtilities.loadImage ("fr/proline/studio/images/search.png")));
-            setMargin(new Insets(1,1,1,1));
-            
-            addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    doSearch();
-                }
-            });
-        }
-
-        public void sortingChanged() {
+        @Override
+        public void reinitSearch() {
             if (peptideMatchIds.isEmpty()) {
                 return;
             }
@@ -307,9 +319,9 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).sortAccordingToModel(peptideMatchIds);
         }
 
-        private void doSearch() {
-
-            final String searchText = m_searchTextField.getText().trim().toUpperCase();
+        @Override
+        public void doSearch(String text) {
+            final String searchText = text.trim().toUpperCase();
 
             if (searchText.compareTo(previousSearch) == 0) {
                 // search already done, display next result
@@ -350,7 +362,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
 
                         //System.out.println("Ids size "+proteinSetIds.size());
-                        m_searchButton.setEnabled(true);
+                        m_searchPanel.enableSearch(true);
                     }
                 };
 
@@ -360,10 +372,13 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                 // Load data if needed asynchronously
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideMatchTask(callback, m_dataBox.getProjectId(), rsetId, searchText, peptideMatchIds));
 
-                m_searchButton.setEnabled(false);
+                m_searchPanel.enableSearch(false);
             }
         }
     }
+    
+    
+ 
 
     private class PeptideMatchTable extends LazyTable {
 

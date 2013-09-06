@@ -17,16 +17,20 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.search.AbstractSearch;
+import fr.proline.studio.search.SearchFloatingPanel;
+import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.LazyTable;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import org.jdesktop.swingx.renderer.DefaultTableRenderer;
-import org.openide.util.ImageUtilities;
 import org.openide.windows.TopComponent;
 
 /**
@@ -41,12 +45,15 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     
     private JScrollPane m_proteinGroupScrollPane;
     private ProteinGroupTable m_proteinGroupTable;
-    private JButton m_searchButton;
-    private JTextField m_searchTextField;
+
     private MarkerContainerPanel m_markerContainerPanel;
     
     private boolean m_forRSM;
     private JButton m_decoyButton;
+    
+    private SearchFloatingPanel m_searchPanel;
+    private JToggleButton m_searchToggleButton;
+    private Search m_search = null;
     
     /**
      * Creates new form ProteinGroupsTablePanel
@@ -135,20 +142,70 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         return "";
     }
 
+    
+    
     private void initComponents() {
+
+
+        setLayout(new BorderLayout());
+
+        m_search = new Search();
+        m_searchPanel = new SearchFloatingPanel(m_search);
+        final JPanel proteinSetPanel = createProteinSetPanel();
+        m_searchPanel.setToggleButton(m_searchToggleButton);
+
+        final JLayeredPane layeredPane = new JLayeredPane();
+
+        layeredPane.addComponentListener(new ComponentListener() {
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                final Component c = e.getComponent();
+
+                proteinSetPanel.setBounds(0, 0, c.getWidth(), c.getHeight());
+                layeredPane.revalidate();
+                layeredPane.repaint();
+
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+            }
+        });
+        add(layeredPane, BorderLayout.CENTER);
+
+        layeredPane.add(proteinSetPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(m_searchPanel, JLayeredPane.PALETTE_LAYER);
+
+
+    }
+    
+    
+    private JPanel createProteinSetPanel() {
+        
+        JPanel proteinSetPanel = new JPanel();
+        proteinSetPanel.setBounds(0, 0, 500, 400);
+        proteinSetPanel.setLayout(new BorderLayout());
+        
+         JPanel internalPanel = createInternalPanel();
         
         if (m_forRSM) {
             JToolBar toolbar = initToolbar();
-            JPanel internalPanel = createInternalPanel();
-
-            setLayout(new BorderLayout());
-            add(toolbar, BorderLayout.WEST);
-            add(internalPanel, BorderLayout.CENTER);
+            proteinSetPanel.add(toolbar, BorderLayout.WEST);
+            proteinSetPanel.add(internalPanel, BorderLayout.CENTER);
         } else {
-            JPanel internalPanel = createInternalPanel();
-            setLayout(new BorderLayout());
-            add(internalPanel, BorderLayout.CENTER);
+            proteinSetPanel.add(internalPanel, BorderLayout.CENTER);
         }
+        
+        return proteinSetPanel;
     }
     
     private JToolBar initToolbar() {
@@ -182,9 +239,12 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             }
         });
         
+        // Search Button
+        m_searchToggleButton = new SearchToggleButton(m_searchPanel);
 
         
         toolbar.add(m_decoyButton);
+        toolbar.add(m_searchToggleButton);
         return toolbar;
     }
     
@@ -215,32 +275,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         m_proteinGroupTable.displayColumnAsPercentage(ProteinGroupTableModel.COLTYPE_PROTEIN_SCORE);
 
 
-        
-        m_searchButton = new SearchButton();
-        try {
-            m_searchButton.setIcon(new javax.swing.ImageIcon(ImageUtilities.loadImage ("fr/proline/studio/images/search.png")));
-        } catch (NullPointerException e) {
-            // Hack : netbeans editor introspection does
-            // not work when this panel is added to another component
-        }
 
-        
-        m_searchTextField = new JTextField(16) {
-            @Override
-            public Dimension getMinimumSize() {
-                return super.getPreferredSize();
-            }
-            
-        };
-        m_searchTextField.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_searchButton.doClick();
-            }
-        });
-        
-        
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
@@ -248,112 +283,11 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         c.gridwidth = 3;
         internalPanel.add(m_markerContainerPanel, c);
         
-        c.gridx = 0;
-        c.gridy++;
-        c.weighty = 0;
-        c.weightx = 1;
-        c.gridwidth = 1;
-        internalPanel.add(Box.createHorizontalGlue(), c);
-        
-        c.gridx++;
-        c.weightx = 0;
-        internalPanel.add(m_searchTextField, c);
-        
-        c.gridx++;
-        internalPanel.add(m_searchButton, c);
+
         
         return internalPanel;
     }                 
 
-
-    
-    private class SearchButton extends JButton  {
-
-        String previousSearch = "";
-        int searchIndex = 0;
-        ArrayList<Long> proteinSetIds = new ArrayList<>();
-
-        
-        public SearchButton() {
-            
-            setIcon(new ImageIcon(ImageUtilities.loadImage ("fr/proline/studio/images/search.png")));
-            setMargin(new Insets(1,1,1,1));
-            
-            addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    doSearch();
-                }
-            });
-        }
-        
-        public void sortingChanged() {
-            if (proteinSetIds.isEmpty()) {
-                return;
-            }
-            searchIndex = -1;
-            ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).sortAccordingToModel(proteinSetIds);
-        }
-        
-        private void doSearch() {
-            
-            final String searchText = m_searchTextField.getText().trim().toUpperCase();
-
-            if (searchText.compareTo(previousSearch) == 0) {
-                // search already done, display next result
-                searchIndex++;
-                if (searchIndex >= proteinSetIds.size()) {
-                    searchIndex = 0;
-                }
-                
-                if (!proteinSetIds.isEmpty()) {
-                    ((ProteinGroupTable) m_proteinGroupTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
-                }
-                
-            } else {
-                previousSearch = searchText;
-                searchIndex = 0;
-
-                // prepare callback for the search
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                        // contruct the Map of proteinSetId
-                        
-                        
-                        if (!proteinSetIds.isEmpty()) {
-                            
-                            ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).sortAccordingToModel(proteinSetIds);
-
-                            ((ProteinGroupTable) m_proteinGroupTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
-                            
-                        }
-
-
-                        //System.out.println("Ids size "+proteinSetIds.size());
-                        m_searchButton.setEnabled(true);
-                    }
-                };
-
-                Long rsmId = ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).getResultSummaryId();
-
-
-                // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchProteinSetsTask(callback, m_dataBox.getProjectId() ,rsmId, searchText, proteinSetIds));
-
-                m_searchButton.setEnabled(false);
-            }
-        }
-        
-    }
     
     private class ProteinGroupTable extends LazyTable  {
         /** 
@@ -464,7 +398,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         
         @Override
         public void sortingChanged(int col) {
-            ((SearchButton)m_searchButton).sortingChanged();
+            m_search.reinitSearch();
         }
     
         public void selectionWillBeRestored(boolean b) {
@@ -477,5 +411,78 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     
 
     
+    private class Search extends AbstractSearch {
+
+        String previousSearch = "";
+        int searchIndex = 0;
+        ArrayList<Long> proteinSetIds = new ArrayList<>();
+
+        @Override
+        public void reinitSearch() {
+            if (proteinSetIds.isEmpty()) {
+                return;
+            }
+            searchIndex = -1;
+            ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).sortAccordingToModel(proteinSetIds);
+        }
+
+        @Override
+        public void doSearch(String text) {
+            final String searchText = text.trim().toUpperCase();
+
+            if (searchText.compareTo(previousSearch) == 0) {
+                // search already done, display next result
+                searchIndex++;
+                if (searchIndex >= proteinSetIds.size()) {
+                    searchIndex = 0;
+                }
+                
+                if (!proteinSetIds.isEmpty()) {
+                    ((ProteinGroupTable) m_proteinGroupTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
+                }
+                
+            } else {
+                previousSearch = searchText;
+                searchIndex = 0;
+
+                // prepare callback for the search
+                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                        // contruct the Map of proteinSetId
+                        
+                        
+                        if (!proteinSetIds.isEmpty()) {
+                            
+                            ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).sortAccordingToModel(proteinSetIds);
+
+                            ((ProteinGroupTable) m_proteinGroupTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
+                            
+                        }
+
+
+                        //System.out.println("Ids size "+proteinSetIds.size());
+                        m_searchPanel.enableSearch(true);
+                    }
+                };
+
+                Long rsmId = ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).getResultSummaryId();
+
+
+                // Load data if needed asynchronously
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchProteinSetsTask(callback, m_dataBox.getProjectId() ,rsmId, searchText, proteinSetIds));
+
+                m_searchPanel.enableSearch(false);
+            }
+        
+        }
+    }
     
 }

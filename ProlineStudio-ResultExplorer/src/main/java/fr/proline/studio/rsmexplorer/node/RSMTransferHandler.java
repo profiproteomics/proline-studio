@@ -105,6 +105,20 @@ public class RSMTransferHandler extends TransferHandler {
  
             }
 
+            // a selected node in a merged parent can not be transferred
+            int nbKeptNodes = keptNodes.size();
+             for (int i=0;i<nbKeptNodes;i++) {
+                 RSMNode curNode = keptNodes.get(i);
+                 RSMNode parentNode = (RSMNode) curNode.getParent();
+                 if (parentNode instanceof RSMDataSetNode) {
+                     RSMDataSetNode parentDatasetNode = (RSMDataSetNode) parentNode;
+                     if ((parentDatasetNode.hasResultSet()) || (parentDatasetNode.hasResultSummary())) {
+                         // parent is a merged dataset : no transfer possible
+                         return null;
+                     }
+                 }
+             }
+            
 
             RSMTransferable.TransferData data = new RSMTransferable.TransferData();
             data.setNodeList(keptNodes);
@@ -165,6 +179,10 @@ public class RSMTransferHandler extends TransferHandler {
             } else if ( nodeType == RSMNode.NodeTypes.PROJECT) {
                 RSMProjectNode dropProjectNode = (RSMProjectNode) dropRSMNode;
                 dropProjectId = dropProjectNode.getProject().getId();
+                if (((JTree.DropLocation) support.getDropLocation()).getChildIndex() == 0) {
+                    // drop can not been done in Project before the All imported
+                    return false;
+                }
             } else {
                 return false;
             }

@@ -209,7 +209,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         public static final int COLTYPE_TASKINFO_CATEGORY = 2;
         public static final int COLTYPE_DESCRIPTION = 3;
         public static final int COLTYPE_PERCENTAGE = 4;
-        private static final String[] columnNames = {"", "id", "Category", "Task Description", "Realization"};
+        private static final String[] columnNames = {"", "id", "Category", "Task Description", "Progress"};
         private ArrayList<TaskInfo> m_taskInfoList = null;
 
         public boolean updateData() {

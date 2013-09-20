@@ -1,10 +1,8 @@
 package fr.proline.studio.parameter;
 
 
-import java.awt.FlowLayout;
+
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 /**
  *

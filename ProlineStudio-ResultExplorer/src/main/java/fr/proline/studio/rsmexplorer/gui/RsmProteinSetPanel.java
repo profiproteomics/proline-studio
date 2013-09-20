@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -14,7 +15,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.gui.model.ProteinGroupTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.search.AbstractSearch;
@@ -43,8 +44,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     private AbstractDataBox m_dataBox;
     
-    private JScrollPane m_proteinGroupScrollPane;
-    private ProteinGroupTable m_proteinGroupTable;
+    private JScrollPane m_proteinSetScrollPane;
+    private ProteinSetTable m_proteinSetTable;
 
     private MarkerContainerPanel m_markerContainerPanel;
     
@@ -54,6 +55,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
     private Search m_search = null;
+    
+    private FilterButton m_filterButton;
     
     /**
      * Creates new form ProteinGroupsTablePanel
@@ -77,27 +80,27 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         }
         
         
-        ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).setData(taskId, proteinSets);
+        ((ProteinSetTableModel) m_proteinSetTable.getModel()).setData(taskId, proteinSets);
 
         // select the first row
         if ((proteinSets != null) && (proteinSets.length > 0)) {
-            m_proteinGroupTable.getSelectionModel().setSelectionInterval(0, 0);
+            m_proteinSetTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(proteinSets.length);
         }
         
         if (finished) {
-            m_proteinGroupTable.setSortable(true);
+            m_proteinSetTable.setSortable(true);
         }
     }
 
     public void dataUpdated(SubTask subTask, boolean finished) {
-        ((ProteinGroupTable) m_proteinGroupTable).dataUpdated(subTask, finished);
+        ((ProteinSetTable) m_proteinSetTable).dataUpdated(subTask, finished);
     }
 
     public DProteinSet getSelectedProteinSet() {
 
         // Retrieve Selected Row
-        int selectedRow = m_proteinGroupTable.getSelectedRow();
+        int selectedRow = m_proteinSetTable.getSelectedRow();
 
 
         // nothing selected
@@ -107,12 +110,12 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         }
 
         // convert according to the sorting
-        selectedRow = m_proteinGroupTable.convertRowIndexToModel(selectedRow);
+        selectedRow = m_proteinSetTable.convertRowIndexToModel(selectedRow);
 
 
 
         // Retrieve ProteinSet selected
-        ProteinGroupTableModel tableModel = (ProteinGroupTableModel) m_proteinGroupTable.getModel();
+        ProteinSetTableModel tableModel = (ProteinSetTableModel) m_proteinSetTable.getModel();
         return tableModel.getProteinSet(selectedRow);
     }
 
@@ -242,9 +245,12 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
 
+        m_filterButton = new FilterButton(((ProteinSetTableModel) m_proteinSetTable.getModel()));
+
         
         toolbar.add(m_decoyButton);
         toolbar.add(m_searchToggleButton);
+        toolbar.add(m_filterButton);
         return toolbar;
     }
     
@@ -259,20 +265,20 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         // create objects
-        m_proteinGroupScrollPane = new JScrollPane();
+        m_proteinSetScrollPane = new JScrollPane();
         
-        m_proteinGroupTable = new ProteinGroupTable();
-        m_proteinGroupTable.setModel(new ProteinGroupTableModel((LazyTable)m_proteinGroupTable));
+        m_proteinSetTable = new ProteinSetTable();
+        m_proteinSetTable.setModel(new ProteinSetTableModel((LazyTable)m_proteinSetTable));
         
         
 
-        m_markerContainerPanel = new MarkerContainerPanel(m_proteinGroupScrollPane, (ProteinGroupTable) m_proteinGroupTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_proteinSetScrollPane, (ProteinSetTable) m_proteinSetTable);
         
-        m_proteinGroupScrollPane.setViewportView(m_proteinGroupTable);
-        m_proteinGroupTable.setFillsViewportHeight(true);
-        m_proteinGroupTable.setViewport(m_proteinGroupScrollPane.getViewport());
+        m_proteinSetScrollPane.setViewportView(m_proteinSetTable);
+        m_proteinSetTable.setFillsViewportHeight(true);
+        m_proteinSetTable.setViewport(m_proteinSetScrollPane.getViewport());
         
-        m_proteinGroupTable.displayColumnAsPercentage(ProteinGroupTableModel.COLTYPE_PROTEIN_SCORE);
+        m_proteinSetTable.displayColumnAsPercentage(ProteinSetTableModel.COLTYPE_PROTEIN_SCORE);
 
 
 
@@ -289,7 +295,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }                 
 
     
-    private class ProteinGroupTable extends LazyTable  {
+    private class ProteinSetTable extends LazyTable  {
         /** 
          * Called whenever the value of the selection changes.
          * @param e the event that characterizes the change.
@@ -298,12 +304,12 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         DProteinSet proteinSetSelected = null;
         
         
-        public ProteinGroupTable() {
-            super(m_proteinGroupScrollPane.getVerticalScrollBar() );
+        public ProteinSetTable() {
+            super(m_proteinSetScrollPane.getVerticalScrollBar() );
             
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             
-            setDefaultRenderer(ProteinGroupTableModel.ProteinCount.class, new DefaultRightAlignRenderer(new DefaultTableRenderer()));
+            setDefaultRenderer(ProteinSetTableModel.ProteinCount.class, new DefaultRightAlignRenderer(new DefaultTableRenderer()));
         }
         
         /** 
@@ -323,11 +329,11 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         }
         
-        public void selectProteinSet(Long proteinSetId, String searchText) {
-            ProteinGroupTableModel tableModel = (ProteinGroupTableModel) getModel();
+        public boolean selectProteinSet(Long proteinSetId, String searchText) {
+            ProteinSetTableModel tableModel = (ProteinSetTableModel) getModel();
             int row = tableModel.findRow(proteinSetId);
             if (row == -1) {
-                return;
+                return false;
             }
             
             // JPM.hack we need to keep the search text
@@ -346,6 +352,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
             searchTextBeingDone = null;
             
+            return true;
         }
         String searchTextBeingDone = null;
 
@@ -363,7 +370,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             
             selectionWillBeRestored(true);
             try {
-                ((ProteinGroupTableModel) getModel()).dataUpdated();
+                ((ProteinSetTableModel) getModel()).dataUpdated();
             } finally {
                 selectionWillBeRestored(false);
             }
@@ -379,8 +386,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((ProteinGroupTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
-                    ((ProteinGroupTable) m_proteinGroupTable).scrollRowToVisible(rowSelectedInView);
+                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((ProteinSetTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                    ((ProteinSetTable) m_proteinSetTable).scrollRowToVisible(rowSelectedInView);
                 }
                     
             }
@@ -423,7 +430,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 return;
             }
             searchIndex = -1;
-            ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).sortAccordingToModel(proteinSetIds);
+            ((ProteinSetTableModel) m_proteinSetTable.getModel()).sortAccordingToModel(proteinSetIds);
         }
 
         @Override
@@ -431,19 +438,35 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             final String searchText = text.trim().toUpperCase();
 
             if (searchText.compareTo(previousSearch) == 0) {
-                // search already done, display next result
-                searchIndex++;
-                if (searchIndex >= proteinSetIds.size()) {
-                    searchIndex = 0;
-                }
                 
-                if (!proteinSetIds.isEmpty()) {
-                    ((ProteinGroupTable) m_proteinGroupTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
+                int checkLoopIndex = -1;
+                while (true) {
+                    // search already done, display next result
+                    searchIndex++;
+                    if (searchIndex >= proteinSetIds.size()) {
+                        searchIndex = 0;
+                    }
+
+                    if (checkLoopIndex == searchIndex) {
+                        break;
+                    }
+                    
+                    if (!proteinSetIds.isEmpty()) {
+                        boolean found = ((ProteinSetTable) m_proteinSetTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
+                        if (found) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                    if (checkLoopIndex == -1) {
+                        checkLoopIndex =  searchIndex;
+                    }
                 }
                 
             } else {
                 previousSearch = searchText;
-                searchIndex = 0;
+                searchIndex = -1;
 
                 // prepare callback for the search
                 AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -461,9 +484,32 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                         
                         if (!proteinSetIds.isEmpty()) {
                             
-                            ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).sortAccordingToModel(proteinSetIds);
+                            ((ProteinSetTableModel) m_proteinSetTable.getModel()).sortAccordingToModel(proteinSetIds);
 
-                            ((ProteinGroupTable) m_proteinGroupTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
+                             int checkLoopIndex = -1;
+                            while (true) {
+                                // search already done, display next result
+                                searchIndex++;
+                                if (searchIndex >= proteinSetIds.size()) {
+                                    searchIndex = 0;
+                                }
+
+                                if (checkLoopIndex == searchIndex) {
+                                    break;
+                                }
+
+                                if (!proteinSetIds.isEmpty()) {
+                                    boolean found = ((ProteinSetTable) m_proteinSetTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
+                                    if (found) {
+                                        break;
+                                    }
+                                } else {
+                                    break;
+                                }
+                                if (checkLoopIndex == -1) {
+                                    checkLoopIndex = searchIndex;
+                                }
+                            }
                             
                         }
 
@@ -473,7 +519,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                     }
                 };
 
-                Long rsmId = ((ProteinGroupTableModel) m_proteinGroupTable.getModel()).getResultSummaryId();
+                Long rsmId = ((ProteinSetTableModel) m_proteinSetTable.getModel()).getResultSummaryId();
 
 
                 // Load data if needed asynchronously

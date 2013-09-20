@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
+import fr.proline.studio.filter.*;
 import fr.proline.studio.utils.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,7 +12,7 @@ import java.util.HashSet;
  * Table Model for Protein Sets
  * @author JM235353
  */
-public class ProteinGroupTableModel extends LazyTableModel {
+public class ProteinSetTableModel extends FilterTableModel implements FilterTableModelInterface {
 
     public static final int COLTYPE_PROTEIN_GROUPS_NAME = 0;
     public static final int COLTYPE_PROTEIN_SCORE = 1;
@@ -20,12 +21,17 @@ public class ProteinGroupTableModel extends LazyTableModel {
     public static final int COLTYPE_SPECTRAL_COUNT = 4;
     public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 5;
     private static final String[] m_columnNames = {"Protein Set", "Score", "Proteins", "Peptides", "Peptide Match Count", "Specific Peptide Match Count"};
+    
     private DProteinSet[] m_proteinSets = null;
+    
+    private ArrayList<Integer> m_filteredIds = null;
+    private boolean m_isFiltering = false;
+    private boolean m_filteringAsked = false;
     
 
     
     
-    public ProteinGroupTableModel(LazyTable table) {
+    public ProteinSetTableModel(LazyTable table) {
         super(table);
     }
     
@@ -74,13 +80,22 @@ public class ProteinGroupTableModel extends LazyTableModel {
         if (m_proteinSets == null) {
             return 0;
         }
+        if (m_filteredIds != null) {
+            return m_filteredIds.size();
+        }
         return m_proteinSets.length;
     }
 
     @Override
     public Object getValueAt(int row, int col) {
+        
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+        
         // Retrieve Protein Set
-        DProteinSet proteinSet = m_proteinSets[row];
+        DProteinSet proteinSet = m_proteinSets[rowFiltered];
         long rsmId = proteinSet.getResultSummaryId();
 
         switch (col) {
@@ -191,7 +206,14 @@ public class ProteinGroupTableModel extends LazyTableModel {
         
         updateMinMax();
         
-        fireTableDataChanged();
+        if (m_filteringAsked) {
+            m_filteringAsked = false;
+            filter();
+        } else {
+            fireTableDataChanged();
+        }
+        
+        
     }
     
     private void updateMinMax() {
@@ -203,7 +225,10 @@ public class ProteinGroupTableModel extends LazyTableModel {
         double maxScore = 0;
         int size = getRowCount();
         for (int i = 0; i < size; i++) {
-            DProteinSet proteinSet = m_proteinSets[i];
+            
+            // Retrieve Protein Set
+            DProteinSet proteinSet = getProteinSet(i);
+
             DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
             if (proteinMatch != null) {
                 long rsmId = proteinSet.getResultSummaryId();
@@ -221,10 +246,19 @@ public class ProteinGroupTableModel extends LazyTableModel {
     
         // no need to do an updateMinMax : scores are known at once
         
-        fireTableDataChanged();
+        if (m_filteredIds != null) {
+            filter();
+        } else {
+            fireTableDataChanged();
+        }
     }
 
     public DProteinSet getProteinSet(int i) {
+        
+        if (m_filteredIds != null) {
+            i = m_filteredIds.get(i).intValue();
+        }
+        
         return m_proteinSets[i];
     }
     
@@ -237,6 +271,17 @@ public class ProteinGroupTableModel extends LazyTableModel {
     }
 
     public int findRow(long proteinSetId) {
+        
+        if (m_filteredIds != null) {
+            int nb = m_filteredIds.size();
+            for (int i = 0; i < nb; i++) {
+                if (proteinSetId == m_proteinSets[m_filteredIds.get(i)].getId()) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        
         int nb = m_proteinSets.length;
         for (int i=0;i<nb;i++) {
             if (proteinSetId == m_proteinSets[i].getId()) {
@@ -258,16 +303,102 @@ public class ProteinGroupTableModel extends LazyTableModel {
         HashSet<Long> proteinSetIdMap = new HashSet<>(proteinSetIds.size());
         proteinSetIdMap.addAll(proteinSetIds);
         
-        int nb = m_proteinSets.length;
+        int nb = getRowCount();
         int iCur = 0;
         for (int iView=0;iView<nb;iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
-            DProteinSet ps = m_proteinSets[iModel];
+            // Retrieve Protein Set
+            DProteinSet ps = getProteinSet(iModel);
             if (  proteinSetIdMap.contains(ps.getId())  ) {
                 proteinSetIds.set(iCur++,ps.getId());
             }
         }
         
+        // need to refilter
+        if (m_filteredIds != null) { // NEEDED ????
+            filter();
+        }
+    }
+
+
+
+    @Override
+    public void filter() {
+        
+        if (m_proteinSets == null) {
+            // filtering not possible for the moment
+            m_filteringAsked = true;
+            return;
+        }
+        
+        m_isFiltering = true;
+        try {
+
+            int nbData = m_proteinSets.length;
+            if (m_filteredIds == null) {
+                m_filteredIds = new ArrayList<>(nbData);
+            } else {
+                m_filteredIds.clear();
+            }
+
+            for (int i = 0; i < nbData; i++) {
+                if (!filter(i)) {
+                    continue;
+                }
+                m_filteredIds.add(Integer.valueOf(i));
+            }
+
+        } finally {
+            m_isFiltering = false;
+        }
+        fireTableDataChanged();
+    }
+
+    
+    @Override
+    public boolean filter(int row, int col) {
+        Filter filter = getColumnFilter(col);
+        if ((filter == null) || (!filter.isUsed())) {
+            return true;
+        }
+        
+        Object data = ((LazyData) getValueAt(row, col)).getData();
+        if (data == null) {
+            return true; // should not happen
+        }
+        
+        switch (col) {
+            case COLTYPE_PROTEIN_GROUPS_NAME: {
+                return ((StringFilter) filter).filter((String)data);
+            }
+            case COLTYPE_PROTEIN_SCORE: {
+                return ((DoubleFilter) filter).filter((Float)data);
+            }
+            case COLTYPE_PROTEINS_COUNT:
+            case COLTYPE_PEPTIDES_COUNT:
+            case COLTYPE_SPECTRAL_COUNT:
+            case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
+                return ((IntegerFilter) filter).filter((Integer)data);
+            }
+    
+        }
+        
+        return true; // should never happen
+    }
+
+
+    @Override
+    public void initFilters() {
+        if (m_filters == null) {
+            int nbCol = getColumnCount();
+            m_filters = new Filter[nbCol];
+            m_filters[COLTYPE_PROTEIN_GROUPS_NAME] = new StringFilter(getColumnName(COLTYPE_PROTEIN_GROUPS_NAME));
+            m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
+            m_filters[COLTYPE_PROTEINS_COUNT] = null;
+            m_filters[COLTYPE_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT));
+            m_filters[COLTYPE_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECTRAL_COUNT));
+            m_filters[COLTYPE_SPECIFIC_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECIFIC_SPECTRAL_COUNT));
+        }
     }
 
 

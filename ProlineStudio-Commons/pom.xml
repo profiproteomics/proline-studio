@@ -135,6 +135,7 @@
                         <publicPackage>fr.proline.studio</publicPackage>
                         <publicPackage>fr.proline.studio.action</publicPackage>
                         <publicPackage>fr.proline.studio.dbs</publicPackage>
+                        <publicPackage>fr.proline.studio.filter</publicPackage>
                         <publicPackage>fr.proline.studio.gui</publicPackage>
                         <publicPackage>fr.proline.studio.markerbar</publicPackage>
                         <publicPackage>fr.proline.studio.parameter</publicPackage>

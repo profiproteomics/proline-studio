@@ -9,6 +9,7 @@ import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import fr.proline.studio.rsmexplorer.actions.PropertiesAction;
 import fr.proline.studio.utils.IconManager;
+import java.util.Enumeration;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.nodes.Sheet;
@@ -145,9 +146,14 @@ public class RSMDataSetNode extends RSMNode {
             return false;
         }
         
-        
-        
-        
+        Enumeration e = children();
+        while (e.hasMoreElements()) {
+            RSMNode child = (RSMNode) e.nextElement();
+            if (!child.canBeDeleted()) {
+                return false;
+            }
+        }
+
         return true;
         
     }

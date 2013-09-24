@@ -28,7 +28,7 @@ public class FilterButton extends JButton implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         FilterDialog dialog = FilterDialog.getDialog(WindowManager.getDefault().getMainWindow());
-        dialog.setLocation(getX() + getWidth() + 5, getY() + getHeight() + 5);
+        dialog.setLocation( getLocationOnScreen().x + getWidth() + 5,  getLocationOnScreen().y + getHeight() + 5);
         Filter[] filters = m_tableModelFilterInterface.getFilters();
         dialog.setFilers(filters);
         dialog.setVisible(true);

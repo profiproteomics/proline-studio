@@ -73,21 +73,23 @@ public class DoubleFilter extends Filter {
                 } catch (NumberFormatException nfe) {
                     // should never happen
                 }
-
-                String maxValue = ((JTextField) getComponent(VALUE_MAX)).getText().trim();
-                if ((maxValue == null) || (maxValue.length() == 0)) {
-                    m_max = null;
-                } else {
-                    try {
-                        m_max = Double.parseDouble(maxValue);
-                    } catch (NumberFormatException nfe) {
-                        // should never happen
-                    }
+            }
+            
+            String maxValue = ((JTextField) getComponent(VALUE_MAX)).getText().trim();
+            if ((maxValue == null) || (maxValue.length() == 0)) {
+                m_max = null;
+            } else {
+                try {
+                    m_max = Double.parseDouble(maxValue);
+                } catch (NumberFormatException nfe) {
+                    // should never happen
                 }
-
             }
         }
-        
+
+
+
+
         registerDefinedAsUsed();
     }
     

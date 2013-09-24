@@ -1,14 +1,14 @@
 package fr.proline.studio.utils;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
-import javax.swing.table.AbstractTableModel;
+import fr.proline.studio.filter.FilterTableModel;
 
 
 /**
  * Table Model to deal with LazyData (data which will be loaded later)
  * @author JM235353
  */
-public abstract class LazyTableModel extends AbstractTableModel {
+public abstract class LazyTableModel extends FilterTableModel {
     
     protected LazyTable m_table;
     protected Long m_taskId = null;

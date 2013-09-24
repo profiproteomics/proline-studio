@@ -487,7 +487,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                             ((ProteinSetTableModel) m_proteinSetTable.getModel()).sortAccordingToModel(proteinSetIds);
 
                              int checkLoopIndex = -1;
-                            while (true) {
+                             while (true) {
                                 // search already done, display next result
                                 searchIndex++;
                                 if (searchIndex >= proteinSetIds.size()) {

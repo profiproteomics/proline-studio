@@ -12,7 +12,7 @@ import java.util.HashSet;
  * Table Model for Protein Sets
  * @author JM235353
  */
-public class ProteinSetTableModel extends FilterTableModel implements FilterTableModelInterface {
+public class ProteinSetTableModel extends LazyTableModel {
 
     public static final int COLTYPE_PROTEIN_GROUPS_NAME = 0;
     public static final int COLTYPE_PROTEIN_SCORE = 1;
@@ -80,7 +80,7 @@ public class ProteinSetTableModel extends FilterTableModel implements FilterTabl
         if (m_proteinSets == null) {
             return 0;
         }
-        if (m_filteredIds != null) {
+       if ((!m_isFiltering) && (m_filteredIds != null)) {
             return m_filteredIds.size();
         }
         return m_proteinSets.length;

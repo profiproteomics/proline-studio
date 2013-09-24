@@ -1,19 +1,18 @@
 package fr.proline.studio.filter;
 
-import fr.proline.studio.utils.LazyTable;
-import fr.proline.studio.utils.LazyTableModel;
+
+import javax.swing.table.AbstractTableModel;
 
 /**
  *
  * @author JM235353
  */
-public abstract class FilterTableModel extends LazyTableModel implements FilterTableModelInterface {
+public abstract class FilterTableModel extends AbstractTableModel implements FilterTableModelInterface {
 
     protected Filter[] m_filters = null;
 
     
-    public FilterTableModel(LazyTable table) {
-        super(table);
+    public FilterTableModel() {
     }
     
     @Override

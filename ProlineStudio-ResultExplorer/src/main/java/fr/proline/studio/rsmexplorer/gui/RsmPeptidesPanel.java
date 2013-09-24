@@ -7,6 +7,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -50,6 +51,8 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
 
+    private FilterButton m_filterButton;
+    
     public RsmPeptidesPanel() {
         initComponents();
 
@@ -143,9 +146,11 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
 
+        m_filterButton = new FilterButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()));
 
         toolbar.add(m_decoyButton);
         toolbar.add(m_searchToggleButton);
+        toolbar.add(m_filterButton);
         
         return toolbar;
     }
@@ -309,11 +314,11 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
         }
 
-        public void selectPeptideInstance(Long peptideInstanceId, String searchText) {
+        public boolean selectPeptideInstance(Long peptideInstanceId, String searchText) {
             PeptideInstanceTableModel tableModel = (PeptideInstanceTableModel) getModel();
             int row = tableModel.findRow(peptideInstanceId);
             if (row == -1) {
-                return;
+                return false;
             }
 
             // JPM.hack we need to keep the search text
@@ -332,6 +337,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
             searchTextBeingDone = null;
 
+            return true;
         }
         String searchTextBeingDone = null;
 
@@ -410,21 +416,36 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         public void doSearch(String text) {
             final String searchText = text.trim().toUpperCase();
 
-
             if (searchText.compareTo(previousSearch) == 0) {
-                // search already done, display next result
-                searchIndex++;
-                if (searchIndex >= peptideInstanceIds.size()) {
-                    searchIndex = 0;
-                }
+                
+                int checkLoopIndex = -1;
+                while (true) {
+                    // search already done, display next result
+                    searchIndex++;
+                    if (searchIndex >= peptideInstanceIds.size()) {
+                        searchIndex = 0;
+                    }
 
-                if (!peptideInstanceIds.isEmpty()) {
-                    ((PeptideInstanceTable) m_peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
+                    if (checkLoopIndex == searchIndex) {
+                        break;
+                    }
+                    
+                    if (!peptideInstanceIds.isEmpty()) {
+                        boolean found = ((PeptideInstanceTable) m_peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
+                        if (found) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                    if (checkLoopIndex == -1) {
+                        checkLoopIndex =  searchIndex;
+                    }
                 }
-
+                
             } else {
                 previousSearch = searchText;
-                searchIndex = 0;
+                searchIndex = -1;
 
                 // prepare callback for the search
                 AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -444,7 +465,31 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
                             ((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()).sortAccordingToModel(peptideInstanceIds);
 
-                            ((PeptideInstanceTable) m_peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
+                            
+                             int checkLoopIndex = -1;
+                             while (true) {
+                                // search already done, display next result
+                                searchIndex++;
+                                if (searchIndex >= peptideInstanceIds.size()) {
+                                    searchIndex = 0;
+                                }
+
+                                if (checkLoopIndex == searchIndex) {
+                                    break;
+                                }
+
+                                if (!peptideInstanceIds.isEmpty()) {
+                                    boolean found = ((PeptideInstanceTable) m_peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
+                                    if (found) {
+                                        break;
+                                    }
+                                } else {
+                                    break;
+                                }
+                                if (checkLoopIndex == -1) {
+                                    checkLoopIndex = searchIndex;
+                                }
+                            }
 
                         }
 

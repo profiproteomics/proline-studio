@@ -24,6 +24,7 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import fr.proline.studio.dam.tasks.*;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
@@ -55,6 +56,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
 
+    private FilterButton m_filterButton;
 
     public RsetProteinsPanel(boolean startingPanel) {
 
@@ -158,11 +160,15 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
        
+        m_filterButton = new FilterButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()));
+        
 
         if (m_startingPanel) {
             toolbar.add(m_decoyButton);
         }
         toolbar.add(m_searchToggleButton);
+        toolbar.add(m_filterButton);
+        
         return toolbar;
     }
 
@@ -402,11 +408,11 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
             }
         }
 
-        public void selectProteinMatch(Long proteinMatchId, String searchText) {
+        public boolean selectProteinMatch(Long proteinMatchId, String searchText) {
             ProteinsOfPeptideMatchTableModel tableModel = (ProteinsOfPeptideMatchTableModel) getModel();
             int row = tableModel.findRow(proteinMatchId);
             if (row == -1) {
-                return;
+                return false;
             }
 
             // JPM.hack we need to keep the search text
@@ -424,6 +430,8 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
             scrollRowToVisible(row);
 
             searchTextBeingDone = null;
+            
+            return true;
 
         }
         String searchTextBeingDone = null;
@@ -453,17 +461,34 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         public void doSearch(String text) {
             final String searchText = text.trim().toUpperCase();
 
-            if (searchText.compareTo(previousSearch) == 0) {
-                // search already done, display next result
-                searchIndex++;
-                if (searchIndex >= proteinMatchIds.size()) {
-                    searchIndex = 0;
-                }
+            
+             if (searchText.compareTo(previousSearch) == 0) {
+                
+                int checkLoopIndex = -1;
+                while (true) {
+                    // search already done, display next result
+                    searchIndex++;
+                    if (searchIndex >= proteinMatchIds.size()) {
+                        searchIndex = 0;
+                    }
 
-                if (!proteinMatchIds.isEmpty()) {
-                    ((ProteinTable) m_proteinTable).selectProteinMatch(proteinMatchIds.get(searchIndex), searchText);
+                    if (checkLoopIndex == searchIndex) {
+                        break;
+                    }
+                    
+                    if (!proteinMatchIds.isEmpty()) {
+                        boolean found = ((ProteinTable) m_proteinTable).selectProteinMatch(proteinMatchIds.get(searchIndex), searchText);
+                        if (found) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                    if (checkLoopIndex == -1) {
+                        checkLoopIndex =  searchIndex;
+                    }
                 }
-
+                
             } else {
                 previousSearch = searchText;
                 searchIndex = 0;
@@ -484,7 +509,34 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
                             ((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()).sortAccordingToModel(proteinMatchIds);
 
-                            ((ProteinTable) m_proteinTable).selectProteinMatch(proteinMatchIds.get(searchIndex), searchText);
+                            
+                                                      int checkLoopIndex = -1;
+                             while (true) {
+                                // search already done, display next result
+                                searchIndex++;
+                                if (searchIndex >= proteinMatchIds.size()) {
+                                    searchIndex = 0;
+                                }
+
+                                if (checkLoopIndex == searchIndex) {
+                                    break;
+                                }
+
+                                if (!proteinMatchIds.isEmpty()) {
+                                    boolean found = ((ProteinTable) m_proteinTable).selectProteinMatch(proteinMatchIds.get(searchIndex), searchText);
+                                    if (found) {
+                                        break;
+                                    }
+                                } else {
+                                    break;
+                                }
+                                if (checkLoopIndex == -1) {
+                                    checkLoopIndex = searchIndex;
+                                }
+                            }
+                            
+                            
+                            
 
                         }
 

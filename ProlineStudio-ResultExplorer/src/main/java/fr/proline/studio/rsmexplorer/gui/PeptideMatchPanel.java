@@ -10,6 +10,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -59,6 +60,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
     
+    private FilterButton m_filterButton;
 
     public PeptideMatchPanel(boolean forRSM, boolean startingPanel) {
         m_forRSM = forRSM;
@@ -234,10 +236,13 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
         
+        m_filterButton = new FilterButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel()));
+        
         if (m_startingPanel) {
             toolbar.add(m_decoyButton);
         }
         toolbar.add(m_searchToggleButton);
+        toolbar.add(m_filterButton);
         
         return toolbar;
     }
@@ -324,16 +329,32 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             final String searchText = text.trim().toUpperCase();
 
             if (searchText.compareTo(previousSearch) == 0) {
-                // search already done, display next result
-                searchIndex++;
-                if (searchIndex >= peptideMatchIds.size()) {
-                    searchIndex = 0;
-                }
+                
+                int checkLoopIndex = -1;
+                while (true) {
+                    // search already done, display next result
+                    searchIndex++;
+                    if (searchIndex >= peptideMatchIds.size()) {
+                        searchIndex = 0;
+                    }
 
-                if (!peptideMatchIds.isEmpty()) {
-                    ((PeptideMatchTable) m_peptideMatchTable).selectProteinSet(peptideMatchIds.get(searchIndex), searchText);
+                    if (checkLoopIndex == searchIndex) {
+                        break;
+                    }
+                    
+                    if (!peptideMatchIds.isEmpty()) {
+                        boolean found = ((PeptideMatchTable) m_peptideMatchTable).selectPeptideMatch(peptideMatchIds.get(searchIndex), searchText);
+                        if (found) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                    if (checkLoopIndex == -1) {
+                        checkLoopIndex =  searchIndex;
+                    }
                 }
-
+                
             } else {
                 previousSearch = searchText;
                 searchIndex = 0;
@@ -356,7 +377,33 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
                             ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).sortAccordingToModel(peptideMatchIds);
 
-                            ((PeptideMatchTable) m_peptideMatchTable).selectProteinSet(peptideMatchIds.get(searchIndex), searchText);
+                             int checkLoopIndex = -1;
+                             while (true) {
+                                // search already done, display next result
+                                searchIndex++;
+                                if (searchIndex >= peptideMatchIds.size()) {
+                                    searchIndex = 0;
+                                }
+
+                                if (checkLoopIndex == searchIndex) {
+                                    break;
+                                }
+
+                                if (!peptideMatchIds.isEmpty()) {
+                                    boolean found = ((PeptideMatchTable) m_peptideMatchTable).selectPeptideMatch(peptideMatchIds.get(searchIndex), searchText);
+                                    if (found) {
+                                        break;
+                                    }
+                                } else {
+                                    break;
+                                }
+                                if (checkLoopIndex == -1) {
+                                    checkLoopIndex = searchIndex;
+                                }
+                            }
+                            
+                            
+                            
 
                         }
 
@@ -419,11 +466,11 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
         }
 
-        public void selectProteinSet(Long proteinSetId, String searchText) {
+        public boolean selectPeptideMatch(Long proteinSetId, String searchText) {
             PeptideMatchTableModel tableModel = (PeptideMatchTableModel) getModel();
             int row = tableModel.findRow(proteinSetId);
             if (row == -1) {
-                return;
+                return false;
             }
             
             // JPM.hack we need to keep the search text
@@ -441,6 +488,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             scrollRowToVisible(row);
 
             searchTextBeingDone = null;
+            
+            return true;
             
         }
         String searchTextBeingDone = null;

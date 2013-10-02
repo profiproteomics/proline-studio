@@ -3,6 +3,8 @@ package fr.proline.studio.gui;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.*;
 
 /**
@@ -28,6 +30,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     private BusyGlassPane m_busyGlassPane = null;
     private HighlightGlassPane m_highlightGlassPane = null;
     
+    private DefaultDialog m_dialog;
     
     private boolean m_firstDisplay = true;
     
@@ -66,6 +69,8 @@ public class DefaultDialog extends javax.swing.JDialog {
             // reinit button when dialog is opened
             m_buttonClicked = BUTTON_CANCEL;
         }
+        
+        m_dialog = this;
         
         super.setVisible(v);
         
@@ -438,6 +443,13 @@ public class DefaultDialog extends javax.swing.JDialog {
         }
     }
     
+    public void startTask(ProgressTask task) {
+        setBusy(true);
+        m_busyGlassPane.setProgressBar(task);
+        
+    }
+    
+    
     public void highlight(Component c) {
         
         if (m_highlightGlassPane == null) {
@@ -458,10 +470,17 @@ public class DefaultDialog extends javax.swing.JDialog {
     /**
      * Glass Pane to set the dialog as busy
      */
-    private class BusyGlassPane extends JComponent {
+    private class BusyGlassPane extends JComponent implements PropertyChangeListener {
 
+        private boolean m_firstProgressDisplay = true;
+        private JPanel m_progressPanel;
+        private JProgressBar m_progressBar;
+        
+        
         public BusyGlassPane() {
 
+            setLayout(null);
+            
             // get rid of all mouse events
             MouseAdapter mouseAdapter = new MouseAdapter() {
             };
@@ -470,11 +489,77 @@ public class DefaultDialog extends javax.swing.JDialog {
 
             // set wait mouse cursor
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            
+            
         }
 
         @Override
         protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            
+            if (m_progressBar != null) {
+
+                if (m_firstProgressDisplay) {
+                    m_progressPanel.setBounds(30, getHeight()/2-16, getWidth()-60, 32);
+                    m_progressBar.setBounds(6, 6, m_progressPanel.getWidth()-12, m_progressPanel.getHeight()-12);
+
+                    m_firstProgressDisplay = false;
+                }
+                
+                Color ppColor = new Color(140, 140, 140, 70);
+                g.setColor(ppColor);
+                g.fillRect(0, 0, getWidth()-1, getHeight()-1);
+            }
         }
+        
+        protected void setProgressBar(ProgressTask task) {
+            
+            removeAll();
+            
+            m_firstProgressDisplay = true;
+            
+            m_progressPanel = new JPanel(null) {
+                
+                @Override
+                public void paint(Graphics g) {
+                    super.paint(g);
+                    
+                    g.setColor(Color.darkGray);
+                    g.drawRect(1, 1, getWidth()-3, getHeight()-3);
+                }
+            };
+
+            m_progressPanel.setOpaque(true);
+            m_progressPanel.setBackground(Color.white);
+
+            
+            m_progressBar = new JProgressBar(task.getMinValue(), task.getMaxValue());
+            m_progressBar.setStringPainted(true);
+
+            m_progressPanel.add(m_progressBar);
+            
+            
+            
+            add(m_progressPanel);
+
+            task.addPropertyChangeListener(this);
+            task.execute();
+            
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if ("progress".equals(evt.getPropertyName())) {
+                int progress = (Integer) evt.getNewValue();
+                m_progressBar.setValue(progress);
+                if (progress >= m_progressBar.getMaximum()) {
+                    setBusy(false);
+                    m_dialog.setVisible(false);
+                }
+            }
+        }
+        
+        
     }
     
     /**
@@ -485,9 +570,9 @@ public class DefaultDialog extends javax.swing.JDialog {
         private final int ANIMATION_DELAY = 400;
         private final int DISPLAY_DELAY = 1300;
         
-        private long timeStart = 0;
-        private Component comp;
-        private int x,y,width,height;
+        private long m_timeStart = 0;
+        private Component m_comp;
+        private int m_x, m_y, m_width, m_height;
         
         public HighlightGlassPane() {
         }
@@ -495,7 +580,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         @Override
         protected void paintComponent(Graphics g) {
             
-            Point p = SwingUtilities.convertPoint(comp, 0, 0, this); 
+            Point p = SwingUtilities.convertPoint(m_comp, 0, 0, this); 
             
             
             g.setColor(new Color(240,0,0));
@@ -507,15 +592,15 @@ public class DefaultDialog extends javax.swing.JDialog {
             final int START_ANGLE = 30;
             final int DELTA_ANGLE = 380;
             int deltaAngle;
-            if (timeCur-timeStart<=ANIMATION_DELAY) {
-                deltaAngle = START_ANGLE + (int) ((DELTA_ANGLE-START_ANGLE)*(((double)(timeCur-timeStart))/ANIMATION_DELAY));
+            if (timeCur-m_timeStart<=ANIMATION_DELAY) {
+                deltaAngle = START_ANGLE + (int) ((DELTA_ANGLE-START_ANGLE)*(((double)(timeCur-m_timeStart))/ANIMATION_DELAY));
             } else {
                 deltaAngle = DELTA_ANGLE;
             }
             for (int angle=START_ANGLE;angle<=deltaAngle+START_ANGLE;angle+=3) {
                 int delta =  (int) (((double)(angle-START_ANGLE)/((double)DELTA_ANGLE))*10.0); //(DELTA_ANGLE-angle-START_ANGLE)/20;
 
-                g.drawArc(p.x+x-delta, p.y+y-delta, width+delta*2, height+delta*2,angle, 3);
+                g.drawArc(p.x+m_x-delta, p.y+m_y-delta, m_width+delta*2, m_height+delta*2,angle, 3);
             }
             
 
@@ -525,19 +610,19 @@ public class DefaultDialog extends javax.swing.JDialog {
             
             final int PAD = 10;
             
-            comp = c;
+            m_comp = c;
             
-            x = -PAD;
-            y = -PAD;
-            width = c.getWidth()+PAD*2;
-            height = c.getHeight()+PAD*2;
+            m_x = -PAD;
+            m_y = -PAD;
+            m_width = c.getWidth()+PAD*2;
+            m_height = c.getHeight()+PAD*2;
         }
         
         public void highlight() {
             
             m_highlightGlassPane.setVisible(true);
             
-            timeStart = System.currentTimeMillis();
+            m_timeStart = System.currentTimeMillis();
 
             
             ActionListener timerAction = new ActionListener() {
@@ -546,7 +631,7 @@ public class DefaultDialog extends javax.swing.JDialog {
                 public void actionPerformed(ActionEvent e) {
                     
                     long timeCur = System.currentTimeMillis();
-                    if ((timeCur-timeStart)>ANIMATION_DELAY+DISPLAY_DELAY) {
+                    if ((timeCur-m_timeStart)>ANIMATION_DELAY+DISPLAY_DELAY) {
                         m_highlightGlassPane.setVisible(false);
                         animationTimer.setRepeats(false);
                     } else {
@@ -575,5 +660,12 @@ public class DefaultDialog extends javax.swing.JDialog {
         }
     }
 
+    
+    public static abstract class ProgressTask extends SwingWorker {
+        
+        public abstract int getMinValue();
+        public abstract int getMaxValue();
+        
+    }
     
 }

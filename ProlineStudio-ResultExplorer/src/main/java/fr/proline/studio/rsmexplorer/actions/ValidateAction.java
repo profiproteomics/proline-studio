@@ -13,6 +13,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.ValidationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dpm.task.ChangeTypicalProteinTask;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.ArrayList;
@@ -89,6 +90,8 @@ public class ValidateAction extends AbstractRSMAction {
 
             // retrieve parameters
             final HashMap<String, String> parserArguments = dialog.getArguments();
+            final String regex = dialog.getTypicalProteinRegex();
+            final boolean regexOnAccession = dialog.isTYpicalProteinOnAccession();
 
             RSMTree tree = RSMTree.getTree();
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -116,7 +119,7 @@ public class ValidateAction extends AbstractRSMAction {
                         @Override
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                            askValidation(dataSetNode, parserArguments);
+                            askValidation(dataSetNode, parserArguments, regex, regexOnAccession);
                         }
                     };
 
@@ -125,7 +128,7 @@ public class ValidateAction extends AbstractRSMAction {
                     AccessDatabaseThread.getAccessDatabaseThread().addTask(taskRemoveValidation);
                 } else {
                     // there is no result summary, we start validation at once
-                    askValidation(dataSetNode, parserArguments);
+                    askValidation(dataSetNode, parserArguments, regex, regexOnAccession);
                 }
 
 
@@ -136,7 +139,7 @@ public class ValidateAction extends AbstractRSMAction {
         }
     }
 
-    private void askValidation(final RSMDataSetNode dataSetNode, HashMap<String, String> parserArguments) {
+    private void askValidation(final RSMDataSetNode dataSetNode, HashMap<String, String> parserArguments, final String regex, final boolean regexOnAccession) {
 
         final Dataset d = dataSetNode.getDataset();
 
@@ -154,7 +157,7 @@ public class ValidateAction extends AbstractRSMAction {
             public void run(boolean success) {
                 if (success) {
 
-                    updateDataset(dataSetNode, d, _resultSummaryId[0], getTaskInfo());
+                    updateDataset(dataSetNode, d, _resultSummaryId[0], getTaskInfo(), regex, regexOnAccession);
 
 
                 } else {
@@ -174,7 +177,36 @@ public class ValidateAction extends AbstractRSMAction {
         AccessServiceThread.getAccessServiceThread().addTask(task);
     }
 
-    private void updateDataset(final RSMDataSetNode datasetNode, final Dataset d, long resultSummaryId, TaskInfo taskInfo) {
+    private void changeTypicalProtein(final RSMDataSetNode datasetNode, String regex, boolean regexOnAccession) {
+        
+                final Dataset d = datasetNode.getDataset();
+
+                AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success) {
+
+                        datasetNode.setIsChanging(false);
+
+
+                        RSMTree tree = RSMTree.getTree();
+                        DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                        treeModel.nodeChanged(datasetNode);
+
+                    }
+                };
+
+
+                ChangeTypicalProteinTask task = new ChangeTypicalProteinTask(callback, d, regex, regexOnAccession);
+                AccessServiceThread.getAccessServiceThread().addTask(task);
+    }
+    
+    private void updateDataset(final RSMDataSetNode datasetNode, final Dataset d, long resultSummaryId, TaskInfo taskInfo, final String regex, final boolean regexOnAccession) {
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -186,11 +218,16 @@ public class ValidateAction extends AbstractRSMAction {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                datasetNode.setIsChanging(false);
+                if (success && (regex!=null)) {
+                    changeTypicalProtein(datasetNode, regex, regexOnAccession);
+                } else {
 
-                RSMTree tree = RSMTree.getTree();
-                DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-                treeModel.nodeChanged(datasetNode);
+                    datasetNode.setIsChanging(false);
+
+                    RSMTree tree = RSMTree.getTree();
+                    DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                    treeModel.nodeChanged(datasetNode);
+                }
             }
         };
 

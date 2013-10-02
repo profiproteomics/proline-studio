@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
+import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -57,6 +58,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private Search m_search = null;
     
     private FilterButton m_filterButton;
+    private ExportButton m_exportButton;
     
     /**
      * Creates new form ProteinGroupsTablePanel
@@ -247,10 +249,12 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         m_filterButton = new FilterButton(((ProteinSetTableModel) m_proteinSetTable.getModel()));
 
+        m_exportButton = new ExportButton("Protein Sets", m_proteinSetTable);
         
         toolbar.add(m_decoyButton);
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
+        toolbar.add(m_exportButton);
         return toolbar;
     }
     

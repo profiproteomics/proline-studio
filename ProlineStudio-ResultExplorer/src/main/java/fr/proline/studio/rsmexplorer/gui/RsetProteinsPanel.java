@@ -24,6 +24,7 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import fr.proline.studio.dam.tasks.*;
+import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
@@ -57,6 +58,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
     private JToggleButton m_searchToggleButton;
 
     private FilterButton m_filterButton;
+    private ExportButton m_exportButton;
 
     public RsetProteinsPanel(boolean startingPanel) {
 
@@ -161,13 +163,14 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
        
         m_filterButton = new FilterButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()));
-        
+        m_exportButton = new ExportButton("Peptide Match", m_proteinTable);
 
         if (m_startingPanel) {
             toolbar.add(m_decoyButton);
         }
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
+        toolbar.add(m_exportButton);
         
         return toolbar;
     }

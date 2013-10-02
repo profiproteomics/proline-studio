@@ -7,6 +7,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -52,6 +53,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     private JToggleButton m_searchToggleButton;
 
     private FilterButton m_filterButton;
+    private ExportButton m_exportButton;
     
     public RsmPeptidesPanel() {
         initComponents();
@@ -147,10 +149,14 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
 
         m_filterButton = new FilterButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()));
-
+        
+        m_exportButton = new ExportButton("Peptide Instances", m_peptideInstanceTable);
+        
+        
         toolbar.add(m_decoyButton);
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
+        toolbar.add(m_exportButton);
         
         return toolbar;
     }

@@ -144,8 +144,12 @@
             <publicPackage>javax.sql</publicPackage>
             <publicPackage>javax.transaction.xa</publicPackage>
             <publicPackage>javax.xml.parsers</publicPackage>
+            <publicPackage>javax.xml.transform.*</publicPackage>
             <publicPackage>org.apache.commons.collections</publicPackage>
             <publicPackage>org.apache.commons.lang3</publicPackage>
+            <publicPackage>org.apache.commons.lang3.math</publicPackage>
+            <publicPackage>org.apache.commons.logging</publicPackage>
+            <publicPackage>org.apache.commons.logging.impl</publicPackage>
             <publicPackage>org.hibernate</publicPackage>
             <publicPackage>org.joda.time</publicPackage>
             <publicPackage>org.joda.time.format</publicPackage>

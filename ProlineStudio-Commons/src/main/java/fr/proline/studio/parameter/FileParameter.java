@@ -48,28 +48,26 @@ public class FileParameter extends AbstractParameter {
             addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
             addFileButton.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
-                JFileChooser fchooser = new JFileChooser();
-                /*if ((defaultDirectory!=null) && (defaultDirectory.isDirectory())) {
-                    fchooser.setCurrentDirectory(defaultDirectory);
-                }*/
-                fchooser.setMultiSelectionEnabled(false);
-                
-                if (m_fileFilterName != null) {
-                    FileNameExtensionFilter filter = new FileNameExtensionFilter(m_fileFilterName, m_fileFilterExtension);
-                    fchooser.addChoosableFileFilter(filter);
-                }
-                //fchooser.setFileFilter(defaultFilter);
-                int result = fchooser.showOpenDialog(addFileButton);
-                if (result == JFileChooser.APPROVE_OPTION) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
 
-                    File file = fchooser.getSelectedFile();
-                    textField.setText(file.getAbsolutePath());
+                    JFileChooser fchooser = new JFileChooser();
+  
+                    fchooser.setMultiSelectionEnabled(false);
+
+                    if (m_fileFilterName != null) {
+                        FileNameExtensionFilter filter = new FileNameExtensionFilter(m_fileFilterName, m_fileFilterExtension);
+                        fchooser.addChoosableFileFilter(filter);
+                    }
+                    //fchooser.setFileFilter(defaultFilter);
+                    int result = fchooser.showOpenDialog(addFileButton);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+
+                        File file = fchooser.getSelectedFile();
+                        textField.setText(file.getAbsolutePath());
+                    }
                 }
-            }
-        });
+            });
             
             
             panel.add(textField);

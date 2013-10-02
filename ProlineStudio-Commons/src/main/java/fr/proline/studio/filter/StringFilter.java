@@ -68,7 +68,7 @@ public class StringFilter extends Filter {
     
     
     private static Pattern compileRegex(String text) {
-        String escapedText = escapeRegex(text);
+        String escapedText = "^"+escapeRegex(text)+"$";
         String wildcardsFilter = escapedText.replaceAll("\\*", ".*").replaceAll("\\?", ".");
         return Pattern.compile(wildcardsFilter, Pattern.CASE_INSENSITIVE);
     }

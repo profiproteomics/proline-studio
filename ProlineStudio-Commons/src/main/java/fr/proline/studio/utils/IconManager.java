@@ -64,7 +64,8 @@ public class IconManager {
         SEARCH,
         SEARCH11,
         FUNNEL,
-        FUNNEL_ACTIVATED;
+        FUNNEL_ACTIVATED,
+        EXPORT;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -229,6 +230,8 @@ public class IconManager {
                 return "fr/proline/studio/images/funnel11x11.png";
             case FUNNEL_ACTIVATED:
                 return "fr/proline/studio/images/funnelActivated11x11.png";
+            case EXPORT:
+                return "fr/proline/studio/images/export11x11.png";
 
         }
 

@@ -14,7 +14,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.prefs.Preferences;
 import javax.swing.*;
+import org.openide.util.NbPreferences;
 
 /**
  * Dialog used to validate an identification and ask the creation of a Result
@@ -59,6 +61,10 @@ public class ValidationDialog extends DefaultDialog {
     private JCheckBox m_fdrCheckbox = null;
     private JCheckBox m_proteinFdrCheckbox = null;
 
+    private JCheckBox m_typicalProteinMatchCheckBox;
+    private JTextField m_regexTextField = null;
+    private JComboBox m_regexTargetCombobox = null;
+    
     public enum DecoyStatus {
         WAITING,
         HAS_DECOY,
@@ -90,6 +96,9 @@ public class ValidationDialog extends DefaultDialog {
 
         initPsmPrefilterPanel();
         initProteinPrefilterPanel();
+        
+        restoreTypicalProteinParameters();
+        
 
     }
 
@@ -154,6 +163,10 @@ public class ValidationDialog extends DefaultDialog {
         c.gridy++;
         internalPanel.add(createProteinSetFilterPanel(), c);
 
+        c.gridy++;
+        internalPanel.add(typicalProteinPanel(), c);
+        
+        
         return internalPanel;
     }
 
@@ -388,30 +401,7 @@ public class ValidationDialog extends DefaultDialog {
         m_fdrOnValueParameter.setUsed(enabled);
     }
 
-//    private JPanel createFDREstimatorPanel() {
-//        JPanel fdrEstimatorPanel = new JPanel(new GridBagLayout());
-//
-//
-//        GridBagConstraints c = new GridBagConstraints();
-//        c.anchor = GridBagConstraints.NORTHWEST;
-//        c.fill = GridBagConstraints.BOTH;
-//        c.insets = new java.awt.Insets(5, 5, 5, 5);
-//
-//
-//
-//        c.gridx = 0;
-//        c.gridy = 0;
-//        fdrEstimatorPanel.add(new JLabel("FDR Estimator"), c);
-//
-//        c.gridx++;
-//        fdrEstimatorPanel.add(m_fdrEstimatorComboBox, c);
-//
-//        c.gridx++;
-//        c.weightx = 1.0;
-//        fdrEstimatorPanel.add(Box.createHorizontalBox(), c);
-//
-//        return fdrEstimatorPanel;
-//    }
+
 
     private JPanel createProteinSetFilterPanel() {
         JPanel proteinSetFilterPanel = new JPanel(new GridBagLayout());
@@ -434,6 +424,48 @@ public class ValidationDialog extends DefaultDialog {
         return proteinSetFilterPanel;
     }
 
+    private JPanel typicalProteinPanel() {
+        JPanel typicalProteinPanel = new JPanel(new GridBagLayout());
+        typicalProteinPanel.setBorder(BorderFactory.createTitledBorder(" Typical Protein Match "));
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        m_typicalProteinMatchCheckBox = new JCheckBox("Containing Text :");
+        m_typicalProteinMatchCheckBox.setHorizontalAlignment(SwingConstants.RIGHT);
+        typicalProteinPanel.add(m_typicalProteinMatchCheckBox, c);
+
+        m_typicalProteinMatchCheckBox.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                boolean enabled = m_typicalProteinMatchCheckBox.isSelected();
+                m_regexTextField.setEnabled(enabled);
+                m_regexTargetCombobox.setEnabled(enabled);
+            }
+        });
+        
+        c.gridx++;
+        m_regexTextField = new JTextField(16);
+        typicalProteinPanel.add(m_regexTextField, c);
+
+        c.gridx=0;
+        c.gridy++;
+        JLabel onMatchLabel = new JLabel("on");
+        onMatchLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        typicalProteinPanel.add(onMatchLabel, c);
+        
+        m_regexTargetCombobox = new JComboBox(ChangeTypicalProteinDialog.REGEX_TARGET_OPTIONS);
+        c.gridx++;
+        typicalProteinPanel.add(m_regexTargetCombobox, c);
+
+        return typicalProteinPanel;
+    }
+    
     private JPanel createProteinFDRFilterPanel() {
         JPanel fdrPanel = new JPanel(new GridBagLayout());
         fdrPanel.setBorder(BorderFactory.createTitledBorder(" FDR Filter "));
@@ -625,6 +657,26 @@ public class ValidationDialog extends DefaultDialog {
         repack();
     }
     
+    private void restoreTypicalProteinParameters() {
+        Preferences preferences = NbPreferences.root();
+        
+        boolean useTypicalProteinRegex = preferences.getBoolean("UseTypicalProteinRegex", true);
+        
+        m_typicalProteinMatchCheckBox.setSelected(useTypicalProteinRegex);
+        
+        String regex = preferences.get("TypicalProteinRegex", "*");
+        m_regexTextField.setText(regex);
+        m_regexTextField.setEnabled(useTypicalProteinRegex);
+        
+                
+        boolean regexOnAccession = preferences.getBoolean("TypicalProteinRegexOnAccession", Boolean.TRUE);
+        if (regexOnAccession) {
+            m_regexTargetCombobox.setSelectedIndex(0);
+        } else {
+            m_regexTargetCombobox.setSelectedIndex(1);
+        }
+        m_regexTargetCombobox.setEnabled(useTypicalProteinRegex);
+    }
     
     private void updateproteinFdrObjects(boolean enabled) {
         m_proteinFdrLabel.setEnabled(enabled);
@@ -699,6 +751,47 @@ public class ValidationDialog extends DefaultDialog {
     public HashMap<String, String> getArguments() {
         return m_parameterList.getValues();
     }
+
+    public String getTypicalProteinRegex() {
+        
+        String regex = m_regexTextField.getText().trim();
+        if (regex.length() == 0) {
+            return null;
+        }
+        if (regex.compareTo("*") == 0) {
+            return null;
+        }
+        
+        return wildcardToRegex(regex);
+    }
+    
+    private String wildcardToRegex(String text) {
+        String escapedText = "^"+escapeRegex(text)+"$";
+        
+        String wildcardsFilter = escapedText.replaceAll("\\*", ".*").replaceAll("\\?", ".");
+        return wildcardsFilter;
+    } 
+    private String escapeRegex(String s) {
+
+        int len = s.length();
+        if (len == 0) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder(len * 2);
+        for (int i = 0; i < len; i++) {
+            char c = s.charAt(i);
+            if ("[](){}.+$^|#\\".indexOf(c) != -1) {
+                sb.append("\\");
+            }
+            sb.append(c);
+        }
+        return sb.toString();
+    }
+    
+    public boolean isTYpicalProteinOnAccession() {
+        return (m_regexTargetCombobox.getSelectedIndex() == 0);
+    }
     
     @Override
     protected boolean okCalled() {
@@ -747,6 +840,13 @@ public class ValidationDialog extends DefaultDialog {
         // Save Parameters        
         m_parameterList.saveParameters();
 
+        // save specific Typical Protein parameters
+        Preferences preferences = NbPreferences.root();
+        preferences.put("TypicalProteinRegex", m_regexTextField.getText().trim());
+        preferences.putBoolean("TypicalProteinRegexOnAccession", (m_regexTargetCombobox.getSelectedIndex() == 0));
+        preferences.putBoolean("UseTypicalProteinRegex", m_typicalProteinMatchCheckBox.isSelected());
+
+        
         return true;
 
     }

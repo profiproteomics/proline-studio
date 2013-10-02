@@ -97,6 +97,16 @@
             <artifactId>ProlineStudio-Logger</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>3.9</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -135,6 +145,7 @@
                         <publicPackage>fr.proline.studio</publicPackage>
                         <publicPackage>fr.proline.studio.action</publicPackage>
                         <publicPackage>fr.proline.studio.dbs</publicPackage>
+                        <publicPackage>fr.proline.studio.export</publicPackage>
                         <publicPackage>fr.proline.studio.filter</publicPackage>
                         <publicPackage>fr.proline.studio.gui</publicPackage>
                         <publicPackage>fr.proline.studio.markerbar</publicPackage>
@@ -142,8 +153,12 @@
                         <publicPackage>fr.proline.studio.search</publicPackage>
                         <publicPackage>fr.proline.studio.utils</publicPackage>
                         <publicPackage>fr.proline.util</publicPackage>
+                        <publicPackage>javax.xml.parsers</publicPackage>
                         <publicPackage>org.jdesktop.beans</publicPackage>
                         <publicPackage>org.jdesktop.swingx.*</publicPackage>
+                        <publicPackage>org.xml.sax</publicPackage>
+                        <publicPackage>org.xml.sax.ext</publicPackage>
+                        <publicPackage>org.xml.sax.helpers</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

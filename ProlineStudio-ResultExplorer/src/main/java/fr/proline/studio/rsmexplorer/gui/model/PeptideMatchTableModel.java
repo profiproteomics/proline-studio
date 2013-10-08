@@ -507,4 +507,9 @@ public class PeptideMatchTableModel extends LazyTableModel {
         
     }
 
+    @Override
+    public boolean isLoaded() {
+        return m_table.isSortable();
+    }
+
 }

@@ -466,6 +466,11 @@ public class PeptideInstanceTableModel extends LazyTableModel {
         }
     }
 
+    @Override
+    public boolean isLoaded() {
+       return m_table.isSortable();
+    }
+
     
     
 }

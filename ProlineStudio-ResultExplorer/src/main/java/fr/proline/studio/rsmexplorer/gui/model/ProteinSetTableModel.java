@@ -401,6 +401,11 @@ public class ProteinSetTableModel extends LazyTableModel {
         }
     }
 
+    @Override
+    public boolean isLoaded() {
+        return m_table.isSortable();
+    }
+
 
     public class ProteinCount implements Comparable {
 

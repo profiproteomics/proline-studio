@@ -4,6 +4,7 @@ import fr.proline.core.orm.msi.BioSequence;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.filter.*;
 import java.util.ArrayList;
+import org.jdesktop.swingx.JXTable;
 
 /**
  * Table Model for Proteins
@@ -25,7 +26,12 @@ public class ProteinTableModel extends FilterTableModel {
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
 
+    private JXTable m_table = null;
 
+    public ProteinTableModel(JXTable t) {
+        m_table = t;
+    }
+    
     public DProteinMatch getProteinMatch(int row) {
 
         int rowFiltered = row;
@@ -222,6 +228,11 @@ public class ProteinTableModel extends FilterTableModel {
             m_filters[COLTYPE_PROTEIN_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PROTEIN_PEPTIDES_COUNT));
             m_filters[COLTYPE_PROTEIN_MASS] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_MASS));
         } 
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return m_table.isSortable();
     }
 
     

@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.event.ActionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.JXTable;
 
 /**
  * In : Window which display Protein Sets of a Result Summary - Panel used to display Proteins of a Protein Set (at the
@@ -152,7 +153,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
         proteinNameTextField.setText(org.openide.util.NbBundle.getMessage(RsmProteinsOfProteinSetPanel.class, "RsmProteinsOfProteinSetPanel.proteinNameTextField.text")); // NOI18N
 
-        proteinTable.setModel(new ProteinTableModel());
+        proteinTable.setModel(new ProteinTableModel((JXTable) proteinTable));
         scrollPane.setViewportView(proteinTable);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);

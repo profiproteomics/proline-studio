@@ -9,51 +9,47 @@ import javax.swing.JTextField;
 
 /**
  * Filter on String values with wildcards : * and ?
+ *
  * @author JM235353
  */
 public class StringFilter extends Filter {
-    
+
     private static final Integer SEARCH_TEXT = 0;
-    
     private String m_filterText = null;
     private Pattern m_searchPattern;
-    
+
     public StringFilter(String variableName) {
         super(variableName);
     }
-    
 
-    
     public boolean filter(String value) {
-        if (m_filterText==null) {
+        if (m_filterText == null) {
             return true;
-        } 
-        
+        }
+
         Matcher matcher = m_searchPattern.matcher(value);
-        
+
         return matcher.matches();
     }
-        
-
 
     @Override
     public FilterStatus checkValues() {
         if (m_filterText == null) {
             return null;
         }
-        
+
         try {
             compileRegex(m_filterText);
         } catch (Exception e) {
             return new FilterStatus("Regex Pattern Error", getComponent(SEARCH_TEXT));
         }
-        
+
         return null;
     }
-    
+
     @Override
     public void registerValues() {
-        
+
         if (isDefined()) {
             m_filterText = ((JTextField) getComponent(SEARCH_TEXT)).getText().trim();
             if (m_filterText.isEmpty()) {
@@ -62,17 +58,16 @@ public class StringFilter extends Filter {
 
             m_searchPattern = compileRegex(m_filterText);
         }
-        
+
         registerDefinedAsUsed();
     }
-    
-    
+
     private static Pattern compileRegex(String text) {
-        String escapedText = "^"+escapeRegex(text)+"$";
+        String escapedText = "^" + escapeRegex(text) + "$";
         String wildcardsFilter = escapedText.replaceAll("\\*", ".*").replaceAll("\\?", ".");
         return Pattern.compile(wildcardsFilter, Pattern.CASE_INSENSITIVE);
     }
-    
+
     private static String escapeRegex(String s) {
 
         int len = s.length();
@@ -90,8 +85,7 @@ public class StringFilter extends Filter {
         }
         return sb.toString();
     }
-    
-      
+
     @Override
     public void createComponents(JPanel p, GridBagConstraints c) {
         c.gridx++;
@@ -108,19 +102,22 @@ public class StringFilter extends Filter {
         c.gridx++;
         c.gridwidth = 3;
         c.weightx = 1;
-        JTextField vTextField = new JTextField(8);
-        p.add(vTextField, c);
-        if (m_filterText != null) {
-            vTextField.setText(m_filterText.toString());
+        JTextField vTextField = ((JTextField) getComponent(SEARCH_TEXT));
+        if (vTextField == null) {
+            vTextField = new JTextField(8);
+            if (m_filterText != null) {
+                vTextField.setText(m_filterText.toString());
+            }
+            registerComponent(SEARCH_TEXT, vTextField);
         }
-        c.gridx+=2;
-        registerComponent(SEARCH_TEXT, vTextField);
+        p.add(vTextField, c);
+
+        c.gridx += 2;
+
     }
 
     @Override
     public void reset() {
         m_filterText = null;
     }
-
-    
 }

@@ -64,7 +64,7 @@ public class AddProjectAction extends AbstractRSMAction {
             ProjectData projectData = new ProjectData(projectName);
             final RSMProjectNode projectNode = new RSMProjectNode(projectData);
             projectNode.setIsChanging(true);
-            RSMTree tree = RSMTree.getTree();
+            final RSMTree tree = RSMTree.getTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             treeModel.insertNodeInto(projectNode, n, insertionIndex);
             
@@ -84,6 +84,7 @@ public class AddProjectAction extends AbstractRSMAction {
                         projectNode.setIsChanging(false);
                         projectNode.add(new RSMHourGlassNode(null));
                         treeModel.nodeChanged(projectNode);
+                        tree.expandNodeIfNeeded(projectNode);
                     } else {
                         //JPM.TODO : manage error with errorMessage
                         treeModel.removeNodeFromParent(projectNode);

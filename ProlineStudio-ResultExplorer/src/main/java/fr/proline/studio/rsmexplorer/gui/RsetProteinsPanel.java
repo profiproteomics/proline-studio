@@ -210,7 +210,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         return tableModel.getProteinMatch(selectedRow);
     }
 
-    public void setDataProteinMatchArray(DProteinMatch[] proteinMatchArray) {
+    public void setDataProteinMatchArray(DProteinMatch[] proteinMatchArray, boolean finished) {
         // Modify the Model
         ((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()).setData(proteinMatchArray);
 
@@ -224,6 +224,10 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
         if ((m_decoyButton != null) && (rset != null)) {
             m_decoyButton.setEnabled(rset.getDecoyResultSet() != null);
+        }
+        
+        if (finished) {
+            m_proteinTable.setSortable(true);
         }
     }
 

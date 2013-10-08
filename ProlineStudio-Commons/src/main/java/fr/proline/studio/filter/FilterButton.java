@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import org.openide.windows.WindowManager;
 
 /**
@@ -27,6 +28,12 @@ public class FilterButton extends JButton implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        
+        if (!m_tableModelFilterInterface.isLoaded()) {
+            JOptionPane.showMessageDialog(this, "Filtering is not available while data is loading.", "Filtering not Available", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        
         FilterDialog dialog = FilterDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation( getLocationOnScreen().x + getWidth() + 5,  getLocationOnScreen().y + getHeight() + 5);
         Filter[] filters = m_tableModelFilterInterface.getFilters();

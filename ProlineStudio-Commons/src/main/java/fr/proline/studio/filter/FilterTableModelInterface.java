@@ -18,6 +18,6 @@ public interface FilterTableModelInterface {
     
     public boolean filter(int row);
 
-    
+    public boolean isLoaded();
         
 }

@@ -13,6 +13,7 @@ import fr.proline.studio.rsmexplorer.node.RSMTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
+import fr.proline.core.orm.msi.ResultSummary;
 
 /**
  *
@@ -53,6 +54,9 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
 
                 final Dataset d = dataSetNode.getDataset();
 
+
+                
+                
                 AbstractServiceCallback callback = new AbstractServiceCallback() {
 
                     @Override
@@ -63,8 +67,14 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
                     @Override
                     public void run(boolean success) {
 
+                        // reinitialize already loaded data.
+                        // Protein Sets will have to be reloaded
+                        ResultSummary rsm = d.getTransientData().getResultSummary();
+                        if (rsm != null) {
+                            rsm.getTransientData().setProteinSetArray(null);
+                        }
+                        
                         dataSetNode.setIsChanging(false);
-
 
                         RSMTree tree = RSMTree.getTree();
                         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();

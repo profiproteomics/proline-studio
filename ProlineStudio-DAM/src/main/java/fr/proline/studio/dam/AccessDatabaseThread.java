@@ -6,10 +6,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.PriorityChangement;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.PriorityQueue;
+import java.util.*;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -220,11 +217,11 @@ public class AccessDatabaseThread extends Thread {
         }
     }
 
-    public final void abortTasks(ArrayList<Long> taskIds) {
+    public final void abortTasks(Set<Long> taskIds) {
         synchronized (this) {
-            int nb = taskIds.size();
-            for (int i = 0; i < nb; i++) {
-                abortTask(taskIds.get(i));
+            Iterator<Long> it = taskIds.iterator();
+            while (it.hasNext()) {
+                abortTask(it.next());
             }
         }
     }

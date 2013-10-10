@@ -8,6 +8,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.BooleanRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
@@ -18,7 +19,6 @@ import java.awt.Color;
 import java.awt.event.ActionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
-import org.jdesktop.swingx.JXTable;
 
 /**
  * In : Window which display Protein Sets of a Result Summary - Panel used to display Proteins of a Protein Set (at the
@@ -153,7 +153,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
         proteinNameTextField.setText(org.openide.util.NbBundle.getMessage(RsmProteinsOfProteinSetPanel.class, "RsmProteinsOfProteinSetPanel.proteinNameTextField.text")); // NOI18N
 
-        proteinTable.setModel(new ProteinTableModel((JXTable) proteinTable));
+        proteinTable.setModel(new ProteinTableModel((ProgressInterface) proteinTable));
         scrollPane.setViewportView(proteinTable);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -185,7 +185,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
 
 
-    private class ProteinTable extends DecoratedTable {
+    private class ProteinTable extends DecoratedTable implements ProgressInterface {
 
         public ProteinTable() {
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(Float.class)) ) );
@@ -207,6 +207,16 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
             m_dataBox.propagateDataChanged(DProteinMatch.class);
 
 
+        }
+
+        @Override
+        public boolean isLoaded() {
+            return m_dataBox.isLoaded();
+        }
+
+        @Override
+        public int getLoadingPercentage() {
+            return m_dataBox.getLoadingPercentage();
         }
     }
 }

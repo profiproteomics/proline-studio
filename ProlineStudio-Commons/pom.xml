@@ -150,6 +150,7 @@
                         <publicPackage>fr.proline.studio.gui</publicPackage>
                         <publicPackage>fr.proline.studio.markerbar</publicPackage>
                         <publicPackage>fr.proline.studio.parameter</publicPackage>
+                        <publicPackage>fr.proline.studio.progress</publicPackage>
                         <publicPackage>fr.proline.studio.search</publicPackage>
                         <publicPackage>fr.proline.studio.utils</publicPackage>
                         <publicPackage>fr.proline.util</publicPackage>

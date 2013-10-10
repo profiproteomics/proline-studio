@@ -1,10 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.orm.msi.BioSequence;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.filter.*;
+import fr.proline.studio.progress.ProgressInterface;
 import java.util.ArrayList;
-import org.jdesktop.swingx.JXTable;
 
 /**
  * Table Model for Proteins
@@ -26,10 +25,10 @@ public class ProteinTableModel extends FilterTableModel {
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
 
-    private JXTable m_table = null;
+    private ProgressInterface m_progressInterface = null;
 
-    public ProteinTableModel(JXTable t) {
-        m_table = t;
+    public ProteinTableModel(ProgressInterface progressInterface) {
+        m_progressInterface = progressInterface;
     }
     
     public DProteinMatch getProteinMatch(int row) {
@@ -230,10 +229,15 @@ public class ProteinTableModel extends FilterTableModel {
         } 
     }
 
-    @Override
-    public boolean isLoaded() {
-        return m_table.isSortable();
-    }
+        @Override
+        public int getLoadingPercentage() {
+            return m_progressInterface.getLoadingPercentage();
+        }
+
+        @Override
+        public boolean isLoaded() {
+            return m_progressInterface.isLoaded();
+        }
 
     
 }

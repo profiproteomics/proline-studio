@@ -34,7 +34,6 @@ import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import org.openide.util.ImageUtilities;
 import org.openide.windows.TopComponent;
 
 /**
@@ -150,7 +149,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
         m_filterButton = new FilterButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()));
         
-        m_exportButton = new ExportButton("Peptide Instances", m_peptideInstanceTable);
+        m_exportButton = new ExportButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()), "Peptide Instances", m_peptideInstanceTable);
         
         
         toolbar.add(m_decoyButton);
@@ -401,6 +400,16 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             selectionWillBeRestored = b;
         }
         private boolean selectionWillBeRestored = false;
+
+        @Override
+        public int getLoadingPercentage() {
+            return m_dataBox.getLoadingPercentage();
+        }
+
+        @Override
+        public boolean isLoaded() {
+            return m_dataBox.isLoaded();
+        }
     }
 
     private class Search extends AbstractSearch {

@@ -163,7 +163,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
        
         m_filterButton = new FilterButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()));
-        m_exportButton = new ExportButton("Peptide Match", m_proteinTable);
+        m_exportButton = new ExportButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()), "Peptide Match", m_proteinTable);
 
         if (m_startingPanel) {
             toolbar.add(m_decoyButton);
@@ -447,6 +447,16 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
             selectionWillBeRestored = b;
         }
         private boolean selectionWillBeRestored = false;
+
+        @Override
+        public int getLoadingPercentage() {
+            return m_dataBox.getLoadingPercentage();
+        }
+
+        @Override
+        public boolean isLoaded() {
+            return m_dataBox.isLoaded();
+        }
     }
 
     private class Search extends AbstractSearch {

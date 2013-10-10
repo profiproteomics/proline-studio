@@ -1,11 +1,12 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
-import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import javax.swing.event.ChangeEvent;
@@ -36,7 +37,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     private ArrayList<GroupParameter> m_outParameters = new ArrayList<>();
     
     
-    private ArrayList<Long> m_taskList = new ArrayList<>();
+    private HashMap<Long, TaskInfo> m_taskMap = new HashMap<>();
     
     private long m_projectId = -1;
     
@@ -54,7 +55,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     protected void deleteThis() {
         
         // cancel task possibily running
-        AccessDatabaseThread.getAccessDatabaseThread().abortTasks(m_taskList);
+        AccessDatabaseThread.getAccessDatabaseThread().abortTasks(m_taskMap.keySet());
         
     }
     
@@ -66,7 +67,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
      */
     protected void registerTask(AbstractDatabaseTask task) {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-        m_taskList.add(task.getId());
+        m_taskMap.put(task.getId(), task.getTaskInfo());
         
     }
  
@@ -225,6 +226,39 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         return new AddDataBoxActionListener(splittedPanel, this);
     }
     
+    public int getLoadingPercentage() {
+        if (m_taskMap.isEmpty()) {
+            return 100;
+        }
+        
+        float percentage = 0;
+        int nb = 0;
+        Iterator<TaskInfo> it = m_taskMap.values().iterator();
+        while (it.hasNext()) {
+            TaskInfo info = it.next();
+            percentage +=info.getPercentage();
+            nb++;
+        }
+        percentage /= nb;
 
+        return (int) Math.round(percentage);
+    }
+    
+    public boolean isLoaded() {
+        if (m_taskMap.isEmpty()) {
+            return true;
+        }
+  
+        Iterator<TaskInfo> it = m_taskMap.values().iterator();
+        while (it.hasNext()) {
+            TaskInfo info = it.next();
+            if (!info.isFinished() && !info.isAborted()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    
 
 }

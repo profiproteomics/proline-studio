@@ -402,10 +402,14 @@ public class ProteinSetTableModel extends LazyTableModel {
     }
 
     @Override
-    public boolean isLoaded() {
-        return m_table.isSortable();
+    public int getLoadingPercentage() {
+        return m_table.getLoadingPercentage();
     }
 
+    @Override
+    public boolean isLoaded() {
+        return m_table.isLoaded();
+    }
 
     public class ProteinCount implements Comparable {
 
@@ -431,7 +435,11 @@ public class ProteinSetTableModel extends LazyTableModel {
         
         @Override
         public int compareTo(Object o) {
-            return m_sameSetCount-((ProteinCount) o).m_sameSetCount;
+            int sameSet =  m_sameSetCount-((ProteinCount) o).m_sameSetCount;
+            if (sameSet != 0) {
+                return sameSet;
+            }
+            return m_subSetCount-((ProteinCount) o).m_subSetCount;
         }
         
     }

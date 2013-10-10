@@ -249,7 +249,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         m_filterButton = new FilterButton(((ProteinSetTableModel) m_proteinSetTable.getModel()));
 
-        m_exportButton = new ExportButton("Protein Sets", m_proteinSetTable);
+        m_exportButton = new ExportButton(((ProteinSetTableModel) m_proteinSetTable.getModel()), "Protein Sets", m_proteinSetTable);
         
         toolbar.add(m_decoyButton);
         toolbar.add(m_searchToggleButton);
@@ -416,6 +416,16 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             selectionWillBeRestored = b;
         }
         private boolean selectionWillBeRestored = false;
+
+        @Override
+        public int getLoadingPercentage() {
+            return m_dataBox.getLoadingPercentage();
+        }
+
+        @Override
+        public boolean isLoaded() {
+            return m_dataBox.isLoaded();
+        }
         
         
     }

@@ -1,20 +1,23 @@
 package fr.proline.studio.utils;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.progress.ProgressBarDialog;
+import fr.proline.studio.progress.ProgressInterface;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollBar;
+import java.util.ArrayList;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import org.openide.windows.WindowManager;
 
 /**
  * Table to deal with LazyData (data which will be loaded later)
  *
  * @author JM235353
  */
-public class LazyTable extends DecoratedMarkerTable implements AdjustmentListener {
+public abstract class LazyTable extends DecoratedMarkerTable implements AdjustmentListener, ProgressInterface {
 
     // used to register the last action done by the user.
     // this last action is used to know if we automatically scroll
@@ -34,14 +37,40 @@ public class LazyTable extends DecoratedMarkerTable implements AdjustmentListene
         setDefaultRenderer(LazyData.class, new LazyTableCellRenderer());
 
         final LazyTable table = this;
+
+
+        
         // look for sorting column
         getTableHeader().addMouseListener(new MouseAdapter() {
 
             @Override
             public void mouseClicked(MouseEvent e) {
+
                 if (!isSortable()) {
-                    JOptionPane.showMessageDialog(table.getTableHeader(), "Sorting is not available while data is loading.","Sorting not Available",JOptionPane.INFORMATION_MESSAGE);
+
+                    ProgressInterface progressInterface = (ProgressInterface) table.getModel();
+                    
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), progressInterface, "Data loading", "Sorting is not available while data is loading. Please Wait.");
+                    dialog.setLocation(e.getLocationOnScreen());
+                    dialog.setVisible(true);
+
+                    if (!dialog.isWaitingFinished()) {
+                        return;
+                    }
+                    
+                    int col = columnAtPoint(e.getPoint());
+                    col = (col == -1) ? -1 : convertColumnIndexToModel(col);
+
+                    DefaultRowSorter sorter = ((DefaultRowSorter) table.getRowSorter());
+                    ArrayList list = new ArrayList();
+                    list.add(new RowSorter.SortKey(col, SortOrder.ASCENDING));
+                    sorter.setSortKeys(list);
+                    sorter.sort();
+
+                    return;
                 }
+
+                
                 
                 int col = columnAtPoint(e.getPoint());
                 col = (col==-1) ? -1 : convertColumnIndexToModel(col);

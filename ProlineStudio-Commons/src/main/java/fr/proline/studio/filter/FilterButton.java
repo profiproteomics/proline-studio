@@ -1,11 +1,11 @@
 package fr.proline.studio.filter;
 
+import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import org.openide.windows.WindowManager;
 
 /**
@@ -30,8 +30,14 @@ public class FilterButton extends JButton implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         
         if (!m_tableModelFilterInterface.isLoaded()) {
-            JOptionPane.showMessageDialog(this, "Filtering is not available while data is loading.", "Filtering not Available", JOptionPane.INFORMATION_MESSAGE);
-            return;
+
+            ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_tableModelFilterInterface, "Data loading", "Filtering is not available while data is loading. Please Wait.");
+            dialog.setLocation( getLocationOnScreen().x + getWidth() + 5,  getLocationOnScreen().y + getHeight() + 5);
+            dialog.setVisible(true);
+            
+            if (!dialog.isWaitingFinished()) {
+                return;
+            }
         }
         
         FilterDialog dialog = FilterDialog.getDialog(WindowManager.getDefault().getMainWindow());

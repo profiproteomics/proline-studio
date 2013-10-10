@@ -468,7 +468,12 @@ public class PeptideInstanceTableModel extends LazyTableModel {
 
     @Override
     public boolean isLoaded() {
-       return m_table.isSortable();
+        return m_table.isSortable();
+    }
+
+    @Override
+    public int getLoadingPercentage() {
+        return m_table.getLoadingPercentage();
     }
 
     

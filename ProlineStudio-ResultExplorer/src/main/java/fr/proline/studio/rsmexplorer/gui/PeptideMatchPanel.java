@@ -240,7 +240,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         
         m_filterButton = new FilterButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel()));
         
-        m_exportButton = new ExportButton("Peptide Match", m_peptideMatchTable);
+        m_exportButton = new ExportButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel()), "Peptide Match", m_peptideMatchTable);
         
         if (m_startingPanel) {
             toolbar.add(m_decoyButton);
@@ -555,5 +555,15 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             selectionWillBeRestored = b;
         }
         private boolean selectionWillBeRestored = false;
+
+        @Override
+        public int getLoadingPercentage() {
+            return m_dataBox.getLoadingPercentage();
+        }
+
+        @Override
+        public boolean isLoaded() {
+            return m_dataBox.isLoaded();
+        }
     }
 }

@@ -512,4 +512,9 @@ public class PeptideMatchTableModel extends LazyTableModel {
         return m_table.isSortable();
     }
 
+    @Override
+    public int getLoadingPercentage() {
+        return m_table.getLoadingPercentage();
+    }
+
 }

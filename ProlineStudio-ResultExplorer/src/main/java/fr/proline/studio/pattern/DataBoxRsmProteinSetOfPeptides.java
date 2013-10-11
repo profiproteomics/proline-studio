@@ -87,6 +87,10 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
                 }
 
                 setLoaded(loadingId);
+                
+                if (finished) {
+                    unregisterTask(taskId);
+                }
             }
         };
 

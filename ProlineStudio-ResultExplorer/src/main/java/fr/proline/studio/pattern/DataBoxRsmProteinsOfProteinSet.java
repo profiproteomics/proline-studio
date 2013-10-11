@@ -85,6 +85,7 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
                          */); //JPM.TODO
                 
                 setLoaded(loadingId);
+                unregisterTask(taskId);
             }
         };
 

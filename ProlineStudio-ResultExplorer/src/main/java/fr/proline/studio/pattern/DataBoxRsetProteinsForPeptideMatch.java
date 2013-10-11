@@ -82,6 +82,11 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
                     ((RsetProteinsPanel) m_panel).dataUpdated(subTask, finished);
                 }
                 setLoaded(loadingId);
+                
+                if (finished) {
+                    unregisterTask(taskId);
+                }
+                
             }
         };
 

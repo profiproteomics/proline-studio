@@ -56,7 +56,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         
         // cancel task possibily running
         AccessDatabaseThread.getAccessDatabaseThread().abortTasks(m_taskMap.keySet());
-        
+     
+        m_taskMap.clear();
     }
     
     /**
@@ -69,6 +70,9 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         m_taskMap.put(task.getId(), task.getTaskInfo());
         
+    }
+    protected void unregisterTask(Long taskId) {
+        m_taskMap.remove(taskId);
     }
  
     

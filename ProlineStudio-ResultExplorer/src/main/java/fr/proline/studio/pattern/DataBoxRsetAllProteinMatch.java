@@ -74,6 +74,11 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
                 }
 
                 setLoaded(loadingId);
+                
+                if (finished) {
+                    unregisterTask(taskId);
+                }
+                
             }
         };
 

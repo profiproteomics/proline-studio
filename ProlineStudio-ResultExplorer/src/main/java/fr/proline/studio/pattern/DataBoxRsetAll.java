@@ -71,6 +71,10 @@ public class DataBoxRsetAll extends AbstractDataBox{
                     ((RsetAllPanel) m_panel).setData(taskId, resultSetArrayList);
 
                     setLoaded(loadingId);
+                    
+                    if (finished) {
+                        unregisterTask(taskId);
+                    }
                 }
             };
 

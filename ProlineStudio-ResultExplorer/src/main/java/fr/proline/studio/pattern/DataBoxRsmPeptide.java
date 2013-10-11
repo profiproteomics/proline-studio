@@ -71,6 +71,10 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
                } else {
                     ((PeptideMatchPanel)m_panel).dataUpdated(subTask, finished);
                 }
+               
+                if (finished) {
+                    unregisterTask(taskId);
+                }
             }
         };
         

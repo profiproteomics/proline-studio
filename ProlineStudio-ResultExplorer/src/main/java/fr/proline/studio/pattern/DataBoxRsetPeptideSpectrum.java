@@ -73,6 +73,10 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
                     ((RsetPeptideSpectrumPanel) m_panel).setData(peptideMatch);
                     
                     setLoaded(loadingId);
+                    
+                    if (finished) {
+                        unregisterTask(taskId);
+                    }
                 }
             };
 

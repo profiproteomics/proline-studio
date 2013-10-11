@@ -91,6 +91,11 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
                }
                 
                 setLoaded(loadingId);
+                
+                if (finished) {
+                    unregisterTask(taskId);
+                }
+                
             }
         };
 

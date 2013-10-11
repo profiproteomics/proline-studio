@@ -1,13 +1,17 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
+
+
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -17,13 +21,12 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.slf4j.LoggerFactory;
 
-
-
 import fr.proline.core.utils.lzma.package$EasyLzma$;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+
 import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
@@ -31,6 +34,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+
+
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.CrosshairState;
 import org.jfree.chart.plot.PlotRenderingInfo;
@@ -51,6 +56,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     
     private DPeptideMatch m_previousPeptideMatch = null;
     
+    private RsetPeptideSpectrumAnnotations spectrumAnnotations= null;
     /**
      * Creates new form RsetPeptideSpectrumPanel
      */
@@ -66,14 +72,18 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
         XYPlot plot = (XYPlot) m_chart.getPlot();
         plot.getRangeAxis().setUpperMargin(0.2);
+       
         
         plot.setBackgroundPaint(Color.white);
 
         XYStickRenderer renderer = new XYStickRenderer();
         renderer.setBaseStroke(new BasicStroke(1.0f));
+        
         plot.setRenderer(renderer);
         
         initComponents();
+        
+        
         
                 /*       ((ChartPanel) spectrumPanel).addChartMouseListener(new ChartMouseListener() {
 
@@ -151,7 +161,9 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
        m_previousPeptideMatch = peptideMatch;
        
         constructSpectrumChart(peptideMatch);
-        
+        spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
+        spectrumAnnotations.addAnnotations();
+ 
     }
     
     private void constructSpectrumChart(DPeptideMatch pm) {
@@ -159,24 +171,41 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         final String SERIES_NAME = "spectrumData";
         if (pm == null) {
             m_dataSet.removeSeries(SERIES_NAME);
+    		if(spectrumAnnotations!=null) {
+    			spectrumAnnotations.removeAnnotations();
+    		}
+    		  
             return;
         }
 
         DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
         if (msQuery == null) {
             m_dataSet.removeSeries(SERIES_NAME);
+            if(spectrumAnnotations!=null) {
+    			spectrumAnnotations.removeAnnotations();
+    		}
+    		
+    		  
             return;
         }
         
         Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
         if (spectrum == null) {
             m_dataSet.removeSeries(SERIES_NAME);
+            if(spectrumAnnotations!=null) {
+    			spectrumAnnotations.removeAnnotations();
+    		}
+    		  
             return;
         }
         
         Peptide p = pm.getPeptide();
         if (p== null) {
             m_dataSet.removeSeries(SERIES_NAME);
+            if(spectrumAnnotations!=null) {
+    			spectrumAnnotations.removeAnnotations();
+    		}
+    		  
             return;
         }
 
@@ -190,6 +219,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             m_dataSet.removeSeries(SERIES_NAME);
             return;
         }
+        
+     
         
         
         ByteBuffer intensityByteBuffer = ByteBuffer.wrap(intensityByteArray).order(ByteOrder.LITTLE_ENDIAN);
@@ -224,7 +255,6 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             data[0][i] = massDoubleArray[i];
             data[1][i] = intensityDoubleArray[i];
         }
-
         m_dataSet.addSeries(SERIES_NAME, data);
 
 
@@ -236,6 +266,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         ((ChartPanel) spectrumPanel).restoreAutoBounds();
         ((ChartPanel) spectrumPanel).setBackground(Color.white);
     }
+    
+    
     
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
@@ -286,7 +318,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         }
     }
     
-      public static byte[] floatsToBytes( float[] floats) {
+    public static byte[] floatsToBytes( float[] floats) {
 
     // Convert float to a byte buffer
     ByteBuffer byteBuf = ByteBuffer.allocate(4 * floats.length).order(ByteOrder.LITTLE_ENDIAN);
@@ -296,4 +328,10 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     // Convert byte buffer into a byte array
     return byteBuf.array();
   }
+    
+
+  	
 }
+	
+	
+

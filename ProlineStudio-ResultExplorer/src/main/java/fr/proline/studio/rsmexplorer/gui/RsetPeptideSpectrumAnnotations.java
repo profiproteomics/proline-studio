@@ -333,10 +333,9 @@ public class RsetPeptideSpectrumAnnotations {
 			size = Math.max(fragSer[positionIonB].masses.length,fragSer[positionIonY].masses.length);
 				
 			
-			System.out.println("position in the table : b ions= " + positionIonB + " y ions:" + positionIonY);
 			// *-*-*-* *-*-*-* *-*-*-* *-*-*-* ici on voit les match*-*-*-* *-*-*-* *-*-*-* *-*-*-* *-*-*-*
 			// à noter que 2 manières de faire les match. soit par égalité de masse théo et match, ou bien par numéro de position sur le match.
-			// exemple b(2) signifie sur le 2e element théorique ca matche. !!!
+			// exemple b(2) signifie sur le 2e element théorique ca matche. !!! 1ere solution employée ici.
 			//int i=0;
 			// Here: filling the fragTables (theo and measured, before displaying)
 			j=0;
@@ -400,7 +399,7 @@ public class RsetPeptideSpectrumAnnotations {
 			
 				//**-*-*-*-*
 				
-				float tolerance = (float) 0.7; //0.01;
+				float tolerance = (float) 0.7; //0.01; // could be 0 but to be sure a match is performed...
 				// place annotations
 				double yPrev =  0; //fragTableTheo[6][1] + getMassFromAminoAcid(peptideSequence.charAt(peptideSequence.length()-1)) ;
 				fragTableTheo[6][0] =  fragTableTheo[6][1] + getMassFromAminoAcid(peptideSequence.charAt(peptideSequence.length()-1)) ;
@@ -442,11 +441,6 @@ public class RsetPeptideSpectrumAnnotations {
 				
 				for (int i = 0; i < size; i++) {
 
-					// initial markers for b/y series
-					
-					
-				
-
 					// place separators marks------
 					if (bPrev != 0) {
 						xyta = new XYTextAnnotation("|", bPrev, maxY - (maxY - minY) * 0.15);
@@ -468,6 +462,7 @@ public class RsetPeptideSpectrumAnnotations {
 					}
 
 					// place AA highlightings
+					
 					System.out.println("i=" + i + " , yPrev= " + yPrev + " , \tfragTable[6][" +i + "]=" + fragTable[6][i] + "\t, fragTableTheo[6][" +i + "]=" + fragTableTheo[6][i] );
 					System.out.println("i=" + i + " , bPrev= " + bPrev + " , \tfragTable[1][" +i + "]=" + fragTable[1][i] + "\t, fragTableTheo[1][" +i + "]=" + fragTableTheo[1][i] );
 					// ----- if 2 contiguous mass peaks are represented...draw the aa

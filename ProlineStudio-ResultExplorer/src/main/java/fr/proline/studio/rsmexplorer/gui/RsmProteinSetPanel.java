@@ -50,7 +50,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     private MarkerContainerPanel m_markerContainerPanel;
     
-    private boolean m_forRSM;
+    private boolean m_firstPanel;
     private JButton m_decoyButton;
     
     private SearchFloatingPanel m_searchPanel;
@@ -63,9 +63,9 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     /**
      * Creates new form ProteinGroupsTablePanel
      */
-    public RsmProteinSetPanel(boolean forRSM) {
+    public RsmProteinSetPanel(boolean firstPanel) {
         
-        m_forRSM = forRSM;
+        m_firstPanel = firstPanel;
         
         initComponents();
 
@@ -74,7 +74,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     public void setData(Long taskId, DProteinSet[] proteinSets, boolean finished) {
         
         // update toolbar
-        if (m_forRSM) {
+        if (m_firstPanel) {
             ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
             if (rsm != null) {
                 m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
@@ -201,15 +201,12 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         proteinSetPanel.setLayout(new BorderLayout());
         
          JPanel internalPanel = createInternalPanel();
-        
-        if (m_forRSM) {
-            JToolBar toolbar = initToolbar();
-            proteinSetPanel.add(toolbar, BorderLayout.WEST);
-            proteinSetPanel.add(internalPanel, BorderLayout.CENTER);
-        } else {
-            proteinSetPanel.add(internalPanel, BorderLayout.CENTER);
-        }
-        
+
+        JToolBar toolbar = initToolbar();
+        proteinSetPanel.add(toolbar, BorderLayout.WEST);
+        proteinSetPanel.add(internalPanel, BorderLayout.CENTER);
+
+
         return proteinSetPanel;
     }
     
@@ -217,44 +214,47 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
         
-        IconManager.IconType iconType = (m_forRSM) ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSET_DECOY;
-        m_decoyButton = new JButton(IconManager.getIcon(IconManager.IconType.RSM_DECOY ));
-        m_decoyButton.setToolTipText("Display Decoy Data"); 
-        m_decoyButton.setEnabled(false);
+        if (m_firstPanel) {
+            
+            // Decoy Button
+            m_decoyButton = new JButton(IconManager.getIcon(IconManager.IconType.RSM_DECOY));
+            m_decoyButton.setToolTipText("Display Decoy Data");
+            m_decoyButton.setEnabled(false);
 
+            m_decoyButton.addActionListener(new ActionListener() {
 
-        
-        m_decoyButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
-                ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
-                ResultSummary decoyRsm = rsm.getDecotResultSummary();
-                if (decoyRsm == null) {
-                    return;
+                    ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+                    ResultSummary decoyRsm = rsm.getDecotResultSummary();
+                    if (decoyRsm == null) {
+                        return;
+                    }
+                    WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox("Decoy " + getTopComponentName(), true);
+                    wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
+
+                    // open a window to display the window box
+                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                    win.open();
+                    win.requestActive();
                 }
-                WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox("Decoy " + getTopComponentName(), true);
-                wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
+            });
 
-                // open a window to display the window box
-                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                win.open();
-                win.requestActive();
-            }
-        });
+            // Search Button
+            m_searchToggleButton = new SearchToggleButton(m_searchPanel);
+
+            toolbar.add(m_decoyButton);
+            toolbar.add(m_searchToggleButton);
+        }
         
-        // Search Button
-        m_searchToggleButton = new SearchToggleButton(m_searchPanel);
-
         m_filterButton = new FilterButton(((ProteinSetTableModel) m_proteinSetTable.getModel()));
 
         m_exportButton = new ExportButton(((ProteinSetTableModel) m_proteinSetTable.getModel()), "Protein Sets", m_proteinSetTable);
-        
-        toolbar.add(m_decoyButton);
-        toolbar.add(m_searchToggleButton);
+
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
+        
         return toolbar;
     }
     

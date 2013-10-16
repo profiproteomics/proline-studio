@@ -150,7 +150,9 @@ public class RsetPeptideSpectrumAnnotations {
 			EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_dataBox.getProjectId()).getEntityManagerFactory().createEntityManager();
 			entityManagerMSI.getTransaction().begin();
 			
-		
+			if(pm == null) {
+				return;
+			}
 			PeptideMatch   pmORM = entityManagerMSI.find(PeptideMatch.class, pm.getId()); 
 				
 			DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
@@ -251,7 +253,7 @@ public class RsetPeptideSpectrumAnnotations {
 	
 			SpectrumMatchAW spectrMatch = new SpectrumMatchAW(fragSer, fragMa);
 
-			size = 25; 
+			//size = 25; 
 			double[][] fragTableTheo = new double[11][size];
 			float [][] fragTableTheoCharge = new float [11][size];
 			double[][] fragTable = new double[11][size];

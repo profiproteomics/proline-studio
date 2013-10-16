@@ -56,6 +56,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     
     private DPeptideMatch m_previousPeptideMatch = null;
     
+    private javax.swing.JPanel spectrumPanel;
+    
     private RsetPeptideSpectrumAnnotations spectrumAnnotations= null;
     /**
      * Creates new form RsetPeptideSpectrumPanel
@@ -147,10 +149,11 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(spectrumPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-    }// </editor-fold>//GEN-END:initComponents
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel spectrumPanel;
-    // End of variables declaration//GEN-END:variables
+    }
+    
+    
+    
+ 
 
     
    public void setData(DPeptideMatch peptideMatch) {
@@ -263,7 +266,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         m_chart.setTitle(title);
 
         // reset X/Y zooming
-        ((ChartPanel) spectrumPanel).restoreAutoBounds();
+       // ((ChartPanel) spectrumPanel).restoreAutoBounds();
         ((ChartPanel) spectrumPanel).setBackground(Color.white);
     }
     

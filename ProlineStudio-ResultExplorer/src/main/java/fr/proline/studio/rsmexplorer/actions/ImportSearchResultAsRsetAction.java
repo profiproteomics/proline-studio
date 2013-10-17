@@ -56,6 +56,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
             String decoyRegex = dialog.getDecoyRegex();
             long instrumentId = dialog.getInstrumentId();
             long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
+            boolean saveSpectrumMatches = dialog.getSaveSpectrumMatches();
             
             RSMTree tree = RSMTree.getTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -100,7 +101,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
                     canonicalPath = f.getAbsolutePath(); // should not happen
                 }
                 Long[] resultSetId = new Long[1];
-                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, projectId, resultSetId);
+                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches,  projectId, resultSetId);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
             }
             

@@ -66,6 +66,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
     private JComboBox m_instrumentsComboBox = null;
     private JComboBox m_peaklistSoftwaresComboBox = null;
+    private JCheckBox m_saveSpectrumCheckBox ;
     private JComboBox m_decoyComboBox = null;
     private JLabel m_decoyAccessionRegexLabel = null;
     private JTextField m_decoyRegexTextField = null;
@@ -139,8 +140,14 @@ public class ImportIdentificationDialog extends DefaultDialog {
         // create parserPanel
         JPanel parserPanel = createParserPanel();
         
+        // create decoyPanel
+        JPanel decoyPanel = createDecoyPanel();
+        
         // create parameter panel
         m_parserParametersPanel = createParametersPanel();
+        
+        // create panel with option save Spectrum Matches
+        JPanel saveSpectrumPanel = createSaveSpectrumPanel();
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -153,8 +160,13 @@ public class ImportIdentificationDialog extends DefaultDialog {
         allParametersPanel.add(parserPanel, c);
         
         c.gridy++;
+        allParametersPanel.add(decoyPanel, c);
+        
+        c.gridy++;
         allParametersPanel.add(m_parserParametersPanel, c);
 
+        c.gridy++;
+        allParametersPanel.add(saveSpectrumPanel, c);
         
         // init the first parser parameters panel selected
         m_parserComboBox.setSelectedIndex(0);
@@ -360,7 +372,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.weightx = 1;
         parserPanel.add(m_peaklistSoftwaresComboBox, c);
         
-        
+       
+        /*
         c.gridx = 0;
         c.gridwidth = 1;
         c.weightx = 0;
@@ -392,7 +405,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         m_regexButton = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));
         m_regexButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
         parserPanel.add(m_regexButton, c);
-        
+        */
         
 
             
@@ -413,6 +426,88 @@ public class ImportIdentificationDialog extends DefaultDialog {
                 repack();
             }
         });
+        
+        /*
+        m_decoyComboBox.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateDecoyRegexEnabled();
+            }
+        });
+        
+        m_regexButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                ArrayList<String> regexArrayList = readRegexArray(null);
+                SelectRegexDialog regexDialog = SelectRegexDialog.getDialog(m_singletonDialog, regexArrayList);
+                regexDialog.setLocationRelativeTo(m_regexButton);
+                regexDialog.setVisible(true);
+                if (regexDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                    
+                    
+                    
+                    String selectedRegex = regexDialog.getSelectedRegex();
+                    if (selectedRegex != null) {
+                        m_decoyRegexTextField.setText(selectedRegex);
+                    }
+                    regexArrayList = regexDialog.getRegexArrayList();
+                    writeRegexArray(regexArrayList);
+                }
+            }
+        });*/
+        
+        return parserPanel;
+    }
+
+    private JPanel createDecoyPanel() {
+         // Creation of Objects for the Parser Panel
+        JPanel decoyPanel = new JPanel(new GridBagLayout());
+        decoyPanel.setBorder(BorderFactory.createTitledBorder(" Decoy Parameters "));
+
+        
+        // Placement of Objects for Parser Panel
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+
+        
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        c.gridy = 0;
+        JLabel decoyLabel = new JLabel("Decoy :");
+        decoyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        decoyPanel.add(decoyLabel, c);
+        
+        c.gridx++;
+        c.gridwidth = 2;
+        c.weightx = 1;
+        decoyPanel.add(m_decoyComboBox, c);
+        
+        
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        c.gridy++;
+        m_decoyAccessionRegexLabel = new JLabel("Decoy Accesion Regex :");
+        m_decoyAccessionRegexLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        decoyPanel.add(m_decoyAccessionRegexLabel, c);
+        
+        c.gridx++;
+        c.weightx = 1;
+        decoyPanel.add(m_decoyRegexTextField, c);
+        
+        c.gridx++;
+        c.weightx = 0;
+        m_regexButton = new JButton(IconManager.getIcon(IconManager.IconType.DOCUMENT_LIST));
+        m_regexButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        decoyPanel.add(m_regexButton, c);
+
         
         
         m_decoyComboBox.addActionListener(new ActionListener() {
@@ -445,10 +540,30 @@ public class ImportIdentificationDialog extends DefaultDialog {
                 }
             }
         });
-        
-        return parserPanel;
-    }
 
+        return decoyPanel;
+    }
+    
+    private JPanel createSaveSpectrumPanel() {
+        
+        JPanel saveSpectrumPanel = new JPanel(new GridBagLayout());
+
+
+        
+        // Placement of Objects for Parser Panel
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
+        saveSpectrumPanel.add(m_saveSpectrumCheckBox, c);
+        
+        return saveSpectrumPanel;
+    }
+    
     private ArrayList<String> readRegexArray(String regexToAdd) {
         
         ArrayList<String> regexArrayList = new ArrayList();
@@ -748,6 +863,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return peaklistSoftware.getId();
     }
     
+    public boolean getSaveSpectrumMatches() {
+        return m_saveSpectrumCheckBox.isSelected();
+    }
+    
     public String getParserId() {
         return PARSER_IDS[m_parserComboBox.getSelectedIndex()];
     }
@@ -820,6 +939,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
         m_decoyRegexParameter = new StringParameter("decoy_accession", "Decoy Accession", m_decoyRegexTextField, "", new Integer(2), null);
         m_decoyRegexParameter.setUsed(false);
         parameterList.add(m_decoyRegexParameter);
+
+        BooleanParameter saveSpectrumParameter = new BooleanParameter("save_spectrum_matches", "Save Spectrum Matches", JCheckBox.class, Boolean.FALSE);
+        m_saveSpectrumCheckBox = (JCheckBox) saveSpectrumParameter.getComponent(null);
+        parameterList.add(saveSpectrumParameter);
         
         
         return parameterList;

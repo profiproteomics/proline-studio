@@ -30,9 +30,10 @@ public class ImportIdentificationTask extends AbstractServiceTask {
     private long m_instrumentId;
     private long m_peaklistSoftwareId;
     private long m_projectId;
+    private boolean m_saveSpectrumMatches;
     private Long[] m_resultSetId = null;
     
-    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String canonicalFilePath, String decoyRegex, long instrumentId, long peaklistSoftwareId, long projectId, Long[] resultSetId) {
+    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String canonicalFilePath, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches, long projectId, Long[] resultSetId) {
         super(callback, false /*asynchronous*/, new TaskInfo("Import Identification "+canonicalFilePath, TASK_LIST_INFO));
         
         m_parserId = parserId;
@@ -41,6 +42,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
         m_decoyRegex = decoyRegex;
         m_instrumentId = instrumentId;
         m_peaklistSoftwareId = peaklistSoftwareId;
+        m_saveSpectrumMatches = saveSpectrumMatches;
         m_projectId = projectId;
         m_resultSetId = resultSetId;
     }
@@ -98,6 +100,8 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             params.put("instrument_config_id", m_instrumentId);
             params.put("peaklist_software_id", m_peaklistSoftwareId);
 
+            params.put("save_spectrum_matches", m_saveSpectrumMatches);
+            
             // parser arguments
             params.put("importer_properties", m_parserArguments);
             

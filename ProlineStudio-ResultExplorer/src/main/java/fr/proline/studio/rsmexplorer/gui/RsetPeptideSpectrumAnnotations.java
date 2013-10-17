@@ -473,10 +473,10 @@ public class RsetPeptideSpectrumAnnotations {
 					if(i!=0 && fragTable[6][ i] != 0)
 					{
 						xyta = new XYTextAnnotation("\u25BE" , fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.05);
-						xyta.setPaint(Color.black);
+						xyta.setPaint(Color.red);
 						plot.addAnnotation(xyta);
 						xyta = new XYTextAnnotation("y" + ( sizeYserie - i), fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.1);
-						xyta.setPaint(Color.black);
+						xyta.setPaint(Color.red);
 						plot.addAnnotation(xyta);
 					}
 					
@@ -522,11 +522,11 @@ public class RsetPeptideSpectrumAnnotations {
 						else
 						{
 							xyta = new XYTextAnnotation("\u25BE" , fragTableTheo[1][i], fragTable[0][i] + (maxY - minY) * 0.05);
-							xyta.setPaint(Color.black);
+							xyta.setPaint(Color.blue);
 							plot.addAnnotation(xyta);
 						
 							xyta = new XYTextAnnotation("b" + (i+1), fragTableTheo[1][i], fragTable[0][i] + (maxY - minY) * 0.1);
-							xyta.setPaint(Color.black);
+							xyta.setPaint(Color.blue);
 							plot.addAnnotation(xyta);
 						}
 						String aa = "" + peptideSequence.charAt(i); //getAminoAcidName( (float)Math.abs(bPrev - fragTableTheo[1][i]),tolerance);//  , tolerance);

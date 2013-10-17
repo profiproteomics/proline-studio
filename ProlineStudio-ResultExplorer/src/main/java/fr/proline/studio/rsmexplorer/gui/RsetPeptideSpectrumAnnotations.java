@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.nio.ByteBuffer;
@@ -16,6 +17,7 @@ import javax.persistence.EntityManager;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
+import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.ValueMarker;
@@ -472,12 +474,21 @@ public class RsetPeptideSpectrumAnnotations {
 				
 					if(i!=0 && fragTable[6][ i] != 0)
 					{
+						// write the triangle
 						xyta = new XYTextAnnotation("\u25BE" , fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.05);
 						xyta.setPaint(Color.red);
 						plot.addAnnotation(xyta);
+						// write the yx serie number
 						xyta = new XYTextAnnotation("y" + ( sizeYserie - i), fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.1);
 						xyta.setPaint(Color.red);
 						plot.addAnnotation(xyta);
+						// dashed vertical bar
+						float yAboveBar =  (float) ((maxY - minY) *0.15); 
+						 float dash[] = { 5.0f };
+						BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+					    XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[6][i],fragTable[5][i] + yAboveBar, fragTableTheo[6][i] , fragTableTheo[5][i] , stk,Color.red);
+				        plot.addAnnotation(line);
+
 					}
 					
 					if (yPrev != 0  && fragTable[6][ i-1] != 0) {
@@ -491,7 +502,7 @@ public class RsetPeptideSpectrumAnnotations {
 							yPrevFound = false;
 						}
 						String aa = ""+  peptideSequence.charAt(i-1); /*getAminoAcidName( (float)Math.abs(yPrev - fragTableTheo[6][i]),tolerance);*/
-						
+						// draw the aa letter
 						xyta = new XYTextAnnotation(" " + aa + " ", (yPrev + fragTable[6][i-1]) / 2, maxY - (maxY - minY) * 0.25);
 						if(yPrevFound) { // 2 consecutives fragments matching, then highlight the AA
 							xyta.setPaint(Color.white);
@@ -521,13 +532,21 @@ public class RsetPeptideSpectrumAnnotations {
 						}
 						else
 						{
+							// draw the triangle above the b number peak
 							xyta = new XYTextAnnotation("\u25BE" , fragTableTheo[1][i], fragTable[0][i] + (maxY - minY) * 0.05);
 							xyta.setPaint(Color.blue);
 							plot.addAnnotation(xyta);
-						
+						// draw the b number overt the peak
 							xyta = new XYTextAnnotation("b" + (i+1), fragTableTheo[1][i], fragTable[0][i] + (maxY - minY) * 0.1);
 							xyta.setPaint(Color.blue);
 							plot.addAnnotation(xyta);
+							// dashed vertical bar over the b number
+							float yAboveBar =  (float) ((maxY - minY) *0.15); 
+							 float dash[] = { 5.0f };
+							BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+						    XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[1][i],fragTable[0][i] + yAboveBar, fragTableTheo[1][i] , fragTableTheo[0][i] , stk,Color.blue);
+					        plot.addAnnotation(line);
+
 						}
 						String aa = "" + peptideSequence.charAt(i); //getAminoAcidName( (float)Math.abs(bPrev - fragTableTheo[1][i]),tolerance);//  , tolerance);
 						xyta = new XYTextAnnotation(" " + aa + " ", (bPrev + fragTable[1][i]) / 2, maxY - (maxY - minY) * 0.15);

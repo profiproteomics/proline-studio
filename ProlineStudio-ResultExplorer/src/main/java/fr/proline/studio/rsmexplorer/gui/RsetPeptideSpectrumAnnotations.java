@@ -484,10 +484,12 @@ public class RsetPeptideSpectrumAnnotations {
 						plot.addAnnotation(xyta);
 						// dashed vertical bar
 						float yAboveBar =  (float) ((maxY - minY) *0.15); 
-						 float dash[] = { 5.0f };
-						BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
-					    XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[6][i],fragTable[5][i] + yAboveBar, fragTableTheo[6][i] , fragTableTheo[5][i] , stk,Color.red);
-				        plot.addAnnotation(line);
+						float dash[] = { 5.0f };
+						if( fragTable[5][i] < fragTableTheo[5][i] ) { // draw only dashline if the y or b tag is not above the y/b line
+							BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+							XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[6][i],fragTable[5][i] + yAboveBar, fragTableTheo[6][i] , fragTableTheo[5][i] , stk,Color.red);
+							plot.addAnnotation(line);
+						}
 
 					}
 					
@@ -542,10 +544,12 @@ public class RsetPeptideSpectrumAnnotations {
 							plot.addAnnotation(xyta);
 							// dashed vertical bar over the b number
 							float yAboveBar =  (float) ((maxY - minY) *0.15); 
-							 float dash[] = { 5.0f };
-							BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
-						    XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[1][i],fragTable[0][i] + yAboveBar, fragTableTheo[1][i] , fragTableTheo[0][i] , stk,Color.blue);
-					        plot.addAnnotation(line);
+							float dash[] = { 5.0f };
+							if( fragTable[0][i] < fragTableTheo[0][i] ) { // draw only dashline if the y or b tag is not above the y/b line 
+								BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+							    XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[1][i],fragTable[0][i] + yAboveBar, fragTableTheo[1][i] , fragTableTheo[0][i] , stk,Color.blue);
+						        plot.addAnnotation(line);
+							}
 
 						}
 						String aa = "" + peptideSequence.charAt(i); //getAminoAcidName( (float)Math.abs(bPrev - fragTableTheo[1][i]),tolerance);//  , tolerance);

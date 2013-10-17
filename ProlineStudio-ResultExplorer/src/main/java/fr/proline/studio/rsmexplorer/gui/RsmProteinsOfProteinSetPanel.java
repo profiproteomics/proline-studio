@@ -4,6 +4,8 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -15,8 +17,15 @@ import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.URLCellRenderer;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 
@@ -31,24 +40,102 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     private AbstractDataBox m_dataBox;
     private DProteinSet m_proteinSetCur = null;
 
+    private JTextField m_proteinNameTextField;
+    private ProteinTable m_proteinTable;
+    private JScrollPane m_scrollPane;
+
+    private FilterButton m_filterButton;
+    private ExportButton m_exportButton;
+    
     /**
      * Creates new form RsmProteinsOfProteinSetPanel
      */
     public RsmProteinsOfProteinSetPanel() {
-        initComponents();
+        
+        setLayout(new BorderLayout());
+        
+        JPanel proteinPanel = createProteinPanel();
+        
+        add(proteinPanel, BorderLayout.CENTER);
+        
+    }
+    
+    
+    private JPanel createProteinPanel() {
+        JPanel proteinPanel = new JPanel();
+        proteinPanel.setBounds(0, 0, 500, 400);
 
-        ((DecoratedTable) proteinTable).displayColumnAsPercentage(ProteinTableModel.COLTYPE_PROTEIN_SCORE);
-        TableColumn accColumn = proteinTable.getColumnModel().getColumn(ProteinTableModel.COLTYPE_PROTEIN_NAME);
+        proteinPanel.setLayout(new BorderLayout());
+
+        JPanel internalPanel = createInternalPanel();
+        proteinPanel.add(internalPanel, BorderLayout.CENTER);
+
+        JToolBar toolbar = initToolbar();
+        proteinPanel.add(toolbar, BorderLayout.WEST);
+
+
+        return proteinPanel;
+
+    }
+    
+    private JPanel createInternalPanel() {
+
+        JPanel internalPanel = new JPanel();
+        internalPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+
+        
+        m_proteinNameTextField = new JTextField();
+        m_proteinNameTextField.setEditable(false);
+        m_proteinNameTextField.setBackground(Color.white);
+        
+        
+        m_scrollPane = new javax.swing.JScrollPane();
+        m_proteinTable = new ProteinTable();
+        m_proteinTable.setModel(new ProteinTableModel((ProgressInterface) m_proteinTable));
+        m_scrollPane.setViewportView(m_proteinTable);
+
+        m_proteinTable.displayColumnAsPercentage(ProteinTableModel.COLTYPE_PROTEIN_SCORE);
+        TableColumn accColumn = m_proteinTable.getColumnModel().getColumn(ProteinTableModel.COLTYPE_PROTEIN_NAME);
         URLCellRenderer renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", ProteinTableModel.COLTYPE_PROTEIN_NAME);
         accColumn.setCellRenderer(renderer);
-        proteinTable.addMouseListener(renderer);
+        m_proteinTable.addMouseListener(renderer);
+        
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
+        internalPanel.add(m_proteinNameTextField, c);
+        
 
+        c.gridy++;
+        c.weighty = 1;
+        internalPanel.add(m_scrollPane, c);
+        
+        return internalPanel;
+        
 
+    }
+
+    private JToolBar initToolbar() {
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+
+        m_filterButton = new FilterButton(((ProteinTableModel) m_proteinTable.getModel()));
+        m_exportButton = new ExportButton(((ProteinTableModel) m_proteinTable.getModel()), "Proteins", m_proteinTable);
+
+        toolbar.add(m_filterButton);
+        toolbar.add(m_exportButton);
+
+        return toolbar;
     }
 
     public DProteinMatch getSelectedProteinMatch() {
 
-        ProteinTable table = (ProteinTable) proteinTable;
+        ProteinTable table = (ProteinTable) m_proteinTable;
 
         // Retrieve Selected Row
         int selectedRow = table.getSelectedRow();
@@ -103,22 +190,24 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
 
         // Modify protein description
-        proteinNameTextField.setText(typicalProtein.getDescription());
+        m_proteinNameTextField.setText(typicalProtein.getDescription());
 
 
         // Modify the Model
-        ((ProteinTableModel) proteinTable.getModel()).setData(proteinSet.getResultSummaryId(), sameSetArray, subSetArray);
+        ((ProteinTableModel) m_proteinTable.getModel()).setData(proteinSet.getResultSummaryId(), sameSetArray, subSetArray);
 
         // Select the Row
-        int row = ((ProteinTableModel) proteinTable.getModel()).findRowToSelect(searchedText);
-        proteinTable.getSelectionModel().setSelectionInterval(row, row);
+        int row = ((ProteinTableModel) m_proteinTable.getModel()).findRowToSelect(searchedText);
+        m_proteinTable.getSelectionModel().setSelectionInterval(row, row);
 
+        m_proteinTable.setSortable(true);
+        
     }
 
     private void clearData() {
-        proteinNameTextField.setText("");
+        m_proteinNameTextField.setText("");
         //((ProteinGroupProteinSelectedPanel) ViewTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(null); //JPM.TODO
-        ((ProteinTableModel) proteinTable.getModel()).setData(-1, null, null);
+        ((ProteinTableModel) m_proteinTable.getModel()).setData(-1, null, null);
 
     }
 
@@ -137,51 +226,8 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         return m_dataBox.getAddAction(splittedPanel);
     }
 
-    /**
-     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
-     * content of this method is always regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
 
-        proteinNameTextField = new javax.swing.JTextField();
-        proteinNameTextField.setEditable(false);
-        proteinNameTextField.setBackground(Color.white);
-        scrollPane = new javax.swing.JScrollPane();
-        proteinTable = new ProteinTable();
 
-        proteinNameTextField.setText(org.openide.util.NbBundle.getMessage(RsmProteinsOfProteinSetPanel.class, "RsmProteinsOfProteinSetPanel.proteinNameTextField.text")); // NOI18N
-
-        proteinTable.setModel(new ProteinTableModel((ProgressInterface) proteinTable));
-        scrollPane.setViewportView(proteinTable);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(scrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(proteinNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(proteinNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-    }// </editor-fold>//GEN-END:initComponents
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField proteinNameTextField;
-    private javax.swing.JTable proteinTable;
-    private javax.swing.JScrollPane scrollPane;
-    // End of variables declaration//GEN-END:variables
 
 
 

@@ -154,7 +154,7 @@ public class ProteinTableModel extends FilterTableModel {
         return rowToBeSelected;
     }
     
-        @Override
+    @Override
     public void filter() {
         
         if (m_sameSetMatches == null) {

@@ -74,13 +74,12 @@ public class ProteinSetTableModel extends LazyTableModel {
     }
 
     
-    
     @Override
     public int getRowCount() {
         if (m_proteinSets == null) {
             return 0;
         }
-       if ((!m_isFiltering) && (m_filteredIds != null)) {
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
             return m_filteredIds.size();
         }
         return m_proteinSets.length;

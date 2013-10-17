@@ -345,59 +345,59 @@ public class RsetPeptideSpectrumAnnotations {
 			int nbFound = 0;
 			int nbThroughB = 0;
 			int nbThroughY = 0;
-				for ( j = 0; j < fragSer.length ; j++) { // loop through theoFragment series here
-					for(int k = 0; k < fragSer[j].masses.length ;k++) { // loop through masses for each fragment serie
-						for(int i = 0 ; i<fragMa.length ; i++) {  // find matching fragMatches with theoFragSeries
-							System.out.println("i,j,k:" + i + " " + j+ " " + k + "/" + fragSer[j].masses.length + " nbThroughB=" + nbThroughB + " nbThroughY=" + nbThroughY);
-							System.out.println("Charge : " + fragSer[j].charge);
-							fragSer[j].computeCharge();
-							System.out.println("serie:" + fragSer[j].frag_series + " -  Charge : " + fragSer[j].charge);
-							if(j == positionIonB) {
-								fragTableTheo[0][nbThroughB] = maxY - (maxY - minY) * 0.15; // data[1][i]; // intensity for b ions
-								fragTableTheo[1][nbThroughB] = fragSer[j].masses[k]; // data[0][i];
-								//fragSer[j].computeCharge();
-								fragTableTheoCharge[0][nbThroughB] = fragSer[j].charge; 
-								if( (fragMa[i].calculated_moz - roundTol <= ((double)(fragSer[j].charge) * fragSer[j].masses[k])) && (fragMa[i].calculated_moz + roundTol >= (double)(fragSer[j].charge) * fragSer[j].masses[k])) {
-									nbFound++;
-									System.out.println("nbThroughB = " + nbThroughB + " , found" + nbFound + " moz" + fragMa[i].moz);
-									fragTable[0][nbThroughB] = maxY - (maxY - minY) * 0.15; //data[1][i];
-									fragTable[1][nbThroughB] =  fragSer[j].masses[k];; //fragMa[positionIonB].moz ; //data[0][i];
-								}
-								else
-								{
-									//if(fragTable[0][nbThroughB])
-//									fragTable[0][nbThroughB] = 0; // 0 means no data so we omit the peak
-//									fragTable[1][nbThroughB] = 0;
-								}
-								
+			for ( j = 0; j < fragSer.length ; j++) { // loop through theoFragment series here
+				for(int k = 0; k < fragSer[j].masses.length ;k++) { // loop through masses for each fragment serie
+					for(int i = 0 ; i<fragMa.length ; i++) {  // find matching fragMatches with theoFragSeries
+						System.out.println("i,j,k:" + i + " " + j+ " " + k + "/" + fragSer[j].masses.length + " nbThroughB=" + nbThroughB + " nbThroughY=" + nbThroughY);
+						System.out.println("Charge : " + fragSer[j].charge);
+						fragSer[j].computeCharge();
+						System.out.println("serie:" + fragSer[j].frag_series + " -  Charge : " + fragSer[j].charge);
+						if(j == positionIonB) {
+							fragTableTheo[0][nbThroughB] = maxY - (maxY - minY) * 0.15; // data[1][i]; // intensity for b ions
+							fragTableTheo[1][nbThroughB] = fragSer[j].masses[k]; // data[0][i];
+							//fragSer[j].computeCharge();
+							fragTableTheoCharge[0][nbThroughB] = fragSer[j].charge; 
+							if( (fragMa[i].calculated_moz - roundTol <= ((double)(fragSer[j].charge) * fragSer[j].masses[k])) && (fragMa[i].calculated_moz + roundTol >= (double)(fragSer[j].charge) * fragSer[j].masses[k])) {
+								nbFound++;
+								System.out.println("nbThroughB = " + nbThroughB + " , found" + nbFound + " moz" + fragMa[i].moz);
+								fragTable[0][nbThroughB] =  fragMa[i].intensity ;  // /*maxY*/ - (maxY - minY) * 0.15; //data[1][i];
+								fragTable[1][nbThroughB] =  fragSer[j].masses[k];; //fragMa[positionIonB].moz ; //data[0][i];
 							}
-							if(j == positionIonY) {
-								fragTableTheo[5][nbThroughY] = maxY - (maxY - minY) * 0.25; // data[1][i]; // intensity for b ions
-								fragTableTheo[6][nbThroughY] = fragSer[j].masses[k]; // data[0][i];
-							//	fragSer[j].computeCharge();
-								fragTableTheoCharge[5][nbThroughY] = fragSer[j].charge; 
-								if( (fragMa[i].calculated_moz - roundTol <= (double)(fragSer[j].charge) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(fragSer[j].charge) * fragSer[j].masses[k])) {
-									nbFound++;
-									System.out.println("nbThroughY = " + nbThroughY + " , found" + nbFound + " moz" + fragMa[i].calculated_moz);
-									fragTable[5][nbThroughY] = maxY - (maxY - minY) * 0.25; //data[1][i];
-									fragTable[6][nbThroughY] =  fragSer[j].masses[k]; //fragMa[positionIonB].moz ; //data[0][i];
-								}
-								else
-								{
-//									fragTable[5][nbThroughY] = 0; // 0 means no data so we omit the peak
-//									fragTable[6][nbThroughY] = 0;
-								}
-								
+							else
+							{
+								//if(fragTable[0][nbThroughB])
+//								fragTable[0][nbThroughB] = 0; // 0 means no data so we omit the peak
+//								fragTable[1][nbThroughB] = 0;
 							}
 							
-					
-					}
-					if(j == positionIonB) 
-						nbThroughB ++;
-					if(j == positionIonY) 
-						nbThroughY++;
+						}
+						if(j == positionIonY) {
+							fragTableTheo[5][nbThroughY] = maxY - (maxY - minY) * 0.25; // data[1][i]; // intensity for b ions
+							fragTableTheo[6][nbThroughY] = fragSer[j].masses[k]; // data[0][i];
+						//	fragSer[j].computeCharge();
+							fragTableTheoCharge[5][nbThroughY] = fragSer[j].charge; 
+							if( (fragMa[i].calculated_moz - roundTol <= (double)(fragSer[j].charge) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(fragSer[j].charge) * fragSer[j].masses[k])) {
+								nbFound++;
+								System.out.println("nbThroughY = " + nbThroughY + " , found" + nbFound + " moz" + fragMa[i].calculated_moz);
+								fragTable[5][nbThroughY] = fragMa[i].intensity ; //data[1][i];
+								fragTable[6][nbThroughY] =  fragSer[j].masses[k]; //fragMa[positionIonB].moz ; //data[0][i];
+							}
+							else
+							{
+//								fragTable[5][nbThroughY] = 0; // 0 means no data so we omit the peak
+//								fragTable[6][nbThroughY] = 0;
+							}
+							
+						}
+						
+				
 				}
+				if(j == positionIonB) 
+					nbThroughB ++;
+				if(j == positionIonY) 
+					nbThroughY++;
 			}
+		}
 			
 				//**-*-*-*-*
 				
@@ -472,7 +472,10 @@ public class RsetPeptideSpectrumAnnotations {
 				
 					if(i!=0 && fragTable[6][ i] != 0)
 					{
-						xyta = new XYTextAnnotation("y" + ( sizeYserie - i), fragTableTheo[6][i], fragTableTheo[5][i] + (maxY - minY) * 0.05);
+						xyta = new XYTextAnnotation("\u25BE" , fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.05);
+						xyta.setPaint(Color.black);
+						plot.addAnnotation(xyta);
+						xyta = new XYTextAnnotation("y" + ( sizeYserie - i), fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.1);
 						xyta.setPaint(Color.black);
 						plot.addAnnotation(xyta);
 					}
@@ -517,7 +520,12 @@ public class RsetPeptideSpectrumAnnotations {
 							;//	xyta = new XYTextAnnotation("b" + (i+1), maxX, fragTableTheo[0][i] + (maxY - minY) * 0.05);
 						}
 						else
-						{	xyta = new XYTextAnnotation("b" + (i+1), fragTableTheo[1][i], fragTableTheo[0][i] + (maxY - minY) * 0.05);
+						{
+							xyta = new XYTextAnnotation("\u25BE" , fragTableTheo[1][i], fragTable[0][i] + (maxY - minY) * 0.05);
+							xyta.setPaint(Color.black);
+							plot.addAnnotation(xyta);
+						
+							xyta = new XYTextAnnotation("b" + (i+1), fragTableTheo[1][i], fragTable[0][i] + (maxY - minY) * 0.1);
 							xyta.setPaint(Color.black);
 							plot.addAnnotation(xyta);
 						}

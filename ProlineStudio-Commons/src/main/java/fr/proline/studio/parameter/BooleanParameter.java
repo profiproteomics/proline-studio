@@ -32,16 +32,21 @@ public class BooleanParameter extends AbstractParameter {
             startValue = (m_defaultValue!=null) ? m_defaultValue : Boolean.TRUE;
         }
 
+        if (m_parameterComponent != null) {
+            if (m_graphicalType.equals(JCheckBox.class)) {
+                ((JCheckBox) m_parameterComponent).setSelected(startValue);
+                return m_parameterComponent;
+            }
+        }
+        
         
         if (m_graphicalType.equals(JCheckBox.class)) {
 
-            // --- TextField ---
+            // --- CheckBox ---
 
             JCheckBox checkBox = new JCheckBox(getName());
+            checkBox.setSelected(startValue);
 
-            if (startValue != null) {
-                checkBox.setSelected(startValue);
-            }
             m_parameterComponent = checkBox;
             return checkBox;
         }

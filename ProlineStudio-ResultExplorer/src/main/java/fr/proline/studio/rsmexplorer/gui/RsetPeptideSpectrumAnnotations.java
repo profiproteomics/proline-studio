@@ -543,7 +543,7 @@ public class RsetPeptideSpectrumAnnotations {
 							xyta.setPaint(Color.blue);
 							plot.addAnnotation(xyta);
 							// dashed vertical bar over the b number
-							float yAboveBar =  (float) ((maxY - minY) *0.15); 
+							float yAboveBar =  (float) ((maxY - minY) *0.25); 
 							float dash[] = { 5.0f };
 							if( fragTable[0][i] < fragTableTheo[0][i] ) { // draw only dashline if the y or b tag is not above the y/b line 
 								BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);

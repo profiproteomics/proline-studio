@@ -260,6 +260,9 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         if (proteinMatchArray != null) {
             m_markerContainerPanel.setMaxLineNumber(proteinMatchArray.length);
         }
+        
+        m_proteinTable.setSortable(true);
+
     }
 
     public void dataUpdated(SubTask subTask, boolean finished) {

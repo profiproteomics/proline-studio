@@ -31,17 +31,19 @@ public class WindowBoxFactory {
     }
     
     public static WindowBox getPeptidesForRsetOnlyWindowBox(String name, boolean isDecoy) {
-        
+        // AW: here is the main loaded window configuration at start.
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[3];
+        AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxRsetPeptide();
         boxes[1] = new DataBoxRsetPeptideSpectrum();
-        boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
-        boxes[2] = new DataBoxRsetProteinsForPeptideMatch();
+       // boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[2] = new DataBoxRsetPeptideFragmentationTable();
+        boxes[2].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[3] = new DataBoxRsetProteinsForPeptideMatch();
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
-        winBox.resetDefaultSize(); //JPM.WART
+      //  winBox.resetDefaultSize(); //JPM.WART
         return winBox;
         
     }
@@ -99,13 +101,14 @@ public class WindowBoxFactory {
     public static WindowBox getProteinSetsWindowBox(String name, boolean isDecoy) {
         
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[5];
+        AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxRsmAllProteinSet();
         boxes[1] = new DataBoxRsmProteinsOfProteinSet();
         boxes[2] = new DataBoxRsmPeptidesOfProtein();
         boxes[3] = new DataBoxRsmProteinAndPeptideSequence();
-        boxes[4] = new DataBoxRsetPeptideSpectrum();
-        boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+       // boxes[4] = new DataBoxRsetPeptideFragmentationTable();
+       // boxes[5] = new DataBoxRsetPeptideSpectrum();
+      //  boxes[5].setLayout(AbstractDataBox.DataBoxLayout.VERTICAL);
         
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;

@@ -24,7 +24,7 @@ public class WindowBox {
         m_icon = icon;
     }
   
-    public String getName() {
+    public String getName(){
         return m_name;
     }
     

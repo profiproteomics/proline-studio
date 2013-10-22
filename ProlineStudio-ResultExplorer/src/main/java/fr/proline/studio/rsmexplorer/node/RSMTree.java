@@ -776,7 +776,10 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 
                 CompareWithSCAction computeSCAction = new CompareWithSCAction();
                 mainActions.add(computeSCAction); 
-                        
+                       
+//                ExportRSMAction exportRSMAction = new ExportRSMAction();
+//                mainActions.add(exportRSMAction);                        
+                
                 mainActions.add(null);  // separator
 
                 RenameAction renameAction = new RenameAction();

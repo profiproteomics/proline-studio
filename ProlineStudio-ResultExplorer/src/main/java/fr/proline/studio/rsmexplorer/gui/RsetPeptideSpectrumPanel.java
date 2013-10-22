@@ -11,6 +11,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Stroke;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -21,7 +22,6 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.slf4j.LoggerFactory;
 
-import fr.proline.core.utils.lzma.package$EasyLzma$;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -34,7 +34,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
-
 
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.CrosshairState;
@@ -305,7 +304,9 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
                 double transY = rangeAxis.valueToJava2D(y, dataArea, yAxisLocation);
                 double transOY = rangeAxis.valueToJava2D(0, dataArea, yAxisLocation);
                 g2.setPaint(getItemPaint(series, item));
-                g2.setStroke(getBaseStroke());
+                setSeriesPaint(0, Color.black); // AW: change peak bars color to black (was red by default)
+                // g2.setStroke(getBaseStroke()); // AW: original
+                g2.setStroke(new BasicStroke(0.5f)); // AW: A thinner stroke than the original
                 PlotOrientation orientation = plot.getOrientation();
                 if (orientation == PlotOrientation.VERTICAL) {
                     g2.drawLine((int) transX, (int) transOY, (int) transX, (int) transY);

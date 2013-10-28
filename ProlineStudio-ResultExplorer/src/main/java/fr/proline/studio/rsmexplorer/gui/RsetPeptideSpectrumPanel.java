@@ -36,6 +36,8 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 
 import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.event.PlotChangeEvent;
+import org.jfree.chart.event.PlotChangeListener;
 import org.jfree.chart.plot.CrosshairState;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
@@ -50,6 +52,13 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
     private AbstractDataBox m_dataBox;
     
+	private static boolean redrawInProgress = false ; // to ensure no circular loop in changeEven when triggerd by zooming the graph... 
+	private double spectrumMinX = 0;
+    private double spectrumMaxX = 0;
+    private double spectrumMinY = 0;
+    private double spectrumMaxY = 0;
+	    
+	    
     private DefaultXYDataset m_dataSet;
     private JFreeChart m_chart;
     
@@ -177,7 +186,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     			spectrumAnnotations.removeAnnotations();
     		}
     		  
-            return;
+            return ;
         }
 
         DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
@@ -267,6 +276,56 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         // reset X/Y zooming
        // ((ChartPanel) spectrumPanel).restoreAutoBounds();
         ((ChartPanel) spectrumPanel).setBackground(Color.white);
+       // plot.getDomainAxis().setLowerBound(0); // set 0 as min for x axis
+		 
+        
+        /// ---- start of plot listenener (for zoom changes for instance)
+    	final XYPlot plot = m_chart.getXYPlot();
+		//p.setRenderer(renderer);
+
+    		
+		spectrumMinX = plot.getDomainAxis().getLowerBound();
+		spectrumMaxX =  plot.getDomainAxis().getUpperBound();
+		spectrumMinY = plot.getRangeAxis().getLowerBound();
+		spectrumMaxY =  plot.getRangeAxis().getUpperBound();
+		
+		plot.addChangeListener(new PlotChangeListener() {
+			
+			@Override
+			public void plotChanged(PlotChangeEvent arg0) {
+				
+				//Plot CHANGED (due to zoom for instance)
+				 
+				double newMinX = plot.getDomainAxis().getLowerBound();
+				double newMaxX = plot.getDomainAxis().getUpperBound();
+				double newMinY = plot.getRangeAxis().getLowerBound();
+				double newMaxY = plot.getRangeAxis().getUpperBound();
+				
+				// only if zoom change do the following:
+				
+				if(!redrawInProgress) {
+					if(newMinX != spectrumMinX ||
+					   newMaxX != spectrumMaxX ||
+					   newMinY != spectrumMinY ||
+					   newMaxY != spectrumMaxY  ) {
+						
+						redrawInProgress = true;
+						
+						spectrumMinX = newMinX ;
+						spectrumMaxX = newMaxX ;
+						spectrumMinY = newMinY ;
+						spectrumMaxY = newMaxY;
+						spectrumAnnotations.removeAnnotations();
+						spectrumAnnotations.addAnnotations();
+						
+						redrawInProgress = false;
+					}
+				}
+				
+			}
+		});
+		
+        /// ----
     }
     
     

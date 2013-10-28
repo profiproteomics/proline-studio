@@ -267,14 +267,19 @@ public class RsetPeptideSpectrumAnnotations {
 			
 			
 			String peptideSequence = pm.getPeptide().getSequence();
-			double minY = DatasetUtilities.findMinimumRangeValue(m_dataSet).doubleValue();
-			double maxY = DatasetUtilities.findMaximumRangeValue(m_dataSet).doubleValue();
-			double maxX = DatasetUtilities.findMaximumDomainValue(m_dataSet).doubleValue(); // in order to know where to place the last AA sequence limit
+//			double minY = DatasetUtilities.findMinimumRangeValue(m_dataSet).doubleValue();
+//			double maxY = DatasetUtilities.findMaximumRangeValue(m_dataSet).doubleValue();
+//			double maxX = DatasetUtilities.findMaximumDomainValue(m_dataSet).doubleValue(); // in order to know where to place the last AA sequence limit
+
 			removeAnnotations();
 			XYTextAnnotation xyta;
 			XYPlot plot = (XYPlot) m_chart.getPlot();
 			// annotations 
-	
+			//double minX = (float) plot.getDomainAxis().getLowerBound();
+			//double maxX = (float) plot.getDomainAxis().getUpperBound();
+			double minY = (float) plot.getRangeAxis().getLowerBound();
+			double maxY = (float) plot.getRangeAxis().getUpperBound();
+
 			plot.clearRangeMarkers();
 			Marker target = new ValueMarker(maxY - (maxY - minY) * 0.25);
 			target.setPaint(new Color(255,85,85));
@@ -467,8 +472,6 @@ public class RsetPeptideSpectrumAnnotations {
 
 					// place AA highlightings
 					
-					System.out.println("i=" + i + " , yPrev= " + yPrev + " , \tfragTable[6][" +i + "]=" + fragTable[6][i] + "\t, fragTableTheo[6][" +i + "]=" + fragTableTheo[6][i] );
-					System.out.println("i=" + i + " , bPrev= " + bPrev + " , \tfragTable[1][" +i + "]=" + fragTable[1][i] + "\t, fragTableTheo[1][" +i + "]=" + fragTableTheo[1][i] );
 					// ----- if 2 contiguous mass peaks are represented...draw the aa
 					// interval Y
 				
@@ -578,10 +581,8 @@ public class RsetPeptideSpectrumAnnotations {
 						}
 					}
 
-					//if(i<sizeYserie) 
-						yPrev = fragTableTheo[6][i+1];
-					//else
-					//	yPrev = 0; // previous theoretical m/z for y & b ions
+					
+					yPrev = fragTableTheo[6][i+1];
 					bPrev = fragTableTheo[1][i];
 					yPrevCharge = fragTableTheoCharge[6][i];
 					bPrevCharge = fragTableTheoCharge[1][i];
@@ -590,8 +591,9 @@ public class RsetPeptideSpectrumAnnotations {
 			    array =null;
 			    gson=null;
 			    parser=null;
-			
+			   
 			}
+			
 	
 		//	entityManagerMSI.getTransaction().commit(); // TODO tester en l'enlevant
 			entityManagerMSI.close();

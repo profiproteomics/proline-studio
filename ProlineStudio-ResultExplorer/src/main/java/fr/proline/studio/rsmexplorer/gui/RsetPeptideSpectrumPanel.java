@@ -274,7 +274,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         m_chart.setTitle(title);
 
         // reset X/Y zooming
-       // ((ChartPanel) spectrumPanel).restoreAutoBounds();
+        ((ChartPanel) spectrumPanel).restoreAutoBounds();
         ((ChartPanel) spectrumPanel).setBackground(Color.white);
        // plot.getDomainAxis().setLowerBound(0); // set 0 as min for x axis
 		 

@@ -283,13 +283,13 @@ public class RsetPeptideSpectrumAnnotations {
 			plot.clearRangeMarkers();
 			Marker target = new ValueMarker(maxY - (maxY - minY) * 0.25);
 			target.setPaint(new Color(255,85,85));
-			target.setLabel("y");
+			target.setLabel("Y");
 			target.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
 			target.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
 			plot.addRangeMarker(target);
 			Marker target2 = new ValueMarker(maxY - (maxY - minY) * 0.15);
 			target2.setPaint(new Color(51,153,255));
-			target2.setLabel("b");
+			target2.setLabel("B");
 			//target.setLabelFont(new Font("Sansserif",Font.BOLD,11));
 			target2.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
 			target2.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);

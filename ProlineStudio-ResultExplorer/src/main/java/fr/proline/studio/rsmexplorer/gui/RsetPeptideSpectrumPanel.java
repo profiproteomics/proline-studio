@@ -10,6 +10,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+
 import java.awt.Font;
 import java.awt.Stroke;
 
@@ -157,7 +158,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(spectrumPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-    }
+           }
     
     
     

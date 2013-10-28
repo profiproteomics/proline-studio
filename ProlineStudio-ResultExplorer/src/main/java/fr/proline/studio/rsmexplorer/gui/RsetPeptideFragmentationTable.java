@@ -649,11 +649,11 @@ public class RsetPeptideFragmentationTable {
 
 		        	// then overwrites style if necessary:
 			      if(selectMatrix[row][column] != null) {
-				        if ( selectMatrix[row] [column].equals("B")) { // highlight the cell if true in selectMatrix
+				        if ( selectMatrix[row] [column].startsWith("B")) { // highlight the cell if true in selectMatrix
 				            clr = new Color(51,153,255);  //"light blue"
 						    component.setFont(component.getFont().deriveFont(Font.BOLD));
 				        	component.setForeground(clr);
-				        } else if(selectMatrix[row] [column].equals("Y")){
+				        } else if(selectMatrix[row] [column].startsWith("Y")){
 				        	clr = new Color(255,85,85); // 255,85,85 light red
 				        	component.setForeground(clr);
 				        	component.setFont(component.getFont().deriveFont(Font.BOLD));

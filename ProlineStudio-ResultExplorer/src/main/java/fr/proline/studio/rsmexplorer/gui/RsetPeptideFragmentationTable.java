@@ -390,7 +390,7 @@ public class RsetPeptideFragmentationTable {
 			
 			Test2CustomRenderer renderer =  (Test2CustomRenderer) new Test2CustomRenderer();  
 			jTable1.setDefaultRenderer(Object.class , renderer);
-			boolean [][] matrix = new boolean[100][100];
+			String [][] matrix = new String[100][100]; // String matrix for the frag table. (which decides the font and color)
 			j = 0;
 			
 			
@@ -420,7 +420,7 @@ public class RsetPeptideFragmentationTable {
 									nbFound++;
 							
 									
-									matrix[k][1] = true;
+									matrix[k][1] = "B";
 									renderer.setSelectMatrix(matrix);
 									System.out.println("nbThroughB = " + nbThroughB + " , found" + nbFound + " moz" + fragMa[i].moz);
 					//				fragTable[0][nbThroughB] = maxY - (maxY - minY) * 0.15; //data[1][i];
@@ -442,7 +442,7 @@ public class RsetPeptideFragmentationTable {
 								if( (fragMa[i].calculated_moz - roundTol <= (double)(fragSer[j].charge) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(fragSer[j].charge) * fragSer[j].masses[k])) {
 									nbFound++;
 						
-									matrix[k][6] = true;
+									matrix[k][6] = "Y";
 									renderer.setSelectMatrix(matrix);
 									System.out.println("nbThroughY = " + nbThroughY + " , found" + nbFound + " moz" + fragMa[i].calculated_moz);
 					//				fragTable[5][nbThroughY] = maxY - (maxY - minY) * 0.25; //data[1][i];
@@ -458,42 +458,42 @@ public class RsetPeptideFragmentationTable {
 							else if(j == positionIon_YNH3) {
 								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
 									nbFound++;
-									matrix[k][8 /*position Y dans le tableau */] = true;
+									matrix[k][8 /*position Y dans le tableau */] = "YNH3";
 									renderer.setSelectMatrix(matrix);
 								}
 							}
 							else if(j == positionIon_BNH3) {
 								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
 									nbFound++;
-									matrix[k][3 /*position Y dans le tableau */] = true;
+									matrix[k][3 /*position Y dans le tableau */] = "BNH3";
 									renderer.setSelectMatrix(matrix);
 								}
 							}
 							else if(j == positionIon_BH2O) {
 								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
 									nbFound++;
-									matrix[k][4 /*position Y dans le tableau */] = true;
+									matrix[k][4 /*position Y dans le tableau */] = "BH2O";
 									renderer.setSelectMatrix(matrix);
 								}
 							}
 							else if(j == positionIon_B2H) {
 								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
 									nbFound++;
-									matrix[k][2 /*position Y dans le tableau */] = true;
+									matrix[k][2 /*position Y dans le tableau */] = "B2H";
 									renderer.setSelectMatrix(matrix);
 								}
 							}
 							else if(j == positionIon_Y2H) {
 								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
 									nbFound++;
-									matrix[k][7 /*position Y dans le tableau */] = true;
+									matrix[k][7 /*position Y dans le tableau */] = "Y2H";
 									renderer.setSelectMatrix(matrix);
 								}
 							}
 							else if(j == positionIon_YH2O) {
 								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
 									nbFound++;
-									matrix[k][9 /*position Y dans le tableau */] = true;
+									matrix[k][9 /*position Y dans le tableau */] = "YH20";
 									renderer.setSelectMatrix(matrix);
 								}
 							}
@@ -517,7 +517,9 @@ public class RsetPeptideFragmentationTable {
 				fragPanelContainer.removeAll();
 				fragPanelContainer.add(fragPane,BorderLayout.NORTH); //fragmentationTablePanel);
 	
-			    fragPane.setPreferredSize(fragPanelContainer.getSize());
+			    fragPane.setPreferredSize(new Dimension(fragPanelContainer.getWidth(),fragPanelContainer.getHeight()-5));
+			    fragPane.setSize(new Dimension(fragPane.getWidth(),fragPane.getHeight()-5)); // to better fit the panel otherwise the bottom is partly hidden.
+
 		        fragPanelContainer.revalidate();
 		        fragPanelContainer.repaint();
 		
@@ -625,14 +627,14 @@ public class RsetPeptideFragmentationTable {
 		public class Test2CustomRenderer extends DefaultTableCellRenderer /*implements TableCellRenderer*/ {
 			int targetRow = 0;
 			int targetCol = 0;
-			boolean [][] selectMatrix = new boolean [100][100];
+			String [][] selectMatrix = new String [100][100];
 			
 			public void setTargetCell(int row, int col) {
 				this.targetRow = row;
 				this.targetCol = col;
 				
 			}
-			public void setSelectMatrix(boolean[][] matx ) {
+			public void setSelectMatrix(String[][] matx ) {
 				this.selectMatrix = matx.clone();
 			}
 			
@@ -640,22 +642,29 @@ public class RsetPeptideFragmentationTable {
 			    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			        Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			   
+			        // standard font and style:
+			    	Color clr = new Color(0,0,0); // 255,85,85 light red
+		        	component.setForeground(clr);
+		        	component.setFont(component.getFont().deriveFont(Font.PLAIN));
+
+		        	// then overwrites style if necessary:
+			      if(selectMatrix[row][column] != null) {
+				        if ( selectMatrix[row] [column].equals("B")) { // highlight the cell if true in selectMatrix
+				            clr = new Color(51,153,255);  //"light blue"
+						    component.setFont(component.getFont().deriveFont(Font.BOLD));
+				        	component.setForeground(clr);
+				        } else if(selectMatrix[row] [column].equals("Y")){
+				        	clr = new Color(255,85,85); // 255,85,85 light red
+				        	component.setForeground(clr);
+				        	component.setFont(component.getFont().deriveFont(Font.BOLD));
+				        } else
+				        {
+				        	component.setFont(component.getFont().deriveFont(Font.BOLD));
+				        }
+			      } 
 			      
-			        if ( selectMatrix[row] [column]) { // highlight the cell if true in selectMatrix
-			            Color clr = new Color(51, 153, 255);
-					    component.setBackground(clr);
-			            component.setForeground(new Color(255,255,255));
-			        } else {
-			        	Color clr;
-			        	if(row % 2 ==0) 
-			        		clr = new Color(255, 255, 255); 
-			            else
-			            	clr = new Color(224, 233, 246);
-			            component.setBackground(clr);
-			            component.setForeground(new Color(0,0,0));
-			        }
-			      
-			        return component;
+				  return component;
+				    
 			    }
 			}
 		

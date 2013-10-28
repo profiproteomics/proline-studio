@@ -499,52 +499,27 @@ public class RsetPeptideFragmentationTable {
 							}
 							
 					
+						}
+						if(j == positionIonB) 
+							nbThroughB ++;
+						if(j == positionIonY) 
+							nbThroughY++;
 					}
-					if(j == positionIonB) 
-						nbThroughB ++;
-					if(j == positionIonY) 
-						nbThroughY++;
+					
 				}
 				
-			}
-			
-
-		    
-			jTable1.setModel(tableModel);
-				
-			renderer.setSelectMatrix(matrix);
-			JScrollPane fragPane = new JScrollPane(jTable1);
-			fragPanelContainer.removeAll();
-			fragPanelContainer.add(fragPane,BorderLayout.NORTH); //fragmentationTablePanel);
-		    
-			//
-		    javax.swing.GroupLayout fragPaneLayout = new javax.swing.GroupLayout(fragPane);
-		    fragPanelContainer.setLayout(fragPaneLayout);
-		    fragPaneLayout.setHorizontalGroup(
-		    		fragPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addGap(0, 400, Short.MAX_VALUE)
-	        );
-		    fragPaneLayout.setVerticalGroup(
-		    		fragPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addGap(0, 300, Short.MAX_VALUE)
-	        );
-
-//	        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(fragPane);
-//	        fragPane.setLayout(layout);
-//	        layout.setHorizontalGroup(
-//	            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-//	            .addComponent(fragPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-//	        );
-//	        layout.setVerticalGroup(
-//	            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-//	            .addComponent(fragPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-//	        );
-		    
-		    
-		    //
-		   // fragPane.setPreferredSize(fragPanelContainer.getSize());
-	        fragPanelContainer.revalidate();
-	        fragPanelContainer.repaint();
+	
+			    
+				jTable1.setModel(tableModel);
+					
+				renderer.setSelectMatrix(matrix);
+				JScrollPane fragPane = new JScrollPane(jTable1);
+				fragPanelContainer.removeAll();
+				fragPanelContainer.add(fragPane,BorderLayout.NORTH); //fragmentationTablePanel);
+	
+			    fragPane.setPreferredSize(fragPanelContainer.getSize());
+		        fragPanelContainer.revalidate();
+		        fragPanelContainer.repaint();
 		
 			
 				jsonProp=null;
@@ -555,7 +530,7 @@ public class RsetPeptideFragmentationTable {
 			   
 			}
 			
-			entityManagerMSI.getTransaction().commit(); // TODO tester en l'enlevant
+		//	entityManagerMSI.getTransaction().commit(); // TODO tester en l'enlevant
 			entityManagerMSI.close();
 		//	entityManagerMSI.clear();
 	  }

@@ -48,9 +48,9 @@ public class MergeAction extends AbstractRSMAction {
                 // check if we can do a merge
                 String error = null;
                 int nbChildren = node.getChildCount();
-                if (nbChildren == 1) {
+                /*if (nbChildren == 1) {
                     error = "Merge on an Aggregate with only one Child is not possible";
-                }
+                }*/
 
                 ArrayList<Long> resultSetIdList = new ArrayList<>();
                 ArrayList<Long> resultSummaryIdList = new ArrayList<>();

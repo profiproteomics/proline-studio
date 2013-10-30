@@ -8,6 +8,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
+import fr.proline.studio.stats.ValuesForStatsAbstract;
 import java.util.Arrays;
 
 /**
@@ -37,6 +38,9 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
         outParameter.addParameter(DPeptideMatch.class, true);
         registerOutParameter(outParameter);
 
+        outParameter = new GroupParameter();
+        outParameter.addParameter(ValuesForStatsAbstract.class, true);
+        registerOutParameter(outParameter);
        
     }
     
@@ -111,6 +115,10 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
                     return m_rset;
                 }
             }
+            if (parameterType.equals(ValuesForStatsAbstract.class)) {
+                return ((PeptideMatchPanel)m_panel).getValuesForStats();
+            }
+            
         }
         return super.getData(getArray, parameterType);
     }

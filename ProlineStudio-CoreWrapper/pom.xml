@@ -154,6 +154,7 @@
             <publicPackage>org.joda.time</publicPackage>
             <publicPackage>org.joda.time.format</publicPackage>
             <publicPackage>org.w3c.dom</publicPackage>
+            <publicPackage>org.w3c.dom.html</publicPackage>
             <publicPackage>org.w3c.dom.ls</publicPackage>
             <publicPackage>org.xml.sax</publicPackage>
             <publicPackage>org.xml.sax.ext</publicPackage>

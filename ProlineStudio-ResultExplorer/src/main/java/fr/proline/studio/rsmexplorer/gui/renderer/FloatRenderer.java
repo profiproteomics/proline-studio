@@ -13,6 +13,13 @@ public class FloatRenderer implements TableCellRenderer {
     
     private TableCellRenderer m_defaultRenderer;
     
+    private int m_digits = 2;
+    
+    public FloatRenderer(TableCellRenderer defaultRenderer, int digits) {
+        m_defaultRenderer = defaultRenderer;
+        m_digits = digits;
+    }
+    
     public FloatRenderer(TableCellRenderer defaultRenderer) {
         m_defaultRenderer = defaultRenderer;
     }
@@ -21,7 +28,7 @@ public class FloatRenderer implements TableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
         Float f = (Float) value;
-        String formatedValue = ((f == null) || (f.isNaN())) ? "" : DataFormat.format(f.floatValue(), 2);
+        String formatedValue = ((f == null) || (f.isNaN())) ? "" : DataFormat.format(f.floatValue(), m_digits);
 
         
 

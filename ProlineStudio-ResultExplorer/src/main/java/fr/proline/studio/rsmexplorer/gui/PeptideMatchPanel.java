@@ -28,8 +28,11 @@ import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.stats.ValuesForStatsAbstract;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.LazyData;
 import fr.proline.studio.utils.LazyTable;
+import fr.proline.studio.utils.LazyTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,6 +41,7 @@ import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.TableCellRenderer;
 import org.openide.windows.TopComponent;
 
 /**
@@ -147,6 +151,29 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         PeptideMatchTableModel tableModel = (PeptideMatchTableModel) table.getModel();
         return tableModel.getPeptideMatch(selectedRow);
     }
+    
+     public ValuesForStatsAbstract getValuesForStats() {
+         return new ValuesForStatsAbstract() {
+
+             
+            @Override
+            public double getValue(int i) {
+                PeptideMatchTableModel tableModel = (PeptideMatchTableModel) m_peptideMatchTable.getModel();
+                LazyData lazyData =  (LazyData) tableModel.getValueAt(i, PeptideMatchTableModel.COLTYPE_PEPTIDE_DELTA_MOZ);
+                if (lazyData != null) {
+                    return ((Float)lazyData.getData()).doubleValue();
+                }
+                return Double.NaN;
+            }
+
+            @Override
+            public int size() {
+                PeptideMatchTableModel tableModel = (PeptideMatchTableModel) m_peptideMatchTable.getModel();
+                return tableModel.getRowCount();
+            }
+        };
+     }
+    
 
     private void initComponents() {
         
@@ -447,9 +474,40 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class))  );
             
+            // WART to have 4 digits for deltaMoz
+            setDefaultRenderer(LazyData.class, new LazyTableCellRenderer() {
+
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+                    Object data = ((LazyData) value).getData();
+                    if (data == null) {
+                        super.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column);
+
+                        return this;
+                    } else {
+                        if (column == PeptideMatchTableModel.COLTYPE_PEPTIDE_DELTA_MOZ) {
+                            if (m_deltaMozRenderer == null) {
+                                m_deltaMozRenderer = new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 6);
+                            }
+                            return m_deltaMozRenderer.getTableCellRendererComponent(table, data, isSelected, hasFocus, row, column);
+                        } else {
+
+
+                            return table.getDefaultRenderer(data.getClass()).getTableCellRendererComponent(table, data, isSelected, hasFocus, row, column);
+                        }
+                    }
+
+
+                }
+            });
+
             displayColumnAsPercentage(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE);
-            
+
         }
+
+
+        private FloatRenderer m_deltaMozRenderer = null;
 
         /**
          * Called whenever the value of the selection changes.

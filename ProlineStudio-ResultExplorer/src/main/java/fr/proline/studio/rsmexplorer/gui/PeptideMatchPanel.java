@@ -482,7 +482,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
                     Object data = ((LazyData) value).getData();
                     if (data == null) {
-                        super.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column);
+                        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
                         return this;
                     } else {

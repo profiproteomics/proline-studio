@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -237,305 +238,213 @@ public class RsetPeptideFragmentationTable {
 	
 	
 			size = 100; 
-			double[][] fragTableTheo = new double[11][size];
-			float [][] fragTableTheoCharge = new float [11][size];
-			double[][] fragTable = new double[11][size];
+			//double[][] fragTableTheo = new double[11][size];
+			//float [][] fragTableTheoCharge = new float [11][size];
+			//double[][] fragTable = new double[11][size];
 		
 
+			// get series names
+			String xyzSerieName = "";
+			String abcSerieName = "";
+			for(int i = 0; i<fragSer.length;i++) { // TODO: en fait les frag series b s'appliquent aussi a b++ etc. donc va falloir faire un tableau de positions au lieu de juste Bposition
+				switch  ( fragSer[i].frag_series.charAt(0)) {
+				case 'a' :  // either a,b or c do:
+				case 'b' : 
+				case 'c' : 
+					if(fragSer[i].frag_series.length()>1) {
+						// then it is either a ++ or a b-H2O and so on...
+					}
+					else
+					{ // it's a 'a/b/c' ion
+						abcSerieName = ""+fragSer[i].frag_series.charAt(0);
+					}
+					break;
+				case 'v' : 
+				case 'w' : 
+				case 'x' : 
+				case 'y' : 
+				case 'z' : 
+					if(fragSer[i].frag_series.length()>1) {
+						// then it is either a ++ or a b-H2O and so on...
+					}
+					else
+					{ // it's a 'x/y/z' ion
+						xyzSerieName = ""+fragSer[i].frag_series.charAt(0);
+					}
+					break;
+				default :
+					break;
+				}
+			}
+			
 			
 			String peptideSequence = pm.getPeptide().getSequence();
 			
+			int sizeMaxSeries = 0; 
+			for(int i = 0; i<fragSer.length;i++) { // TODO: en fait les frag series b s'appliquent aussi a b++ etc. donc va falloir faire un tableau de positions au lieu de juste Bposition
+				if(fragSer[i].masses.length>sizeMaxSeries)
+					sizeMaxSeries = fragSer[i].masses.length;
+
+			}
+
+			int nbSeries = fragSer.length;
 	
 			int j = 0;
 			
-	
-			int positionIonB= 0;
-			int positionIon_B2H = 0;
-			int positionIonY= 0;
-			int positionIon_BNH3 = 0;
-			int positionIon_YNH3 = 0;
-			int positionIon_BH2O = 0;
-			int positionIon_YH2O = 0;
-			int positionIon_Y2H = 0;
+			String [] titles = new String[3+ fragSer.length  ];
+			titles[0] = "amino acid";
+			titles[1] = abcSerieName + " ion";
 			
-			for(int i = 0; i<fragSer.length;i++) { // TODO: en fait les frag series b s'appliquent aussi a b++ etc. donc va falloir faire un tableau de positions au lieu de juste Bposition
-				
-				
-				if(fragSer[i].frag_series.equals("b")) {
-					positionIonB = i;
-				}
-				else if(fragSer[i].frag_series.equals("b++")) {
-					positionIon_B2H = i;
-				}
-				else if(fragSer[i].frag_series.equals("b-NH3")) {
-					positionIon_BNH3 = i;
-				}
-				else if(fragSer[i].frag_series.equals("b-H2O")) {
-					positionIon_BH2O = i;
-				}
-				else if(fragSer[i].frag_series.equals("y")) {
-					positionIonY = i;
-				}	
-				else if(fragSer[i].frag_series.equals("y-NH3")) {
-					positionIon_YNH3 = i;
-				}
-				else if(fragSer[i].frag_series.equals("y-H2O")) {
-					positionIon_YH2O = i;
-				} 
-				else if(fragSer[i].frag_series.equals("y++")) {
-					positionIon_Y2H = i;
-				}
-
+			titles[1+ nbSeries + 1 ] = xyzSerieName + " ion";
+			
+			int i = 2;
+			for(TheoreticalFragmentSeries_AW currentFrag : fragSer) {
+				titles[i] = currentFrag.frag_series;
+				System.out.println("fragSer= " + currentFrag.frag_series);
+				i++;
 			}
-				
-			int sizeBserie = fragSer[positionIonB].masses.length;
 			
-				
-			int sizeYserie = fragSer[positionIonY].masses.length;
-			
-			size = Math.max(fragSer[positionIonB].masses.length,fragSer[positionIonY].masses.length);
-				
-
-
-			String [] titles = /*new String[11];//*/ 
-				{ "B", "B ions", "B+2H", "B-NH3", "B-H20", "AA", "Y ions", "Y+2H", "Y-NH3", "Y-H2O", "Y" };
-			
+			i = 0;
 		
+			jTable1 = new javax.swing.JTable();
+			
+			final Class[] typesPre = new Class[fragSer.length+3]; // +3 for the row number columns and AA column
+			final boolean [] canEditPre = new boolean[fragSer.length+3];
+			
+			for(int zz = 0; zz<typesPre.length;zz++) {
+				   
+				typesPre[zz] = FragTableCustomRenderer.class;
+				canEditPre[zz] = false;
+				
+		    }
+			
+			DefaultTableModel tableModel = new javax.swing.table.DefaultTableModel(
+	 
+			new Object[][] {
 
-			  jTable1 = new javax.swing.JTable();
+			},  titles) {
+				Class[] types =  typesPre;
 			  
-			  DefaultTableModel tableModel = new javax.swing.table.DefaultTableModel(
-					  
-						new Object[][] {
+				// TODO: les booleans aussi à parametrer
+				boolean[] canEdit = canEditPre;
 
-						},  titles) {
-							Class[] types = new Class[] { Test2CustomRenderer.class, Test2CustomRenderer.class,Test2CustomRenderer.class,Test2CustomRenderer.class,Test2CustomRenderer.class,Test2CustomRenderer.class,Test2CustomRenderer.class,Test2CustomRenderer.class,Test2CustomRenderer.class, Test2CustomRenderer.class,Test2CustomRenderer.class};
-									
-									
-									
-//									java.lang.Double.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class,
-//										java.lang.Double.class,/* java.lang.String.class,*/ java.lang.Double.class, java.lang.Double.class/*, java.lang.Double.class,
-//										java.lang.Object.class, java.lang.Object.class*/ };
-							boolean[] canEdit = new boolean[] { false, false, false, false, false, false, false, false, false,false, false/*, false, false, true*/ };
-
-							public Class getColumnClass(int columnIndex) {
-								return types[columnIndex];
-							}
-
-							public boolean isCellEditable(int rowIndex, int columnIndex) {
-								return canEdit[columnIndex];
-							}
-						};
-
-				RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel);
-				Test2CustomRenderer cr = new Test2CustomRenderer();
-				jTable1.setDefaultRenderer(String.class, cr);  
-				jTable1.setRowSorter(sorter);
-				
-				
-			
-
-				int col = 0;
-				for ( int i = 0; i < fragSer[0].masses.length ; i++) { // on boucle sur les masses de fragSer
-
-					
-					Vector v = new Vector(); // la ligne du tableau
-
-					v.add(i+1); // le numero de ligne
-					if(fragSer[positionIonB].masses[i]!=0)
-						v.add((double)Math.round(fragSer[positionIonB].masses[i] * 10000) / 10000); // round mass to 4 decimals
-					else
-						v.add("");
-					if(fragSer[positionIon_B2H].masses[i]!=0)
-						v.add((double)Math.round(fragSer[positionIon_B2H].masses[i] * 10000) / 10000);
-					else
-						v.add("");
-					if(fragSer[positionIon_BNH3].masses[i]!=0)
-						v.add((double)Math.round(fragSer[positionIon_BNH3].masses[i] * 10000) / 10000); 
-					else
-						v.add(""); 
-					if( fragSer[positionIon_BH2O].masses[i]!=0)
-						v.add((double)Math.round(fragSer[positionIon_BH2O].masses[i] * 10000) / 10000);
-					else
-						v.add("");
-					if(i<peptideSequence.length())
-						v.add(peptideSequence.charAt(i));
-					else
-						v.add("?"); // problem: should be of the right size...need debugging!
-					if( fragSer[positionIonY].masses[i]!=0)
-						v.add((double)Math.round(fragSer[positionIonY].masses[i] * 10000) / 10000);
-					else
-						v.add("");
-					if(fragSer[positionIon_Y2H].masses[i]!=0)
-						v.add((double)Math.round(fragSer[positionIon_Y2H].masses[i] * 10000) / 10000); 
-					else
-						v.add(""); 
-					if(fragSer[positionIon_YNH3].masses[i]!=0)
-						v.add((double)Math.round(fragSer[positionIon_YNH3].masses[i] * 10000) / 10000);
-					else
-						v.add(""); 
-					if(fragSer[positionIon_YH2O].masses[i]!=0)
-						v.add((double)Math.round(fragSer[positionIon_YH2O].masses[i] * 10000) / 10000);
-					else
-						v.add(""); 
-					v.add(fragSer[0].masses.length -i); // y serie index
-				
-					// remove zeros and display an empty field instead
-					
-					tableModel.addRow(v);
-					
+				public Class getColumnClass(int columnIndex) {
+					return types[columnIndex];
 				}
-				jTable1.setModel(tableModel);
-				jTable1.setVisible(true);
+
+				public boolean isCellEditable(int rowIndex, int columnIndex) {
+					return canEdit[columnIndex];
+				}
+			};
+
+			RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel);
+			FragTableCustomRenderer cr = new FragTableCustomRenderer();
+			jTable1.setDefaultRenderer(String.class, cr);  
+			jTable1.setRowSorter(sorter);
 			
-			Test2CustomRenderer renderer =  (Test2CustomRenderer) new Test2CustomRenderer();  
+			
+		    // create the Jtable model (content)
+			int col = 0;
+			for ( i = 0; i < sizeMaxSeries ; i++) { // we loop over fragSer
+				Vector v = new Vector(); // table line
+				if(i<peptideSequence.length())
+					v.add(peptideSequence.charAt(i));
+				else
+					v.add("?"); // problem: should be of the right size...need debugging!
+				v.add(i+1); // ion number
+				
+				for(TheoreticalFragmentSeries_AW currentFragSer : fragSer) {
+					if(currentFragSer.masses[i] !=0 ) {
+						v.add((double)Math.round(currentFragSer.masses[i] * 10000) / 10000);
+					} else
+					{ 
+						v.add("");
+					}
+				}
+				v.add(sizeMaxSeries -i); //reverse ion number
+
+				tableModel.addRow(v);
+			}
+			jTable1.setModel(tableModel);
+			jTable1.setVisible(true);
+			
+			FragTableCustomRenderer renderer =  (FragTableCustomRenderer) new FragTableCustomRenderer();  
 			jTable1.setDefaultRenderer(Object.class , renderer);
-			String [][] matrix = new String[100][100]; // String matrix for the frag table. (which decides the font and color)
-			j = 0;
+			
+			String [][] matrix = new String[sizeMaxSeries][nbSeries+3];
+		
 			
 			
 			j=0;
-			double roundTol = 0.000001;
+			double roundTol = 0.0001;
 			int nbFound = 0;
-			int nbThroughB = 0;
-			int nbThroughY = 0;
-				for ( j = 0; j < fragSer.length ; j++) { // loop through theoFragment series here
-					
-					
-					for(int k = 0; k < fragSer[j].masses.length ;k++) { // loop through masses for each fragment serie
+			
+			for ( j = 0; j < fragSer.length ; j++) { // loop through theoFragment series here
+				for(int k = 0; k < fragSer[j].masses.length ;k++) { // loop through masses for each fragment serie
+					for( i = 0 ; i<fragMa.length ; i++) {  // find matching fragMatches with theoFragSeries
 						
-						
-					
-						for( int i = 0 ; i<fragMa.length ; i++) {  // find matching fragMatches with theoFragSeries
-							System.out.println("i,j,k:" + i + " " + j+ " " + k + "/" + fragSer[j].masses.length + " nbThroughB=" + nbThroughB + " nbThroughY=" + nbThroughY);
-							System.out.println("Charge : " + fragSer[j].charge);
-							fragSer[j].computeCharge();
-							System.out.println("serie:" + fragSer[j].frag_series + " -  Charge : " + fragSer[j].charge);
-							if(j == positionIonB) {
-					//			fragTableTheo[0][nbThroughB] = maxY - (maxY - minY) * 0.15; // data[1][i]; // intensity for b ions
-								fragTableTheo[1][nbThroughB] = fragSer[j].masses[k]; // data[0][i];
-								//fragSer[j].computeCharge();
-								fragTableTheoCharge[0][nbThroughB] = fragSer[j].charge; 
-								if( (fragMa[i].calculated_moz - roundTol <= ((double)(fragSer[j].charge) * fragSer[j].masses[k])) && (fragMa[i].calculated_moz + roundTol >= (double)(fragSer[j].charge) * fragSer[j].masses[k])) {
-									nbFound++;
-							
-									
-									matrix[k][1] = "B";
-									renderer.setSelectMatrix(matrix);
-									System.out.println("nbThroughB = " + nbThroughB + " , found" + nbFound + " moz" + fragMa[i].moz);
-					//				fragTable[0][nbThroughB] = maxY - (maxY - minY) * 0.15; //data[1][i];
-									fragTable[1][nbThroughB] =  fragSer[j].masses[k];; //fragMa[positionIonB].moz ; //data[0][i];
-								}
-								else
-								{
-									//if(fragTable[0][nbThroughB])
-//									fragTable[0][nbThroughB] = 0; // 0 means no data so we omit the peak
-//									fragTable[1][nbThroughB] = 0;
-								}
-								
-							}
-							if(j == positionIonY) {
-					//			fragTableTheo[5][nbThroughY] = maxY - (maxY - minY) * 0.25; // data[1][i]; // intensity for b ions
-								fragTableTheo[6][nbThroughY] = fragSer[j].masses[k]; // data[0][i];
-							//	fragSer[j].computeCharge();
-								fragTableTheoCharge[5][nbThroughY] = fragSer[j].charge; 
-								if( (fragMa[i].calculated_moz - roundTol <= (double)(fragSer[j].charge) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(fragSer[j].charge) * fragSer[j].masses[k])) {
-									nbFound++;
-						
-									matrix[k][6] = "Y";
-									renderer.setSelectMatrix(matrix);
-									System.out.println("nbThroughY = " + nbThroughY + " , found" + nbFound + " moz" + fragMa[i].calculated_moz);
-					//				fragTable[5][nbThroughY] = maxY - (maxY - minY) * 0.25; //data[1][i];
-									fragTable[6][nbThroughY] =  fragSer[j].masses[k]; //fragMa[positionIonB].moz ; //data[0][i];
-								}
-								else
-								{
-//									fragTable[5][nbThroughY] = 0; // 0 means no data so we omit the peak
-//									fragTable[6][nbThroughY] = 0;
-								}
-								
-							}
-							else if(j == positionIon_YNH3) {
-								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
-									nbFound++;
-									matrix[k][8 /*position Y dans le tableau */] = "YNH3";
-									renderer.setSelectMatrix(matrix);
-								}
-							}
-							else if(j == positionIon_BNH3) {
-								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
-									nbFound++;
-									matrix[k][3 /*position Y dans le tableau */] = "BNH3";
-									renderer.setSelectMatrix(matrix);
-								}
-							}
-							else if(j == positionIon_BH2O) {
-								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
-									nbFound++;
-									matrix[k][4 /*position Y dans le tableau */] = "BH2O";
-									renderer.setSelectMatrix(matrix);
-								}
-							}
-							else if(j == positionIon_B2H) {
-								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
-									nbFound++;
-									matrix[k][2 /*position Y dans le tableau */] = "B2H";
-									renderer.setSelectMatrix(matrix);
-								}
-							}
-							else if(j == positionIon_Y2H) {
-								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
-									nbFound++;
-									matrix[k][7 /*position Y dans le tableau */] = "Y2H";
-									renderer.setSelectMatrix(matrix);
-								}
-							}
-							else if(j == positionIon_YH2O) {
-								if( (fragMa[i].calculated_moz - roundTol <= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(1/*fragSer[j].charge*/) * fragSer[j].masses[k])) {
-									nbFound++;
-									matrix[k][9 /*position Y dans le tableau */] = "YH20";
-									renderer.setSelectMatrix(matrix);
-								}
-							}
-							
-					
-						}
-						if(j == positionIonB) 
-							nbThroughB ++;
-						if(j == positionIonY) 
-							nbThroughY++;
-					}
-					
-				}
-				
-	
-			    
-				jTable1.setModel(tableModel);
-					
-				renderer.setSelectMatrix(matrix);
-				JScrollPane fragPane = new JScrollPane(jTable1);
-				fragPanelContainer.removeAll();
-				fragPanelContainer.add(fragPane,BorderLayout.NORTH); //fragmentationTablePanel);
-	
-			    fragPane.setPreferredSize(new Dimension(fragPanelContainer.getWidth(),fragPanelContainer.getHeight()-5));
-			    fragPane.setSize(new Dimension(fragPane.getWidth(),fragPane.getHeight()-5)); // to better fit the panel otherwise the bottom is partly hidden.
-
-		        fragPanelContainer.revalidate();
-		        fragPanelContainer.repaint();
+						//fragSer[j].computeCharge();
 		
-			
-				jsonProp=null;
-			    array =null;
-			    gson=null;
-			    parser=null;
-			
-			   
+					
+						if( (fragMa[i].calculated_moz - roundTol <= ( fragSer[j].masses[k])) && (fragMa[i].calculated_moz + roundTol >=  fragSer[j].masses[k])) {
+							nbFound++;
+							
+							if(fragSer[j].frag_series.toUpperCase().contains("A") || fragSer[j].frag_series.toUpperCase().contains("B") ||fragSer[j].frag_series.toUpperCase().contains("C"))
+							{
+								matrix[k][j+2] = "ABC";
+								renderer.setSelectMatrix(matrix);
+							}
+							else if(fragSer[j].frag_series.toUpperCase().contains("X") || fragSer[j].frag_series.toUpperCase().contains("Y") ||fragSer[j].frag_series.toUpperCase().contains("Z"))
+							{
+								matrix[k][j+2] = "XYZ";
+								renderer.setSelectMatrix(matrix);
+							}
+							else {
+								LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("AW: strange, there is no ABC nor XYZ ions..." + fragSer[j].frag_series);
+							}
+							
+							
+						}
+						else
+						{
+						}
+
+					}
+				}
 			}
+			
+			    
+			jTable1.setModel(tableModel);
+				
+			renderer.setSelectMatrix(matrix);
+			
+			JScrollPane fragPane = new JScrollPane(jTable1);
+			fragPanelContainer.removeAll();
+			fragPanelContainer.add(fragPane,BorderLayout.CENTER); //fragmentationTablePanel);
+			
+			//fragPanelContainer.setLayout(new FlowLayout());
+			//fragPane.setMaximumSize(new Dimension(fragSer.length * 100,fragPane.getSize().height));
+		  
+		    fragPane.setSize(new Dimension(fragSer.length * 80/*fragPane.getWidth()*/,fragPane.getHeight()-5)); // to better fit the panel otherwise the bottom is partly hidden.
+		    fragPane.setMaximumSize(new Dimension(fragSer.length * 80,fragPane.getSize().height-5));
+		    fragPane.setPreferredSize(new Dimension(fragSer.length * 80 /*fragPanelContainer.getWidth()*/,fragPanelContainer.getHeight()-5));
+
+	        fragPanelContainer.revalidate();
+	        fragPanelContainer.repaint();
+	
+		
+			jsonProp=null;
+		    array =null;
+		    gson=null;
+		    parser=null;
+		
+		   
+		}
 			
 		//	entityManagerMSI.getTransaction().commit(); // TODO tester en l'enlevant
 			entityManagerMSI.close();
 		//	entityManagerMSI.clear();
-	  }
+	 }
 		
 		
 		
@@ -624,7 +533,7 @@ public class RsetPeptideFragmentationTable {
 	
 		}
 		
-		public class Test2CustomRenderer extends DefaultTableCellRenderer /*implements TableCellRenderer*/ {
+		public class FragTableCustomRenderer extends DefaultTableCellRenderer /*implements TableCellRenderer*/ {
 			int targetRow = 0;
 			int targetCol = 0;
 			String [][] selectMatrix = new String [100][100];
@@ -635,7 +544,7 @@ public class RsetPeptideFragmentationTable {
 				
 			}
 			public void setSelectMatrix(String[][] matx ) {
-				this.selectMatrix = matx.clone();
+				this.selectMatrix = matx; //.clone();
 			}
 			
 			    @Override
@@ -649,11 +558,11 @@ public class RsetPeptideFragmentationTable {
 
 		        	// then overwrites style if necessary:
 			      if(selectMatrix[row][column] != null) {
-				        if ( selectMatrix[row] [column].startsWith("B")) { // highlight the cell if true in selectMatrix
+				        if ( selectMatrix[row] [column].contains("ABC")) { // highlight the cell if true in selectMatrix
 				            clr = new Color(51,153,255);  //"light blue"
 						    component.setFont(component.getFont().deriveFont(Font.BOLD));
 				        	component.setForeground(clr);
-				        } else if(selectMatrix[row] [column].startsWith("Y")){
+				        } else if(selectMatrix[row] [column].contains("XYZ")){
 				        	clr = new Color(255,85,85); // 255,85,85 light red
 				        	component.setForeground(clr);
 				        	component.setFont(component.getFont().deriveFont(Font.BOLD));
@@ -661,7 +570,7 @@ public class RsetPeptideFragmentationTable {
 				        {
 				        	component.setFont(component.getFont().deriveFont(Font.BOLD));
 				        }
-			      } 
+			      }
 			      
 				  return component;
 				    

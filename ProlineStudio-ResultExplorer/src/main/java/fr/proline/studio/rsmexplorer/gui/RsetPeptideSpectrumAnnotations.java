@@ -373,7 +373,8 @@ public class RsetPeptideSpectrumAnnotations {
 			
 			//int size = Math.max(fragSer[positionIonABC].masses.length,fragSer[positionIonXYZ].masses.length);
 				
-			
+			if(xyzSerieName.contains("z+1"))
+				xyzSerieName = "z"; // we keep only the char sequence instead of full (ex: z+1 -> z) 
 			// *-*-*-* *-*-*-* *-*-*-* *-*-*-* ici on voit les match*-*-*-* *-*-*-* *-*-*-* *-*-*-* *-*-*-*
 			// à noter que 2 manières de faire les match. soit par égalité de masse théo et match, ou bien par numéro de position sur le match.
 			// exemple b(2) signifie sur le 2e element théorique ca matche. !!! 1ere solution employée ici.

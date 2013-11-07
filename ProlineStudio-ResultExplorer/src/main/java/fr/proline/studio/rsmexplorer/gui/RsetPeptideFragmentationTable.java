@@ -263,7 +263,7 @@ public class RsetPeptideFragmentationTable {
 				case 'w' : 
 				case 'x' : 
 				case 'y' : 
-				case 'z' : 
+				
 					if(fragSer[i].frag_series.length()>1) {
 						// then it is either a ++ or a b-H2O and so on...
 					}
@@ -271,6 +271,9 @@ public class RsetPeptideFragmentationTable {
 					{ // it's a 'x/y/z' ion
 						xyzSerieName = ""+fragSer[i].frag_series.charAt(0);
 					}
+					break;
+				case 'z' : 
+					xyzSerieName = ""+fragSer[i].frag_series.charAt(0);
 					break;
 				default :
 					break;

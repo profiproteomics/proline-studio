@@ -235,9 +235,9 @@ public class RsetPeptideSpectrumAnnotations {
 			
 			
 			// get all the data to be plot
-			int size = intensityDoubleArray.length;
-			double[][] data = new double[2][size];
-			for (int i = 0; i < size; i++) {
+			int dataSize = intensityDoubleArray.length;
+			double[][] data = new double[2][dataSize];
+			for (int i = 0; i < dataSize; i++) {
 				data[0][i] = massDoubleArray[i];
 				data[1][i] = intensityDoubleArray[i];
 			}
@@ -253,12 +253,19 @@ public class RsetPeptideSpectrumAnnotations {
 				}
 			}
 	
-			SpectrumMatchAW spectrMatch = new SpectrumMatchAW(fragSer, fragMa);
+		//	SpectrumMatchAW spectrMatch = new SpectrumMatchAW(fragSer, fragMa);
 
-			//size = 25; 
-			double[][] fragTableTheo = new double[11][size];
-			float [][] fragTableTheoCharge = new float [11][size];
-			double[][] fragTable = new double[11][size];
+			//dataSize = 25; 
+			int sizeMaxSeries = 0; 
+			for(int i = 0; i<fragSer.length;i++) { // TODO: en fait les frag series b s'appliquent aussi a b++ etc. donc va falloir faire un tableau de positions au lieu de juste Bposition
+				if(fragSer[i].masses.length>sizeMaxSeries)
+					sizeMaxSeries = fragSer[i].masses.length;
+
+			}
+			
+			double[][] fragTableTheo = new double[11][sizeMaxSeries+1];
+			float [][] fragTableTheoCharge = new float [11][sizeMaxSeries+1];
+			double[][] fragTable = new double[11][sizeMaxSeries+1];
 			//char[] aaNames = { 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y' };
 	
 			// **-*-*-* HERE READING Data from Objects *-*-*-*-**-
@@ -305,22 +312,36 @@ public class RsetPeptideSpectrumAnnotations {
 					else
 					{ // it's a 'a/b/c' ion
 						positionIonABC = i;
-						abcSerieName = ""+fragSer[i].frag_series.charAt(0);
+						abcSerieName = ""+fragSer[i].frag_series;
 					}
 					break;
 				case 'v' : 
 				case 'w' : 
 				case 'x' : 
 				case 'y' : 
-				case 'z' : 
+					
 					if(fragSer[i].frag_series.length()>1) {
 						// then it is either a ++ or a b-H2O and so on...
 					}
 					else
 					{ // it's a 'x/y/z' ion
+						xyzSerieName = ""+fragSer[i].frag_series;
 						positionIonXYZ = i;
-						xyzSerieName = ""+fragSer[i].frag_series.charAt(0);
 					}
+					break;
+				case 'z' : 
+					if(fragSer[i].frag_series.length()==3) {
+						if(fragSer[i].frag_series.equals("z+1")) {
+							xyzSerieName = "(z+1)";	
+							positionIonXYZ = i;
+						}// else if (!xyzSerieName.equals("z+1")) {
+							//xyzSerieName = "" + fragSer[i].frag_series;
+						//	positionIonXYZ = i;
+						//}
+					} //else {
+					//	xyzSerieName = ""+fragSer[i].frag_series.charAt(0);
+					//	positionIonXYZ = i ;
+					//}
 					break;
 				default :
 					break;
@@ -350,7 +371,7 @@ public class RsetPeptideSpectrumAnnotations {
 			int sizeABCserie = fragSer[positionIonABC].masses.length;
 			int sizeXYZserie = fragSer[positionIonXYZ].masses.length;
 			
-			size = Math.max(fragSer[positionIonABC].masses.length,fragSer[positionIonXYZ].masses.length);
+			//int size = Math.max(fragSer[positionIonABC].masses.length,fragSer[positionIonXYZ].masses.length);
 				
 			
 			// *-*-*-* *-*-*-* *-*-*-* *-*-*-* ici on voit les match*-*-*-* *-*-*-* *-*-*-* *-*-*-* *-*-*-*
@@ -375,7 +396,7 @@ public class RsetPeptideSpectrumAnnotations {
 							fragTableTheo[1][nbThroughB] = fragSer[j].masses[k]; // data[0][i];
 							//fragSer[j].computeCharge();
 							fragTableTheoCharge[0][nbThroughB] = fragSer[j].charge; 
-							if( (fragMa[i].calculated_moz - roundTol <= ((double)(fragSer[j].charge) * fragSer[j].masses[k])) && (fragMa[i].calculated_moz + roundTol >= (double)(fragSer[j].charge) * fragSer[j].masses[k])) {
+							if( (fragMa[i].calculated_moz - roundTol <= (/*(double)(fragSer[j].charge) **/ fragSer[j].masses[k])) && (fragMa[i].calculated_moz + roundTol >= /*(double)(fragSer[j].charge) * */fragSer[j].masses[k])) {
 								nbFound++;
 								System.out.println("nbThroughB = " + nbThroughB + " , found" + nbFound + " moz" + fragMa[i].moz);
 								fragTable[0][nbThroughB] =  fragMa[i].intensity ;  // /*maxY*/ - (maxY - minY) * 0.15; //data[1][i];
@@ -394,7 +415,7 @@ public class RsetPeptideSpectrumAnnotations {
 							fragTableTheo[6][nbThroughY] = fragSer[j].masses[k]; // data[0][i];
 						//	fragSer[j].computeCharge();
 							fragTableTheoCharge[5][nbThroughY] = fragSer[j].charge; 
-							if( (fragMa[i].calculated_moz - roundTol <= (double)(fragSer[j].charge) * fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= (double)(fragSer[j].charge) * fragSer[j].masses[k])) {
+							if( (fragMa[i].calculated_moz - roundTol <= /*(double)(fragSer[j].charge) **/ fragSer[j].masses[k]) && (fragMa[i].calculated_moz + roundTol >= /*(double)(fragSer[j].charge) **/ fragSer[j].masses[k])) {
 								nbFound++;
 								System.out.println("nbThroughY = " + nbThroughY + " , found" + nbFound + " moz" + fragMa[i].calculated_moz);
 								fragTable[5][nbThroughY] = fragMa[i].intensity ; //data[1][i];
@@ -459,7 +480,9 @@ public class RsetPeptideSpectrumAnnotations {
 				plot.addAnnotation(xyta);
 				
 				
-				for (int i = 0; i < size; i++) {
+				int size = Math.max(fragSer[positionIonABC].masses.length,fragSer[positionIonXYZ].masses.length);
+				
+				for (int i = 0; i < size; i++) { // loop through the series points
 
 					// place separators marks------
 					if (abcPrev != 0) {
@@ -606,7 +629,7 @@ public class RsetPeptideSpectrumAnnotations {
 			}
 			
 	
-		//	entityManagerMSI.getTransaction().commit(); // TODO tester en l'enlevant
+		    entityManagerMSI.getTransaction().commit(); // TODO tester en l'enlevant, mais il semble qu'on obtienne "Trop de commit" après avoir visualisé plusieurs dixaines de spectres...
 			entityManagerMSI.close();
 		//	entityManagerMSI.clear();
 	  }

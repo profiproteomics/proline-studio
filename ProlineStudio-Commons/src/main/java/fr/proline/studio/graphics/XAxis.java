@@ -2,7 +2,7 @@ package fr.proline.studio.graphics;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.text.DecimalFormat;
 
 /**
@@ -18,7 +18,7 @@ public class XAxis extends Axis {
 
     
     @Override
-    public void paint(Graphics g) {
+    public void paint(Graphics2D g) {
         
         int maxTicks = m_width/30;
         
@@ -30,18 +30,23 @@ public class XAxis extends Axis {
         m_maxTick = ticks.getTickMax();
         double tickSpacing = ticks.getTickSpacing();
         
+        String pattern;
         int digits = ticks.getDigits();
-        String pattern = "#.";
-        while(digits>0) {
-            pattern += "#";
-            digits--;
+        if (digits <= 0) {
+            pattern = "#";
+        } else {
+            pattern = "#.";
+            while (digits > 0) {
+                pattern += "#";
+                digits--;
+            }
         }
         m_df = new DecimalFormat(pattern);
         
         
         int pixelStart = valueToPixel(m_minTick);
         int pixelStop = valueToPixel(m_maxTick);
-        g.drawLine(pixelStart, m_y /*+PlotPanel.GAP_TOP_AXIS*/, pixelStop, m_y /*+PlotPanel.GAP_TOP_AXIS*/);
+        g.drawLine(pixelStart, m_y, pixelStop, m_y);
         
         FontMetrics metrics = g.getFontMetrics(g.getFont());
         int height = metrics.getHeight();
@@ -50,7 +55,7 @@ public class XAxis extends Axis {
         double x = m_minTick;
         int pX = pixelStart;
         while(true) {
-            g.drawLine(pX, m_y/*+PlotPanel.GAP_TOP_AXIS*/, pX, m_y+4/*+PlotPanel.GAP_TOP_AXIS*/);
+            g.drawLine(pX, m_y, pX, m_y+4);
             
             String s = m_df.format(x);
             int stringWidth = metrics.stringWidth(s);

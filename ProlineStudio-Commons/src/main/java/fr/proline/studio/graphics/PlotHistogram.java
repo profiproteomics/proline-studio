@@ -2,10 +2,11 @@ package fr.proline.studio.graphics;
 
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
+import fr.proline.studio.graphics.marker.TextMarker;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
 import fr.proline.studio.stats.ValuesForStatsAbstract;
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 /**
  *
@@ -24,6 +25,14 @@ public class PlotHistogram extends PlotAbstract {
     public PlotHistogram(PlotPanel plotPanel, ValuesForStatsAbstract values) {
         
         super(plotPanel);
+       
+        update(values);
+        
+    }
+    
+    public final void update(ValuesForStatsAbstract values) {
+         
+        clearMarkers();
         
         // number of bins
         int size = values.size();
@@ -78,6 +87,7 @@ public class PlotHistogram extends PlotAbstract {
         double yMeanLabel = m_yMax*1.1;
         m_yMax *= 1.2; // we let place at the top to be able to put information
         
+        m_plotPanel.updateAxis(this);
         
         m_dataX = new double[bins + 1];
         m_dataY = new double[bins + 1];
@@ -105,8 +115,11 @@ public class PlotHistogram extends PlotAbstract {
         addMarker(new LineMarker(m_plotPanel, mean, LineMarker.ORIENTATION_VERTICAL));
         addMarker(new LabelMarker(m_plotPanel, mean, yMeanLabel, "Mean : "+mean, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_BOTTOM));
         
+        // add Title
+        addMarker(new TextMarker(m_plotPanel, 0.05, 0.95, values.getValueType()+" Histogram"));
+        
+        m_plotPanel.repaint();
     }
-    
     
     
     @Override
@@ -130,7 +143,7 @@ public class PlotHistogram extends PlotAbstract {
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void paint(Graphics2D g) {
         
         
         

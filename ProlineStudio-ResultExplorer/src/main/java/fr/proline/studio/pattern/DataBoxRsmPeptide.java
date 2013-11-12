@@ -6,7 +6,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
-import java.util.Arrays;
+import fr.proline.studio.stats.ValuesForStatsAbstract;
+
 
 /**
  * Databox : All PSM of an Identification Summary or corresponding to a Peptide Instance
@@ -15,7 +16,9 @@ import java.util.Arrays;
 public class DataBoxRsmPeptide extends AbstractDataBox {
 
     
-    ResultSummary m_rsm = null;
+    private ResultSummary m_rsm = null;
+    
+    private boolean m_finishedLoading = false;
     
     public DataBoxRsmPeptide() {
 
@@ -73,7 +76,9 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
                 }
                
                 if (finished) {
+                    m_finishedLoading = true;
                     unregisterTask(taskId);
+                    propagateDataChanged(ValuesForStatsAbstract.class);
                 }
             }
         };
@@ -95,6 +100,13 @@ public class DataBoxRsmPeptide extends AbstractDataBox {
             if (parameterType.equals(ResultSummary.class)) {
                 if (m_rsm != null) {
                     return m_rsm;
+                }
+            }
+            if (parameterType.equals(ValuesForStatsAbstract.class)) {
+                if (m_finishedLoading) {
+                    return ((PeptideMatchPanel) m_panel).getValuesForStats();
+                } else {
+                    return null;
                 }
             }
         }

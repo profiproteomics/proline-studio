@@ -1,7 +1,7 @@
 package fr.proline.studio.graphics;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 /**
  *
@@ -15,7 +15,7 @@ public class YAxis extends Axis {
 
     
     @Override
-    public void paint(Graphics g) {
+    public void paint(Graphics2D g) {
         
         int maxTicks = m_height/20;
         

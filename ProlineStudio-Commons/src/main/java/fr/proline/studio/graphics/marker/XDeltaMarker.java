@@ -4,7 +4,7 @@ import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 
 /**
@@ -27,7 +27,7 @@ public class XDeltaMarker extends AbstractMarker {
     }
     
     @Override
-    public void paint(Graphics g) {
+    public void paint(Graphics2D g) {
 
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();

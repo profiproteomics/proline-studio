@@ -25,11 +25,10 @@ public class LineMarker extends AbstractMarker {
     }
     
     @Override
-    public void paint(Graphics g) {
-        
-        Graphics2D g2 = (Graphics2D) g;
-        Stroke prevStroke = g2.getStroke();
-        g2.setStroke(dashed);
+    public void paint(Graphics2D g) {
+
+        Stroke prevStroke = g.getStroke();
+        g.setStroke(dashed);
         
 
         
@@ -55,7 +54,7 @@ public class LineMarker extends AbstractMarker {
         }
         
         // restore stroke
-        g2.setStroke(prevStroke);
+        g.setStroke(prevStroke);
         
     }
     private final static float dash1[] = {10.0f};

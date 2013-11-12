@@ -9,7 +9,6 @@ import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
 import fr.proline.studio.stats.ValuesForStatsAbstract;
-import java.util.Arrays;
 
 /**
  * Databox for all PSM of a ResultSet (Search Result)
@@ -19,6 +18,8 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
 
     
     private ResultSet m_rset = null;
+    
+    private boolean m_finishedLoading = false;
     
     public DataBoxRsetPeptide() {
 
@@ -84,7 +85,9 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
                setLoaded(loadingId);
                
                 if (finished) {
+                    m_finishedLoading = true;
                     unregisterTask(taskId);
+                    propagateDataChanged(ValuesForStatsAbstract.class);
                 }
             }
         };
@@ -116,7 +119,11 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
                 }
             }
             if (parameterType.equals(ValuesForStatsAbstract.class)) {
-                return ((PeptideMatchPanel)m_panel).getValuesForStats();
+                if (m_finishedLoading) {
+                    return ((PeptideMatchPanel)m_panel).getValuesForStats();
+                } else {
+                    return null;
+                }
             }
             
         }

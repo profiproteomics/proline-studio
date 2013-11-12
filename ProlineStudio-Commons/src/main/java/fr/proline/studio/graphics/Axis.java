@@ -1,6 +1,7 @@
 package fr.proline.studio.graphics;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 /**
  *
@@ -38,7 +39,7 @@ public abstract class Axis {
         m_maxTick = max;
     }
 
-    public abstract void paint(Graphics g);
+    public abstract void paint(Graphics2D g);
 
     public int valueToPixel(double v) {
         return (int) Math.round((v - m_minTick) * m_width);

@@ -1,7 +1,7 @@
 package fr.proline.studio.graphics.marker;
 
 import fr.proline.studio.graphics.PlotPanel;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 /**
  *
@@ -15,5 +15,5 @@ public abstract class AbstractMarker {
         m_plotPanel = plotPanel;
     }
     
-    public abstract void paint(Graphics g);
+    public abstract void paint(Graphics2D g);
 }

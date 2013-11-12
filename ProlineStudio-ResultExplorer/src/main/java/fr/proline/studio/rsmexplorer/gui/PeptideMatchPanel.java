@@ -19,6 +19,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
@@ -43,6 +44,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableCellRenderer;
 import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /**
  * Panel for Peptide Matches
@@ -67,6 +69,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
+    private JButton m_histogramButton;
 
     public PeptideMatchPanel(boolean forRSM, boolean startingPanel) {
         m_forRSM = forRSM;
@@ -155,13 +158,20 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
      public ValuesForStatsAbstract getValuesForStats() {
          return new ValuesForStatsAbstract() {
 
+            private final String[] m_valuesType = {"Delta MoZ", "Calc. Mass", "Exp. MoZ", "Charge", "Score" };
+            private final int[] m_valuesCol = { PeptideMatchTableModel.COLTYPE_PEPTIDE_DELTA_MOZ, PeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS, PeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, PeptideMatchTableModel.COLTYPE_PEPTIDE_CHARGE, PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE };
+
+            private int m_valueCol = m_valuesCol[0];
+            
+            private String m_valueType = m_valuesType[0];
+            
              
             @Override
             public double getValue(int i) {
                 PeptideMatchTableModel tableModel = (PeptideMatchTableModel) m_peptideMatchTable.getModel();
-                LazyData lazyData =  (LazyData) tableModel.getValueAt(i, PeptideMatchTableModel.COLTYPE_PEPTIDE_DELTA_MOZ);
+                LazyData lazyData =  (LazyData) tableModel.getValueAt(i, m_valueCol);
                 if (lazyData != null) {
-                    return ((Float)lazyData.getData()).doubleValue();
+                    return ((Number)lazyData.getData()).doubleValue();
                 }
                 return Double.NaN;
             }
@@ -170,6 +180,27 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             public int size() {
                 PeptideMatchTableModel tableModel = (PeptideMatchTableModel) m_peptideMatchTable.getModel();
                 return tableModel.getRowCount();
+            }
+
+            @Override
+            public String[] getAvailableValueTypes() {
+                return m_valuesType;
+            }
+
+            @Override
+            public void setValueType(String valueType) {
+                m_valueType = valueType;
+                for (int i=0;i<m_valuesType.length;i++) {
+                    if (m_valuesType[i].compareTo(valueType) == 0) {
+                        m_valueCol = m_valuesCol[i];
+                    }
+                }
+            }
+
+            @Override
+            public String getValueType() {
+                
+               return m_valueType;
             }
         };
      }
@@ -269,12 +300,43 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         
         m_exportButton = new ExportButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel()), "Peptide Match", m_peptideMatchTable);
         
+        m_histogramButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
+        m_histogramButton.setToolTipText("Histogram and Standard Deviation");
+        m_histogramButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!((PeptideMatchTableModel) m_peptideMatchTable.getModel()).isLoaded()) {
+
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((PeptideMatchTableModel) m_peptideMatchTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
+                    dialog.setLocation(getLocationOnScreen().x + m_histogramButton.getWidth() + 5, m_histogramButton.getLocationOnScreen().y + getHeight() + 5);
+                    dialog.setVisible(true);
+
+                    if (!dialog.isWaitingFinished()) {
+                        return;
+                    }
+                }
+                // prepare window box
+                WindowBox wbox = WindowBoxFactory.getHistogramWindowBox("Histogram");
+
+                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, ValuesForStatsAbstract.class));
+
+
+
+                // open a window to display the window box
+                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                win.open();
+                win.requestActive();
+            }
+        });
+
         if (m_startingPanel) {
             toolbar.add(m_decoyButton);
         }
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
+        toolbar.add(m_histogramButton);
         
         return toolbar;
     }

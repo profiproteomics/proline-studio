@@ -3,10 +3,7 @@ package fr.proline.studio.graphics.marker;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
+import java.awt.*;
 
 /**
  *
@@ -37,7 +34,10 @@ public class LabelMarker extends AbstractMarker {
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void paint(Graphics2D g) {
+        
+       
+        
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();
 
@@ -62,7 +62,7 @@ public class LabelMarker extends AbstractMarker {
             int yBox = pixelY + deltaY - stringHeight / 2 - DELTA;
             int widthBox = stringWidth + DELTA * 2;
             int heightBox = stringHeight + DELTA * 2;
-            g.setColor(new Color(255,255,255,128));
+            g.setColor(new Color(255,255,255,196));
             g.fillRect(xBox, yBox, widthBox, heightBox);
             g.setColor(Color.black);
             g.drawRect(xBox, yBox, widthBox, heightBox);

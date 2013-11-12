@@ -48,6 +48,14 @@ public class WindowBoxFactory {
         
     }
     
+    public static WindowBox getHistogramWindowBox(String name) {
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxStatisticsFrequencyResponse();
+        IconManager.IconType iconType = IconManager.IconType.CHART;
+         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+         return winBox;
+    }
+    
     public static WindowBox getProteinMatchesForRsetWindowBox(String name, boolean isDecoy) {
         
         // create boxes

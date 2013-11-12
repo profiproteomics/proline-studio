@@ -1,7 +1,7 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.graphics.marker.AbstractMarker;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 /**
@@ -23,7 +23,7 @@ public abstract class PlotAbstract {
     public abstract boolean needsXAxis();
     public abstract boolean needsYAxis();
     
-    public abstract void paint(Graphics g);
+    public abstract void paint(Graphics2D g);
 
     public PlotAbstract(PlotPanel plotPanel) {
         m_plotPanel = plotPanel;
@@ -36,7 +36,14 @@ public abstract class PlotAbstract {
         m_markersList.add(m);
     }
     
-    public void paintMarkers(Graphics g) {
+    public void clearMarkers() {
+        if (m_markersList == null) {
+            return;
+        }
+        m_markersList.clear();
+    }
+    
+    public void paintMarkers(Graphics2D g) {
         if (m_markersList == null) {
             return;
         }

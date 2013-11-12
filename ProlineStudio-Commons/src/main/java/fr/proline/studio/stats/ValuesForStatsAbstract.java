@@ -1,5 +1,7 @@
 package fr.proline.studio.stats;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author JM235353
@@ -9,6 +11,10 @@ public abstract class ValuesForStatsAbstract {
     public abstract double getValue(int i);
     
     public abstract int size();
+    
+    public abstract String[] getAvailableValueTypes();
+    public abstract void setValueType(String valueType);
+    public abstract String getValueType();
     
     public double sum() {
         

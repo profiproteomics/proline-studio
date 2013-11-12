@@ -1,8 +1,6 @@
 package fr.proline.studio.graphics;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.*;
 import javax.swing.JPanel;
 
 /**
@@ -19,7 +17,7 @@ public class PlotPanel extends JPanel {
     public final static int GAP_FIGURES_Y = 30;
     public final static int GAP_FIGURES_X = 30;
     public final static int GAP_END_AXIS = 10;
-    //public final static int GAP_TOP_AXIS = 3;
+
     
     
     public PlotPanel() {
@@ -28,6 +26,10 @@ public class PlotPanel extends JPanel {
     
     @Override
     public void paint(Graphics g) {
+        
+        Graphics2D g2d = (Graphics2D)g;
+         g2d.setRenderingHint( RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        
         Rectangle bounds = getBounds();
 
         g.setColor(Color.white);
@@ -35,37 +37,42 @@ public class PlotPanel extends JPanel {
         
         if (m_xAxis != null) {
             m_xAxis.setSize(GAP_FIGURES_Y, ((int)bounds.getHeight())-GAP_FIGURES_X /*-GAP_TOP_AXIS*/, bounds.width-GAP_FIGURES_Y-GAP_END_AXIS, GAP_FIGURES_X /*+GAP_TOP_AXIS*/);
-            m_xAxis.paint(g);
+            m_xAxis.paint(g2d);
         }
         
         if (m_yAxis != null) {
             m_yAxis.setSize(0, GAP_END_AXIS, GAP_FIGURES_Y /*+GAP_TOP_AXIS*/, ((int)bounds.getHeight())-GAP_FIGURES_X-GAP_END_AXIS);
-            m_yAxis.paint(g);
+            m_yAxis.paint(g2d);
         }
         
         if (m_plot != null) {
-            m_plot.paint(g);
+            m_plot.paint(g2d);
         }
         
     }
     
     public void addPlot(PlotAbstract plot) {
         m_plot = plot;
+
+        updateAxis(plot);
+
+    }
+
+    public void updateAxis(PlotAbstract plot) {
         
-        if (m_plot.needsXAxis()) {
+        if (plot.needsXAxis()) {
             if (m_xAxis == null) {
                 m_xAxis = new XAxis();
             }
-            m_xAxis.setRange(m_plot.getXMin(), m_plot.getXMax());
+            m_xAxis.setRange(plot.getXMin(), plot.getXMax());
         }
 
-        if (m_plot.needsYAxis()) {
+        if (plot.needsYAxis()) {
             if (m_yAxis == null) {
                 m_yAxis = new YAxis();
             }
-            m_yAxis.setRange(m_plot.getYMin(), m_plot.getYMax());
+            m_yAxis.setRange(plot.getYMin(), plot.getYMax());
         }
-
     }
     
     public XAxis getXAxis() {

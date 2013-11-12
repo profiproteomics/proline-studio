@@ -1,6 +1,6 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.rsmexplorer.gui.StatsFrequencyResponsePanel;
+import fr.proline.studio.rsmexplorer.gui.StatsHistogramPanel;
 import fr.proline.studio.stats.ValuesForStatsAbstract;
 
 /**
@@ -9,11 +9,13 @@ import fr.proline.studio.stats.ValuesForStatsAbstract;
  */
 public class DataBoxStatisticsFrequencyResponse extends AbstractDataBox  {
 
+    private ValuesForStatsAbstract m_values = null;;
+    
         public DataBoxStatisticsFrequencyResponse() {
 
         // Name of this databox
-        m_name = "Standard Deviation";
-        m_description = "Standard Deviation";
+        m_name = "Histogram";
+        m_description = "Histogram and Standard Deviation of a Value";
         
         // Register Possible in parameters
         // One ResultSummary
@@ -27,7 +29,7 @@ public class DataBoxStatisticsFrequencyResponse extends AbstractDataBox  {
     
     @Override
     public void createPanel() {
-        StatsFrequencyResponsePanel p = new StatsFrequencyResponsePanel();
+        StatsHistogramPanel p = new StatsHistogramPanel();
         p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
@@ -35,8 +37,14 @@ public class DataBoxStatisticsFrequencyResponse extends AbstractDataBox  {
 
     @Override
     public void dataChanged() {
-        final ValuesForStatsAbstract values = (ValuesForStatsAbstract) m_previousDataBox.getData(false, ValuesForStatsAbstract.class);
-        ((StatsFrequencyResponsePanel)m_panel).setData(values);
+        final ValuesForStatsAbstract values = (m_values!=null) ? m_values : (ValuesForStatsAbstract) m_previousDataBox.getData(false, ValuesForStatsAbstract.class);
+        ((StatsHistogramPanel)m_panel).setData(values);
+    }
+    
+    @Override
+    public void setEntryData(Object data) {
+        m_values = (ValuesForStatsAbstract) data;
+        dataChanged();
     }
     
 }

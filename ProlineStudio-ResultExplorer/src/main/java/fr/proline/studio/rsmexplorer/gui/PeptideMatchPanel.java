@@ -300,43 +300,49 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         
         m_exportButton = new ExportButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel()), "Peptide Match", m_peptideMatchTable);
         
-        m_histogramButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
-        m_histogramButton.setToolTipText("Histogram and Standard Deviation");
-        m_histogramButton.addActionListener(new ActionListener() {
+        if (m_startingPanel) {
+            m_histogramButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
+            m_histogramButton.setToolTipText("Histogram and Standard Deviation");
+            m_histogramButton.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!((PeptideMatchTableModel) m_peptideMatchTable.getModel()).isLoaded()) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (!((PeptideMatchTableModel) m_peptideMatchTable.getModel()).isLoaded()) {
 
-                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((PeptideMatchTableModel) m_peptideMatchTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
-                    dialog.setLocation(getLocationOnScreen().x + m_histogramButton.getWidth() + 5, m_histogramButton.getLocationOnScreen().y + getHeight() + 5);
-                    dialog.setVisible(true);
+                        ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((PeptideMatchTableModel) m_peptideMatchTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
+                        dialog.setLocation(getLocationOnScreen().x + m_histogramButton.getWidth() + 5, m_histogramButton.getLocationOnScreen().y + getHeight() + 5);
+                        dialog.setVisible(true);
 
-                    if (!dialog.isWaitingFinished()) {
-                        return;
+                        if (!dialog.isWaitingFinished()) {
+                            return;
+                        }
                     }
+                    // prepare window box
+                    WindowBox wbox = WindowBoxFactory.getHistogramWindowBox("Histogram");
+
+                    wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, ValuesForStatsAbstract.class));
+
+
+
+                    // open a window to display the window box
+                    DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                    win.open();
+                    win.requestActive();
                 }
-                // prepare window box
-                WindowBox wbox = WindowBoxFactory.getHistogramWindowBox("Histogram");
-
-                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, ValuesForStatsAbstract.class));
-
-
-
-                // open a window to display the window box
-                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                win.open();
-                win.requestActive();
-            }
-        });
-
+            });
+        }
+        
+        
         if (m_startingPanel) {
             toolbar.add(m_decoyButton);
         }
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
-        toolbar.add(m_histogramButton);
+        
+        if (m_startingPanel) {
+            toolbar.add(m_histogramButton);
+        }
         
         return toolbar;
     }

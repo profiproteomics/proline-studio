@@ -18,7 +18,11 @@ public class AxisTicks {
     private int m_nbDigits;
 
     public AxisTicks(double min, double max, int maxTicks) {
-        m_maxTicks = maxTicks;
+        if (maxTicks <=1) {
+            m_maxTicks = 2;
+        } else {
+            m_maxTicks = maxTicks;
+        }
         m_min = min;
         m_max = max;
         calculate();

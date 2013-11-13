@@ -48,7 +48,7 @@ public class DisplayRsetPeptidesAction extends AbstractRSMAction {
         if (rset != null) {
         
             // prepare window box
-            WindowBox wbox = (hasResultSummary) ? WindowBoxFactory.getPeptidesWindowBox(dataSet.getName()+" Peptides", false) : WindowBoxFactory.getPeptidesForRsetOnlyWindowBox(dataSet.getName()+" Peptides", false);
+            WindowBox wbox = (hasResultSummary) ? WindowBoxFactory.getPeptidesWindowBox(dataSet.getName()+" PSM", false) : WindowBoxFactory.getPeptidesForRsetOnlyWindowBox(dataSet.getName()+" PSM", false);
             wbox.setEntryData(dataSet.getProject().getId(), rset);
             
 

@@ -428,9 +428,13 @@ public class RsetPeptideFragmentationTable {
 			//fragPanelContainer.setLayout(new FlowLayout());
 			//fragPane.setMaximumSize(new Dimension(fragSer.length * 100,fragPane.getSize().height));
 		  
-		    fragPane.setSize(new Dimension(fragSer.length * 80/*fragPane.getWidth()*/,fragPane.getHeight()-5)); // to better fit the panel otherwise the bottom is partly hidden.
-		    fragPane.setMaximumSize(new Dimension(fragSer.length * 80,fragPane.getSize().height-5));
-		    fragPane.setPreferredSize(new Dimension(fragSer.length * 80 /*fragPanelContainer.getWidth()*/,fragPanelContainer.getHeight()-5));
+		    fragPane.setSize(new Dimension(fragSer.length * 80/*fragPane.getWidth()*/,fragPane.getHeight()-5)); // -5 to better fit the panel otherwise the bottom is partly hidden.
+		    // next 2 lines for fixed size fragmentation table
+		    //	    fragPane.setMaximumSize(new Dimension(fragSer.length * 80,fragPane.getSize().height-5));
+		    // next 2 lines for full size fragmentation table
+		    //	    fragPane.setPreferredSize(new Dimension(fragSer.length * 80 /*fragPanelContainer.getWidth()*/,fragPanelContainer.getHeight()-5));
+		    fragPane.setMaximumSize(new Dimension(fragPanelContainer.getWidth(),fragPane.getSize().height-5));
+		    fragPane.setPreferredSize(new Dimension(fragPanelContainer.getWidth(),fragPanelContainer.getHeight()-5));
 
 	        fragPanelContainer.revalidate();
 	        fragPanelContainer.repaint();

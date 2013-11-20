@@ -20,7 +20,7 @@ public class DataboxManager {
                                                  new DataBoxRsetProteinsForPeptideMatch(),
                                                  new DataboxRsetPeptidesOfProtein(),
                                                  new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(),
-                                                 new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet(), new DataBoxTaskDescription(), new DataBoxStatisticsFrequencyResponse() };
+                                                 new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet(), new DataBoxTaskDescription(), new DataBoxStatisticsFrequencyResponse(), new DataBoxRsetPeptideFragmentationTable() };
     
     private DataboxManager() {
     }

@@ -35,6 +35,9 @@ public class PlotPanel extends JPanel {
         g.setColor(Color.white);
         g.fillRect(0, 0, bounds.width, bounds.height);
         
+        g.setColor(Color.darkGray);
+        g.drawRect(0, 0, bounds.width-1, bounds.height-1);
+        
         if (m_xAxis != null) {
             m_xAxis.setSize(GAP_FIGURES_Y, ((int)bounds.getHeight())-GAP_FIGURES_X /*-GAP_TOP_AXIS*/, bounds.width-GAP_FIGURES_Y-GAP_END_AXIS, GAP_FIGURES_X /*+GAP_TOP_AXIS*/);
             m_xAxis.paint(g2d);

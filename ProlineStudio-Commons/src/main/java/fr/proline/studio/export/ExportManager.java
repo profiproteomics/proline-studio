@@ -3,11 +3,9 @@ package fr.proline.studio.export;
 
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Component;
-import java.io.IOException;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.SwingWorker;
 import javax.swing.table.TableCellRenderer;
 
 /**

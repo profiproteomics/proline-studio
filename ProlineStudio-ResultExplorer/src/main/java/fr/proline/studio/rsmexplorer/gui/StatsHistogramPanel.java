@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.PlotHistogram;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.gui.HourglassPanel;
@@ -7,17 +8,15 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.stats.ValuesForStatsAbstract;
+import java.awt.BorderLayout;
 import java.awt.Color;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.Box;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import org.jdesktop.swingx.JXComboBox;
+import javax.swing.*;
+
 
 
 /**
@@ -30,6 +29,8 @@ public class StatsHistogramPanel extends HourglassPanel implements DataBoxPanelI
     private AbstractDataBox m_dataBox;
 
     private PlotPanel m_plotPanel;
+    private JPanel m_statPanel;
+    
     
     private JComboBox<String> m_valueComboBox;
     
@@ -38,31 +39,58 @@ public class StatsHistogramPanel extends HourglassPanel implements DataBoxPanelI
     private ValuesForStatsAbstract m_values = null;
     
     public StatsHistogramPanel() {
-        
+        setLayout(new BorderLayout());
 
-        setLayout(new GridBagLayout());
-        setBackground(Color.white);
+        JPanel internalPanel = createInternalPanel();
+        add(internalPanel, BorderLayout.CENTER);
+
+        JToolBar toolbar = initToolbar();
+        add(toolbar, BorderLayout.WEST);
+
+    }
+    
+    public final JPanel createInternalPanel() {
+        
+        JPanel internalPanel = new JPanel();
+        
+        internalPanel.setLayout(new GridBagLayout());
+        internalPanel.setBackground(Color.white);
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(0, 5, 0, 5);
 
-        JPanel statPanel = createStatPanel();
+        m_statPanel = createStatPanel();
         JPanel selectPanel = createSelectPanel();
         
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        add(statPanel, c);
+        internalPanel.add(m_statPanel, c);
         
         c.gridy++;
         c.weighty = 0;
-        add(selectPanel, c);
+        internalPanel.add(selectPanel, c);
 
+        return internalPanel;
     }
  
+    public final JToolBar initToolbar() {
+            
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+
+        ExportButton exportImageButton = new ExportButton("Histogram", m_statPanel);
+
+        
+        toolbar.add(exportImageButton);
+
+        return toolbar;
+
+    }
+    
     
     private JPanel createStatPanel() {
         

@@ -159,7 +159,7 @@ public class PlotHistogram extends PlotAbstract {
             
             
             
-            g.setColor(Color.red);
+            g.setColor(COLOR_MARS_RED);
             g.fillRect(x1, y1 , x2-x1, y2-y1);
             
             g.setColor(Color.black);
@@ -169,6 +169,7 @@ public class PlotHistogram extends PlotAbstract {
         
         paintMarkers(g);
     }
+    private final static Color COLOR_MARS_RED = new Color(227,38,54);
 
 
 

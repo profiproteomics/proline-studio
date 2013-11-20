@@ -33,7 +33,9 @@ public class XAxis extends Axis {
         String pattern;
         int digits = ticks.getDigits();
         if (digits <= 0) {
-            pattern = "#";
+            pattern = "#";  // number like "3"
+        } else if (digits>3) { // 3 is 
+            pattern = ("0.0E0"); // scientific notation for numbers with too much digits "0.0000532"
         } else {
             pattern = "#.";
             while (digits > 0) {
@@ -52,12 +54,20 @@ public class XAxis extends Axis {
         int height = metrics.getHeight();
 
         
+        double multForRounding = Math.pow(10,digits);
+        
         double x = m_minTick;
         int pX = pixelStart;
         while(true) {
             g.drawLine(pX, m_y, pX, m_y+4);
             
-            String s = m_df.format(x);
+            // round x
+            double xDisplay = x;
+            if (digits>0) {
+                xDisplay = StrictMath.round(xDisplay * multForRounding) / multForRounding;
+            }
+            
+            String s = m_df.format(xDisplay);
             int stringWidth = metrics.stringWidth(s);
             g.drawString(s, pX-stringWidth/2, m_y+height+4);
             

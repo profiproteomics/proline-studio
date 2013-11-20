@@ -31,7 +31,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.nio.ByteBuffer;
@@ -81,7 +81,11 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 
 	private RsetPeptideFragmentationTable fragmentationTable= null;
 	
-		
+	public RsetPeptideFragmentationTablePanel() {
+            setLayout(new BorderLayout());
+        }	
+        
+        
 	/**
 	 * Creates new form RsetPeptidefragmentationTablePanel
 	 */

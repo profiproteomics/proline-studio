@@ -48,6 +48,8 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.utils.DecoratedTable;
+import javax.swing.table.*;
 
 public class RsetPeptideFragmentationTable {
 
@@ -58,7 +60,7 @@ public class RsetPeptideFragmentationTable {
 
 	DPeptideMatch peptideMatch;
 	DPeptideMatch pm;
-	JTable jTable1 ;
+	DecoratedTable jTable1 ;
 	
 	public RsetPeptideFragmentationTable (AbstractDataBox m_dBox, JPanel fragPanel /* DefaultXYDataset m_dSet,*//* JFreeChart m_chrt,*/, DPeptideMatch pepMatch) {
 		
@@ -74,7 +76,7 @@ public class RsetPeptideFragmentationTable {
 	}
 
 
-	class JsonProperties {
+	private class JsonProperties {
 	    //String jsonProperties = "{\"ms_query_initial_id\":3,\"peptide_match_rank\":4,\"frag_table\":[{\"frag_series\":\"b\",\"masses\":[72.04439,171.112804,268.165568,365.218332,478.302396,0]},\"frag_matches\":[{\"label\":\"b(2)\",\"moz\":171.161,\"calculated_moz\":171.112804,\"intensity\":4.932}]}";
 	    public int ms_query_initial_id;
 	    public int peptide_match_rank;
@@ -83,7 +85,7 @@ public class RsetPeptideFragmentationTable {
 	           
 	}
 	
-	class TheoreticalFragmentSeries_AW {
+	protected class TheoreticalFragmentSeries_AW {
 		public String frag_series;
 		public double[] masses;
 		public int charge=1; //default to 1 because it is used to multiply the m/z to obtain real mass values for aa calculation
@@ -110,7 +112,7 @@ public class RsetPeptideFragmentationTable {
 	//	}
 	}
 	
-	  class FragmentMatch_AW {
+	protected class FragmentMatch_AW {
 	        //String type = "REGULAR"; // FragmentMatchType.REGULAR.toString,
 		public String label;
 		public Double moz;
@@ -138,7 +140,7 @@ public class RsetPeptideFragmentationTable {
 	
 		
 
-		jTable1=  new javax.swing.JTable() ;
+		jTable1=  new DecoratedTable() ;
 	  
 	         
 			final String SERIES_NAME = "spectrumData"; // TODO: change series name to fragmentation table
@@ -226,215 +228,36 @@ public class RsetPeptideFragmentationTable {
 	
 			for (int i = 0; i < massDoubleArray.length; i++)
 				massDoubleArray[i] = massDoubleBuffer.get();
-			
-			
-			// get all the data to be plot
-			int size = intensityDoubleArray.length;
-			double[][] data = new double[2][size];
-			for (int i = 0; i < size; i++) {
-				data[0][i] = massDoubleArray[i];
-				data[1][i] = intensityDoubleArray[i];
-			}
-	
-	
-			size = 100; 
-			//double[][] fragTableTheo = new double[11][size];
-			//float [][] fragTableTheoCharge = new float [11][size];
-			//double[][] fragTable = new double[11][size];
-		
 
-			// get series names
-			String xyzSerieName = "";
-			String abcSerieName = "";
-			for(int i = 0; i<fragSer.length;i++) { // TODO: en fait les frag series b s'appliquent aussi a b++ etc. donc va falloir faire un tableau de positions au lieu de juste Bposition
-				switch  ( fragSer[i].frag_series.charAt(0)) {
-				case 'a' :  // either a,b or c do:
-				case 'b' : 
-				case 'c' : 
-					if(fragSer[i].frag_series.length()>1) {
-						// then it is either a ++ or a b-H2O and so on...
-					}
-					else
-					{ // it's a 'a/b/c' ion
-						abcSerieName = ""+fragSer[i].frag_series.charAt(0);
-					}
-					break;
-				case 'v' : 
-				case 'w' : 
-				case 'x' : 
-				case 'y' : 
-				
-					if(fragSer[i].frag_series.length()>1) {
-						// then it is either a ++ or a b-H2O and so on...
-					}
-					else
-					{ // it's a 'x/y/z' ion
-						xyzSerieName = ""+fragSer[i].frag_series.charAt(0);
-					}
-					break;
-				case 'z' : 
-					xyzSerieName = ""+fragSer[i].frag_series.charAt(0);
-					break;
-				default :
-					break;
-				}
-			}
-			
-			
-			String peptideSequence = pm.getPeptide().getSequence();
-			
-			int sizeMaxSeries = 0; 
-			for(int i = 0; i<fragSer.length;i++) { // TODO: en fait les frag series b s'appliquent aussi a b++ etc. donc va falloir faire un tableau de positions au lieu de juste Bposition
-				if(fragSer[i].masses.length>sizeMaxSeries)
-					sizeMaxSeries = fragSer[i].masses.length;
 
-			}
+			jTable1 = new DecoratedTable();
 
-			int nbSeries = fragSer.length;
-	
-			int j = 0;
 			
-			String [] titles = new String[3+ fragSer.length  ];
-			titles[0] = "amino acid";
-			titles[1] = abcSerieName + " ion";
-			
-			titles[1+ nbSeries + 1 ] = xyzSerieName + " ion";
-			
-			int i = 2;
-			for(TheoreticalFragmentSeries_AW currentFrag : fragSer) {
-				titles[i] = currentFrag.frag_series;
-				System.out.println("fragSer= " + currentFrag.frag_series);
-				i++;
-			}
-			
-			i = 0;
-		
-			jTable1 = new javax.swing.JTable();
-			
-			final Class[] typesPre = new Class[fragSer.length+3]; // +3 for the row number columns and AA column
-			final boolean [] canEditPre = new boolean[fragSer.length+3];
-			
-			for(int zz = 0; zz<typesPre.length;zz++) {
-				   
-				typesPre[zz] = FragTableCustomRenderer.class;
-				canEditPre[zz] = false;
-				
-		    }
-			
-			DefaultTableModel tableModel = new javax.swing.table.DefaultTableModel(
-	 
-			new Object[][] {
+                        
+                    FragmentationTableModel fragmentationTableModel = new FragmentationTableModel();
+                    fragmentationTableModel.setData(fragMa, fragSer, pm.getPeptide().getSequence());
 
-			},  titles) {
-				Class[] types =  typesPre;
-			  
-				// TODO: les booleans aussi à parametrer
-				boolean[] canEdit = canEditPre;
 
-				public Class getColumnClass(int columnIndex) {
-					return types[columnIndex];
-				}
-
-				public boolean isCellEditable(int rowIndex, int columnIndex) {
-					return canEdit[columnIndex];
-				}
-			};
-
-			RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel);
+			RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(fragmentationTableModel);
 			FragTableCustomRenderer cr = new FragTableCustomRenderer();
-			jTable1.setDefaultRenderer(String.class, cr);  
+			jTable1.setDefaultRenderer(Double.class, cr);  
 			jTable1.setRowSorter(sorter);
-			
-			
-		    // create the Jtable model (content)
-			int col = 0;
-			for ( i = 0; i < sizeMaxSeries ; i++) { // we loop over fragSer
-				Vector v = new Vector(); // table line
-				if(i<peptideSequence.length())
-					v.add(peptideSequence.charAt(i));
-				else
-					v.add("?"); // problem: should be of the right size...need debugging!
-				v.add(i+1); // ion number
-				
-				for(TheoreticalFragmentSeries_AW currentFragSer : fragSer) {
-					if(currentFragSer.masses[i] !=0 ) {
-						v.add((double)Math.round(currentFragSer.masses[i] * 10000) / 10000);
-					} else
-					{ 
-						v.add("");
-					}
-				}
-				v.add(sizeMaxSeries -i); //reverse ion number
 
-				tableModel.addRow(v);
-			}
-			jTable1.setModel(tableModel);
+			jTable1.setModel(fragmentationTableModel);
 			jTable1.setVisible(true);
-			
-			FragTableCustomRenderer renderer =  (FragTableCustomRenderer) new FragTableCustomRenderer();  
-			jTable1.setDefaultRenderer(Object.class , renderer);
-			
-			String [][] matrix = new String[sizeMaxSeries][nbSeries+3];
-		
-			
-			
-			j=0;
-			double roundTol = 0.0001;
-			int nbFound = 0;
-			
-			for ( j = 0; j < fragSer.length ; j++) { // loop through theoFragment series here
-				for(int k = 0; k < fragSer[j].masses.length ;k++) { // loop through masses for each fragment serie
-					for( i = 0 ; i<fragMa.length ; i++) {  // find matching fragMatches with theoFragSeries
-						
-						//fragSer[j].computeCharge();
-		
-					
-						if( (fragMa[i].calculated_moz - roundTol <= ( fragSer[j].masses[k])) && (fragMa[i].calculated_moz + roundTol >=  fragSer[j].masses[k])) {
-							nbFound++;
-							
-							if(fragSer[j].frag_series.toUpperCase().contains("A") || fragSer[j].frag_series.toUpperCase().contains("B") ||fragSer[j].frag_series.toUpperCase().contains("C"))
-							{
-								matrix[k][j+2] = "ABC";
-								renderer.setSelectMatrix(matrix);
-							}
-							else if(fragSer[j].frag_series.toUpperCase().contains("X") || fragSer[j].frag_series.toUpperCase().contains("Y") ||fragSer[j].frag_series.toUpperCase().contains("Z"))
-							{
-								matrix[k][j+2] = "XYZ";
-								renderer.setSelectMatrix(matrix);
-							}
-							else {
-								LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("AW: strange, there is no ABC nor XYZ ions..." + fragSer[j].frag_series);
-							}
-							
-							
-						}
-						else
-						{
-						}
 
-					}
-				}
-			}
-			
 			    
-			jTable1.setModel(tableModel);
+			jTable1.setModel(fragmentationTableModel);
 				
-			renderer.setSelectMatrix(matrix);
+			cr.setSelectMatrix(fragmentationTableModel.getMatrix());
 			
 			JScrollPane fragPane = new JScrollPane(jTable1);
+                        fragPane.setViewportView(jTable1);
+                        
 			fragPanelContainer.removeAll();
 			fragPanelContainer.add(fragPane,BorderLayout.CENTER); //fragmentationTablePanel);
 			
-			//fragPanelContainer.setLayout(new FlowLayout());
-			//fragPane.setMaximumSize(new Dimension(fragSer.length * 100,fragPane.getSize().height));
-		  
-		    fragPane.setSize(new Dimension(fragSer.length * 80/*fragPane.getWidth()*/,fragPane.getHeight()-5)); // -5 to better fit the panel otherwise the bottom is partly hidden.
-		    // next 2 lines for fixed size fragmentation table
-		    //	    fragPane.setMaximumSize(new Dimension(fragSer.length * 80,fragPane.getSize().height-5));
-		    // next 2 lines for full size fragmentation table
-		    //	    fragPane.setPreferredSize(new Dimension(fragSer.length * 80 /*fragPanelContainer.getWidth()*/,fragPanelContainer.getHeight()-5));
-		    fragPane.setMaximumSize(new Dimension(fragPanelContainer.getWidth(),fragPane.getSize().height-5));
-		    fragPane.setPreferredSize(new Dimension(fragPanelContainer.getWidth(),fragPanelContainer.getHeight()-5));
+
 
 	        fragPanelContainer.revalidate();
 	        fragPanelContainer.repaint();
@@ -540,49 +363,246 @@ public class RsetPeptideFragmentationTable {
 	
 		}
 		
-		public class FragTableCustomRenderer extends DefaultTableCellRenderer /*implements TableCellRenderer*/ {
-			int targetRow = 0;
-			int targetCol = 0;
-			String [][] selectMatrix = new String [100][100];
-			
-			public void setTargetCell(int row, int col) {
-				this.targetRow = row;
-				this.targetCol = col;
-				
-			}
-			public void setSelectMatrix(String[][] matx ) {
-				this.selectMatrix = matx; //.clone();
-			}
-			
-			    @Override
-			    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-			        Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			   
-			        // standard font and style:
-			    	Color clr = new Color(0,0,0); // 255,85,85 light red
-		        	component.setForeground(clr);
-		        	component.setFont(component.getFont().deriveFont(Font.PLAIN));
+                
+    public static class FragmentationTableModel  extends AbstractTableModel {
 
-		        	// then overwrites style if necessary:
-			      if(selectMatrix[row][column] != null) {
-				        if ( selectMatrix[row] [column].contains("ABC")) { // highlight the cell if true in selectMatrix
-				            clr = new Color(51,153,255);  //"light blue"
-						    component.setFont(component.getFont().deriveFont(Font.BOLD));
-				        	component.setForeground(clr);
-				        } else if(selectMatrix[row] [column].contains("XYZ")){
-				        	clr = new Color(255,85,85); // 255,85,85 light red
-				        	component.setForeground(clr);
-				        	component.setFont(component.getFont().deriveFont(Font.BOLD));
-				        } else
-				        {
-				        	component.setFont(component.getFont().deriveFont(Font.BOLD));
-				        }
-			      }
-			      
-				  return component;
-				    
-			    }
-			}
+        private TheoreticalFragmentSeries_AW[] m_fragSer;
+        private FragmentMatch_AW [] m_fragMa;
+        
+        private String m_peptideSequence;
+        private int m_sizeMaxSeries;
+
+        private  String[][] m_matrix;
+        
+        private String[] m_columnNames;
+        
+        public FragmentationTableModel() {
+
+        }
+        
+        public void setData(FragmentMatch_AW [] fragMa, TheoreticalFragmentSeries_AW[] fragSer, String peptideSequence) {
+            m_fragMa = fragMa;
+            m_fragSer = fragSer;
+            m_peptideSequence = peptideSequence;
+            
+            int sizeMaxSeries = 0;
+            for (int i = 0; i < fragSer.length; i++) { // TODO: en fait les frag series b s'appliquent aussi a b++ etc. donc va falloir faire un tableau de positions au lieu de juste Bposition
+                if (fragSer[i].masses.length > sizeMaxSeries) {
+                    sizeMaxSeries = fragSer[i].masses.length;
+                }
+
+            }
+            
+            m_sizeMaxSeries = sizeMaxSeries;
+         
+            
+            // get series names
+            String xyzSerieName = "";
+            String abcSerieName = "";
+            for (int i = 0; i < fragSer.length; i++) { // TODO: en fait les frag series b s'appliquent aussi a b++ etc. donc va falloir faire un tableau de positions au lieu de juste Bposition
+                switch (fragSer[i].frag_series.charAt(0)) {
+                    case 'a':  // either a,b or c do:
+                    case 'b':
+                    case 'c':
+                        if (fragSer[i].frag_series.length() > 1) {
+                            // then it is either a ++ or a b-H2O and so on...
+                        } else { // it's a 'a/b/c' ion
+                            abcSerieName = "" + fragSer[i].frag_series.charAt(0);
+                        }
+                        break;
+                    case 'v':
+                    case 'w':
+                    case 'x':
+                    case 'y':
+
+                        if (fragSer[i].frag_series.length() > 1) {
+                            // then it is either a ++ or a b-H2O and so on...
+                        } else { // it's a 'x/y/z' ion
+                            xyzSerieName = "" + fragSer[i].frag_series.charAt(0);
+                        }
+                        break;
+                    case 'z':
+                        xyzSerieName = "" + fragSer[i].frag_series.charAt(0);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            
+            m_columnNames = new String[fragSer.length+3];
+            int i = 0;
+            m_columnNames[i++] = "amino acid";
+            m_columnNames[i++] = abcSerieName + " ion";
+            
+            for (TheoreticalFragmentSeries_AW currentFrag : fragSer) {
+                m_columnNames[i++] = currentFrag.frag_series;
+
+            }
+            
+            m_columnNames[i] = xyzSerieName + " ion";
+            
+            
+            m_matrix = new String[sizeMaxSeries][fragSer.length + 3];
+
+            double roundTol = 0.0001;
+            int nbFound = 0;
+
+            for (int j = 0; j < fragSer.length; j++) { // loop through theoFragment series here
+                for (int k = 0; k < fragSer[j].masses.length; k++) { // loop through masses for each fragment serie
+                    for (i = 0; i < fragMa.length; i++) {  // find matching fragMatches with theoFragSeries
+
+                        //fragSer[j].computeCharge();
+
+
+                        if ((fragMa[i].calculated_moz - roundTol <= (fragSer[j].masses[k])) && (fragMa[i].calculated_moz + roundTol >= fragSer[j].masses[k])) {
+                            nbFound++;
+
+                            if (fragSer[j].frag_series.toUpperCase().contains("A") || fragSer[j].frag_series.toUpperCase().contains("B") || fragSer[j].frag_series.toUpperCase().contains("C")) {
+                                m_matrix[k][j + 2] = "ABC";
+                            } else if (fragSer[j].frag_series.toUpperCase().contains("X") || fragSer[j].frag_series.toUpperCase().contains("Y") || fragSer[j].frag_series.toUpperCase().contains("Z")) {
+                                m_matrix[k][j + 2] = "XYZ";
+                            } else {
+                                LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("AW: strange, there is no ABC nor XYZ ions..." + fragSer[j].frag_series);
+                            }
+
+
+                        } else {
+                        }
+
+                    }
+                }
+            }
+
+        }
+        
+        public String[][] getMatrix() {
+            return m_matrix;
+        }
+        
+        @Override
+        public String getColumnName(int col) {
+            return m_columnNames[col];
+        }
+
+        @Override
+        public int getRowCount() {
+            return m_sizeMaxSeries;
+        }
+
+        @Override
+        public int getColumnCount() {
+            return m_columnNames.length;
+        }
+
+        @Override
+        public Class getColumnClass(int columnIndex) {
+            if (columnIndex == 0) {
+                return String.class;
+            }
+            if (columnIndex == 1) {
+                return Integer.class;
+            }
+            if (columnIndex == m_columnNames.length-1) {
+                return Integer.class;
+            }
+            
+            return Double.class;
+            
+            
+        }
+        
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            if (columnIndex == 0) {
+
+                if (rowIndex < m_peptideSequence.length()) {
+                    return m_peptideSequence.charAt(rowIndex);
+                } else {
+                    return "?"; // problem: should be of the right size...need debugging!
+                }
+            }
+            
+            if (columnIndex == 1) {
+                    return rowIndex+1;
+            }
+            
+            if (columnIndex == m_columnNames.length-1) {
+                   return m_sizeMaxSeries-rowIndex; 
+            }
+                    
+            TheoreticalFragmentSeries_AW currentFragSer = m_fragSer[columnIndex-2];
+
+            if (currentFragSer.masses[rowIndex] !=0 ) {
+                return (double)Math.round(currentFragSer.masses[rowIndex] * 10000) / 10000;
+	    } else { 
+                return null;
+            }
+            
+        }
+        
+    }
+                
+    public static class FragTableCustomRenderer extends org.jdesktop.swingx.renderer.DefaultTableRenderer {
+
+        private String[][] m_selectMatrix = new String[100][100];
+
+        private Font m_fontPlain = null;
+        private Font m_fontBold = null;
+        
+        private final static Color LIGHT_BLUE_COLOR = new Color(51, 153, 255);
+        private final static Color LIGHT_RED_COLOR = new Color(255, 85, 85);
+        
+        private final static Color EXTRA_LIGHT_BLUE_COLOR = new Color(175, 255, 255);
+        private final static Color EXTRA_LIGHT_RED_COLOR = new Color(255, 230, 230);
+        
+        public void setSelectMatrix(String[][] matx) {
+            m_selectMatrix = matx;
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            // prepare needed fonts
+            if (m_fontPlain == null) {
+                m_fontPlain = component.getFont().deriveFont(Font.PLAIN);
+                m_fontBold = m_fontPlain.deriveFont(Font.BOLD);
+            }
+
+            // select font
+            if (m_selectMatrix[row][column] != null) {
+                component.setFont(m_fontBold);
+            } else {
+                component.setFont(m_fontPlain);
+            }
+            
+            // select color
+            Color foregroundColor = null;
+
+            if (m_selectMatrix[row][column] != null) {
+
+                if (m_selectMatrix[row][column].contains("ABC")) { // highlight the cell if true in selectMatrix
+                    foregroundColor = (isSelected) ? EXTRA_LIGHT_BLUE_COLOR : LIGHT_BLUE_COLOR;
+                } else if (m_selectMatrix[row][column].contains("XYZ")) {
+                    foregroundColor = (isSelected) ? EXTRA_LIGHT_RED_COLOR : LIGHT_RED_COLOR;
+                } else {
+                    foregroundColor = (isSelected) ? Color.white : Color.black;
+                }
+            } else {
+                // standard color:
+                foregroundColor = (isSelected) ? Color.white : Color.black;
+            }
+            
+            component.setForeground(foregroundColor);
+
+            return component;
+
+        }
+        
+        
+        
+    }
 		
 }
 

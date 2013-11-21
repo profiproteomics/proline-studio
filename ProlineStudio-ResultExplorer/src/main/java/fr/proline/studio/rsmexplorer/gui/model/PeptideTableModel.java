@@ -3,11 +3,11 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.filter.*;
-import fr.proline.studio.utils.DataFormat;
 import java.util.ArrayList;
 
 
@@ -20,15 +20,17 @@ public class PeptideTableModel extends FilterTableModel {
     public static final int COLTYPE_PEPTIDE_NAME = 0;
     public static final int COLTYPE_PEPTIDE_SCORE = 1;
     public static final int COLTYPE_PROTEIN_SETS_MATCHES = 2;
-    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 3;
-    public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 4;
-    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 5;
-    public static final int COLTYPE_PEPTIDE_CHARGE = 6;
-    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 7;
-    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 8;
-    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 9;
-    public static final int COLTYPE_PEPTIDE_PTM = 10;
-    private static final String[] m_columnNames = {"Peptide", "Score", "Protein S. Matches", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
+    public static final int COLTYPE_PEPTIDE_START = 3;
+    public static final int COLTYPE_PEPTIDE_STOP = 4;
+    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 5;
+    public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 6;
+    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 7;
+    public static final int COLTYPE_PEPTIDE_CHARGE = 8;
+    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 9;
+    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 10;
+    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 11;
+    public static final int COLTYPE_PEPTIDE_PTM = 12;
+    private static final String[] m_columnNames = {"Peptide", "Score", "Protein S. Matches", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
     
     private PeptideInstance[] m_peptideInstances = null;
 
@@ -70,6 +72,8 @@ public class PeptideTableModel extends FilterTableModel {
                 return Double.class;
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
+            case COLTYPE_PEPTIDE_START:
+            case COLTYPE_PEPTIDE_STOP:    
                 return Integer.class;
         }
         return null; // should not happen
@@ -166,6 +170,32 @@ public class PeptideTableModel extends FilterTableModel {
                 }
                 return Double.valueOf(peptideMatch.getDeltaMoz());
             }
+            case COLTYPE_PEPTIDE_START: {
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    return null; // should never happen   
+                }
+                Peptide p = peptideMatch.getPeptide();
+                SequenceMatch sequenceMatch = p.getTransientData().getSequenceMatch();
+                if (sequenceMatch == null) {
+                    return null;
+                }
+                int start = sequenceMatch.getId().getStart();
+                return Integer.valueOf(start);
+            }
+            case COLTYPE_PEPTIDE_STOP: {
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    return null; // should never happen   
+                }
+                Peptide p = peptideMatch.getPeptide();
+                SequenceMatch sequenceMatch = p.getTransientData().getSequenceMatch();
+                if (sequenceMatch == null) {
+                    return null;
+                }
+                int stop = sequenceMatch.getId().getStop();
+                return Integer.valueOf(stop);
+            }
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch != null) {
@@ -241,6 +271,8 @@ public class PeptideTableModel extends FilterTableModel {
             m_filters[COLTYPE_PEPTIDE_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE));
 
             m_filters[COLTYPE_PROTEIN_SETS_MATCHES] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SETS_MATCHES));
+            m_filters[COLTYPE_PEPTIDE_START] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_START));
+            m_filters[COLTYPE_PEPTIDE_STOP] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_STOP));  
             m_filters[COLTYPE_PEPTIDE_CALCULATED_MASS] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_CALCULATED_MASS));
             m_filters[COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ));
             m_filters[COLTYPE_PEPTIDE_DELTA_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_DELTA_MOZ));
@@ -283,7 +315,9 @@ public class PeptideTableModel extends FilterTableModel {
                 return ((DoubleFilter) filter).filter(((Number) data).doubleValue());
             }
             case COLTYPE_PEPTIDE_CHARGE: 
-            case COLTYPE_PEPTIDE_MISSED_CLIVAGE: {
+            case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
+            case COLTYPE_PEPTIDE_START:
+            case COLTYPE_PEPTIDE_STOP: {
             
                 return ((IntegerFilter) filter).filter((Integer) data);
             }

@@ -22,17 +22,18 @@ public class PeptideMatchTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDE_NAME = 0;
     public static final int COLTYPE_PEPTIDE_SCORE = 1;
     public static final int COLTYPE_PEPTIDE_MSQUERY = 2;
-    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 3;
-    public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 4;
-    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 5;
-    public static final int COLTYPE_PEPTIDE_CHARGE = 6;
-    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 7;
-    //public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 8;  //JPM.TODO : retention time (=elution time) is for the moment in PeptideInstance
-    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
-    public static final int COLTYPE_PEPTIDE_PTM = 9;
-    public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 10;
-    private static final String[] m_columnNamesRset = {"Peptide", "Score", "MsQuery", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM"};
-    private static final String[] m_columnNamesRsm =  {"Peptide", "Score", "MsQuery", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM", "Protein Sets"};
+    public static final int COLTYPE_PEPTIDE_RANK = 3;
+    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 4;
+    public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 5;
+    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 6;
+    public static final int COLTYPE_PEPTIDE_CHARGE = 7;
+    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 8;
+    //public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 9;  //JPM.TODO : retention time (=elution time) is for the moment in PeptideInstance
+    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 9;
+    public static final int COLTYPE_PEPTIDE_PTM = 10;
+    public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 11;
+    private static final String[] m_columnNamesRset = {"Peptide", "Score", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM"};
+    private static final String[] m_columnNamesRsm =  {"Peptide", "Score", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM", "Protein Sets"};
     
     private DPeptideMatch[] m_peptideMatches = null; // some of the DPeptideMatch can be null : they are loaded in sub task
     private long[] m_peptideMatchesId = null;
@@ -177,6 +178,9 @@ public class PeptideMatchTableModel extends LazyTableModel {
                 return lazyData;
 
    
+            }
+            case COLTYPE_PEPTIDE_RANK: {
+                lazyData.setData(peptideMatch.getRank());
             }
 
             case COLTYPE_PEPTIDE_CHARGE: {

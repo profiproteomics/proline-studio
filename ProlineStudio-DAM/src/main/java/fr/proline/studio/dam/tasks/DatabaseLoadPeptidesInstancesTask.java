@@ -129,7 +129,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
             ArrayList<PeptideInstance> peptideInstanceList = new ArrayList<>();
 
-            Query peptideInstancesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pi.resultSummary.id=:rsmId AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id ORDER BY pm.score DESC");
+            Query peptideInstancesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pi.resultSummary.id=:rsmId AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id ORDER BY pm.score DESC");
             peptideInstancesQuery.setParameter("rsmId", m_rsm.getId());
 
             List l = peptideInstancesQuery.getResultList();
@@ -139,15 +139,16 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
                 PeptideInstance pi = (PeptideInstance) resCur[0];
                 
                 Long pmId = (Long) resCur[1];
-                Integer pmCharge = (Integer) resCur[2];
-                Float pmDeltaMoz = (Float) resCur[3];
-                Double pmExperimentalMoz = (Double) resCur[4];
-                Integer pmMissedCleavage = (Integer) resCur[5];
-                Float pmScore = (Float) resCur[6];
-                Long pmResultSetId = (Long) resCur[7];
-                DPeptideMatch pm = new DPeptideMatch(pmId, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId);
+                Integer pmRank = (Integer) resCur[2];
+                Integer pmCharge = (Integer) resCur[3];
+                Float pmDeltaMoz = (Float) resCur[4];
+                Double pmExperimentalMoz = (Double) resCur[5];
+                Integer pmMissedCleavage = (Integer) resCur[6];
+                Float pmScore = (Float) resCur[7];
+                Long pmResultSetId = (Long) resCur[8];
+                DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId);
                 
-                Peptide p = (Peptide) resCur[8];
+                Peptide p = (Peptide) resCur[9];
 
 
                 pi.getTransientData().setBestPeptideMatch(pm);
@@ -255,7 +256,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         //JPM.TODO : speed up the peptidesQuery
         
         // Retrieve the list of PeptideInstance, PeptideMatch, Peptide, MSQuery, Spectrum of a PeptideSet
-        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p, sm, ms.id, ms.initialId, sp  FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem ps_to_pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.SequenceMatch as sm, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ORDER BY pm.score DESC");
+        Query peptidesQuery = entityManagerMSI.createQuery("SELECT pi, pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, p, sm, ms.id, ms.initialId, sp  FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem ps_to_pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.SequenceMatch as sm, fr.proline.core.orm.msi.MsQuery ms, fr.proline.core.orm.msi.Spectrum sp WHERE ps_to_pi.peptideSet.id=:peptideSetId AND ps_to_pi.peptideInstance.id=pi.id AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId=p.id AND pm.msQuery=ms AND ms.spectrum=sp ORDER BY pm.score DESC");
 
         peptidesQuery.setParameter("peptideSetId", peptideSet.getId());
         peptidesQuery.setParameter("proteinMatchId", proteinMatch.getId());
@@ -268,21 +269,22 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             PeptideInstance pi = (PeptideInstance) resCur[0];
             
             Long pmId = (Long) resCur[1];
-            Integer pmCharge = (Integer) resCur[2];
-            Float pmDeltaMoz = (Float) resCur[3];
-            Double pmExperimentalMoz = (Double) resCur[4];
-            Integer pmMissedCleavage = (Integer) resCur[5];
-            Float pmScore = (Float) resCur[6];
-            Long pmResultSetId = (Long) resCur[7];
-            DPeptideMatch pm = new DPeptideMatch(pmId, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId);
+            Integer pmRank = (Integer) resCur[2];
+            Integer pmCharge = (Integer) resCur[3];
+            Float pmDeltaMoz = (Float) resCur[4];
+            Double pmExperimentalMoz = (Double) resCur[5];
+            Integer pmMissedCleavage = (Integer) resCur[6];
+            Float pmScore = (Float) resCur[7];
+            Long pmResultSetId = (Long) resCur[8];
+            DPeptideMatch pm = new DPeptideMatch(pmId, pmRank, pmCharge, pmDeltaMoz, pmExperimentalMoz, pmMissedCleavage, pmScore, pmResultSetId);
 
-            Peptide p = (Peptide) resCur[8];
+            Peptide p = (Peptide) resCur[9];
 
-            SequenceMatch sm = (SequenceMatch) resCur[9];
-            Long msqId = (Long) resCur[10];
-            Integer msqInitialId = (Integer) resCur[11];
+            SequenceMatch sm = (SequenceMatch) resCur[10];
+            Long msqId = (Long) resCur[11];
+            Integer msqInitialId = (Integer) resCur[12];
             
-            Spectrum sp = (Spectrum) resCur[12];
+            Spectrum sp = (Spectrum) resCur[13];
             
             DMsQuery msq = new DMsQuery(pmId, msqId, msqInitialId, sp.getPrecursorIntensity());
 

@@ -12,11 +12,12 @@ import java.util.ArrayList;
 public class ProteinTableModel extends FilterTableModel {
 
     public static final int COLTYPE_PROTEIN_NAME           = 0;
-    public static final int COLTYPE_SAMESET_SUBSET         = 1;
-    public static final int COLTYPE_PROTEIN_SCORE          = 2;
-    public static final int COLTYPE_PROTEIN_PEPTIDES_COUNT = 3;
-    public static final int COLTYPE_PROTEIN_MASS           = 4;
-    private static final String[] m_columnNames = {"Protein", "Same Set", "Score", "Peptides", "Mass"};
+    public static final int COLTYPE_PROTEIN_DESCRIPTION    = 1;
+    public static final int COLTYPE_SAMESET_SUBSET         = 2;
+    public static final int COLTYPE_PROTEIN_SCORE          = 3;
+    public static final int COLTYPE_PROTEIN_PEPTIDES_COUNT = 4;
+    public static final int COLTYPE_PROTEIN_MASS           = 5;
+    private static final String[] m_columnNames = {"Protein", "Description","Same Set", "Score", "Peptides", "Mass"};
     private DProteinMatch[] m_sameSetMatches = null;
     private DProteinMatch[] m_subSetMatches = null;
     private Long m_rsmId = null;
@@ -59,6 +60,7 @@ public class ProteinTableModel extends FilterTableModel {
     public Class getColumnClass(int col) {
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
+            case COLTYPE_PROTEIN_DESCRIPTION:
                 return String.class;
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return Integer.class;
@@ -93,6 +95,8 @@ public class ProteinTableModel extends FilterTableModel {
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
                 return proteinMatch.getAccession();
+            case COLTYPE_PROTEIN_DESCRIPTION:
+                return proteinMatch.getDescription();
             case COLTYPE_SAMESET_SUBSET:
                 if (row<m_sameSetMatches.length) {
                     return Boolean.TRUE;
@@ -202,6 +206,9 @@ public class ProteinTableModel extends FilterTableModel {
             case COLTYPE_PROTEIN_NAME: {
                 return ((StringFilter) filter).filter((String)data);
             }
+            case COLTYPE_PROTEIN_DESCRIPTION: {
+                return ((StringFilter) filter).filter((String)data);
+            }
             case COLTYPE_PROTEIN_SCORE:
             case COLTYPE_PROTEIN_MASS: {
                 return ((DoubleFilter) filter).filter((Float)data);
@@ -222,6 +229,7 @@ public class ProteinTableModel extends FilterTableModel {
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
             m_filters[COLTYPE_PROTEIN_NAME] = new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME));
+            m_filters[COLTYPE_PROTEIN_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_PROTEIN_DESCRIPTION));
             m_filters[COLTYPE_SAMESET_SUBSET] = null; //JPM.TODO
             m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
             m_filters[COLTYPE_PROTEIN_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PROTEIN_PEPTIDES_COUNT));

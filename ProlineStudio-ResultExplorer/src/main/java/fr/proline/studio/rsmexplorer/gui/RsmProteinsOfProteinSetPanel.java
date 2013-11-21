@@ -22,10 +22,7 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 
@@ -105,13 +102,18 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         accColumn.setCellRenderer(renderer);
         m_proteinTable.addMouseListener(renderer);
         
+        
         c.gridx = 0;
         c.gridy = 0;
+        internalPanel.add(new JLabel("Typical Protein Description:"), c);
+        
+        c.gridx++;
         c.weightx = 1;
         internalPanel.add(m_proteinNameTextField, c);
         
-
+        c.gridx = 0;
         c.gridy++;
+        c.gridwidth = 2;
         c.weighty = 1;
         internalPanel.add(m_scrollPane, c);
         

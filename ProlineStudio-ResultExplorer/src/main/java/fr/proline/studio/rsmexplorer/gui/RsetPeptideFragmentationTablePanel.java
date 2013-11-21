@@ -2,29 +2,13 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 
-import fr.proline.core.orm.msi.MsQuery;
-import fr.proline.core.orm.msi.PeptideMatch;
+//import fr.proline.core.orm.msi.MsQuery;
+//import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.Marker;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.title.TextTitle;
-import org.jfree.data.general.DatasetUtilities;
-import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.slf4j.LoggerFactory;
+//import org.jfree.data.xy.DefaultXYDataset;
 
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -33,34 +17,9 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.geom.Rectangle2D;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.RowSorter;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
-
-import org.jfree.chart.annotations.XYAnnotation;
-import org.jfree.chart.annotations.XYPointerAnnotation;
-import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.CrosshairState;
-import org.jfree.chart.plot.PlotRenderingInfo;
-import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.chart.renderer.xy.XYItemRendererState;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.RectangleAnchor;
-import org.jfree.ui.TextAnchor;
 
 
 /**
@@ -72,9 +31,14 @@ import org.jfree.ui.TextAnchor;
 public class RsetPeptideFragmentationTablePanel extends HourglassPanel implements DataBoxPanelInterface {
 
     
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private AbstractDataBox m_dataBox;
 
-	private DefaultXYDataset m_dataSet;
+//	private DefaultXYDataset m_dataSet;
 	//private JFreeChart m_chart;
 
 	private DPeptideMatch m_previousPeptideMatch = null;
@@ -116,8 +80,16 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 
 	private void constructFragmentationTable(DPeptideMatch pm) {
 
-		final String SERIES_NAME = "spectrumData";
+	//	final String SERIES_NAME = "spectrumData";
 		if (pm == null) {
+//			JLabel lblInfo = new JLabel("Spectrum match has not been enabled for this file. This has to be done when adding a new search result by checking the Save Spectrum Matches");
+//			lblInfo.setPreferredSize(this.fragmentationTable.fragPanelContainer.getSize());
+//			lblInfo.setSize(this.fragmentationTable.fragPanelContainer.getSize());
+//			this.fragmentationTable.fragPanelContainer.add(lblInfo);
+//			this.fragmentationTable.fragPanelContainer.setToolTipText("(pm null): Spectrum match has not been enabled for this file. This has to be done when adding a new search result by checking the Save Spectrum Matches");
+//			this.setVisible(true);
+//			lblInfo.setVisible(true);
+//			this.fragmentationTable.fragPanelContainer.repaint();
 			//dataSet.removeSeries(SERIES_NAME);
 			//removeAnnotations();
 			if(fragmentationTable != null){
@@ -131,7 +103,7 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 	        
 		//MsQuery msQuery = pm.getTransientData().getIsMsQuerySet() ? pm.getMsQuery() : null;
 		if (msQuery == null) {
-		//	dataSet.removeSeries(SERIES_NAME);
+			//	dataSet.removeSeries(SERIES_NAME);
 			if(fragmentationTable != null){
 			//	fragmentationTable.fragmentationTablePanel.removeAll();
 			//	fragmentationTable = null;
@@ -165,8 +137,8 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
     	   c.repaint();
        }
       
-       this.fragmentationTable.fragPanelContainer.revalidate();
-       this.fragmentationTable.fragPanelContainer.repaint();
+       this.fragmentationTable.m_fragPanelContainer.revalidate();
+       this.fragmentationTable.m_fragPanelContainer.repaint();
        this.revalidate();
        this.repaint();
 	}

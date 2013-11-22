@@ -774,8 +774,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 ChangeTypicalProteinAction changeTypicalProteinAction = new ChangeTypicalProteinAction();
                 mainActions.add(changeTypicalProteinAction);
                 
-                CompareWithSCAction computeSCAction = new CompareWithSCAction();
-                mainActions.add(computeSCAction); 
+                //CompareWithSCAction computeSCAction = new CompareWithSCAction(); //JPM.BETA : removed Spectral count for beta
+                //mainActions.add(computeSCAction); 
                        
 //                ExportRSMAction exportRSMAction = new ExportRSMAction();
 //                mainActions.add(exportRSMAction);                        

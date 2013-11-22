@@ -105,7 +105,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         
         c.gridx = 0;
         c.gridy = 0;
-        internalPanel.add(new JLabel("Typical Protein Description:"), c);
+        internalPanel.add(new JLabel("Typical Protein:"), c);
         
         c.gridx++;
         c.weightx = 1;

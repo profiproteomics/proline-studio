@@ -6,7 +6,6 @@ import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -107,7 +106,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
             
             request.setParameters(params);
 
-            HttpResponse response = postRequest("dps.msi/import_result_files/"+request.getMethod()+getIdString(), request);
+            HttpResponse response = postRequest("dps.msi/import_result_files/"+request.getMethod()+getIdString()+"&ws_version=0.3", request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -171,7 +170,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("dps.msi/import_result_files/"+request.getMethod()+getIdString(), request);
+            HttpResponse response = postRequest("dps.msi/import_result_files/"+request.getMethod()+getIdString()+"&ws_version=0.3", request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 

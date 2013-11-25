@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.actions;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
+import fr.proline.studio.dpm.task.CertifyIdentificationTask;
 import fr.proline.studio.dpm.task.ImportIdentificationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ImportIdentificationDialog;
@@ -39,7 +40,11 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
         // only RSMAllImportedNode selected for this action
         final RSMAllImportedNode allImportedNode = (RSMAllImportedNode) selectedNodes[0];
         
-        ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        RSMProjectNode projectNode = (RSMProjectNode) allImportedNode.getParent();
+        Project project =  projectNode.getProject();
+        
+        
+        ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow(), project.getId());
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         
@@ -49,8 +54,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
             File[] filePaths = dialog.getFilePaths();
             HashMap<String, String> parserArguments = dialog.getParserArguments();
             
-            RSMProjectNode projectNode = (RSMProjectNode) allImportedNode.getParent();
-            Project project =  projectNode.getProject();
+
             
             String parserId = dialog.getParserId();
             String decoyRegex = dialog.getDecoyRegex();
@@ -101,6 +105,8 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
                     canonicalPath = f.getAbsolutePath(); // should not happen
                 }
                 Long[] resultSetId = new Long[1];
+                
+
                 ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches,  projectId, resultSetId);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
             }

@@ -96,6 +96,8 @@ public class ProgressBarDialog extends DefaultDialog {
     public void setVisible(boolean v) {
 
         m_progressBar.setValue(0);
+        m_progressBar.setIndeterminate(true);
+        m_progressBar.setStringPainted(false);
         
         if (v) {
             m_progressBarTimer = new Timer(500, new ActionListener() {
@@ -111,6 +113,10 @@ public class ProgressBarDialog extends DefaultDialog {
                     }
 
                     int percentage = m_progressInterface.getLoadingPercentage();
+                    if (percentage>0 && (m_progressBar.isIndeterminate())) {
+                        m_progressBar.setIndeterminate(false);
+                        m_progressBar.setStringPainted(true);
+                    }
                     m_progressBar.setValue(percentage);
                 }
             });

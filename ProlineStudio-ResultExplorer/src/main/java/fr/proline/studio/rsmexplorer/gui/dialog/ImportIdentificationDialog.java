@@ -3,9 +3,14 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.task.AbstractServiceCallback;
+import fr.proline.studio.dpm.task.CertifyIdentificationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.parameter.*;
+import fr.proline.studio.progress.ProgressBarDialog;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.util.system.OSInfo;
 import fr.proline.util.system.OSType;
@@ -26,6 +31,7 @@ import java.util.prefs.Preferences;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openide.util.NbPreferences;
+import org.openide.windows.WindowManager;
 
 /**
  *
@@ -43,7 +49,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private final static String[] PARSER_NAMES = {"Mascot", "Omssa"};
     private final static String[] FILE_EXTENSIONS = {"dat", "omx"};
     private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Omssa Identification Result"};
-    private final static String[] PARSER_IDS = { "mascot.dat", "omssa.omx" };
+    private final static String[] PARSER_IDS = { "MascotMSParser", "OmssaMSParser" };
     
     
     private final static String[] DECOY_VALUES = {null, "No Decoy", "Software Engine Decoy", "Concataned Decoy"};
@@ -77,13 +83,15 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
     private File m_defaultDirectory = null;
     
-
-    public static ImportIdentificationDialog getDialog(Window parent) {
+    private long m_projectId;
+    
+    public static ImportIdentificationDialog getDialog(Window parent, long projectId) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new ImportIdentificationDialog(parent);
         }
 
         m_singletonDialog.reinitialize();
+        m_singletonDialog.m_projectId = projectId;
 
         return m_singletonDialog;
     }
@@ -757,9 +765,89 @@ public class ImportIdentificationDialog extends DefaultDialog {
             writeRegexArray(regexArrayList);
         }
 
+        
+        // Certify Import
+        if (!certifyImport()) {
+            return false;
+        }
+        
         return true;
 
     }
+
+    public boolean certifyImport() {
+
+        // retrieve parameters
+        File[] filePaths = getFilePaths();
+        HashMap<String, String> parserArguments = getParserArguments();
+
+        String parserId = getParserId();
+
+
+        int nbFiles = filePaths.length;
+        String[] canonicalPathArray = new String[nbFiles];
+        for (int i = 0; i < nbFiles; i++) {
+            File f = filePaths[i];
+
+            // use canonicalPath when it is possible to be sure to have an unique path
+            String canonicalPath;
+            try {
+                canonicalPath = f.getCanonicalPath();
+            } catch (IOException ioe) {
+                canonicalPath = f.getAbsolutePath(); // should not happen
+            }
+            canonicalPathArray[i] = canonicalPath;
+        }
+
+        final CertifyIdentificationProgress progressInterface = new CertifyIdentificationProgress();
+        
+        
+        AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success) {
+                
+                progressInterface.setLoaded();
+                
+                if (success) {
+                    //JPM.TODO 
+                    //ImportSearchResultAsRsetAction.fireListener(_project.getId());
+                    //createDataset(identificationNode, _project, _parentDataset, _datasetName, _resultSetId[0], getTaskInfo());
+                } else {
+                    //JPM.TODO
+                }
+            }
+        };
+
+
+
+
+
+        String[] result = new String[1];
+        CertifyIdentificationTask task = new CertifyIdentificationTask(callback, parserId, parserArguments, canonicalPathArray, m_projectId, result);
+        AccessServiceThread.getAccessServiceThread().addTask(task);
+
+        
+        ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), progressInterface, "Pre-Import", "Check Result Files to Import. Please Wait.");
+        dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        dialog.setButtonVisible(ImportIdentificationDialog.BUTTON_CANCEL, false);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+        
+
+        if (result[0] == null) {
+            return true;
+        }
+
+        return false;
+
+    }
+    
 
     @Override
     protected boolean cancelCalled() {
@@ -1146,4 +1234,26 @@ public class ImportIdentificationDialog extends DefaultDialog {
             return m_regexArrayList;
         }
     }
+    
+    
+    public class CertifyIdentificationProgress implements ProgressInterface {
+
+        private boolean m_isLoaded = false;
+
+        @Override
+        public boolean isLoaded() {
+            return m_isLoaded;
+        }
+
+        @Override
+        public int getLoadingPercentage() {
+            return 0; // progress bar displayed as a waiting bar
+        }
+
+        public void setLoaded() {
+            m_isLoaded = true;
+        }
+    };
+        
+    
 }

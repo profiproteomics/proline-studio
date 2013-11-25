@@ -19,6 +19,7 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dpm.task.CertifyIdentificationTask;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +45,19 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
         // only one node selected for this action
         final RSMNode n = selectedNodes[0];
         
-        ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        // retrieve project id
+        long projectId = 0;
+        if (n.getType() == RSMNode.NodeTypes.PROJECT) {
+            RSMProjectNode projectNode = (RSMProjectNode) n;
+            projectId = projectNode.getProject().getId();
+        } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
+            RSMDataSetNode dataSetNode = (RSMDataSetNode) n;
+            projectId = dataSetNode.getDataset().getProject().getId();
+
+        }
+
+        
+        ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow(), projectId);
         dialog.setLocation(x, y);
         dialog.setVisible(true);
 
@@ -135,6 +148,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                 } catch (IOException ioe) {
                     canonicalPath = f.getAbsolutePath(); // should not happen
                 }
+                
                 ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches, project.getId(), _resultSetId);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
                 

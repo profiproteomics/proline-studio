@@ -777,8 +777,11 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 //CompareWithSCAction computeSCAction = new CompareWithSCAction(); //JPM.BETA : removed Spectral count for beta
                 //mainActions.add(computeSCAction); 
                        
-//                ExportRSMAction exportRSMAction = new ExportRSMAction();
-//                mainActions.add(exportRSMAction);                        
+                
+                mainActions.add(null);  // separator
+                
+                ExportRSMAction exportRSMAction = new ExportRSMAction();
+                mainActions.add(exportRSMAction);                        
                 
                 mainActions.add(null);  // separator
 

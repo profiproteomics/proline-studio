@@ -82,16 +82,13 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
 
     private File m_defaultDirectory = null;
-    
-    private long m_projectId;
-    
-    public static ImportIdentificationDialog getDialog(Window parent, long projectId) {
+
+    public static ImportIdentificationDialog getDialog(Window parent/*, long projectId*/) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new ImportIdentificationDialog(parent);
         }
 
         m_singletonDialog.reinitialize();
-        m_singletonDialog.m_projectId = projectId;
 
         return m_singletonDialog;
     }
@@ -765,88 +762,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
             writeRegexArray(regexArrayList);
         }
 
-        
-        // Certify Import
-        if (!certifyImport()) {
-            return false;
-        }
-        
         return true;
 
     }
 
-    public boolean certifyImport() {
-
-        // retrieve parameters
-        File[] filePaths = getFilePaths();
-        HashMap<String, String> parserArguments = getParserArguments();
-
-        String parserId = getParserId();
-
-
-        int nbFiles = filePaths.length;
-        String[] canonicalPathArray = new String[nbFiles];
-        for (int i = 0; i < nbFiles; i++) {
-            File f = filePaths[i];
-
-            // use canonicalPath when it is possible to be sure to have an unique path
-            String canonicalPath;
-            try {
-                canonicalPath = f.getCanonicalPath();
-            } catch (IOException ioe) {
-                canonicalPath = f.getAbsolutePath(); // should not happen
-            }
-            canonicalPathArray[i] = canonicalPath;
-        }
-
-        final CertifyIdentificationProgress progressInterface = new CertifyIdentificationProgress();
-        
-        
-        AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success) {
-                
-                progressInterface.setLoaded();
-                
-                if (success) {
-                    //JPM.TODO 
-                    //ImportSearchResultAsRsetAction.fireListener(_project.getId());
-                    //createDataset(identificationNode, _project, _parentDataset, _datasetName, _resultSetId[0], getTaskInfo());
-                } else {
-                    //JPM.TODO
-                }
-            }
-        };
-
-
-
-
-
-        String[] result = new String[1];
-        CertifyIdentificationTask task = new CertifyIdentificationTask(callback, parserId, parserArguments, canonicalPathArray, m_projectId, result);
-        AccessServiceThread.getAccessServiceThread().addTask(task);
-
-        
-        ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), progressInterface, "Pre-Import", "Check Result Files to Import. Please Wait.");
-        dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        dialog.setButtonVisible(ImportIdentificationDialog.BUTTON_CANCEL, false);
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
-        
-
-        if (result[0] == null) {
-            return true;
-        }
-
-        return false;
-
-    }
     
 
     @Override

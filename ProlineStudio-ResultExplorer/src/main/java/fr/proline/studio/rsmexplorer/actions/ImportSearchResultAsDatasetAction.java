@@ -57,7 +57,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
         }
 
         
-        ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow(), projectId);
+        ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);
 
@@ -65,7 +65,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             
             // retrieve parameters
             File[] filePaths = dialog.getFilePaths();
-            HashMap<String, String> parserArguments = dialog.getParserArguments();
+            final HashMap<String, String> parserArguments = dialog.getParserArguments();
             
             Project project = null;
             Dataset parentDataset = null;
@@ -82,16 +82,21 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             final Project _project = project;
             final Dataset _parentDataset = parentDataset;
                     
-            String parserId = dialog.getParserId();
-            String decoyRegex = dialog.getDecoyRegex();
-            long instrumentId = dialog.getInstrumentId();
-            long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
-            boolean saveSpectrumMatches = dialog.getSaveSpectrumMatches();
+            final String parserId = dialog.getParserId();
+            final String decoyRegex = dialog.getDecoyRegex();
+            final long instrumentId = dialog.getInstrumentId();
+            final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
+            final boolean saveSpectrumMatches = dialog.getSaveSpectrumMatches();
             
             RSMTree tree = RSMTree.getTree();
             
-            // Start identification for each file
-            int nbFiles = filePaths.length;
+            final ArrayList<RSMDataSetNode> allIdentificationNodes = new ArrayList<>();
+            final ArrayList<String> allDatasetNames = new ArrayList<>();
+            
+            final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+            
+            // Create dataset nodes for each files
+            final int nbFiles = filePaths.length;
             for (int i=0;i<nbFiles;i++) {
                 File f = filePaths[i];
 
@@ -102,55 +107,23 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                     datasetName = datasetName.substring(0, indexOfDot);
                 }
                 final String _datasetName = datasetName;
+                allDatasetNames.add(datasetName);
+                
                 DataSetData identificationData = new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS );  //JPM.TODO
                 
                 final RSMDataSetNode identificationNode = new RSMDataSetNode(identificationData);
                 identificationNode.setIsChanging(true);
+                allIdentificationNodes.add(identificationNode);
                 
-                final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                
                 if (isParentAProject) {
                     
                     treeModel.insertNodeInto(identificationNode, n, n.getChildCount()-1);
                 } else {
                     treeModel.insertNodeInto(identificationNode, n, n.getChildCount());
                 }
-                // used as out parameter for the service
-                final Long[] _resultSetId = new Long[1]; 
-                
-                AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success) {
-                        if (success) {
-                            
-                            ImportSearchResultAsRsetAction.fireListener(_project.getId());
-                            
-                            createDataset(identificationNode, _project, _parentDataset, _datasetName, _resultSetId[0], getTaskInfo());
-                            
-                            
-                        } else {
-                            //JPM.TODO : manage error with errorMessage
-                            treeModel.removeNodeFromParent(identificationNode);
-                        }
-                    }
-                };
 
 
-                // use canonicalPath when it is possible to be sure to have an unique path
-                String canonicalPath;
-                try {
-                    canonicalPath = f.getCanonicalPath();
-                } catch (IOException ioe) {
-                    canonicalPath = f.getAbsolutePath(); // should not happen
-                }
-                
-                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches, project.getId(), _resultSetId);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
                 
             }
             
@@ -159,9 +132,91 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                 tree.expandNodeIfNeeded(n);
             }
             
+            // Pre-Import files
+            final String[] canonicalPathArray = new String[nbFiles];
+            for (int i = 0; i < nbFiles; i++) {
+                File f = filePaths[i];
+
+                // use canonicalPath when it is possible to be sure to have an unique path
+                String canonicalPath;
+                try {
+                    canonicalPath = f.getCanonicalPath();
+                } catch (IOException ioe) {
+                    canonicalPath = f.getAbsolutePath(); // should not happen
+                }
+                canonicalPathArray[i] = canonicalPath;
+            }
+
+ 
+            final String[] result = new String[1];
+            
+            AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success) {
+
+                    if (success) {
+                        // start all imports
+                        for (int i=0;i<nbFiles;i++) {
+                            startImport(_project, allIdentificationNodes.get(i), _parentDataset, allDatasetNames.get(i), canonicalPathArray[i], treeModel, parserId, parserArguments, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches);
+                        }
+                    } else {
+                        // delete all nodes
+                        for (int i=0;i<allIdentificationNodes.size();i++) {
+                            treeModel.removeNodeFromParent(allIdentificationNodes.get(i));
+                        }
+                    }
+                }
+            };
+
+            CertifyIdentificationTask task = new CertifyIdentificationTask(callback, parserId, parserArguments, canonicalPathArray, projectId, result);
+            AccessServiceThread.getAccessServiceThread().addTask(task);
+
+
 
         }
     }
+    
+    private void startImport(final Project project, final RSMDataSetNode identificationNode, final Dataset parentDataset, final String datasetName, String canonicalPath, final DefaultTreeModel treeModel, String parserId, HashMap<String, String> parserArguments, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches) {
+        // used as out parameter for the service
+        final Long[] _resultSetId = new Long[1];
+
+        AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success) {
+                if (success) {
+
+                    ImportSearchResultAsRsetAction.fireListener(project.getId());
+
+                    createDataset(identificationNode, project, parentDataset, datasetName, _resultSetId[0], getTaskInfo());
+
+
+                } else {
+                    //JPM.TODO : manage error with errorMessage
+                    treeModel.removeNodeFromParent(identificationNode);
+                }
+            }
+        };
+
+
+        // use canonicalPath when it is possible to be sure to have an unique path
+
+
+        ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches, project.getId(), _resultSetId);
+        AccessServiceThread.getAccessServiceThread().addTask(task);
+    }
+    
     
     private void createDataset(final RSMDataSetNode identificationNode, Project project, Dataset parentDataset, String name, Long resultSetId, TaskInfo taskInfo) {
                                     

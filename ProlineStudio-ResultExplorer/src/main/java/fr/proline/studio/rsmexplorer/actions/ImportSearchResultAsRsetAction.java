@@ -44,23 +44,23 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
         Project project =  projectNode.getProject();
         
         
-        ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow(), project.getId());
+        ImportIdentificationDialog dialog = ImportIdentificationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
             
              // retrieve parameters
-            File[] filePaths = dialog.getFilePaths();
-            HashMap<String, String> parserArguments = dialog.getParserArguments();
+            final File[] filePaths = dialog.getFilePaths();
+            final HashMap<String, String> parserArguments = dialog.getParserArguments();
             
 
             
-            String parserId = dialog.getParserId();
-            String decoyRegex = dialog.getDecoyRegex();
-            long instrumentId = dialog.getInstrumentId();
-            long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
-            boolean saveSpectrumMatches = dialog.getSaveSpectrumMatches();
+            final String parserId = dialog.getParserId();
+            final String decoyRegex = dialog.getDecoyRegex();
+            final long instrumentId = dialog.getInstrumentId();
+            final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
+            final boolean saveSpectrumMatches = dialog.getSaveSpectrumMatches();
             
             RSMTree tree = RSMTree.getTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -69,6 +69,27 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
             treeModel.nodeChanged(allImportedNode);
             
             final Long projectId = project.getId();
+
+
+            // --------------------- Pre-Import --------------------------
+
+            int nbFiles = filePaths.length;
+            String[] canonicalPathArray = new String[nbFiles];
+            for (int i = 0; i < nbFiles; i++) {
+                File f = filePaths[i];
+
+                // use canonicalPath when it is possible to be sure to have an unique path
+                String canonicalPath;
+                try {
+                    canonicalPath = f.getCanonicalPath();
+                } catch (IOException ioe) {
+                    canonicalPath = f.getAbsolutePath(); // should not happen
+                }
+                canonicalPathArray[i] = canonicalPath;
+            }
+
+ 
+            final String[] result = new String[1];
             
             AbstractServiceCallback callback = new AbstractServiceCallback() {
 
@@ -79,39 +100,70 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
 
                 @Override
                 public void run(boolean success) {
-                    
-                    fireListener(projectId);
-                    
-                    m_beingImportedNumber--;
-                    if (m_beingImportedNumber == 0) {
+
+                    if (success) {
+                        // start imports
+                        startImport(projectId, allImportedNode, filePaths, treeModel, parserId, parserArguments, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches  );
+                    } else {
                         allImportedNode.setIsChanging(false);
-                         treeModel.nodeChanged(allImportedNode);
+                        treeModel.nodeChanged(allImportedNode);
                     }
                 }
             };
-            
-            
-              // Start identification for each file
-            int nbFiles = filePaths.length;
-            m_beingImportedNumber += nbFiles;
-            for (int i=0;i<nbFiles;i++) {
-                File f = filePaths[i];
-                
-                // use canonicalPath when it is possible to be sure to have an unique path
-                String canonicalPath;
-                try {
-                    canonicalPath = f.getCanonicalPath();
-                } catch (IOException ioe) {
-                    canonicalPath = f.getAbsolutePath(); // should not happen
-                }
-                Long[] resultSetId = new Long[1];
-                
 
-                ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches,  projectId, resultSetId);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
+            CertifyIdentificationTask task = new CertifyIdentificationTask(callback, parserId, parserArguments, canonicalPathArray, projectId, result);
+            AccessServiceThread.getAccessServiceThread().addTask(task);
+
+
+
+            
+            
+        }
+    }
+    
+    private void startImport(final Long projectId, final RSMAllImportedNode allImportedNode, File[] filePaths, final DefaultTreeModel treeModel, String parserId, HashMap<String, String> parserArguments, String decoyRegex, long instrumentId, long peaklistSoftwareId,  boolean saveSpectrumMatches ) {
+
+
+
+        AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
             }
-            
-            
+
+            @Override
+            public void run(boolean success) {
+
+                fireListener(projectId);
+
+                m_beingImportedNumber--;
+                if (m_beingImportedNumber == 0) {
+                    allImportedNode.setIsChanging(false);
+                    treeModel.nodeChanged(allImportedNode);
+                }
+            }
+        };
+
+
+        // Start identification for each file
+        int nbFiles = filePaths.length;
+        m_beingImportedNumber += nbFiles;
+        for (int i = 0; i < nbFiles; i++) {
+            File f = filePaths[i];
+
+            // use canonicalPath when it is possible to be sure to have an unique path
+            String canonicalPath;
+            try {
+                canonicalPath = f.getCanonicalPath();
+            } catch (IOException ioe) {
+                canonicalPath = f.getAbsolutePath(); // should not happen
+            }
+            Long[] resultSetId = new Long[1];
+
+
+            ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches, projectId, resultSetId);
+            AccessServiceThread.getAccessServiceThread().addTask(task);
         }
     }
     

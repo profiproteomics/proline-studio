@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.uds.Dataset;
@@ -14,14 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Export a Identification Summary Action
+ * 
  * @author VD225637
  */
 public class ExportRSMAction extends AbstractRSMAction {
      protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
      
     public ExportRSMAction(){
-        super("TEST EXPORT");        
+        super("Export...");        
     }
     
         @Override
@@ -33,30 +30,29 @@ public class ExportRSMAction extends AbstractRSMAction {
         
         // used as out parameter for the service
         final String[] _filePath = new String[1];
-        
-        AbstractServiceCallback callback = new AbstractServiceCallback() {
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
+            AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success) {
+                    if (success) {
+                        m_logger.info("OK " + _filePath[0]);
+
+                    } else {
+                        m_logger.info("ERROR");
                     }
+                }
+            };
 
-                    @Override
-                    public void run(boolean success) {
-                        if (success) {
-                            m_logger.info("OK "+_filePath[0]);
 
-                        } else {
-                            m_logger.info("ERROR");
-                        } 
-                    }
-                       
-                };
-
-    
             ExportRSMTask task = new ExportRSMTask(callback, dataSetNode.getDataset(), _filePath);
-           AccessServiceThread.getAccessServiceThread().addTask(task); 
-     
+            AccessServiceThread.getAccessServiceThread().addTask(task);
+
 
 
     }

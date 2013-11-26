@@ -30,7 +30,7 @@ public class CertifyIdentificationTask extends AbstractServiceTask {
     private String[] m_certifyErrorMessage = null;
     
     public CertifyIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String[] canonicalFilePathArray, long projectId, String[] certifyErrorMessage) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Certify Identification "+canonicalFilePathArray[0]+"...", TASK_LIST_INFO));
+        super(callback, false /*asynchronous*/, new TaskInfo("Check Files to Import : "+canonicalFilePathArray[0]+", ...", TASK_LIST_INFO));
 
         m_parserId = parserId;
         m_parserArguments = parserArguments;
@@ -229,11 +229,18 @@ public class CertifyIdentificationTask extends AbstractServiceTask {
                         m_loggerProline.error(getClass().getSimpleName() + " failed : No returned values");
                         return ServiceState.STATE_FAILED;
                     }
+ 
                     
                     if (returnedResult.equalsIgnoreCase("OK")) {
                         m_certifyErrorMessage[0] = null;
                     } else {
                         m_certifyErrorMessage[0] = returnedResult;
+                        
+                        String errorMessage = returnedResult;
+                        m_taskError = new TaskError(errorMessage);
+
+                        m_loggerProline.error(getClass().getSimpleName() + " failed : returnedResult");
+                        return ServiceState.STATE_FAILED;
                     }
 
                     

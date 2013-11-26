@@ -985,9 +985,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private ParameterList createOmssaParser() {
         ParameterList parameterList = new ParameterList("Omssa Parser");
         
-        parameterList.add(new FileParameter("usermod.xml.file", "Usermods file path", JTextField.class, "", "Usermods XML File", "xml"));
-        parameterList.add(new BooleanParameter("fasta.contains.target", "Fasta contains target entries", JCheckBox.class, Boolean.TRUE));
-        parameterList.add(new BooleanParameter("fasta.contains.decoy", "Fasta contains decoy entries", JCheckBox.class, Boolean.TRUE));
+        Preferences preferences = NbPreferences.root();
+        parameterList.add(new FileParameter("usermod.xml.file", "Usermods file path", JTextField.class, preferences.get("Omssa_Parser.Usermods_file_path", ""), "Usermods XML File", "xml"));
+        parameterList.add(new FileParameter("ptm.composition.file", "PTM composition file path", JTextField.class, preferences.get("Omssa_Parser.PTM_composition_file_path", ""), "PTM composition File", "txt"));
+//        parameterList.add(new BooleanParameter("fasta.contains.target", "Fasta contains target entries", JCheckBox.class, Boolean.TRUE));
+//        parameterList.add(new BooleanParameter("fasta.contains.decoy", "Fasta contains decoy entries", JCheckBox.class, Boolean.TRUE));
 
         
         return parameterList;

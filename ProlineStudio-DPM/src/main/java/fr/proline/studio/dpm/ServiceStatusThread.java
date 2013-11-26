@@ -3,6 +3,8 @@ package fr.proline.studio.dpm;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.task.AbstractServiceTask;
 import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.openide.awt.StatusDisplayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,9 @@ public class ServiceStatusThread extends Thread {
     private final static int DELAY_BETWEEN_POLLING = 10000;
     
     private TaskInfo m_currentTaskInfo = null;
+    
+    private TaskInfo m_lastTaskInfoInError = null;
+    private long m_lastError = 0;
     
     private static ServiceStatusThread m_instance;
     
@@ -72,6 +77,8 @@ public class ServiceStatusThread extends Thread {
                 switch(serviceState) {
                     case STATE_FAILED:
                         task.callback(false);
+                        m_lastTaskInfoInError = task.getTaskInfo();
+                        m_lastError = System.currentTimeMillis();
                         break;
                     case STATE_WAITING:
                         // put back the task
@@ -127,8 +134,51 @@ public class ServiceStatusThread extends Thread {
             } else {
                 status = "";
             }
+            
+            
+            long deltaTime = 0;
+            if (m_lastTaskInfoInError != null) { 
+                
+                deltaTime = (System.currentTimeMillis()-m_lastError);
+                
+                if (deltaTime>=30000) {
+                    m_lastTaskInfoInError = null;
+                }
+            }
+            
+            if (m_lastTaskInfoInError != null) { 
+                String error = "<html><font color='red'>Error on : "+m_lastTaskInfoInError.getTaskDescription()+"</font>";
+                if (status.length() == 0) {
+                    status = error+"</html>";
+                     
+                    // clear display later
+                    Timer timer = new Timer();
+                    long delay = 30000 - deltaTime;
+
+                    timer.schedule(new ClearStatusTask(), delay);
+
+                } else {
+                     status = error+" | "+status+"</html>";
+                     
+
+              
+                }
+            } else {
+                status = "<html>"+status+"</html>";
+            }
+            
             StatusDisplayer.getDefault().setStatusText(status, StatusDisplayer.IMPORTANCE_ANNOTATION);
+
+            
         }
     }
     
+    class ClearStatusTask extends TimerTask {
+
+        @Override
+        public void run() {
+            updateStatusDisplay();
+        }
+    }
+
 }

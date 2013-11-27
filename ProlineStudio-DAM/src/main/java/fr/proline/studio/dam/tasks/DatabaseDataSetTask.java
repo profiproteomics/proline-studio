@@ -635,8 +635,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             try {
                 m_parentDataset.addChild(d);
             } catch (org.hibernate.LazyInitializationException e) {
-                // if this exception happens, there is in fact nothing to do
-                // (children have never been loaded)
+                // JPM.WART
+                // if this exception happens : the children count has not been updated
+                // I update it by hand
+                m_parentDataset.setChildrenCount(mergedParentDataset.getChildrenCount());
+                
             }
         } else {
             int childrenCount = m_project.getTransientData().getChildrenNumber();
@@ -836,8 +839,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     try {
                         parentDataset.replaceAllChildren(datasetList);
                     } catch (org.hibernate.LazyInitializationException e) {
-                        // if this exception happens, there is in fact nothing to do
-                        // (children have never been loaded)
+                        // JPM.WART
+                        // if this exception happens : the children count has not been updated
+                        // I update it by hand
+                        parentDataset.setChildrenCount(mergedParentDataset.getChildrenCount());
                     }
 
                 } else if (parentObject instanceof Project) {

@@ -4,7 +4,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigDecimal;
@@ -18,11 +18,11 @@ import java.util.Map;
  */
 public class ExportRSMTask extends AbstractServiceTask {
 
-    private Dataset m_dataset;
+    private DDataset m_dataset;
     String[] m_filePathResult;
     
-    public ExportRSMTask(AbstractServiceCallback callback, Dataset dataset, String[] filePathInfo) {
-        super(callback, false /** asynchronous */, new TaskInfo("Export RSM " + dataset.getName(), TASK_LIST_INFO));
+    public ExportRSMTask(AbstractServiceCallback callback, DDataset dataset, String[] filePathInfo) {
+        super(callback, false /** asynchronous */, new TaskInfo("Export Identification Summary " + dataset.getName(), TASK_LIST_INFO));
         m_dataset = dataset;
       
         m_filePathResult = filePathInfo;
@@ -42,9 +42,9 @@ public class ExportRSMTask extends AbstractServiceTask {
         params.put("file_format", "TEMPLATED"); //Ou MZIDENTML ...
         // **** Pour la version FILE :"file_name" & "file_directory" 
         // **** Pour la version STREAM :"file_name" sert de prefixe (modifier dans la version +1 :=) 
-        params.put("file_name", "testExcel"); 
-        params.put("file_directory", "D:/Vero/temp");
-        params.put("output_mode", "FILE"); // *** ou STREAM
+        //params.put("file_name", "testExcel"); 
+        //params.put("file_directory", "D:/Vero/temp");
+        params.put("output_mode", "STREAM"); // *** ou STREAM
             
         ArrayList rsmIdents = new ArrayList();
         Map<String, Object> rsmIdent = new HashMap<>();
@@ -54,7 +54,7 @@ public class ExportRSMTask extends AbstractServiceTask {
         params.put("rsm_identifiers",rsmIdents);
 
         Map<String, Object> extraParams = new HashMap<>();
-        extraParams.put("template_name","IRMA_LIKE_XLSX"); //************ TODO Liste des templates possibles ?! 
+        extraParams.put("template_name", "IRMA_LIKE_XLSX"); //************ TODO Liste des templates possibles ?! 
         params.put("extra_params", extraParams);
         
         request.setParameters(params);

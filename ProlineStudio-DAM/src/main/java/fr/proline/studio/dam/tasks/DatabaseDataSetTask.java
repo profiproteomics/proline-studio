@@ -913,18 +913,17 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     
                     
                     parentDataset.setChildrenCount(mergedParentDataset.getChildrenCount());
-                    /*try {
-                        parentDataset.replaceAllChildren(datasetList);
-                    } catch (org.hibernate.LazyInitializationException e) {
-                        // JPM.WART
-                        // if this exception happens : the children count has not been updated
-                        // I update it by hand
-                        parentDataset.setChildrenCount(mergedParentDataset.getChildrenCount());
-                    }*/
+
 
                 } else if (parentObject instanceof Project) {
                     parentProject = (Project) parentObject;
                     parentProject.getTransientData().setChildrenNumber(nbDataset);
+                    
+                    // order the children which can have been moved
+                    for (int i = 0; i < mergedDatasetList.size(); i++) {
+                        Dataset mergedChildDataset = mergedDatasetList.get(i);
+                        mergedChildDataset.setNumber(i);
+                    }
                 }
 
                 for (int i = 0; i < mergedDatasetList.size(); i++) {

@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.actions;
 
 
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -53,7 +54,7 @@ public class CompareWithSCAction extends AbstractRSMAction {
 
                 // check if we can compute SC
                 String error = null;
-                ArrayList<Dataset> datasetList = new ArrayList<>();        
+                ArrayList<DDataset> datasetList = new ArrayList<>();        
                 datasetList.add(refDatasetNode.getDataset());
                 
                 if (treeSelectionDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {

@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.gui;
 
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import javax.swing.Action;
 
 /**
@@ -13,8 +9,8 @@ import javax.swing.Action;
  */
 public interface DatasetAction extends Action {
     
-     public void updateEnabled(Dataset[] selectedNodes);
+     public void updateEnabled(DDataset[] selectedNodes);
      
-     public void actionPerformed(Dataset[] selectedNodes, int x, int y);
+     public void actionPerformed(DDataset[] selectedNodes, int x, int y);
 
 }

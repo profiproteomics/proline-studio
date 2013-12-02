@@ -5,7 +5,7 @@ import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -42,7 +42,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     private long m_projectId = -1;
     private ResultSummary m_rsm = null;
     private PeptideInstance m_peptideInstance = null;
-    private Dataset m_dataset = null;
+    private DDataset m_dataset = null;
 
     
     // data kept for sub tasks
@@ -62,7 +62,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         action = LOAD_PROTEIN_SET_FOR_RSM;
     }
     
-    public void initCountProteinSets(Dataset dataset) {
+    public void initCountProteinSets(DDataset dataset) {
         init(SUB_TASK_COUNT, new TaskInfo("Count Number of Protein Sets of Identification Summary "+dataset.getName(), TASK_LIST_INFO));
         m_dataset = dataset;
         action = LOAD_PROTEIN_SET_NUMBER;
@@ -102,7 +102,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             case LOAD_PROTEIN_SET_FOR_PEPTIDE_INSTANCE:
                 return (m_peptideInstance.getTransientData().getProteinSetArray() == null);
             case LOAD_PROTEIN_SET_NUMBER:
-                m_rsm = m_dataset.getTransientData().getResultSummary();
+                m_rsm = m_dataset.getResultSummary();
                 return (m_rsm.getTransientData().getNumberOfProteinSet() == null);
         }
         return false; // should not happen

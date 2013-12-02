@@ -4,7 +4,7 @@ import fr.proline.core.orm.msi.Enzyme;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.SearchSetting;
 import fr.proline.core.orm.msi.SearchSettingsSeqDatabaseMap;
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -20,10 +20,10 @@ import javax.persistence.TypedQuery;
 public class DatabaseRsetProperties extends AbstractDatabaseTask {
     
     private long m_projectId;
-    private Dataset m_dataset = null;
+    private DDataset m_dataset = null;
     private ResultSet m_rset = null;
     
-    public DatabaseRsetProperties(AbstractDatabaseCallback callback, long projectId, Dataset dataset) {
+    public DatabaseRsetProperties(AbstractDatabaseCallback callback, long projectId, DDataset dataset) {
         super(callback, new TaskInfo("Load Properties for Search Result "+dataset.getName(), TASK_LIST_INFO));
         m_projectId = projectId;
         m_dataset = dataset;
@@ -39,7 +39,7 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
     @Override
     public boolean needToFetch() {
         if (m_rset == null) {
-            m_rset = m_dataset.getTransientData().getResultSet();
+            m_rset = m_dataset.getResultSet();
         }
         return (m_rset.getTransientData().getPeptideMatchesCount() == null);
     }

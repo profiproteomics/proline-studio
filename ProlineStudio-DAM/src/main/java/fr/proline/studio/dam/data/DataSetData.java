@@ -2,6 +2,7 @@ package fr.proline.studio.dam.data;
 
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -13,12 +14,12 @@ import java.util.List;
  */
 public class DataSetData extends AbstractData {
     
-    private Dataset m_dataset = null;
+    private DDataset m_dataset = null;
     private String m_temporaryName = null;
     private Aggregation.ChildNature m_temporaryAggregateType = null;
     private Dataset.DatasetType m_temporaryDatasetType = null;
 
-    public DataSetData(Dataset dataSet) {
+    public DataSetData(DDataset dataSet) {
         m_dataType = DataTypes.DATA_SET;
 
         m_dataset = dataSet;
@@ -33,11 +34,11 @@ public class DataSetData extends AbstractData {
 
     }
 
-    public Dataset getDataset() {
+    public DDataset getDataset() {
         return m_dataset;
     }
     
-    public void setDataset(Dataset dataset) {
+    public void setDataset(DDataset dataset) {
         m_dataset = dataset;
         m_temporaryName = null;
     }
@@ -84,6 +85,7 @@ public class DataSetData extends AbstractData {
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+
         task.initLoadChildrenDataset(m_dataset, list);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 

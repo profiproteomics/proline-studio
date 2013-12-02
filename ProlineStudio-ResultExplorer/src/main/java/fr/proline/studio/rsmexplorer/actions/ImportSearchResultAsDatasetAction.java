@@ -4,6 +4,7 @@ package fr.proline.studio.rsmexplorer.actions;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -68,8 +69,9 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             final HashMap<String, String> parserArguments = dialog.getParserArguments();
             
             Project project = null;
-            Dataset parentDataset = null;
+            DDataset parentDataset = null;
             boolean isParentAProject = false;
+            RSMDataSetNode parentDatasetNode = null;
             if (n.getType() == RSMNode.NodeTypes.PROJECT) {
                 RSMProjectNode projectNode = (RSMProjectNode) n;
                 project = projectNode.getProject();
@@ -78,9 +80,11 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                 RSMDataSetNode dataSetNode = (RSMDataSetNode) n;
                 project = dataSetNode.getDataset().getProject();
                 parentDataset = dataSetNode.getDataset();
+                parentDatasetNode = dataSetNode;
             } 
             final Project _project = project;
-            final Dataset _parentDataset = parentDataset;
+            final DDataset _parentDataset = parentDataset;
+
                     
             final String parserId = dialog.getParserId();
             final String decoyRegex = dialog.getDecoyRegex();
@@ -182,7 +186,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
         }
     }
     
-    private void startImport(final Project project, final RSMDataSetNode identificationNode, final Dataset parentDataset, final String datasetName, String canonicalPath, final DefaultTreeModel treeModel, String parserId, HashMap<String, String> parserArguments, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches) {
+    private void startImport(final Project project, final RSMDataSetNode identificationNode, final DDataset parentDataset, final String datasetName, String canonicalPath, final DefaultTreeModel treeModel, String parserId, HashMap<String, String> parserArguments, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches) {
         // used as out parameter for the service
         final Long[] _resultSetId = new Long[1];
 
@@ -218,7 +222,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
     }
     
     
-    private void createDataset(final RSMDataSetNode identificationNode, Project project, Dataset parentDataset, String name, Long resultSetId, TaskInfo taskInfo) {
+    private void createDataset(final RSMDataSetNode identificationNode, Project project, DDataset parentDataset, String name, Long resultSetId, TaskInfo taskInfo) {
                                     
 
         identificationNode.setIsChanging(false);
@@ -227,7 +231,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         treeModel.nodeChanged(identificationNode);
 
-        final ArrayList<Dataset> createdDatasetList = new ArrayList<>();
+        final ArrayList<DDataset> createdDatasetList = new ArrayList<>();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -241,7 +245,8 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
 
                 if (success) {
 
-                    Dataset dataset = createdDatasetList.get(0);
+                    
+                    DDataset dataset = createdDatasetList.get(0);
                     identificationNode.setIsChanging(false);
                     ((DataSetData) identificationNode.getData()).setDataset(dataset);
                     treeModel.nodeChanged(identificationNode);
@@ -257,6 +262,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
 
 
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+
         task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, name, resultSetId, null, createdDatasetList, taskInfo);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 

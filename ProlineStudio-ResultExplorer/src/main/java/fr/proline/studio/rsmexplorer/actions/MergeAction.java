@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
@@ -101,7 +102,7 @@ public class MergeAction extends AbstractRSMAction {
 
     private void askMergeService(final RSMDataSetNode node, final List<Long> idList, final boolean mergeOnRsm) {
 
-        final Dataset dataset = node.getDataset();
+        final DDataset dataset = node.getDataset();
         long projectId = dataset.getProject().getId();
         String datasetName = dataset.getName();
 
@@ -145,7 +146,7 @@ public class MergeAction extends AbstractRSMAction {
         AccessServiceThread.getAccessServiceThread().addTask(task);
     }
 
-    private void updateDataset(final RSMDataSetNode datasetNode, Dataset d, Long resultSetId, Long resultSummaryId, TaskInfo taskInfo) {
+    private void updateDataset(final RSMDataSetNode datasetNode, DDataset d, Long resultSetId, Long resultSummaryId, TaskInfo taskInfo) {
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

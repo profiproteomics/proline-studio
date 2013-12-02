@@ -19,7 +19,7 @@ import java.util.Map;
 public class ExportRSMTask extends AbstractServiceTask {
 
     private DDataset m_dataset;
-    String[] m_filePathResult;
+    private String[] m_filePathResult;
     
     public ExportRSMTask(AbstractServiceCallback callback, DDataset dataset, String[] filePathInfo) {
         super(callback, false /** asynchronous */, new TaskInfo("Export Identification Summary " + dataset.getName(), TASK_LIST_INFO));
@@ -177,14 +177,15 @@ public class ExportRSMTask extends AbstractServiceTask {
                     }
                     
                     // retrieve file path
-                    String exportedFilePath = (String) resultMap.get("result");
-                    if (exportedFilePath == null ) {
+                    ArrayList exportedFilePathList = (ArrayList) resultMap.get("result");
+                    if (exportedFilePathList == null ) {
                         m_loggerProline.error(getClass().getSimpleName() + " failed : No file path returned.");
                         return ServiceState.STATE_FAILED;
                     }
 
-                    m_filePathResult[0] = exportedFilePath;
+                    m_filePathResult[0] = (String) exportedFilePathList.get(0);
 
+                    
                     return ServiceState.STATE_DONE;
                 } else {
                     String errorMessage = (String) resultMap.get("message");

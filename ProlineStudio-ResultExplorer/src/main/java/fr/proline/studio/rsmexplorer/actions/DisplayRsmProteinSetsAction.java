@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -30,7 +30,7 @@ public class DisplayRsmProteinSetsAction extends AbstractRSMAction {
         // only one node selected for this action
         RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[0];
 
-        final Dataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
+        final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
 
         if (!dataSetNode.hasResultSummary()) {
             return; // should not happen
@@ -69,7 +69,7 @@ public class DisplayRsmProteinSetsAction extends AbstractRSMAction {
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     // prepare window box
                     
-                    wbox.setEntryData(dataset.getProject().getId(), dataset.getTransientData().getResultSummary());
+                    wbox.setEntryData(dataset.getProject().getId(), dataset.getResultSummary());
 
 
                     

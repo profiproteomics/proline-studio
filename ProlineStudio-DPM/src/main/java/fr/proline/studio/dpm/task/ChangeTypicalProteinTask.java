@@ -4,11 +4,10 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,11 +17,11 @@ import java.util.Map;
  */
 public class ChangeTypicalProteinTask extends AbstractServiceTask {
 
-    private Dataset m_dataset;
+    private DDataset m_dataset;
     private String m_regex;
     private boolean m_onAccession; // regex done on accession or description of Proteins
     
-    public ChangeTypicalProteinTask(AbstractServiceCallback callback, Dataset dataset, String regex, boolean onAccession) {
+    public ChangeTypicalProteinTask(AbstractServiceCallback callback, DDataset dataset, String regex, boolean onAccession) {
         super(callback, false /** asynchronous */, new TaskInfo("Change Typical Protein on Identification Summary " + dataset.getName(), TASK_LIST_INFO));
         m_dataset = dataset;
         m_regex = regex;

@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
@@ -52,7 +52,7 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
                 dataSetNode.setIsChanging(true);
                 treeModel.nodeChanged(dataSetNode);
 
-                final Dataset d = dataSetNode.getDataset();
+                final DDataset d = dataSetNode.getDataset();
 
 
                 
@@ -69,7 +69,7 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
 
                         // reinitialize already loaded data.
                         // Protein Sets will have to be reloaded
-                        ResultSummary rsm = d.getTransientData().getResultSummary();
+                        ResultSummary rsm = d.getResultSummary();
                         if (rsm != null) {
                             rsm.getTransientData().setProteinSetArray(null);
                         }

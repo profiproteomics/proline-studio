@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -39,10 +39,10 @@ public class ValidateAction extends AbstractRSMAction {
         int nbAlreadyValidated = 0;
 
         int nbNodes = selectedNodes.length;
-        ArrayList<Dataset> datasetList = new ArrayList<>(nbNodes);
+        ArrayList<DDataset> datasetList = new ArrayList<>(nbNodes);
         for (int i = 0; i < nbNodes; i++) {
             RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[i];
-            Dataset d = dataSetNode.getDataset();
+            DDataset d = dataSetNode.getDataset();
             datasetList.add(d);
 
             if (dataSetNode.hasResultSummary()) {
@@ -103,7 +103,7 @@ public class ValidateAction extends AbstractRSMAction {
                 dataSetNode.setIsChanging(true);
                 treeModel.nodeChanged(dataSetNode);
 
-                final Dataset d = dataSetNode.getDataset();
+                final DDataset d = dataSetNode.getDataset();
 
                 if (dataSetNode.hasResultSummary()) {
 
@@ -141,7 +141,7 @@ public class ValidateAction extends AbstractRSMAction {
 
     private void askValidation(final RSMDataSetNode dataSetNode, HashMap<String, String> parserArguments, final String regex, final boolean regexOnAccession) {
 
-        final Dataset d = dataSetNode.getDataset();
+        final DDataset d = dataSetNode.getDataset();
 
         // used as out parameter for the service
         final Integer[] _resultSummaryId = new Integer[1];
@@ -179,7 +179,7 @@ public class ValidateAction extends AbstractRSMAction {
 
     private void changeTypicalProtein(final RSMDataSetNode datasetNode, String regex, boolean regexOnAccession) {
         
-                final Dataset d = datasetNode.getDataset();
+                final DDataset d = datasetNode.getDataset();
 
                 AbstractServiceCallback callback = new AbstractServiceCallback() {
 
@@ -206,7 +206,7 @@ public class ValidateAction extends AbstractRSMAction {
                 AccessServiceThread.getAccessServiceThread().addTask(task);
     }
     
-    private void updateDataset(final RSMDataSetNode datasetNode, final Dataset d, long resultSummaryId, TaskInfo taskInfo, final String regex, final boolean regexOnAccession) {
+    private void updateDataset(final RSMDataSetNode datasetNode, final DDataset d, long resultSummaryId, TaskInfo taskInfo, final String regex, final boolean regexOnAccession) {
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 

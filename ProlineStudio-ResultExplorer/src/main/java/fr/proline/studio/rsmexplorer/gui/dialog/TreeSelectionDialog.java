@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
@@ -20,7 +20,7 @@ import javax.swing.tree.TreePath;
 public class TreeSelectionDialog extends DefaultDialog {
     
     private RSMTree m_tree = null;
-    private ArrayList<Dataset> m_selectedDatasetList = null;
+    private ArrayList<DDataset> m_selectedDatasetList = null;
     private ArrayList<RSMDataSetNode> m_selectedRSMDSNodeList = null;
     
     private boolean m_userSetSize = false;
@@ -67,8 +67,8 @@ public class TreeSelectionDialog extends DefaultDialog {
         m_tree.setSelection(rsmArray);
     }
     
-    public ArrayList<Dataset> getSelectedDatasetList() {
-        ArrayList<Dataset> returnedList = m_selectedDatasetList;
+    public ArrayList<DDataset> getSelectedDatasetList() {
+        ArrayList<DDataset> returnedList = m_selectedDatasetList;
         m_selectedDatasetList = null; // avoid a potential memory leak
         m_selectedRSMDSNodeList = null;
         return returnedList;

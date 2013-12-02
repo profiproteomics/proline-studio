@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
@@ -109,7 +109,7 @@ public class ValidationDialog extends DefaultDialog {
         return m_hasDecoy;
     }
     
-    public void setDatasetList(final ArrayList<Dataset> datasetList) {
+    public void setDatasetList(final ArrayList<DDataset> datasetList) {
 
         setHasDecoy(DecoyStatus.WAITING);
         
@@ -127,8 +127,8 @@ public class ValidationDialog extends DefaultDialog {
                 
                 int nb = datasetList.size();
                 for (int i=0;i<nb;i++) {
-                    Dataset dataset = datasetList.get(i);
-                    ResultSet rset = dataset.getTransientData().getResultSet();
+                    DDataset dataset = datasetList.get(i);
+                    ResultSet rset = dataset.getResultSet();
                     
                     if (rset.getDecoyResultSet() == null) {
                         setHasDecoy(DecoyStatus.NO_DECOY);

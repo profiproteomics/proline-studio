@@ -4,7 +4,7 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigDecimal;
@@ -18,12 +18,12 @@ import java.util.Map;
  */
 public class ValidationTask extends AbstractServiceTask {
 
-    private Dataset m_dataset = null;
+    private DDataset m_dataset = null;
     String m_description;
     HashMap<String, String> m_argumentsMap;
     Integer[] m_resultSummaryId = null;
     
-    public ValidationTask(AbstractServiceCallback callback, Dataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId) {
+    public ValidationTask(AbstractServiceCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId) {
         super(callback, false /*asynchronous*/, new TaskInfo("Validation of Search Result "+dataset.getName(), TASK_LIST_INFO));
         m_dataset = dataset;
         m_description = description;

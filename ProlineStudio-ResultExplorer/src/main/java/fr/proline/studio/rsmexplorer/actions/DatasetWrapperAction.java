@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.gui.DatasetAction;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
@@ -23,8 +19,9 @@ public class DatasetWrapperAction extends AbstractRSMAction {
         this.wrappedAction = action;
     }
     
+    @Override
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
-        final Dataset[] dataSet = new Dataset[selectedNodes.length];
+        final DDataset[] dataSet = new DDataset[selectedNodes.length];
         int count = 0;
         for (RSMNode rsmNode : selectedNodes) {
                dataSet[count++] = ((DataSetData) ((RSMDataSetNode)rsmNode).getData()).getDataset();
@@ -48,7 +45,7 @@ public class DatasetWrapperAction extends AbstractRSMAction {
             return;
         }
         
-        final Dataset[] dataSet = new Dataset[selectedNodes.length];
+        final DDataset[] dataSet = new DDataset[selectedNodes.length];
         int count = 0;
         for (RSMNode rsmNode : selectedNodes) {
                dataSet[count++] = ((DataSetData) ((RSMDataSetNode)rsmNode).getData()).getDataset();

@@ -29,6 +29,8 @@ import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
 
+import fr.proline.core.orm.uds.dto.DDataset;
+
 /**
  * Used to load dataset in two cases :
  * - parent dataset of a project
@@ -38,12 +40,12 @@ import org.netbeans.api.db.explorer.JDBCDriverManager;
 public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     private Project m_project = null;
-    private Dataset m_dataset = null;
-    private ArrayList<Dataset> m_datasetList = null;
+    private DDataset m_dataset = null;
+    private ArrayList<DDataset> m_datasetList = null;
     private List<AbstractData> m_list = null;
     private ResultSummary m_rsm = null;
     private String m_name = null;
-    private Dataset m_parentDataset = null;
+    private DDataset m_parentDataset = null;
     private Long m_resultSetId = null;
     private Long m_resultSummaryId = null;
     private Aggregation.ChildNature m_datasetType;
@@ -92,7 +94,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param parentDataSet
      * @param list 
      */
-    public void initLoadChildrenDataset(Dataset parentDataset, List<AbstractData> list) {
+    public void initLoadChildrenDataset(DDataset parentDataset, List<AbstractData> list) {
         setTaskInfo(new TaskInfo("Load Data for Aggregate "+parentDataset.getName(), TASK_LIST_INFO));
         m_project = parentDataset.getProject();
         m_parentDataset = parentDataset;
@@ -105,7 +107,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * Load Rset and Rsm of a dataset
      * @param dataSet 
      */
-    public void initLoadRsetAndRsm(Dataset dataset) {
+    public void initLoadRsetAndRsm(DDataset dataset) {
         setTaskInfo(new TaskInfo("Load Search Result and Identification Summary for Dataset "+dataset.getName(), TASK_LIST_INFO));
         m_dataset = dataset;
 
@@ -116,7 +118,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * Load Rset and Rsm of a dataset list
      * @param dataSetList 
      */
-    public void initLoadRsetAndRsm(ArrayList<Dataset> datasetList) {
+    public void initLoadRsetAndRsm(ArrayList<DDataset> datasetList) {
         setTaskInfo(new TaskInfo("Load Search Result and Identification Summary for multiple Dataset", TASK_LIST_INFO));
         
         m_datasetList = datasetList;
@@ -139,7 +141,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * rename a dataset
      * @return 
      */
-    public void initRenameDataset(Dataset dataset, String name) {
+    public void initRenameDataset(DDataset dataset, String name) {
         setTaskInfo(new TaskInfo("Rename Dataset "+dataset.getName()+" to "+name, TASK_LIST_INFO));
         m_name = name;
         m_dataset = dataset;
@@ -147,10 +149,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     }
 
     
-    public void initCreateDatasetAggregate(Project project, Dataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, ArrayList<Dataset> datasetList) {
+    public void initCreateDatasetAggregate(Project project, DDataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, ArrayList<DDataset> datasetList) {
         initCreateDatasetAggregate(project, parentDataset, datasetType, aggregateName, false, 0, 0, datasetList);
     }
-    public void initCreateDatasetAggregate(Project project, Dataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, boolean hasSuffix, int suffixStart, int suffixStop, ArrayList<Dataset> datasetList) {
+    public void initCreateDatasetAggregate(Project project, DDataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, boolean hasSuffix, int suffixStart, int suffixStop, ArrayList<DDataset> datasetList) {
         setTaskInfo(new TaskInfo("Create Aggregate "+aggregateName, TASK_LIST_INFO));
         m_project = project;
         m_parentDataset = parentDataset;
@@ -163,7 +165,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_action = CREATE_AGGREGATE_DATASET;
     }
     
-    public void initCreateDatasetForIdentification(Project project, Dataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, Long resultSetId, Long resultSummaryId, ArrayList<Dataset> datasetList, TaskInfo taskInfo) {
+    public void initCreateDatasetForIdentification(Project project, DDataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, Long resultSetId, Long resultSummaryId, ArrayList<DDataset> datasetList, TaskInfo taskInfo) {
         setTaskInfo(taskInfo);
         setPriority(Priority.HIGH_2);
         m_project = project;
@@ -176,7 +178,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_action = CREATE_IDENTIFICATION_DATASET;
     }
     
-    public void initModifyDatasetForValidation(Dataset dataset, Long resultSummaryId, TaskInfo taskInfo) {
+    public void initModifyDatasetForValidation(DDataset dataset, Long resultSummaryId, TaskInfo taskInfo) {
         setTaskInfo(taskInfo);
         setPriority(Priority.HIGH_2);
         m_dataset = dataset;
@@ -184,14 +186,14 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_action = MODIFY_VALIDATED_DATASET;
     }
     
-    public void initModifyDatasetToRemoveValidation(Dataset dataset) {
+    public void initModifyDatasetToRemoveValidation(DDataset dataset) {
         setTaskInfo(new TaskInfo("Remove Identification Summary from Dataset "+dataset.getName(), TASK_LIST_INFO));
         setPriority(Priority.HIGH_2);
         m_dataset = dataset;
         m_action = REMOVE_VALIDATION_OF_DATASET;
     }
     
-    public void initModifyDatasetForMerge(Dataset dataset, Long resultSetId, Long resultSummaryId, TaskInfo taskInfo) {
+    public void initModifyDatasetForMerge(DDataset dataset, Long resultSetId, Long resultSummaryId, TaskInfo taskInfo) {
         setTaskInfo(taskInfo);
         setPriority(Priority.HIGH_2);
         m_dataset = dataset;
@@ -200,7 +202,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_action = MODIFY_MERGED_DATASET;
     }
     
-    public void initEmptyTrash(Dataset trashDataset) {
+    public void initEmptyTrash(DDataset trashDataset) {
         setTaskInfo(new TaskInfo("Empty Trash", TASK_LIST_INFO));
         setPriority(Priority.HIGH_2);
         m_dataset = trashDataset;
@@ -223,7 +225,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 if (m_datasetList != null) {
                     int nbDataSet = m_datasetList.size();
                     for (int i=0;i<nbDataSet;i++) {
-                        Dataset d = m_datasetList.get(i);
+                        DDataset d = m_datasetList.get(i);
                         if (needToFetchRsetAndRsm(d)) {
                             return true;
                         }
@@ -248,12 +250,12 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     
     
-    private boolean needToFetchRsetAndRsm(Dataset dataset) {
-       if ((dataset.getResultSetId() != null) && (dataset.getTransientData().getResultSet() == null)) {
+    private boolean needToFetchRsetAndRsm(DDataset dataset) {
+       if ((dataset.getResultSetId() != null) && (dataset.getResultSet() == null)) {
            // need to fetch a result set
            return true;
        }
-       if ((dataset.getResultSummaryId() != null) && (dataset.getTransientData().getResultSummary() == null)) {
+       if ((dataset.getResultSummaryId() != null) && (dataset.getResultSummary() == null)) {
            // need to fetch a result summary
            return true;
        }
@@ -303,15 +305,23 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
 
             
-            // load parent DataSet
-            TypedQuery<Dataset> dataSetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE (d.parentDataset IS null) AND d.project.id=:projectId  ORDER BY d.number ASC", Dataset.class);
+            // ---- load parent DataSet -----
+            //JPM.HACK : there is a join done by Hibernate if we read the Aggregation at once,
+            // But some Aggregation are null (for identifications) -> identifications are not loaded
+            // So we load aggregations afterwards
+            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
             dataSetQuery.setParameter("projectId", projectId);
-            List<Dataset> datasetListSelected = dataSetQuery.getResultList();
+            List<DDataset> datasetListSelected = dataSetQuery.getResultList();
 
-            Dataset trash = null;
-            Iterator<Dataset> it = datasetListSelected.iterator();
+
+            ArrayList<Long> idList = new ArrayList<>();
+            HashMap<Long, DDataset> ddatasetMap = new HashMap<>();
+            
+            
+            DDataset trash = null;
+            Iterator<DDataset> it = datasetListSelected.iterator();
             while (it.hasNext()) {
-                Dataset datasetCur = it.next();
+                DDataset datasetCur = it.next();
                
                 
                 if (datasetCur.getType() == Dataset.DatasetType.TRASH) {
@@ -319,7 +329,31 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 } else {
                     m_list.add(new DataSetData(datasetCur));
                 }
+                
+                                
+                Long id = datasetCur.getId();
+                idList.add(id);
+                ddatasetMap.put(id, datasetCur);
             }
+            
+            
+            // Load Aggregation separately
+            if (!m_list.isEmpty()) {
+
+                Query aggregationQuery = entityManagerUDS.createQuery("SELECT d.id, d.aggregation FROM Dataset d WHERE d.id IN (:listId)");
+                aggregationQuery.setParameter("listId", idList);
+                List<Object[]> results = aggregationQuery.getResultList();
+                Iterator<Object[]> itAgg = results.iterator();
+                while (itAgg.hasNext()) {
+                    Object[] resCur = itAgg.next();
+                    Long id = (Long) resCur[0];
+                    Aggregation aggregation = (Aggregation) resCur[1];
+                    ddatasetMap.get(id).setAggregation(aggregation);
+                }
+        
+            }
+            
+            
             
             boolean hasTrash = false;
             if (trash != null) {
@@ -404,16 +438,40 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
 
+            ArrayList<Long> idList = new ArrayList<>();
+            HashMap<Long, DDataset> ddatasetMap = new HashMap<>();
 
-            TypedQuery<Dataset> datasetQuery = entityManagerUDS.createQuery("SELECT d FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", Dataset.class);
+            //JPM.HACK : there is a join done by Hibernate if we read the Aggregation at once,
+            // But some Aggregation are null (for identifications) -> identifications are not loaded
+            // So we load aggregations afterwards
+            TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
             datasetQuery.setParameter("parentDatasetId", parentDatasetId);
-            List<Dataset> dataSetResultList = datasetQuery.getResultList();
-            Iterator<Dataset> itDataset = dataSetResultList.iterator();
+            List<DDataset> dataSetResultList = datasetQuery.getResultList();
+            Iterator<DDataset> itDataset = dataSetResultList.iterator();
             while (itDataset.hasNext()) {
-                Dataset datasetCur = itDataset.next();
+                DDataset datasetCur = itDataset.next();
                 m_list.add(new DataSetData(datasetCur));
+                
+                Long id = datasetCur.getId();
+                idList.add(id);
+                ddatasetMap.put(id, datasetCur);
             }
             
+            // Load Aggregation separately
+            if (!m_list.isEmpty()) {
+
+                Query aggregationQuery = entityManagerUDS.createQuery("SELECT d.id, d.aggregation FROM Dataset d WHERE d.id IN (:listId)");
+                aggregationQuery.setParameter("listId", idList);
+                List<Object[]> results = aggregationQuery.getResultList();
+                Iterator<Object[]> it = results.iterator();
+                while (it.hasNext()) {
+                    Object[] resCur = it.next();
+                    Long id = (Long) resCur[0];
+                    Aggregation aggregation = (Aggregation) resCur[1];
+                    ddatasetMap.get(id).setAggregation(aggregation);
+                }
+        
+            }
             
             entityManagerUDS.getTransaction().commit();
 
@@ -466,7 +524,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
     
-    private void fetchRsetAndRsmForOneDataset(EntityManager entityManagerMSI, Dataset d) {
+    private void fetchRsetAndRsmForOneDataset(EntityManager entityManagerMSI, DDataset d) {
 
         Long rsetId = d.getResultSetId();
         if (rsetId != null) {
@@ -491,15 +549,15 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             }
             
             
-            d.getTransientData().setResultSet(rsetFound);
+            d.setResultSet(rsetFound);
         }
 
         Long rsmId = d.getResultSummaryId();
         if (rsmId != null) {
             ResultSummary rsmFound = entityManagerMSI.find(ResultSummary.class, rsmId);
 
-            rsmFound.getTransientData().setDataSet(d);
-            d.getTransientData().setResultSummary(rsmFound);
+            rsmFound.getTransientData().setDDataset(d);
+            d.setResultSummary(rsmFound);
         }
     }
     
@@ -607,8 +665,12 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         //JPM.TODO : reuse objects for multiple queries
         
         Project mergedProject = entityManagerUDS.merge(m_project);
-        Dataset mergedParentDataset = (m_parentDataset == null) ? null : entityManagerUDS.merge(m_parentDataset);
-         
+        
+        
+        
+        Dataset mergedParentDataset = (m_parentDataset == null) ? null : entityManagerUDS.find(Dataset.class, m_parentDataset.getId());
+  
+        
         Dataset d;
         if (identificationDataset) {
             d = new IdentificationDataset();
@@ -632,15 +694,15 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         // number of children of the parent
         if (mergedParentDataset != null) {
             mergedParentDataset.addChild(d);
-            try {
-                m_parentDataset.addChild(d);
+            /*try {
+                m_parentDataset[0].addChild(d);
             } catch (org.hibernate.LazyInitializationException e) {
                 // JPM.WART
                 // if this exception happens : the children count has not been updated
                 // I update it by hand
-                m_parentDataset.setChildrenCount(mergedParentDataset.getChildrenCount());
+                m_parentDataset[0].setChildrenCount(mergedParentDataset.getChildrenCount());
                 
-            }
+            }*/
         } else {
             int childrenCount = m_project.getTransientData().getChildrenNumber();
             d.setNumber(childrenCount);
@@ -652,7 +714,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             entityManagerUDS.persist(mergedParentDataset);
         }
 
-        m_datasetList.add(d);
+        DDataset ddataset = new DDataset(d.getId(), d.getProject(), d.getName(), d.getType(), d.getChildrenCount(), d.getResultSetId(), d.getResultSummaryId(), d.getNumber());
+        ddataset.setAggregation(d.getAggregation());
+        
+        m_datasetList.add(ddataset);
     }
     
     
@@ -664,9 +729,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             try {
                 entityManagerUDS.getTransaction().begin();
 
-
-
-                Dataset mergedDataset = entityManagerUDS.merge(m_dataset);
+                Dataset mergedDataset = entityManagerUDS.find(Dataset.class, m_dataset.getId());
 
                 m_dataset.setResultSummaryId(m_resultSummaryId);
                 mergedDataset.setResultSummaryId(m_resultSummaryId);
@@ -699,12 +762,12 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
 
 
-                Dataset mergedDataset = entityManagerUDS.merge(m_dataset);
+                Dataset mergedDataset = entityManagerUDS.find(Dataset.class, m_dataset.getId());
 
                 m_dataset.setResultSummaryId(null);
                 mergedDataset.setResultSummaryId(null);
                 
-                m_dataset.getTransientData().setResultSummary(null);                          
+                m_dataset.setResultSummary(null);                          
                 mergedDataset.getTransientData().setResultSummary(null);
 
                 entityManagerUDS.persist(mergedDataset);
@@ -733,7 +796,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             try {
                 entityManagerUDS.getTransaction().begin();
 
-                Dataset mergedDataset = entityManagerUDS.merge(m_dataset);
+                Dataset mergedDataset = entityManagerUDS.find(Dataset.class, m_dataset.getId());
 
                 m_dataset.setResultSetId(m_resultSetId);
                 mergedDataset.setResultSetId(m_resultSetId);
@@ -765,7 +828,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             try {
                 entityManagerUDS.getTransaction().begin();
 
-                Dataset mergedTrash = entityManagerUDS.merge(m_dataset); // dataset is the Trash
+                Dataset mergedTrash = entityManagerUDS.find(Dataset.class, m_dataset.getId()); // dataset is the Trash
                 removeChildren(entityManagerUDS, mergedTrash);
                 mergedTrash.setChildren(new ArrayList());
                 mergedTrash.setChildrenCount(0);
@@ -806,7 +869,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param databaseObjectsToModify HashMap whose keys can be Project or
      * Parent Dataset
      */
-    public static boolean updateDatasetAndProjectsTree(HashMap<Object, ArrayList<Dataset>> databaseObjectsToModify) {
+    public static boolean updateDatasetAndProjectsTree(HashMap<Object, ArrayList<DDataset>> databaseObjectsToModify) {
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
@@ -814,43 +877,57 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             Iterator it = databaseObjectsToModify.keySet().iterator();
             while (it.hasNext()) {
                 Object parentObject = it.next();
-                ArrayList<Dataset> datasetList = databaseObjectsToModify.get(parentObject);
+                ArrayList<DDataset> datasetList = databaseObjectsToModify.get(parentObject);
 
                 int nbDataset = datasetList.size();
-                ArrayList<Dataset> mergedDatasetList = new ArrayList<Dataset>(nbDataset);
+                ArrayList<Dataset> mergedDatasetList = new ArrayList<>(nbDataset);
 
+                boolean childrenNotLoaded = false;
                 for (int i = 0; i < nbDataset; i++) {
-                    Dataset dataset = datasetList.get(i);
-                    Dataset mergedDataset = entityManagerUDS.merge(dataset);
+                    DDataset dataset = datasetList.get(i);
+                    if (dataset == null) {
+                        childrenNotLoaded = true; // some children have not been loaded already
+                        continue;
+                    }
+                    Dataset mergedDataset = entityManagerUDS.find(Dataset.class, dataset.getId());
                     mergedDatasetList.add(mergedDataset);
                 }
 
 
-                Dataset parentDataset;
+                DDataset parentDataset;
                 Dataset mergedParentDataset = null;
                 Project parentProject;
                 //Project mergedParentProject = null;
-                if (parentObject instanceof Dataset) {
-                    parentDataset = (Dataset) parentObject;
-                    mergedParentDataset = entityManagerUDS.merge(parentDataset);
+                if (parentObject instanceof DDataset) {
+                    parentDataset = (DDataset) parentObject;
+                    mergedParentDataset = entityManagerUDS.find(Dataset.class, parentDataset.getId());
+                    
+                    if (childrenNotLoaded) {
+                        for (int i=0;i<mergedDatasetList.size();i++) {
+                            mergedParentDataset.addChild(mergedDatasetList.get(i));
+                        }
+                    } else {
+                        mergedParentDataset.replaceAllChildren(mergedDatasetList);
+                    }
 
-
-                    mergedParentDataset.replaceAllChildren(mergedDatasetList);
-                    try {
+                    
+                    
+                    parentDataset.setChildrenCount(mergedParentDataset.getChildrenCount());
+                    /*try {
                         parentDataset.replaceAllChildren(datasetList);
                     } catch (org.hibernate.LazyInitializationException e) {
                         // JPM.WART
                         // if this exception happens : the children count has not been updated
                         // I update it by hand
                         parentDataset.setChildrenCount(mergedParentDataset.getChildrenCount());
-                    }
+                    }*/
 
                 } else if (parentObject instanceof Project) {
                     parentProject = (Project) parentObject;
                     parentProject.getTransientData().setChildrenNumber(nbDataset);
                 }
 
-                for (int i = 0; i < nbDataset; i++) {
+                for (int i = 0; i < mergedDatasetList.size(); i++) {
                     Dataset mergedDataset = mergedDatasetList.get(i);
                     entityManagerUDS.persist(mergedDataset);
                 }

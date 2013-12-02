@@ -2,6 +2,8 @@ package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
+
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
@@ -111,17 +113,20 @@ public class AggregateAction extends AbstractRSMAction {
                 // add to really create the aggregate dataset
 
                 Project project = null;
-                Dataset parentDataset = null;
+                DDataset parentDataset = null;
+                RSMDataSetNode parentDatasetNode = null;
                 if (n.getType() == RSMNode.NodeTypes.PROJECT) {
                     project = ((RSMProjectNode) n).getProject();
                     parentDataset = null;
                 } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
-                    parentDataset = ((RSMDataSetNode) n).getDataset();
+                    parentDatasetNode = ((RSMDataSetNode) n);
+                    parentDataset = parentDatasetNode.getDataset();
                     project = parentDataset.getProject();
                 }
 
-                final ArrayList<Dataset> createdDatasetList = new ArrayList<>();
+                final ArrayList<DDataset> createdDatasetList = new ArrayList<>();
 
+                        
                 AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                     @Override
@@ -135,11 +140,12 @@ public class AggregateAction extends AbstractRSMAction {
                         if (!success) {
                             return; // should not happen
                         }
+
                         int nbNodes = nodesCreated.size();
                         for (int i = 0; i < nbNodes; i++) {
 
                             RSMDataSetNode datasetNode = nodesCreated.get(i);
-                            Dataset dataset = createdDatasetList.get(i);
+                            DDataset dataset = createdDatasetList.get(i);
                             datasetNode.setIsChanging(false);
                             ((DataSetData) datasetNode.getData()).setDataset(dataset);
                             treeModel.nodeChanged(datasetNode);
@@ -186,7 +192,7 @@ public class AggregateAction extends AbstractRSMAction {
             // we can add an aggregate only to a data set without a ResultSet or a ResultSummary
             if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
                 
-                Dataset d = ((RSMDataSetNode) node).getDataset();
+                DDataset d = ((RSMDataSetNode) node).getDataset();
                 if (d.getType() != Dataset.DatasetType.AGGREGATE) {
                     setEnabled(false);
                 return;

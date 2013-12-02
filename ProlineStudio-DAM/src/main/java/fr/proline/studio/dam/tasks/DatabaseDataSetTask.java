@@ -362,8 +362,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             }
             
             // add Trash if it not exists
-
-            if (!hasTrash) {
+            // ----------- no longer needed -----------------
+            /*if (!hasTrash) {
 
                 Project mergedProject = entityManagerUDS.merge(m_project);
                 Dataset trashDataset = new Dataset(mergedProject);
@@ -380,7 +380,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
                 entityManagerUDS.persist(trashDataset);
 
-            }
+            }*/
     
             
             m_project.getTransientData().setChildrenNumber(m_list.size());

@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
@@ -32,7 +33,7 @@ public class RSMDataSetNode extends RSMNode {
     @Override
     public ImageIcon getIcon() {
         
-        Dataset dataset = ((DataSetData) getData()).getDataset();
+        DDataset dataset = ((DataSetData) getData()).getDataset();
         Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
         switch(datasetType) {
             case IDENTIFICATION:
@@ -79,12 +80,16 @@ public class RSMDataSetNode extends RSMNode {
     
 
     
-    public Dataset getDataset() {
+    public DDataset getDataset() {
         return ((DataSetData) getData()).getDataset();
     }
     
+    public void setDataset(DDataset dataset) {
+        ((DataSetData) getData()).setDataset(dataset);
+    }
+    
     public boolean isTrash() {
-        Dataset dataset = ((DataSetData) getData()).getDataset();
+        DDataset dataset = ((DataSetData) getData()).getDataset();
         if (dataset == null) {
             return false;
         }
@@ -96,7 +101,7 @@ public class RSMDataSetNode extends RSMNode {
     }
     
     public boolean hasResultSummary() {
-        Dataset dataSet = ((DataSetData) getData()).getDataset();
+        DDataset dataSet = ((DataSetData) getData()).getDataset();
         return (dataSet.getResultSummaryId() != null);
     }
     
@@ -107,13 +112,13 @@ public class RSMDataSetNode extends RSMNode {
     
     public ResultSummary getResultSummary() {
         // getResultSummary() can return null if the resultSummary has not been loaded previously
-        Dataset dataSet = ((DataSetData) getData()).getDataset();
-        return dataSet.getTransientData().getResultSummary();
+        DDataset dataSet = ((DataSetData) getData()).getDataset();
+        return dataSet.getResultSummary();
     }
     
     
     public boolean hasResultSet() {
-        Dataset dataSet = ((DataSetData) getData()).getDataset();
+        DDataset dataSet = ((DataSetData) getData()).getDataset();
         return (dataSet.getResultSetId() != null);
     }
     
@@ -123,8 +128,8 @@ public class RSMDataSetNode extends RSMNode {
     
     public ResultSet getResultSet() {
         // getResultSet() can return null if the resultSet has not been loaded previously
-        Dataset dataSet = ((DataSetData) getData()).getDataset();
-        return dataSet.getTransientData().getResultSet();
+        DDataset dataSet = ((DataSetData) getData()).getDataset();
+        return dataSet.getResultSet();
     }
     
     @Override
@@ -160,7 +165,7 @@ public class RSMDataSetNode extends RSMNode {
     
     public void rename(final String newName) {
 
-        Dataset dataset = getDataset();
+        DDataset dataset = getDataset();
         String name = dataset.getName();
 
         if ((newName != null) && (newName.compareTo(name) != 0)) {
@@ -199,7 +204,7 @@ public class RSMDataSetNode extends RSMNode {
     public void loadDataForProperties(final Runnable callback) {
         
         // we must load resultSet and resultSummary
-        final Dataset dataSet = ((DataSetData) getData()).getDataset();
+        final DDataset dataSet = ((DataSetData) getData()).getDataset();
         
 
         
@@ -229,7 +234,7 @@ public class RSMDataSetNode extends RSMNode {
         
         // Task 2 : Load ResultSet Extra Data
         AbstractDatabaseCallback task2Callback = (dataSet.getResultSummaryId()!=null) ? null : dbCallback;
-        DatabaseRsetProperties task2 = new DatabaseRsetProperties(task2Callback,dataSet.getProject().getId(),dataSet);
+        DatabaseRsetProperties task2 = new DatabaseRsetProperties(task2Callback, dataSet.getProject().getId(),dataSet);
         task2.setPriority(Priority.HIGH_3); // highest priority
         task1.setConsecutiveTask(task2);
         
@@ -250,7 +255,7 @@ public class RSMDataSetNode extends RSMNode {
     @Override
     public Sheet createSheet() {
         
-        Dataset dataset = getDataset();
+        DDataset dataset = getDataset();
         return PropertiesAction.createSheet(dataset);
         
     }

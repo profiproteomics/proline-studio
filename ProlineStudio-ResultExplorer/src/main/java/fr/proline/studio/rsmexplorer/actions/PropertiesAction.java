@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.msi.*;
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
@@ -132,13 +132,13 @@ public class PropertiesAction extends AbstractRSMAction {
         
     }
     
-    public static Sheet createSheet(Dataset dataset) {
-        ResultSet rset = dataset.getTransientData().getResultSet();
-        ResultSummary rsm = dataset.getTransientData().getResultSummary();
+    public static Sheet createSheet(DDataset dataset) {
+        ResultSet rset = dataset.getResultSet();
+        ResultSummary rsm = dataset.getResultSummary();
         return createSheet(dataset, rset, rsm);
     }
 
-    public static Sheet createSheet(Dataset dataset, ResultSet rset, ResultSummary rsm) {
+    public static Sheet createSheet(DDataset dataset, ResultSet rset, ResultSummary rsm) {
 
         Sheet sheet = Sheet.createDefault();
 
@@ -228,7 +228,7 @@ public class PropertiesAction extends AbstractRSMAction {
         return sheet;
     }
     
-    private static Sheet.Set createDataSetSheetSet(final Dataset dataset) throws NoSuchMethodException {
+    private static Sheet.Set createDataSetSheetSet(final DDataset dataset) throws NoSuchMethodException {
             Sheet.Set propGroup = Sheet.createPropertiesSet();
             propGroup.setName("Data Set");
             propGroup.setDisplayName("Data Set");

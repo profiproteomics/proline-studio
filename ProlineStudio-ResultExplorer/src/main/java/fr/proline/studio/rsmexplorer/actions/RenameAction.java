@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
@@ -30,7 +30,7 @@ public class RenameAction extends AbstractRSMAction {
         RSMNode.NodeTypes nodeType = n.getType();
         if (nodeType == RSMNode.NodeTypes.DATA_SET) {
             RSMDataSetNode datasetNode = (RSMDataSetNode) n;
-            Dataset dataset = datasetNode.getDataset();
+            DDataset dataset = datasetNode.getDataset();
             
             String name = dataset.getName();
             String newName = showRenameDialog(name, x, y);

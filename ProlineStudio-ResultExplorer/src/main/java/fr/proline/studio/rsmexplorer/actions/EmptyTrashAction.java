@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.core.orm.uds.Dataset;
+
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -28,7 +29,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
         // selected node is the Trash
         final RSMNode n = selectedNodes[0];
         RSMDataSetNode datasetNode = (RSMDataSetNode) n;
-        Dataset trashDataset = datasetNode.getDataset();
+        DDataset trashDataset = datasetNode.getDataset();
         
         RSMTree tree = RSMTree.getTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();

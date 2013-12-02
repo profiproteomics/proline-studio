@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.ExportRSMTask;
@@ -26,7 +27,7 @@ public class ExportRSMAction extends AbstractRSMAction {
 
         // only one node selected for this action        
         final RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[0];
-        final Dataset d = dataSetNode.getDataset();
+        final DDataset d = dataSetNode.getDataset();
         
         // used as out parameter for the service
         final String[] _filePath = new String[1];

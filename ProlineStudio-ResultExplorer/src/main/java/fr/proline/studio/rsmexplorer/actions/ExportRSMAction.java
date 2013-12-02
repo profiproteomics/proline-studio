@@ -71,11 +71,18 @@ public class ExportRSMAction extends AbstractRSMAction {
 
         RSMNode node = selectedNodes[0];
         RSMNode.NodeTypes nodeType = node.getType();
-        if ((nodeType != RSMNode.NodeTypes.DATA_SET) && (nodeType != RSMNode.NodeTypes.PROJECT )) {
+        if (nodeType != RSMNode.NodeTypes.DATA_SET) {
             setEnabled(false);
             return;
         }
 
+        // We can only export a RSM
+        RSMDataSetNode datasetNode = (RSMDataSetNode) node;
+        if (!datasetNode.hasResultSummary()) {
+            setEnabled(false);
+            return;
+        }
+        
         setEnabled(true);
     }
     

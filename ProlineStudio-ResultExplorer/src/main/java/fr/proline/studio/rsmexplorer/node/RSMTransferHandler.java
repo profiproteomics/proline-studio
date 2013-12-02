@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.node;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
@@ -280,15 +281,16 @@ public class RSMTransferHandler extends TransferHandler {
         
         
         Project project = null;
-        Dataset parentDataset = null;
+        DDataset parentDataset = null;
+        RSMDataSetNode parentDatasetNode = null;
 
         if (dropRSMNode.getType() == RSMNode.NodeTypes.PROJECT) {
             RSMProjectNode projectNode = (RSMProjectNode) dropRSMNode;
             project = projectNode.getProject();
         } else if (dropRSMNode.getType() == RSMNode.NodeTypes.DATA_SET) {
-            RSMDataSetNode dataSetNode = (RSMDataSetNode) dropRSMNode;
-            project = dataSetNode.getDataset().getProject();
-            parentDataset = dataSetNode.getDataset();
+            parentDatasetNode = (RSMDataSetNode) dropRSMNode;
+            project = parentDatasetNode.getDataset().getProject();
+            parentDataset = parentDatasetNode.getDataset();
         }
 
 
@@ -312,7 +314,8 @@ public class RSMTransferHandler extends TransferHandler {
             treeModel.insertNodeInto(identificationNode, dropRSMNode, childIndex);
             childIndex++;
 
-            final ArrayList<Dataset> createdDatasetList = new ArrayList<>();
+            final ArrayList<DDataset> createdDatasetList = new ArrayList<>();
+
 
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -327,7 +330,9 @@ public class RSMTransferHandler extends TransferHandler {
                      identificationNode.setIsChanging(false);
                     
                     if (success) {
-                        Dataset dataset = createdDatasetList.get(0);
+                        
+
+                        DDataset dataset = createdDatasetList.get(0);
                         identificationNode.setIsChanging(false);
                         ((DataSetData) identificationNode.getData()).setDataset(dataset);
                         treeModel.nodeChanged(identificationNode);
@@ -408,9 +413,10 @@ public class RSMTransferHandler extends TransferHandler {
 
         }
 
-        // create HashMap of Databse Object which need to be updated
-        HashMap<Object, ArrayList<Dataset>> databaseObjectsToModify = new HashMap<>();
-
+        // create HashMap of Database Object which need to be updated
+        HashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new HashMap<>();
+        HashSet<RSMDataSetNode> nodeToBeChanged = new HashSet<>();
+        
         Iterator<RSMNode> it = allParentNodeModified.iterator();
         while (it.hasNext()) {
 
@@ -422,6 +428,7 @@ public class RSMTransferHandler extends TransferHandler {
             if (type == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode datasetNode = ((RSMDataSetNode) parentNode);
                 databaseParentObject = datasetNode.getDataset();
+                nodeToBeChanged.add(datasetNode);
             } else if (type == RSMNode.NodeTypes.PROJECT) {
                 RSMProjectNode projectNode = ((RSMProjectNode) parentNode);
                 databaseParentObject = projectNode.getProject();
@@ -431,26 +438,35 @@ public class RSMTransferHandler extends TransferHandler {
 
             // get new Dataset children
             int nbChildren = parentNode.getChildCount();
-            ArrayList<Dataset> datasetList = new ArrayList<>(nbChildren);
+            ArrayList<DDataset> datasetList = new ArrayList<>(nbChildren);
             for (int i = 0; i < nbChildren; i++) {
                 // we are sure that it is a Dataset
 
                 RSMNode childNode = ((RSMNode) parentNode.getChildAt(i));
                 if (!(childNode instanceof RSMDataSetNode)) {
-                    continue; // possible for "All imported" node
+                    
+                    if (childNode instanceof RSMHourGlassNode) {
+                        // drop on a node whose children have not been loaded
+                        datasetList.add(null); // JPM.WART : children not already loaded
+                    }
+                    
+                    continue; // possible for "All imported" node or Hour Glass Node
                 }
                 RSMDataSetNode childDatasetNode = (RSMDataSetNode) childNode;
-                Dataset dataset = childDatasetNode.getDataset();
+                DDataset dataset = childDatasetNode.getDataset();
                 datasetList.add(dataset);
+                nodeToBeChanged.add(childDatasetNode);
             }
 
             // register this modification
             databaseObjectsToModify.put(databaseParentObject, datasetList);
+            
         }
 
         // ask the modification to the database at once (intricate to put in a thread in Dnd context)
         DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify);
 
+        
 
         return true;
 

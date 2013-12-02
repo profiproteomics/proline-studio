@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ParentData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -114,7 +114,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     }
     
     
-    public RSMTree copyDataSetRootSubTree(Dataset dset, long projectId) {
+    public RSMTree copyDataSetRootSubTree(DDataset dset, long projectId) {
 
         long dsetId = dset.getId();
         RSMDataSetNode dsetNode = findDataSetNode((RSMNode) m_model.getRoot(), dsetId, projectId);
@@ -122,8 +122,6 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         if (dsetNode == null) {
             return null;
         }
-
-//        dsetNode = findResultSetNodeRootParent(dsetNode);
 
         return new RSMTree(dsetNode);
 
@@ -509,8 +507,9 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         
 
-        HashMap<Object, ArrayList<Dataset>> databaseObjectsToModify = new HashMap<Object, ArrayList<Dataset>>();
-
+        HashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new HashMap<>();
+        HashSet<RSMDataSetNode> nodeToBeChanged = new HashSet<>();
+        
         Iterator<RSMNode> it = allParentNodeModified.iterator();
         while (it.hasNext()) {
 
@@ -522,6 +521,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             if (type == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode datasetNode = ((RSMDataSetNode) parentNode);
                 databaseParentObject = datasetNode.getDataset();
+                nodeToBeChanged.add(datasetNode);
             } else if (type == RSMNode.NodeTypes.PROJECT) {
                 RSMProjectNode projectNodeS = ((RSMProjectNode) parentNode);
                 databaseParentObject = projectNodeS.getProject();
@@ -531,13 +531,17 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
             // get new Dataset children
             int nb = parentNode.getChildCount();
-            ArrayList<Dataset> datasetList = new ArrayList<Dataset>(nb);
+            ArrayList<DDataset> datasetList = new ArrayList<>(nb);
             for (int i = 0; i < nb; i++) {
                 // we are sure that it is a Dataset
                 RSMNode childNode = ((RSMNode) parentNode.getChildAt(i));
                 if (childNode instanceof RSMDataSetNode) {
-                    Dataset dataset = ((RSMDataSetNode)childNode).getDataset();
+                    DDataset dataset = ((RSMDataSetNode)childNode).getDataset();
                     datasetList.add(dataset);
+                    nodeToBeChanged.add((RSMDataSetNode)childNode);
+                } else if (childNode instanceof RSMHourGlassNode) {
+                    // potential bug
+                    //JPM.TODO ??? (should not happen)
                 }
             }
 
@@ -548,6 +552,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         // ask the modification to the database at once (intricate to put in a thread in Dnd context)
         DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify);
 
+
+        
     }
         
     private static HashMap<AbstractData, RSMNode> loadingMap = new HashMap<>();
@@ -804,7 +810,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                     }
                 }
                 //mainPopup.add(new DoItAction());
-                List<Action> additionalActions = ActionRegistry.getInstance().getActions(Dataset.class);
+                List<Action> additionalActions = ActionRegistry.getInstance().getActions(DDataset.class);
                 if(additionalActions != null) {
                     for (Action action : additionalActions)
                         mainPopup.add(new DatasetWrapperAction(((DatasetAction)action)));

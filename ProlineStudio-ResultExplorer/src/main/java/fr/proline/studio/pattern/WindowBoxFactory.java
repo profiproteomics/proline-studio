@@ -21,7 +21,7 @@ public class WindowBoxFactory {
 
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
         WindowBox winBox = new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
-        //winBox.resetDefaultSize(); //JPM.WART
+
         return winBox;
     }
     
@@ -43,7 +43,7 @@ public class WindowBoxFactory {
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
-      //  winBox.resetDefaultSize(); //JPM.WART
+
         return winBox;
         
     }
@@ -66,7 +66,7 @@ public class WindowBoxFactory {
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
-        winBox.resetDefaultSize(); //JPM.WART
+
         return winBox;
         
     }
@@ -79,7 +79,7 @@ public class WindowBoxFactory {
 
 
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.RSET) );
-        //winBox.resetDefaultSize(); //JPM.WART
+
         return winBox;
         
     }
@@ -103,7 +103,10 @@ public class WindowBoxFactory {
         boxes[3].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
 
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;
-        return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+
+        
+        return winBox;
     }
     
     public static WindowBox getProteinSetsWindowBox(String name, boolean isDecoy) {
@@ -123,7 +126,10 @@ public class WindowBoxFactory {
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;
         
-        return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+
+        
+        return winBox; 
     }
     
     public static WindowBox getAllResultSetWindowBox(String name) {

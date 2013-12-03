@@ -10,9 +10,11 @@ public class ExporterFactory {
     
     public static final int EXPORT_TABLE = 1;
     public static final int EXPORT_IMAGE = 2;
+    public static final int EXPORT_FROM_SERVER = 3;
 
     private static ArrayList<ExporterInfo> m_listTable = null;
-    private static ArrayList<ExporterInfo> m_listImage= null;
+    private static ArrayList<ExporterInfo> m_listImage = null;
+    private static ArrayList<ExporterInfo> m_listServer= null;
     
     public enum ExporterType {
         EXCEL_XML,
@@ -36,7 +38,7 @@ public class ExporterFactory {
             m_listTable.add(new ExporterInfo(ExporterType.CSV, "CSV (.csv)", "csv"));
 
             return m_listTable;
-        } else {  // IMAGE
+        } else if (exportType == EXPORT_IMAGE) {
              if (m_listImage != null) {
                 return m_listImage;
             }
@@ -46,6 +48,18 @@ public class ExporterFactory {
             m_listImage.add(new ExporterInfo(ExporterType.PNG, "PNG (.png)", "png"));
 
             return m_listImage;
+        } else { // EXPORT_FROM_SERVER
+            
+            if (m_listServer != null) {
+                return m_listServer;
+            }
+            m_listServer = new ArrayList<>(1);
+
+
+            m_listServer.add(new ExporterInfo(ExporterType.EXCEL_XML, "Excel (.xlsx)", "xlsx"));
+
+
+            return m_listServer;
         }
     }
     

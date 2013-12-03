@@ -907,7 +907,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (m_isMainTree && e.isPopupTrigger()) {
+        if (m_isMainTree && SwingUtilities.isRightMouseButton(e)) {
             triggerPopup(e);
         }
     }

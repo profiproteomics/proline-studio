@@ -4,9 +4,13 @@ import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
+import fr.proline.studio.dpm.task.DownloadFileTask;
 import fr.proline.studio.dpm.task.ExportRSMTask;
+import fr.proline.studio.export.ExportDialog;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,35 +29,87 @@ public class ExportRSMAction extends AbstractRSMAction {
         @Override
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
 
-        // only one node selected for this action        
         final RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[0];
         final DDataset d = dataSetNode.getDataset();
+
+        final ExportDialog dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow());
         
-        // used as out parameter for the service
-        final String[] _filePath = new String[1];
+        DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
 
-            AbstractServiceCallback callback = new AbstractServiceCallback() {
+            @Override
+            public int getMinValue() {
+                return 0;
+            }
 
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
+            @Override
+            public int getMaxValue() {
+                return 100;
+            }
 
-                @Override
-                public void run(boolean success) {
-                    if (success) {
-                        m_logger.info("OK " + _filePath[0]);
+            @Override
+            protected Object doInBackground() throws Exception {
 
-                    } else {
-                        m_logger.info("ERROR");
+
+                final AbstractServiceCallback downloadCallback = new AbstractServiceCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
                     }
-                }
-            };
+
+                    @Override
+                    public void run(boolean success) {
+                        if (success) {
+
+                            setProgress(100);
+
+                        } else {
+                            // nothing to do
+                            // failed
+                            setProgress(100);
+                        }
+                    }
+                };
+
+                // used as out parameter for the service
+                final String[] _filePath = new String[1];
+
+                AbstractServiceCallback exportCallback = new AbstractServiceCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success) {
+                        if (success) {
+
+                            DownloadFileTask task = new DownloadFileTask(downloadCallback, dialog.getFileName(), _filePath[0]);
+                            AccessServiceThread.getAccessServiceThread().addTask(task);
+
+                        } else {
+                            // nothing to do
+                            // failed
+                            setProgress(100);
+                        }
+                    }
+                };
 
 
-            ExportRSMTask task = new ExportRSMTask(callback, dataSetNode.getDataset(), _filePath);
-            AccessServiceThread.getAccessServiceThread().addTask(task);
+                ExportRSMTask task = new ExportRSMTask(exportCallback, dataSetNode.getDataset(), _filePath);
+                AccessServiceThread.getAccessServiceThread().addTask(task);
 
+                
+
+                return null;
+            }
+        };
+
+
+        dialog.setTask(task);
+        dialog.setLocation(x, y);
+        dialog.setVisible(true);
 
 
     }

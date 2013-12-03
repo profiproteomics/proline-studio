@@ -534,7 +534,8 @@ public class DefaultDialog extends javax.swing.JDialog {
 
             
             m_progressBar = new JProgressBar(task.getMinValue(), task.getMaxValue());
-            m_progressBar.setStringPainted(true);
+            m_progressBar.setIndeterminate(true);
+            m_progressBar.setStringPainted(false);
 
             m_progressPanel.add(m_progressBar);
             
@@ -551,6 +552,10 @@ public class DefaultDialog extends javax.swing.JDialog {
         public void propertyChange(PropertyChangeEvent evt) {
             if ("progress".equals(evt.getPropertyName())) {
                 int progress = (Integer) evt.getNewValue();
+                if ((progress>0) && (m_progressBar.isIndeterminate())) {
+                    m_progressBar.setIndeterminate(false);
+                    m_progressBar.setStringPainted(true);
+                }
                 m_progressBar.setValue(progress);
                 if (progress >= m_progressBar.getMaximum()) {
                     setBusy(false);

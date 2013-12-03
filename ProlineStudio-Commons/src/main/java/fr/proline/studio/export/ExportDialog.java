@@ -25,6 +25,7 @@ public class ExportDialog extends DefaultDialog {
 
     private static ExportDialog m_singletonImageDialog = null;
     private static ExportDialog m_singletonExcelDialog = null;
+    private static ExportDialog m_singletonServerDialog = null;
  
     private int m_exportType;
     
@@ -33,6 +34,8 @@ public class ExportDialog extends DefaultDialog {
 
     private JXTable m_table = null;
     private JPanel m_panel = null;
+    
+    private DefaultDialog.ProgressTask m_task = null;
     
     private String m_exportName = null;
     
@@ -58,8 +61,23 @@ public class ExportDialog extends DefaultDialog {
         return m_singletonImageDialog;
     }
     
+        
+    public static ExportDialog getDialog(Window parent) {
+        if (m_singletonServerDialog == null) {
+            m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER);
+        }
 
-    public ExportDialog(Window parent, int type) {
+        
+
+        return m_singletonServerDialog;
+    }
+
+    public void setTask(DefaultDialog.ProgressTask task) {
+        m_task = task;
+    }
+    
+    
+    private ExportDialog(Window parent, int type) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         m_exportType = type;
@@ -70,12 +88,12 @@ public class ExportDialog extends DefaultDialog {
         setInternalComponent(createExportPanel());
 
         setButtonVisible(BUTTON_DEFAULT, false);
-        setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_TABLE) ? "Export" : "Export Image");
+        setButtonName(BUTTON_OK, (m_exportType == ExporterFactory.EXPORT_IMAGE) ? "Export Image" : "Export");
 
         Preferences preferences = NbPreferences.root();
         String defaultExportPath;
         
-        if (m_exportType == ExporterFactory.EXPORT_TABLE) {
+        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER)) {
            defaultExportPath = preferences.get("DefaultExcelExportPath", "");
         } else { // IMAGE
            defaultExportPath = preferences.get("DefaultImageExportPath", "");
@@ -214,6 +232,13 @@ public class ExportDialog extends DefaultDialog {
 
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultExcelExportPath", f.getParent());
+        } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) {
+
+            startTask(m_singletonServerDialog.m_task);
+            
+            Preferences preferences = NbPreferences.root();
+            preferences.put("DefaultExcelExportPath", f.getParent());
+            
         } else {
 
             BufferedImage bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB); 

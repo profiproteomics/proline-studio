@@ -23,6 +23,7 @@ public class ServerConnectionManager {
     private static final String KEY_SERVER_URL = "serverURL";
     private static final String KEY_PROJECT_USER = "projectUser";
     private static final String KEY_DB_PASSWORD = "databasePassword";
+    private static final String KEY_PASSWORD_NEEDED = "passwordNeeded";
     
     public static final int NOT_CONNECTED = 0;
     public static final int CONNECTION_SERVER_ASKED = 1;
@@ -37,11 +38,13 @@ public class ServerConnectionManager {
     private String m_serverURL;
     private String m_projectUser;
     private String m_databasePassword;
+    private boolean m_passwordNeeded;
     
     
     private String m_previousServerURL = "";
     private String m_previousProjectUser = "";
     private String m_previousDatabsePassword = "";
+    
     private int m_previousErrorId = -1;
     
     
@@ -56,7 +59,10 @@ public class ServerConnectionManager {
 
     public ServerConnectionManager() {
         restoreParameters();
-        tryServerConnection();
+        
+        if ((!m_passwordNeeded) || (!m_databasePassword.isEmpty())) {
+            tryServerConnection();
+        }
     }
     
    private void restoreParameters() {
@@ -65,15 +71,18 @@ public class ServerConnectionManager {
         m_serverURL = preferences.get(KEY_SERVER_URL, "http://");
         m_projectUser = preferences.get(KEY_PROJECT_USER, "");
         m_databasePassword = preferences.get(KEY_DB_PASSWORD, "");
+        
+        m_passwordNeeded = preferences.getBoolean(KEY_PASSWORD_NEEDED, false);
     }
    
-       public void saveParameters() {
+    public void saveParameters() {
         Preferences preferences = NbPreferences.root();
         
         preferences.put(KEY_SERVER_URL, m_serverURL);
         preferences.put(KEY_PROJECT_USER, m_projectUser);
         preferences.put(KEY_DB_PASSWORD, m_databasePassword);
 
+        preferences.putBoolean(KEY_PASSWORD_NEEDED, m_passwordNeeded);
         
         try {
             preferences.flush();
@@ -110,7 +119,7 @@ public class ServerConnectionManager {
        m_previousProjectUser = projectUser;
        m_previousErrorId = -1;
        
-     
+       m_passwordNeeded = !databasePassword.isEmpty();
        
        setConnectionState(CONNECTION_SERVER_ASKED);
        
@@ -287,7 +296,9 @@ public class ServerConnectionManager {
         m_databasePassword = databasePassword;
     }
 
-    
+    public void setPasswordNeeded(boolean passwordNeeded) {
+        m_passwordNeeded = passwordNeeded;
+    }
     
     public synchronized boolean isConnectionFailed() {
         return ((m_connectionState == CONNECTION_SERVER_FAILED) || (m_connectionState == CONNECTION_DATABASE_FAILED));

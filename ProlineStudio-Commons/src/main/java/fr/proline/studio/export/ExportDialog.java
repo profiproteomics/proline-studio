@@ -231,13 +231,13 @@ public class ExportDialog extends DefaultDialog {
             startTask(exportTask);
 
             Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelExportPath", f.getParent());
+            preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
         } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) {
 
             startTask(m_singletonServerDialog.m_task);
             
             Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelExportPath", f.getParent());
+            preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
             
         } else {
 
@@ -252,7 +252,7 @@ public class ExportDialog extends DefaultDialog {
             }
             
             Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelImagePath", f.getParent());
+            preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
             
             setVisible(false);
         }

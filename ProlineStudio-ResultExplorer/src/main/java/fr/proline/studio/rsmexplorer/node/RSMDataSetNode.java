@@ -141,6 +141,15 @@ public class RSMDataSetNode extends RSMNode {
     }
     
     @Override
+    public String toString() {
+        //JPM.WART : display Trash instead of TRASH
+        if (isTrash()) {
+            return "Trash";
+        }
+        return super.toString();
+    }
+    
+    @Override
     public boolean canBeDeleted() {
         
         // for the moment, we can delete only empty DataSet with no leaf

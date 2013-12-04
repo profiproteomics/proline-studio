@@ -803,24 +803,45 @@ public class SplittedPanelContainer extends JPanel {
     
     /**
      * Dispatch the new heights
+     * The code seems intricate, but as we have JSplitPane in JSplitPane and
+     * the fact that setDividerLocation use a event mechanism, we are obliged
+     * to do the setDividerLocation() of the different JSplitPane in different
+     * successive invokeLater
      * @param heights 
      */
     private void dispatchHeight(final int[] heights) {
-        SwingUtilities.invokeLater(new Runnable() {
 
-            @Override
-            public void run() {
-                // set new height to split pane
-                int nbSplits = m_splitPaneArray.size();
-                for (int i = nbSplits - 1; i >= 0; i--) {
-                    m_splitPaneArray.get(i).setDividerLocation(heights[i]);
+        int nbSplits = m_splitPaneArray.size();
+
+        if (nbSplits == 0) {
+            return;
+        }
+        
+        final Runnable[] rs = new Runnable[nbSplits];
+        
+        for (int i = 0; i < nbSplits; i++) {
+            final JSplitPane s =  m_splitPaneArray.get(i);
+            final int height = heights[i];
+            final int _i = i;
+            rs[i] = new Runnable() {
+
+                @Override
+                public void run() {
+                    s.setDividerLocation(height);
+                    if (_i+1<rs.length) {
+                        // Start resize of the next JSplitPane
+                         SwingUtilities.invokeLater(rs[_i+1]);
+                    }
                 }
-            }
-        });
+            };
+        }
 
-
+        // Start resize of the first JSplitPane
+        SwingUtilities.invokeLater(rs[0]);
 
     }
+
+
     
     
     /**

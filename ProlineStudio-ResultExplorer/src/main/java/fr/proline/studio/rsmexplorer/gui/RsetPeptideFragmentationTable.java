@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -14,11 +13,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.swing.JLayeredPane;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JToolBar;
+
 import javax.swing.RowSorter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -36,12 +35,8 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.markerbar.MarkerComponentInterface;
-import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
-import fr.proline.studio.utils.DecoratedMarkerTable;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;

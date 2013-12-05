@@ -3,43 +3,23 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 //import fr.proline.core.orm.msi.MsQuery;
-//import fr.proline.core.orm.msi.PeptideMatch;
-import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
 //import org.jfree.data.xy.DefaultXYDataset;
 
-import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.progress.ProgressBarDialog;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.gui.RsetPeptideFragmentationTable.FragmentationTableModel;
-import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
-import fr.proline.studio.search.SearchFloatingPanel;
-import fr.proline.studio.search.SearchToggleButton;
-import fr.proline.studio.stats.ValuesForStatsAbstract;
-import fr.proline.studio.utils.IconManager;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.swing.JButton;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
 
-import org.openide.windows.WindowManager;
 
 
 
@@ -69,8 +49,7 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
         }	
         
 	
-    private ExportButton m_exportButton;
-    
+   
     
         
 	/**
@@ -85,19 +64,7 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 	//}
 
 
-     JToolBar initToolbar() {
-        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-        toolbar.setFloatable(false);
-        
-               
-        m_exportButton = new ExportButton(((FragmentationTableModel) fragmentationTable.getModel()), "Fragmentation Table", fragmentationTable);
-        
-       
-        toolbar.add(m_exportButton);
-        
-             
-        return toolbar;
-    }
+   
     
 	
   public void setData(DPeptideMatch peptideMatch) {

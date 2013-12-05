@@ -2,6 +2,7 @@ package fr.proline.studio.dam.tasks;
 
 
 import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMsQuery;
@@ -482,23 +483,41 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
 
         List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
 
-        Query peptideQuery = entityManagerMSI.createQuery("SELECT pm.id, p FROM PeptideMatch pm,fr.proline.core.orm.msi.Peptide p WHERE pm.id IN (:listId) AND pm.peptideId=p.id");
+        Query peptideQuery = entityManagerMSI.createQuery("SELECT pm.id, p FROM PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pm.id IN (:listId) AND pm.peptideId=p.id");
         peptideQuery.setParameter("listId", sliceOfPeptideMatchIds);
 
- 
+        HashMap<Long, Peptide> peptideMap= new HashMap<>();
         
-
         List<Object[]> peptides = peptideQuery.getResultList();
         Iterator<Object[]> it = peptides.iterator();
         while (it.hasNext()) {
             Object[] res = it.next();
             Long peptideMatchId = (Long) res[0];
             Peptide peptide = (Peptide) res[1];
+            peptide.getTransientData().setPeptideReadablePtmStringLoaded();
             m_peptideMatchMap.get(peptideMatchId).setPeptide(peptide);
+            peptideMap.put(peptide.getId(), peptide);
         }
         
+        // Retrieve PeptideReadablePtmString
+        Long rsetId = (m_rset != null) ? m_rset.getId() : m_rsm.getResultSet().getId();
+        Query ptmStingQuery = entityManagerMSI.createQuery("SELECT p.id, ptmString FROM fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.PeptideReadablePtmString ptmString WHERE p.id IN (:listId) AND ptmString.peptide=p AND ptmString.resultSet.id=:rsetId");
+        ptmStingQuery.setParameter("listId", peptideMap.keySet());
+        ptmStingQuery.setParameter("rsetId", rsetId);
+
+        List<Object[]> ptmStrings = ptmStingQuery.getResultList();
+        it = ptmStrings.iterator();
+        while (it.hasNext()) {
+            Object[] res = it.next();
+            Long peptideId = (Long) res[0];
+            PeptideReadablePtmString ptmString = (PeptideReadablePtmString)  res[1];
+            Peptide peptide = peptideMap.get(peptideId);
+            peptide.getTransientData().setPeptideReadablePtmString(ptmString);
+        }
  
     }
+    
+
     
     /**
      * Retrieve MsQuery for a Sub Task

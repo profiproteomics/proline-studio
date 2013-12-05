@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.MsQuery;
 import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
@@ -25,15 +26,15 @@ public class PeptideMatchTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDE_RANK = 3;
     public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 4;
     public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 5;
-    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 6;
+    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 6; // COLTYPE_PEPTIDE_PPM = 6;
     public static final int COLTYPE_PEPTIDE_CHARGE = 7;
     public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 8;
     //public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 9;  //JPM.TODO : retention time (=elution time) is for the moment in PeptideInstance
     public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 9;
     public static final int COLTYPE_PEPTIDE_PTM = 10;
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 11;
-    private static final String[] m_columnNamesRset = {"Peptide", "Score", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM"};
-    private static final String[] m_columnNamesRsm =  {"Peptide", "Score", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM", "Protein Sets"};
+    private static final String[] m_columnNamesRset = {"Peptide", "Score", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Delta MoZ" /*"Ppm"*/, "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM"};
+    private static final String[] m_columnNamesRsm =  {"Peptide", "Score", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Delta MoZ" /*"Ppm"*/, "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM", "Protein Sets"};
     
     private DPeptideMatch[] m_peptideMatches = null; // some of the DPeptideMatch can be null : they are loaded in sub task
     private long[] m_peptideMatchesId = null;
@@ -194,8 +195,28 @@ public class PeptideMatchTableModel extends LazyTableModel {
             }
             case COLTYPE_PEPTIDE_DELTA_MOZ: {
                 lazyData.setData(Float.valueOf((float) peptideMatch.getDeltaMoz()));
-                return  lazyData;
+                return lazyData;
             }
+            /*case COLTYPE_PEPTIDE_PPM: { 
+                
+                Peptide peptide = peptideMatch.getPeptide();
+                if ( peptide == null) {
+                    givePriorityTo(m_taskId, row, col);
+                    lazyData.setData(null);
+                }
+                
+                
+                double deltaMoz = (double) peptideMatch.getDeltaMoz();
+                double calculatedMass = peptide.getCalculatedMass() ;
+                double charge = (double) peptideMatch.getCharge(); 
+                final double CSTE = 1.007825;
+                final double EXP_CSTE = StrictMath.pow(10, 6);
+                float ppm = (float) ((deltaMoz*EXP_CSTE) / ((calculatedMass + (charge*CSTE))/charge));
+                
+                //double deltaMoz
+                lazyData.setData(Float.valueOf(ppm));
+                return  lazyData;
+            }*/
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
 
                 Peptide peptide = peptideMatch.getPeptide();
@@ -265,15 +286,24 @@ public class PeptideMatchTableModel extends LazyTableModel {
                 if (peptide == null) {
                     givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
-                } else {
-                    String ptmString = peptide.getPtmString();
-                    if (ptmString != null) {
-                        lazyData.setData(ptmString);
-                    } else {
-                        lazyData.setData("");
-                    }
-                    
+                    return lazyData;
                 }
+                
+                boolean ptmStringLoadeed = peptide.getTransientData().isPeptideReadablePtmStringLoaded();
+                if (!ptmStringLoadeed) {
+                    givePriorityTo(m_taskId, row, col);
+                    lazyData.setData(null);
+                    return lazyData;
+                }
+                
+                String ptm = "";
+                PeptideReadablePtmString ptmString = peptide.getTransientData().getPeptideReadablePtmString();
+                if (ptmString != null) {
+                    ptm = ptmString.getReadablePtmString();
+                }
+                
+                lazyData.setData(ptm);
+
                 return lazyData;
             }
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: {
@@ -461,12 +491,14 @@ public class PeptideMatchTableModel extends LazyTableModel {
             case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: {
                 return ((StringFilter) filter).filter((String)data);
             }
+            case COLTYPE_PEPTIDE_DELTA_MOZ: {  // COLTYPE_PEPTIDE_PPM
+                return ((DoubleFilter) filter).filter((Double)data);
+            }  
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
-            case COLTYPE_PEPTIDE_DELTA_MOZ:
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: {
-                return ((DoubleFilter) filter).filter((Float)data);
+                
             }
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
               if (data instanceof String) {
@@ -497,7 +529,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
             m_filters[COLTYPE_PEPTIDE_MSQUERY] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_MSQUERY));
             m_filters[COLTYPE_PEPTIDE_CALCULATED_MASS] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_CALCULATED_MASS));
             m_filters[COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ));
-            m_filters[COLTYPE_PEPTIDE_DELTA_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_DELTA_MOZ));
+            m_filters[COLTYPE_PEPTIDE_DELTA_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_DELTA_MOZ));  // COLTYPE_PEPTIDE_PPM
             
             m_filters[COLTYPE_PEPTIDE_CHARGE] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_CHARGE));
             m_filters[COLTYPE_PEPTIDE_MISSED_CLIVAGE] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_MISSED_CLIVAGE));

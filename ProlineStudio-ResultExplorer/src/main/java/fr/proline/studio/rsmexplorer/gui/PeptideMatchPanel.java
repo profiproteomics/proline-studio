@@ -298,7 +298,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         
         m_filterButton = new FilterButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel()));
         
-        m_exportButton = new ExportButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel()), "Peptide Match", m_peptideMatchTable);
+        m_exportButton = new ExportButton((PeptideMatchTableModel) m_peptideMatchTable.getModel(), "Peptide Match", m_peptideMatchTable);
         
         if (m_startingPanel) {
             m_histogramButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));

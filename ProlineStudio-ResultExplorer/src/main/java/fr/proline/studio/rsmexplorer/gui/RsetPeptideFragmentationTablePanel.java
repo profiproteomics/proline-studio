@@ -4,21 +4,42 @@ package fr.proline.studio.rsmexplorer.gui;
 
 //import fr.proline.core.orm.msi.MsQuery;
 //import fr.proline.core.orm.msi.PeptideMatch;
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
 //import org.jfree.data.xy.DefaultXYDataset;
 
+import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.progress.ProgressBarDialog;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.gui.RsetPeptideFragmentationTable.FragmentationTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
+import fr.proline.studio.search.SearchFloatingPanel;
+import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.stats.ValuesForStatsAbstract;
+import fr.proline.studio.utils.IconManager;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+
+import javax.swing.JButton;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+
+import org.openide.windows.WindowManager;
 
 
 
@@ -38,9 +59,7 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 
 	private AbstractDataBox m_dataBox;
 
-//	private DefaultXYDataset m_dataSet;
-	//private JFreeChart m_chart;
-
+//
 	private DPeptideMatch m_previousPeptideMatch = null;
 
 	private RsetPeptideFragmentationTable fragmentationTable= null;
@@ -49,6 +68,10 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
             setLayout(new BorderLayout());
         }	
         
+	
+    private ExportButton m_exportButton;
+    
+    
         
 	/**
 	 * Creates new form RsetPeptidefragmentationTablePanel
@@ -62,6 +85,20 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 	//}
 
 
+     JToolBar initToolbar() {
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+        
+               
+        m_exportButton = new ExportButton(((FragmentationTableModel) fragmentationTable.getModel()), "Fragmentation Table", fragmentationTable);
+        
+       
+        toolbar.add(m_exportButton);
+        
+             
+        return toolbar;
+    }
+    
 	
   public void setData(DPeptideMatch peptideMatch) {
 
@@ -71,42 +108,21 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
        m_previousPeptideMatch = peptideMatch;
        
        constructFragmentationTable(peptideMatch);
-   //    fragmentationTable = new RsetPeptideFragmentationTable(m_dataBox, this,  peptideMatch);
-  //     fragmentationTable.createFragmentationTable();
-// 
-   }
+     }
 
 
 
 	private void constructFragmentationTable(DPeptideMatch pm) {
 
-	//	final String SERIES_NAME = "spectrumData";
 		if (pm == null) {
-//			JLabel lblInfo = new JLabel("Spectrum match has not been enabled for this file. This has to be done when adding a new search result by checking the Save Spectrum Matches");
-//			lblInfo.setPreferredSize(this.fragmentationTable.fragPanelContainer.getSize());
-//			lblInfo.setSize(this.fragmentationTable.fragPanelContainer.getSize());
-//			this.fragmentationTable.fragPanelContainer.add(lblInfo);
-//			this.fragmentationTable.fragPanelContainer.setToolTipText("(pm null): Spectrum match has not been enabled for this file. This has to be done when adding a new search result by checking the Save Spectrum Matches");
-//			this.setVisible(true);
-//			lblInfo.setVisible(true);
-//			this.fragmentationTable.fragPanelContainer.repaint();
-			//dataSet.removeSeries(SERIES_NAME);
-			//removeAnnotations();
 			if(fragmentationTable != null){
-			//	fragmentationTable.fragmentationTablePanel.removeAll();
-			//	fragmentationTable = null;
 			}
 			return;
 		}
-//
 		DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
 	        
-		//MsQuery msQuery = pm.getTransientData().getIsMsQuerySet() ? pm.getMsQuery() : null;
 		if (msQuery == null) {
-			//	dataSet.removeSeries(SERIES_NAME);
 			if(fragmentationTable != null){
-			//	fragmentationTable.fragmentationTablePanel.removeAll();
-			//	fragmentationTable = null;
 			}
 			return;
 		}
@@ -114,10 +130,7 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 		Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
         
 		if (spectrum == null) {
-		//	dataSet.removeSeries(SERIES_NAME);
 			if(fragmentationTable != null){
-			//	fragmentationTable.fragmentationTablePanel.removeAll();
-				//fragmentationTable = null;
 			}
 			return;
 		}
@@ -126,8 +139,6 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 		
 	
 		if(fragmentationTable != null){
-		//	fragmentationTable.fragmentationTablePanel.removeAll();
-		//	fragmentationTable = null;
 		}
 		
 		// TODO: clean up the following lines for the really necessary repainting...

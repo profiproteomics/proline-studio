@@ -3,18 +3,23 @@ package fr.proline.studio.rsmexplorer.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JToolBar;
 import javax.swing.RowSorter;
-
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -30,21 +35,33 @@ import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.markerbar.MarkerComponentInterface;
+import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
+import fr.proline.studio.utils.DecoratedMarkerTable;
 import fr.proline.studio.utils.DecoratedTable;
-import javax.swing.table.*;
+import fr.proline.studio.utils.LazyTable;
+import fr.proline.studio.utils.LazyTableModel;
 
-public class RsetPeptideFragmentationTable {
 
+public class RsetPeptideFragmentationTable extends LazyTable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private AbstractDataBox m_dataBox;
 	JPanel m_fragPanelContainer;
+	static JScrollPane jScrollFragPane = new JScrollPane();
 	DPeptideMatch m_peptideMatch;
 	//DPeptideMatch pm;
 	DecoratedTable m_jTable1;
 
-	public RsetPeptideFragmentationTable(AbstractDataBox m_dBox,
-			JPanel fragPanel, DPeptideMatch pepMatch) {
-
+	public RsetPeptideFragmentationTable(AbstractDataBox m_dBox, JPanel fragPanel, DPeptideMatch pepMatch) {
+		super(jScrollFragPane.getVerticalScrollBar());
 		m_dataBox = m_dBox;
 		m_peptideMatch = pepMatch;
 		
@@ -161,7 +178,7 @@ public class RsetPeptideFragmentationTable {
 
 			m_jTable1 = new DecoratedTable();
 
-			FragmentationTableModel fragmentationTableModel = new FragmentationTableModel();
+			FragmentationTableModel fragmentationTableModel = new FragmentationTableModel( m_jTable1, false);
 			fragmentationTableModel.setData(fragMa, fragSer, m_peptideMatch.getPeptide()
 					.getSequence());
 
@@ -174,16 +191,50 @@ public class RsetPeptideFragmentationTable {
 			m_jTable1.setModel(fragmentationTableModel);
 			m_jTable1.setVisible(true);
 
-			m_jTable1.setModel(fragmentationTableModel);
-
 			cr.setSelectMatrix(fragmentationTableModel.getMatrix());
 
-			JScrollPane fragPane = new JScrollPane(m_jTable1);
-			fragPane.setViewportView(m_jTable1);
-
+			jScrollFragPane = new JScrollPane(m_jTable1);
+			jScrollFragPane.setViewportView(m_jTable1);
 			m_fragPanelContainer.removeAll();
-			m_fragPanelContainer.add(fragPane, BorderLayout.CENTER);
+		
+		     ExportButton m_exportButton = new ExportButton(null, "Fragmentation Table", m_jTable1);		           
+	        m_fragPanelContainer.setBounds(0, 0, 500, 400);
+	
+	        m_fragPanelContainer.setLayout(new BorderLayout());
+	
+	        JPanel internalPanel = new JPanel();
+	        JPanel leftPanel = new JPanel();
+	        leftPanel.setLayout(new FlowLayout());
+	        leftPanel.add(m_exportButton);
+	        internalPanel.setLayout(new GridBagLayout());
+	        GridBagConstraints c = new GridBagConstraints();
+	        c.anchor = GridBagConstraints.NORTHWEST;
+	        c.fill = GridBagConstraints.BOTH;
+	        c.insets = new java.awt.Insets(5, 5, 5, 5);
+	        
+	        // create objects
+	        JScrollPane m_scrollPane = new JScrollPane();
+	        
+	      //  m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, ???);
+				        
+	        m_scrollPane.setViewportView(m_jTable1);
+			m_jTable1.setFillsViewportHeight(true);
+	   
+	
+	        c.gridx = 0;
+	        c.gridy = 0;
+	        c.weightx = 1;
+	        c.weighty = 1;
+	        c.gridwidth = 3;
+	        internalPanel.add(m_scrollPane, c);
+		        
 
+		        
+	        m_fragPanelContainer.add(internalPanel, BorderLayout.CENTER);
+	
+	        m_fragPanelContainer.add(leftPanel, BorderLayout.WEST);
+	
+	
 			m_fragPanelContainer.revalidate();
 			m_fragPanelContainer.repaint();
 
@@ -198,7 +249,9 @@ public class RsetPeptideFragmentationTable {
 		entityManagerMSI.clear();
 		entityManagerMSI.close();
 		
+		
 	}
+	
 
 	public static double getMassFromAminoAcid(char aa) {
 		double mass = 0;
@@ -275,7 +328,7 @@ public class RsetPeptideFragmentationTable {
 
 	}
 
-	public static class FragmentationTableModel extends AbstractTableModel {
+	public static class FragmentationTableModel extends LazyTableModel implements ProgressInterface {
 
 		/**
 		 * 
@@ -290,9 +343,15 @@ public class RsetPeptideFragmentationTable {
 		private String[][] m_matrix;
 
 		private String[] m_columnNames;
+		
+        private boolean m_forRSM;
 
-		public FragmentationTableModel() { // constructor
 
+		public FragmentationTableModel(DecoratedTable table, boolean forRSM) { // constructor
+			    super(null);
+		        
+		        m_forRSM = forRSM;
+		  
 		}
 
 		public void setData(FragmentMatch_AW[] fragMa,
@@ -358,7 +417,7 @@ public class RsetPeptideFragmentationTable {
 
 			m_matrix = new String[sizeMaxSeries][fragSer.length + 3];
 
-			double roundTol = 0.0001;
+			double roundTol = 0.0001; // could be put to zero but in case some rounding happens at other's code.
 			int nbFound = 0;
 
 			for (int j = 0; j < fragSer.length; j++) { // loop through
@@ -418,6 +477,8 @@ public class RsetPeptideFragmentationTable {
 		public String getColumnName(int col) {
 			return m_columnNames[col];
 		}
+	  
+		  
 
 		@Override
 		public int getRowCount() {
@@ -475,6 +536,40 @@ public class RsetPeptideFragmentationTable {
 			}
 
 		}
+		
+		 @Override
+		    public boolean isLoaded() {
+		        return m_table.isSortable();
+		    }
+
+		    @Override
+		    public int getLoadingPercentage() {
+		        return m_table.getLoadingPercentage();
+		    }
+
+			@Override
+			public void initFilters() {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void filter() {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public boolean filter(int row, int col) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public int getSubTaskId(int col) {
+				// TODO Auto-generated method stub
+				return 0;
+			}
 
 	}
 
@@ -553,5 +648,19 @@ public class RsetPeptideFragmentationTable {
 		}
 
 	}
+
+	@Override
+	public boolean isLoaded() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public int getLoadingPercentage() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	
 
 }

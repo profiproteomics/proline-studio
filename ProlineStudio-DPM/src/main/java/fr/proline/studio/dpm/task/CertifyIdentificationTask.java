@@ -102,7 +102,7 @@ public class CertifyIdentificationTask extends AbstractServiceTask {
             
             request.setParameters(params);
 
-            HttpResponse response = postRequest("dps.msi/certify_result_files/"+request.getMethod()+getIdString()+"&ws_version=0.2", request);
+            HttpResponse response = postRequest("dps.msi/certify_result_files/"+request.getMethod()+getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -168,7 +168,7 @@ public class CertifyIdentificationTask extends AbstractServiceTask {
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("dps.msi/certify_result_files/"+request.getMethod()+getIdString()+"&ws_version=0.2", request);
+            HttpResponse response = postRequest("dps.msi/certify_result_files/"+request.getMethod()+getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 

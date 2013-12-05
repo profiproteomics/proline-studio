@@ -3,13 +3,9 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.studio.dam.UDSDataManager;
-import fr.proline.studio.dpm.AccessServiceThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.CertifyIdentificationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.parameter.*;
-import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.util.system.OSInfo;
@@ -31,7 +27,6 @@ import java.util.prefs.Preferences;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
 
 /**
  *
@@ -49,7 +44,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private final static String[] PARSER_NAMES = {"Mascot", "Omssa"};
     private final static String[] FILE_EXTENSIONS = {"dat", "omx"};
     private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Omssa Identification Result"};
-    private final static String[] PARSER_IDS = { "MascotMSParser", "OmssaMSParser" };
+    private final static String[] PARSER_IDS = { "mascot.dat", "omssa.omx" };
     
     
     private final static String[] DECOY_VALUES = {null, "No Decoy", "Software Engine Decoy", "Concataned Decoy"};
@@ -897,6 +892,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         ParameterList parameterList = new ParameterList("Mascot");
         parameterList.add(new DoubleParameter("ion.score.cutoff", "Ion Score Cutoff", JTextField.class, new Double(0.0), new Double(0), null));
         parameterList.add(new DoubleParameter("subset.threshold", "Subset Threshold", JTextField.class, new Double(1.0), new Double(0), new Double(1)));
+        parameterList.add(new StringParameter("mascot.server.url", "Mascot Serveur URL (including /cgi/)", JTextField.class, "http://www.matrixscience.com/cgi/", null, null));
         
         return parameterList;
     }

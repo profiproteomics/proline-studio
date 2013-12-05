@@ -158,7 +158,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
      public ValuesForStatsAbstract getValuesForStats() {
          return new ValuesForStatsAbstract() {
 
-            private final String[] m_valuesType = {"Delta MoZ", "Calc. Mass", "Exp. MoZ", "Charge", "Score" };
+            private final String[] m_valuesType = {"Delta MoZ" /*"Ppm"*/, "Calc. Mass", "Exp. MoZ", "Charge", "Score" };
             private final int[] m_valuesCol = { PeptideMatchTableModel.COLTYPE_PEPTIDE_DELTA_MOZ, PeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS, PeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, PeptideMatchTableModel.COLTYPE_PEPTIDE_CHARGE, PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE };
 
             private int m_valueCol = m_valuesCol[0];

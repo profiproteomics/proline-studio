@@ -363,7 +363,7 @@ public class RsetPeptideSpectrumAnnotations {
 							if ((fragMa[i].calculated_moz - roundTol <= (fragSer[j].masses[k]))
 									&& (fragMa[i].calculated_moz + roundTol >= fragSer[j].masses[k])) {
 								nbFound++;
-								System.out.println("nbThroughB = " + nbThroughB + " , found" + nbFound + " moz" + fragMa[i].moz);
+								//System.out.println("nbThroughB = " + nbThroughB + " , found" + nbFound + " moz" + fragMa[i].moz);
 								fragTable[0][nbThroughB] = fragMa[i].intensity; 
 								fragTable[1][nbThroughB] = fragSer[j].masses[k];
 								; 
@@ -379,7 +379,7 @@ public class RsetPeptideSpectrumAnnotations {
 							if ((fragMa[i].calculated_moz - roundTol <= fragSer[j].masses[k])
 									&& (fragMa[i].calculated_moz + roundTol >= fragSer[j].masses[k])) {
 								nbFound++;
-								System.out.println("nbThroughY = " + nbThroughY + " , found" + nbFound + " moz" + fragMa[i].calculated_moz);
+								//System.out.println("nbThroughY = " + nbThroughY + " , found" + nbFound + " moz" + fragMa[i].calculated_moz);
 								fragTable[5][nbThroughY] = fragMa[i].intensity; 
 								fragTable[6][nbThroughY] = fragSer[j].masses[k]; 
 							} else {
@@ -670,7 +670,7 @@ public class RsetPeptideSpectrumAnnotations {
 		aaHashMap.put((double) 163.06333, 'Y');
 		
 		double toleranceCalc = tolerance;
-		System.out.println("--->Submitted mass of " + deltaMass);
+		//System.out.println("--->Submitted mass of " + deltaMass);
 		for (double aaMass : aaHashMap.keySet()) {
 			if ((aaMass - toleranceCalc < deltaMass) && (aaMass + toleranceCalc > deltaMass)) {
 				return (aaHashMap.get(aaMass).toString());

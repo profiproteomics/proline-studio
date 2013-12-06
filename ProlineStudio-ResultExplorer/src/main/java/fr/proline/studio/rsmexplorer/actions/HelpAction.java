@@ -1,5 +1,6 @@
-package fr.proline.studio.rsmexplorer.gui.dialog;
+package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.studio.rsmexplorer.gui.dialog.HelpDialog;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

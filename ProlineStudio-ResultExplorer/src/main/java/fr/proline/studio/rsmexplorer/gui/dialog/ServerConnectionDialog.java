@@ -8,6 +8,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
 import javax.swing.*;
+import org.openide.windows.WindowManager;
 
 /**
  * Dialog to Connect to the server
@@ -239,6 +240,21 @@ public class ServerConnectionDialog extends DefaultDialog {
                 } else if (serverManager.isConnectionDone()) {
                     storeDefaults();
                     setVisible(false);     
+                    
+                    
+                    
+                    // Open the Help
+                    if (HelpDialog.showAtStart()) {
+                        SwingUtilities.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                HelpDialog helpDialog = HelpDialog.getDialog(WindowManager.getDefault().getMainWindow());
+                                helpDialog.centerToScreen();
+                                helpDialog.setVisible(true);
+                            }
+                        });
+                    }
                 }
        
             }

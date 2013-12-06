@@ -40,6 +40,7 @@ import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
+import javax.swing.*;
 
 
 public class RsetPeptideFragmentationTable extends LazyTable {
@@ -114,139 +115,129 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 		}
 	}
 
-	public void createFragmentationTable() {
+    public void createFragmentationTable() {
 
-		m_jTable1 = new DecoratedTable();
+        m_jTable1 = new DecoratedTable();
 
-		final String SERIES_NAME = "spectrumData"; 
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_dataBox.getProjectId()).getEntityManagerFactory().createEntityManager();
+        entityManagerMSI.getTransaction().begin();
+        PeptideMatch pmORM = entityManagerMSI.find(PeptideMatch.class,
+                m_peptideMatch.getId());
+        DMsQuery msQuery = m_peptideMatch.isMsQuerySet() ? m_peptideMatch.getMsQuery() : null;
+        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum()
+                : null;
 
-		EntityManager entityManagerMSI = DataStoreConnectorFactory
-				.getInstance().getMsiDbConnector(m_dataBox.getProjectId())
-				.getEntityManagerFactory().createEntityManager();
-		entityManagerMSI.getTransaction().begin();
-		PeptideMatch pmORM = entityManagerMSI.find(PeptideMatch.class,
-				m_peptideMatch.getId());
-		DMsQuery msQuery = m_peptideMatch.isMsQuerySet() ? m_peptideMatch.getMsQuery() : null;
-		Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum()
-				: null;
+        DataStoreConnectorFactory dsConnectorFactory = DataStoreConnectorFactory.getInstance();
+        if (dsConnectorFactory.isInitialized() == false) {
+            dsConnectorFactory.initialize(DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_dataBox.getProjectId()));
+        }
 
-		DataStoreConnectorFactory dsConnectorFactory = DataStoreConnectorFactory
-				.getInstance();
-		if (dsConnectorFactory.isInitialized() == false) {
-			dsConnectorFactory.initialize(DataStoreConnectorFactory
-					.getInstance().getMsiDbConnector(m_dataBox.getProjectId()));
-		}
+        Map<String, Long> aw_Map = pmORM.getObjectTreeIdByName();
 
-		Map<String, Long> aw_Map = pmORM.getObjectTreeIdByName();
+        Long objectTreeId = null; //
+        for (Map.Entry<String, Long> entry : aw_Map.entrySet()) {
+            objectTreeId = entry.getValue();
+        }
 
-		Long objectTreeId = null; //
-		for (Map.Entry<String, Long> entry : aw_Map.entrySet()) {
-			objectTreeId = entry.getValue();
-		}
+        if (objectTreeId != null) {
+            ObjectTree ot = entityManagerMSI.find(ObjectTree.class,
+                    objectTreeId); // get the objectTree from id.
 
-		if (objectTreeId != null) {
-			ObjectTree ot = entityManagerMSI.find(ObjectTree.class,
-					objectTreeId); // get the objectTree from id.
+            String clobData = ot.getClobData();
 
-			String clobData = ot.getClobData();
+            String jsonProperties = clobData;
 
-			String jsonProperties = clobData;
+            JsonParser parser = new JsonParser();
+            Gson gson = new Gson();
 
-			JsonParser parser = new JsonParser();
-			Gson gson = new Gson();
+            JsonObject array = parser.parse(jsonProperties).getAsJsonObject();
+            JsonProperties jsonProp = gson.fromJson(array, JsonProperties.class);
 
-			JsonObject array = parser.parse(jsonProperties).getAsJsonObject();
-			JsonProperties jsonProp = gson
-					.fromJson(array, JsonProperties.class);
+            // compute the charge for each fragment match from the label
+            for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
+                fragMa.computeChargeFromLabel();
+            }
 
-			// compute the charge for each fragment match from the label
-			for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
-				fragMa.computeChargeFromLabel();
-			}
+            TheoreticalFragmentSeries_AW[] fragSer = jsonProp.frag_table;
+            FragmentMatch_AW[] fragMa = jsonProp.frag_matches;
 
-			TheoreticalFragmentSeries_AW[] fragSer = jsonProp.frag_table;
-			FragmentMatch_AW[] fragMa = jsonProp.frag_matches;
+            if (spectrum == null) {
+                return;
+            }
 
-			if (spectrum == null) {
-				return;
-			}
+            m_jTable1 = new DecoratedTable();
 
-			m_jTable1 = new DecoratedTable();
+            FragmentationTableModel fragmentationTableModel = new FragmentationTableModel(m_jTable1, false);
+            fragmentationTableModel.setData(fragMa, fragSer, m_peptideMatch.getPeptide().getSequence());
 
-			FragmentationTableModel fragmentationTableModel = new FragmentationTableModel( m_jTable1, false);
-			fragmentationTableModel.setData(fragMa, fragSer, m_peptideMatch.getPeptide()
-					.getSequence());
+            RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(
+                    fragmentationTableModel);
+            FragTableCustomRenderer cr = new FragTableCustomRenderer();
+            m_jTable1.setDefaultRenderer(Double.class, cr);
+            m_jTable1.setRowSorter(sorter);
 
-			RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(
-					fragmentationTableModel);
-			FragTableCustomRenderer cr = new FragTableCustomRenderer();
-			m_jTable1.setDefaultRenderer(Double.class, cr);
-			m_jTable1.setRowSorter(sorter);
+            m_jTable1.setModel(fragmentationTableModel);
+            m_jTable1.setVisible(true);
 
-			m_jTable1.setModel(fragmentationTableModel);
-			m_jTable1.setVisible(true);
+            cr.setSelectMatrix(fragmentationTableModel.getMatrix());
 
-			cr.setSelectMatrix(fragmentationTableModel.getMatrix());
+            jScrollFragPane = new JScrollPane(m_jTable1);
+            jScrollFragPane.setViewportView(m_jTable1);
+            m_fragPanelContainer.removeAll();
 
-			jScrollFragPane = new JScrollPane(m_jTable1);
-			jScrollFragPane.setViewportView(m_jTable1);
-			m_fragPanelContainer.removeAll();
-		
-		     ExportButton m_exportButton = new ExportButton(null, "Fragmentation Table", m_jTable1);		           
-	        m_fragPanelContainer.setBounds(0, 0, 500, 400);
-	
-	        m_fragPanelContainer.setLayout(new BorderLayout());
-	
-	        JPanel internalPanel = new JPanel();
-	        JPanel leftPanel = new JPanel();
-	        leftPanel.setLayout(new FlowLayout());
-	        leftPanel.add(m_exportButton);
-	        internalPanel.setLayout(new GridBagLayout());
-	        GridBagConstraints c = new GridBagConstraints();
-	        c.anchor = GridBagConstraints.NORTHWEST;
-	        c.fill = GridBagConstraints.BOTH;
-	        c.insets = new java.awt.Insets(5, 5, 5, 5);
-	        
-	        // create objects
-	        JScrollPane m_scrollPane = new JScrollPane();
-	        
-	      //  m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, ???);
-				        
-	        m_scrollPane.setViewportView(m_jTable1);
-			m_jTable1.setFillsViewportHeight(true);
-	   
-	
-	        c.gridx = 0;
-	        c.gridy = 0;
-	        c.weightx = 1;
-	        c.weighty = 1;
-	        c.gridwidth = 3;
-	        internalPanel.add(m_scrollPane, c);
-		        
+            
+            m_fragPanelContainer.setBounds(0, 0, 500, 400);
 
-		        
-	        m_fragPanelContainer.add(internalPanel, BorderLayout.CENTER);
-	
-	        m_fragPanelContainer.add(leftPanel, BorderLayout.WEST);
-	
-	
-			m_fragPanelContainer.revalidate();
-			m_fragPanelContainer.repaint();
+            m_fragPanelContainer.setLayout(new BorderLayout());
 
-			jsonProp = null;
-			array = null;
-			gson = null;
-			parser = null;
+            JPanel internalPanel = new JPanel();
+            
+            JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+            toolbar.setFloatable(false);
+            ExportButton m_exportButton = new ExportButton(null, "Fragmentation Table", m_jTable1);
+            toolbar.add(m_exportButton);
 
-		}
+            internalPanel.setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.anchor = GridBagConstraints.NORTHWEST;
+            c.fill = GridBagConstraints.BOTH;
+            c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-		entityManagerMSI.getTransaction().commit();
-		entityManagerMSI.clear();
-		entityManagerMSI.close();
-		
-		
-	}
-	
+            // create objects
+            JScrollPane m_scrollPane = new JScrollPane();
+
+
+            m_scrollPane.setViewportView(m_jTable1);
+            m_jTable1.setFillsViewportHeight(true);
+
+
+            c.gridx = 0;
+            c.gridy = 0;
+            c.weightx = 1;
+            c.weighty = 1;
+            c.gridwidth = 3;
+            internalPanel.add(m_scrollPane, c);
+
+
+
+            m_fragPanelContainer.add(internalPanel, BorderLayout.CENTER);
+
+            m_fragPanelContainer.add(toolbar, BorderLayout.WEST);
+
+
+            m_fragPanelContainer.revalidate();
+            m_fragPanelContainer.repaint();
+
+
+        }
+
+        entityManagerMSI.getTransaction().commit();
+        entityManagerMSI.clear();
+        entityManagerMSI.close();
+
+
+    }
+
 
 	public static double getMassFromAminoAcid(char aa) {
 		double mass = 0;
@@ -315,9 +306,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 			}
 		}
 
-		NumberFormat formatter = null;
-		formatter = java.text.NumberFormat.getInstance(java.util.Locale.FRENCH);
-		formatter = new DecimalFormat("#0.000");
+		NumberFormat formatter = new DecimalFormat("#0.000");
 
 		return ("" + formatter.format(deltaMass)); // return ("*");
 

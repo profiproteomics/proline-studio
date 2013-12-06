@@ -67,7 +67,10 @@ public class IconManager {
         FUNNEL_ACTIVATED,
         EXPORT,
         EXPORT_IMAGE,
-        CHART;
+        CHART,
+        BOOK,
+        BOOK_OPEN,
+        BOOK_QUESTION;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -238,6 +241,12 @@ public class IconManager {
                 return "fr/proline/studio/images/exportImage.png";
             case CHART:
                 return "fr/proline/studio/images/chart.png";
+            case BOOK:
+                return "fr/proline/studio/images/book.png";
+            case BOOK_OPEN:
+                return "fr/proline/studio/images/book-open.png";
+            case BOOK_QUESTION:
+                return "fr/proline/studio/images/book-question.png";
 
         }
 

@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -46,14 +45,14 @@ import javax.swing.*;
 public class RsetPeptideFragmentationTable extends LazyTable {
 
 	/**
-	 * 
+	 *  Created by AW
 	 */
 	private static final long serialVersionUID = 1L;
 	private AbstractDataBox m_dataBox;
 	JPanel m_fragPanelContainer;
 	static JScrollPane jScrollFragPane = new JScrollPane();
 	DPeptideMatch m_peptideMatch;
-	//DPeptideMatch pm;
+	
 	DecoratedTable m_jTable1;
 
 	public RsetPeptideFragmentationTable(AbstractDataBox m_dBox, JPanel fragPanel, DPeptideMatch pepMatch) {
@@ -203,7 +202,6 @@ public class RsetPeptideFragmentationTable extends LazyTable {
             c.fill = GridBagConstraints.BOTH;
             c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-            // create objects
             JScrollPane m_scrollPane = new JScrollPane();
 
 
@@ -218,13 +216,9 @@ public class RsetPeptideFragmentationTable extends LazyTable {
             c.gridwidth = 3;
             internalPanel.add(m_scrollPane, c);
 
-
-
             m_fragPanelContainer.add(internalPanel, BorderLayout.CENTER);
 
             m_fragPanelContainer.add(toolbar, BorderLayout.WEST);
-
-
             m_fragPanelContainer.revalidate();
             m_fragPanelContainer.repaint();
 
@@ -240,7 +234,6 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 
 
 	public static double getMassFromAminoAcid(char aa) {
-		double mass = 0;
 		HashMap<Character, Double> aaHashMap = new HashMap<Character, Double>();
 
 		aaHashMap.put('A', (double) 71.03711);
@@ -264,7 +257,6 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 		aaHashMap.put('W', (double) 186.07931);
 		aaHashMap.put('Y', (double) 163.06333);
 
-		// float deltaMoZ = 0;
 		return aaHashMap.get(aa);
 
 	}
@@ -296,8 +288,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 		aaHashMap.put((double) 99.06841, 'V');
 		aaHashMap.put((double) 186.07931, 'W');
 		aaHashMap.put((double) 163.06333, 'Y');
-		// float deltaMoZ = 0;
-
+		
 		double toleranceCalc = tolerance;
 		for (double aaMass : aaHashMap.keySet()) {
 			if ((aaMass - toleranceCalc < deltaMass)

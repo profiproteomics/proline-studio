@@ -1,10 +1,12 @@
 package fr.proline.studio.utils;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.net.URL;
 import java.util.prefs.Preferences;
 import javax.swing.JTable;
@@ -20,7 +22,7 @@ import org.slf4j.LoggerFactory;
  * @author CB205360
  */
 
-public class URLCellRenderer extends DefaultTableCellRenderer implements MouseListener {
+public class URLCellRenderer extends DefaultTableCellRenderer implements MouseListener, MouseMotionListener {
 
     private String m_preferenceKey;
     private String m_defaultURLTemplate;
@@ -101,8 +103,52 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
     public void mouseReleased(MouseEvent e) { }
 
     @Override
-    public void mouseEntered(MouseEvent e) { }
+    public void mouseEntered(MouseEvent e) {
+        checkCursor(e);
+    }
 
     @Override
-    public void mouseExited(MouseEvent e) { }
+    public void mouseExited(MouseEvent e) {
+        checkCursor(e);
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        checkCursor(e);
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        checkCursor(e);
+    }
+    
+    
+    private void checkCursor(MouseEvent e) {
+        JTable table = (JTable) e.getSource();
+        Point pt = e.getPoint();
+        int col = table.columnAtPoint(pt);
+
+        if (col != m_column) {
+            table.setCursor(Cursor.getDefaultCursor());
+            return;
+        }
+
+        JTableHeader th = table.getTableHeader();
+        TableColumnModel tcm = th.getColumnModel();
+
+        int columnStart = 0;
+        for (int i = 0; i < m_column; i++) {
+            TableColumn column = tcm.getColumn(i);
+            columnStart += column.getWidth();
+        }
+
+        // check that the user is over the icon
+        if (columnStart + 20 < e.getX()) {
+            table.setCursor(Cursor.getDefaultCursor());
+            return;
+        }
+
+        table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+    }
 }

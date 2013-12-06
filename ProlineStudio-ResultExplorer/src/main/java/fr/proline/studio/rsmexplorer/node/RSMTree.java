@@ -41,6 +41,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         setEditable(true);
         
+        setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        
         RSMTransferHandler handler = new RSMTransferHandler();
         setTransferHandler(handler);
 

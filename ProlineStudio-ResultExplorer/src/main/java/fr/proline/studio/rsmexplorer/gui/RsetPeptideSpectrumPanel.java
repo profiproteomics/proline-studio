@@ -115,17 +115,14 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
      */
    
     private void initComponents() {
-    	  setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
 
-          //JPanel internalPanel = createInternalPanel();
-         
-        JToolBar toolbar = initToolbar();
-        add(toolbar, BorderLayout.WEST);
-         
-
-        
         m_spectrumPanel = new ChartPanel(m_chart, true);
-        m_spectrumPanel.setPreferredSize(new Dimension(600,400));
+        m_spectrumPanel.setPreferredSize(new Dimension(600, 400));
+
+        JToolBar toolbar = initToolbar();
+
+        add(toolbar, BorderLayout.WEST);
         add(m_spectrumPanel, BorderLayout.CENTER);
 
         

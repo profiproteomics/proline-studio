@@ -176,7 +176,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
         MarkerComponentInterface componentInterface = m_containerPanel.getMarkerComponentInterface();
         rowClicked = componentInterface.getRowInModel(e.getY());
                 
-        if (e.isPopupTrigger()) {
+        if (SwingUtilities.isRightMouseButton(e)) {
             
             
             

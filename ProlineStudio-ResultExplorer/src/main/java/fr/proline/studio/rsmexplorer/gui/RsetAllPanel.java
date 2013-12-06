@@ -135,7 +135,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
+                    if (SwingUtilities.isRightMouseButton(e)) {
                         getPopup().show(e.getComponent(), e.getX(), e.getY());
                     }
                 }

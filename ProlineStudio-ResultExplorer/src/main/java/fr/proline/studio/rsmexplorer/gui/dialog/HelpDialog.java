@@ -26,10 +26,13 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
     private JCheckBox m_checkBox = null;
     
     private String[][] HELP_CONTENT = {
-        { "Create a Project", "https://bioproj.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createproject" },
-        { "Create a Dataset", "https://bioproj.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createaggregate" },
-        { "Import a Search Result", "https://bioproj.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot" },
-        { "Validate a Search Result", "https://bioproj.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:rsvalidation" }
+        { "Create a Project", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createproject" },
+        { "Create a Dataset", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createaggregate" },
+        { "Import a Search Result", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot" },
+        { "Validate a Search Result", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:rsvalidation" },
+        { "Display Search Result Data", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:viewpsm" },
+        { "Display Identification Summary Data", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:viewprotset" }
+  
     };
     
     public static HelpDialog getDialog(Window parent) {

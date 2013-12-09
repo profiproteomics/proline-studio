@@ -32,6 +32,7 @@ public class FilterDialog extends DefaultDialog {
 
         setTitle("Filters");
 
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:filtertables");
 
         setInternalComponent(createFilterPanel());
 

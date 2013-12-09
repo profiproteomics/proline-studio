@@ -39,6 +39,7 @@ public class AnnotationMarkerDialog extends DefaultDialog {
         setTitle("Add Annotation");
 
         setButtonVisible(BUTTON_DEFAULT, false);
+        setButtonVisible(BUTTON_HELP, false);
 
         initInternalPanel();
 

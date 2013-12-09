@@ -44,6 +44,7 @@ public class ProgressBarDialog extends DefaultDialog {
     public ProgressBarDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         
+        setButtonVisible(BUTTON_HELP, false);
         setButtonVisible(BUTTON_DEFAULT, false);
         setButtonVisible(BUTTON_OK, false);
         

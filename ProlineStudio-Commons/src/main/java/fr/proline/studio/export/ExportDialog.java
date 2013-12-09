@@ -84,6 +84,7 @@ public class ExportDialog extends DefaultDialog {
         
         setTitle("Export");
 
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
 
         setInternalComponent(createExportPanel());
 

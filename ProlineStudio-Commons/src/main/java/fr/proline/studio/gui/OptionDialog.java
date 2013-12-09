@@ -35,6 +35,7 @@ public class OptionDialog extends DefaultDialog {
 
         setTitle(title);
 
+        setButtonVisible(BUTTON_HELP, false);
         setButtonVisible(BUTTON_DEFAULT, false);
 
         initInternalPanel();

@@ -95,7 +95,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param list 
      */
     public void initLoadChildrenDataset(DDataset parentDataset, List<AbstractData> list) {
-        setTaskInfo(new TaskInfo("Load Data for Aggregate "+parentDataset.getName(), TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Data for Dataset "+parentDataset.getName(), TASK_LIST_INFO));
         m_project = parentDataset.getProject();
         m_parentDataset = parentDataset;
         m_list = list;
@@ -153,7 +153,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         initCreateDatasetAggregate(project, parentDataset, datasetType, aggregateName, false, 0, 0, datasetList);
     }
     public void initCreateDatasetAggregate(Project project, DDataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, boolean hasSuffix, int suffixStart, int suffixStop, ArrayList<DDataset> datasetList) {
-        setTaskInfo(new TaskInfo("Create Aggregate "+aggregateName, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Create Dataset "+aggregateName, TASK_LIST_INFO));
         m_project = project;
         m_parentDataset = parentDataset;
         m_datasetType = datasetType;

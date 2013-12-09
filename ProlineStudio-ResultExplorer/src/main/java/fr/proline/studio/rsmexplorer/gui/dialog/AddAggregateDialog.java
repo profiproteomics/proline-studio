@@ -32,7 +32,7 @@ public class AddAggregateDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
 
-        setTitle("Add Aggregate");
+        setTitle("Add Dataset");
 
 
         m_aggregatePanel = new AddAggregatePanel();
@@ -46,7 +46,7 @@ public class AddAggregateDialog extends DefaultDialog {
         String name = m_aggregatePanel.getAggregateName();
        
         if (name.isEmpty()) {
-            setStatus(true, "You must fill the aggregate name.");
+            setStatus(true, "You must fill the dataset name.");
             highlight(m_aggregatePanel.getNameTextfield());
             return false;
         }

@@ -322,7 +322,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().commit();
 
         } catch (Exception e) {
-            m_taskError = new TaskError("Unable to load Aggregates from UDS");
+            m_taskError = new TaskError("Unable to load Datasets from UDS");
             m_logger.error(getClass().getSimpleName() + " failed", e);
             entityManagerUDS.getTransaction().rollback();
             DataStoreConnectorFactory.getInstance().closeAll();

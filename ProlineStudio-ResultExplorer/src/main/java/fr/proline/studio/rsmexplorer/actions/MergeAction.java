@@ -50,7 +50,7 @@ public class MergeAction extends AbstractRSMAction {
                 String error = null;
                 int nbChildren = node.getChildCount();
                 /*if (nbChildren == 1) {
-                    error = "Merge on an Aggregate with only one Child is not possible";
+                    error = "Merge on an Dataset with only one Child is not possible";
                 }*/
 
                 ArrayList<Long> resultSetIdList = new ArrayList<>();

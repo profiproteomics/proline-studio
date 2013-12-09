@@ -5,7 +5,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.URL;
 import javax.swing.*;
+import org.slf4j.LoggerFactory;
 
 /**
  * All Dialogs of this application must extend this class
@@ -17,12 +19,14 @@ public class DefaultDialog extends javax.swing.JDialog {
     public static final int BUTTON_OK = 0;
     public static final int BUTTON_CANCEL = 1;
     public static final int BUTTON_DEFAULT = 2;
+    public static final int BUTTON_HELP = 3;
     
     private JPanel m_internalPanel;
     
     private JButton m_okButton;
     private JButton m_cancelButton;
     private JButton m_defaultButton;
+    private JButton m_helpButton;
 
     private JPanel m_statusPanel;
     private JLabel m_statusLabel;
@@ -36,6 +40,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     
     protected int m_buttonClicked = BUTTON_CANCEL;
     
+    private String m_helpURL = null;
      
     /**
      * Creates new form AbstractDialog
@@ -61,6 +66,10 @@ public class DefaultDialog extends javax.swing.JDialog {
 
     }
 
+    public void setHelpURL(String helpURL) {
+        m_helpURL = helpURL;
+    }
+    
     @Override
     public void setVisible(boolean v) {
         pack();
@@ -119,6 +128,8 @@ public class DefaultDialog extends javax.swing.JDialog {
             case BUTTON_DEFAULT:
                 m_defaultButton.setVisible(visible);
                 break;
+            case BUTTON_HELP:
+                m_helpButton.setVisible(visible); 
                 
         }
     }
@@ -134,6 +145,8 @@ public class DefaultDialog extends javax.swing.JDialog {
             case BUTTON_DEFAULT:
                 m_defaultButton.setText(name);
                 break;
+            case BUTTON_HELP:
+                m_helpButton.setText(name);
         }
     }
     
@@ -148,6 +161,9 @@ public class DefaultDialog extends javax.swing.JDialog {
             case BUTTON_DEFAULT:
                 m_defaultButton.setIcon(icon);
                 break;
+            case BUTTON_HELP:
+                m_helpButton.setIcon(icon);
+                break;
         }
     }
     
@@ -161,6 +177,9 @@ public class DefaultDialog extends javax.swing.JDialog {
                 break;
             case BUTTON_DEFAULT:
                 m_defaultButton.doClick();
+                break;
+            case BUTTON_HELP:
+                m_helpButton.doClick();
                 break;
         }
     }
@@ -270,6 +289,12 @@ public class DefaultDialog extends javax.swing.JDialog {
         getRootPane().setDefaultButton(m_okButton);
         m_cancelButton = new JButton(IconManager.getIcon(IconManager.IconType.CANCEL));
         m_defaultButton = new JButton(IconManager.getIcon(IconManager.IconType.DEFAULT));
+        m_helpButton = new JButton(IconManager.getIcon(IconManager.IconType.QUESTION));
+        Insets margin = m_helpButton.getMargin();
+        margin.left=3;
+        margin.right=3;
+        m_helpButton.setMargin(margin);
+        
         
         buttonPanel.add(m_defaultButton, c);
         
@@ -283,6 +308,9 @@ public class DefaultDialog extends javax.swing.JDialog {
         
         c.gridx++;
         buttonPanel.add(m_cancelButton, c);
+        
+        c.gridx++;
+        buttonPanel.add(m_helpButton, c);
         
         m_okButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
         m_okButton.addActionListener(new java.awt.event.ActionListener() {
@@ -305,6 +333,14 @@ public class DefaultDialog extends javax.swing.JDialog {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 defaultButtonActionPerformed();
+            }
+        });
+        
+        //m_helpButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.helpButton.text"));
+        m_helpButton.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                helpButtonActionPerformed();
             }
         });
 
@@ -332,6 +368,23 @@ public class DefaultDialog extends javax.swing.JDialog {
             setVisible(false);
         }
     } 
+    
+    private void helpButtonActionPerformed() {
+        // Show help
+        if (m_helpURL == null) {
+            LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed");
+            return; // should not happen
+        }
+        if (Desktop.isDesktopSupported()) { // JDK 1.6.0
+
+            try {
+                Desktop.getDesktop().browse(new URL(m_helpURL).toURI());
+            } catch (Exception ex) {
+                LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", ex);
+            }
+        }
+    }
+    
 
     private JPanel createStatusPanel() {
         

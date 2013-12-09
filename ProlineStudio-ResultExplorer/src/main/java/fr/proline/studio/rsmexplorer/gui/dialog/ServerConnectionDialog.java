@@ -36,11 +36,14 @@ public class ServerConnectionDialog extends DefaultDialog {
 
         setTitle("Server Connection");
 
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:startsession");
+        
         JPanel internalPanel = createInternalPanel();
         
         setInternalComponent(internalPanel);
         
         initDefaults();
+        
         
     }
     

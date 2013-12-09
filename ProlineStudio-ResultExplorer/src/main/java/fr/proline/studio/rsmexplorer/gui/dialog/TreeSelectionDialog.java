@@ -28,8 +28,9 @@ public class TreeSelectionDialog extends DefaultDialog {
     public TreeSelectionDialog(Window parent, RSMTree tree, String title) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
      
-        // hide default button
+        // hide default and help buttons
         setButtonVisible(BUTTON_DEFAULT, false);
+        setButtonVisible(BUTTON_HELP, false);
         
         setStatusVisible(false);
         

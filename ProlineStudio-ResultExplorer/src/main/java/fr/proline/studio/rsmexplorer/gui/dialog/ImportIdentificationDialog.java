@@ -93,6 +93,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
 
         setTitle("Import Search Results");
+       
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot");
+        
         setResizable(true);
         setMinimumSize(new Dimension(200, 240));
 
@@ -985,6 +988,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
             setTitle("Select Decoy Accession Regex");
             setResizable(false);
             setMinimumSize(new Dimension(200, 240));
+            
+            setButtonVisible(DefaultDialog.BUTTON_HELP, false);
             setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
             
             initInternalPanel();

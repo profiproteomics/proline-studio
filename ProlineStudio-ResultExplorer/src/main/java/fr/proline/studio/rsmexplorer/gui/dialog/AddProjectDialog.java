@@ -36,6 +36,8 @@ public class AddProjectDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Add Project");
+        
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createproject");
 
         setButtonVisible(BUTTON_DEFAULT, false);
         

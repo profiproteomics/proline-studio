@@ -31,9 +31,9 @@ public class AddAggregateDialog extends DefaultDialog {
     private AddAggregateDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-
         setTitle("Add Dataset");
 
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createaggregate");
 
         m_aggregatePanel = new AddAggregatePanel();
 

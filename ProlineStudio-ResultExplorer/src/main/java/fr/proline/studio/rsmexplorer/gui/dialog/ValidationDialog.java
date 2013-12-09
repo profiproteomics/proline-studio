@@ -88,6 +88,8 @@ public class ValidationDialog extends DefaultDialog {
 
         setTitle("Identification Validation");
 
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:rsvalidation");
+        
         m_parameterList = new ParameterList("Validation");
         createParameters();
         m_parameterList.updateIsUsed();

@@ -40,6 +40,9 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Change Typical Protein");
+        
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:changetypicalprot");
+        
         setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
         setStatusVisible(false);
 

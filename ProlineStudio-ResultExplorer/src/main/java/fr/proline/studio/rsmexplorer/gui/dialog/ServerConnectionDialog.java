@@ -108,7 +108,7 @@ public class ServerConnectionDialog extends DefaultDialog {
         JPanel loginPanel = new JPanel(new GridBagLayout());
         loginPanel.setBorder(BorderFactory.createTitledBorder(" User Parameters "));
         
-        JLabel userLabel = new JLabel("Project User :");
+        JLabel userLabel = new JLabel("User :");
         m_userTextField = new JTextField(30);
         JLabel passwordLabel = new JLabel("Password :");
         m_passwordField = new JPasswordField();
@@ -201,7 +201,7 @@ public class ServerConnectionDialog extends DefaultDialog {
         
         String user = m_userTextField.getText();
         if (user.isEmpty()) {
-            setStatus(true, "You must fill the Project User");
+            setStatus(true, "You must fill the User");
             highlight(m_userTextField);
             return false;
         }

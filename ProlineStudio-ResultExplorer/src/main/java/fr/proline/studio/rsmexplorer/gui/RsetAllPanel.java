@@ -21,10 +21,7 @@ import fr.proline.studio.utils.PropertiesProviderInterface;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -123,6 +120,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
     
     
     private class ResultSetTable extends DecoratedMarkerTable {
+
         
         private JPopupMenu m_popup = null;
         
@@ -131,6 +129,14 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             TableTransferHandler handler = new TableTransferHandler();
             setTransferHandler(handler);
             
+            // remove mouse listeners and put them back later
+            // (our listener must be executed first so the selection
+            // of nodes have not been already managed
+            final MouseListener[] ls = getMouseListeners();
+            for (final MouseListener l : ls) {
+                removeMouseListener(l);
+            }
+            
             addMouseListener(new MouseAdapter() {
 
                 @Override
@@ -138,8 +144,49 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
                     if (SwingUtilities.isRightMouseButton(e)) {
                         getPopup().show(e.getComponent(), e.getX(), e.getY());
                     }
+                    
+                    
+                }
+                
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    // Need to explicitly start a drag operation when the mouse is pressed.
+                    // Otherwise drags are only started *after* the user has clicked once
+                    // on the JTable (this could be down to the L&F not doing the right thing).
+
+                    
+                    if (!SwingUtilities.isLeftMouseButton(e)) {
+                        return;
+                    }
+                    
+                    
+                    // hack to avoid a conflict with selection manager
+                    // --- begin
+                    int row = m_resultSetTable.rowAtPoint(e.getPoint());
+                    if (row == -1) {
+                        return;
+                    }
+                    
+                    int[] selectedRows = m_resultSetTable.getSelectedRows();
+
+                    for (int i = 0; i < selectedRows.length; i++) {
+                        if (selectedRows[i] == row) {
+                            return;
+                        }
+                    }
+                    // -- end
+
+
+                        
+                    getTransferHandler().exportAsDrag(m_resultSetTable, e, TransferHandler.COPY);
+
                 }
             });
+            
+            // put back mouse listeners
+            for (final MouseListener l : ls) {
+                addMouseListener(l);
+            }
         }
         
         private JPopupMenu getPopup() {
@@ -436,7 +483,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
     private static final DateFormat m_df = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
     
     public class TableTransferHandler extends TransferHandler {
-        
+
         @Override
         public int getSourceActions(JComponent c) {
             return TransferHandler.COPY;
@@ -483,6 +530,12 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             
         }
         
+        /*@Override
+        public void exportAsDrag(JComponent comp, InputEvent e, int action) {
+            super.exportAsDrag(comp, e, action);
+
+        }*/
+
         @Override
         protected void exportDone(JComponent source, Transferable data, int action) {
 

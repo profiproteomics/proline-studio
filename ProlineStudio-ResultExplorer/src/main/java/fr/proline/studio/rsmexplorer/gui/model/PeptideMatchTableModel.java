@@ -492,7 +492,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
                 return ((StringFilter) filter).filter((String)data);
             }
             case COLTYPE_PEPTIDE_DELTA_MOZ: {  // COLTYPE_PEPTIDE_PPM
-                return ((DoubleFilter) filter).filter((Double)data);
+                return ((DoubleFilter) filter).filter((Float)data);
             }  
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:

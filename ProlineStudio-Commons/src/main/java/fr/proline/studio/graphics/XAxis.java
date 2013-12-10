@@ -58,6 +58,7 @@ public class XAxis extends Axis {
         
         double x = m_minTick;
         int pX = pixelStart;
+        int previousEndX = -Integer.MAX_VALUE;
         while(true) {
             g.drawLine(pX, m_y, pX, m_y+4);
             
@@ -69,7 +70,12 @@ public class XAxis extends Axis {
             
             String s = m_df.format(xDisplay);
             int stringWidth = metrics.stringWidth(s);
-            g.drawString(s, pX-stringWidth/2, m_y+height+4);
+            
+            int posX = pX-stringWidth/2;
+            if (posX>previousEndX+2) { // check to avoid to overlap labels
+                g.drawString(s, posX, m_y+height+4);
+                previousEndX = posX+stringWidth;
+            }
             
             x += tickSpacing;
             pX = valueToPixel(x);

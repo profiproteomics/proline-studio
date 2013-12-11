@@ -15,10 +15,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
@@ -381,8 +378,8 @@ public class RSMTransferHandler extends TransferHandler {
 
         // used to keep parent node modified
         // to be able later to modify the database
-        HashSet<RSMNode> allParentNodeModified = new HashSet<>();
-        allParentNodeModified.add(dropRSMNode);
+        LinkedHashSet<RSMNode> allParentNodeModified = new LinkedHashSet<>();
+        
 
 
         ArrayList<RSMNode> nodeList = (ArrayList<RSMNode>) data.getDataList();
@@ -412,10 +409,14 @@ public class RSMTransferHandler extends TransferHandler {
             childIndex++;
 
         }
+        
+        // Drop node must be added at the end : because the add of dataset must be done
+        // after children have been removed from their parents
+        allParentNodeModified.add(dropRSMNode);
 
         // create HashMap of Database Object which need to be updated
-        HashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new HashMap<>();
-        HashSet<RSMDataSetNode> nodeToBeChanged = new HashSet<>();
+        LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new LinkedHashMap<>();
+        //HashSet<RSMDataSetNode> nodeToBeChanged = new HashSet<>();
         
         Iterator<RSMNode> it = allParentNodeModified.iterator();
         while (it.hasNext()) {
@@ -428,7 +429,7 @@ public class RSMTransferHandler extends TransferHandler {
             if (type == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode datasetNode = ((RSMDataSetNode) parentNode);
                 databaseParentObject = datasetNode.getDataset();
-                nodeToBeChanged.add(datasetNode);
+                //nodeToBeChanged.add(datasetNode);
             } else if (type == RSMNode.NodeTypes.PROJECT) {
                 RSMProjectNode projectNode = ((RSMProjectNode) parentNode);
                 databaseParentObject = projectNode.getProject();
@@ -455,7 +456,7 @@ public class RSMTransferHandler extends TransferHandler {
                 RSMDataSetNode childDatasetNode = (RSMDataSetNode) childNode;
                 DDataset dataset = childDatasetNode.getDataset();
                 datasetList.add(dataset);
-                nodeToBeChanged.add(childDatasetNode);
+                //nodeToBeChanged.add(childDatasetNode);
             }
 
             // register this modification

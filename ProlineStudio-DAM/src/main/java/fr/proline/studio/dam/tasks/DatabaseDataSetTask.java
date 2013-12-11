@@ -869,10 +869,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param databaseObjectsToModify HashMap whose keys can be Project or
      * Parent Dataset
      */
-    public static boolean updateDatasetAndProjectsTree(HashMap<Object, ArrayList<DDataset>> databaseObjectsToModify) {
+    public static boolean updateDatasetAndProjectsTree(LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify) {
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
+
 
             Iterator it = databaseObjectsToModify.keySet().iterator();
             while (it.hasNext()) {

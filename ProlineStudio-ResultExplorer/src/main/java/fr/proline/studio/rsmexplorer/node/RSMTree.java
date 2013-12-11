@@ -496,8 +496,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         }
 
         // move node to Trash
-        HashSet<RSMNode> allParentNodeModified = new HashSet<>();
-        allParentNodeModified.add(trash);
+        LinkedHashSet<RSMNode> allParentNodeModified = new LinkedHashSet<>();
+
 
         int nbKeptNodes = keptNodes.size();
         for (int i=0;i<nbKeptNodes;i++) {
@@ -507,10 +507,12 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             m_model.insertNodeInto(nodeCur, trash, trash.getChildCount());
         }
 
-        
+        // Trash must be added at the end : because the add of dataset must be done
+        // after children have been removed from their parents
+        allParentNodeModified.add(trash);
 
-        HashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new HashMap<>();
-        HashSet<RSMDataSetNode> nodeToBeChanged = new HashSet<>();
+        LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new LinkedHashMap<>();
+        //HashSet<RSMDataSetNode> nodeToBeChanged = new HashSet<>();
         
         Iterator<RSMNode> it = allParentNodeModified.iterator();
         while (it.hasNext()) {
@@ -523,7 +525,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             if (type == RSMNode.NodeTypes.DATA_SET) {
                 RSMDataSetNode datasetNode = ((RSMDataSetNode) parentNode);
                 databaseParentObject = datasetNode.getDataset();
-                nodeToBeChanged.add(datasetNode);
+                //nodeToBeChanged.add(datasetNode);
             } else if (type == RSMNode.NodeTypes.PROJECT) {
                 RSMProjectNode projectNodeS = ((RSMProjectNode) parentNode);
                 databaseParentObject = projectNodeS.getProject();
@@ -540,7 +542,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 if (childNode instanceof RSMDataSetNode) {
                     DDataset dataset = ((RSMDataSetNode)childNode).getDataset();
                     datasetList.add(dataset);
-                    nodeToBeChanged.add((RSMDataSetNode)childNode);
+                    //nodeToBeChanged.add((RSMDataSetNode)childNode);
                 } else if (childNode instanceof RSMHourGlassNode) {
                     // potential bug
                     //JPM.TODO ??? (should not happen)

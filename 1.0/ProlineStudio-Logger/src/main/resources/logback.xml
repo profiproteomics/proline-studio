@@ -1,0 +1,30 @@
+<configuration>
+ <contextName>Proline Studio </contextName>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- encoders are assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <encoder>
+      <pattern>%-5level: [%thread] %date{dd MMM yyyy - HH:mm:ss} %logger{35} - %msg%n</pattern>
+    </encoder>
+  </appender>
+  
+   <appender name="Fappender" class="ch.qos.logback.core.FileAppender">
+      <file>Proline_Studio-${user.name}.log</file>
+      <append>true</append>
+      <encoder>
+        <pattern>%-5level: [%thread] %date{dd MMM yyyy - HH:mm:ss} %logger{35} - %msg%n</pattern>
+      </encoder>       
+   </appender>
+
+  <logger name="fr.proline" level="DEBUG">
+  </logger>
+
+  <logger name="org.hibernate" level="INFO">
+  </logger>
+
+  <root level="OFF">
+      <appender-ref ref="STDOUT" />
+      <appender-ref ref="Fappender" />    
+  </root>
+  
+</configuration>

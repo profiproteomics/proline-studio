@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>ProlineStudio-parent</artifactId>
+    <groupId>fr.proline</groupId>
+    <version>1.0</version>
+  </parent>
+
+  <groupId>fr.proline</groupId>
+  <artifactId>ProlineStudio-CoreWrapper</artifactId>
+  <packaging>nbm</packaging>
+
+  <name>ProlineStudio-CoreWrapper</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <core.version>0.0.8</core.version>
+  </properties>
+
+  <dependencies>
+
+    <!-- NetBeans dependencies -->
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-api-annotations-common</artifactId>
+      <version>${netbeans.version}</version>
+    </dependency>
+
+    <!-- Other dependencies -->
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <!-- Version inherited from ProFI-Pom -->
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <!-- Version inherited from ProFI-Pom -->
+    </dependency>
+
+    <!-- Proline-Core dependencies -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>Proline-Databases</artifactId>
+      <version>${core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>Proline-ORM</artifactId>
+      <version>${core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>Proline-OM</artifactId>
+      <version>${core.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-collections</artifactId>
+          <groupId>commons-collections</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>Proline-DAL</artifactId>
+      <version>${core.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>fr.proline</groupId>
+      <artifactId>Proline-OM</artifactId>
+      <version>${core.version}</version>
+      <type>test-jar</type>
+    </dependency> <!-- JPM.TODO : to remove when we no longer use ResultSet Generator -->
+
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>nbm-maven-plugin</artifactId>
+        <!-- Version inherited from ProlineStudio-parent -->
+        <extensions>true</extensions>
+        <configuration>
+          <publicPackages>
+            <!--<publicPackage>javax.transaction</publicPackage>
+            <publicPackage>javax.transaction.xa</publicPackage>-->
+            <!--<publicPackage>javax.xml.transform.*</publicPackage>-->
+            <publicPackage>fr.profi.jdbc</publicPackage>
+            <publicPackage>fr.profi.jdbc.easy</publicPackage>
+            <publicPackage>fr.proline.api.service</publicPackage>
+            <publicPackage>fr.proline.context</publicPackage>
+            <publicPackage>fr.proline.core.algo.lcms.*</publicPackage>
+            <publicPackage>fr.proline.core.algo.msi.*</publicPackage>
+            <publicPackage>fr.proline.core.algo.msq</publicPackage>
+            <publicPackage>fr.proline.core.dal.*</publicPackage>
+            <publicPackage>fr.proline.core.om.builder</publicPackage>
+            <publicPackage>fr.proline.core.om.model.lcms</publicPackage>
+            <publicPackage>fr.proline.core.om.model.msi</publicPackage>
+            <publicPackage>fr.proline.core.om.model.msq</publicPackage>
+            <publicPackage>fr.proline.core.om.model.pdi</publicPackage>
+            <publicPackage>fr.proline.core.om.model.uds</publicPackage>
+            <publicPackage>fr.proline.core.om.msi</publicPackage>
+            <publicPackage>fr.proline.core.om.provider.*</publicPackage>
+            <publicPackage>fr.proline.core.om.storer.lcms</publicPackage>
+            <publicPackage>fr.proline.core.om.storer.lcms.impl</publicPackage>
+            <publicPackage>fr.proline.core.om.storer.msi</publicPackage>
+            <publicPackage>fr.proline.core.om.storer.msi.impl</publicPackage>
+            <publicPackage>fr.proline.core.om.storer.ps</publicPackage>
+            <publicPackage>fr.proline.core.om.utils</publicPackage>
+            <publicPackage>fr.proline.core.orm.msi</publicPackage>
+            <publicPackage>fr.proline.core.orm.msi.repository</publicPackage>
+            <publicPackage>fr.proline.core.orm.pdi</publicPackage>
+            <publicPackage>fr.proline.core.orm.pdi.repository</publicPackage>
+            <publicPackage>fr.proline.core.orm.ps</publicPackage>
+            <publicPackage>fr.proline.core.orm.ps.repository</publicPackage>
+            <publicPackage>fr.proline.core.orm.uds</publicPackage>
+            <publicPackage>fr.proline.core.orm.uds.repository</publicPackage>
+            <publicPackage>fr.proline.core.orm.util</publicPackage>
+            <publicPackage>fr.proline.core.parser.lcms</publicPackage>
+            <publicPackage>fr.proline.core.parser.lcms.impl</publicPackage>
+            <publicPackage>fr.proline.core.service.lcms</publicPackage>
+            <publicPackage>fr.proline.core.service.msi</publicPackage>
+            <publicPackage>fr.proline.core.service.msq</publicPackage>
+            <publicPackage>fr.proline.core.service.msq.impl</publicPackage>
+            <publicPackage>fr.proline.core.service.msq.quantitation</publicPackage>
+            <publicPackage>fr.proline.core.service.uds</publicPackage>
+            <publicPackage>fr.proline.core.utils.generator</publicPackage>
+            <publicPackage>fr.proline.core.utils.lzma</publicPackage>
+            <publicPackage>fr.proline.core.utils.serialization</publicPackage>
+            <publicPackage>fr.proline.module</publicPackage>
+            <publicPackage>fr.proline.module.parser.mascot</publicPackage>
+            <publicPackage>fr.proline.repository.*</publicPackage>
+            <publicPackage>fr.proline.util.*</publicPackage>
+            <publicPackage>javax.annotation</publicPackage>
+            <publicPackage>javax.annotation.meta</publicPackage>
+            <publicPackage>javax.persistence.*</publicPackage>
+            <publicPackage>javax.sql</publicPackage>
+            <publicPackage>javax.transaction.xa</publicPackage>
+            <publicPackage>javax.xml.parsers</publicPackage>
+            <publicPackage>org.apache.commons.collections</publicPackage>
+            <publicPackage>org.apache.commons.lang3</publicPackage>
+            <publicPackage>org.joda.time</publicPackage>
+            <publicPackage>org.joda.time.format</publicPackage>
+            <publicPackage>org.w3c.dom</publicPackage>
+            <publicPackage>org.w3c.dom.ls</publicPackage>
+            <publicPackage>org.xml.sax</publicPackage>
+            <publicPackage>org.xml.sax.ext</publicPackage>
+            <publicPackage>org.xml.sax.helpers</publicPackage>
+            <publicPackage>scala.*</publicPackage>
+          </publicPackages>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>

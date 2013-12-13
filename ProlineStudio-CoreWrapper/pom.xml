@@ -5,7 +5,7 @@
   <parent>
     <artifactId>ProlineStudio-parent</artifactId>
     <groupId>fr.proline</groupId>
-    <version>0.1.2-SNAPSHOT</version>
+    <version>0.1.2</version>
   </parent>
 
   <groupId>fr.proline</groupId>
@@ -16,7 +16,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <core.version>0.1.2-SNAPSHOT</core.version>
+    <core.version>0.1.2</core.version>
   </properties>
 
   <dependencies>

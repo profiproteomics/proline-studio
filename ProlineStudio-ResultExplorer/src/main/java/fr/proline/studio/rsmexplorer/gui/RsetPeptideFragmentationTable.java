@@ -119,6 +119,9 @@ public class RsetPeptideFragmentationTable extends LazyTable {
         m_jTable1 = new DecoratedTable();
 
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_dataBox.getProjectId()).getEntityManagerFactory().createEntityManager();
+        
+        try {
+        
         entityManagerMSI.getTransaction().begin();
         PeptideMatch pmORM = entityManagerMSI.find(PeptideMatch.class,
                 m_peptideMatch.getId());
@@ -139,8 +142,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
         }
 
         if (objectTreeId != null) {
-            ObjectTree ot = entityManagerMSI.find(ObjectTree.class,
-                    objectTreeId); // get the objectTree from id.
+            ObjectTree ot = entityManagerMSI.find(ObjectTree.class, objectTreeId); // get the objectTree from id.
 
             String clobData = ot.getClobData();
 
@@ -226,15 +228,19 @@ public class RsetPeptideFragmentationTable extends LazyTable {
         }
 
         entityManagerMSI.getTransaction().commit();
-        entityManagerMSI.clear();
-        entityManagerMSI.close();
+        
+        } catch (Exception e) {
+            entityManagerMSI.getTransaction().rollback();
+        } finally {
 
+            entityManagerMSI.close();
+        }
 
     }
 
 
 	public static double getMassFromAminoAcid(char aa) {
-		HashMap<Character, Double> aaHashMap = new HashMap<Character, Double>();
+		HashMap<Character, Double> aaHashMap = new HashMap<>();
 
 		aaHashMap.put('A', (double) 71.03711);
 		aaHashMap.put('C', (double) 103.00919);

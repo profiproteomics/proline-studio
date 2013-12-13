@@ -124,15 +124,19 @@ public class RsetPeptideSpectrumAnnotations {
 
 	public void addAnnotations() {
 
+            if (m_peptideMatch == null) {
+                return;
+            }
+            
+            EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_dataBox.getProjectId()).getEntityManagerFactory().createEntityManager();
+		
+            try {
+            
 		final String SERIES_NAME = "spectrumData";
 
-		EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_dataBox.getProjectId()).getEntityManagerFactory()
-				.createEntityManager();
 		entityManagerMSI.getTransaction().begin();
 
-		if (m_peptideMatch == null) {
-			return;
-		}
+
 		PeptideMatch pmORM = entityManagerMSI.find(PeptideMatch.class, m_peptideMatch.getId());
 
 		DMsQuery msQuery = m_peptideMatch.isMsQuerySet() ? m_peptideMatch.getMsQuery() : null;
@@ -606,9 +610,15 @@ public class RsetPeptideSpectrumAnnotations {
 
 		}
 
-		entityManagerMSI.getTransaction().commit(); 
-		entityManagerMSI.clear();
+                entityManagerMSI.getTransaction().commit(); 
+                
+            } catch (Exception e) {
+                entityManagerMSI.getTransaction().rollback(); 
+            } finally {
+                
+		
 		entityManagerMSI.close();
+            }
 		
 	}
 

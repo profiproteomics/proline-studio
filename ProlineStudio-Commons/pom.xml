@@ -175,6 +175,9 @@
                         <publicPackage>javax.xml.parsers</publicPackage>
                         <publicPackage>org.jdesktop.beans</publicPackage>
                         <publicPackage>org.jdesktop.swingx.*</publicPackage>
+                        <publicPackage>org.rosuda.REngine</publicPackage>
+                        <publicPackage>org.rosuda.REngine.Rserve</publicPackage>
+                        <publicPackage>org.rosuda.REngine.Rserve.protocol</publicPackage>
                         <publicPackage>org.xml.sax</publicPackage>
                         <publicPackage>org.xml.sax.ext</publicPackage>
                         <publicPackage>org.xml.sax.helpers</publicPackage>

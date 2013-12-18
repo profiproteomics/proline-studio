@@ -172,7 +172,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                     return false;
                 }
                 
-                // check if the projectUser asked is known
+                // load data from UDS : instruments, peaklists...
                 if (!loadUDSData(entityManagerUDS)) {
                     return false;
                 }

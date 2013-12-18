@@ -1,8 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -20,6 +23,10 @@ public class ServerConnectionDialog extends DefaultDialog {
     private JTextField m_userTextField;
     private JPasswordField m_passwordField;
     private JCheckBox m_rememberPasswordCheckBox;
+   
+    
+    private boolean m_changingUser = false;
+    private String m_keepLastPasswordForChangingUser = null;
     
     private static ServerConnectionDialog m_singletonDialog = null;
     
@@ -165,7 +172,44 @@ public class ServerConnectionDialog extends DefaultDialog {
             return false;
         }
         
-        connect();
+        if (m_changingUser) {
+            // aleady connected to the server and UDS database, we check the new user
+            String projectUser = m_userTextField.getText();
+            String password = new String(m_passwordField.getPassword());
+            
+            UDSDataManager udsMgr = UDSDataManager.getUDSDataManager();
+            boolean foundUser = false;
+            UserAccount[] projectUsers = udsMgr.getProjectUsersArray();
+            int nb = projectUsers.length;
+            for (int i = 0; i < nb; i++) {
+                UserAccount account = projectUsers[i];
+                if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
+                    udsMgr.setProjectUser(account);
+                    foundUser = true;
+                    break;
+                }
+            }
+            
+            if (!foundUser) {
+                 setStatus(true, "Unknown Project User: "+projectUser);
+                 highlight(m_userTextField);
+                 return false;
+            }
+            
+            if (m_keepLastPasswordForChangingUser.compareTo(password) != 0) {
+                setStatus(true, "Incorrect Password");
+                highlight(m_passwordField);
+                return false;
+            }
+
+            // start to load the data for the new user
+            RSMTree.getTree().startLoading();
+
+            return true;
+ 
+        } else {
+            connect();
+        }
         
         // dialog will be closed if the connection is established
         return false;
@@ -181,6 +225,11 @@ public class ServerConnectionDialog extends DefaultDialog {
         initDefaults();
 
         return false;
+    }
+    
+    public void setChangeUser() {
+        m_serverURLTextField.setEnabled(false);
+        m_changingUser = true;
     }
     
     private boolean checkParameters() {
@@ -225,7 +274,7 @@ public class ServerConnectionDialog extends DefaultDialog {
         }
         
         String projectUser  = m_userTextField.getText();
-        String password = new String(m_passwordField.getPassword());
+        final String password = new String(m_passwordField.getPassword());
         
         
         
@@ -241,6 +290,9 @@ public class ServerConnectionDialog extends DefaultDialog {
                     setStatus(true, connectionError.getErrorTitle());
                     JOptionPane.showMessageDialog(m_singletonDialog, connectionError, "Database Connection Error", JOptionPane.ERROR_MESSAGE);
                 } else if (serverManager.isConnectionDone()) {
+                    
+                    m_keepLastPasswordForChangingUser = password;
+                    
                     storeDefaults();
                     setVisible(false);     
                     

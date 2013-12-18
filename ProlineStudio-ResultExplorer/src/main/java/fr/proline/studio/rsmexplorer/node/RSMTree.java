@@ -87,6 +87,16 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     }
     
+    public void removeRootChildren() {
+
+        RSMNode root = ((RSMNode) m_model.getRoot());
+        
+        root.removeAllChildren();
+        
+        m_model.nodeStructureChanged(root);
+
+    }
+    
     @Override
     public boolean isPathEditable(TreePath path) {
         if (isEditable()) {
@@ -670,160 +680,161 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             }
 
             // we show the popup to connect or disconnect
-            if (rootPopup == null) {
+            if (m_rootPopup == null) {
                 // create the actions
-                rootActions = new ArrayList<>(2);  // <--- get in sync
+                m_rootActions = new ArrayList<>(4);  // <--- get in sync
 
                 AddProjectAction addProjectAction = new AddProjectAction();
-                rootActions.add(addProjectAction);
+                m_rootActions.add(addProjectAction);
                 
-                /*rootActions.add(null);  // separator
+                m_rootActions.add(null);  // separator
+                
                 
                 ConnectAction connectAction = new ConnectAction();
-                rootActions.add(connectAction);*/
+                m_rootActions.add(connectAction);
 
-                /*DisconnectAction disconnectAction = new DisconnectAction();
-                rootActions.add(disconnectAction);*/ //JPM.TODO
+                DisconnectAction disconnectAction = new DisconnectAction();
+                m_rootActions.add(disconnectAction);
 
                 // add actions to popup
-                rootPopup = new JPopupMenu();
-                for (int i = 0; i < rootActions.size(); i++) {
-                    AbstractRSMAction action = rootActions.get(i);
+                m_rootPopup = new JPopupMenu();
+                for (int i = 0; i < m_rootActions.size(); i++) {
+                    AbstractRSMAction action = m_rootActions.get(i);
                     if (action == null) {
-                        rootPopup.addSeparator();
+                        m_rootPopup.addSeparator();
                     } else {
-                        rootPopup.add(action.getPopupPresenter());
+                        m_rootPopup.add(action.getPopupPresenter());
                     }
                 }
             }
             
-            popup = rootPopup;
-            actions = rootActions;
+            popup = m_rootPopup;
+            actions = m_rootActions;
             
         } else if (trashNodeSelected && (nbNodes == 1)) {
             
             // creation of the popup if needed
-            if (trashPopup == null) {
+            if (m_trashPopup == null) {
                  // create the actions
-                trashActions = new ArrayList<>(1);  // <--- get in sync
+                m_trashActions = new ArrayList<>(1);  // <--- get in sync
                 
                 EmptyTrashAction emtpyTrashAction = new EmptyTrashAction();
-                trashActions.add(emtpyTrashAction);
+                m_trashActions.add(emtpyTrashAction);
                 
-                trashPopup = new JPopupMenu();
+                m_trashPopup = new JPopupMenu();
                 
-                trashPopup.add(emtpyTrashAction.getPopupPresenter());
+                m_trashPopup.add(emtpyTrashAction.getPopupPresenter());
             }
             
-            popup = trashPopup;
-            actions = trashActions;
+            popup = m_trashPopup;
+            actions = m_trashActions;
             
         } else if (allImportedNodeSelected && (nbNodes == 1)) {
             
             // creation of the popup if needed
-            if (allImportedPopup == null) {
+            if (m_allImportedPopup == null) {
                  // create the actions
-                allImportedActions = new ArrayList<>(3);  // <--- get in sync
+                m_allImportedActions = new ArrayList<>(3);  // <--- get in sync
    
 
                 
                 DisplayAllRsetAction allRsetAction = new DisplayAllRsetAction();
-                allImportedActions.add(allRsetAction);
+                m_allImportedActions.add(allRsetAction);
 
-                allImportedActions.add(null);
+                m_allImportedActions.add(null);
                 
                 ImportSearchResultAsRsetAction importAction = new ImportSearchResultAsRsetAction();
-                allImportedActions.add(importAction);
+                m_allImportedActions.add(importAction);
                 
-                allImportedPopup = new JPopupMenu();
+                m_allImportedPopup = new JPopupMenu();
                 
-                for (int i = 0; i < allImportedActions.size(); i++) {
-                    AbstractRSMAction action = allImportedActions.get(i);
+                for (int i = 0; i < m_allImportedActions.size(); i++) {
+                    AbstractRSMAction action = m_allImportedActions.get(i);
                     if (action == null) {
-                        allImportedPopup.addSeparator();
+                        m_allImportedPopup.addSeparator();
                     } else {
-                        allImportedPopup.add(action.getPopupPresenter());
+                        m_allImportedPopup.add(action.getPopupPresenter());
                     }
                 }
             }
  
-            popup = allImportedPopup;
-            actions = allImportedActions;
+            popup = m_allImportedPopup;
+            actions = m_allImportedActions;
             
         } else {
 
 
             // creation of the popup if needed
-            if (mainPopup == null) {
+            if (m_mainPopup == null) {
 
                 // create the actions
-                mainActions = new ArrayList<>(11);  // <--- get in sync
+                m_mainActions = new ArrayList<>(11);  // <--- get in sync
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction();
-                mainActions.add(displayRsetAction);
+                m_mainActions.add(displayRsetAction);
                 
                 DisplayRsmAction displayRsmAction = new DisplayRsmAction();
-                mainActions.add(displayRsmAction);
+                m_mainActions.add(displayRsmAction);
 
 
                 PropertiesAction propertiesAction = new PropertiesAction();
-                mainActions.add(propertiesAction);
+                m_mainActions.add(propertiesAction);
 
                 
-                mainActions.add(null);  // separator
+                m_mainActions.add(null);  // separator
 
                 AddAction addAction = new AddAction();
-                mainActions.add(addAction);
+                m_mainActions.add(addAction);
                 
                 MergeAction mergeAction = new MergeAction();
-                mainActions.add(mergeAction);
+                m_mainActions.add(mergeAction);
                 
                 ValidateAction validateAction = new ValidateAction();
-                mainActions.add(validateAction);
+                m_mainActions.add(validateAction);
                 
                 ChangeTypicalProteinAction changeTypicalProteinAction = new ChangeTypicalProteinAction();
-                mainActions.add(changeTypicalProteinAction);
+                m_mainActions.add(changeTypicalProteinAction);
                 
                 //CompareWithSCAction computeSCAction = new CompareWithSCAction(); //JPM.BETA : removed Spectral count for beta
                 //mainActions.add(computeSCAction); 
                        
                 
-                mainActions.add(null);  // separator
+                m_mainActions.add(null);  // separator
                 
                 ExportRSMAction exportRSMAction = new ExportRSMAction();
-                mainActions.add(exportRSMAction);                        
+                m_mainActions.add(exportRSMAction);                        
                 
-                mainActions.add(null);  // separator
+                m_mainActions.add(null);  // separator
 
                 RenameAction renameAction = new RenameAction();
-                mainActions.add(renameAction);
+                m_mainActions.add(renameAction);
 
                 
                 DeleteAction deleteAction = new DeleteAction();
-                mainActions.add(deleteAction);
+                m_mainActions.add(deleteAction);
 
 
                 // add actions to popup
-                mainPopup = new JPopupMenu();
-                for (int i = 0; i < mainActions.size(); i++) {
-                    AbstractRSMAction action = mainActions.get(i);
+                m_mainPopup = new JPopupMenu();
+                for (int i = 0; i < m_mainActions.size(); i++) {
+                    AbstractRSMAction action = m_mainActions.get(i);
                     if (action == null) {
-                        mainPopup.addSeparator();
+                        m_mainPopup.addSeparator();
                     } else {
-                        mainPopup.add(action.getPopupPresenter());
+                        m_mainPopup.add(action.getPopupPresenter());
                     }
                 }
                 //mainPopup.add(new DoItAction());
                 List<Action> additionalActions = ActionRegistry.getInstance().getActions(DDataset.class);
                 if(additionalActions != null) {
                     for (Action action : additionalActions)
-                        mainPopup.add(new DatasetWrapperAction(((DatasetAction)action)));
+                        m_mainPopup.add(new DatasetWrapperAction(((DatasetAction)action)));
                 }                
                 
             }
             
-            popup = mainPopup;
-            actions = mainActions;
+            popup = m_mainPopup;
+            actions = m_mainActions;
         }
 
         
@@ -840,14 +851,14 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         
         popup.show( (JComponent)e.getSource(), e.getX(), e.getY() );
     }
-    private JPopupMenu mainPopup;
-    private ArrayList<AbstractRSMAction> mainActions;
-    private JPopupMenu rootPopup;
-    private ArrayList<AbstractRSMAction> rootActions;
-    private JPopupMenu trashPopup;
-    private ArrayList<AbstractRSMAction> trashActions;
-    private JPopupMenu allImportedPopup;
-    private ArrayList<AbstractRSMAction> allImportedActions;
+    private JPopupMenu m_mainPopup;
+    private ArrayList<AbstractRSMAction> m_mainActions;
+    private JPopupMenu m_rootPopup;
+    private ArrayList<AbstractRSMAction> m_rootActions;
+    private JPopupMenu m_trashPopup;
+    private ArrayList<AbstractRSMAction> m_trashActions;
+    private JPopupMenu m_allImportedPopup;
+    private ArrayList<AbstractRSMAction> m_allImportedActions;
     
     @Override
     public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {

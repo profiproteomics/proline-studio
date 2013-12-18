@@ -43,10 +43,17 @@ public class RServerManager {
     }
 
     public RConnection connect() throws RServerException {
+        return connect(null, null);
+    }
+    public RConnection connect(String user, String password) throws RServerException {
         
         try {
             m_connection = new RConnection(m_host, m_port);
 
+            if (user != null) {
+                m_connection.login(user, password);
+            }
+            
             // for the moment, we need to load the library roline //JPM.TODO
             m_connection.eval("library(Roline)");
 

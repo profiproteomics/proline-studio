@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * Task to export a RSM (Identification Summary)
  * @author JM235353
  */
 public class ExportRSMTask extends AbstractServiceTask {

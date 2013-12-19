@@ -15,7 +15,7 @@ import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Management of the connection to the Jetty Server and to the databases
  * @author jm235353
  */
 public class ServerConnectionManager {

@@ -927,7 +927,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
         AbstractParameterToString<PeaklistSoftware> softwareToString = new AbstractParameterToString<PeaklistSoftware>() {
             @Override
             public String toString(PeaklistSoftware o) {
-                return o.getName();
+                String version = o.getVersion();
+                if (version == null) {
+                    return o.getName();
+                }
+                return o.getName()+" "+version;
             }  
         };
         

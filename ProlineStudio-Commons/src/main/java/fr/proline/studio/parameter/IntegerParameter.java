@@ -7,7 +7,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 /**
- *
+ * Parameter of type Integer, displayed as a Textfield or a Slider
  * @author jm235353
  */
 public class IntegerParameter extends AbstractParameter {

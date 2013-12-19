@@ -9,7 +9,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 /**
- *
+ * Histogram Plot
  * @author JM235353
  */
 public class PlotHistogram extends PlotAbstract {

@@ -1,7 +1,7 @@
 package fr.proline.studio.graphics;
 
 /**
- *
+ * Management of ticks along an axis
  * @author JM235353
  */
 public class AxisTicks {

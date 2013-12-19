@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 /**
- *
+ * Y Axis
  * @author JM235353
  */
 public class YAxis extends Axis {

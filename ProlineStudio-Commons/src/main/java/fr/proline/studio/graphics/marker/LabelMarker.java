@@ -6,7 +6,7 @@ import fr.proline.studio.graphics.YAxis;
 import java.awt.*;
 
 /**
- *
+ * Marker to display text at a specific position
  * @author JM235353
  */
 public class LabelMarker extends AbstractMarker {

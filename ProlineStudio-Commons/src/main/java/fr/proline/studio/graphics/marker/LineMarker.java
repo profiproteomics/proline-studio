@@ -6,7 +6,7 @@ import fr.proline.studio.graphics.YAxis;
 import java.awt.*;
 
 /**
- *
+ * Marker to display an horizontal or vertical line
  * @author JM235353
  */
 public class LineMarker extends AbstractMarker {

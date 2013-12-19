@@ -1,7 +1,7 @@
 package fr.proline.studio.search;
 
 /**
- *
+ * Parent class for search functionnality
  * @author JM235353
  */
 public abstract class AbstractSearch {

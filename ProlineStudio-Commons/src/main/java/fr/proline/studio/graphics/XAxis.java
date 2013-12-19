@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 import java.text.DecimalFormat;
 
 /**
- *
+ * X Axis
  * @author JM235353
  */
 public class XAxis extends Axis {

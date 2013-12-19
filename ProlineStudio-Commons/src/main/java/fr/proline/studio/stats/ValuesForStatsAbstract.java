@@ -3,7 +3,7 @@ package fr.proline.studio.stats;
 import java.util.ArrayList;
 
 /**
- *
+ * Class used to provide values which can be used to do an histogram
  * @author JM235353
  */
 public abstract class ValuesForStatsAbstract {

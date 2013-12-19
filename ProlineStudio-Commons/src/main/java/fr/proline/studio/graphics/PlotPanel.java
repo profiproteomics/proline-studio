@@ -4,7 +4,7 @@ import java.awt.*;
 import javax.swing.JPanel;
 
 /**
- *
+ * Panel to display data with an X and Y Axis
  * @author JM235353
  */
 public class PlotPanel extends JPanel {

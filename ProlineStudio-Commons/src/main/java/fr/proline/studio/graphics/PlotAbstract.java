@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 /**
- *
+ * Base class for all types of plot
  * @author JM235353
  */
 public abstract class PlotAbstract {

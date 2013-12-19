@@ -8,7 +8,7 @@ import java.awt.Graphics2D;
 
 
 /**
- *
+ * Marker to display an horizontal segment between two points
  * @author JM235353
  */
 public class XDeltaMarker extends AbstractMarker {

@@ -6,7 +6,7 @@ import fr.proline.studio.graphics.YAxis;
 import java.awt.*;
 
 /**
- *
+ * Marker to display text at a % position in the Plot Panel
  * @author JM235353
  */
 public class TextMarker extends AbstractMarker {

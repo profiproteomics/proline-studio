@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 /**
- *
+ * Base class for axis
  * @author JM235353
  */
 public abstract class Axis {

@@ -23,11 +23,12 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
     private long m_projectId = -1;
     private List<AbstractData> m_list = null;
     private String m_name = null;
+    private String m_description = null;
 
     private int m_action;
     
     private final static int LOAD_PROJECT   = 0;
-    private final static int RENAME_PROJECT = 1;
+    private final static int CHANGE_NAME_DESCRIPTION_PROJECT = 1;
     
     public DatabaseProjectTask(AbstractDatabaseCallback callback) {
         super(callback, null);
@@ -52,12 +53,13 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
      * @param projectId
      * @param list 
      */
-    public void initRenameProject(long projectId, String name) {
-        setTaskInfo(new TaskInfo("Rename Project to "+name, true, TASK_LIST_INFO));
+    public void initChangeNameAndDescriptionProject(long projectId, String name, String description) {
+        setTaskInfo(new TaskInfo("Change Name/Description of a Project", true, TASK_LIST_INFO));
         m_projectId = projectId;
         m_name = name;
+        m_description = description;
         
-        m_action = RENAME_PROJECT;
+        m_action = CHANGE_NAME_DESCRIPTION_PROJECT;
     }
 
     
@@ -72,8 +74,8 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
         switch (m_action) {
             case LOAD_PROJECT:
                 return loadProject();
-            case RENAME_PROJECT:
-                return renameProject();
+            case CHANGE_NAME_DESCRIPTION_PROJECT:
+                return changeNameDescriptionProject();
         }
         return false; // should not happen
     }
@@ -136,17 +138,18 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
         return true;
     }
 
-    private boolean renameProject() {
+    private boolean changeNameDescriptionProject() {
 
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 
-            String hqlUpdate = "UPDATE Project p set p.name= :name where p.id = :projectId";
-            Query renameQuery = entityManagerUDS.createQuery(hqlUpdate);
-            renameQuery.setParameter("projectId", m_projectId);
-            renameQuery.setParameter("name", m_name);
-            renameQuery.executeUpdate();
+            String hqlUpdate = "UPDATE Project p set p.name= :name, p.description= :description where p.id = :projectId";
+            Query modifyProjectQuery = entityManagerUDS.createQuery(hqlUpdate);
+            modifyProjectQuery.setParameter("projectId", m_projectId);
+            modifyProjectQuery.setParameter("name", m_name);
+            modifyProjectQuery.setParameter("description", m_description);
+            modifyProjectQuery.executeUpdate();
 
             entityManagerUDS.getTransaction().commit();
 

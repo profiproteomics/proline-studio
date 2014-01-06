@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ParentData;
@@ -806,6 +807,10 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 
                 m_mainActions.add(null);  // separator
 
+                
+                ChangeDescriptionAction changeDescriptionAction = new ChangeDescriptionAction();
+                m_mainActions.add(changeDescriptionAction);
+                
                 RenameAction renameAction = new RenameAction();
                 m_mainActions.add(renameAction);
 
@@ -987,7 +992,9 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             RSMNode rsmNode = (RSMNode) path.getLastPathComponent();
 
             if (rsmNode.getType()== RSMNode.NodeTypes.PROJECT) {
-                ((RSMProjectNode) rsmNode).rename(newValue.toString());
+                RSMProjectNode projectNode = (RSMProjectNode) rsmNode;
+                Project project = projectNode.getProject();
+                ((RSMProjectNode) rsmNode).changeNameAndDescription(newValue.toString(), project.getDescription());
             } else if (rsmNode.getType()== RSMNode.NodeTypes.DATA_SET) {
                 ((RSMDataSetNode) rsmNode).rename(newValue.toString());
             }

@@ -37,12 +37,13 @@ public class RSMProjectNode extends RSMNode {
         return getIcon(IconManager.IconType.PROJECT);
     }
 
-    public void rename(final String newName) {
+    public void changeNameAndDescription(final String newName, final String newDescription) {
         
         final Project project = getProject();
         String name = project.getName();
+        String description = project.getDescription();
         
-        if ((newName != null) && (newName.compareTo(name) != 0)) {
+        if (((newName != null) && (newName.compareTo(name) != 0)) || ((newDescription != null) && (newDescription.compareTo(description) != 0))) {
             setIsChanging(true);
             project.setName(newName + "...");
             ((DefaultTreeModel) RSMTree.getTree().getModel()).nodeChanged(this);
@@ -60,6 +61,7 @@ public class RSMProjectNode extends RSMNode {
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     setIsChanging(false);
                     project.setName(newName);
+                    project.setDescription(newDescription);
                     ((DefaultTreeModel) RSMTree.getTree().getModel()).nodeChanged(projectNode);
                 }
             };
@@ -67,7 +69,7 @@ public class RSMProjectNode extends RSMNode {
 
             // ask asynchronous loading of data
             DatabaseProjectTask task = new DatabaseProjectTask(callback);
-            task.initRenameProject(project.getId(), newName);
+            task.initChangeNameAndDescriptionProject(project.getId(), newName, newDescription);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }

@@ -23,7 +23,7 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
     private DPeptideMatch m_peptideMatch = null;
 
     public DatabaseLoadSpectrumsTask(AbstractDatabaseCallback callback, long projectId, DPeptideMatch peptideMatch) {
-        super(callback, new TaskInfo("Load Spectrum for Peptide Match "+getPeptideName(peptideMatch), TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load Spectrum for Peptide Match "+getPeptideName(peptideMatch), false, TASK_LIST_INFO));
         m_projectId = projectId;
         m_peptideMatch = peptideMatch;
     }

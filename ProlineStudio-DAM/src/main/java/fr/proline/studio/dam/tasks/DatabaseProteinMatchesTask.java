@@ -45,7 +45,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
     
     public DatabaseProteinMatchesTask(AbstractDatabaseCallback callback, long projectId, DPeptideMatch peptideMatch) {
         super(callback);
-        init(SLICE_SIZE, new TaskInfo("Load Proteins for a Peptide Match "+getPeptideName(peptideMatch), TASK_LIST_INFO));
+        init(SLICE_SIZE, new TaskInfo("Load Proteins for a Peptide Match "+getPeptideName(peptideMatch), false, TASK_LIST_INFO));
         m_projectId = projectId;
         m_peptideMatch = peptideMatch;     
         m_action = LOAD_PROTEINS_FROM_PEPTIDE_MATCH;
@@ -53,7 +53,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
     
     public DatabaseProteinMatchesTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset) {
         super(callback);
-        init(SLICE_SIZE, new TaskInfo("Load Proteins of Search Result "+rset.getId(), TASK_LIST_INFO));
+        init(SLICE_SIZE, new TaskInfo("Load Proteins of Search Result "+rset.getId(), false, TASK_LIST_INFO));
         m_projectId = projectId;
         m_rset = rset;        
         m_action = LOAD_ALL_PROTEINS_OF_RSET;

@@ -62,7 +62,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * @param projectUser 
      */
     public void initConnectionToUDS(Map<Object, Object> databaseProperties, String projectUser) {
-        setTaskInfo(new TaskInfo("Connection to UDS Database", TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Connection to UDS Database", false, TASK_LIST_INFO));
         setPriority(Priority.TOP);
         
         m_databaseProperties = databaseProperties;
@@ -79,7 +79,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * @param projectId 
      */
     public void initConnectionToMSI(int projectId) {
-        setTaskInfo(new TaskInfo("Connection to MSI Database", TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Connection to MSI Database", false, TASK_LIST_INFO));
         setPriority(Priority.TOP);
         
         m_projectId = projectId;
@@ -105,7 +105,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
      * @param projectUser 
      */
     public void initCheckProjectUser(String projectUser) {
-        setTaskInfo(new TaskInfo("Check Project User", TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Check Project User", false, TASK_LIST_INFO));
         setPriority(Priority.TOP);
 
         m_projectUser = projectUser;

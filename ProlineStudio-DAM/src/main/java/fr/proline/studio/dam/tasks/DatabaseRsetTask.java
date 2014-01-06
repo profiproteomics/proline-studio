@@ -20,7 +20,7 @@ public class DatabaseRsetTask extends AbstractDatabaseTask {
     private ArrayList<ResultSet> m_resultSetArrayList = null;
     
     public DatabaseRsetTask(AbstractDatabaseCallback callback, long projectId, ArrayList<ResultSet> resultSetArrayList) {
-        super(callback, new TaskInfo("Load All Search Results", TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load All Search Results", false, TASK_LIST_INFO));
         m_projectId = projectId;
         m_resultSetArrayList = resultSetArrayList;
     }

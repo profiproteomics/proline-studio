@@ -22,7 +22,7 @@ public class ChangeTypicalProteinTask extends AbstractServiceTask {
     private boolean m_onAccession; // regex done on accession or description of Proteins
     
     public ChangeTypicalProteinTask(AbstractServiceCallback callback, DDataset dataset, String regex, boolean onAccession) {
-        super(callback, false /** asynchronous */, new TaskInfo("Change Typical Protein on Identification Summary " + dataset.getName(), TASK_LIST_INFO));
+        super(callback, false /** asynchronous */, new TaskInfo("Change Typical Protein on Identification Summary " + dataset.getName(), true, TASK_LIST_INFO));
         m_dataset = dataset;
         m_regex = regex;
         m_onAccession = onAccession;

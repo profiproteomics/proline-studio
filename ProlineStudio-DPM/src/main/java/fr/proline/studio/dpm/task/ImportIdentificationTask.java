@@ -33,7 +33,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
     private Long[] m_resultSetId = null;
     
     public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String canonicalFilePath, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches, long projectId, Long[] resultSetId) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Import Identification "+canonicalFilePath, TASK_LIST_INFO));
+        super(callback, false /*asynchronous*/, new TaskInfo("Import Identification "+canonicalFilePath, true, TASK_LIST_INFO));
         
         m_parserId = parserId;
         m_parserArguments = parserArguments;

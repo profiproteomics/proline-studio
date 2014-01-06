@@ -23,7 +23,7 @@ public class DatabaseSearchPeptideMatchTask extends AbstractDatabaseTask {
     private ArrayList<Long>     m_searchResult = null;
     
     public DatabaseSearchPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, long rsetId, String searchString, ArrayList<Long> searchResult) {
-        super(callback, Priority.HIGH_1, new TaskInfo("Search Peptide Match "+searchString, TASK_LIST_INFO));
+        super(callback, Priority.HIGH_1, new TaskInfo("Search Peptide Match "+searchString, false, TASK_LIST_INFO));
         m_projectId = projectId;
         m_rsetId = rsetId;       
         m_searchString = searchString;

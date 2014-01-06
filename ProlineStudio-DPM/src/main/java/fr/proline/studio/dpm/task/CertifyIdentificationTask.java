@@ -30,7 +30,7 @@ public class CertifyIdentificationTask extends AbstractServiceTask {
     private String[] m_certifyErrorMessage = null;
     
     public CertifyIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String[] canonicalFilePathArray, long projectId, String[] certifyErrorMessage) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Check Files to Import : "+canonicalFilePathArray[0]+", ...", TASK_LIST_INFO));
+        super(callback, false /*asynchronous*/, new TaskInfo("Check Files to Import : "+canonicalFilePathArray[0]+", ...", true, TASK_LIST_INFO));
 
         m_parserId = parserId;
         m_parserArguments = parserArguments;

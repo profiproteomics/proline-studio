@@ -82,7 +82,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param list 
      */
     public void initLoadParentDataset(Project project, List<AbstractData> list) {
-        setTaskInfo(new TaskInfo("Load Data for Project "+project.getName(), TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Data for Project "+project.getName(), false, TASK_LIST_INFO));
         m_project = project;
         m_list = list;
         m_action = LOAD_PARENT_DATASET;
@@ -95,7 +95,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param list 
      */
     public void initLoadChildrenDataset(DDataset parentDataset, List<AbstractData> list) {
-        setTaskInfo(new TaskInfo("Load Data for Dataset "+parentDataset.getName(), TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Data for Dataset "+parentDataset.getName(), false, TASK_LIST_INFO));
         m_project = parentDataset.getProject();
         m_parentDataset = parentDataset;
         m_list = list;
@@ -108,7 +108,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param dataSet 
      */
     public void initLoadRsetAndRsm(DDataset dataset) {
-        setTaskInfo(new TaskInfo("Load Search Result and Identification Summary for Dataset "+dataset.getName(), TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Search Result and Identification Summary for Dataset "+dataset.getName(), false, TASK_LIST_INFO));
         m_dataset = dataset;
 
         m_action = LOAD_RSET_AND_RSM_OF_DATASET;
@@ -119,7 +119,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param dataSetList 
      */
     public void initLoadRsetAndRsm(ArrayList<DDataset> datasetList) {
-        setTaskInfo(new TaskInfo("Load Search Result and Identification Summary for multiple Dataset", TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Search Result and Identification Summary for multiple Dataset", false, TASK_LIST_INFO));
         
         m_datasetList = datasetList;
 
@@ -132,7 +132,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param rsm 
      */
     public void initLoadDatasetForRsm(ResultSummary rsm) {
-        setTaskInfo(new TaskInfo("Load data for Identification Summary "+rsm.getId(), TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load data for Identification Summary "+rsm.getId(), false, TASK_LIST_INFO));
         m_rsm = rsm;
         m_action = LOAD_DATASET_FOR_RSM;
     }
@@ -142,7 +142,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @return 
      */
     public void initRenameDataset(DDataset dataset, String name) {
-        setTaskInfo(new TaskInfo("Rename Dataset "+dataset.getName()+" to "+name, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Rename Dataset "+dataset.getName()+" to "+name, true, TASK_LIST_INFO));
         m_name = name;
         m_dataset = dataset;
         m_action = RENAME_DATASET;
@@ -153,7 +153,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         initCreateDatasetAggregate(project, parentDataset, datasetType, aggregateName, false, 0, 0, datasetList);
     }
     public void initCreateDatasetAggregate(Project project, DDataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, boolean hasSuffix, int suffixStart, int suffixStop, ArrayList<DDataset> datasetList) {
-        setTaskInfo(new TaskInfo("Create Dataset "+aggregateName, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Create Dataset "+aggregateName, true, TASK_LIST_INFO));
         m_project = project;
         m_parentDataset = parentDataset;
         m_datasetType = datasetType;
@@ -187,7 +187,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     }
     
     public void initModifyDatasetToRemoveValidation(DDataset dataset) {
-        setTaskInfo(new TaskInfo("Remove Identification Summary from Dataset "+dataset.getName(), TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Remove Identification Summary from Dataset "+dataset.getName(), true, TASK_LIST_INFO));
         setPriority(Priority.HIGH_2);
         m_dataset = dataset;
         m_action = REMOVE_VALIDATION_OF_DATASET;
@@ -203,7 +203,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     }
     
     public void initEmptyTrash(DDataset trashDataset) {
-        setTaskInfo(new TaskInfo("Empty Trash", TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Empty Trash", true, TASK_LIST_INFO));
         setPriority(Priority.HIGH_2);
         m_dataset = trashDataset;
         m_action = EMPTY_TRASH;

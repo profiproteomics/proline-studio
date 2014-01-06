@@ -56,20 +56,20 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
     }
     
     public void initLoadProteinSets(long projectId, ResultSummary rsm) {
-        init(SUB_TASK_COUNT, new TaskInfo("Load Protein Sets of Identification Summary "+rsm.getId(), TASK_LIST_INFO));
+        init(SUB_TASK_COUNT, new TaskInfo("Load Protein Sets of Identification Summary "+rsm.getId(), false, TASK_LIST_INFO));
         m_projectId = projectId;
         m_rsm = rsm;
         action = LOAD_PROTEIN_SET_FOR_RSM;
     }
     
     public void initCountProteinSets(DDataset dataset) {
-        init(SUB_TASK_COUNT, new TaskInfo("Count Number of Protein Sets of Identification Summary "+dataset.getName(), TASK_LIST_INFO));
+        init(SUB_TASK_COUNT, new TaskInfo("Count Number of Protein Sets of Identification Summary "+dataset.getName(), false, TASK_LIST_INFO));
         m_dataset = dataset;
         action = LOAD_PROTEIN_SET_NUMBER;
     }
 
     public void initLoadProteinSetForPeptideInstance(long projectId, PeptideInstance peptideInstance) {        
-        init(SUB_TASK_COUNT, new TaskInfo("Load Protein Sets for Peptide Instance "+peptideInstance.getId(), TASK_LIST_INFO));
+        init(SUB_TASK_COUNT, new TaskInfo("Load Protein Sets for Peptide Instance "+peptideInstance.getId(), false, TASK_LIST_INFO));
         m_projectId = projectId;
         m_peptideInstance = peptideInstance;
         m_rsm = peptideInstance.getResultSummary();

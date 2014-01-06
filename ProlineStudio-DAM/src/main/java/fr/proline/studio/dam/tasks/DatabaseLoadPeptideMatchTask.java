@@ -51,20 +51,20 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     private final static int LOAD_PEPTIDES_FOR_PROTEIN_RSET = 2;
     
     public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset) {
-        super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Peptide Matches for Search Result "+rset.getId(), TASK_LIST_INFO));
+        super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Peptide Matches for Search Result "+rset.getId(), false, TASK_LIST_INFO));
         m_projectId = projectId;
         m_rset = rset;   
         m_action = LOAD_ALL_RSET;
     }
     public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset, DProteinMatch proteinMatch) {
-        super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Peptide Matches for Protein Match " + proteinMatch.getAccession() , TASK_LIST_INFO));
+        super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Peptide Matches for Protein Match " + proteinMatch.getAccession() , false, TASK_LIST_INFO));
         m_projectId = projectId;
         m_rset = rset;
         m_proteinMatch = proteinMatch;
         m_action = LOAD_PEPTIDES_FOR_PROTEIN_RSET;
     }
     public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm) {
-        super(callback, SUB_TASK_COUNT_RSM, new TaskInfo("Load Peptide Matches for Identification Summary "+rsm.getId(), TASK_LIST_INFO));
+        super(callback, SUB_TASK_COUNT_RSM, new TaskInfo("Load Peptide Matches for Identification Summary "+rsm.getId(), false, TASK_LIST_INFO));
         m_projectId = projectId;
         m_rsm = rsm;
         m_action = LOAD_ALL_RSM;

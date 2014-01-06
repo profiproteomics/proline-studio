@@ -342,7 +342,7 @@ public class RSMTransferHandler extends TransferHandler {
 
 
             DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-            task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, datasetName, rset.getId(), null, createdDatasetList, new TaskInfo("Create Dataset " + datasetName, AbstractDatabaseTask.TASK_LIST_INFO));
+            task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, datasetName, rset.getId(), null, createdDatasetList, new TaskInfo("Create Dataset " + datasetName, true, AbstractDatabaseTask.TASK_LIST_INFO));
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
 

@@ -71,7 +71,9 @@ public class IconManager {
         BOOK,
         BOOK_OPEN,
         BOOK_QUESTION,
-        BIG_HELP;
+        BIG_HELP,
+        BIG_WARNING,
+        BIG_INFO;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -250,6 +252,10 @@ public class IconManager {
                 return "fr/proline/studio/images/book-question.png";
             case BIG_HELP:
                 return "fr/proline/studio/images/big-help.png";
+            case BIG_WARNING:
+                return "fr/proline/studio/images/big-warning.png";
+            case BIG_INFO:
+                return "fr/proline/studio/images/big-info.png";
 
         }
 

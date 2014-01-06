@@ -44,7 +44,7 @@ public class RenameAction extends AbstractRSMAction {
             String name = project.getName();
             String newName = showRenameDialog(name,  x, y);
 
-            projectNode.rename(newName);
+            projectNode.changeNameAndDescription(newName, project.getDescription());
 
         }
 
@@ -53,7 +53,7 @@ public class RenameAction extends AbstractRSMAction {
         
     private String showRenameDialog(String name, int x, int y) {
         
-        OptionDialog dialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Rename", null, "New Name");
+        OptionDialog dialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Rename", null, "New Name", OptionDialog.OptionDialogType.TEXTFIELD);
         dialog.setText(name);
         dialog.setLocation(x, y);
         dialog.setVisible(true);

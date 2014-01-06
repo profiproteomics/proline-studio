@@ -9,8 +9,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
     public final static int STATE_WAITING = 0;
     public final static int STATE_RUNNING = 1;
     public final static int STATE_FINISHED = 2;
-    public final static int STATE_ABORTED = 3;
-
+    public final static int STATE_ABORTED = 3;    
 
     private String m_taskDescription = null;
     private String m_idList = null;
@@ -31,15 +30,18 @@ public class TaskInfo implements Comparable<TaskInfo> {
     
     private int m_id;
     
+    private boolean m_askBeforeExitingApp;
+    
     private boolean m_success;
     private TaskError m_taskError = null;
     
     private static int INC_ID = 0;
     
-    public TaskInfo(String taskDescription, String idList) {
+    public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList) {
         m_taskDescription = taskDescription;
+        m_askBeforeExitingApp = askBeforeExitingApp;
         m_idList = idList;
-        
+       
         m_state = STATE_WAITING;
         
         m_id = INC_ID++;
@@ -167,6 +169,9 @@ public class TaskInfo implements Comparable<TaskInfo> {
         return m_idList;
     }
 
+    public boolean askBeforeExitingApplication() {
+        return m_askBeforeExitingApp;
+    }
     
     public String getTaskDescription() {
         return m_taskDescription;
@@ -237,6 +242,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
     
     private static void copy(TaskInfo from, TaskInfo to) {
         to.m_taskDescription = from.m_taskDescription;
+        to.m_askBeforeExitingApp = from.m_askBeforeExitingApp;
         to.m_idList = from.m_idList;
         to.m_state = from.m_state;
         to.m_id = from.m_id;

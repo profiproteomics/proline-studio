@@ -1,14 +1,8 @@
 package fr.proline.studio.gui;
 
 import fr.proline.studio.gui.DefaultDialog;
-import java.awt.Dialog;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Window;
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import java.awt.*;
+import javax.swing.*;
 
 /**
  * Dialog for a question yes/no or to get a text input
@@ -16,19 +10,27 @@ import javax.swing.JTextField;
  */
 public class OptionDialog extends DefaultDialog {
 
-    private boolean m_hasATextField;
+    public enum OptionDialogType {
+        NO_TEXT,
+        TEXTFIELD,
+        TEXTAREA
+    }
     
+    private OptionDialogType m_dialogType;
+
     private JTextField m_optionTextfield = null;
+    private JTextArea m_optionTextArea = null;
     
     private String m_message = null;
-    private String m_textForTextField = null;
+    private String m_labelForText = null;
    
     private boolean m_allowEmptyText = false;
 
     public OptionDialog(Window parent, String title, String message) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-        m_hasATextField = false;
+        m_dialogType = OptionDialogType.NO_TEXT;
+
         setStatusVisible(false);
         
         m_message = message;
@@ -43,13 +45,13 @@ public class OptionDialog extends DefaultDialog {
 
     }
     
-    public OptionDialog(Window parent, String title, String message, String textForTextField) {
+    public OptionDialog(Window parent, String title, String message, String labelForText, OptionDialogType dialogType) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-        m_hasATextField = true;
+        m_dialogType = dialogType;
         
         m_message = message;
-        m_textForTextField = textForTextField;
+        m_labelForText = labelForText;
         
         setTitle(title);
 
@@ -105,8 +107,8 @@ public class OptionDialog extends DefaultDialog {
         }
         
         
-        if (m_hasATextField) {
-            JLabel textfieldLabel = new JLabel(m_textForTextField + " :");
+        if (m_dialogType == OptionDialogType.TEXTFIELD) {
+            JLabel textfieldLabel = new JLabel(m_labelForText + " :");
             m_optionTextfield = new JTextField(30);
 
             c.gridx = 0;
@@ -116,6 +118,26 @@ public class OptionDialog extends DefaultDialog {
             c.gridx++;
             c.weightx = 1.0;
             renamePanel.add(m_optionTextfield, c);
+        } else if (m_dialogType == OptionDialogType.TEXTAREA) {
+            JLabel textfieldLabel = new JLabel(m_labelForText + " :");
+            m_optionTextArea = new JTextArea();
+            JScrollPane desciptionScrollPane = new JScrollPane(m_optionTextArea) {
+
+                private Dimension preferredSize = new Dimension(360, 200);
+
+                @Override
+                public Dimension getPreferredSize() {
+                    return preferredSize;
+                }
+            };
+
+            c.gridx = 0;
+            renamePanel.add(textfieldLabel, c);
+
+
+            c.gridx++;
+            c.weightx = 1.0;
+            renamePanel.add(desciptionScrollPane, c);
         }
 
         return renamePanel;
@@ -130,8 +152,17 @@ public class OptionDialog extends DefaultDialog {
             String text = m_optionTextfield.getText();
 
             if ((!m_allowEmptyText) && (text.isEmpty())) {
-                setStatus(true, "You must fill the field " + m_textForTextField + ".");
+                setStatus(true, "You must fill the field " + m_labelForText + ".");
                 highlight(m_optionTextfield);
+                return false;
+            }
+        } else if (m_optionTextArea != null) {
+            
+            String text = m_optionTextArea.getText();
+
+            if ((!m_allowEmptyText) && (text.isEmpty())) {
+                setStatus(true, "You must fill the field " + m_labelForText + ".");
+                highlight(m_optionTextArea);
                 return false;
             }
         }
@@ -144,14 +175,26 @@ public class OptionDialog extends DefaultDialog {
     }
     
     public void setText(String name) {
-        m_optionTextfield.setText(name);
-        m_optionTextfield.requestFocus();
-        m_optionTextfield.setSelectionStart(0);
-        m_optionTextfield.setSelectionEnd(name.length());
+        if (m_optionTextfield != null) {
+            m_optionTextfield.setText(name);
+            m_optionTextfield.requestFocus();
+            m_optionTextfield.setSelectionStart(0);
+            m_optionTextfield.setSelectionEnd(name.length());
+        } else if (m_optionTextArea != null) {
+            m_optionTextArea.setText(name);
+            m_optionTextArea.requestFocus();
+            m_optionTextArea.setSelectionStart(0);
+            m_optionTextArea.setSelectionEnd(name.length());
+        }
     }
     
     public String getText() {
-        return m_optionTextfield.getText();
+        if (m_optionTextfield != null) {
+            return m_optionTextfield.getText();
+        } else if (m_optionTextArea != null) {
+            return m_optionTextArea.getText();
+        }
+        return ""; // should not happen
     }
 
 }

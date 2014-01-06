@@ -134,7 +134,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         }
     }
     
-    protected void setButtonName(int buttonId, String name) {
+    public void setButtonName(int buttonId, String name) {
         switch (buttonId) {
             case BUTTON_OK:
                 m_okButton.setText(name);
@@ -451,7 +451,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         int height = getHeight();
         
         int frameX = f.getX();
-        int frameY = f.getX();
+        int frameY = f.getY();
         int frameWidth = f.getWidth();
         int frameHeight = f.getHeight();
       

@@ -58,6 +58,24 @@ public class TaskInfoManager {
         }
     }
     
+    public synchronized boolean askBeforeExitingApp() {
+        
+        if (isUpdateNeeded()) {
+            updateAll();
+        }
+
+        Iterator<TaskInfo> it = m_tasks.iterator();
+        while (it.hasNext()) {
+            TaskInfo infoCur = it.next();
+            if ((infoCur.isWaiting() || infoCur.isRunning()) && infoCur.askBeforeExitingApplication()) {
+                return true;
+            }
+        }
+        
+        return false;
+        
+    }
+    
     private synchronized void updateAll() {
 
         int nb = m_taskToBeUpdated.size();

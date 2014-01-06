@@ -24,7 +24,7 @@ public class ValidationTask extends AbstractServiceTask {
     Integer[] m_resultSummaryId = null;
     
     public ValidationTask(AbstractServiceCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Validation of Search Result "+dataset.getName(), TASK_LIST_INFO));
+        super(callback, false /*asynchronous*/, new TaskInfo("Validation of Search Result "+dataset.getName(), true, TASK_LIST_INFO));
         m_dataset = dataset;
         m_description = description;
         m_argumentsMap = argumentsMap;

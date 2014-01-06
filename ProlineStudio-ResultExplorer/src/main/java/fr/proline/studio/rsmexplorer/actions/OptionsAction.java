@@ -32,7 +32,7 @@ public final class OptionsAction implements ActionListener {
         String serverFilePath = preferences.get("ServerIdentificationFilePath", "");
 
 
-        OptionDialog dialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Server Search Result File Path", "Please define the file path where the search results (Mascot, Omssa files...) are saved.\nAsk to your IT Administrator if you don't know where it is.\nIf the data server is running on your computer, the file path can be empty.", "Search Result File Path");
+        OptionDialog dialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Server Search Result File Path", "Please define the file path where the search results (Mascot, Omssa files...) are saved.\nAsk to your IT Administrator if you don't know where it is.\nIf the data server is running on your computer, the file path can be empty.", "Search Result File Path", OptionDialog.OptionDialogType.TEXTFIELD);
         dialog.setText(serverFilePath);
 
 

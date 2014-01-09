@@ -42,7 +42,6 @@ import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.TableCellRenderer;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -573,9 +572,9 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             displayColumnAsPercentage(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE);
 
         }
-
-
         private FloatRenderer m_deltaMozRenderer = null;
+
+
 
         /**
          * Called whenever the value of the selection changes.

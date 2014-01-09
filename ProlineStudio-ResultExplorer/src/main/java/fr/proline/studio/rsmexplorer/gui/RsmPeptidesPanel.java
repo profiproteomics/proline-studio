@@ -18,6 +18,7 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideInstanceTableModel;
+import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
@@ -25,7 +26,9 @@ import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.LazyData;
 import fr.proline.studio.utils.LazyTable;
+import fr.proline.studio.utils.LazyTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -295,9 +298,31 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))));
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class)));
 
+            // WART to have 4 digits for deltaMoz
+            setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))) {
+
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+                    if (column == PeptideInstanceTableModel.COLTYPE_PEPTIDE_DELTA_MOZ) {
+                            if (m_deltaMozRenderer == null) {
+                                m_deltaMozRenderer = new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 6);
+                            }
+                            return m_deltaMozRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                        } else {
+
+
+                            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                        }
+                    }
+
+
+            });
+            
             displayColumnAsPercentage(PeptideInstanceTableModel.COLTYPE_PEPTIDE_SCORE);
 
         }
+        private FloatRenderer m_deltaMozRenderer = null;
 
         /**
          * Called whenever the value of the selection changes.

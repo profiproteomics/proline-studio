@@ -65,9 +65,9 @@ public class PeptideTableModel extends FilterTableModel {
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_RETENTION_TIME:
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
+            case COLTYPE_PEPTIDE_DELTA_MOZ:
                 return Float.class;
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
-            case COLTYPE_PEPTIDE_DELTA_MOZ:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
                 return Double.class;
             case COLTYPE_PEPTIDE_CHARGE:
@@ -168,7 +168,7 @@ public class PeptideTableModel extends FilterTableModel {
                 if (peptideMatch == null) {
                     return null; // should never happen   
                 }
-                return Double.valueOf(peptideMatch.getDeltaMoz());
+                return Float.valueOf(peptideMatch.getDeltaMoz());
             }
             case COLTYPE_PEPTIDE_START: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();

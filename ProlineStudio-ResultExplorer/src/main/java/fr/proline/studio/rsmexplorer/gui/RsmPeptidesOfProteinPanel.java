@@ -19,11 +19,13 @@ import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.utils.DecoratedTable;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 
@@ -171,8 +173,32 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             setDefaultRenderer(Peptide.class, new PeptideRenderer());
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
+            
+            // WART to have 4 digits for deltaMoz
+            setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))) {
+
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+                    if (column == PeptideTableModel.COLTYPE_PEPTIDE_DELTA_MOZ) {
+                            if (m_deltaMozRenderer == null) {
+                                m_deltaMozRenderer = new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 6);
+                            }
+                            return m_deltaMozRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                        } else {
+
+
+                            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                        }
+                    }
+
+
+            });
+            
+            
         } 
         
+        private FloatRenderer m_deltaMozRenderer = null;
         
         /** 
          * Called whenever the value of the selection changes.

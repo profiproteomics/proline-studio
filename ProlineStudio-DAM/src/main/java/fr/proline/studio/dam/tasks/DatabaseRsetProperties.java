@@ -1,9 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.Enzyme;
-import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.SearchSetting;
-import fr.proline.core.orm.msi.SearchSettingsSeqDatabaseMap;
+import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
@@ -60,25 +57,28 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
             }
             
             // Load Enzymes
-            SearchSetting searchSetting = m_rset.getMsiSearch().getSearchSetting();
-            
-            SearchSetting mergedSearchSetting = entityManagerMSI.merge(searchSetting);
-            Set<Enzyme> enzymeSet = mergedSearchSetting.getEnzymes();
-            Iterator<Enzyme> it = enzymeSet.iterator();
-            while (it.hasNext()) { // to avoid lazy fetching problem
-                it.next();
+            MsiSearch msiSearch = m_rset.getMsiSearch();
+            if (msiSearch != null) {
+
+                SearchSetting searchSetting = msiSearch.getSearchSetting();
+
+                SearchSetting mergedSearchSetting = entityManagerMSI.merge(searchSetting);
+                Set<Enzyme> enzymeSet = mergedSearchSetting.getEnzymes();
+                Iterator<Enzyme> it = enzymeSet.iterator();
+                while (it.hasNext()) { // to avoid lazy fetching problem
+                    it.next();
+                }
+                searchSetting.setEnzymes(enzymeSet);
+
+                // Load SeqDatabase
+                Set<SearchSettingsSeqDatabaseMap> setDatabaseMapSet = mergedSearchSetting.getSearchSettingsSeqDatabaseMaps();
+                Iterator<SearchSettingsSeqDatabaseMap> itSeqDbMap = setDatabaseMapSet.iterator();
+                while (itSeqDbMap.hasNext()) { // to avoid lazy fetching problem
+                    itSeqDbMap.next();
+                }
+                searchSetting.setSearchSettingsSeqDatabaseMaps(setDatabaseMapSet);
+
             }
-            searchSetting.setEnzymes(enzymeSet);
-            
-            // Load SeqDatabase
-            Set<SearchSettingsSeqDatabaseMap> setDatabaseMapSet = mergedSearchSetting.getSearchSettingsSeqDatabaseMaps();
-            Iterator<SearchSettingsSeqDatabaseMap> itSeqDbMap = setDatabaseMapSet.iterator();
-            while (itSeqDbMap.hasNext()) { // to avoid lazy fetching problem
-                itSeqDbMap.next();
-            }
-            searchSetting.setSearchSettingsSeqDatabaseMaps(setDatabaseMapSet);
-            
-            
             
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {

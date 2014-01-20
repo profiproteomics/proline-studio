@@ -4,11 +4,8 @@ import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dpm.ServerConnectionManager;
-import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
-import java.awt.Dialog;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import fr.proline.studio.gui.ConnectionDialog;
+import fr.proline.studio.rsmexplorer.node.RSMTree; 
 import java.awt.Window;
 import javax.swing.*;
 import org.openide.windows.WindowManager;
@@ -17,14 +14,8 @@ import org.openide.windows.WindowManager;
  * Dialog to Connect to the server
  * @author jm235353
  */
-public class ServerConnectionDialog extends DefaultDialog {
-    
-    private JTextField m_serverURLTextField;
-    private JTextField m_userTextField;
-    private JPasswordField m_passwordField;
-    private JCheckBox m_rememberPasswordCheckBox;
-   
-    
+public class ServerConnectionDialog extends ConnectionDialog {
+
     private boolean m_changingUser = false;
     private String m_keepLastPasswordForChangingUser = null;
     
@@ -39,120 +30,16 @@ public class ServerConnectionDialog extends DefaultDialog {
     }
     
     private ServerConnectionDialog(Window parent) {
-        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-
-        setTitle("Server Connection");
+        super(parent, "Server Connection", " Server Parameter ", "Server Host :");
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:startsession");
-        
-        JPanel internalPanel = createInternalPanel();
-        
-        setInternalComponent(internalPanel);
+
         
         initDefaults();
         
         
     }
-    
-    private JPanel createInternalPanel() {
 
-        JPanel internalPanel = new JPanel();
-        internalPanel.setLayout(new java.awt.GridBagLayout());
-
-
-        JPanel URLPanel = createHostPanel();
-        JPanel loginPanel = createLoginPanel();
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1.0;
-        c.weighty = 0;
-        internalPanel.add(URLPanel, c);
-        
-        c.gridy++;
-        internalPanel.add(loginPanel, c);
-        
-        return internalPanel;
-    }
-    
-     
-    private JPanel createHostPanel() {
-        
-        JPanel URLPanel = new JPanel(new GridBagLayout());
-        URLPanel.setBorder(BorderFactory.createTitledBorder(" Server Parameter "));
-        
-        JLabel serverLabel = new JLabel("Server Host :");
-        m_serverURLTextField = new JTextField(30);
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 0;
-        c.weighty = 0;
-        URLPanel.add(serverLabel, c);
-        
-        c.gridx = 1;
-        c.weightx = 1;
-        URLPanel.add(m_serverURLTextField, c);
-        
-
-
-        
-        return URLPanel;
-    }
-    
-    private JPanel createLoginPanel() {
-        
-        JPanel loginPanel = new JPanel(new GridBagLayout());
-        loginPanel.setBorder(BorderFactory.createTitledBorder(" User Parameters "));
-        
-        JLabel userLabel = new JLabel("User :");
-        m_userTextField = new JTextField(30);
-        JLabel passwordLabel = new JLabel("Password :");
-        m_passwordField = new JPasswordField();
-        m_rememberPasswordCheckBox = new JCheckBox("Remember Password");
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 0;
-        c.weighty = 0;
-        loginPanel.add(userLabel, c);
-        
-        c.gridx = 1;
-        c.weightx = 1;
-        loginPanel.add(m_userTextField, c);
-        
-        c.gridy++;
-        c.gridx = 0;
-        c.weightx = 0;
-        loginPanel.add(passwordLabel, c);
-        
-         c.gridx = 1;
-        c.weightx = 1;
-        loginPanel.add(m_passwordField, c);
-        
-        c.gridy++;
-        loginPanel.add(m_rememberPasswordCheckBox, c);
-
-        
-        return loginPanel;
-    }
-
-    
     private void initDefaults() {
 
         ServerConnectionManager serverConnectionManager = ServerConnectionManager.getServerConnectionManager();
@@ -214,11 +101,7 @@ public class ServerConnectionDialog extends DefaultDialog {
         // dialog will be closed if the connection is established
         return false;
     }
- 
-    @Override
-    protected boolean cancelCalled() {
-        return true;
-    }
+
 
     @Override
     protected boolean defaultCalled() {
@@ -232,34 +115,7 @@ public class ServerConnectionDialog extends DefaultDialog {
         m_changingUser = true;
     }
     
-    private boolean checkParameters() {
 
-
-        
-        String serverURL = m_serverURLTextField.getText();
-        if (serverURL.isEmpty()) {
-            setStatus(true, "You must fill the Server URL");
-            highlight(m_serverURLTextField);
-            return false;
-        }
-        if (serverURL.length() <= "http://".length()) {
-            setStatus(true, "The Server URL is incorrect");
-            highlight(m_serverURLTextField);
-            return false;
-        }
-        
-        String user = m_userTextField.getText();
-        if (user.isEmpty()) {
-            setStatus(true, "You must fill the User");
-            highlight(m_userTextField);
-            return false;
-        }
-
-
-        
-        return true;
-        
-    }
     
     private void connect() {
     

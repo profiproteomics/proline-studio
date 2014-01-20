@@ -6,6 +6,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
+import fr.proline.studio.rserver.RServerManager;
 import org.openide.modules.ModuleInstall;
 import org.openide.windows.WindowManager;
 
@@ -46,6 +47,9 @@ public class Installer extends ModuleInstall {
             }
         
         }
+        
+        // Close connection to R Server if needed
+        RServerManager.getRServerManager().close();
         
         return true;
     }

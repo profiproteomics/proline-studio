@@ -25,7 +25,9 @@ public class ExportManager {
     }
 
     private String componentToText(Component c) {
-        if (c instanceof JLabel) {
+        if (c instanceof ExportTextInterface) {
+            return ((ExportTextInterface)c).getExportText();
+        } else if (c instanceof JLabel) {
             return ((JLabel) c).getText();
         } else if (c instanceof AbstractButton) {
             return ((AbstractButton) c).getText();

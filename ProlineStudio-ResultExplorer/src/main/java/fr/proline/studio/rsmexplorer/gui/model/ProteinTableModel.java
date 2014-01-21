@@ -55,6 +55,11 @@ public class ProteinTableModel extends FilterTableModel {
     public String getColumnName(int col) {
         return m_columnNames[col];
     }
+    
+    @Override
+    public String getToolTipForHeader(int col) {
+        return getColumnName(col);
+    }
 
     @Override
     public Class getColumnClass(int col) {

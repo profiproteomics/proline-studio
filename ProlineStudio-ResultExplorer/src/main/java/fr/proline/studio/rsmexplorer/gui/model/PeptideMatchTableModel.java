@@ -35,6 +35,9 @@ public class PeptideMatchTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 11;
     private static final String[] m_columnNamesRset = {"Peptide", "Score", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Delta MoZ" /*"Ppm"*/, "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM"};
     private static final String[] m_columnNamesRsm =  {"Peptide", "Score", "MsQuery", "Rank", "Calc. Mass", "Exp. MoZ", "Delta MoZ" /*"Ppm"*/, "Charge", "Missed Cl.", /*"RT",*/ "Ion Parent Int.", "PTM", "Protein Sets"};
+    private static final String[] m_columnTooltipsRset = {"Peptide", "Score", "MsQuery", "Rank", "Calculated Mass", "Experimental Mass to Charge Ratio", "Delta Mass to Charge Ratio" /*"Ppm"*/, "Charge", "Missed Clivage", "Ion Parent Intensity", "Post Translational Modifications"};
+    private static final String[] m_columnTooltipsRsm = {"Peptide", "Score", "MsQuery", "Rank", "Calculated Mass", "Experimental Mass to Charge Ratio", "Delta Mass to Charge Ratio" /*"Ppm"*/, "Charge", "Missed Clivage", /*"RT",*/ "Ion Parent Intensity", "Post Translational Modifications", "Protein Sets"};
+    
     
     private DPeptideMatch[] m_peptideMatches = null; // some of the DPeptideMatch can be null : they are loaded in sub task
     private long[] m_peptideMatchesId = null;
@@ -79,6 +82,15 @@ public class PeptideMatchTableModel extends LazyTableModel {
             return m_columnNamesRsm[col];
         } else {
             return m_columnNamesRset[col];
+        }
+    }
+
+    @Override
+    public String getToolTipForHeader(int col) {
+        if (m_forRSM) {
+            return m_columnTooltipsRsm[col];
+        } else {
+            return m_columnTooltipsRset[col];
         }
     }
 

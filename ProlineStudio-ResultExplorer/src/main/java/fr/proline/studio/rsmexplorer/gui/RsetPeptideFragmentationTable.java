@@ -459,6 +459,10 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 			return m_columnNames[col];
 		}
 	  
+            @Override
+            public String getToolTipForHeader(int col) {
+                return getColumnName(col);
+            }
 		  
 
 		@Override

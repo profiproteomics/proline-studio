@@ -1,13 +1,14 @@
 package fr.proline.studio.filter;
 
 
-import javax.swing.table.AbstractTableModel;
+import fr.proline.studio.utils.DecoratedTableModel;
+
 
 /**
  *
  * @author JM235353
  */
-public abstract class FilterTableModel extends AbstractTableModel implements FilterTableModelInterface {
+public abstract class FilterTableModel extends DecoratedTableModel implements FilterTableModelInterface {
 
     protected Filter[] m_filters = null;
 

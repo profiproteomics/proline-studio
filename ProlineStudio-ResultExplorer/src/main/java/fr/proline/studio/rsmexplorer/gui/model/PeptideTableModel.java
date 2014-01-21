@@ -31,6 +31,8 @@ public class PeptideTableModel extends FilterTableModel {
     public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 11;
     public static final int COLTYPE_PEPTIDE_PTM = 12;
     private static final String[] m_columnNames = {"Peptide", "Score", "Protein S. Matches", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
+    private static final String[] m_columnTooltips = {"Peptide", "Score", "Protein Set Matches", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "Delta Mass to Charge Ratio", "Charge", "Missed Clivage", "Retention Time", "Ion Parent Intensity", "Post Translational Modifications"};
+    
     
     private PeptideInstance[] m_peptideInstances = null;
 
@@ -54,6 +56,13 @@ public class PeptideTableModel extends FilterTableModel {
         return m_columnNames[col];
     }
 
+    @Override
+    public String getToolTipForHeader(int col) {
+        return m_columnTooltips[col];
+    }
+    
+    
+    
     @Override
     public Class getColumnClass(int col) {
         switch (col){

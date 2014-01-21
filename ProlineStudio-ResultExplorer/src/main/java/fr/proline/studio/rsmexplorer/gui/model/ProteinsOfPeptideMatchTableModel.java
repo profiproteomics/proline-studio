@@ -57,6 +57,11 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
     }
 
     @Override
+    public String getToolTipForHeader(int col) {
+        return getColumnName(col);
+    }
+    
+    @Override
     public Class getColumnClass(int col) {
         switch (col) {
             case COLTYPE_PROTEIN_NAME:

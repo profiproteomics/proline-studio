@@ -30,7 +30,7 @@ public class ExportRSMAction extends AbstractRSMAction {
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
 
         final RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[0];
-        final DDataset d = dataSetNode.getDataset();
+        
 
         final ExportDialog dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow());
         
@@ -85,7 +85,11 @@ public class ExportRSMAction extends AbstractRSMAction {
                     public void run(boolean success) {
                         if (success) {
 
-                            DownloadFileTask task = new DownloadFileTask(downloadCallback, dialog.getFileName(), _filePath[0]);
+                            String fileName = dialog.getFileName();
+                            if (!fileName.endsWith(".xlsx")) {
+                                fileName += ".xlsx";
+                            }
+                            DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath[0]);
                             AccessServiceThread.getAccessServiceThread().addTask(task);
 
                         } else {

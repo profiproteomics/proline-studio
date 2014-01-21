@@ -19,6 +19,11 @@ public class CSVExporter implements ExporterInterface {
     
     @Override
     public void start(String filePath) throws java.io.IOException {
+        
+        if (!filePath.endsWith(".csv") && !filePath.endsWith(".txt")) {
+            filePath = filePath+".csv";
+        }
+        
         m_fw = new FileWriter(filePath);
     }
 

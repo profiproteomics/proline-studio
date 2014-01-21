@@ -26,6 +26,11 @@ public class Excel2003Exporter implements ExporterInterface {
     
     @Override
     public void start(String filePath) {
+        
+        if (!filePath.endsWith(".xls")) {
+            filePath = filePath+".xls";
+        }
+        
         m_wb = new HSSFWorkbook();
         m_filePath = filePath;
     }

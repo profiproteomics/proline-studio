@@ -23,6 +23,11 @@ public class ExcelXMLExporter implements ExporterInterface {
     
     @Override
     public void start(String filePath) {
+        
+        if (!filePath.endsWith(".xlsx")) {
+            filePath = filePath+".xlsx";
+        }
+        
         m_wb = new SXSSFWorkbook(512);
         m_filePath = filePath;
     }

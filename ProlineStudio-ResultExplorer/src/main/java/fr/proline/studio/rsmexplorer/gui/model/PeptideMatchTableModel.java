@@ -194,6 +194,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
             }
             case COLTYPE_PEPTIDE_RANK: {
                 lazyData.setData(peptideMatch.getRank());
+                return lazyData;
             }
 
             case COLTYPE_PEPTIDE_CHARGE: {

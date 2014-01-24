@@ -553,7 +553,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
                         return this;
                     } else {
-                        if (column == PeptideMatchTableModel.COLTYPE_PEPTIDE_DELTA_MOZ) {
+                     
+                        if (convertColumnIndexToModel(column) == PeptideMatchTableModel.COLTYPE_PEPTIDE_DELTA_MOZ) {
                             if (m_deltaMozRenderer == null) {
                                 m_deltaMozRenderer = new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 6);
                             }

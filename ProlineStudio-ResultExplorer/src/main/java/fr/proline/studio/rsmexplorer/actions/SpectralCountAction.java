@@ -52,12 +52,11 @@ public class SpectralCountAction extends AbstractRSMAction {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 m_logger.debug(" Choose RSM for Weighted SC");
-//                treeSelectionDialog.setBusy(false);
 
                 // check if we can compute SC
                 String error = null;
                 ArrayList<DDataset> datasetList = new ArrayList<>();        
-                datasetList.add(refDatasetNode.getDataset());
+                datasetList.add(refDatasetNode.getDataset()); //first entry is Reference Dataset in data box !
                 
                 if (m_treeSelectionDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                    ArrayList<RSMDataSetNode> selectedDSNodes = m_treeSelectionDialog.getSelectedRSMDSNodeList();
@@ -86,29 +85,35 @@ public class SpectralCountAction extends AbstractRSMAction {
                     return;
                 }
                 
-                m_logger.debug(" Will Compute SC on "+(datasetList.size()-1)+" RSMs : "+datasetList);
+                m_logger.debug(" Will Compute SC on "+(datasetList.size())+" RSMs : "+datasetList);
                 
-                //TODO
-                
-                final Long[] quantiDatasetId = new Long[1];
-                
-                AbstractServiceCallback callback = new AbstractServiceCallback() {
+                WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox(refDatasetNode.getDataset().getName()+" WSC") ;
+                wbox.setEntryData(refDatasetNode.getDataset().getProject().getId(), datasetList);
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success) {
-
-                        //JPM.TODO
-                        // use quantiDatasetId[0]
-                    }
-                };
+                // open a window to display the window box
+                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                win.open();
+                win.requestActive(); 
                 
-                SpectralCountTask task = new SpectralCountTask(callback, refDatasetNode.getDataset(), datasetList, quantiDatasetId);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
+//                final Long[] quantiDatasetId = new Long[1];
+//                final String[] spectralCountResultData = new String[1];
+//                AbstractServiceCallback callback = new AbstractServiceCallback() {
+//
+//                    @Override
+//                    public boolean mustBeCalledInAWT() {
+//                        return true;
+//                    }
+//
+//                    @Override
+//                    public void run(boolean success) {
+//
+//                        //JPM.TODO
+//                        // use quantiDatasetId[0]
+//                    }
+//                };
+//                
+//                SpectralCountTask task = new SpectralCountTask(callback, refDatasetNode.getDataset(), datasetList, quantiDatasetId,spectralCountResultData);
+//                AccessServiceThread.getAccessServiceThread().addTask(task);
             }
         };
         

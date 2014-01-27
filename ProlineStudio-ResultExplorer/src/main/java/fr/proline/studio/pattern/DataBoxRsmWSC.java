@@ -1,10 +1,10 @@
 package fr.proline.studio.pattern;
 
 
-import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.ComputeSCTask;
+import fr.proline.studio.dpm.task.SpectralCountTask;
 import fr.proline.studio.rsmexplorer.gui.WSCResultPanel;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class DataBoxRsmWSC extends AbstractDataBox {
 
-    private Dataset m_refDataset = null;
-    private ArrayList<Dataset> m_datasetRsms = null;
+    private DDataset m_refDataset = null;
+    private ArrayList<DDataset> m_datasetRsms = null;
     
     public DataBoxRsmWSC() {
         
@@ -27,7 +27,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ComputeSCTask.WSCResultData.class, false);
+        inParameter.addParameter(SpectralCountTask.WSCResultData.class, false);
         registerInParameter(inParameter);
 
     }
@@ -47,7 +47,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
         
         // used as out parameter for the service
         final String[] _spCountJSON = new String[1];
-        
+        final Long[] _quantiDatasetId = new Long[1];
         AbstractServiceCallback callback = new AbstractServiceCallback() {
             
             @Override
@@ -60,7 +60,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
                 if (success) {
                     
                     String scResultAsJson = _spCountJSON[0];
-                    ComputeSCTask.WSCResultData scResult = new ComputeSCTask.WSCResultData(m_refDataset, m_datasetRsms, scResultAsJson);
+                    SpectralCountTask.WSCResultData scResult = new SpectralCountTask.WSCResultData(m_refDataset, m_datasetRsms, scResultAsJson);
                     
                     ((WSCResultPanel)m_panel).setData(scResult);                  
                 } else {
@@ -70,12 +70,8 @@ public class DataBoxRsmWSC extends AbstractDataBox {
                 setLoaded(loadingId);
             }
         };
-                      
-        List<Long> rsmIds = new ArrayList<>(m_datasetRsms.size());
-        for(Dataset ds :m_datasetRsms ){
-            rsmIds.add(ds.getResultSummaryId());
-        }              
-        ComputeSCTask task = new ComputeSCTask(callback,  m_refDataset, rsmIds, _spCountJSON);
+                                
+        SpectralCountTask task = new SpectralCountTask(callback,  m_refDataset, m_datasetRsms,_quantiDatasetId, _spCountJSON);
 
         AccessServiceThread.getAccessServiceThread().addTask(task);
  
@@ -86,13 +82,13 @@ public class DataBoxRsmWSC extends AbstractDataBox {
     @Override
     public void setEntryData(Object data) {
         
-        ArrayList<Dataset> datasetArray = (ArrayList) data;
+        ArrayList<DDataset> datasetArray = (ArrayList) data;
         m_refDataset = datasetArray.get(0);
         
         int nb = datasetArray.size()-1;
         m_datasetRsms = new ArrayList<>(nb);
         for (int i=1;i<=nb;i++) {
-            m_datasetRsms.add((Dataset) datasetArray.get(i));
+            m_datasetRsms.add(datasetArray.get(i));
         }
 
         dataChanged();

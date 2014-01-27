@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
-import fr.proline.core.orm.uds.Dataset;
-import fr.proline.studio.dpm.task.ComputeSCTask;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dpm.task.SpectralCountTask;
 import java.util.*;
 import javax.swing.table.AbstractTableModel;
 
@@ -17,7 +17,7 @@ public class WSCProteinTableModel extends AbstractTableModel {
     public static final int COLTYPE_WSC             = 3;
     private static final String[] m_columnNames = {"Protein", "Basic SC", "Specific SC", "Weighted SC"};
 
-    private ComputeSCTask.WSCResultData m_wscResult = null;
+    private SpectralCountTask.WSCResultData m_wscResult = null;
     private List<String> m_protMatchNames = new ArrayList();
     
     public String getProteinMatchAccession(int row) {
@@ -83,16 +83,25 @@ public class WSCProteinTableModel extends AbstractTableModel {
             default: {
               int currentRSMNbr = (col%3==0) ? col/3 : (col/3)+1;
               Long rsmID =m_wscResult.getComputedSCDatasets().get(currentRSMNbr-1).getResultSummaryId();
-              Map<String, ComputeSCTask.SpectralCountsStruct> rsmResult =  m_wscResult.getRsmSCResult(rsmID);
-              ComputeSCTask.SpectralCountsStruct searchedProtSC = rsmResult.get(proteinMatchName);
+              Map<String, SpectralCountTask.SpectralCountsStruct> rsmResult =  m_wscResult.getRsmSCResult(rsmID);
+              SpectralCountTask.SpectralCountsStruct searchedProtSC = rsmResult.get(proteinMatchName);
               int modulo = col%3;
               switch (modulo){
                 case 0:
-                    return searchedProtSC.getWsc();
+                    if(searchedProtSC != null)
+                        return  searchedProtSC.getWsc();
+                    else
+                        return Float.NaN;
                 case 1:
-                    return searchedProtSC.getBsc();
+                    if(searchedProtSC != null)
+                        return searchedProtSC.getBsc();
+                    else
+                        return Float.NaN;
                 case 2 :
-                    return searchedProtSC.getSsc();
+                    if(searchedProtSC != null)
+                        return searchedProtSC.getSsc();
+                    else
+                        return Float.NaN;
                 }            
             }  
         }
@@ -100,12 +109,12 @@ public class WSCProteinTableModel extends AbstractTableModel {
     }
     
 
-    public void setData(ComputeSCTask.WSCResultData wscResult) {
+    public void setData(SpectralCountTask.WSCResultData wscResult) {
         m_wscResult = wscResult;
         
         Set<String> names = new HashSet();
-        List<Dataset> dss = m_wscResult.getComputedSCDatasets();
-        for (Dataset ds :dss) {
+        List<DDataset> dss = m_wscResult.getComputedSCDatasets();
+        for (DDataset ds :dss) {
            names.addAll(m_wscResult.getRsmSCResult(ds.getResultSummaryId()).keySet());
         }
         m_protMatchNames = new ArrayList(names);    

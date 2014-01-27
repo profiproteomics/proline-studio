@@ -24,6 +24,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Action to start a spectral count calculation and display
  * @author VD225637
+ * 
+ * SHOULD NOT BE USED ANY MORE 
+ * REPLACED By SpectralCountAction
  */
 public class CompareWithSCAction extends AbstractRSMAction {
  
@@ -111,37 +114,39 @@ public class CompareWithSCAction extends AbstractRSMAction {
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
         
-         if (selectedNodes.length != 1) {
-            setEnabled(false);
-            return;
-        }
+//         if (selectedNodes.length != 1) {
+//            setEnabled(false);
+//            return;
+//        }
+//
+//        RSMNode node = (RSMNode) selectedNodes[0];
+//
+//        if (node.isChanging()) {
+//            setEnabled(false);
+//            return;
+//        }
+//
+//        if (node.getType() != RSMNode.NodeTypes.DATA_SET) {
+//            setEnabled(false);
+//            return;
+//        }
+//
+//        RSMDataSetNode datasetNode = (RSMDataSetNode) node;
+//        
+//        Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
+//        if (datasetType != Dataset.DatasetType.AGGREGATE) {
+//            setEnabled(false);
+//            return;
+//        }
+//
+//        if (!datasetNode.hasResultSummary()) {
+//            setEnabled(false);
+//            return;
+//        }
 
-        RSMNode node = (RSMNode) selectedNodes[0];
-
-        if (node.isChanging()) {
-            setEnabled(false);
-            return;
-        }
-
-        if (node.getType() != RSMNode.NodeTypes.DATA_SET) {
-            setEnabled(false);
-            return;
-        }
-
-        RSMDataSetNode datasetNode = (RSMDataSetNode) node;
+//        setEnabled(true);
+          setEnabled(false);
         
-        Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
-        if (datasetType != Dataset.DatasetType.AGGREGATE) {
-            setEnabled(false);
-            return;
-        }
-
-        if (!datasetNode.hasResultSummary()) {
-            setEnabled(false);
-            return;
-        }
-
-        setEnabled(true);
     }
 
 }

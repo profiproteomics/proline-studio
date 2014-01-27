@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.studio.dpm.task.ComputeSCTask;
+import fr.proline.studio.dpm.task.SpectralCountTask;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -27,7 +27,7 @@ import java.awt.GridBagLayout;
 public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
-    private ComputeSCTask.WSCResultData m_weightedSCResult = null;
+    private SpectralCountTask.WSCResultData m_weightedSCResult = null;
    
     private javax.swing.JTextField rsmRefNameField;
     private javax.swing.JTable proteinTable;
@@ -73,7 +73,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 //        return tableModel.getProteinMatch(selectedRow);
 //    }
 
-    public void setData(ComputeSCTask.WSCResultData scResult) {
+    public void setData(SpectralCountTask.WSCResultData scResult) {
 
         if (scResult == m_weightedSCResult) {
             return;

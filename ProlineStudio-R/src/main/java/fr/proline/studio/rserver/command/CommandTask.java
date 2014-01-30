@@ -5,6 +5,7 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.AbstractServiceTask;
 import fr.proline.studio.rserver.RServerManager;
+import java.awt.Image;
 import java.io.File;
 import javax.imageio.ImageIO;
 
@@ -49,10 +50,7 @@ public class CommandTask extends AbstractServiceTask {
 
                 m_outVar.setVar(var, resultType);
                 String code = m_command.getCommandExpression(m_outVar, m_inVar);
-                
-                /*String codeTEST = "GetGraphicsAsPng('test_boxplot.png', boxPlotEDyP("+m_inVar.getVar()+", 'testBoxplot'), 500, 500)";
-                
-                serverR.eval(codeTEST);*/
+
                 
                 if (resultType == RVar.GRAPHIC) {
 
@@ -69,7 +67,12 @@ public class CommandTask extends AbstractServiceTask {
                         serverR.downloadFile(fileOnServer, boxPlotTempFile.getAbsolutePath());
 
                         // Create the image
-                        m_outVar.setAttachedData(ImageIO.read(boxPlotTempFile));
+                        final Image img = ImageIO.read(boxPlotTempFile);
+                        m_outVar.setAttachedData(img);
+
+
+
+        
                         
                     } finally {
                         // remove files

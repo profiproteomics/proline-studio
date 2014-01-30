@@ -4,13 +4,14 @@ import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.rserver.data.MsnSetData;
 import fr.proline.studio.rserver.data.RGraphicData;
+import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
 import fr.proline.studio.rserver.node.RGraphicNode;
 import fr.proline.studio.rserver.node.RMsnSetNode;
 import fr.proline.studio.rserver.node.RNode;
 import fr.proline.studio.rserver.node.RTree;
 import java.awt.Image;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
+import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
@@ -23,6 +24,7 @@ public class RScenario {
     private ArrayList<AbstractCommand> m_commandList = new ArrayList<>();
     
     private String m_name;
+
     
     public RScenario(String name) {
         m_name = name;
@@ -140,13 +142,26 @@ public class RScenario {
                         ((RGraphicData) _resultNode.getData()).setImage(img);
                     }
                     
+                    outVar.setFullDisplay(cmd.getLongDisplayName(_resultNode.getParent().toString()));
                     _resultNode.setLongDisplayName(cmd.getLongDisplayName(_resultNode.getParent().toString()));
                     //_resultNode.getData().setName(cmd.getNodeName());
                     
                     treeModel.nodeChanged(_resultNode);
                     
-                    
-                    
+                    if (_resultNode.getType() == RNode.NodeTypes.GRAPHIC) {
+                        SwingUtilities.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                RVar var = _resultNode.getVar();
+                                Image img = ((RGraphicData)_resultNode.getData()).getImage();
+                                ImageViewerTopComponent win = new ImageViewerTopComponent(var.getFullDisplay(), img);
+                                win.open();
+                                win.requestActive();
+                            }
+                        });
+                    }
+                        
                     executeCmd(_resultNode, cmdIndex+1);
                     
                 } else {

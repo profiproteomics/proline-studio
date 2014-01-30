@@ -14,6 +14,9 @@ public class RVar {
     
     private String m_var = null;
     private int m_type;
+    
+    private String m_fullDisplay = null;
+    
 
     private Object m_attachedData = null;
     
@@ -25,7 +28,7 @@ public class RVar {
         setVar(v, type);
     }
     
-    public void setVar(String v, int type) {
+    public final void setVar(String v, int type) {
         m_var = v;
         m_type = type;
     }
@@ -41,6 +44,17 @@ public class RVar {
     @Override
     public String toString() {
         return m_var;
+    }
+    
+    public String getFullDisplay() {
+        if (m_fullDisplay == null) {
+            return m_var;
+        }
+        return m_fullDisplay;
+    }
+    
+    public void setFullDisplay(String fullDisplay) {
+        m_fullDisplay = fullDisplay;
     }
     
     public void setAttachedData(Object attachedData) {

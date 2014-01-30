@@ -26,7 +26,7 @@ public class PlotCommand extends AbstractCommand {
         String timestamp = String.valueOf(System.currentTimeMillis());
         m_fileNameOnServer = "image"+timestamp+".png";
 
-        return m_plotRExpression.replaceFirst(IN_VARIABLE, inVariable.getVar()).replaceFirst(FILE_ON_SERVER, m_fileNameOnServer);
+        return m_plotRExpression.replaceFirst(IN_VARIABLE, inVariable.getVar()).replaceFirst(FILE_ON_SERVER, m_fileNameOnServer).replaceFirst(PREVIOUS_LONG_DISPLAY_NAME, inVariable.getFullDisplay());
 
     }
 

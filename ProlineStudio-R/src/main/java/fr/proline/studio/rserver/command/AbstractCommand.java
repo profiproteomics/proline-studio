@@ -9,7 +9,8 @@ public abstract class AbstractCommand {
     public static final String IN_VARIABLE = "#IN_VAR#";
     public static final String OUT_VARIABLE = "#OUT_VAR#";
     public static final String FILE_ON_SERVER = "#FILE_ON_SERVER#";
-    public static final String PEVIOUS_NODE = "#PREVIOUS_NODE#";
+    public static final String PREVIOUS_NODE = "#PREVIOUS_NODE#";
+    public static final String PREVIOUS_LONG_DISPLAY_NAME = "#PREVIOUS_LDNAME#";
     
     public static final int CMD_GENERIC = 0;
     public static final int CMD_PLOT = 1;
@@ -45,7 +46,7 @@ public abstract class AbstractCommand {
     }
     
     public String getLongDisplayName(String parentNodeName) {
-        return m_longDisplayName.replaceFirst(PEVIOUS_NODE, parentNodeName);
+        return m_longDisplayName.replaceFirst(PREVIOUS_NODE, parentNodeName);
     }
     
     public int getResultType() {

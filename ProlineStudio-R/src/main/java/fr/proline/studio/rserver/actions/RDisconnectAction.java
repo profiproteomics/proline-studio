@@ -26,7 +26,11 @@ public class RDisconnectAction extends AbstractRAction {
         
         RTree tree = RTree.getTree();
         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-        treeModel.nodeChanged(selectedNodes[0]);
+        
+        RNode root = (RNode) treeModel.getRoot();
+        root.removeAllChildren();
+        
+        treeModel.nodeStructureChanged(root);
     }
     
     @Override

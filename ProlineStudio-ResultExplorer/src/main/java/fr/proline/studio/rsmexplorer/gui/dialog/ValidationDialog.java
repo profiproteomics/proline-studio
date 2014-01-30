@@ -494,9 +494,11 @@ public class ValidationDialog extends DefaultDialog {
         c.gridx++;
         fdrPanel.add(m_proteinFdrLabel, c);
 
-
         c.gridx++;
         fdrPanel.add(m_proteinFdrTextField, c);
+        
+        c.gridx++;
+        fdrPanel.add(m_proteinFdrPercentageLabel, c);
 
         c.gridx++;
         c.weightx = 1.0;

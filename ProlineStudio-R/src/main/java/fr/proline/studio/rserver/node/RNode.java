@@ -1,7 +1,9 @@
 package fr.proline.studio.rserver.node;
 
+import fr.proline.studio.rserver.command.AbstractCommand;
+import fr.proline.studio.rserver.command.GenericCommand;
+import fr.proline.studio.rserver.command.RVar;
 import fr.proline.studio.rserver.data.AbstractRData;
-import fr.proline.studio.rserver.data.RExpression;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -63,12 +65,8 @@ public abstract class RNode extends DefaultMutableTreeNode {
         return m_isChanging;
     }
 
-    public String getToolTipText() {
-        RExpression expression = getData().getRExpression();
-        if (expression == null) {
-            return null;
-        }
-        return expression.getRExpression();
+    public String getToolTipText() { 
+        return getLongDisplayName();
     }
     
     public String getLongDisplayName() {
@@ -78,12 +76,20 @@ public abstract class RNode extends DefaultMutableTreeNode {
     public void setLongDisplayName(String longDisplayName) {
         getData().setLongDisplayName(longDisplayName);
     }
-    
-    public RExpression getRExpression() {
-        return getData().getRExpression();
+
+    public void setCommand(AbstractCommand c) {
+        getData().setCommand(c);
     }
-    
-    public void setRExpression(RExpression e) {
-        getData().setRExpression(e);
+
+    public AbstractCommand getCommand() {
+        return getData().getCommand();
+    }
+
+    public void setVar(RVar v) {
+        getData().setVar(v);
+    }
+
+    public RVar getVar() {
+        return getData().getVar();
     }
 }

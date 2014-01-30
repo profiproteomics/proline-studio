@@ -4,10 +4,11 @@ import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.AbstractServiceTask;
-import fr.proline.studio.rserver.RServerManager;
+import fr.proline.studio.rserver.command.AbstractCommand;
+import fr.proline.studio.rserver.command.GenericCommand;
+import fr.proline.studio.rserver.command.CommandTask;
+import fr.proline.studio.rserver.command.RVar;
 import fr.proline.studio.rserver.data.MsnSetData;
-import fr.proline.studio.rserver.data.RExpression;
 import fr.proline.studio.rserver.node.RMsnSetNode;
 import fr.proline.studio.rserver.node.RNode;
 import fr.proline.studio.rserver.node.RTree;
@@ -30,9 +31,8 @@ public class NormalizeMsnSetAction extends AbstractRAction {
         RTree tree = RTree.getTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         final RMsnSetNode parentNode = (RMsnSetNode) selectedNodes[0];
-        final RMsnSetNode resultNode = new RMsnSetNode(new MsnSetData("Normalized"));
-        final RExpression expression = new RExpression();
-        resultNode.setRExpression(expression);
+        final RMsnSetNode resultNode = new RMsnSetNode(new MsnSetData("Normalized"), false);
+
         resultNode.getData().setLongDisplayName("Normalize("+parentNode.getLongDisplayName()+")");
         resultNode.setIsChanging(true);
         treeModel.insertNodeInto(resultNode, parentNode, parentNode.getChildCount());
@@ -43,8 +43,10 @@ public class NormalizeMsnSetAction extends AbstractRAction {
         }
         
         
-        
-        final String[] RVariable = new String[1];
+        final RVar inVar = parentNode.getVar(); 
+        final RVar outVar = new RVar();
+        String[] parameters = {GenericCommand.IN_VARIABLE};
+        final GenericCommand cmd = new GenericCommand("NormalizeCenterReduction", "Normalized", "Nomalize("+AbstractCommand.PEVIOUS_NODE+")", parameters, RVar.MSN_SET);
 
         AbstractServiceCallback callback = new AbstractServiceCallback() {
 
@@ -57,6 +59,8 @@ public class NormalizeMsnSetAction extends AbstractRAction {
             public void run(boolean success) {
                 if (success) {
                     resultNode.setIsChanging(false);
+                    resultNode.setCommand(cmd);
+                    resultNode.setVar(outVar);
                     treeModel.nodeChanged(resultNode);
                 } else {
                     treeModel.removeNodeFromParent(resultNode);
@@ -64,7 +68,9 @@ public class NormalizeMsnSetAction extends AbstractRAction {
             }
         };
 
-        NormalizeMsnSetTask task = new NormalizeMsnSetTask(callback, parentNode.toString(), parentNode.getRExpression().getRVariable(), expression);
+        CommandTask task = new CommandTask(callback, outVar, inVar, cmd );
+        
+        //NormalizeMsnSetTask task = new NormalizeMsnSetTask(callback, parentNode.toString(), parentNode.getRExpression().getRVariable(), expression);
         AccessServiceThread.getAccessServiceThread().addTask(task);
         
     }
@@ -79,14 +85,14 @@ public class NormalizeMsnSetAction extends AbstractRAction {
     
     
     
-       
+      /* 
     public class NormalizeMsnSetTask extends AbstractServiceTask {
 
         private RExpression m_RExpression;
         private String m_srcRVariable;
 
         public NormalizeMsnSetTask(AbstractServiceCallback callback, String name, String srcRVariable, RExpression expression) {
-            super(callback, true /** synchronous */, new TaskInfo("Normalize MsnSet " + name, false, TASK_LIST_INFO));
+            super(callback, true , new TaskInfo("Normalize MsnSet " + name, false, TASK_LIST_INFO));
 
             m_srcRVariable = srcRVariable;
             m_RExpression = expression;
@@ -119,7 +125,7 @@ public class NormalizeMsnSetAction extends AbstractRAction {
             // always returns STATE_DONE because it is a synchronous service
             return AbstractServiceTask.ServiceState.STATE_DONE;
         }
-    }
+    }*/
     
     
 }

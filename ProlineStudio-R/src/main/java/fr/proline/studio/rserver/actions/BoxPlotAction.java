@@ -6,15 +6,16 @@ import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.AbstractServiceTask;
 import fr.proline.studio.rserver.RServerManager;
+import fr.proline.studio.rserver.command.*;
 import fr.proline.studio.rserver.data.RGraphicData;
 import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
 import fr.proline.studio.rserver.node.RGraphicNode;
 import fr.proline.studio.rserver.node.RMsnSetNode;
 import fr.proline.studio.rserver.node.RNode;
 import fr.proline.studio.rserver.node.RTree;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import javax.imageio.ImageIO;
+
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
@@ -44,10 +45,13 @@ public class BoxPlotAction extends AbstractRAction {
             tree.expandPath(pathToExpand);
         }
 
-        final BufferedImage[] image = new BufferedImage[1];
+        final RVar inVar = parentNode.getVar(); 
+        final RVar outVar = new RVar();
 
+        final PlotCommand plotCommand = new PlotCommand("Box Plot", "Box Plot", "BoxPlot("+AbstractCommand.PEVIOUS_NODE+")", "GetGraphicsAsPng('"+AbstractCommand.FILE_ON_SERVER+"', boxPlotEDyP("+AbstractCommand.IN_VARIABLE+", 'testBoxplot'), 500, 500)");
         
         
+
         AbstractServiceCallback callback = new AbstractServiceCallback() {
 
             @Override
@@ -58,11 +62,15 @@ public class BoxPlotAction extends AbstractRAction {
             @Override
             public void run(boolean success) {
                 if (success) {
+                    
+                    Image img = (Image) outVar.getAttachedData();
+                    
+                    resultNode.setCommand(plotCommand);
                     resultNode.setIsChanging(false);
-                    ((RGraphicData)resultNode.getData()).setImage(image[0]);
+                    ((RGraphicData)resultNode.getData()).setImage(img);
                     treeModel.nodeChanged(resultNode);
                     
-                    ImageViewerTopComponent win = new ImageViewerTopComponent(resultNode.getLongDisplayName(), image[0]);
+                    ImageViewerTopComponent win = new ImageViewerTopComponent(resultNode.getLongDisplayName(), img);
                     win.open();
                     win.requestActive();
                     
@@ -72,7 +80,7 @@ public class BoxPlotAction extends AbstractRAction {
             }
         };
 
-        GraphicTask task = new GraphicTask(callback, parentNode.toString(), parentNode.getRExpression().getRVariable(), image);
+        CommandTask task = new CommandTask(callback, outVar, inVar, plotCommand);
         AccessServiceThread.getAccessServiceThread().addTask(task);
         
     }
@@ -86,56 +94,5 @@ public class BoxPlotAction extends AbstractRAction {
     }
     
     
-    
-       
-    public class GraphicTask extends AbstractServiceTask {
-
-        private String m_srcRVariable;
-        private BufferedImage[] m_image;
-
-        public GraphicTask (AbstractServiceCallback callback, String name, String srcRVariable, BufferedImage[] image) {
-            super(callback, true /** synchronous */, new TaskInfo("BoxPlot " + name, false, TASK_LIST_INFO));
-
-            m_srcRVariable = srcRVariable;
-            m_image = image;
-        }
-
-        @Override
-        public boolean askService() {
-
-            String timestamp = String.valueOf(System.currentTimeMillis());
-            String boxPlotFileName = "boxPlot"+timestamp+".png";
-            
-            RServerManager serverR = RServerManager.getRServerManager();
-
-            try {
-
-                String code = "boxplotAsPng(" + m_srcRVariable + ",'"+boxPlotFileName+"')";
-                serverR.eval(code);
-                
-                // download box plot png file
-                File boxPlotTempFile = File.createTempFile("boxPlot", ".png"); 
-                boxPlotTempFile.deleteOnExit();
-                serverR.downloadFile(boxPlotFileName, boxPlotTempFile.getAbsolutePath());
-                
-                // Create the image
-                m_image[0] = ImageIO.read(boxPlotTempFile);
-                
-            } catch (RServerManager.RServerException | java.io.IOException ex) {
-                m_taskError = new TaskError(ex);
-                return false;
-            }
-
-
-            return true;
-        }
-
-        @Override
-        public AbstractServiceTask.ServiceState getServiceState() {
-            // always returns STATE_DONE because it is a synchronous service
-            return AbstractServiceTask.ServiceState.STATE_DONE;
-        }
-    }
-    
-    
+ 
 }

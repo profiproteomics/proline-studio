@@ -1,5 +1,9 @@
 package fr.proline.studio.rserver.data;
 
+
+import fr.proline.studio.rserver.command.AbstractCommand;
+import fr.proline.studio.rserver.command.RVar;
+
 /**
  * Must be extended by classes used as User Data in RExplorer Nodes
  * @author JM235353
@@ -13,7 +17,8 @@ public abstract class AbstractRData {
     }
     protected String m_name;
     protected String m_longDisplayName;
-    protected RExpression m_RExpression;
+    protected AbstractCommand m_command;
+    protected RVar m_var;
     
     protected DataTypes m_dataType;
 
@@ -27,6 +32,9 @@ public abstract class AbstractRData {
         return m_name;
     }
 
+    public void setName(String name) {
+        m_name = name;
+    }
 
     public DataTypes getDataType() {
         return m_dataType;
@@ -40,12 +48,19 @@ public abstract class AbstractRData {
         return m_longDisplayName;
     }
     
-    public void setRExpression(RExpression e) {
-        m_RExpression = e;
+    public void setCommand(AbstractCommand c) {
+        m_command = c;
     }
 
-    public RExpression getRExpression() {
-        return m_RExpression;
+    public AbstractCommand getCommand() {
+        return m_command;
     }
 
+    public void setVar(RVar v) {
+        m_var = v;
+    }
+
+    public RVar getVar() {
+        return m_var;
+    }
 }

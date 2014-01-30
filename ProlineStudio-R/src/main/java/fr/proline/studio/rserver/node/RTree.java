@@ -146,6 +146,9 @@ public class RTree extends JTree implements MouseListener {
 
                 m_rootActions.add(null);
                 
+                ROpenMsnSetAction openMsnSetAction = new ROpenMsnSetAction();
+                m_rootActions.add(openMsnSetAction);
+                
                 RImportMsnSetAction importMsnSetAction = new RImportMsnSetAction();
                 m_rootActions.add(importMsnSetAction);
                 
@@ -185,6 +188,15 @@ public class RTree extends JTree implements MouseListener {
                 BoxPlotAction boxPlotAction = new BoxPlotAction();
                 m_mainActions.add(boxPlotAction);
 
+                
+                m_mainActions.add(null);  // separator
+                
+                SaveScriptAction saveScriptAction = new SaveScriptAction();
+                m_mainActions.add(saveScriptAction);
+                
+                ReplayScriptAction replayScriptAction = new ReplayScriptAction();
+                m_mainActions.add(replayScriptAction);
+                
                 // add actions to popup
                 m_mainPopup = new JPopupMenu();
                 for (int i = 0; i < m_mainActions.size(); i++) {

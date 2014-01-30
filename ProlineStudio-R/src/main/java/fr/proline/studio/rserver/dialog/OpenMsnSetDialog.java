@@ -14,22 +14,20 @@ import org.openide.util.NbPreferences;
  *
  * @author JM235353
  */
-public class ImportMsnSetDialog extends DefaultDialog {
+public class OpenMsnSetDialog extends DefaultDialog {
     
     
-    private static ImportMsnSetDialog m_singletonDialog = null;
+    private static OpenMsnSetDialog m_singletonDialog = null;
     
-    private JTextField m_designFileTextField;
-    private JTextField m_dataFileTextField;
+    private JTextField m_fileTextField;
     
-    private JButton m_addDesignFileButton;
-    private JButton m_addDataFileButton;
+    private JButton m_addFileButton;
     
     private File m_defaultDirectory = null;
     
-    public static ImportMsnSetDialog getDialog(Window parent) {
+    public static OpenMsnSetDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
-            m_singletonDialog = new ImportMsnSetDialog(parent);
+            m_singletonDialog = new OpenMsnSetDialog(parent);
         }
 
         m_singletonDialog.reinitialize();
@@ -37,10 +35,10 @@ public class ImportMsnSetDialog extends DefaultDialog {
         return m_singletonDialog;
     }
     
-    private ImportMsnSetDialog(Window parent) {
+    private OpenMsnSetDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-        setTitle("Create Msn Set");
+        setTitle("Open Msn Set");
 
         //setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot"); //JPM.TODO
         
@@ -61,14 +59,10 @@ public class ImportMsnSetDialog extends DefaultDialog {
         JPanel fileSelectionPanel = new JPanel(new GridBagLayout());
         fileSelectionPanel.setBorder(BorderFactory.createTitledBorder(" Files Selection "));
 
-        m_dataFileTextField = new JTextField(30);
-        m_designFileTextField = new JTextField(30);
+        m_fileTextField = new JTextField(30);
         
-        m_addDataFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-        m_addDataFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        
-        m_addDesignFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-        m_addDesignFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        m_addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
+        m_addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
 
 
@@ -84,30 +78,17 @@ public class ImportMsnSetDialog extends DefaultDialog {
 
         c.gridx++;
         c.weightx=1;
-        fileSelectionPanel.add(m_dataFileTextField, c);
+        fileSelectionPanel.add(m_fileTextField, c);
         
         c.gridx++;
         c.weightx = 0;
-        fileSelectionPanel.add(m_addDataFileButton, c);
-
-        
-        c.gridx = 0;
-        c.gridy++;
-        fileSelectionPanel.add(new JLabel("Desgin File:"), c);
-
-        c.gridx++;
-        c.weightx=1;
-        fileSelectionPanel.add(m_designFileTextField, c);
-        
-        c.gridx++;
-        c.weightx = 0;
-        fileSelectionPanel.add(m_addDesignFileButton, c);
+        fileSelectionPanel.add(m_addFileButton, c);
 
 
 
-        m_addDataFileButton.addActionListener(new AddFileActionListener(m_dataFileTextField));
-        m_addDesignFileButton.addActionListener(new AddFileActionListener(m_designFileTextField));
 
+
+        m_addFileButton.addActionListener(new AddFileActionListener(m_fileTextField));
         return fileSelectionPanel;
 
     }
@@ -146,8 +127,7 @@ public class ImportMsnSetDialog extends DefaultDialog {
     }
         
     private void reinitialize() {
-        m_designFileTextField.setText("");
-        m_dataFileTextField.setText("");
+        m_fileTextField.setText("");
     }
     
     private void restoreInitialParameters() {
@@ -163,29 +143,22 @@ public class ImportMsnSetDialog extends DefaultDialog {
         }
     }
     
-    public String getDataFilePath() {
-        return m_dataFileTextField.getText().trim();
+    public String getFilePath() {
+        return m_fileTextField.getText().trim();
     }
-    public String getDesignFilePath() {
-        return m_designFileTextField.getText().trim();
-    }
+
     
     @Override
     protected boolean okCalled() {
 
         // check that files are existing
-        String error = checkFilePath(getDataFilePath());
+        String error = checkFilePath(getFilePath());
         if (error != null) {
             setStatus(true, error);
-            highlight(m_dataFileTextField);
+            highlight(m_fileTextField);
             return false;
         }
-        error = checkFilePath(getDesignFilePath());
-        if (error != null) {
-            setStatus(true, error);
-            highlight(m_designFileTextField);
-            return false;
-        }
+
         
         // msn set user file path
         if (m_defaultDirectory != null) {

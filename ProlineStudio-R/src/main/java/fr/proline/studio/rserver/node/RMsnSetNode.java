@@ -10,8 +10,13 @@ import javax.swing.ImageIcon;
  */
 public class RMsnSetNode extends RNode {
 
-    public RMsnSetNode(AbstractRData data) {
+    
+    private boolean m_scriptStart;
+    
+    public RMsnSetNode(AbstractRData data, boolean scriptStart) {
         super(RNode.NodeTypes.MSN_SET, data);
+        
+        m_scriptStart = scriptStart;
     }
 
 
@@ -19,5 +24,9 @@ public class RMsnSetNode extends RNode {
     @Override
     public ImageIcon getIcon() {
         return getIcon(IconManager.IconType.MSN_SET);
+    }
+    
+    public boolean isScriptStart() {
+        return m_scriptStart;
     }
 }

@@ -9,7 +9,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rserver.RServerManager;
 import fr.proline.studio.rserver.command.RVar;
 import fr.proline.studio.rserver.data.MsnSetData;
-import fr.proline.studio.rserver.dialog.ImportMsnSetDialog;
+import fr.proline.studio.rserver.dialog.OpenMsnSetDialog;
 import fr.proline.studio.rserver.node.RMsnSetNode;
 import fr.proline.studio.rserver.node.RNode;
 import fr.proline.studio.rserver.node.RTree;
@@ -22,15 +22,15 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class RImportMsnSetAction extends AbstractRAction {
+public class ROpenMsnSetAction extends AbstractRAction {
 
-    public RImportMsnSetAction() {
-        super("Create Msn Set...");
+    public ROpenMsnSetAction() {
+        super("Open Msn Set...");
     }
 
     @Override
     public void actionPerformed(RNode[] selectedNodes, int x, int y) {
-        ImportMsnSetDialog dialog = ImportMsnSetDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        OpenMsnSetDialog dialog = OpenMsnSetDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);
         
@@ -38,9 +38,8 @@ public class RImportMsnSetAction extends AbstractRAction {
             
 
             // retrieve files to import
-            String designFilePath = dialog.getDesignFilePath();
-            String dataFilePath = dialog.getDataFilePath();
-            String nodeName = new File(designFilePath).getName();
+            String filePath = dialog.getFilePath();
+            String nodeName = new File(filePath).getName();
             
             
             // create the Msn Set Node
@@ -49,7 +48,6 @@ public class RImportMsnSetAction extends AbstractRAction {
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             MsnSetData data = new MsnSetData(nodeName);
             final RMsnSetNode msnSetNode = new RMsnSetNode(data, true);
-            
             
             msnSetNode.setIsChanging(true);
             treeModel.insertNodeInto(msnSetNode, parentNode, parentNode.getChildCount());
@@ -80,8 +78,8 @@ public class RImportMsnSetAction extends AbstractRAction {
                 
             };
             
-            ImportMsnSetTask task = new ImportMsnSetTask(callback, designFilePath, dataFilePath, data);
-            AccessServiceThread.getAccessServiceThread().addTask(task);  //JPM.TODO
+            OpenMsnSetTask task = new OpenMsnSetTask(callback, filePath, data);
+            AccessServiceThread.getAccessServiceThread().addTask(task); 
 
         }
     }
@@ -93,17 +91,15 @@ public class RImportMsnSetAction extends AbstractRAction {
     
     
        
-    public class ImportMsnSetTask extends AbstractServiceTask {
+    public class OpenMsnSetTask extends AbstractServiceTask {
 
-        private String m_designFilePath;
-        private String m_dataFilePath;
+        private String m_filePath;
         private MsnSetData m_msnSetData;
 
-        public ImportMsnSetTask(AbstractServiceCallback callback, String designFilePath, String dataFilePath, MsnSetData msnSetData) {
-            super(callback, true /** synchronous */, new TaskInfo("Import MsnSet " + designFilePath, false, TASK_LIST_INFO));
+        public OpenMsnSetTask(AbstractServiceCallback callback, String filePath, MsnSetData msnSetData) {
+            super(callback, true /** synchronous */, new TaskInfo("Open MsnSet " + filePath, false, TASK_LIST_INFO));
 
-            m_designFilePath = designFilePath;
-            m_dataFilePath = dataFilePath;
+            m_filePath = filePath;
             m_msnSetData = msnSetData;
         }
 
@@ -111,21 +107,21 @@ public class RImportMsnSetAction extends AbstractRAction {
         public boolean askService() {
 
             String timestamp = String.valueOf(System.currentTimeMillis());
-            String designOnServer = "msnSetDesign"+timestamp+".txt";
-            String dataOnServer = "msnSetData"+timestamp+".txt";
+            String msnSetOnServer = "msnSet"+timestamp+".txt";
             
             RServerManager serverR = RServerManager.getRServerManager();
 
             try {
-                serverR.uploadFile(m_designFilePath, designOnServer);
-                serverR.uploadFile(m_dataFilePath, dataOnServer);
+                serverR.uploadFile(m_filePath, msnSetOnServer);
 
                 String var = serverR.getNewVariableName("msnSet");
                 m_msnSetData.setVar(new RVar(var, RVar.MSN_SET));
-                
 
-                String codeToCreateMsnSet = var+" <- Quant2MSnset('" + dataOnServer + "','" + designOnServer + "',NULL,c(3:8),c(9:20),1)";
+
+                String codeToCreateMsnSet = var+" <- readRDS('" + msnSetOnServer + "')";
                 serverR.parseAndEval(codeToCreateMsnSet);
+
+                
                 
             } catch (RServerManager.RServerException ex) {
                 m_taskError = new TaskError(ex);
@@ -133,14 +129,11 @@ public class RImportMsnSetAction extends AbstractRAction {
             } finally {
                 // remove files
                 try {
-                    serverR.deleteFile(designOnServer);
+                    serverR.deleteFile(msnSetOnServer);
                 } catch (Exception ex) {
                 }
 
-                try {
-                    serverR.deleteFile(dataOnServer);
-                } catch (Exception ex) {
-                }
+
             }
 
 

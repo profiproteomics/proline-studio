@@ -18,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 import javax.swing.*;
@@ -42,10 +43,17 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private static ImportIdentificationDialog m_singletonDialog = null;
     
     private final static String[] PARSER_NAMES = {"Mascot", "Omssa"};
-    private final static String[] FILE_EXTENSIONS = {"dat", "omx"};
+    // ABU : added a map to consider the case when a parser handles more than one extensions
+    // the key is the extension, the value is the id of the parser in the other arrays
+    private static Map<String, Integer> EXTENSION_TO_PARSER = new HashMap<String, Integer>();
+    static {
+    	EXTENSION_TO_PARSER.put("dat", 0);
+    	EXTENSION_TO_PARSER.put("omx", 1);
+    	EXTENSION_TO_PARSER.put("omx.bz2", 1);
+    }
+//    private final static String[] FILE_EXTENSIONS = {"dat", "omx"};
     private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Omssa Identification Result"};
     private final static String[] PARSER_IDS = { "mascot.dat", "omssa.omx" };
-    
     
     private final static String[] DECOY_VALUES = {null, "No Decoy", "Software Engine Decoy", "Concataned Decoy"};
     private final static String[] DECOY_VALUES_ASSOCIATED_KEYS = DECOY_VALUES;
@@ -248,17 +256,35 @@ public class ImportIdentificationDialog extends DefaultDialog {
                     fchooser.setCurrentDirectory(m_defaultDirectory);
                 }
                 fchooser.setMultiSelectionEnabled(true);
-                
-                int nbFilters = FILE_EXTENSIONS_DESCRIPTION.length;
-                //FileNameExtensionFilter defaultFilter = null;
-                for (int i = 0; i < nbFilters; i++) {
-                    FileNameExtensionFilter filter = new FileNameExtensionFilter(FILE_EXTENSIONS_DESCRIPTION[i], FILE_EXTENSIONS[i]);
-                    fchooser.addChoosableFileFilter(filter);
-                    /*
-                     * if (i == 0) { defaultFilter = filter;
-                    }
-                     */
+
+                // ABU : for each parser, add all its extensions
+                String[] filters = new String[FILE_EXTENSIONS_DESCRIPTION.length];
+                for(String key : EXTENSION_TO_PARSER.keySet()) {
+                	int i = EXTENSION_TO_PARSER.get(key);
+                	if(filters[i] == null) { filters[i] = ""; }
+                	if(!filters[i].equals("")) { filters[i] += ";"; }
+                	if(key.contains(".")) { // if the extension contains a dot, only keep what is on its right (ie. "omx.bz2" -> "bz2")
+                		int indexOfDot = key.lastIndexOf('.');
+                    	filters[i] += key.substring(indexOfDot + 1);
+                	} else {
+                    	filters[i] += key;
+                	}
                 }
+                for (int i = 0; i < filters.length; i++) { // extensions with a dot inside will not be considered
+                	FileNameExtensionFilter filter = new FileNameExtensionFilter(FILE_EXTENSIONS_DESCRIPTION[i], filters[i].split(";"));
+                    fchooser.addChoosableFileFilter(filter);
+                }
+//                int nbFilters = FILE_EXTENSIONS_DESCRIPTION.length;
+//                //FileNameExtensionFilter defaultFilter = null;
+//                for (int i = 0; i < nbFilters; i++) {
+//                    FileNameExtensionFilter filter = new FileNameExtensionFilter(FILE_EXTENSIONS_DESCRIPTION[i], FILE_EXTENSIONS[i]);
+//                    fchooser.addChoosableFileFilter(filter);
+//                    /*
+//                     * if (i == 0) { defaultFilter = filter;
+//                    }
+//                     */
+//                }
+                
                 //fchooser.setFileFilter(defaultFilter);
                 int result = fchooser.showOpenDialog(m_singletonDialog);
                 if (result == JFileChooser.APPROVE_OPTION) {
@@ -272,24 +298,36 @@ public class ImportIdentificationDialog extends DefaultDialog {
                     }
 
                     // select Parser according to the extension of the first file
+                    // ABU : use the map to deal with different extensions for the same parser
                     if ((nbFiles > 0) && !hasFilesPreviously) {
                         File f = files[0];
                         String fileName = f.getName();
-                        int indexOfDot = fileName.lastIndexOf('.');
-                        if (indexOfDot != -1) {
-                            int parserIndex = -1;
-                            String fileExtension = fileName.substring(indexOfDot + 1);
-                            for (int i = 0; i < FILE_EXTENSIONS.length; i++) {
-                                String extension = FILE_EXTENSIONS[i];
-                                if (fileExtension.compareToIgnoreCase(extension) == 0) {
-                                    parserIndex = i;
-                                    break;
-                                }
-                            }
-                            if (parserIndex >= 0) {
-                                m_parserComboBox.setSelectedIndex(parserIndex);
+                        int parserIndex = -1;
+                        for(String key : EXTENSION_TO_PARSER.keySet()) {
+                            String extension = "."+key;
+                            if (fileName.endsWith(extension)) {
+                                parserIndex = EXTENSION_TO_PARSER.get(key);
+                                break;
                             }
                         }
+                        if (parserIndex >= 0) {
+                            m_parserComboBox.setSelectedIndex(parserIndex);
+                        }
+//                        int indexOfDot = fileName.lastIndexOf('.');
+//                        if (indexOfDot != -1) {
+//                            int parserIndex = -1;
+//                            String fileExtension = fileName.substring(indexOfDot + 1);
+//                            for (int i = 0; i < FILE_EXTENSIONS.length; i++) {
+//                                String extension = FILE_EXTENSIONS[i];
+//                                if (fileExtension.compareToIgnoreCase(extension) == 0) {
+//                                    parserIndex = i;
+//                                    break;
+//                                }
+//                            }
+//                            if (parserIndex >= 0) {
+//                                m_parserComboBox.setSelectedIndex(parserIndex);
+//                            }
+//                        }
                     }
                     
                     if (nbFiles>0) {

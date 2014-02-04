@@ -54,6 +54,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     public DefaultDialog(Window parent, Dialog.ModalityType modalityType) {
         super(parent, modalityType);
         
+        // Action when the user press on the dialog cross
         addWindowListener(new WindowAdapter() {
 
             @Override
@@ -61,6 +62,32 @@ public class DefaultDialog extends javax.swing.JDialog {
                 cancelButtonActionPerformed();
             }
         });
+        
+        // Escape Key Action
+        KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+        Action actionListener = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                cancelButtonActionPerformed();
+            }
+        };
+        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(stroke, "ESCAPE");
+        getRootPane().getActionMap().put("ESCAPE", actionListener);
+
+        // Enter Action
+        stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+        actionListener = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                doClick(BUTTON_OK);
+            }
+        };
+        inputMap.put(stroke, "ENTER");
+        getRootPane().getActionMap().put("ENTER", actionListener);
+        
         
         initComponents(); 
 
@@ -285,8 +312,6 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.weighty = 0;
         
         m_okButton = new JButton(IconManager.getIcon(IconManager.IconType.OK));
-        m_okButton.setDefaultCapable(true);
-        getRootPane().setDefaultButton(m_okButton);
         m_cancelButton = new JButton(IconManager.getIcon(IconManager.IconType.CANCEL));
         m_defaultButton = new JButton(IconManager.getIcon(IconManager.IconType.DEFAULT));
         m_helpButton = new JButton(IconManager.getIcon(IconManager.IconType.QUESTION));

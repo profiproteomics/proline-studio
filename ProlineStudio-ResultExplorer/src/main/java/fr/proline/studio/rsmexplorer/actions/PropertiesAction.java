@@ -491,10 +491,26 @@ public class PropertiesAction extends AbstractRSMAction {
         prop.setName("Taxonomy");
         propGroup.put(prop);
         
-        
+        if (searchSetting instanceof MsmsSearch) {
+            MsmsSearch msmsSearch = (MsmsSearch) searchSetting;
+            
+            prop = new PropertySupport.Reflection<>(msmsSearch, String.class, "getFragmentChargeStates", null);
+            prop.setName("Fragment Charge States");
+            propGroup.put(prop);
+            
+            prop = new PropertySupport.Reflection<>(msmsSearch, Double.class, "getFragmentMassErrorTolerance", null);
+            prop.setName("Fragment Mass Error Tolerance");
+            propGroup.put(prop);
+            
+            prop = new PropertySupport.Reflection<>(msmsSearch, String.class, "getFragmentMassErrorToleranceUnit", null);
+            prop.setName("Fragment Mass Error Tolerance Unit");
+            propGroup.put(prop);
+            
+        }
                 
         return propGroup;
     }
+    
     
     private static Sheet.Set createInstrumentConfigSheetSet(InstrumentConfig instrumentConfig) throws NoSuchMethodException {
 

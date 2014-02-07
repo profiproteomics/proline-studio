@@ -20,7 +20,7 @@ autostore = false)
 @TopComponent.Description(preferredID = "RExplorerTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
-@TopComponent.Registration(mode = "explorer", openAtStartup = true)
+@TopComponent.Registration(mode = "explorer", openAtStartup = false)
 @ActionID(category = "Window", id = "fr.proline.studio.rsmexplorer.RExplorerTopComponent")
 @ActionReference(path = "Menu/Window" /*
  * , position = 334

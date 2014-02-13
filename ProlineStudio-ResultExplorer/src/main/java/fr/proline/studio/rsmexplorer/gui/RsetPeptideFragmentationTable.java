@@ -129,10 +129,6 @@ public class RsetPeptideFragmentationTable extends LazyTable {
         Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum()
                 : null;
 
-        DataStoreConnectorFactory dsConnectorFactory = DataStoreConnectorFactory.getInstance();
-        if (dsConnectorFactory.isInitialized() == false) {
-            dsConnectorFactory.initialize(DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_dataBox.getProjectId()));
-        }
 
         Map<String, Long> aw_Map = pmORM.getObjectTreeIdByName();
 

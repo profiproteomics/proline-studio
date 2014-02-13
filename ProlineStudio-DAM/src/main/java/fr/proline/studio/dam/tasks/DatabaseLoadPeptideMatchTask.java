@@ -1,10 +1,7 @@
 package fr.proline.studio.dam.tasks;
 
 
-import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideReadablePtmString;
-import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
@@ -483,21 +480,70 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
 
         List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
 
-        Query peptideQuery = entityManagerMSI.createQuery("SELECT pm.id, p FROM PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pm.id IN (:listId) AND pm.peptideId=p.id");
-        peptideQuery.setParameter("listId", sliceOfPeptideMatchIds);
-
-        HashMap<Long, Peptide> peptideMap= new HashMap<>();
         
-        List<Object[]> peptides = peptideQuery.getResultList();
-        Iterator<Object[]> it = peptides.iterator();
-        while (it.hasNext()) {
-            Object[] res = it.next();
-            Long peptideMatchId = (Long) res[0];
-            Peptide peptide = (Peptide) res[1];
-            peptide.getTransientData().setPeptideReadablePtmStringLoaded();
-            m_peptideMatchMap.get(peptideMatchId).setPeptide(peptide);
-            peptideMap.put(peptide.getId(), peptide);
+        HashMap<Long, Peptide> peptideMap = new HashMap<>();
+        if (m_proteinMatch != null) {
+            
+            // if the peptide is fetched for a specific proteinMatch, we look for the SequenceMatch in the same time
+            long proteinMatchId = m_proteinMatch.getId();
+
+            Query peptideQuery = entityManagerMSI.createQuery("SELECT pm.id, p, sm FROM PeptideMatch pm, fr.proline.core.orm.msi.Peptide p, fr.proline.core.orm.msi.SequenceMatch as sm WHERE pm.id IN (:listId) AND pm.peptideId=p.id AND sm.id.proteinMatchId=:proteinMatchId AND sm.id.peptideId=p.id");
+            peptideQuery.setParameter("listId", sliceOfPeptideMatchIds);
+            peptideQuery.setParameter("proteinMatchId", proteinMatchId);
+
+
+
+            List<Object[]> peptides = peptideQuery.getResultList();
+            Iterator<Object[]> it = peptides.iterator();
+            while (it.hasNext()) {
+                Object[] res = it.next();
+                Long peptideMatchId = (Long) res[0];
+                Peptide peptide = (Peptide) res[1];
+                SequenceMatch sm = (SequenceMatch) res[2];
+                peptide.getTransientData().setSequenceMatch(sm);
+                peptide.getTransientData().setPeptideReadablePtmStringLoaded();
+                m_peptideMatchMap.get(peptideMatchId).setPeptide(peptide);
+                peptideMap.put(peptide.getId(), peptide);
+            }
+            
+            EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();
+            try {
+
+                entityManagerPS.getTransaction().begin();
+
+                DatabaseLoadPeptidesInstancesTask.fetchPtmData(entityManagerPS, peptideMap);
+
+                entityManagerPS.getTransaction().commit();
+            } catch (Exception e) {
+                m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
+                entityManagerPS.getTransaction().rollback();
+            } finally {
+                entityManagerPS.close();
+            }
+            
+            
+        } else {
+
+            Query peptideQuery = entityManagerMSI.createQuery("SELECT pm.id, p FROM PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pm.id IN (:listId) AND pm.peptideId=p.id");
+            peptideQuery.setParameter("listId", sliceOfPeptideMatchIds);
+
+            
+
+            List<Object[]> peptides = peptideQuery.getResultList();
+            Iterator<Object[]> it = peptides.iterator();
+            while (it.hasNext()) {
+                Object[] res = it.next();
+                Long peptideMatchId = (Long) res[0];
+                Peptide peptide = (Peptide) res[1];
+                peptide.getTransientData().setPeptideReadablePtmStringLoaded();
+                m_peptideMatchMap.get(peptideMatchId).setPeptide(peptide);
+                peptideMap.put(peptide.getId(), peptide);
+            }
         }
+        
+        
+  
         
         // Retrieve PeptideReadablePtmString
         Long rsetId = (m_rset != null) ? m_rset.getId() : m_rsm.getResultSet().getId();
@@ -506,7 +552,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         ptmStingQuery.setParameter("rsetId", rsetId);
 
         List<Object[]> ptmStrings = ptmStingQuery.getResultList();
-        it = ptmStrings.iterator();
+         Iterator<Object[]> it = ptmStrings.iterator();
         while (it.hasNext()) {
             Object[] res = it.next();
             Long peptideId = (Long) res[0];

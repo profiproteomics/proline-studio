@@ -206,21 +206,10 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             entityManagerMSI.close();
         }
         
-        EntityManager entityManagerPS;
-        try {
-        
-            DataStoreConnectorFactory.getInstance();
-            DataStoreConnectorFactory.getInstance().getPsDbConnector();
-            DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory();
-            
-            entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
-        } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName()+" failed", e);
-            m_taskError = new TaskError(e);
-            return false;
-        }
+ 
         
         if (!peptideMap.isEmpty()) {
+            EntityManager entityManagerPS = DataStoreConnectorFactory.getInstance().getPsDbConnector().getEntityManagerFactory().createEntityManager();  
             try {
 
                 entityManagerPS.getTransaction().begin();
@@ -348,7 +337,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
     }
     
-    private void fetchPtmData(EntityManager entityManagerPS, HashMap<Long, Peptide> peptideMap) {
+    protected static void fetchPtmData(EntityManager entityManagerPS, HashMap<Long, Peptide> peptideMap) {
 
         TypedQuery<PeptidePtm> ptmQuery = entityManagerPS.createQuery("SELECT ptm FROM fr.proline.core.orm.ps.PeptidePtm ptm WHERE ptm.peptide.id IN (:peptideIds)", PeptidePtm.class);
         ptmQuery.setParameter("peptideIds", peptideMap.keySet());

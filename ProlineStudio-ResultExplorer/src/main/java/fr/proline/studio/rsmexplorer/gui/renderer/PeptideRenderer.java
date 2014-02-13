@@ -45,15 +45,6 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
                 m_displaySB.append("<HTML>");
             }
 
-            // Add Before residue of the peptide
-            Character residueBefore = sequenceMatch.getResidueBefore();
-            if (residueBefore != null) {
-                m_displaySB.append(Character.toUpperCase(residueBefore));
-                m_displaySB.append('-');
-                
-                m_exportSB.append(Character.toUpperCase(residueBefore));
-                m_exportSB.append('-');
-            }
 
 
             String sequence = peptide.getSequence();
@@ -102,14 +93,6 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
 
             }
 
-            // Add After residue of the peptide
-            Character residueAfter = sequenceMatch.getResidueAfter();
-            if (residueAfter != null) {
-                m_displaySB.append('-');
-                m_displaySB.append(Character.toUpperCase(residueAfter));
-                m_exportSB.append('-');
-                m_exportSB.append(Character.toUpperCase(residueAfter));
-            }
 
             if (ptmMap != null) {
                 m_displaySB.append("</HTML>");

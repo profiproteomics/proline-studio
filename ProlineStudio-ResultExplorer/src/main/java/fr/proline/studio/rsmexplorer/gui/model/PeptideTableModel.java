@@ -17,21 +17,23 @@ import java.util.ArrayList;
  */
 public class PeptideTableModel extends FilterTableModel {
 
-    public static final int COLTYPE_PEPTIDE_NAME = 0;
-    public static final int COLTYPE_PEPTIDE_SCORE = 1;
-    public static final int COLTYPE_PROTEIN_SETS_MATCHES = 2;
-    public static final int COLTYPE_PEPTIDE_START = 3;
-    public static final int COLTYPE_PEPTIDE_STOP = 4;
-    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 5;
-    public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 6;
-    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 7;
-    public static final int COLTYPE_PEPTIDE_CHARGE = 8;
-    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 9;
-    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 10;
-    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 11;
-    public static final int COLTYPE_PEPTIDE_PTM = 12;
-    private static final String[] m_columnNames = {"Peptide", "Score", "Protein S. Matches", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
-    private static final String[] m_columnTooltips = {"Peptide", "Score", "Protein Set Matches", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "Delta Mass to Charge Ratio", "Charge", "Missed Clivage", "Retention Time", "Ion Parent Intensity", "Post Translational Modifications"};
+    public static final int COLTYPE_PEPTIDE_PREVIOUS_AA = 0;
+    public static final int COLTYPE_PEPTIDE_NAME = 1;
+    public static final int COLTYPE_PEPTIDE_NEXT_AA = 2;
+    public static final int COLTYPE_PEPTIDE_SCORE = 3;
+    public static final int COLTYPE_PROTEIN_SETS_MATCHES = 4;
+    public static final int COLTYPE_PEPTIDE_START = 5;
+    public static final int COLTYPE_PEPTIDE_STOP = 6;
+    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 7;
+    public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 8;
+    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 9;
+    public static final int COLTYPE_PEPTIDE_CHARGE = 10;
+    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 11;
+    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 12;
+    public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 13;
+    public static final int COLTYPE_PEPTIDE_PTM = 14;
+    private static final String[] m_columnNames = {"Prev. AA", "Peptide", "Next AA", "Score", "Protein S. Matches", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
+    private static final String[] m_columnTooltips = {"Previous Amino Acid","Peptide", "Next Amino Acid", "Score", "Protein Set Matches", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "Delta Mass to Charge Ratio", "Charge", "Missed Clivage", "Retention Time", "Ion Parent Intensity", "Post Translational Modifications"};
     
     
     private PeptideInstance[] m_peptideInstances = null;
@@ -66,8 +68,12 @@ public class PeptideTableModel extends FilterTableModel {
     @Override
     public Class getColumnClass(int col) {
         switch (col){
+            case COLTYPE_PEPTIDE_PREVIOUS_AA:
+                return String.class;
             case COLTYPE_PEPTIDE_NAME:
                 return Peptide.class;
+            case COLTYPE_PEPTIDE_NEXT_AA:
+                return String.class;
             case COLTYPE_PROTEIN_SETS_MATCHES:
             case COLTYPE_PEPTIDE_PTM:
                 return String.class;
@@ -113,6 +119,26 @@ public class PeptideTableModel extends FilterTableModel {
         PeptideInstance peptideInstance = m_peptideInstances[rowFiltered];
 
         switch (col) {
+            case COLTYPE_PEPTIDE_PREVIOUS_AA: {
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    return ""; // should never happen   
+                }
+                Peptide p = peptideMatch.getPeptide();
+                if (p == null) {
+                    return "";
+                }
+                SequenceMatch sequenceMatch = p.getTransientData().getSequenceMatch();
+                if (sequenceMatch == null) {
+                    return "";
+                }
+                Character residueBefore = sequenceMatch.getResidueBefore();
+                if (residueBefore != null) {
+                    return Character.toUpperCase(residueBefore);
+                } else {
+                    return "";
+                }
+            }
             case COLTYPE_PEPTIDE_NAME: {
                 // Retrieve typical Peptide Match
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
@@ -120,6 +146,26 @@ public class PeptideTableModel extends FilterTableModel {
                     return null;
                 }
                 return peptideMatch.getPeptide();
+            }
+            case COLTYPE_PEPTIDE_NEXT_AA: {
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    return ""; // should never happen   
+                }
+                Peptide p = peptideMatch.getPeptide();
+                if (p == null) {
+                    return "";
+                }
+                SequenceMatch sequenceMatch = p.getTransientData().getSequenceMatch();
+                if (sequenceMatch == null) {
+                    return "";
+                }
+                Character residueAfter= sequenceMatch.getResidueAfter();
+                if (residueAfter != null) {
+                    return Character.toUpperCase(residueAfter);
+                } else {
+                    return "";
+                }
             }
             case COLTYPE_PEPTIDE_SCORE: {
                 // Retrieve typical Peptide Match
@@ -276,7 +322,9 @@ public class PeptideTableModel extends FilterTableModel {
         if (m_filters == null) {
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
+            m_filters[COLTYPE_PEPTIDE_PREVIOUS_AA] = new StringFilter(getColumnName(COLTYPE_PEPTIDE_PREVIOUS_AA));
             m_filters[COLTYPE_PEPTIDE_NAME] = new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME));
+            m_filters[COLTYPE_PEPTIDE_NEXT_AA] = new StringFilter(getColumnName(COLTYPE_PEPTIDE_NEXT_AA));
             m_filters[COLTYPE_PEPTIDE_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE));
 
             m_filters[COLTYPE_PROTEIN_SETS_MATCHES] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SETS_MATCHES));
@@ -308,6 +356,10 @@ public class PeptideTableModel extends FilterTableModel {
         }
 
         switch (col) {
+            case COLTYPE_PEPTIDE_PREVIOUS_AA:
+            case COLTYPE_PEPTIDE_NEXT_AA: {
+                return ((StringFilter) filter).filter(((Character) data).toString());
+            }
             case COLTYPE_PEPTIDE_NAME: {
                 return ((StringFilter) filter).filter(((Peptide) data).getSequence());
             }

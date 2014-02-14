@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -285,13 +286,30 @@ public class PeptideTableModel extends FilterTableModel {
             }
             case COLTYPE_PEPTIDE_PTM: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
-                if (peptideMatch != null) {
-                    Peptide p = peptideMatch.getPeptide();
-                    if (p != null) {
-                        return p.getPtmString();
-                    }
+                if (peptideMatch == null) {
+                     return "";
                 }
-                return "";
+                
+                Peptide p = peptideMatch.getPeptide();
+                if (p == null) {
+                    return "";
+                }
+                
+                boolean ptmStringLoadeed = p.getTransientData().isPeptideReadablePtmStringLoaded();
+                if (!ptmStringLoadeed) {
+                    return "";
+                }
+                
+                
+                String ptm = "";
+                PeptideReadablePtmString ptmString = p.getTransientData().getPeptideReadablePtmString();
+                if (ptmString != null) {
+                    ptm = ptmString.getReadablePtmString();
+                }
+                
+                return ptm;
+
+               
             }
         }
         return null; // should never happen

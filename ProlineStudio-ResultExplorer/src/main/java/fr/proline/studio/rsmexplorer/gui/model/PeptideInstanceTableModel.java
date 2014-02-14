@@ -19,7 +19,7 @@ import java.util.HashSet;
  * Table Model for PeptideInstance of a Rsm
  * @author JM235353
  */
-public class PeptideInstanceTableModel extends LazyTableModel {
+public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : should be removed, model seems not to use lazy model in fact
 
     public static final int COLTYPE_PEPTIDE_NAME = 0;
     public static final int COLTYPE_PEPTIDE_SCORE = 1;

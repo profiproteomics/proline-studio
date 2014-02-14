@@ -8,6 +8,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.utils.DecoratedMarkerTable;
+import fr.proline.studio.utils.DecoratedTableModel;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Component;
@@ -202,7 +203,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         }
     }
 
-    private static class LogTableModel extends AbstractTableModel {
+    private static class LogTableModel extends DecoratedTableModel {
 
         public static final int COLTYPE_STEP = 0;
         public static final int COLTYPE_TASKINFO_ID = 1;
@@ -310,6 +311,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
             }
             return null; // should not happen
+        }
+
+        @Override
+        public String getToolTipForHeader(int col) {
+            return null; // no tooltip
         }
     }
 

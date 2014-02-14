@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
+import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
@@ -34,8 +35,8 @@ public class PeptideInstanceTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 8; 
     //public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
     public static final int COLTYPE_PEPTIDE_PTM = 9;
-    private static final String[] m_columnNames = {"Peptide", "Score", "Mass Calc.", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
-    private static final String[] m_columnTooltips = {"Peptide", "Score", "Mass Calculated", "Experimental Mass to Charge Ratio", "Delta Mass to Charge Ratio", "Charge", "Missed Clivage", "Protein Set Count", "Retention Time", "Post Translational Modifications"};
+    private static final String[] m_columnNames = {"Peptide", "Score", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
+    private static final String[] m_columnTooltips = {"Peptide", "Score", "Calculated Mass", "Experimental Mass to Charge Ratio", "Delta Mass to Charge Ratio", "Charge", "Missed Clivage", "Protein Set Count", "Retention Time", "Post Translational Modifications"};
     private PeptideInstance[] m_peptideInstances = null;
 
     private ArrayList<Integer> m_filteredIds = null;
@@ -254,15 +255,25 @@ public class PeptideInstanceTableModel extends LazyTableModel {
                 if (peptide == null) {
                     givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
-                } else {
-                    String ptmString = peptide.getPtmString();
-                    if (ptmString != null) {
-                        lazyData.setData(ptmString);
-                    } else {
-                        lazyData.setData("");
-                    }
-                    
+                    return lazyData;
                 }
+                
+                boolean ptmStringLoadeed = peptide.getTransientData().isPeptideReadablePtmStringLoaded();
+                if (!ptmStringLoadeed) {
+                    givePriorityTo(m_taskId, row, col);
+                    lazyData.setData(null);
+                    return lazyData;
+                }
+                
+                
+                String ptm = "";
+                PeptideReadablePtmString ptmString = peptide.getTransientData().getPeptideReadablePtmString();
+                if (ptmString != null) {
+                    ptm = ptmString.getReadablePtmString();
+                }
+                
+                lazyData.setData(ptm);
+
                 return lazyData;
             }
         }

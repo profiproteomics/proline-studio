@@ -175,7 +175,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             
             // WART to have 4 digits for deltaMoz
-            setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))) {
+            /*setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))) {
 
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -193,7 +193,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
                     }
 
 
-            });
+            });*/
             
             
         } 

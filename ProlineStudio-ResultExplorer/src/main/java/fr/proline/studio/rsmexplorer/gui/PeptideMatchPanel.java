@@ -157,8 +157,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
      public ValuesForStatsAbstract getValuesForStats() {
          return new ValuesForStatsAbstract() {
 
-            private final String[] m_valuesType = {"Delta MoZ" /*"Ppm"*/, "Calc. Mass", "Exp. MoZ", "Charge", "Score" };
-            private final int[] m_valuesCol = { PeptideMatchTableModel.COLTYPE_PEPTIDE_DELTA_MOZ, PeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS, PeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, PeptideMatchTableModel.COLTYPE_PEPTIDE_CHARGE, PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE };
+            private final String[] m_valuesType = {/*"Delta MoZ"*/ "Ppm", "Calc. Mass", "Exp. MoZ", "Charge", "Score" };
+            private final int[] m_valuesCol = { PeptideMatchTableModel.COLTYPE_PEPTIDE_PPM, PeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS, PeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, PeptideMatchTableModel.COLTYPE_PEPTIDE_CHARGE, PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE };
 
             private int m_valueCol = m_valuesCol[0];
             
@@ -542,7 +542,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class))  );
             
             // WART to have 4 digits for deltaMoz
-            setDefaultRenderer(LazyData.class, new LazyTableCellRenderer() {
+            /*setDefaultRenderer(LazyData.class, new LazyTableCellRenderer() {
 
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -568,12 +568,12 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
 
                 }
-            });
+            });*/
 
             displayColumnAsPercentage(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE);
 
         }
-        private FloatRenderer m_deltaMozRenderer = null;
+        //private FloatRenderer m_deltaMozRenderer = null;
 
 
 

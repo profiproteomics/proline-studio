@@ -296,7 +296,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class)));
 
             // WART to have 4 digits for deltaMoz
-            setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))) {
+            /*setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))) {
 
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -314,12 +314,12 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
                     }
 
 
-            });
+            });*/
             
             displayColumnAsPercentage(PeptideInstanceTableModel.COLTYPE_PEPTIDE_SCORE);
 
         }
-        private FloatRenderer m_deltaMozRenderer = null;
+        //private FloatRenderer m_deltaMozRenderer = null;
 
         /**
          * Called whenever the value of the selection changes.

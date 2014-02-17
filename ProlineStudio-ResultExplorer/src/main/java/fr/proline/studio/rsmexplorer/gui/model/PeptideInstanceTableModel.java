@@ -26,7 +26,8 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
     //public static final int COLTYPE_PEPTIDE_MSQUERY = 2;
     public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 2;
     public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 3;
-    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 4;
+    //public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 4;
+    public static final int COLTYPE_PEPTIDE_PPM = 4;
     public static final int COLTYPE_PEPTIDE_CHARGE = 5;
     
     
@@ -35,8 +36,8 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
     public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 8; 
     //public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
     public static final int COLTYPE_PEPTIDE_PTM = 9;
-    private static final String[] m_columnNames = {"Peptide", "Score", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
-    private static final String[] m_columnTooltips = {"Peptide", "Score", "Calculated Mass", "Experimental Mass to Charge Ratio", "Delta Mass to Charge Ratio", "Charge", "Missed Clivage", "Protein Set Count", "Retention Time", "Post Translational Modifications"};
+    private static final String[] m_columnNames = {"Peptide", "Score", "Calc. Mass", "Exp. MoZ", "Ppm" /*"Delta MoZ"*/, "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
+    private static final String[] m_columnTooltips = {"Peptide", "Score", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" /*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Protein Set Count", "Retention Time", "Post Translational Modifications"};
     private PeptideInstance[] m_peptideInstances = null;
 
     private ArrayList<Integer> m_filteredIds = null;
@@ -87,7 +88,8 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
                 return LazyData.class;
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
-            case COLTYPE_PEPTIDE_DELTA_MOZ:
+            //case COLTYPE_PEPTIDE_DELTA_MOZ:
+            case COLTYPE_PEPTIDE_PPM:
             case COLTYPE_PEPTIDE_RETENTION_TIME:
                 return Float.class;
             case COLTYPE_PEPTIDE_CHARGE:
@@ -188,8 +190,19 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
                 return Float.valueOf((float) peptideMatch.getExperimentalMoz());
             }
-            case COLTYPE_PEPTIDE_DELTA_MOZ: {
+            /*case COLTYPE_PEPTIDE_DELTA_MOZ: {
                 return Float.valueOf((float) peptideMatch.getDeltaMoz());
+            }*/
+            case COLTYPE_PEPTIDE_PPM: {
+
+                double deltaMoz = (double) peptideMatch.getDeltaMoz();
+                double calculatedMass = peptideMatch.getPeptide().getCalculatedMass() ;
+                double charge = (double) peptideMatch.getCharge(); 
+                final double CSTE = 1.007825;
+                final double EXP_CSTE = StrictMath.pow(10, 6);
+                float ppm = (float) ((deltaMoz*EXP_CSTE) / ((calculatedMass + (charge*CSTE))/charge));
+                
+                return Float.valueOf(ppm);
             }
             case COLTYPE_PEPTIDE_CALCULATED_MASS: {
                 LazyData lazyData = getLazyData(row,col);
@@ -447,7 +460,8 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: 
-            case COLTYPE_PEPTIDE_DELTA_MOZ:
+            /*case COLTYPE_PEPTIDE_DELTA_MOZ:*/
+            case COLTYPE_PEPTIDE_PPM:
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
                 return ((DoubleFilter) filter).filter((Float) data);
             }
@@ -473,7 +487,9 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
             m_filters[COLTYPE_PEPTIDE_PTM] = new StringFilter(getColumnName(COLTYPE_PEPTIDE_PTM));
             
             m_filters[COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ));
-            m_filters[COLTYPE_PEPTIDE_DELTA_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_DELTA_MOZ));
+            //m_filters[COLTYPE_PEPTIDE_DELTA_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_DELTA_MOZ));
+            m_filters[COLTYPE_PEPTIDE_PPM] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_PPM));
+            
             m_filters[COLTYPE_PEPTIDE_RETENTION_TIME] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_RETENTION_TIME));
             
             m_filters[COLTYPE_PEPTIDE_CHARGE] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_CHARGE));

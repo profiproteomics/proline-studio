@@ -27,14 +27,15 @@ public class PeptideTableModel extends FilterTableModel {
     public static final int COLTYPE_PEPTIDE_STOP = 6;
     public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 7;
     public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 8;
-    public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 9;
+    //public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 9;
+    public static final int COLTYPE_PEPTIDE_PPM = 9;
     public static final int COLTYPE_PEPTIDE_CHARGE = 10;
     public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 11;
     public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 12;
     public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 13;
     public static final int COLTYPE_PEPTIDE_PTM = 14;
-    private static final String[] m_columnNames = {"Prev. AA", "Peptide", "Next AA", "Score", "Protein S. Matches", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Delta MoZ", "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
-    private static final String[] m_columnTooltips = {"Previous Amino Acid","Peptide", "Next Amino Acid", "Score", "Protein Set Matches", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "Delta Mass to Charge Ratio", "Charge", "Missed Clivage", "Retention Time", "Ion Parent Intensity", "Post Translational Modifications"};
+    private static final String[] m_columnNames = {"Prev. AA", "Peptide", "Next AA", "Score", "Protein S. Matches", "Start", "Stop", "Calc. Mass", "Exp. MoZ", "Ppm"/*"Delta MoZ"*/, "Charge", "Missed Cl.", "RT", "Ion Parent Int.", "PTM"};
+    private static final String[] m_columnTooltips = {"Previous Amino Acid","Peptide", "Next Amino Acid", "Score", "Protein Set Matches", "Start", "Stop", "Calculated Mass", "Experimental Mass to Charge Ration", "parts-per-million"/*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Retention Time", "Ion Parent Intensity", "Post Translational Modifications"};
     
     
     private PeptideInstance[] m_peptideInstances = null;
@@ -81,7 +82,7 @@ public class PeptideTableModel extends FilterTableModel {
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_RETENTION_TIME:
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
-            case COLTYPE_PEPTIDE_DELTA_MOZ:
+            case COLTYPE_PEPTIDE_PPM: //COLTYPE_PEPTIDE_DELTA_MOZ:
                 return Float.class;
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
@@ -219,12 +220,28 @@ public class PeptideTableModel extends FilterTableModel {
                 }
                 return Double.valueOf(peptideMatch.getExperimentalMoz());
             }
-            case COLTYPE_PEPTIDE_DELTA_MOZ: {
+            /*case COLTYPE_PEPTIDE_DELTA_MOZ: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
                 if (peptideMatch == null) {
                     return null; // should never happen   
                 }
                 return Float.valueOf(peptideMatch.getDeltaMoz());
+            }*/
+            case COLTYPE_PEPTIDE_PPM: {
+                DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
+                if (peptideMatch == null) {
+                    return null; // should never happen   
+                }
+                
+                double deltaMoz = (double) peptideMatch.getDeltaMoz();
+                double calculatedMass = peptideMatch.getPeptide().getCalculatedMass();
+                double charge = (double) peptideMatch.getCharge();
+                final double CSTE = 1.007825;
+                final double EXP_CSTE = StrictMath.pow(10, 6);
+                float ppm = (float) ((deltaMoz * EXP_CSTE) / ((calculatedMass + (charge * CSTE)) / charge));
+
+                return Float.valueOf(ppm);
+
             }
             case COLTYPE_PEPTIDE_START: {
                 DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
@@ -350,7 +367,8 @@ public class PeptideTableModel extends FilterTableModel {
             m_filters[COLTYPE_PEPTIDE_STOP] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_STOP));  
             m_filters[COLTYPE_PEPTIDE_CALCULATED_MASS] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_CALCULATED_MASS));
             m_filters[COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ));
-            m_filters[COLTYPE_PEPTIDE_DELTA_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_DELTA_MOZ));
+            //m_filters[COLTYPE_PEPTIDE_DELTA_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_DELTA_MOZ)); COLTYPE_PEPTIDE_PPM
+            m_filters[COLTYPE_PEPTIDE_PPM] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_PPM)); 
             m_filters[COLTYPE_PEPTIDE_CHARGE] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_CHARGE));
             m_filters[COLTYPE_PEPTIDE_MISSED_CLIVAGE] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_MISSED_CLIVAGE));
             m_filters[COLTYPE_PEPTIDE_RETENTION_TIME] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_RETENTION_TIME));
@@ -388,7 +406,8 @@ public class PeptideTableModel extends FilterTableModel {
             case COLTYPE_PEPTIDE_SCORE: 
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
-            case COLTYPE_PEPTIDE_DELTA_MOZ: 
+            //case COLTYPE_PEPTIDE_DELTA_MOZ: 
+            case COLTYPE_PEPTIDE_PPM:
             case COLTYPE_PEPTIDE_RETENTION_TIME:
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
                 return ((DoubleFilter) filter).filter(((Number) data).doubleValue());

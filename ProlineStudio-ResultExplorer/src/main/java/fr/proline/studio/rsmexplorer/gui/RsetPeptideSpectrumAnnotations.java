@@ -642,7 +642,6 @@ public class RsetPeptideSpectrumAnnotations {
 		aaHashMap.put('W', (double) 186.07931);
 		aaHashMap.put('Y', (double) 163.06333);
 
-		// float deltaMoZ = 0;
 		return aaHashMap.get(aa);
 
 	}

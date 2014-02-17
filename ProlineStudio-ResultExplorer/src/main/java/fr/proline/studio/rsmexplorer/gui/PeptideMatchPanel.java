@@ -160,7 +160,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             private final String[] m_valuesType = {/*"Delta MoZ"*/ "Ppm", "Calc. Mass", "Exp. MoZ", "Charge", "Score" };
             private final int[] m_valuesCol = { PeptideMatchTableModel.COLTYPE_PEPTIDE_PPM, PeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS, PeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, PeptideMatchTableModel.COLTYPE_PEPTIDE_CHARGE, PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE };
 
-            private int m_valueCol = m_valuesCol[0];
+            private int m_valueCol = ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).convertColToColUsed(m_valuesCol[0]);
             
             private String m_valueType = m_valuesType[0];
             
@@ -191,7 +191,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                 m_valueType = valueType;
                 for (int i=0;i<m_valuesType.length;i++) {
                     if (m_valuesType[i].compareTo(valueType) == 0) {
-                        m_valueCol = m_valuesCol[i];
+                        m_valueCol = ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).convertColToColUsed(m_valuesCol[i]);
                     }
                 }
             }

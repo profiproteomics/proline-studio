@@ -80,6 +80,15 @@ public class PeptideMatchTableModel extends LazyTableModel {
         m_hasPrevNextAA = hasPrevNextAA;
     }
     
+    public int convertColToColUsed(int col) {
+        for (int i=0; i<m_colUsed.length; i++) {
+            if (col == m_colUsed[i]) {
+                return i;
+            }
+        }
+        return -1; // should not happen
+    }
+    
     
     public DPeptideMatch getPeptideMatch(int row) {
         
@@ -156,6 +165,8 @@ public class PeptideMatchTableModel extends LazyTableModel {
     @Override
     public Object getValueAt(int row, int col) {
         
+        LazyData lazyData = getLazyData(row,col);
+        
         col =  m_colUsed[col];
         
         int rowFiltered = row;
@@ -167,7 +178,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
         // Retrieve Protein Set
         DPeptideMatch peptideMatch = m_peptideMatches[rowFiltered];
 
-        LazyData lazyData = getLazyData(row,col);
+        
         
         if (peptideMatch == null) {
             givePriorityTo(m_taskId, row, COLTYPE_PEPTIDE_MISSED_CLIVAGE); // no data att all : need to read PeptideMatch like for the COLTYPE_PEPTIDE_MISSED_CLIVAGE column
@@ -289,7 +300,11 @@ public class PeptideMatchTableModel extends LazyTableModel {
                 final double EXP_CSTE = StrictMath.pow(10, 6);
                 float ppm = (float) ((deltaMoz*EXP_CSTE) / ((calculatedMass + (charge*CSTE))/charge));
                 
-                //double deltaMoz
+                if ((calculatedMass >= -1e-10) && (calculatedMass <= 1e-10)) {
+                    //calculatedMass == 0; // it was a bug, does no longer exist, but 0 values can exist in database.
+                    ppm = 0;
+                }
+
                 lazyData.setData(Float.valueOf(ppm));
                 return  lazyData;
             }

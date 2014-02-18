@@ -92,6 +92,7 @@ public class ValidateAction extends AbstractRSMAction {
             final HashMap<String, String> parserArguments = dialog.getArguments();
             final String regex = dialog.getTypicalProteinRegex();
             final boolean regexOnAccession = dialog.isTYpicalProteinOnAccession();
+            final String scoringType = dialog.getScoringType();
 
             RSMTree tree = RSMTree.getTree();
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -119,7 +120,7 @@ public class ValidateAction extends AbstractRSMAction {
                         @Override
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                            askValidation(dataSetNode, parserArguments, regex, regexOnAccession);
+                            askValidation(dataSetNode, parserArguments, regex, regexOnAccession, scoringType);
                         }
                     };
 
@@ -128,7 +129,7 @@ public class ValidateAction extends AbstractRSMAction {
                     AccessDatabaseThread.getAccessDatabaseThread().addTask(taskRemoveValidation);
                 } else {
                     // there is no result summary, we start validation at once
-                    askValidation(dataSetNode, parserArguments, regex, regexOnAccession);
+                    askValidation(dataSetNode, parserArguments, regex, regexOnAccession, scoringType);
                 }
 
 
@@ -139,7 +140,7 @@ public class ValidateAction extends AbstractRSMAction {
         }
     }
 
-    private void askValidation(final RSMDataSetNode dataSetNode, HashMap<String, String> parserArguments, final String regex, final boolean regexOnAccession) {
+    private void askValidation(final RSMDataSetNode dataSetNode, HashMap<String, String> parserArguments, final String regex, final boolean regexOnAccession, final String scoringType) {
 
         final DDataset d = dataSetNode.getDataset();
 
@@ -173,7 +174,7 @@ public class ValidateAction extends AbstractRSMAction {
         };
 
 
-        ValidationTask task = new ValidationTask(callback, dataSetNode.getDataset(), "", parserArguments, _resultSummaryId);
+        ValidationTask task = new ValidationTask(callback, dataSetNode.getDataset(), "", parserArguments, _resultSummaryId, scoringType);
         AccessServiceThread.getAccessServiceThread().addTask(task);
     }
 

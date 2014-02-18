@@ -19,16 +19,18 @@ import java.util.Map;
 public class ValidationTask extends AbstractServiceTask {
 
     private DDataset m_dataset = null;
-    String m_description;
-    HashMap<String, String> m_argumentsMap;
-    Integer[] m_resultSummaryId = null;
+    private String m_description;
+    private HashMap<String, String> m_argumentsMap;
+    private Integer[] m_resultSummaryId = null;
+    private String m_scoringType = null;
     
-    public ValidationTask(AbstractServiceCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId) {
+    public ValidationTask(AbstractServiceCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, String scoringType) {
         super(callback, false /*asynchronous*/, new TaskInfo("Validation of Search Result "+dataset.getName(), true, TASK_LIST_INFO));
         m_dataset = dataset;
         m_description = description;
         m_argumentsMap = argumentsMap;
         m_resultSummaryId = resultSummaryId;
+        m_scoringType = scoringType;
     }
     
     @Override
@@ -101,6 +103,7 @@ public class ValidationTask extends AbstractServiceTask {
                 params.put("use_td_competition", Boolean.parseBoolean(m_argumentsMap.get("use_td_competition")) );
             }
                 
+            params.put("pep_set_score_type", m_scoringType);
                 
             // Protein Pre-Filters
             ArrayList proteinFilters = new ArrayList();

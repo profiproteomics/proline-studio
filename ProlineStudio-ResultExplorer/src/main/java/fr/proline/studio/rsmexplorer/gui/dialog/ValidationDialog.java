@@ -33,6 +33,9 @@ public class ValidationDialog extends DefaultDialog {
     private final static String[] FDR_ON_VALUES = {null, "Score", "e-Value", "Identity p-Value", "Homology p-Value"};
     private final static String[] FDR_ON_VALUES_ASSOCIATED_KEYS = {null, "SCORE", "MASCOT_EVALUE", "SCORE_IT_P-VALUE", "SCORE_HT_P-VALUE"};
     
+    private final static  String[] SCORING_TYPE_OPTIONS = { "Standard", "Mascot Modified Mudpit" };
+    private final static  String[] SCORING_TYPE_VALUES = { "mascot:standard score", "mascot:modified mudpit score" };
+    
     private ParameterList m_parameterList;
     
     private AbstractParameter[] m_psmPrefilterParameters;
@@ -64,6 +67,8 @@ public class ValidationDialog extends DefaultDialog {
     private JCheckBox m_typicalProteinMatchCheckBox;
     private JTextField m_regexTextField = null;
     private JComboBox m_regexTargetCombobox = null;
+    
+    private JComboBox m_proteinScoringTypeCbx = null;
     
     public enum DecoyStatus {
         WAITING,
@@ -98,6 +103,8 @@ public class ValidationDialog extends DefaultDialog {
 
         initPsmPrefilterPanel();
         initProteinPrefilterPanel();
+        
+        restoreScoringTypeParameter();
         
         restoreTypicalProteinParameters();
         
@@ -423,6 +430,9 @@ public class ValidationDialog extends DefaultDialog {
         c.gridy++;
         proteinSetFilterPanel.add(createProteinFDRFilterPanel(), c);
         
+        c.gridy++;
+        proteinSetFilterPanel.add(createScoringTypePanel(), c);
+        
         return proteinSetFilterPanel;
     }
 
@@ -535,6 +545,35 @@ public class ValidationDialog extends DefaultDialog {
 
 
         return fdrPanel;
+    }
+    
+    private JPanel createScoringTypePanel() {
+        JPanel scoringTypePanel = new JPanel(new GridBagLayout());
+        //scoringTypePanel.setBorder(BorderFactory.createTitledBorder(" Scoring "));
+
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+
+        JLabel proteinScoringTypeLabel = new JLabel("Scoring Type: ");
+        m_proteinScoringTypeCbx = new JComboBox(SCORING_TYPE_OPTIONS);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        scoringTypePanel.add(proteinScoringTypeLabel, c);
+
+        c.gridx++;
+        scoringTypePanel.add(m_proteinScoringTypeCbx, c);
+
+        c.gridx++;
+        c.weightx = 1.0;
+        scoringTypePanel.add(Box.createHorizontalBox(), c);
+
+
+        return scoringTypePanel;
     }
     
     private JPanel createProteinPreFilterPanel() {
@@ -659,6 +698,15 @@ public class ValidationDialog extends DefaultDialog {
 
 
         repack();
+    }
+    
+    
+    private void restoreScoringTypeParameter() {
+        Preferences preferences = NbPreferences.root();
+        
+        String scoringType = preferences.get("ValidationScoringType", SCORING_TYPE_OPTIONS[0]);
+        m_proteinScoringTypeCbx.setSelectedItem(scoringType);
+        
     }
     
     private void restoreTypicalProteinParameters() {
@@ -797,6 +845,10 @@ public class ValidationDialog extends DefaultDialog {
         return (m_regexTargetCombobox.getSelectedIndex() == 0);
     }
     
+    public String getScoringType() {
+        return SCORING_TYPE_VALUES[m_proteinScoringTypeCbx.getSelectedIndex()];
+    }
+    
     @Override
     protected boolean okCalled() {
 
@@ -838,14 +890,17 @@ public class ValidationDialog extends DefaultDialog {
             return false;
         }
 
-        // retrieve values
-        //HashMap<String, String> values = parameterList.getValues();
 
         // Save Parameters        
         m_parameterList.saveParameters();
 
-        // save specific Typical Protein parameters
+        
         Preferences preferences = NbPreferences.root();
+        
+        // save scoring type
+         preferences.put("TypicalProteinRegex", m_proteinScoringTypeCbx.getSelectedItem().toString());
+        
+        // save specific Typical Protein parameters
         preferences.put("TypicalProteinRegex", m_regexTextField.getText().trim());
         preferences.putBoolean("TypicalProteinRegexOnAccession", (m_regexTargetCombobox.getSelectedIndex() == 0));
         preferences.putBoolean("UseTypicalProteinRegex", m_typicalProteinMatchCheckBox.isSelected());

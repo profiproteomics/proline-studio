@@ -27,7 +27,7 @@ public class MarkerBar extends AbstractBar implements MouseListener, MouseMotion
     private static int m_fontAscent = 0;
     private static int m_fontDescent = 0;
     
-    private boolean m_displayLineNumbers = false;
+    private boolean m_displayLineNumbers = true;
     private int m_maxLineNumber = -1;
     
     public MarkerBar(MarkerContainerPanel containerPanel) {

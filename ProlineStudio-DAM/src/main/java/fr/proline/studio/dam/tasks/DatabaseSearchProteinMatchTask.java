@@ -36,7 +36,8 @@ public class DatabaseSearchProteinMatchTask extends AbstractDatabaseTask {
             
             // Search the first ProteinSet which has a Best Protein Match with the searched name
             TypedQuery<Long> searchQuery = entityManagerMSI.createQuery("SELECT pm.id FROM ProteinMatch pm WHERE pm.resultSet.id=:rsetId AND pm.accession LIKE :search ORDER BY pm.score DESC", Long.class);
-            searchQuery.setParameter("search", "%"+m_searchAccession+"%");
+            String searchStringSql = m_searchAccession.replaceAll("\\*", "%").replaceAll("\\?","_");
+            searchQuery.setParameter("search", searchStringSql);
             searchQuery.setParameter("rsetId", m_rset.getId());
             List<Long> proteinMatchIdList = searchQuery.getResultList();
 

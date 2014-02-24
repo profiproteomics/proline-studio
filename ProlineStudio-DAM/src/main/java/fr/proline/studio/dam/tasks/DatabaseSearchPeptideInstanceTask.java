@@ -37,7 +37,8 @@ public class DatabaseSearchPeptideInstanceTask extends AbstractDatabaseTask {
             
             // Search peptideMatches with the searched name
             TypedQuery<Long> searchQuery = entityManagerMSI.createQuery("SELECT pi.id FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pi.resultSummary.id=:rsmId AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND p.sequence LIKE :search ORDER BY pm.score DESC", Long.class);
-            searchQuery.setParameter("search", "%"+m_searchString+"%");
+            String searchStringSql = m_searchString.replaceAll("\\*", "%").replaceAll("\\?","_");
+            searchQuery.setParameter("search", searchStringSql);
             searchQuery.setParameter("rsmId", m_rsm.getId());
             List<Long> peptideInstanceIdList = searchQuery.getResultList();
 

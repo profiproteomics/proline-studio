@@ -22,7 +22,7 @@ public class SearchFloatingPanel extends JPanel {
     private AbstractSearch m_search = null;
     
     private JButton m_searchButton;
-    
+    private JTextField m_searchTextField;
 
     
     public SearchFloatingPanel(AbstractSearch search) {
@@ -52,7 +52,7 @@ public class SearchFloatingPanel extends JPanel {
             }
         });
         
-        final JTextField searchTextField = new JTextField(16);
+        m_searchTextField = new JTextField(16);
         
         m_searchButton = new JButton(IconManager.getIcon(IconManager.IconType.SEARCH));
         m_searchButton.setMargin(new Insets(1, 1, 1, 1));
@@ -61,13 +61,13 @@ public class SearchFloatingPanel extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                final String searchText = searchTextField.getText();
+                final String searchText = m_searchTextField.getText();
                 m_search.doSearch(searchText);
             }
         });
         
         add(closeButton);
-        add(searchTextField);
+        add(m_searchTextField);
         add(m_searchButton);
 
         
@@ -142,6 +142,10 @@ public class SearchFloatingPanel extends JPanel {
         if (m_srcButton != null) {
             m_searchButton.setEnabled(enable);
         }
+    }
+    
+    public void setFocus() {
+        m_searchTextField.requestFocus();
     }
     
     

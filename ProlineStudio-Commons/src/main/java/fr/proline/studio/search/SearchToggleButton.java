@@ -28,6 +28,8 @@ public class SearchToggleButton extends JToggleButton {
                     firstTime = false;
                     searchPanel.setLocation(getX() + getWidth() + 5, getY() + 5);
                 }
+                
+                searchPanel.setFocus();
             }
         });
 

@@ -323,7 +323,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
  
             }
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: {
-                lazyData.setData(Float.valueOf(peptideMatch.getMissedCleavage()));
+                lazyData.setData(Integer.valueOf(peptideMatch.getMissedCleavage()));
                 return lazyData;
             }
             /*case COLTYPE_PEPTIDE_RETENTION_TIME: { //JPM.TODO : can not do it for the moment: Retention Time is on Peptide Instance
@@ -565,7 +565,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
             return true;
         }
         
-        Object data = getValueAt(row, m_colUsed[col]);
+        Object data = getValueAt(row, col);
         if (data == null) {
             return true; // should not happen
         }
@@ -592,9 +592,8 @@ public class PeptideMatchTableModel extends LazyTableModel {
             }  
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
-            case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
-            case COLTYPE_PEPTIDE_MISSED_CLIVAGE: {
-                
+            case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
+                return ((DoubleFilter) filter).filter((Float)data);
             }
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
               if (data instanceof String) {
@@ -602,7 +601,9 @@ public class PeptideMatchTableModel extends LazyTableModel {
               } else {
                   return ((DoubleFilter) filter).filter((Float)data);
               }
-            } case COLTYPE_PEPTIDE_CHARGE: {
+            }
+            case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
+            case COLTYPE_PEPTIDE_CHARGE: {
                 return ((IntegerFilter) filter).filter((Integer)data);
             }
             case COLTYPE_PEPTIDE_MSQUERY: {
@@ -619,6 +620,9 @@ public class PeptideMatchTableModel extends LazyTableModel {
     public void initFilters() {
         
         if (m_filters == null) {
+            
+            // "Charge", "Missed Clivage", /*"RT",*/ "Ion Parent Intensity", "Post Translational Modifications", "Protein Sets"};
+    
             
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
@@ -638,11 +642,12 @@ public class PeptideMatchTableModel extends LazyTableModel {
             
             m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_SCORE
             m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_MSQUERY
+            m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_RANK
             m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_CALCULATED_MASS
             m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ
             m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_DELTA_MOZ  (COLTYPE_PEPTIDE_PPM)
             m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_CHARGE
-            m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_MISSED_CLIVAGE
+            m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_MISSED_CLIVAGE
             m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_ION_PARENT_INTENSITY
             m_filters[colIdx] = new StringFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_PTM
             

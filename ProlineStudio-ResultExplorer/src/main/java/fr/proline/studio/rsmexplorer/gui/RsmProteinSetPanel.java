@@ -273,7 +273,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         
         m_proteinSetTable = new ProteinSetTable();
         m_proteinSetTable.setModel(new ProteinSetTableModel((LazyTable)m_proteinSetTable));
-        
+        // hide the id column
+        m_proteinSetTable.getColumnExt(ProteinSetTableModel.COLTYPE_PROTEIN_SET_ID).setVisible(false);
         
 
         m_markerContainerPanel = new MarkerContainerPanel(m_proteinSetScrollPane, (ProteinSetTable) m_proteinSetTable);
@@ -314,6 +315,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             
             setDefaultRenderer(ProteinSetTableModel.ProteinCount.class, new DefaultRightAlignRenderer(new DefaultTableRenderer()));
+            
+
         }
         
         /** 

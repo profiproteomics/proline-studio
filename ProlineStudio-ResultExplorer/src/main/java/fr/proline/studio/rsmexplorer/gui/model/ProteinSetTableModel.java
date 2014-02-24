@@ -14,14 +14,15 @@ import java.util.HashSet;
  */
 public class ProteinSetTableModel extends LazyTableModel {
 
-    public static final int COLTYPE_PROTEIN_SETS_NAME = 0;
-    public static final int COLTYPE_PROTEIN_SETS_DESCRIPTION = 1;
-    public static final int COLTYPE_PROTEIN_SCORE = 2;
-    public static final int COLTYPE_PROTEINS_COUNT = 3;
-    public static final int COLTYPE_PEPTIDES_COUNT = 4;
-    public static final int COLTYPE_SPECTRAL_COUNT = 5;
-    public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 6;
-    private static final String[] m_columnNames = {"Protein Set", "Description", "Score", "Proteins", "Peptides", "Peptide Match Count", "Specific Peptide Match Count"};
+    public static final int COLTYPE_PROTEIN_SET_ID = 0;
+    public static final int COLTYPE_PROTEIN_SET_NAME = 1;
+    public static final int COLTYPE_PROTEIN_SET_DESCRIPTION = 2;
+    public static final int COLTYPE_PROTEIN_SCORE = 3;
+    public static final int COLTYPE_PROTEINS_COUNT = 4;
+    public static final int COLTYPE_PEPTIDES_COUNT = 5;
+    public static final int COLTYPE_SPECTRAL_COUNT = 6;
+    public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 7;
+    private static final String[] m_columnNames = {"Id", "Protein Set", "Description", "Score", "Proteins", "Peptides", "Peptide Match Count", "Specific Peptide Match Count"};
     
     private DProteinSet[] m_proteinSets = null;
     
@@ -55,17 +56,17 @@ public class ProteinSetTableModel extends LazyTableModel {
 
     @Override
     public Class getColumnClass(int col) {
-        /*if (col == COLTYPE_PROTEIN_SCORE) {
-            return Float.class;
-        }*/
+        if (col == COLTYPE_PROTEIN_SET_ID) {
+            return Long.class;
+        }
         return LazyData.class;
     }
     
     @Override
     public int getSubTaskId(int col) {
         switch (col) {
-            case COLTYPE_PROTEIN_SETS_NAME:
-            case COLTYPE_PROTEIN_SETS_DESCRIPTION:
+            case COLTYPE_PROTEIN_SET_NAME:
+            case COLTYPE_PROTEIN_SET_DESCRIPTION:
                 return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
             case COLTYPE_PROTEIN_SCORE:
             case COLTYPE_PROTEINS_COUNT:
@@ -105,7 +106,10 @@ public class ProteinSetTableModel extends LazyTableModel {
         long rsmId = proteinSet.getResultSummaryId();
 
         switch (col) {
-            case COLTYPE_PROTEIN_SETS_NAME: {
+            case COLTYPE_PROTEIN_SET_ID: {
+                return proteinSet.getId();
+            }
+            case COLTYPE_PROTEIN_SET_NAME: {
 
                 LazyData lazyData = getLazyData(row,col);
                 
@@ -120,7 +124,7 @@ public class ProteinSetTableModel extends LazyTableModel {
                 }
                 return lazyData;
             }
-            case COLTYPE_PROTEIN_SETS_DESCRIPTION: {
+            case COLTYPE_PROTEIN_SET_DESCRIPTION: {
                 LazyData lazyData = getLazyData(row, col);
 
                 // Retrieve typical Protein Match
@@ -386,10 +390,10 @@ public class ProteinSetTableModel extends LazyTableModel {
         }
         
         switch (col) {
-            case COLTYPE_PROTEIN_SETS_NAME: {
+            case COLTYPE_PROTEIN_SET_NAME: {
                 return ((StringFilter) filter).filter((String)data);
             }
-            case COLTYPE_PROTEIN_SETS_DESCRIPTION: {
+            case COLTYPE_PROTEIN_SET_DESCRIPTION: {
                 return ((StringFilter) filter).filter((String)data);
             }
             case COLTYPE_PROTEIN_SCORE: {
@@ -413,8 +417,9 @@ public class ProteinSetTableModel extends LazyTableModel {
         if (m_filters == null) {
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
-            m_filters[COLTYPE_PROTEIN_SETS_NAME] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SETS_NAME));
-            m_filters[COLTYPE_PROTEIN_SETS_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SETS_DESCRIPTION));
+            m_filters[COLTYPE_PROTEIN_SET_ID] = null;
+            m_filters[COLTYPE_PROTEIN_SET_NAME] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_NAME));
+            m_filters[COLTYPE_PROTEIN_SET_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_DESCRIPTION));
             m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
             m_filters[COLTYPE_PROTEINS_COUNT] = null;
             m_filters[COLTYPE_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT));

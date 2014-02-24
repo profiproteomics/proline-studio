@@ -86,6 +86,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
 
         m_peptidesTable = new PeptideTable();
         m_peptidesTable.setModel(new PeptideTableModel());
+        m_peptidesTable.getColumnExt(PeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
         m_peptidesTable.displayColumnAsPercentage(PeptideTableModel.COLTYPE_PEPTIDE_SCORE);
 
 

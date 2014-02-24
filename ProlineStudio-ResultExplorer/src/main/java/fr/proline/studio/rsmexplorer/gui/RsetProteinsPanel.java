@@ -306,7 +306,10 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
         m_proteinTable = new ProteinTable();
         m_proteinTable.setModel(new ProteinsOfPeptideMatchTableModel(m_proteinTable));
-
+        // hide the id column
+        m_proteinTable.getColumnExt(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_ID).setVisible(false);
+        
+        
         TableColumn accColumn = m_proteinTable.getColumnModel().getColumn(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
         URLCellRenderer renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
         accColumn.setCellRenderer(renderer);

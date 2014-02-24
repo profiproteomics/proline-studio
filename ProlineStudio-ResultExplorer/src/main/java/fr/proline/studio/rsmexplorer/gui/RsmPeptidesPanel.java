@@ -194,7 +194,9 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
         m_peptideInstanceTable = new PeptideInstanceTable();
         m_peptideInstanceTable.setModel(new PeptideInstanceTableModel((LazyTable) m_peptideInstanceTable));
-
+        m_peptideInstanceTable.getColumnExt(PeptideInstanceTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
+        
+        
         m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, (PeptideInstanceTable) m_peptideInstanceTable);
 
 

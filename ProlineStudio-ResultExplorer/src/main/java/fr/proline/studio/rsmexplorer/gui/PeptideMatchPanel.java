@@ -378,6 +378,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         m_scrollPane = new JScrollPane();
         m_peptideMatchTable = new PeptideMatchTable();
         m_peptideMatchTable.setModel(new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !m_startingPanel));
+        m_peptideMatchTable.getColumnExt(PeptideMatchTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
         
         m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_peptideMatchTable);
         

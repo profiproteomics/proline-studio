@@ -21,23 +21,24 @@ import java.util.HashSet;
  */
 public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : should be removed, model seems not to use lazy model in fact
 
-    public static final int COLTYPE_PEPTIDE_NAME = 0;
-    public static final int COLTYPE_PEPTIDE_SCORE = 1;
+    public static final int COLTYPE_PEPTIDE_ID = 0;
+    public static final int COLTYPE_PEPTIDE_NAME = 1;
+    public static final int COLTYPE_PEPTIDE_SCORE = 2;
     //public static final int COLTYPE_PEPTIDE_MSQUERY = 2;
-    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 2;
-    public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 3;
+    public static final int COLTYPE_PEPTIDE_CALCULATED_MASS = 3;
+    public static final int COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ = 4;
     //public static final int COLTYPE_PEPTIDE_DELTA_MOZ = 4;
-    public static final int COLTYPE_PEPTIDE_PPM = 4;
-    public static final int COLTYPE_PEPTIDE_CHARGE = 5;
+    public static final int COLTYPE_PEPTIDE_PPM = 5;
+    public static final int COLTYPE_PEPTIDE_CHARGE = 6;
     
     
-    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 6;
-    public static final int COLTYPE_PEPTIDE_NB_PROTEIN_SETS = 7;
-    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 8; 
+    public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 7;
+    public static final int COLTYPE_PEPTIDE_NB_PROTEIN_SETS = 8;
+    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 9; 
     //public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
-    public static final int COLTYPE_PEPTIDE_PTM = 9;
-    private static final String[] m_columnNames = {"Peptide", "Score", "Calc. Mass", "Exp. MoZ", "Ppm" /*"Delta MoZ"*/, "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
-    private static final String[] m_columnTooltips = {"Peptide", "Score", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" /*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Protein Set Count", "Retention Time", "Post Translational Modifications"};
+    public static final int COLTYPE_PEPTIDE_PTM = 10;
+    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Calc. Mass", "Exp. MoZ", "Ppm" /*"Delta MoZ"*/, "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
+    private static final String[] m_columnTooltips = {"PeptideMatch Id","Peptide", "Score", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" /*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Protein Set Count", "Retention Time", "Post Translational Modifications"};
     private PeptideInstance[] m_peptideInstances = null;
 
     private ArrayList<Integer> m_filteredIds = null;
@@ -80,6 +81,8 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
     public Class getColumnClass(int col) {
         
         switch (col) {
+            case COLTYPE_PEPTIDE_ID:
+                return Long.class;
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             //case COLTYPE_PEPTIDE_RETENTION_TIME:
@@ -146,6 +149,8 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
         DPeptideMatch peptideMatch = (DPeptideMatch) peptideInstance.getTransientData().getBestPeptideMatch();
 
         switch (col) {
+            case COLTYPE_PEPTIDE_ID:
+                return peptideMatch.getId();
             case COLTYPE_PEPTIDE_NAME: {
                 
                 LazyData lazyData = getLazyData(row,col);
@@ -481,6 +486,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
         if (m_filters == null) {
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
+            m_filters[COLTYPE_PEPTIDE_ID] = null;
             m_filters[COLTYPE_PEPTIDE_NAME] = new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME));
             m_filters[COLTYPE_PEPTIDE_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_SCORE));
             m_filters[COLTYPE_PEPTIDE_CALCULATED_MASS] = new DoubleFilter(getColumnName(COLTYPE_PEPTIDE_CALCULATED_MASS));

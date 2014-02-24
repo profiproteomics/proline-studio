@@ -84,8 +84,8 @@ public final class RSMExplorerTopComponent extends TopComponent  {
             @Override
             public void run() {
 
-                ServerConnectionManager serciceConnectionMgr = ServerConnectionManager.getServerConnectionManager();
-                while (serciceConnectionMgr.isConnectionAsked()) {
+                ServerConnectionManager serverConnectionMgr = ServerConnectionManager.getServerConnectionManager();
+                while (serverConnectionMgr.isConnectionAsked()) {
                     // wait for the connection to have succedeed or failed
                     try {
                         Thread.sleep(100); // JPM.TODO : one day remove the polling and write blocking code instead
@@ -93,7 +93,7 @@ public final class RSMExplorerTopComponent extends TopComponent  {
                     }
                 }
 
-                if ((serciceConnectionMgr.isNotConnected()) || (serciceConnectionMgr.isConnectionFailed())) {
+                if ((serverConnectionMgr.isNotConnected()) || (serverConnectionMgr.isConnectionFailed())) {
                     // the user need to enter connection parameters
 
                     SwingUtilities.invokeLater(new Runnable() {
@@ -112,7 +112,7 @@ public final class RSMExplorerTopComponent extends TopComponent  {
                         }
                     });
 
-                } else if (serciceConnectionMgr.isConnectionDone()) {
+                } else if (serverConnectionMgr.isConnectionDone()) {
                     SwingUtilities.invokeLater(new Runnable() {
 
                         @Override

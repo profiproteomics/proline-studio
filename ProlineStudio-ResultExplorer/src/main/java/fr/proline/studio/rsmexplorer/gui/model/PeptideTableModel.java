@@ -416,7 +416,6 @@ public class PeptideTableModel extends FilterTableModel {
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
             case COLTYPE_PEPTIDE_START:
             case COLTYPE_PEPTIDE_STOP: {
-            
                 return ((IntegerFilter) filter).filter((Integer) data);
             }
 

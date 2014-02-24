@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.*;
+import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 
@@ -57,7 +58,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
         columnModel.getColumn(LogTableModel.COLTYPE_STEP).setCellRenderer(new TaskInfoStepRenderer());
 
-        DefaultErrorRenderer defaultErrorRenderer = new DefaultErrorRenderer(new DefaultTableRenderer());
+        DefaultErrorRenderer defaultErrorRenderer = new DefaultErrorRenderer(new DefaultTableRenderer(), m_logTable);
         columnModel.getColumn(LogTableModel.COLTYPE_TASKINFO_ID).setCellRenderer(defaultErrorRenderer);
         columnModel.getColumn(LogTableModel.COLTYPE_TASKINFO_CATEGORY).setCellRenderer(defaultErrorRenderer);
         columnModel.getColumn(LogTableModel.COLTYPE_DESCRIPTION).setCellRenderer(defaultErrorRenderer);
@@ -352,9 +353,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
     public class DefaultErrorRenderer implements TableCellRenderer, Serializable {
 
         private TableCellRenderer m_renderer;
+        private JXTable m_table;
         
-        public DefaultErrorRenderer(TableCellRenderer renderer) {
+        public DefaultErrorRenderer(TableCellRenderer renderer, JXTable table) {
             m_renderer = renderer;
+            m_table = table;
         }
 
         @Override
@@ -366,6 +369,8 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
                 l.setHorizontalAlignment(JLabel.LEFT);
 
+                
+                row = m_table.convertRowIndexToModel(row);
                 TaskInfo taskInfo = ((LogTableModel) table.getModel()).getTaskInfo(row);
                 if (taskInfo.hasTaskError()) {
                     l.setForeground(Color.red);

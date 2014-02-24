@@ -31,6 +31,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     private boolean m_isMainTree;
     private static RSMTree m_instance = null;
 
+    private boolean m_loadingDone = false;
+    
     public static RSMTree getTree() {
         if (m_instance == null) {
             m_instance = new RSMTree();
@@ -90,6 +92,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     
     public void removeRootChildren() {
 
+        m_loadingDone = false;
+        
         RSMNode root = ((RSMNode) m_model.getRoot());
         
         root.removeAllChildren();
@@ -297,7 +301,14 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         
     }
     
+
     public void startLoading() {
+        
+        if (m_loadingDone) {
+            return;
+        }
+        
+        m_loadingDone = true;
         
         // add hourglass node
         RSMNode root = (RSMNode) m_model.getRoot(); 

@@ -49,12 +49,15 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        
+
         JTable table = (JTable) e.getSource();
         Point pt = e.getPoint();
         int col = table.columnAtPoint(pt);
+        int row = table.rowAtPoint(pt);
         
-        if (col != m_column) {
+        int modelCol = table.convertColumnIndexToModel(col);
+        
+        if ((modelCol != m_column) || (row == -1)) {
             return;
         }
  
@@ -62,7 +65,7 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
         TableColumnModel tcm = th.getColumnModel();
         
         int columnStart = 0;
-        for (int i=0;i<m_column;i++) {
+        for (int i=0;i<col;i++) {
             TableColumn column = tcm.getColumn(i);
             columnStart += column.getWidth();
         }
@@ -72,7 +75,6 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
             return;
         }
 
-        int row = table.rowAtPoint(pt);
         
         Object value = table.getValueAt(row, col);
 
@@ -87,12 +89,19 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
                     preferences.put(m_preferenceKey, m_defaultURLTemplate);
                 }
                 
-                Desktop.getDesktop().browse(new URL(template + value.toString()).toURI());
+                String info = value.toString();
+                if (info.startsWith("sp|")) {
+                    // wart for proteins starting with sp|
+                    info = info.substring(3, info.length());
+                }
+                
+                Desktop.getDesktop().browse(new URL(template + info).toURI());
             }
         } catch (Exception ex) {
             // should not happen
             LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", ex);
         }
+
 
     }
 
@@ -124,11 +133,15 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
     
     
     private void checkCursor(MouseEvent e) {
+
+        
         JTable table = (JTable) e.getSource();
         Point pt = e.getPoint();
         int col = table.columnAtPoint(pt);
-
-        if (col != m_column) {
+        int row = table.rowAtPoint(pt);
+        int modelCol = table.convertColumnIndexToModel(col);
+        
+        if ((modelCol != m_column) || (row == -1)) {
             table.setCursor(Cursor.getDefaultCursor());
             return;
         }
@@ -137,7 +150,7 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
         TableColumnModel tcm = th.getColumnModel();
 
         int columnStart = 0;
-        for (int i = 0; i < m_column; i++) {
+        for (int i = 0; i < col; i++) {
             TableColumn column = tcm.getColumn(i);
             columnStart += column.getWidth();
         }
@@ -149,6 +162,7 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
         }
 
         table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
 
     }
 }

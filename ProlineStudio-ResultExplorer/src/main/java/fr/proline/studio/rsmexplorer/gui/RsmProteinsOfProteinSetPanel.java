@@ -95,8 +95,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         m_proteinTable = new ProteinTable();
         m_proteinTable.setModel(new ProteinTableModel((ProgressInterface) m_proteinTable));
         m_scrollPane.setViewportView(m_proteinTable);
-        // hide the id column
-        m_proteinTable.getColumnExt(ProteinTableModel.COLTYPE_PROTEIN_ID).setVisible(false);
+
         
         
         m_proteinTable.displayColumnAsPercentage(ProteinTableModel.COLTYPE_PROTEIN_SCORE);
@@ -105,6 +104,8 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         accColumn.setCellRenderer(renderer);
         m_proteinTable.addMouseListener(renderer);
         
+        // hide the id column  (must be done after the URLCellRenderer is set)
+        m_proteinTable.getColumnExt(ProteinTableModel.COLTYPE_PROTEIN_ID).setVisible(false);
         
         c.gridx = 0;
         c.gridy = 0;

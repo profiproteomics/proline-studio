@@ -306,8 +306,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
         m_proteinTable = new ProteinTable();
         m_proteinTable.setModel(new ProteinsOfPeptideMatchTableModel(m_proteinTable));
-        // hide the id column
-        m_proteinTable.getColumnExt(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_ID).setVisible(false);
+        
         
         
         TableColumn accColumn = m_proteinTable.getColumnModel().getColumn(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
@@ -316,6 +315,8 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         m_proteinTable.addMouseListener(renderer);
         m_proteinTable.addMouseMotionListener(renderer);
 
+        // hide the id column (must be done after the URLCellRenderer is set)
+        m_proteinTable.getColumnExt(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_ID).setVisible(false);
 
         m_markerContainerPanel = new MarkerContainerPanel(m_proteinScrollPane, (ProteinTable) m_proteinTable);
 

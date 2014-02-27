@@ -219,7 +219,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 
 
         } else {
-            JLabel noDataAvailableLabel = new JLabel("Fragmentation Information is not avaible in database.");
+            JLabel noDataAvailableLabel = new JLabel("Fragmentation Information is not avaible in database. To obtain this information, you must select the “Save Spectrum Matches” option in the Import Search Results Dialog.");
             noDataAvailableLabel.setBackground(Color.white);
             noDataAvailableLabel.setOpaque(true);
             noDataAvailableLabel.setHorizontalAlignment(SwingConstants.LEFT);

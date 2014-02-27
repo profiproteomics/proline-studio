@@ -49,11 +49,11 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private AbstractDataBox m_dataBox;
-	JPanel m_fragPanelContainer;
-	static JScrollPane jScrollFragPane = new JScrollPane();
-	DPeptideMatch m_peptideMatch;
+	protected JPanel m_fragPanelContainer;
+	private static JScrollPane jScrollFragPane = new JScrollPane();
+	private DPeptideMatch m_peptideMatch;
 	
-	DecoratedTable m_jTable1;
+	private DecoratedTable m_jTable1;
 
 	public RsetPeptideFragmentationTable(AbstractDataBox m_dBox, JPanel fragPanel, DPeptideMatch pepMatch) {
 		super(jScrollFragPane.getVerticalScrollBar());
@@ -116,8 +116,6 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 
     public void createFragmentationTable() {
 
-        m_jTable1 = new DecoratedTable();
-
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_dataBox.getProjectId()).getEntityManagerFactory().createEntityManager();
         
         try {
@@ -167,8 +165,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
             FragmentationTableModel fragmentationTableModel = new FragmentationTableModel(m_jTable1, false);
             fragmentationTableModel.setData(fragMa, fragSer, m_peptideMatch.getPeptide().getSequence());
 
-            RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(
-                    fragmentationTableModel);
+            RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(fragmentationTableModel);
             FragTableCustomRenderer cr = new FragTableCustomRenderer();
             m_jTable1.setDefaultRenderer(Double.class, cr);
             m_jTable1.setRowSorter(sorter);
@@ -221,6 +218,15 @@ public class RsetPeptideFragmentationTable extends LazyTable {
             m_fragPanelContainer.repaint();
 
 
+        } else {
+            JLabel noDataAvailableLabel = new JLabel("Fragmentation Information is not avaible in database.");
+            noDataAvailableLabel.setBackground(Color.white);
+            noDataAvailableLabel.setOpaque(true);
+            noDataAvailableLabel.setHorizontalAlignment(SwingConstants.LEFT);
+            noDataAvailableLabel.setVerticalAlignment(SwingConstants.TOP);
+            
+            m_fragPanelContainer.setLayout(new BorderLayout());
+            m_fragPanelContainer.add(noDataAvailableLabel, BorderLayout.CENTER);
         }
 
         entityManagerMSI.getTransaction().commit();
@@ -268,7 +274,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 	public String getAminoAcidName(double deltaMass, double tolerance) {
 
 		// scan the spectrum to find potential aminoacids
-		HashMap<Double, Character> aaHashMap = new HashMap<Double, Character>();
+		HashMap<Double, Character> aaHashMap = new HashMap<>();
 
 		aaHashMap.put((double) 71.03711, 'A');
 		aaHashMap.put((double) 103.00919, 'C');
@@ -600,7 +606,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 			}
 
 			// select color
-			Color foregroundColor = null;
+			Color foregroundColor;
 
 			if (m_selectMatrix[row][column] != null) {
 

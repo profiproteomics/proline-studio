@@ -112,17 +112,15 @@ public class WindowBoxFactory {
     public static WindowBox getProteinSetsWindowBox(String name, boolean isDecoy) {
         
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[5];
+        AbstractDataBox[] boxes = new AbstractDataBox[6];
         boxes[0] = new DataBoxRsmAllProteinSet();
         boxes[1] = new DataBoxRsmProteinsOfProteinSet();
         boxes[2] = new DataBoxRsmPeptidesOfProtein();
         boxes[3] = new DataBoxRsmProteinAndPeptideSequence();
         boxes[4] = new DataBoxRsetPeptideSpectrum();
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
-       // boxes[4] = new DataBoxRsetPeptideFragmentationTable();
-       // boxes[5] = new DataBoxRsetPeptideSpectrum();
-      //  boxes[5].setLayout(AbstractDataBox.DataBoxLayout.VERTICAL);
-        
+        boxes[5] = new DataBoxRsetPeptideFragmentationTable();
+        boxes[5].setLayout(AbstractDataBox.DataBoxLayout.TABBED);        
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;
         

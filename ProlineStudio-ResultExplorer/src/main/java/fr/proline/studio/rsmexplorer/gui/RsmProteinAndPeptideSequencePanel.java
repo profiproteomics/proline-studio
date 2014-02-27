@@ -113,7 +113,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     public void setData(DProteinMatch pm, PeptideInstance selectedPeptide, PeptideInstance[] peptideInstances) {
         
         if ((pm == null) || (pm.getBioSequence() == null)) {
-            m_editorPane.setText("Protein Sequence not avaible in database");
+            m_editorPane.setText("Protein Sequence not available in database");
 
             return;
         }

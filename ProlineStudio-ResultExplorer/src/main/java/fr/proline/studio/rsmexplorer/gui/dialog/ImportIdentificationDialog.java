@@ -433,7 +433,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.gridwidth = 1;
         c.weightx = 0;
         c.gridy++;
-        m_decoyAccessionRegexLabel = new JLabel("Decoy Accesion Regex :");
+        m_decoyAccessionRegexLabel = new JLabel("Decoy Accession Regex :");
         m_decoyAccessionRegexLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         parserPanel.add(m_decoyAccessionRegexLabel, c);
         
@@ -535,7 +535,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.gridwidth = 1;
         c.weightx = 0;
         c.gridy++;
-        m_decoyAccessionRegexLabel = new JLabel("Decoy Accesion Regex :");
+        m_decoyAccessionRegexLabel = new JLabel("Decoy Accession Regex :");
         m_decoyAccessionRegexLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         decoyPanel.add(m_decoyAccessionRegexLabel, c);
         
@@ -933,7 +933,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         ParameterList parameterList = new ParameterList("Mascot");
         parameterList.add(new DoubleParameter("ion.score.cutoff", "Ion Score Cutoff", JTextField.class, new Double(0.0), new Double(0), null));
         parameterList.add(new DoubleParameter("subset.threshold", "Subset Threshold", JTextField.class, new Double(1.0), new Double(0), new Double(1)));
-        parameterList.add(new StringParameter("mascot.server.url", "Mascot Serveur URL (including /cgi/)", JTextField.class, "http://www.matrixscience.com/cgi/", null, null));
+        parameterList.add(new StringParameter("mascot.server.url", "Mascot Server URL (including /cgi/)", JTextField.class, "http://www.matrixscience.com/cgi/", null, null));
         
         return parameterList;
     }

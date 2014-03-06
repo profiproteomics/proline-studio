@@ -15,8 +15,12 @@ public class WSCProteinTableModel extends AbstractTableModel {
     public static final int COLTYPE_BSC             = 1;
     public static final int COLTYPE_SSC             = 2;
     public static final int COLTYPE_WSC             = 3;
-    private static final String[] m_columnNames = {"Protein", "Basic SC", "Specific SC", "Weighted SC"};
-
+    public static final int COLTYPE_STATUS          = 4;
+//    private static final String[] m_columnNames = {"Protein", "Basic SC", "Specific SC", "Weighted SC"};
+    private static final String[] m_columnNames = {"Protein", "Basic SC", "Specific SC", "Weighted SC","Status"};
+    private static final Class[] m_rsmColumnType = {Float.class, Float.class, Float.class,String.class};
+    private static final int COLNBR_PER_RSM = m_columnNames.length-1;
+    
     private SpectralCountTask.WSCResultData m_wscResult = null;
     private List<String> m_protMatchNames = new ArrayList();
     
@@ -28,7 +32,7 @@ public class WSCProteinTableModel extends AbstractTableModel {
     public int getColumnCount() {
         if (m_wscResult ==null)
             return 1;
-        return 1 + (m_wscResult.getComputedSCDatasets().size()*3);        
+        return 1 + (m_wscResult.getComputedSCDatasets().size()*COLNBR_PER_RSM);        
     }
 
     @Override
@@ -37,12 +41,12 @@ public class WSCProteinTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_NAME:
                 return m_columnNames[col];
             default:    {
-              int currentRSMNbr = (col%3==0) ? col/3 : (col/3)+1;
+              int currentRSMNbr = (col%COLNBR_PER_RSM==0) ? col/COLNBR_PER_RSM : (col/COLNBR_PER_RSM)+1;
               int colSuffixIndex;
-              int modulo = col%3;
+              int modulo = col%COLNBR_PER_RSM;
               switch (modulo){
                 case 0:
-                    colSuffixIndex=3;
+                    colSuffixIndex=COLNBR_PER_RSM;
                     break;
                 default:
                     colSuffixIndex=modulo;
@@ -62,7 +66,17 @@ public class WSCProteinTableModel extends AbstractTableModel {
             case COLTYPE_PROTEIN_NAME:
                 return String.class;
            default:
-                return Float.class;
+                int modulo = col%COLNBR_PER_RSM;
+                int colSuffixIndex;
+                switch (modulo){
+                case 0:
+                    colSuffixIndex=COLNBR_PER_RSM;
+                    break;
+                default:
+                    colSuffixIndex=modulo;
+                    break;                
+                }
+                return m_rsmColumnType[colSuffixIndex-1];
         }        
     }
 
@@ -81,17 +95,17 @@ public class WSCProteinTableModel extends AbstractTableModel {
                 return proteinMatchName;
                 
             default: {
-              int currentRSMNbr = (col%3==0) ? col/3 : (col/3)+1;
+              int currentRSMNbr = (col%COLNBR_PER_RSM==0) ? col/COLNBR_PER_RSM : (col/COLNBR_PER_RSM)+1;
               Long rsmID =m_wscResult.getComputedSCDatasets().get(currentRSMNbr-1).getResultSummaryId();
               Map<String, SpectralCountTask.SpectralCountsStruct> rsmResult =  m_wscResult.getRsmSCResult(rsmID);
               SpectralCountTask.SpectralCountsStruct searchedProtSC = rsmResult.get(proteinMatchName);
-              int modulo = col%3;
+              int modulo = col%COLNBR_PER_RSM;
               switch (modulo){
                 case 0:
                     if(searchedProtSC != null)
-                        return  searchedProtSC.getWsc();
+                        return  searchedProtSC.getProtMatchStatus();
                     else
-                        return Float.NaN;
+                        return "";
                 case 1:
                     if(searchedProtSC != null)
                         return searchedProtSC.getBsc();
@@ -102,7 +116,11 @@ public class WSCProteinTableModel extends AbstractTableModel {
                         return searchedProtSC.getSsc();
                     else
                         return Float.NaN;
-                }            
+                case 3 :
+                    if(searchedProtSC != null)
+                        return searchedProtSC.getWsc();
+                    else
+                        return Float.NaN;                }            
             }  
         }
         return null; // should never happen

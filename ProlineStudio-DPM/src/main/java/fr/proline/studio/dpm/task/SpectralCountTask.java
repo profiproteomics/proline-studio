@@ -272,13 +272,18 @@ public class SpectralCountTask extends AbstractServiceTask {
 
 public static class WSCResultData {
 
-        final String rootPropName = "\"SpectralCountResult\"";
+        final String rootPropName = "\"spectral_count_result\"";
         final String rsmIDPropName = "\"rsm_id\"";
         final String protSCsListPropName = "\"proteins_spectral_counts\"";
         final String protACPropName = "\"protein_accession\"";
         final String bscPropName = "\"bsc\"";
         final String sscPropName = "\"ssc\"";
         final String wscPropName = "\"wsc\"";
+        final String protMatchIdPropName = "\"prot_match_id\"";
+        final String protSetIdPropName  = "\"prot_set_id\"";
+        final String protMatchStatusPropName ="\"prot_status\"";
+        final String pepNbrPropName ="\"pep_nbr\"";
+        
         private Map<Long, Map<String, SpectralCountsStruct>> scsByProtByRSMId;
         private DDataset m_refDS;
         private List<DDataset> m_datasetRSMs;
@@ -312,15 +317,16 @@ public static class WSCResultData {
 
         /**
          * Parse SC Result to created formatted data m_scResult is formatted as
-         * : "{"SpectralCountResult":{[ { "rsm_id":Long,
+         * : "{"spectral_count_result":{[ { "rsm_id":Long,
          * "proteins_spectral_counts":[ {
-         * "protein_accession"=Acc,"bsc"=Float,"ssc"=Float,"wsc"=Float}, {...} ]
+         * "protein_accession"=Acc,"prot_match_id"=Long, "prot_set_id"=Long, "prot_status"=String, "bsc"=Float,"ssc"=Float,"wsc"=Float}, {...} ]
          * }, { "rsm_id"... } ]}}"
          *
          */
         private void initData(String scResult) {
-            //first 27 char are constant
-            String parsingSC = scResult.substring(27);
+            //first xx char are constant
+            int firstRSMEntryIndex = scResult.indexOf("{" + rsmIDPropName);            
+            String parsingSC = scResult.substring(firstRSMEntryIndex);
 
             String[] rsmEntries = parsingSC.split("\\{" + rsmIDPropName);
             for (String rsmEntry : rsmEntries) { //{"rsm_id":Long,"proteins_spectral_counts":[...
@@ -341,7 +347,7 @@ public static class WSCResultData {
          *
          *
          * "proteins_spectral_counts":[ {
-         * "protein_accession"=Acc,"bsc"=Float,"ssc"=Float,"wsc"=Float}, {...} ]
+         * "protein_accession"=Acc,"prot_match_id"=Long, "prot_set_id"=Long, "prot_status"=String,"bsc"=Float,"ssc"=Float,"wsc"=Float}, {...} ]
          * },
          *
          * @return Map of spectralCounts for each Protein Matches
@@ -365,6 +371,7 @@ public static class WSCResultData {
                 Float bsc = null;
                 Float ssc = null;
                 Float wsc = null;
+                String protMatchStatus = null;
                 for (String protProperty : protAccPropertiesEntries) { //Should create 2 entry : key -> value 
                     String[] propKeyValues = protProperty.split("="); //split prop key / value 
                     if (propKeyValues[0].contains(protACPropName)) {
@@ -379,11 +386,14 @@ public static class WSCResultData {
                     if (propKeyValues[0].contains(wscPropName)) {
                         wsc = Float.valueOf(propKeyValues[1]);
                     }
+                    if (propKeyValues[0].contains(protMatchStatusPropName)) {
+                        protMatchStatus = propKeyValues[1];
+                    }
                 }
                 if (bsc == null || ssc == null || wsc == null || protAccStr == null) {
                     throw new IllegalArgumentException("Invalid Spectral Count result. Value missing : " + protAcc);
                 }
-                scByProtAcc.put(protAccStr, new SpectralCountsStruct(bsc, ssc, wsc));
+                scByProtAcc.put(protAccStr, new SpectralCountsStruct(bsc, ssc, wsc,protMatchStatus));
                 protIndex++;
             }
 
@@ -398,11 +408,13 @@ public static class WSCResultData {
         Float m_basicSC;
         Float m_specificSC;
         Float m_weightedSC;
+        String m_pmStatus;
 
-        public SpectralCountsStruct(Float bsc, Float ssc, Float wsc) {
+        public SpectralCountsStruct(Float bsc, Float ssc, Float wsc, String pmStatus) {
             this.m_basicSC = bsc;
             this.m_specificSC = ssc;
             this.m_weightedSC = wsc;
+            this.m_pmStatus = pmStatus;
         }
 
         public Float getBsc() {
@@ -416,5 +428,10 @@ public static class WSCResultData {
         public Float getWsc() {
             return m_weightedSC;
         }
+        
+        public String getProtMatchStatus() {
+            return m_pmStatus;
+        }
+        
     }
 }

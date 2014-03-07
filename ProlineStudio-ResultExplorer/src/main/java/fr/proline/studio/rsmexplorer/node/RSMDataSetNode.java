@@ -70,11 +70,11 @@ public class RSMDataSetNode extends RSMNode {
             case TRASH:
                 return getIcon(IconManager.IconType.TRASH);
             default:
-                // sould not happen
+                return getIcon(IconManager.IconType.QUANT);// sould not happen
                 
         }
         
-        return null;
+        //return null;
 
     }
     

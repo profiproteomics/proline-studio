@@ -309,9 +309,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             //JPM.HACK : there is a join done by Hibernate if we read the Aggregation at once,
             // But some Aggregation are null (for identifications) -> identifications are not loaded
             // So we load aggregations afterwards
-            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type<>:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+//            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type<>:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
             dataSetQuery.setParameter("projectId", projectId);
-            dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+//            dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
             List<DDataset> datasetListSelected = dataSetQuery.getResultList();
 
 

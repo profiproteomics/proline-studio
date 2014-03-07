@@ -812,7 +812,9 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
                 
                 SpectralCountAction spectralCountAction = new SpectralCountAction();
                 m_mainActions.add(spectralCountAction); 
-                       
+                  
+                RetrieveSCDataAction getSCAction = new RetrieveSCDataAction();
+                m_mainActions.add(getSCAction); 
                 
                 m_mainActions.add(null);  // separator
                 

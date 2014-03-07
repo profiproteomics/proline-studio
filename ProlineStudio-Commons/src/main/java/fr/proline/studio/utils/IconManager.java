@@ -67,6 +67,7 @@ public class IconManager {
         FUNNEL_ACTIVATED,
         EXPORT,
         EXPORT_IMAGE,
+        QUANT,
         CHART,
         BOOK,
         BOOK_OPEN,
@@ -248,6 +249,8 @@ public class IconManager {
                 return "fr/proline/studio/images/exportImage.png";
             case CHART:
                 return "fr/proline/studio/images/chart.png";
+            case QUANT:
+                return "fr/proline/studio/images/chart-quant.png";
             case BOOK:
                 return "fr/proline/studio/images/book.png";
             case BOOK_OPEN:

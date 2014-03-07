@@ -5,9 +5,6 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dpm.AccessServiceThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.SpectralCountTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
@@ -55,7 +52,7 @@ public class SpectralCountAction extends AbstractRSMAction {
 
                 // check if we can compute SC
                 String error = null;
-                ArrayList<DDataset> datasetList = new ArrayList<>();        
+                ArrayList<DDataset> datasetList = new ArrayList<DDataset>();        
                 datasetList.add(refDatasetNode.getDataset()); //first entry is Reference Dataset in data box !
                 
                 if (m_treeSelectionDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
@@ -95,25 +92,6 @@ public class SpectralCountAction extends AbstractRSMAction {
                 win.open();
                 win.requestActive(); 
                 
-//                final Long[] quantiDatasetId = new Long[1];
-//                final String[] spectralCountResultData = new String[1];
-//                AbstractServiceCallback callback = new AbstractServiceCallback() {
-//
-//                    @Override
-//                    public boolean mustBeCalledInAWT() {
-//                        return true;
-//                    }
-//
-//                    @Override
-//                    public void run(boolean success) {
-//
-//                        //JPM.TODO
-//                        // use quantiDatasetId[0]
-//                    }
-//                };
-//                
-//                SpectralCountTask task = new SpectralCountTask(callback, refDatasetNode.getDataset(), datasetList, quantiDatasetId,spectralCountResultData);
-//                AccessServiceThread.getAccessServiceThread().addTask(task);
             }
         };
         

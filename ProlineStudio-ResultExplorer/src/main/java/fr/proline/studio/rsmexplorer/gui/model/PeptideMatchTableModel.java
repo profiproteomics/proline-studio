@@ -298,6 +298,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
                 if ( peptide == null) {
                     givePriorityTo(m_taskId, row, col);
                     lazyData.setData(null);
+                    return lazyData;
                 }
                 
                 

@@ -9,7 +9,6 @@ import fr.proline.studio.dpm.task.RetrieveSpectralCountTask;
 import fr.proline.studio.dpm.task.SpectralCountTask;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import org.jfree.data.general.Dataset;
 import org.openide.util.NbBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

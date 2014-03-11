@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.renderer;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.SequenceMatch;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.studio.export.ExportTextInterface;
 import fr.proline.studio.utils.GlobalValues;
@@ -26,20 +27,23 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
         if (value == null) {
             displayString = "";
         } else {
-            Peptide p = (Peptide) value;
+            DPeptideMatch pm = (DPeptideMatch) value;
 
-            displayString = constructPeptideDisplay(p);
+            displayString = constructPeptideDisplay(pm);
         }
         
         return super.getTableCellRendererComponent(table, displayString, isSelected, hasFocus, row, column);
     }
 
-    private String constructPeptideDisplay(Peptide peptide) {
+    private String constructPeptideDisplay(DPeptideMatch peptideMatch) {
 
-        SequenceMatch sequenceMatch = peptide.getTransientData().getSequenceMatch();
+        Peptide peptide = peptideMatch.getPeptide();
+        SequenceMatch sequenceMatch = peptideMatch.getSequenceMatch();
 
         if (sequenceMatch != null) {
 
+            
+            
             HashMap<Integer, PeptidePtm> ptmMap = peptide.getTransientData().getPeptidePtmMap();
             if (ptmMap != null) {
                 m_displaySB.append("<HTML>");

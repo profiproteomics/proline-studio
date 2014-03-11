@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 
+import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
@@ -155,14 +156,8 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
                 
                 LazyData lazyData = getLazyData(row,col);
 
-                Peptide peptide = peptideMatch.getPeptide();
-                if ( peptide == null) {
-                    givePriorityTo(m_taskId, row, col);
-                    lazyData.setData(null);
-                } else {
-                    lazyData.setData(peptide);
-                }
-                
+                lazyData.setData(peptideMatch);
+
                 return lazyData;
             }
             case COLTYPE_PEPTIDE_SCORE: {

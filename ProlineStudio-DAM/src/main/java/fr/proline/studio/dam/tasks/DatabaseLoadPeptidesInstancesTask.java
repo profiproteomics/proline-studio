@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
@@ -97,7 +98,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         if (peptideSet == null) {
             return true;
         }
-        return ( peptideSet.getTransientPeptideInstances() == null);
+        return ( peptideSet.getTransientDPeptideInstances() == null);
     }
     
 
@@ -276,12 +277,13 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
         HashMap<Long, Peptide> peptideMapForPtm = new  HashMap<>();
         
-        ArrayList<PeptideInstance> peptideInstanceList = new ArrayList<>();
-        List l = peptidesQuery.getResultList();
+        ArrayList<DPeptideInstance> peptideInstanceList = new ArrayList<>();
+        List l = peptidesQuery.getResultList(); 
         Iterator<Object[]> itPeptidesQuery = l.iterator();
         while (itPeptidesQuery.hasNext()) {
             Object[] resCur = itPeptidesQuery.next();
             PeptideInstance pi = (PeptideInstance) resCur[0];
+            DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptideId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
             
             Long pmId = (Long) resCur[1];
             Integer pmRank = (Integer) resCur[2];
@@ -304,16 +306,17 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
             
             DMsQuery msq = new DMsQuery(pmId, msqId, msqInitialId, sp.getPrecursorIntensity());
 
-            pi.getTransientData().setBestPeptideMatch(pm);
+            dpi.setBestPeptideMatch(pm);
 
 
-            p.getTransientData().setSequenceMatch(sm);
+            pm.setSequenceMatch(sm);
+            //p.getTransientData().setSequenceMatch(sm);
             p.getTransientData().setPeptideReadablePtmStringLoaded();
 
             pm.setPeptide(p);
             pm.setMsQuery(msq);
 
-            peptideInstanceList.add(pi);
+            peptideInstanceList.add(dpi);
         }
 
 
@@ -335,12 +338,12 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
         
         int nbPeptides = peptideInstanceList.size();
-        PeptideInstance[] peptideInstances = peptideInstanceList.toArray(new PeptideInstance[nbPeptides]);
-        peptideSet.setTransientPeptideInstances(peptideInstances);
+        DPeptideInstance[] peptideInstances = peptideInstanceList.toArray(new DPeptideInstance[nbPeptides]);
+        peptideSet.setTransientDPeptideInstances(peptideInstances);
 
         
         for (int i = 0; i < nbPeptides; i++) {
-            peptideMap.put(peptideInstances[i].getPeptideId(), ((DPeptideMatch)peptideInstances[i].getTransientData().getBestPeptideMatch()).getPeptide());
+            peptideMap.put(peptideInstances[i].getPeptideId(), ((DPeptideMatch)peptideInstances[i].getBestPeptideMatch()).getPeptide());
         }
 
 

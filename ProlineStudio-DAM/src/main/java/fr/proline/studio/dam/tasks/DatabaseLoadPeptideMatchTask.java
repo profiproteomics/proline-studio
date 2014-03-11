@@ -38,6 +38,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     // data kept for sub tasks
     private ArrayList<Long> m_peptideMatchIds = null;
     private HashMap<Long, DPeptideMatch> m_peptideMatchMap = null;
+    private HashMap<Long,  ArrayList<DPeptideMatch>> m_peptideMatchSequenceMatchArrayMap = null;
     private HashMap<Long, Integer> m_peptideMatchPosition = null;
 
 
@@ -239,12 +240,18 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             // Retrieve Peptide Match Ids and create map of PeptideMatch in the same time
             int nb = peptideMatchArray.length;
             m_peptideMatchIds = new ArrayList<>(nb);
-            m_peptideMatchMap = new HashMap<>();
+            m_peptideMatchSequenceMatchArrayMap = new HashMap<>();
             for (int i = 0; i < nb; i++) {
                 DPeptideMatch pm = peptideMatchArray[i];
                 Long pmId = pm.getId();
                 m_peptideMatchIds.add(i, pmId);
-                m_peptideMatchMap.put(pmId, pm);
+                
+                ArrayList<DPeptideMatch> sequenceMatchArray = m_peptideMatchSequenceMatchArrayMap.get(pmId);
+                if (sequenceMatchArray == null) {
+                    sequenceMatchArray = new ArrayList<>();
+                    m_peptideMatchSequenceMatchArrayMap.put(pmId, sequenceMatchArray);
+                }
+                sequenceMatchArray.add(pm);
             }
 
 
@@ -491,8 +498,13 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             peptideQuery.setParameter("listId", sliceOfPeptideMatchIds);
             peptideQuery.setParameter("proteinMatchId", proteinMatchId);
 
+            /*if (proteinMatchId == 46847) {
+               System.out.println(46847);
+            }*/
 
 
+             ArrayList<DPeptideMatch> sequenceMatchListPrevious = null;
+            int indexArray = 0;
             List<Object[]> peptides = peptideQuery.getResultList();
             Iterator<Object[]> it = peptides.iterator();
             while (it.hasNext()) {
@@ -500,9 +512,16 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 Long peptideMatchId = (Long) res[0];
                 Peptide peptide = (Peptide) res[1];
                 SequenceMatch sm = (SequenceMatch) res[2];
-                peptide.getTransientData().setSequenceMatch(sm);
+                //peptide.getTransientData().setSequenceMatch(sm);
                 peptide.getTransientData().setPeptideReadablePtmStringLoaded();
-                m_peptideMatchMap.get(peptideMatchId).setPeptide(peptide);
+                ArrayList<DPeptideMatch> sequenceMatchList = m_peptideMatchSequenceMatchArrayMap.get(peptideMatchId);
+                if (sequenceMatchListPrevious != sequenceMatchList) {
+                    sequenceMatchListPrevious = sequenceMatchList;
+                    indexArray = 0;
+                }
+                sequenceMatchList.get(indexArray).setPeptide(peptide);
+                sequenceMatchList.get(indexArray).setSequenceMatch(sm);
+                indexArray++;
                 peptideMap.put(peptide.getId(), peptide);
             }
             
@@ -584,8 +603,19 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         Iterator<DMsQuery> it = msQueries.iterator();
         while (it.hasNext()) {
             DMsQuery q = it.next();
-            DPeptideMatch peptideMatch = m_peptideMatchMap.get(q.getPeptideMatchId());
-            peptideMatch.setMsQuery(q);
+            
+            if (m_proteinMatch != null) {
+                 ArrayList<DPeptideMatch> sequenceMatchArray = m_peptideMatchSequenceMatchArrayMap.get(q.getPeptideMatchId());
+                 for (int i=0;i<sequenceMatchArray.size();i++) {
+                     DPeptideMatch peptideMatch = sequenceMatchArray.get(i);
+                     peptideMatch.setMsQuery(q);
+                 }
+            } else {
+                DPeptideMatch peptideMatch = m_peptideMatchMap.get(q.getPeptideMatchId());
+                peptideMatch.setMsQuery(q);
+            }
+            
+            
         }
 
 

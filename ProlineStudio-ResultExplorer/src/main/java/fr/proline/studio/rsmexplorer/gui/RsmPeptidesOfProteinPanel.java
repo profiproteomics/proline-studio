@@ -3,8 +3,9 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideSet;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
@@ -116,7 +117,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     }
 
     
-    public PeptideInstance getSelectedPeptide() {
+    public DPeptideInstance getSelectedPeptide() {
         int selectedIndex = m_peptidesTable.getSelectionModel().getMinSelectionIndex();
             
         if (selectedIndex == -1) {
@@ -140,7 +141,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             ((PeptideTableModel) m_peptidesTable.getModel()).setData(null);
         } else {
             PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
-            PeptideInstance[] peptideInstances = peptideSet.getTransientPeptideInstances();
+            DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
 
             ((PeptideTableModel) m_peptidesTable.getModel()).setData(peptideInstances);
 
@@ -171,7 +172,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     private class PeptideTable extends DecoratedTable  {
         
         public PeptideTable() {
-            setDefaultRenderer(Peptide.class, new PeptideRenderer());
+            setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             
@@ -212,7 +213,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             
 
             
-            m_dataBox.propagateDataChanged(PeptideInstance.class);
+            m_dataBox.propagateDataChanged(DPeptideInstance.class);
 
         }
         

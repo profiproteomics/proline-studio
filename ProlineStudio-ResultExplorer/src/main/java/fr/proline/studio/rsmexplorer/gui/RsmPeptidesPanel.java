@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
@@ -293,7 +294,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
          */
         public PeptideInstanceTable() {
             super(m_scrollPane.getVerticalScrollBar());
-            setDefaultRenderer(Peptide.class, new PeptideRenderer());
+            setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());
             setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))));
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class)));
 

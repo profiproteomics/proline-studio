@@ -3,6 +3,7 @@ package fr.proline.studio.pattern;
 
 
 import fr.proline.core.orm.msi.*;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -28,7 +29,7 @@ public class DataBoxRsetPeptideFragmentationTable extends AbstractDataBox {
 	        registerInParameter(inParameter);
 
 	        inParameter = new GroupParameter();
-	        inParameter.addParameter(PeptideInstance.class, false);
+	        inParameter.addParameter(DPeptideInstance.class, false);
 	        registerInParameter(inParameter);
 
 	        // Register possible out parameters

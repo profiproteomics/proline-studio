@@ -1,8 +1,9 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.core.orm.msi.PeptideInstance;
+
 import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinAndPeptideSequencePanel;
 
@@ -22,7 +23,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DProteinMatch.class, false);
-        inParameter.addParameter(PeptideInstance.class, false, false /* parameter is not compulsory */); 
+        inParameter.addParameter(DPeptideInstance.class, false, false /* parameter is not compulsory */); 
         inParameter.addParameter(ResultSummary.class, false); // needs a ProteinMatch and a ResultSummary (PeptideInstance is optionnal)
         registerInParameter(inParameter);
 
@@ -42,7 +43,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
     @Override
     public void dataChanged() {
         DProteinMatch proteinMatch = (DProteinMatch) m_previousDataBox.getData(false, DProteinMatch.class);
-        PeptideInstance selectedPeptide = (PeptideInstance) m_previousDataBox.getData(false, PeptideInstance.class);
+        DPeptideInstance selectedPeptide = (DPeptideInstance) m_previousDataBox.getData(false, DPeptideInstance.class);
         ResultSummary resultSummary = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
        
         
@@ -57,7 +58,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
             return;
         }
         
-        PeptideInstance[] peptideInstances = peptideSet.getTransientPeptideInstances();
+        DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
         
         // check that the selectedPeptide found in previous databox is really a peptide of the proteinMatch (they
         // can come from different databoxes)

@@ -537,7 +537,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         //ProteinSet proteinSetSelected = null;
         public PeptideMatchTable() {
             super(m_scrollPane.getVerticalScrollBar());
-            setDefaultRenderer(Peptide.class, new PeptideRenderer());
+            setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());
             setDefaultRenderer(DMsQuery.class, new MsQueryRenderer());
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class))  );

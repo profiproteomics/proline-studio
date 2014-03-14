@@ -93,13 +93,12 @@ public class DoubleFilter extends Filter {
         registerDefinedAsUsed();
     }
 
-    /*
-     * public void setMin(Double min) { m_min = min; }
-     *
-     * public void setMax(Double max) { m_max = max;
-    }
-     */
     public boolean filter(double value) {
+        
+        if (value != value) { // NaN
+            return false;
+        }
+        
         if (m_min != null) {
             if (value < m_min.doubleValue()) {
                 return false;

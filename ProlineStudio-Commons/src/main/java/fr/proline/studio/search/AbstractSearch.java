@@ -13,4 +13,9 @@ public abstract class AbstractSearch {
     public void setFloatingPanel(SearchFloatingPanel searchPanel) {
         m_searchPanel = searchPanel;
     }
+    
+    public String wildcardToRegex(String pattern) {
+        
+        return pattern.replaceAll("\\*", "\\\\w*").replaceAll("\\?", "\\\\w");
+    }
 }

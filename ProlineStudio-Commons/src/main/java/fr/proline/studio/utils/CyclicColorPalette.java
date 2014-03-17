@@ -15,7 +15,7 @@ import org.jdesktop.swingx.util.PaintUtils;
 public class CyclicColorPalette {
     private static Color[] palette = { Color.red, Color.blue, Color.green, Color.yellow, Color.pink, Color.cyan };
 
-    private static HashMap<String, ImageIcon> m_imageIconMap = null;
+    //private static HashMap<String, ImageIcon> m_imageIconMap = null;
     
     public static Color getColor(int colorIndex) {
         int paletteSize = palette.length*2;
@@ -25,6 +25,16 @@ public class CyclicColorPalette {
         }
         return PaintUtils.setSaturation(palette[colorIndex-palette.length], .7f);
     }
+
+    public static String getHTMLColor(int colorIndex) {
+        Color c = getColor(colorIndex);
+        return String.format("%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
+    }
+            
+            
+        
+    /* no longer used for the moment
+        
     
     public static ImageIcon getColoredImageIcon(int width, int height, int colorIndex, boolean registerImage) {
         
@@ -108,6 +118,9 @@ public class CyclicColorPalette {
         }
         m_imageIconMap.put(registerKey, i);
     }
+    * 
+    * 
+    */
 
     
 }

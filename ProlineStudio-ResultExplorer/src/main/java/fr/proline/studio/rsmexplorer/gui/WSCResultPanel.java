@@ -9,10 +9,8 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.event.ActionListener;
 import javax.swing.event.ListSelectionEvent;
@@ -38,7 +36,6 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     private AbstractDataBox m_dataBox;
     private SpectralCountTask.WSCResultData m_weightedSCResult = null;
    
-    private JTextField m_rsmRefNameField;
     private ProteinTable m_proteinTable;
     private JScrollPane m_scrollPane;
     
@@ -76,11 +73,6 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             return;
         }
 
-
-        // Modify protein description
-        m_rsmRefNameField.setText(scResult.getDataSetReference().getName());
-
-
         // Modify the Model
         ((WSCProteinTableModel) m_proteinTable.getModel()).setData(scResult);
 
@@ -89,7 +81,6 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     }
 
     private void clearData() {
-        m_rsmRefNameField.setText("");
         ((WSCProteinTableModel) m_proteinTable.getModel()).setData(null);
 
     }
@@ -178,10 +169,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
-        m_rsmRefNameField = new javax.swing.JTextField();
-        m_rsmRefNameField.setEditable(false);
-        m_rsmRefNameField.setBackground(Color.white);
+
         
         m_scrollPane = new javax.swing.JScrollPane();
         m_proteinTable = new ProteinTable();
@@ -192,9 +180,6 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
                 
         c.gridx = 0;
         c.gridy = 0;
-        internalPanel.add(m_rsmRefNameField, c);
-        
-        c.gridy++;
         c.weightx = 1;
         c.weighty = 1;
         internalPanel.add(m_scrollPane, c);
@@ -231,8 +216,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         }
         
         public boolean selectProtein(Integer row) {
-            WSCProteinTableModel tableModel = (WSCProteinTableModel) getModel();
-
+            
             // must convert row index if there is a sorting
             row = convertRowIndexToView(row);
             

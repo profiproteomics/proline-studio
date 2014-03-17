@@ -372,28 +372,27 @@ public static class WSCResultData {
                 Float ssc = null;
                 Float wsc = null;
                 String protMatchStatus = null;
+                Integer peptideNumber = null;
                 for (String protProperty : protAccPropertiesEntries) { //Should create 2 entry : key -> value 
                     String[] propKeyValues = protProperty.split("="); //split prop key / value 
                     if (propKeyValues[0].contains(protACPropName)) {
                         protAccStr = propKeyValues[1];
-                    }
-                    if (propKeyValues[0].contains(bscPropName)) {
+                    } else if (propKeyValues[0].contains(bscPropName)) {
                         bsc = Float.valueOf(propKeyValues[1]);
-                    }
-                    if (propKeyValues[0].contains(sscPropName)) {
+                    } else if (propKeyValues[0].contains(sscPropName)) {
                         ssc = Float.valueOf(propKeyValues[1]);
-                    }
-                    if (propKeyValues[0].contains(wscPropName)) {
+                    } else if (propKeyValues[0].contains(wscPropName)) {
                         wsc = Float.valueOf(propKeyValues[1]);
-                    }
-                    if (propKeyValues[0].contains(protMatchStatusPropName)) {
+                    } else if (propKeyValues[0].contains(protMatchStatusPropName)) {
                         protMatchStatus = propKeyValues[1];
+                    } else if (propKeyValues[0].contains(pepNbrPropName)) {
+                        peptideNumber = Integer.valueOf(propKeyValues[1]);
                     }
                 }
-                if (bsc == null || ssc == null || wsc == null || protAccStr == null) {
+                if (bsc == null || ssc == null || wsc == null || protAccStr == null || peptideNumber==null ) {
                     throw new IllegalArgumentException("Invalid Spectral Count result. Value missing : " + protAcc);
                 }
-                scByProtAcc.put(protAccStr, new SpectralCountsStruct(bsc, ssc, wsc,protMatchStatus));
+                scByProtAcc.put(protAccStr, new SpectralCountsStruct(bsc, ssc, wsc,protMatchStatus, peptideNumber));
                 protIndex++;
             }
 
@@ -405,16 +404,18 @@ public static class WSCResultData {
 
     public static class SpectralCountsStruct {
 
-        Float m_basicSC;
-        Float m_specificSC;
-        Float m_weightedSC;
-        String m_pmStatus;
+        private Float m_basicSC;
+        private Float m_specificSC;
+        private Float m_weightedSC;
+        private String m_pmStatus;
+        private Integer m_peptideNumber;
 
-        public SpectralCountsStruct(Float bsc, Float ssc, Float wsc, String pmStatus) {
+        public SpectralCountsStruct(Float bsc, Float ssc, Float wsc, String pmStatus, Integer peptideNumber) {
             this.m_basicSC = bsc;
             this.m_specificSC = ssc;
             this.m_weightedSC = wsc;
             this.m_pmStatus = pmStatus;
+            this.m_peptideNumber = peptideNumber;
         }
 
         public Float getBsc() {
@@ -431,6 +432,10 @@ public static class WSCResultData {
         
         public String getProtMatchStatus() {
             return m_pmStatus;
+        }
+        
+        public Integer getPeptideNumber() {
+            return m_peptideNumber;
         }
         
     }

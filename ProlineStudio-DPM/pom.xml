@@ -111,6 +111,7 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>fr.proline.studio.dpm</publicPackage>
+                        <publicPackage>fr.proline.studio.dpm.data</publicPackage>
                         <publicPackage>fr.proline.studio.dpm.task</publicPackage>
                     </publicPackages>
                 </configuration>

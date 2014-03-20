@@ -9,11 +9,14 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.gui.dialog.SetQuantitationDSNameDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.TreeSelectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JOptionPane;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -29,15 +32,21 @@ public class SpectralCountAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     protected TreeSelectionDialog m_treeSelectionDialog;
   
+    final static public String DS_NAME_PROPERTIES="dsName";
+    final static public String DS_DESCRIPTION_PROPERTIES="dsDescription";
+    final static public String DS_LIST_PROPERTIES="dsList";
+    
     public SpectralCountAction() {
-        super(NbBundle.getMessage(CompareWithSCAction.class, "CTL_CompareWithSCAction"));
+        super(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"));
     }
     
     @Override
-    public void actionPerformed(RSMNode[] selectedNodes, int x, int y) { 
+    public void actionPerformed(RSMNode[] selectedNodes, final int x, final int y) { 
      
         // Only Ref should be selected to compute SC         
         final RSMDataSetNode refDatasetNode = (RSMDataSetNode) selectedNodes[0];
+        final SetQuantitationDSNameDialog qttDSDialog = SetQuantitationDSNameDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        qttDSDialog.setLocation(x, y);
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -52,7 +61,8 @@ public class SpectralCountAction extends AbstractRSMAction {
 
                 // check if we can compute SC
                 String error = null;
-                ArrayList<DDataset> datasetList = new ArrayList<DDataset>();        
+                Map<String,Object> params = new HashMap();
+                ArrayList<DDataset> datasetList = new ArrayList<>();        
                 datasetList.add(refDatasetNode.getDataset()); //first entry is Reference Dataset in data box !
                 
                 if (m_treeSelectionDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
@@ -72,7 +82,18 @@ public class SpectralCountAction extends AbstractRSMAction {
                             break;  
                         }
                         datasetList.add(dsNode.getDataset());
+                        params.put(DS_LIST_PROPERTIES,datasetList);
                    }
+                   
+                      
+                   qttDSDialog.setVisible(true);
+                    if (qttDSDialog.getButtonClicked() == SetQuantitationDSNameDialog.BUTTON_OK) {
+                        params.put(DS_NAME_PROPERTIES, qttDSDialog.getQuantiDSName());
+                        params.put(DS_DESCRIPTION_PROPERTIES, qttDSDialog.getQuantiDSDescriptionName());
+                    }  else { //Cancel / Close was clicked
+                        return;                                                
+                    }
+                   
                 } else { //Cancel / Close was clicked
                     return;                                                
                 }
@@ -84,8 +105,8 @@ public class SpectralCountAction extends AbstractRSMAction {
                 
                 m_logger.debug(" Will Compute SC on "+(datasetList.size())+" RSMs : "+datasetList);
                 
-                WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox(refDatasetNode.getDataset().getName()+" WSC") ;
-                wbox.setEntryData(refDatasetNode.getDataset().getProject().getId(), datasetList);
+                WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox((String)params.get(DS_NAME_PROPERTIES), false) ;
+                wbox.setEntryData(refDatasetNode.getDataset().getProject().getId(), params);
 
                 // open a window to display the window box
                 DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
@@ -98,9 +119,10 @@ public class SpectralCountAction extends AbstractRSMAction {
         //Create Child Tree to select RSM to compute SC for
         final RSMTree childTree = RSMTree.getTree().copyDataSetRootSubTree(refDatasetNode.getDataset(),  refDatasetNode.getDataset().getProject().getId());
         m_treeSelectionDialog = new TreeSelectionDialog(WindowManager.getDefault().getMainWindow(), childTree, "Select Identification Summaries for Spectral Count", 380, 500);
+        m_treeSelectionDialog.setButtonName(TreeSelectionDialog.BUTTON_OK, "Next");
         m_treeSelectionDialog.setLocation(x, y);   
         m_treeSelectionDialog.setVisible(true);  
-        
+
         RSMTree.getTree().loadInBackground(refDatasetNode, callback);
 
     

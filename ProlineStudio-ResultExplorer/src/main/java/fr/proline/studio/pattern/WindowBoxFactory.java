@@ -71,14 +71,21 @@ public class WindowBoxFactory {
         
     }
     
-    public static WindowBox getRsmWSCWindowBox(String name) {
+    /**
+     * 
+     * @param name : title of the created Windows 
+     * @param readData : specify if the spectral count to display has to be retrieve from computing (false)
+     * or read back operation (true)
+     * @return 
+     */
+    public static WindowBox getRsmWSCWindowBox(String name, boolean readData) {
         
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataBoxRsmWSC();
+        boxes[0] = new DataBoxRsmWSC(readData);
 
 
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.RSET) );
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.RSM) );
 
         return winBox;
         

@@ -85,7 +85,7 @@ public class WindowBoxFactory {
         boxes[0] = new DataBoxRsmWSC(readData);
 
 
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.RSM) );
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.QUANT) );
 
         return winBox;
         

@@ -53,8 +53,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private boolean m_hasSuffix = false;
     private int m_suffixStart = 0;
     private int m_suffixStop = 0;
-    
-    
+    private Long m_datasetId = null;
+    private List<Long> m_dsChildRSMIds = null;
+    private List<String> m_dsNames = null;
     
     private int m_action;
     
@@ -69,7 +70,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int REMOVE_VALIDATION_OF_DATASET = 8;
     private final static int MODIFY_MERGED_DATASET = 9;
     private final static int EMPTY_TRASH = 10;
-    
+    private final static int LOAD_DATASET_AND_RSM_INFO = 11;
+     
     private static final Object WRITE_DATASET_LOCK = new Object();
     
     public DatabaseDataSetTask(AbstractDatabaseCallback callback) {
@@ -209,7 +211,22 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_action = EMPTY_TRASH;
     }
 
-  
+    /**
+     * Load Dataset with specific ID
+     * @param datasetId Dataset Id
+     * @param project project Dataset belongs to
+     */
+    public void initLoadDatasetAndRSMInfo(Long datasetId, ArrayList<Long> rsmIds, ArrayList<DDataset> returnedDatasetList, ArrayList<String> returnedDatasetNames, Project project) {
+        setTaskInfo(new TaskInfo("Load DataSet "+datasetId+" and get RSMs names", false, TASK_LIST_INFO));
+        m_project = project;
+        m_datasetId = datasetId;
+        m_dsChildRSMIds = rsmIds;
+        m_action = LOAD_DATASET_AND_RSM_INFO;
+        m_datasetList = returnedDatasetList;
+        m_dsNames = returnedDatasetNames;
+        setPriority(Priority.HIGH_1);
+    }
+    
     @Override
     public boolean needToFetch() {
 
@@ -241,6 +258,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case REMOVE_VALIDATION_OF_DATASET:
             case MODIFY_MERGED_DATASET:
             case EMPTY_TRASH:
+            case LOAD_DATASET_AND_RSM_INFO:
                 return true; // done one time
          
         }
@@ -289,6 +307,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return  modifyDatasetRsetAndRsm();
             case EMPTY_TRASH:
                 return emptyTrash();
+            case LOAD_DATASET_AND_RSM_INFO : 
+                return fetchDatasetWithIDAndRSMInfo();
         }
         
         return false; // should never happen
@@ -596,6 +616,116 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
     
+    private boolean fetchDatasetWithIDAndRSMInfo() {
+        
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
+        
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            // *** load dataset for specified id
+            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
+            dataSetQuery.setParameter("dsId", m_datasetId);
+            DDataset ddataSet = dataSetQuery.getSingleResult();
+            m_logger.debug("DDataset REF  "+ddataSet.getName());
+            m_datasetList.add(ddataSet);
+                
+            TypedQuery<Aggregation>  aggregationQuery = entityManagerUDS.createQuery("SELECT d.aggregation FROM Dataset d WHERE d.id = :dsId", Aggregation.class);
+            aggregationQuery.setParameter("dsId", m_datasetId);
+            Aggregation aggregation = aggregationQuery.getSingleResult();
+            ddataSet.setAggregation(aggregation);
+            
+            //m_datasetList.add(ddataSet);
+
+            //****  Get all DS for searched RSMs
+            Query rsmDSQuery = entityManagerUDS.createQuery("SELECT d.id, d.resultSummaryId FROM Dataset d WHERE d.resultSummaryId IN (:listId) and d.project.id = :pjId ");
+            rsmDSQuery.setParameter("listId", m_dsChildRSMIds);
+            rsmDSQuery.setParameter("pjId", m_project.getId());
+            Map<Long,List<Long>> dsIdPerRSMIds = new HashMap<>();
+            Iterator<Object[]> it = rsmDSQuery.getResultList().iterator();
+            while (it.hasNext()) {
+                Object[] resCur = it.next();
+                Long dsId = (Long) resCur[0];
+                Long rsmId = (Long) resCur[1];
+                m_logger.debug("--- FOR RSM   "+rsmId+" DS = "+dsId);
+                //A RSM could belong to multiple DS
+                if(dsIdPerRSMIds.containsKey(rsmId)){
+                    dsIdPerRSMIds.get(rsmId).add(dsId);
+                } else {
+                    ArrayList<Long> rsmDSs = new ArrayList<>(); 
+                    rsmDSs.add(dsId);
+                    dsIdPerRSMIds.put(rsmId, rsmDSs);   
+                }                
+            }
+            
+            //****  Get all none root DS informations
+            Query dsQueries = entityManagerUDS.createQuery("SELECT d.id, d.parentDataset.id, d.name FROM Dataset d WHERE d.project.id = :pjId and d.parentDataset is not null ");
+            dsQueries.setParameter("pjId", m_project.getId());
+            List<Object[]> results = dsQueries.getResultList();
+            Map<Long,Object[]> dsInfoPerDsIds = new HashMap<>();
+            Iterator<Object[]> it2 = results.iterator();
+            while (it2.hasNext()) {
+                Object[] resCur = it2.next();
+                Long dsId = (Long) resCur[0];
+                Object[] dsInfo = new Object[2];
+                dsInfo[0] = (Long) resCur[1];
+                dsInfo[1] = (String) resCur[2];
+                dsInfoPerDsIds.put(dsId, dsInfo);
+                m_logger.debug("--- DS INFO "+dsId+" PDS = "+dsInfo[0]+" Name "+dsInfo[1] );
+            }
+            
+            entityManagerUDS.getTransaction().commit();
+            
+            //*** Find DS of searched rsm and which belongs to specfied DS childs            
+            for(Long nextRSMId : m_dsChildRSMIds){
+                
+                boolean foundDS = false; // Correct DS found
+                Iterator<Long> rsmDSsIdIt = dsIdPerRSMIds.get(nextRSMId).iterator();
+                
+                while(!foundDS && rsmDSsIdIt.hasNext() ){
+                    Long nextDSId = rsmDSsIdIt.next(); // DS in hierarchy to test 
+                    Long rsmDSId = nextDSId; // Keep DS assciated to RSM
+                    while(!foundDS && nextDSId != null){
+                        if(m_datasetId.equals(nextDSId)){ // current DS RSM is the good one (in correct branch)
+                            foundDS = true;
+                            //Get initial DS for RSM
+                            m_logger.debug("--- foundDS for "+rsmDSId);
+                            Object[] rsmDSInfo = dsInfoPerDsIds.get(rsmDSId);
+                            if(rsmDSInfo == null){
+                                // RSM DS is root so should be reference DS! 
+                                m_logger.debug("--- No info, RSM DS = root DS " );
+                                m_dsNames.add(ddataSet.getName());
+                            } else {
+                                m_logger.debug("--- RSM DS  "+rsmDSInfo[1]);
+                                m_dsNames.add((String)rsmDSInfo[1]);
+                            }     
+                        } else {
+                            //Get current DS info 
+                            Object[] dsInfo = dsInfoPerDsIds.get(nextDSId);
+                            if(dsInfo == null){ //No parent, root reached without finding ref DS. Search in other branch
+                                nextDSId = null;
+                            } else { // Set current DS = parent DS
+                              nextDSId = (Long) dsInfo[0];
+                            }
+                        }                        
+                    }// End search in current branch
+                } //End search in all hierarchies for current RSM
+                
+            }//End go through all searched RSMs
+
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
+            entityManagerUDS.getTransaction().rollback();
+            return false;
+        } finally {
+            entityManagerUDS.close();
+        }
+
+        return true;
+    }
+ 
+   
     private boolean renameDataset() {
         
             

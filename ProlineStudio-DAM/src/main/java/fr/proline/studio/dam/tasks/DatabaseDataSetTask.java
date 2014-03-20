@@ -627,7 +627,6 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
             dataSetQuery.setParameter("dsId", m_datasetId);
             DDataset ddataSet = dataSetQuery.getSingleResult();
-            m_logger.debug("DDataset REF  "+ddataSet.getName());
             m_datasetList.add(ddataSet);
                 
             TypedQuery<Aggregation>  aggregationQuery = entityManagerUDS.createQuery("SELECT d.aggregation FROM Dataset d WHERE d.id = :dsId", Aggregation.class);
@@ -670,8 +669,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 Object[] dsInfo = new Object[2];
                 dsInfo[0] = (Long) resCur[1];
                 dsInfo[1] = (String) resCur[2];
-                dsInfoPerDsIds.put(dsId, dsInfo);
-                m_logger.debug("--- DS INFO "+dsId+" PDS = "+dsInfo[0]+" Name "+dsInfo[1] );
+                dsInfoPerDsIds.put(dsId, dsInfo);                
             }
             
             entityManagerUDS.getTransaction().commit();
@@ -689,14 +687,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                         if(m_datasetId.equals(nextDSId)){ // current DS RSM is the good one (in correct branch)
                             foundDS = true;
                             //Get initial DS for RSM
-                            m_logger.debug("--- foundDS for "+rsmDSId);
                             Object[] rsmDSInfo = dsInfoPerDsIds.get(rsmDSId);
                             if(rsmDSInfo == null){
                                 // RSM DS is root so should be reference DS! 
-                                m_logger.debug("--- No info, RSM DS = root DS " );
                                 m_dsNames.add(ddataSet.getName());
                             } else {
-                                m_logger.debug("--- RSM DS  "+rsmDSInfo[1]);
                                 m_dsNames.add((String)rsmDSInfo[1]);
                             }     
                         } else {

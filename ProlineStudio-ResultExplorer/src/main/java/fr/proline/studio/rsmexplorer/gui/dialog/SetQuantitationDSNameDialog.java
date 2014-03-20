@@ -34,7 +34,8 @@ public class SetQuantitationDSNameDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         setTitle("Set Quantitaion Dataset Name");
-
+        setButtonVisible(BUTTON_HELP, false);
+        setButtonVisible(BUTTON_DEFAULT, false);
         m_quantiDSPanel = new SetQuantitationDSNamePanel();
 
         setInternalComponent(m_quantiDSPanel);

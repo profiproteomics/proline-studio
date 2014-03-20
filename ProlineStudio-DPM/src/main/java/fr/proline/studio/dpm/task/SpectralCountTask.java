@@ -4,8 +4,6 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
-import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -22,8 +20,10 @@ public class SpectralCountTask extends AbstractServiceTask {
     private List<DDataset> m_rsmDataset = null;
     private Long[] m_quantiDatasetId = null;
     private String[] m_spCountJSONResult = null;
+    private String m_dsName = null;
+    private String m_dsDescr = null;
 
-    public SpectralCountTask(AbstractServiceCallback callback, DDataset refDataset, List<DDataset> rsmDataset, Long[] quantiDatasetId, String[] spectralCountResultList) {
+    public SpectralCountTask(AbstractServiceCallback callback, DDataset refDataset, List<DDataset> rsmDataset, String dsName, String dsDescr, Long[] quantiDatasetId, String[] spectralCountResultList) {
         super(callback, false /*
                  * asynchronous
                  */, new TaskInfo("Spectral Count on " + refDataset.getName(), true, TASK_LIST_INFO));
@@ -31,6 +31,16 @@ public class SpectralCountTask extends AbstractServiceTask {
         m_rsmDataset = rsmDataset;
         m_quantiDatasetId = quantiDatasetId;
         m_spCountJSONResult = spectralCountResultList;
+        m_dsName = dsName; 
+        m_dsDescr = dsDescr;
+        if(m_dsName == null  || m_dsName.isEmpty()) {
+            m_dsName = m_refDataset.getName() + " Spectral Count";
+        }
+        
+        if(m_dsDescr == null  || m_dsDescr.isEmpty()) {
+            m_dsDescr = m_dsName;
+        }
+       
     }
 
     @Override
@@ -44,10 +54,11 @@ public class SpectralCountTask extends AbstractServiceTask {
 
 
             Map<String, Object> params = new HashMap<>();
-            params.put("name", m_refDataset.getName() + " Spectral Count");
-            params.put("description", m_refDataset.getName() + " Spectral Count");
+            params.put("name",m_dsName);
+            params.put("description", m_dsDescr);
             params.put("project_id", m_refDataset.getProject().getId());
             params.put("ref_rsm_id", m_refDataset.getResultSummaryId());
+            params.put("ref_ds_id", m_refDataset.getId());
 
             // experimental_design
             Map<String, Object> experimentalDesignParams = new HashMap<>();
@@ -270,173 +281,4 @@ public class SpectralCountTask extends AbstractServiceTask {
 
     }
 
-public static class WSCResultData {
-
-        final String rootPropName = "\"spectral_count_result\"";
-        final String rsmIDPropName = "\"rsm_id\"";
-        final String protSCsListPropName = "\"proteins_spectral_counts\"";
-        final String protACPropName = "\"protein_accession\"";
-        final String bscPropName = "\"bsc\"";
-        final String sscPropName = "\"ssc\"";
-        final String wscPropName = "\"wsc\"";
-        final String protMatchIdPropName = "\"prot_match_id\"";
-        final String protSetIdPropName  = "\"prot_set_id\"";
-        final String protMatchStatusPropName ="\"prot_status\"";
-        final String pepNbrPropName ="\"pep_nbr\"";
-        
-        private Map<Long, Map<String, SpectralCountsStruct>> scsByProtByRSMId;
-        private DDataset m_refDS;
-        private List<DDataset> m_datasetRSMs;
-
-        public WSCResultData(DDataset refDataset, List<DDataset> datasets, String spectralCountResult) {
-            m_refDS = refDataset;
-            m_datasetRSMs = datasets;
-            scsByProtByRSMId = new HashMap<>();
-            try {
-                initData(spectralCountResult);
-            } catch (Exception e) {
-                throw new IllegalArgumentException(e.getMessage());
-            }
-        }
-
-        public ResultSummary getRSMReference() {
-            return m_refDS.getResultSummary();
-        }
-
-        public DDataset getDataSetReference() {
-            return m_refDS;
-        }
-
-        public List<DDataset> getComputedSCDatasets() {
-            return m_datasetRSMs;
-        }
-
-        public Map<String, SpectralCountsStruct> getRsmSCResult(Long rsmId) {
-            return scsByProtByRSMId.get(rsmId);
-        }
-
-        /**
-         * Parse SC Result to created formatted data m_scResult is formatted as
-         * : "{"spectral_count_result":{[ { "rsm_id":Long,
-         * "proteins_spectral_counts":[ {
-         * "protein_accession"=Acc,"prot_match_id"=Long, "prot_set_id"=Long, "prot_status"=String, "bsc"=Float,"ssc"=Float,"wsc"=Float}, {...} ]
-         * }, { "rsm_id"... } ]}}"
-         *
-         */
-        private void initData(String scResult) {
-            //first xx char are constant
-            int firstRSMEntryIndex = scResult.indexOf("{" + rsmIDPropName);            
-            String parsingSC = scResult.substring(firstRSMEntryIndex);
-
-            String[] rsmEntries = parsingSC.split("\\{" + rsmIDPropName);
-            for (String rsmEntry : rsmEntries) { //{"rsm_id":Long,"proteins_spectral_counts":[...
-                if (rsmEntry.isEmpty()) {
-                    continue;
-                }
-                String rsmSCResult = rsmEntry.substring(rsmEntry.indexOf(":") + 1);
-                //ToDO : Verify rsmId belongs to m_datasetRSMs ?
-                Long rsmId = Long.parseLong(rsmSCResult.substring(0, rsmSCResult.indexOf(",")).trim());
-
-                Map<String, SpectralCountsStruct> rsmSCRst = parseRsmSC(rsmSCResult.substring(rsmSCResult.indexOf(protSCsListPropName)));
-                scsByProtByRSMId.put(rsmId, rsmSCRst);
-            }
-        }
-
-        /**
-         * Parse one RSM Sc entry
-         *
-         *
-         * "proteins_spectral_counts":[ {
-         * "protein_accession"=Acc,"prot_match_id"=Long, "prot_set_id"=Long, "prot_status"=String,"bsc"=Float,"ssc"=Float,"wsc"=Float}, {...} ]
-         * },
-         *
-         * @return Map of spectralCounts for each Protein Matches
-         */
-        private Map<String, SpectralCountsStruct> parseRsmSC(String rsmsSCResult) {
-            m_loggerProline.debug(" parseRsmSC :   " + rsmsSCResult);
-
-            //"proteins_spectral_counts":[{"protein_accession"=MyProt,"bsc"=123.6,"ssc"=45.6,"wsc"=55.5}, {"protein_accession"=OtherProt,"bsc"=17.2,"ssc"=2.6,"wsc"=1.5} ]
-            Map<String, SpectralCountsStruct> scByProtAcc = new HashMap<>();
-
-            //Remove "proteins_spectral_counts":[
-            String protEntries = rsmsSCResult.substring(rsmsSCResult.indexOf("[") + 1);
-            protEntries = protEntries.substring(0, protEntries.indexOf("]"));
-
-            String[] protAccEntries = protEntries.split("}"); //Each ProtAcc entry
-            int protIndex = 0;
-            for (String protAcc : protAccEntries) {
-                //For each protein ...            
-                String[] protAccPropertiesEntries = protAcc.split(","); //Get properties list : Acc / bsc / ssc / wsc 
-                String protAccStr = null;
-                Float bsc = null;
-                Float ssc = null;
-                Float wsc = null;
-                String protMatchStatus = null;
-                Integer peptideNumber = null;
-                for (String protProperty : protAccPropertiesEntries) { //Should create 2 entry : key -> value 
-                    String[] propKeyValues = protProperty.split("="); //split prop key / value 
-                    if (propKeyValues[0].contains(protACPropName)) {
-                        protAccStr = propKeyValues[1];
-                    } else if (propKeyValues[0].contains(bscPropName)) {
-                        bsc = Float.valueOf(propKeyValues[1]);
-                    } else if (propKeyValues[0].contains(sscPropName)) {
-                        ssc = Float.valueOf(propKeyValues[1]);
-                    } else if (propKeyValues[0].contains(wscPropName)) {
-                        wsc = Float.valueOf(propKeyValues[1]);
-                    } else if (propKeyValues[0].contains(protMatchStatusPropName)) {
-                        protMatchStatus = propKeyValues[1];
-                    } else if (propKeyValues[0].contains(pepNbrPropName)) {
-                        peptideNumber = Integer.valueOf(propKeyValues[1]);
-                    }
-                }
-                if (bsc == null || ssc == null || wsc == null || protAccStr == null || peptideNumber==null ) {
-                    throw new IllegalArgumentException("Invalid Spectral Count result. Value missing : " + protAcc);
-                }
-                scByProtAcc.put(protAccStr, new SpectralCountsStruct(bsc, ssc, wsc,protMatchStatus, peptideNumber));
-                protIndex++;
-            }
-
-            return scByProtAcc;
-
-        }
-    }
-
-
-    public static class SpectralCountsStruct {
-
-        private Float m_basicSC;
-        private Float m_specificSC;
-        private Float m_weightedSC;
-        private String m_pmStatus;
-        private Integer m_peptideNumber;
-
-        public SpectralCountsStruct(Float bsc, Float ssc, Float wsc, String pmStatus, Integer peptideNumber) {
-            this.m_basicSC = bsc;
-            this.m_specificSC = ssc;
-            this.m_weightedSC = wsc;
-            this.m_pmStatus = pmStatus;
-            this.m_peptideNumber = peptideNumber;
-        }
-
-        public Float getBsc() {
-            return m_basicSC;
-        }
-
-        public Float getSsc() {
-            return m_specificSC;
-        }
-
-        public Float getWsc() {
-            return m_weightedSC;
-        }
-        
-        public String getProtMatchStatus() {
-            return m_pmStatus;
-        }
-        
-        public Integer getPeptideNumber() {
-            return m_peptideNumber;
-        }
-        
-    }
 }

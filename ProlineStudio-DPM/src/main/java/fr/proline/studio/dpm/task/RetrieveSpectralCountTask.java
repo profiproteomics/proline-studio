@@ -20,14 +20,16 @@ public class RetrieveSpectralCountTask extends AbstractServiceTask {
 
     private DDataset m_refQuantDataset = null;
     private Long[] m_refRSMId = null;
+    private Long[] m_refDSId = null;
     private String[] m_spCountJSONResult = null;
 
-    public RetrieveSpectralCountTask(AbstractServiceCallback callback, DDataset refDataset, Long[] refRSMId, String[] spectralCountResultList) {
+    public RetrieveSpectralCountTask(AbstractServiceCallback callback, DDataset refDataset, Long[] refRSMId, Long[] refDSId, String[] spectralCountResultList) {
         super(callback, false /*
                  * asynchronous
                  */, new TaskInfo("Retrieve Spectral Count on " + refDataset.getName(), true, TASK_LIST_INFO));
         m_refQuantDataset = refDataset;
         m_refRSMId = refRSMId;
+        m_refDSId = refDSId;
         m_spCountJSONResult = spectralCountResultList;
     }
 
@@ -45,9 +47,8 @@ public class RetrieveSpectralCountTask extends AbstractServiceTask {
             params.put("project_id", m_refQuantDataset.getProject().getId());
             params.put("dataset_quanti_id", m_refQuantDataset.getId());
 
-            request.setParameters(params);
-            m_loggerProline.debug(" --- WILL CALLL retrieve_wsc with "+params.get("project_id")+" - "+params.get("dataset_quanti_id"));
-            //m_loggerProline.debug("Will postRequest with params  project_id "+m_refDataset.getProject().getId()+" ; ref_result_summary_id "+m_refDataset.getResultSummaryId()+" ; compute_result_summary_ids "+m_resultSummaryIds);
+            request.setParameters(params);           
+            
             HttpResponse response = postRequest("dps.msq/retrieve_wsc/" + request.getMethod() + getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
@@ -173,14 +174,21 @@ public class RetrieveSpectralCountTask extends AbstractServiceTask {
 
 //                    ArrayMap returnedValuesMap = (ArrayMap) returnedValues.get(0);
 
-                    // retrieve Quanti Dataset ID
+                    // retrieve identification Reference RSM ID
                     BigDecimal rsmIDFdBD = (BigDecimal) returnedValues.get("ref_rsm_id");
                     if (rsmIDFdBD == null) {
                         m_loggerProline.warn(getClass().getSimpleName() + " failed : No returned Ref RSM Id");
-//                        return ServiceState.STATE_FAILED;
                     }
                     m_refRSMId[0] = new Long(rsmIDFdBD.longValue());
 
+                     // retrieve identification Reference dataset ID
+                    BigDecimal dsIDFdBD = (BigDecimal) returnedValues.get("ref_ds_id");
+                    if (dsIDFdBD == null) {
+                        m_loggerProline.warn(getClass().getSimpleName() + " failed : No returned Ref Dataset Id");
+                        return ServiceState.STATE_FAILED;
+                    }
+                    m_refDSId[0] = new Long(dsIDFdBD.longValue());
+                    
                     //retrieve SC Values as JSON String 
                     String scValues = (String) returnedValues.get("spectral_count_result");
                     if (scValues == null) {

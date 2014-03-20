@@ -78,7 +78,8 @@ public class IconManager {
         SERVER_ON,
         SERVER_OFF,
         MSN_SET,
-        WAVE;
+        WAVE,
+        COLUMNS_VISIBILITY;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -271,6 +272,8 @@ public class IconManager {
                 return "fr/proline/studio/images/block.png";
             case WAVE:
                 return "fr/proline/studio/images/wave.png";
+            case COLUMNS_VISIBILITY:
+                return "fr/proline/studio/images/columnsVisibility11x11.png";          
         }
 
 

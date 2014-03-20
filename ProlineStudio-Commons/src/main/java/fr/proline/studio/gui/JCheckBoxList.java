@@ -96,13 +96,10 @@ public class JCheckBoxList<E> extends JList {
             setFont(comp.getFont());
             setText(value.toString());
 
-            if (isSelected) {
-                setBackground(comp.getSelectionBackground());
-                setForeground(comp.getSelectionForeground());
-            } else {
-                setBackground(comp.getBackground());
-                setForeground(comp.getForeground());
-            }
+            
+            setBackground(comp.getBackground());
+            setForeground(comp.getForeground());
+
 
             return this;
         }

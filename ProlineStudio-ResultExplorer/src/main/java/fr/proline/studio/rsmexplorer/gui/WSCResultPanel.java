@@ -5,7 +5,9 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dpm.task.SpectralCountTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.JCheckBoxList;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
@@ -20,12 +22,17 @@ import fr.proline.studio.rsmexplorer.gui.renderer.BooleanRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.LazyTable;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
+import org.jdesktop.swingx.table.TableColumnExt;
+import org.openide.windows.WindowManager;
 
 /**
  * Panel for Protein Matches
@@ -45,6 +52,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;    
+    private JButton m_columnVisibilityButton;
     
     /**
      * Creates new form RsmProteinsOfProteinSetPanel
@@ -57,6 +65,12 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         accColumn.setCellRenderer(renderer);
         m_proteinTable.addMouseListener(renderer);
 
+
+        //YODO
+        List<TableColumn> columns = m_proteinTable.getColumns(true);
+        ((TableColumnExt) columns.get(0)).setVisible(false);
+
+        
     }
 
 
@@ -76,7 +90,8 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         // Modify the Model
         ((WSCProteinTableModel) m_proteinTable.getModel()).setData(scResult);
 
-
+        // allow to change column visibility
+        m_columnVisibilityButton.setEnabled(true);
 
     }
 
@@ -199,8 +214,24 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
         m_exportButton = new ExportButton(((WSCProteinTableModel) m_proteinTable.getModel()), "Spectral Counts", m_proteinTable);
 
+        
+        m_columnVisibilityButton = new JButton();
+        m_columnVisibilityButton.setIcon(IconManager.getIcon(IconManager.IconType.COLUMNS_VISIBILITY));
+        m_columnVisibilityButton.setToolTipText("Hide/Show Columns...");
+        m_columnVisibilityButton.setEnabled(false);
+        m_columnVisibilityButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ColumnsVisibilityDialog dialog = new ColumnsVisibilityDialog(WindowManager.getDefault().getMainWindow(), m_proteinTable, (WSCProteinTableModel) m_proteinTable.getModel() );
+                dialog.setLocation(m_columnVisibilityButton.getLocationOnScreen().x +m_columnVisibilityButton.getWidth(), m_columnVisibilityButton.getLocationOnScreen().y + m_columnVisibilityButton.getHeight());
+                dialog.setVisible(true);
+            }
+        });
+        
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
+        toolbar.add(m_columnVisibilityButton);
         
         return toolbar;
     }
@@ -359,4 +390,168 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         
         }
     }
+    
+    public class ColumnsVisibilityDialog extends DefaultDialog {
+
+        private JCheckBoxList m_rsmList;
+        private JCheckBoxList m_spectralCountList;
+        
+        public ColumnsVisibilityDialog(Window parent, ProteinTable table, WSCProteinTableModel proteinTableModel) {
+            super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+
+            // hide default and help buttons
+            setButtonVisible(BUTTON_DEFAULT, false);
+            setButtonVisible(BUTTON_HELP, false);
+
+            setStatusVisible(false);
+
+            setResizable(true);
+
+            setTitle("Select Columns to Display");
+
+            // Prepare data for RSM
+            List<String> rsmList = new ArrayList<>();
+            List<Boolean> visibilityRsmList = new ArrayList<>();
+
+            // Prepare data for different column types
+            int nbTypes = proteinTableModel.getByRsmCount();
+            List<String> typeList = new ArrayList<>();
+            List<Boolean> visibilityTypeList = new ArrayList<>();
+            boolean[] visibilityTypeArray = new boolean[nbTypes];
+            for (int i=0;i<nbTypes;i++) {
+                visibilityTypeArray[i] = false;
+            }
+            
+            
+            List<TableColumn> columns = table.getColumns(true);
+
+            int rsmCount = proteinTableModel.getRsmCount();
+            for (int i = 0; i < rsmCount; i++) {
+                int start = proteinTableModel.getColumStart(i);
+                int stop = proteinTableModel.getColumStop(i);
+
+                boolean rsmVisible = false;
+                for (int j = start; j <= stop; j++) {
+                    boolean columnVisible = ((TableColumnExt) columns.get(j)).isVisible();
+                    if (columnVisible) {
+                        rsmVisible = true;
+                        int type = j-start;
+                        visibilityTypeArray[type] |= columnVisible;
+                    }
+
+                    
+                }
+
+                String rsmName = proteinTableModel.getRsmName(i);
+                rsmList.add(rsmName);
+                visibilityRsmList.add(rsmVisible);
+
+            }
+            
+            for (int i = 0; i < nbTypes; i++) {
+                String name = proteinTableModel.getByRsmColumnName(i);
+                typeList.add(name);
+                visibilityTypeList.add(visibilityTypeArray[i]);
+            }
+            
+            
+
+            
+            
+            
+            JPanel internalPanel = createInternalPanel(rsmList, visibilityRsmList, typeList, visibilityTypeList);
+            setInternalComponent(internalPanel);
+
+
+            
+        }
+
+        private JPanel createInternalPanel(List<String> rsmList, List<Boolean> visibilityList, List<String> typeList, List<Boolean> visibilityTypeList) {
+            JPanel internalPanel = new JPanel();
+
+            internalPanel.setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.anchor = GridBagConstraints.NORTHWEST; 
+            c.fill = GridBagConstraints.BOTH;
+            c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+            JLabel idSummaryLabel = new JLabel("Identification Summaries");
+            JLabel informationLabel = new JLabel("Information");
+            
+            JSeparator separator = new JSeparator(JSeparator.VERTICAL);
+
+            JScrollPane rsmScrollPane = new JScrollPane();
+            m_rsmList = new JCheckBoxList(rsmList, visibilityList);
+            rsmScrollPane.setViewportView(m_rsmList);
+
+            JScrollPane spectralCountScrollPane = new JScrollPane();
+            m_spectralCountList = new JCheckBoxList(typeList, visibilityTypeList); 
+            spectralCountScrollPane.setViewportView(m_spectralCountList);
+
+            c.gridx = 0;
+            c.gridy = 0;
+            
+            internalPanel.add(idSummaryLabel, c);
+            
+            c.gridy++;
+            c.weightx = 1;
+            c.weighty = 1;
+            internalPanel.add(rsmScrollPane, c);
+
+            c.gridy = 0;
+            c.gridx++;
+            c.weightx = 0;
+            c.weighty = 1;
+            c.gridheight = 2;
+            internalPanel.add(separator, c);
+            
+
+            c.gridx++;
+            c.gridheight = 1;
+            c.weightx = 0;
+            c.weighty = 0;
+            internalPanel.add(informationLabel, c);
+            
+            c.gridy++;
+            c.weightx = 1;
+            c.weighty = 1;
+            internalPanel.add(spectralCountScrollPane, c);
+
+
+            return internalPanel;
+        }
+
+        /*
+         * @Override public void pack() { if (m_userSetSize) { // forbid pack by
+         * overloading the method return; } super.pack();
+    }
+         */
+        @Override
+        protected boolean okCalled() {
+
+            WSCProteinTableModel model = ((WSCProteinTableModel) m_proteinTable.getModel());
+            
+            List<TableColumn> columns = m_proteinTable.getColumns(true);
+            for (int i=1;i<columns.size();i++) {
+                int rsmCur = model.getRsmNumber(i);
+                int type = model.getTypeNumber(i);
+                boolean visible = m_rsmList.isVisible(rsmCur) && m_spectralCountList.isVisible(type);
+                boolean columnVisible = ((TableColumnExt) columns.get(i)).isVisible();
+                if (visible ^ columnVisible) {
+                    ((TableColumnExt) columns.get(i)).setVisible(visible);
+                }
+            }
+
+
+            return true;
+        }
+
+        @Override
+        protected boolean cancelCalled() {
+
+            return true;
+        }
+
+    }
+    
 }

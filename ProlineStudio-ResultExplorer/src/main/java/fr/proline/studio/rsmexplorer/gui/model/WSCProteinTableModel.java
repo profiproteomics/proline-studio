@@ -59,6 +59,45 @@ public class WSCProteinTableModel extends LazyTableModel {
         return 1 + (m_wscResult.getComputedSCDatasets().size()*COLNBR_PER_RSM);        
     }
 
+    public int getColumStart(int rsmIndex) {
+        return 1+rsmIndex*COLNBR_PER_RSM;
+    }
+    public int getColumStop(int rsmIndex) {
+        return (1+rsmIndex)*COLNBR_PER_RSM;
+    }
+    
+    public int getRsmCount() {
+        return m_wscResult.getComputedSCDatasets().size();
+    }
+    
+    public String getRsmName(int i) {
+
+        StringBuilder sb = new StringBuilder();
+
+        String rsmHtmlColor = CyclicColorPalette.getHTMLColor(i);
+        sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+        sb.append(m_wscResult.getComputedSCDatasets().get(i).getName());
+        sb.append("</html>");
+
+        return sb.toString();
+    }
+    
+    public int getByRsmCount() {
+        return m_columnNames.length-1;
+    }
+    
+    public String getByRsmColumnName(int index) {
+        return m_columnNames[index+1];
+    }
+    
+    public int getRsmNumber(int col) {
+        return (col-1) / COLNBR_PER_RSM;
+    }
+    
+    public int getTypeNumber(int col) {
+        return (col-1) % COLNBR_PER_RSM;
+    }
+    
     @Override
     public String getColumnName(int col) {
         switch (col) {

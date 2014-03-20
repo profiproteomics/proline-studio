@@ -2,13 +2,16 @@ package fr.proline.studio.rsmexplorer.actions;
 
 
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.dpm.AccessServiceThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.RetrieveSpectralCountTask;
-import fr.proline.studio.dpm.task.SpectralCountTask;
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import org.openide.util.NbBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,38 +31,21 @@ public class RetrieveSCDataAction extends AbstractRSMAction {
     
     @Override
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) { 
-     
-        // Onlt Ref should be selected to compute SC         
+        
+        // Only Ref should be selected to compute SC         
         final RSMDataSetNode refDatasetNode = (RSMDataSetNode) selectedNodes[0];
-        final String[] _spCountJSON = new String[1];
-        final Long[] _refIdfRSMId = new Long[1];
+        Map<String,Object> params = new HashMap();
         
-        AbstractServiceCallback callback = new AbstractServiceCallback() {
+        ArrayList<DDataset> datasetList = new ArrayList<>();        
+        datasetList.add(refDatasetNode.getDataset()); //first and single entry is Reference Dataset in data box !
+        params.put(SpectralCountAction.DS_LIST_PROPERTIES, datasetList);
+        WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox(refDatasetNode.getDataset().getName()+" WSC", true) ;
+        wbox.setEntryData(refDatasetNode.getDataset().getProject().getId(), params);
 
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success) {
-                m_logger.debug(" Read Weighted SC");
-                if (success) {
-                
-                    m_logger.debug(" Will GET SC from "+refDatasetNode.getDataset().getType()+" with ID "+ refDatasetNode.getDataset().getId());
-                    String scResultAsJson = _spCountJSON[0];
-                    Long refIdfRSM = _refIdfRSMId[0];
-                    SpectralCountTask.WSCResultData scResult = new SpectralCountTask.WSCResultData(null, null, scResultAsJson);
-                    System.out.println(scResultAsJson);
-                } else {
-                     System.out.println("ERROR ");
-                }
-                    
-        
-            }
-        };
-        RetrieveSpectralCountTask task = new RetrieveSpectralCountTask(callback, refDatasetNode.getDataset(), _refIdfRSMId, _spCountJSON);
-        AccessServiceThread.getAccessServiceThread().addTask(task);
+        // open a window to display the window box
+        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+        win.open();
+        win.requestActive(); 
     }
 
     @Override

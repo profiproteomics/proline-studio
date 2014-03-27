@@ -1,6 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.rsmexplorer.actions.HelpAction;
 import java.awt.*;
 import javax.swing.*;
 
@@ -15,29 +17,50 @@ public class AddProjectDialog extends DefaultDialog {
     private JTextField m_nameTextField;
     private JTextArea m_descriptionTextArea;
     
-    public static AddProjectDialog getDialog(Window parent) {
+    public static AddProjectDialog getAddProjectDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new AddProjectDialog(parent);
         }
 
-        m_singletonDialog.reinitialize();
+        m_singletonDialog.initialize(null);
         
         return m_singletonDialog;
     }
 
-    public void reinitialize() {
+    public static AddProjectDialog getModifyProjectDialog(Window parent, Project p) {
+        if (m_singletonDialog == null) {
+            m_singletonDialog = new AddProjectDialog(parent);
+        }
 
-        // reinit fields
-        m_nameTextField.setText("");
-        m_descriptionTextArea.setText("");
+        m_singletonDialog.initialize(p);
+        
+        return m_singletonDialog;
+    }
+    
+    public void initialize(Project p) {
+
+        // initialize fields
+        if (p == null) {
+            m_nameTextField.setText("");
+            m_descriptionTextArea.setText("");
+            
+            setTitle("Add Project");
+
+            setButtonVisible(BUTTON_HELP, true);
+            setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createproject");
+
+        } else {
+            m_nameTextField.setText(p.getName());
+            m_descriptionTextArea.setText(p.getDescription());
+            
+            setTitle("Modify Project Parameters");
+            
+            setButtonVisible(BUTTON_HELP, false); //JPM.TODO
+        }
     }
     
     private AddProjectDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-
-        setTitle("Add Project");
-        
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createproject");
 
         setButtonVisible(BUTTON_DEFAULT, false);
         
@@ -135,6 +158,7 @@ public class AddProjectDialog extends DefaultDialog {
 
     @Override
     protected boolean cancelCalled() {
+
         return true;
     }
     

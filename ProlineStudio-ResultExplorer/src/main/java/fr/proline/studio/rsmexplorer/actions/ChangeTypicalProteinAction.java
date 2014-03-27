@@ -41,7 +41,7 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
             String regex = dialog.getRegex();
             boolean regexOnAccession = dialog.regexOnAccession();
 
-            RSMTree tree = RSMTree.getTree();
+            RSMTree tree = RSMTree.getCurrentTree();
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
             // start validation for each selected Dataset
@@ -76,7 +76,7 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
                         
                         dataSetNode.setIsChanging(false);
 
-                        RSMTree tree = RSMTree.getTree();
+                        RSMTree tree = RSMTree.getCurrentTree();
                         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                         treeModel.nodeChanged(dataSetNode);
                     }

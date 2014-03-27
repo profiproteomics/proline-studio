@@ -31,7 +31,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
         RSMDataSetNode datasetNode = (RSMDataSetNode) n;
         DDataset trashDataset = datasetNode.getDataset();
         
-        RSMTree tree = RSMTree.getTree();
+        RSMTree tree = RSMTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
         n.setIsChanging(true);

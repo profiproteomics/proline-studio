@@ -4,6 +4,7 @@ package fr.proline.studio.rsmexplorer.actions;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
@@ -37,8 +38,11 @@ public class DisconnectAction extends AbstractRSMAction {
         }
         
         // must remove all nodes
-        RSMTree.getTree().removeRootChildren();
+        //RSMTree.getTree().removeRootChildren();
+        ProjectExplorerPanel.getProjectExplorerPanel().selectProject(null);
+        RSMTree.clearAll();
 
+        
         // open the dialog to connect to another user
         ServerConnectionDialog serverConnectionDialog = ServerConnectionDialog.getDialog(WindowManager.getDefault().getMainWindow());
         serverConnectionDialog.setChangeUser();

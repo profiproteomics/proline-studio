@@ -85,7 +85,7 @@ public class AggregateAction extends AbstractRSMAction {
 
                 final ArrayList<RSMDataSetNode> nodesCreated = new ArrayList<>();
 
-                final RSMTree tree = RSMTree.getTree();
+                final RSMTree tree = RSMTree.getCurrentTree();
                 final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 for (int i = 0; i < nbAggregates; i++) {
                     String aggregateName = name;

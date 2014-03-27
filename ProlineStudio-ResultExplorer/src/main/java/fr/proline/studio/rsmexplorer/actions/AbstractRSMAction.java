@@ -23,7 +23,7 @@ public abstract class AbstractRSMAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         
-        RSMTree tree = RSMTree.getTree();
+        RSMTree tree = RSMTree.getCurrentTree();
         
         TreePath treePath = tree.getSelectionPath();
         

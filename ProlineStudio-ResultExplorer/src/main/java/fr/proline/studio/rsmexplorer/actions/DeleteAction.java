@@ -21,7 +21,7 @@ public class DeleteAction extends AbstractRSMAction {
 
     @Override
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) { 
-        RSMTree.getTree().moveToTrash(selectedNodes);
+        RSMTree.getCurrentTree().moveToTrash(selectedNodes);
     }
     
     @Override

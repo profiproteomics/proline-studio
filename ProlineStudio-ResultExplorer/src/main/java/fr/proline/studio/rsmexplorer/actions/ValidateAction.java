@@ -94,7 +94,7 @@ public class ValidateAction extends AbstractRSMAction {
             final boolean regexOnAccession = dialog.isTYpicalProteinOnAccession();
             final String scoringType = dialog.getScoringType();
 
-            RSMTree tree = RSMTree.getTree();
+            RSMTree tree = RSMTree.getCurrentTree();
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
             // start validation for each selected Dataset
@@ -166,7 +166,7 @@ public class ValidateAction extends AbstractRSMAction {
                     dataSetNode.setIsChanging(false);
 
 
-                    RSMTree tree = RSMTree.getTree();
+                    RSMTree tree = RSMTree.getCurrentTree();
                     DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                     treeModel.nodeChanged(dataSetNode);
                 }
@@ -195,7 +195,7 @@ public class ValidateAction extends AbstractRSMAction {
                         datasetNode.setIsChanging(false);
 
 
-                        RSMTree tree = RSMTree.getTree();
+                        RSMTree tree = RSMTree.getCurrentTree();
                         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                         treeModel.nodeChanged(datasetNode);
 
@@ -225,7 +225,7 @@ public class ValidateAction extends AbstractRSMAction {
 
                     datasetNode.setIsChanging(false);
 
-                    RSMTree tree = RSMTree.getTree();
+                    RSMTree tree = RSMTree.getCurrentTree();
                     DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                     treeModel.nodeChanged(datasetNode);
                 }

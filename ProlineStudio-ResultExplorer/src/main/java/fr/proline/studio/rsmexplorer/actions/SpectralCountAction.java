@@ -99,7 +99,7 @@ public class SpectralCountAction extends AbstractRSMAction {
                 }
 
                 if (error != null) {
-                    JOptionPane.showMessageDialog(RSMTree.getTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(RSMTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 
@@ -117,13 +117,13 @@ public class SpectralCountAction extends AbstractRSMAction {
         };
         
         //Create Child Tree to select RSM to compute SC for
-        final RSMTree childTree = RSMTree.getTree().copyDataSetRootSubTree(refDatasetNode.getDataset(),  refDatasetNode.getDataset().getProject().getId());
+        final RSMTree childTree = RSMTree.getCurrentTree().copyDataSetRootSubTree(refDatasetNode.getDataset(),  refDatasetNode.getDataset().getProject().getId());
         m_treeSelectionDialog = new TreeSelectionDialog(WindowManager.getDefault().getMainWindow(), childTree, "Select Identification Summaries for Spectral Count", 380, 500);
         m_treeSelectionDialog.setButtonName(TreeSelectionDialog.BUTTON_OK, "Next");
         m_treeSelectionDialog.setLocation(x, y);   
         m_treeSelectionDialog.setVisible(true);  
 
-        RSMTree.getTree().loadInBackground(refDatasetNode, callback);
+        RSMTree.getCurrentTree().loadInBackground(refDatasetNode, callback);
 
     
     }

@@ -259,7 +259,7 @@ public class RSMTransferHandler extends TransferHandler {
         int childIndex = location.getChildIndex();
         RSMNode dropRSMNode = (RSMNode) dropTreePath.getLastPathComponent();
 
-        RSMTree tree = RSMTree.getTree();
+        RSMTree tree = RSMTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
         // no insert index specified -> we insert at the end
@@ -359,7 +359,7 @@ public class RSMTransferHandler extends TransferHandler {
         int childIndex = location.getChildIndex();
         RSMNode dropRSMNode = (RSMNode) dropTreePath.getLastPathComponent();
 
-        RSMTree tree = RSMTree.getTree();
+        RSMTree tree = RSMTree.getCurrentTree();
         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
         // no insert index specified -> we insert at the end

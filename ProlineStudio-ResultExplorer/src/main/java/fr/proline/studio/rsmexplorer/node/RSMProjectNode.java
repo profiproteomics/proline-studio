@@ -4,7 +4,6 @@ import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ProjectData;
-import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProjectTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -34,9 +33,14 @@ public class RSMProjectNode extends RSMNode {
     
     @Override
     public ImageIcon getIcon() {
-        return getIcon(IconManager.IconType.PROJECT);
+        return getIcon(IconManager.IconType.MOLECULE);
     }
 
+    @Override
+    public String toString() {
+        return "Identifications";
+    }
+    
     public void changeNameAndDescription(final String newName, final String newDescription) {
         
         final Project project = getProject();
@@ -46,7 +50,7 @@ public class RSMProjectNode extends RSMNode {
         if (((newName != null) && (newName.compareTo(name) != 0)) || ((newDescription != null) && (newDescription.compareTo(description) != 0))) {
             setIsChanging(true);
             project.setName(newName + "...");
-            ((DefaultTreeModel) RSMTree.getTree().getModel()).nodeChanged(this);
+            ((DefaultTreeModel) RSMTree.getCurrentTree().getModel()).nodeChanged(this);
 
             final RSMProjectNode projectNode = this;
             
@@ -62,7 +66,7 @@ public class RSMProjectNode extends RSMNode {
                     setIsChanging(false);
                     project.setName(newName);
                     project.setDescription(newDescription);
-                    ((DefaultTreeModel) RSMTree.getTree().getModel()).nodeChanged(projectNode);
+                    ((DefaultTreeModel) RSMTree.getCurrentTree().getModel()).nodeChanged(projectNode);
                 }
             };
 

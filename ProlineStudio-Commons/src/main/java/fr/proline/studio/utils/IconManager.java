@@ -79,7 +79,11 @@ public class IconManager {
         SERVER_OFF,
         MSN_SET,
         WAVE,
-        COLUMNS_VISIBILITY;
+        COLUMNS_VISIBILITY,
+        PLUS_SMALL_10X10,
+        PROPERTY_SMALL_10X10,
+        EDIT_SMALL_10X10,
+        MOLECULE;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -273,7 +277,15 @@ public class IconManager {
             case WAVE:
                 return "fr/proline/studio/images/wave.png";
             case COLUMNS_VISIBILITY:
-                return "fr/proline/studio/images/columnsVisibility11x11.png";          
+                return "fr/proline/studio/images/columnsVisibility11x11.png";      
+            case PLUS_SMALL_10X10:
+                return "fr/proline/studio/images/plus-small10x10.png";     
+            case PROPERTY_SMALL_10X10:
+                return "fr/proline/studio/images/property-small10x10.png";    
+            case EDIT_SMALL_10X10:
+                return "fr/proline/studio/images/edit-small10x10.png";   
+            case MOLECULE:
+                return "fr/proline/studio/images/molecule.png";  
         }
 
 

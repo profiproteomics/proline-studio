@@ -92,7 +92,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
             final boolean saveSpectrumMatches = dialog.getSaveSpectrumMatches();
             
-            RSMTree tree = RSMTree.getTree();
+            RSMTree tree = RSMTree.getCurrentTree();
             
             final ArrayList<RSMDataSetNode> allIdentificationNodes = new ArrayList<>();
             final ArrayList<String> allDatasetNames = new ArrayList<>();
@@ -227,7 +227,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
 
         identificationNode.setIsChanging(false);
 
-        RSMTree tree = RSMTree.getTree();
+        RSMTree tree = RSMTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         treeModel.nodeChanged(identificationNode);
 

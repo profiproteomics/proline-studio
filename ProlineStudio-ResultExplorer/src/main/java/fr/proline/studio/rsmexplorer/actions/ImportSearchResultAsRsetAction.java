@@ -62,7 +62,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
             final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
             final boolean saveSpectrumMatches = dialog.getSaveSpectrumMatches();
             
-            RSMTree tree = RSMTree.getTree();
+            RSMTree tree = RSMTree.getCurrentTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             
             allImportedNode.setIsChanging(true);

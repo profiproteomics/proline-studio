@@ -5,6 +5,8 @@ import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.ConnectionDialog;
+import fr.proline.studio.rsmexplorer.actions.ConnectAction;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.node.RSMTree; 
 import java.awt.Window;
 import javax.swing.*;
@@ -90,8 +92,9 @@ public class ServerConnectionDialog extends ConnectionDialog {
             }
 
             // start to load the data for the new user
-            RSMTree.getTree().startLoading();
+            ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
 
+            
             return true;
  
         } else {

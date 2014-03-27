@@ -183,7 +183,7 @@ public class RSMDataSetNode extends RSMNode {
 
             setIsChanging(true);
             dataset.setName(newName + "...");
-            ((DefaultTreeModel) RSMTree.getTree().getModel()).nodeChanged(this);
+            ((DefaultTreeModel) RSMTree.getCurrentTree().getModel()).nodeChanged(this);
 
 
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -197,7 +197,7 @@ public class RSMDataSetNode extends RSMNode {
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     datasetNode.setIsChanging(false);
                     datasetNode.getDataset().setName(newName);
-                    ((DefaultTreeModel) RSMTree.getTree().getModel()).nodeChanged(datasetNode);
+                    ((DefaultTreeModel) RSMTree.getCurrentTree().getModel()).nodeChanged(datasetNode);
                 }
             };
 

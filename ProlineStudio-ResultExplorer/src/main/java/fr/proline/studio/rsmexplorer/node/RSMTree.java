@@ -5,7 +5,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.AbstractData;
-import fr.proline.studio.dam.data.ParentData;
+import fr.proline.studio.dam.data.ProjectData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -29,18 +29,32 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     private RSMTreeModel m_model;
     private boolean m_isMainTree;
-    private static RSMTree m_instance = null;
+    //private static RSMTree m_instance = null;
 
+    private static HashMap<ProjectData, RSMTree> treeMap = new HashMap<>();
+    private static RSMTree m_currentTree = null;
+    
     private boolean m_loadingDone = false;
     
-    public static RSMTree getTree() {
-        if (m_instance == null) {
-            m_instance = new RSMTree();
+    public static RSMTree getTree(ProjectData projectData) {
+        
+        RSMTree tree = treeMap.get(projectData);
+        if (tree == null) {
+            tree = new RSMTree(projectData);
+            treeMap.put(projectData, tree);
         }
-        return m_instance;
+        
+        m_currentTree = tree;
+        
+        return tree;
     }
+    
+    public static RSMTree getCurrentTree() {
+        return m_currentTree;
+    }
+    
 
-    private RSMTree() {
+    private RSMTree(ProjectData projectData) {
 
         setEditable(true);
         
@@ -55,9 +69,11 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         m_isMainTree = true;
 
         // Model of the tree
-        RSMNode top = RSMChildFactory.createNode(new ParentData());
+        RSMNode top = RSMChildFactory.createNode(projectData);
 
         initTree(top);
+        
+        startLoading(top);
 
     }
 
@@ -88,6 +104,10 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         addTreeWillExpandListener(this); // used for lazy loading
         addMouseListener(this);         // used for popup triggering
 
+    }
+    
+    public static void clearAll() {
+        treeMap.clear();
     }
     
     public void removeRootChildren() {
@@ -646,14 +666,14 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         int nbNodes = selectedNodes.length;
 
         // check if the Root node or Trash or a Node in Trash is selected
-        boolean rootNodeSelected = false;
+        //boolean rootNodeSelected = false;
         boolean trashNodeSelected = false;
         boolean allImportedNodeSelected = false;
         for (int i=0;i<nbNodes;i++) {
             RSMNode n = selectedNodes[i];
-            if (n.isRoot()) {
+            /*if (n.isRoot()) {
                 rootNodeSelected = true;
-            }
+            }*/
 
             if (n instanceof RSMDataSetNode) {
                 RSMDataSetNode datasetNode = (RSMDataSetNode) n;
@@ -684,7 +704,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         JPopupMenu popup;
         ArrayList<AbstractRSMAction> actions;
         
-        if (rootNodeSelected && (nbNodes >= 1)) {
+        /*if (rootNodeSelected && (nbNodes >= 1)) {
             if (nbNodes > 1) {
                 // the root node is selected and multiple nodes are
                 // selected : we do not show the popup
@@ -723,7 +743,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             popup = m_rootPopup;
             actions = m_rootActions;
             
-        } else if (trashNodeSelected && (nbNodes == 1)) {
+        } else */
+        if (trashNodeSelected && (nbNodes == 1)) {
             
             // creation of the popup if needed
             if (m_trashPopup == null) {
@@ -874,8 +895,8 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
     }
     private JPopupMenu m_mainPopup;
     private ArrayList<AbstractRSMAction> m_mainActions;
-    private JPopupMenu m_rootPopup;
-    private ArrayList<AbstractRSMAction> m_rootActions;
+    //private JPopupMenu m_rootPopup;
+    //private ArrayList<AbstractRSMAction> m_rootActions;
     private JPopupMenu m_trashPopup;
     private ArrayList<AbstractRSMAction> m_trashActions;
     private JPopupMenu m_allImportedPopup;

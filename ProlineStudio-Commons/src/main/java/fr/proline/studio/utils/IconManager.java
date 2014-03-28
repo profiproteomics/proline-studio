@@ -83,7 +83,7 @@ public class IconManager {
         PLUS_SMALL_10X10,
         PROPERTY_SMALL_10X10,
         EDIT_SMALL_10X10,
-        MOLECULE;
+        IDENTIFICATION;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -284,8 +284,8 @@ public class IconManager {
                 return "fr/proline/studio/images/property-small10x10.png";    
             case EDIT_SMALL_10X10:
                 return "fr/proline/studio/images/edit-small10x10.png";   
-            case MOLECULE:
-                return "fr/proline/studio/images/molecule.png";  
+            case IDENTIFICATION:
+                return "fr/proline/studio/images/identification.png";  
         }
 
 

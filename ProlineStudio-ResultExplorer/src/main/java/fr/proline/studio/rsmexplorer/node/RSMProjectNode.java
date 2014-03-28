@@ -33,7 +33,7 @@ public class RSMProjectNode extends RSMNode {
     
     @Override
     public ImageIcon getIcon() {
-        return getIcon(IconManager.IconType.MOLECULE);
+        return getIcon(IconManager.IconType.IDENTIFICATION);
     }
 
     @Override

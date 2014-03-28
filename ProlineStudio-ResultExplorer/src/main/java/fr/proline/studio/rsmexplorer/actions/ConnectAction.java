@@ -29,42 +29,41 @@ import org.openide.windows.WindowManager;
  */
 
 @ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.ConnectAction")
-@ActionRegistration(displayName = "Connect...")
+@ActionRegistration(displayName = "#CTL_ConnectAction")
 @ActionReferences({
     @ActionReference(path = "Menu/File", position = 100)
 })
-public class ConnectAction  extends AbstractAction implements ContextAwareAction, ServerConnectionManager.ConnectionListener {
+@NbBundle.Messages("CTL_ConnectAction=Connect...")
+public class ConnectAction  extends AbstractAction implements ContextAwareAction {
 
     private static ConnectAction m_action = null;
     
-    private boolean m_connectAction;
+    private static boolean m_connectAction;
     
-    public ConnectAction() {
+    private ConnectAction() {
 
+        m_action = this;
+        
         setConnectionType(true, true);
+    }
 
-        ServerConnectionManager.getServerConnectionManager().setConnectionListener(this);
-    }
     
-    public static ConnectAction getConnectionAction() {
-        if (m_action == null) {
-            m_action = new ConnectAction();
-        }
-        return m_action;
-    }
-    
-    public final void setConnectionType(boolean connectAction, boolean enabled) {
+    public final static void setConnectionType(boolean connectAction, boolean enabled) {
         m_connectAction = connectAction;
-        if (connectAction) {
-            putValue(Action.NAME, NbBundle.getMessage(ConnectAction.class, "CTL_ConnectAction"));
-        } else {
-            putValue(Action.NAME, NbBundle.getMessage(ConnectAction.class, "CTL_DisconnectAction"));
+        
+        if (m_action != null) {
+            m_action.setEnabled(enabled);
+            if (connectAction) {
+                m_action.putValue(Action.NAME, NbBundle.getMessage(ConnectAction.class, "CTL_ConnectAction"));
+            } else {
+                m_action.putValue(Action.NAME, "Disconnect...");
+            }
         }
     }
 
     @Override
     public Action createContextAwareInstance(Lookup lkp) {
-        return getConnectionAction();
+        return new ConnectAction();
     }
     
     @Override
@@ -89,7 +88,7 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
 
                         ServerConnectionManager serciceConnectionMgr = ServerConnectionManager.getServerConnectionManager();
                         if (serciceConnectionMgr.isConnectionDone()) {
-                            // RSMTree.getTree().startLoading(); //JPM.TODO.TREE
+                            ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
                         }
                     }
                 });
@@ -131,12 +130,6 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
             
         }
     }
-
-    @Override
-    public void connectionDone() {
-        //setConnection(!connected);
-    }
-
 
 
     

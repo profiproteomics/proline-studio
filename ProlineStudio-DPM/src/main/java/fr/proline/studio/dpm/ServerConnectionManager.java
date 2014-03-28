@@ -46,8 +46,7 @@ public class ServerConnectionManager {
     private String m_previousDatabsePassword = "";
     
     private int m_previousErrorId = -1;
-    
-    private ConnectionListener m_listener = null;
+
     
     private static ServerConnectionManager m_connectionManager = null;
 
@@ -316,21 +315,11 @@ public class ServerConnectionManager {
 
     public synchronized void setConnectionState(int connectionState) {
         m_connectionState = connectionState;
-        if ((connectionState == CONNECTION_DONE) && (m_listener != null)) {
-            m_listener.connectionDone();
-        }
+
     }
 
     public TaskError getConnectionError() {
         return m_connectionError;
     }
-    
-    public void setConnectionListener(ConnectionListener listener) {
-        m_listener = listener;
-    }
-    
-    public interface ConnectionListener {
-        
-        public void connectionDone();
-    }
+
 }

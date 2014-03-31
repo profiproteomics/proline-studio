@@ -15,7 +15,7 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.task.ChangeTypicalProteinTask;
 import fr.proline.studio.gui.OptionDialog;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.tree.DefaultTreeModel;
@@ -94,7 +94,7 @@ public class ValidateAction extends AbstractRSMAction {
             final boolean regexOnAccession = dialog.isTYpicalProteinOnAccession();
             final String scoringType = dialog.getScoringType();
 
-            RSMTree tree = RSMTree.getCurrentTree();
+            IdentificationTree tree = IdentificationTree.getCurrentTree();
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
             // start validation for each selected Dataset
@@ -166,7 +166,7 @@ public class ValidateAction extends AbstractRSMAction {
                     dataSetNode.setIsChanging(false);
 
 
-                    RSMTree tree = RSMTree.getCurrentTree();
+                    IdentificationTree tree = IdentificationTree.getCurrentTree();
                     DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                     treeModel.nodeChanged(dataSetNode);
                 }
@@ -195,7 +195,7 @@ public class ValidateAction extends AbstractRSMAction {
                         datasetNode.setIsChanging(false);
 
 
-                        RSMTree tree = RSMTree.getCurrentTree();
+                        IdentificationTree tree = IdentificationTree.getCurrentTree();
                         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                         treeModel.nodeChanged(datasetNode);
 
@@ -225,7 +225,7 @@ public class ValidateAction extends AbstractRSMAction {
 
                     datasetNode.setIsChanging(false);
 
-                    RSMTree tree = RSMTree.getCurrentTree();
+                    IdentificationTree tree = IdentificationTree.getCurrentTree();
                     DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                     treeModel.nodeChanged(datasetNode);
                 }

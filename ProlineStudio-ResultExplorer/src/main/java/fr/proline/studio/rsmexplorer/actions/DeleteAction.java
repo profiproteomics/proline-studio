@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +21,7 @@ public class DeleteAction extends AbstractRSMAction {
 
     @Override
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) { 
-        RSMTree.getCurrentTree().moveToTrash(selectedNodes);
+        IdentificationTree.getCurrentTree().moveToTrash(selectedNodes);
     }
     
     @Override

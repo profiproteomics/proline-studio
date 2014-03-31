@@ -5,7 +5,7 @@ package fr.proline.studio.rsmexplorer;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;

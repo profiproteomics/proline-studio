@@ -13,7 +13,7 @@ import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.MergeTask;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -73,7 +73,7 @@ public class MergeAction extends AbstractRSMAction {
                 }
 
                 if (error != null) {
-                    JOptionPane.showMessageDialog(RSMTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -84,7 +84,7 @@ public class MergeAction extends AbstractRSMAction {
                 } else if (resultSummaryIdList.size()>0) {
                     // not all children have a result summary
                     error = "Merge is not possible : some Search Results are not validated ";
-                    JOptionPane.showMessageDialog(RSMTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
                 } else {
                     // merge on result set
                     askMergeService((RSMDataSetNode) node, resultSetIdList, false);
@@ -96,7 +96,7 @@ public class MergeAction extends AbstractRSMAction {
             }
         };
 
-        RSMTree.getCurrentTree().loadInBackground(node, callback);
+        IdentificationTree.getCurrentTree().loadInBackground(node, callback);
 
     }
 
@@ -107,7 +107,7 @@ public class MergeAction extends AbstractRSMAction {
         String datasetName = dataset.getName();
 
         node.setIsChanging(true);
-        RSMTree tree = RSMTree.getCurrentTree();
+        IdentificationTree tree = IdentificationTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
         treeModel.nodeChanged(node);
 
@@ -160,7 +160,7 @@ public class MergeAction extends AbstractRSMAction {
 
                 datasetNode.setIsChanging(false);
 
-                RSMTree tree = RSMTree.getCurrentTree();
+                IdentificationTree tree = IdentificationTree.getCurrentTree();
                 DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 treeModel.nodeChanged(datasetNode);
             }

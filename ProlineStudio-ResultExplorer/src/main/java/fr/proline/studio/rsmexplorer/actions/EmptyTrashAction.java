@@ -8,7 +8,7 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 
@@ -31,7 +31,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
         RSMDataSetNode datasetNode = (RSMDataSetNode) n;
         DDataset trashDataset = datasetNode.getDataset();
         
-        RSMTree tree = RSMTree.getCurrentTree();
+        IdentificationTree tree = IdentificationTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
         n.setIsChanging(true);

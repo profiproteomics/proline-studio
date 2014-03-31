@@ -41,8 +41,8 @@ public class RSMTransferHandler extends TransferHandler {
     @Override
     protected Transferable createTransferable(JComponent c) {
 
-        if (c instanceof RSMTree) {
-            RSMTree tree = (RSMTree) c;
+        if (c instanceof IdentificationTree) {
+            IdentificationTree tree = (IdentificationTree) c;
             
             // only Dataset which are not being changed can be transferred
             // furthermore Dataset must be of the same project
@@ -259,7 +259,7 @@ public class RSMTransferHandler extends TransferHandler {
         int childIndex = location.getChildIndex();
         RSMNode dropRSMNode = (RSMNode) dropTreePath.getLastPathComponent();
 
-        RSMTree tree = RSMTree.getCurrentTree();
+        IdentificationTree tree = IdentificationTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
         // no insert index specified -> we insert at the end
@@ -359,7 +359,7 @@ public class RSMTransferHandler extends TransferHandler {
         int childIndex = location.getChildIndex();
         RSMNode dropRSMNode = (RSMNode) dropTreePath.getLastPathComponent();
 
-        RSMTree tree = RSMTree.getCurrentTree();
+        IdentificationTree tree = IdentificationTree.getCurrentTree();
         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
         // no insert index specified -> we insert at the end

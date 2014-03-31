@@ -50,7 +50,7 @@ public class RSMProjectNode extends RSMNode {
         if (((newName != null) && (newName.compareTo(name) != 0)) || ((newDescription != null) && (newDescription.compareTo(description) != 0))) {
             setIsChanging(true);
             project.setName(newName + "...");
-            ((DefaultTreeModel) RSMTree.getCurrentTree().getModel()).nodeChanged(this);
+            ((DefaultTreeModel) IdentificationTree.getCurrentTree().getModel()).nodeChanged(this);
 
             final RSMProjectNode projectNode = this;
             
@@ -66,7 +66,7 @@ public class RSMProjectNode extends RSMNode {
                     setIsChanging(false);
                     project.setName(newName);
                     project.setDescription(newDescription);
-                    ((DefaultTreeModel) RSMTree.getCurrentTree().getModel()).nodeChanged(projectNode);
+                    ((DefaultTreeModel) IdentificationTree.getCurrentTree().getModel()).nodeChanged(projectNode);
                 }
             };
 

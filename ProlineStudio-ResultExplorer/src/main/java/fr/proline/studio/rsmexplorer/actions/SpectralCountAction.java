@@ -13,7 +13,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.SetQuantitationDSNameDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.TreeSelectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -99,7 +99,7 @@ public class SpectralCountAction extends AbstractRSMAction {
                 }
 
                 if (error != null) {
-                    JOptionPane.showMessageDialog(RSMTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 
@@ -117,13 +117,13 @@ public class SpectralCountAction extends AbstractRSMAction {
         };
         
         //Create Child Tree to select RSM to compute SC for
-        final RSMTree childTree = RSMTree.getCurrentTree().copyDataSetRootSubTree(refDatasetNode.getDataset(),  refDatasetNode.getDataset().getProject().getId());
+        final IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(refDatasetNode.getDataset(),  refDatasetNode.getDataset().getProject().getId());
         m_treeSelectionDialog = new TreeSelectionDialog(WindowManager.getDefault().getMainWindow(), childTree, "Select Identification Summaries for Spectral Count", 380, 500);
         m_treeSelectionDialog.setButtonName(TreeSelectionDialog.BUTTON_OK, "Next");
         m_treeSelectionDialog.setLocation(x, y);   
         m_treeSelectionDialog.setVisible(true);  
 
-        RSMTree.getCurrentTree().loadInBackground(refDatasetNode, callback);
+        IdentificationTree.getCurrentTree().loadInBackground(refDatasetNode, callback);
 
     
     }

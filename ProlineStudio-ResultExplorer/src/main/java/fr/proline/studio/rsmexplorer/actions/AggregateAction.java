@@ -14,7 +14,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.AddAggregateDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.util.ArrayList;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
@@ -85,7 +85,7 @@ public class AggregateAction extends AbstractRSMAction {
 
                 final ArrayList<RSMDataSetNode> nodesCreated = new ArrayList<>();
 
-                final RSMTree tree = RSMTree.getCurrentTree();
+                final IdentificationTree tree = IdentificationTree.getCurrentTree();
                 final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 for (int i = 0; i < nbAggregates; i++) {
                     String aggregateName = name;

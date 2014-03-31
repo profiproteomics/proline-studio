@@ -7,7 +7,7 @@ import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.util.Iterator;
 import java.util.Set;
 import org.openide.util.NbBundle;
@@ -40,7 +40,7 @@ public class DisconnectAction extends AbstractRSMAction {
         // must remove all nodes
         //RSMTree.getTree().removeRootChildren();
         ProjectExplorerPanel.getProjectExplorerPanel().selectProject(null);
-        RSMTree.clearAll();
+        IdentificationTree.clearAll();
 
         
         // open the dialog to connect to another user

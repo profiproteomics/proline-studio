@@ -25,22 +25,22 @@ import javax.swing.tree.*;
  * Tree of projects and datasets
  * @author JM235353
  */
-public class RSMTree extends JTree implements TreeWillExpandListener, MouseListener {
+public class IdentificationTree extends JTree implements TreeWillExpandListener, MouseListener {
 
     private RSMTreeModel m_model;
     private boolean m_isMainTree;
     //private static RSMTree m_instance = null;
 
-    private static HashMap<ProjectData, RSMTree> treeMap = new HashMap<>();
-    private static RSMTree m_currentTree = null;
+    private static HashMap<ProjectData, IdentificationTree> treeMap = new HashMap<>();
+    private static IdentificationTree m_currentTree = null;
     
     private boolean m_loadingDone = false;
     
-    public static RSMTree getTree(ProjectData projectData) {
+    public static IdentificationTree getTree(ProjectData projectData) {
         
-        RSMTree tree = treeMap.get(projectData);
+        IdentificationTree tree = treeMap.get(projectData);
         if (tree == null) {
-            tree = new RSMTree(projectData);
+            tree = new IdentificationTree(projectData);
             treeMap.put(projectData, tree);
         }
         
@@ -49,12 +49,12 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         return tree;
     }
     
-    public static RSMTree getCurrentTree() {
+    public static IdentificationTree getCurrentTree() {
         return m_currentTree;
     }
     
 
-    private RSMTree(ProjectData projectData) {
+    private IdentificationTree(ProjectData projectData) {
 
         setEditable(true);
         
@@ -77,7 +77,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
     }
 
-    private RSMTree(RSMNode top) {
+    private IdentificationTree(RSMNode top) {
 
         m_isMainTree = false;
 
@@ -134,7 +134,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
         return false;
     }
 
-    public RSMTree copyResultSetRootSubTree(ResultSet rset, long projectId) {
+    public IdentificationTree copyResultSetRootSubTree(ResultSet rset, long projectId) {
 
         long rsetId = rset.getId();
 
@@ -146,12 +146,12 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
 
         rsetNode = findResultSetNodeRootParent(rsetNode);
 
-        return new RSMTree(rsetNode);
+        return new IdentificationTree(rsetNode);
 
     }
     
     
-    public RSMTree copyDataSetRootSubTree(DDataset dset, long projectId) {
+    public IdentificationTree copyDataSetRootSubTree(DDataset dset, long projectId) {
 
         long dsetId = dset.getId();
         RSMDataSetNode dsetNode = findDataSetNode((RSMNode) m_model.getRoot(), dsetId, projectId);
@@ -160,7 +160,7 @@ public class RSMTree extends JTree implements TreeWillExpandListener, MouseListe
             return null;
         }
 
-        return new RSMTree(dsetNode);
+        return new IdentificationTree(dsetNode);
 
     }
 

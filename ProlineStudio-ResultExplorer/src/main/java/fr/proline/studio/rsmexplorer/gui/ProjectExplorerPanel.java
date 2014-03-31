@@ -16,7 +16,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddProjectDialog;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.PropertiesProviderInterface;
 import java.awt.*;
@@ -394,7 +394,7 @@ public class ProjectExplorerPanel extends JPanel {
         ProjectData projectData = projectItem.getProjectData();
 
         if ((!projectItem.isChanging()) && (projectData != null)) {
-            RSMTree identificationTree = RSMTree.getTree(projectData);
+            IdentificationTree identificationTree = IdentificationTree.getTree(projectData);
 
             m_identificationTreeScrollPane.setViewportView(identificationTree);
             //JPM.TODO

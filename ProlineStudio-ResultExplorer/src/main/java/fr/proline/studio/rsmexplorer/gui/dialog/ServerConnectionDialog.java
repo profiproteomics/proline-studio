@@ -7,7 +7,7 @@ import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.ConnectionDialog;
 import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.node.RSMTree; 
+import fr.proline.studio.rsmexplorer.node.IdentificationTree; 
 import java.awt.Window;
 import javax.swing.*;
 import org.openide.windows.WindowManager;

@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -23,7 +23,7 @@ public abstract class AbstractRSMAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         
-        RSMTree tree = RSMTree.getCurrentTree();
+        IdentificationTree tree = IdentificationTree.getCurrentTree();
         
         TreePath treePath = tree.getSelectionPath();
         

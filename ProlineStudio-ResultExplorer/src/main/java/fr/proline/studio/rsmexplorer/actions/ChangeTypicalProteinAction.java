@@ -9,7 +9,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ChangeTypicalProteinDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -41,7 +41,7 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
             String regex = dialog.getRegex();
             boolean regexOnAccession = dialog.regexOnAccession();
 
-            RSMTree tree = RSMTree.getCurrentTree();
+            IdentificationTree tree = IdentificationTree.getCurrentTree();
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
             // start validation for each selected Dataset
@@ -76,7 +76,7 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
                         
                         dataSetNode.setIsChanging(false);
 
-                        RSMTree tree = RSMTree.getCurrentTree();
+                        IdentificationTree tree = IdentificationTree.getCurrentTree();
                         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                         treeModel.nodeChanged(dataSetNode);
                     }

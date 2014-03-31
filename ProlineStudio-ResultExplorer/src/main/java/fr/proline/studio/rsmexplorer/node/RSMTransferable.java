@@ -15,7 +15,7 @@ import java.util.HashMap;
  */
 public class RSMTransferable implements Transferable, Serializable {
     
-    public final static DataFlavor RSMNodeList_FLAVOR = new DataFlavor(RSMTree.class, "Drag and drop RSM TreePath list");
+    public final static DataFlavor RSMNodeList_FLAVOR = new DataFlavor(IdentificationTree.class, "Drag and drop RSM TreePath list");
 
     
     private Integer m_transferKey = null;

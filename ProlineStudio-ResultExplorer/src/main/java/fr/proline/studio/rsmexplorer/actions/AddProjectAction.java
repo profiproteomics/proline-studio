@@ -12,7 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.AddProjectDialog;
 import fr.proline.studio.rsmexplorer.node.RSMHourGlassNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.tree.DefaultTreeModel;

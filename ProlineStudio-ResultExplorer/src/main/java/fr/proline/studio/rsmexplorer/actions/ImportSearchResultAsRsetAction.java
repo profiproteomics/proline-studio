@@ -10,7 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.ImportIdentificationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMAllImportedNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
             final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
             final boolean saveSpectrumMatches = dialog.getSaveSpectrumMatches();
             
-            RSMTree tree = RSMTree.getCurrentTree();
+            IdentificationTree tree = IdentificationTree.getCurrentTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             
             allImportedNode.setIsChanging(true);

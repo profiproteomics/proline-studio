@@ -5,7 +5,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.awt.Dialog;
 import java.awt.Window;
 import java.util.ArrayList;
@@ -19,13 +19,13 @@ import javax.swing.tree.TreePath;
  */
 public class TreeSelectionDialog extends DefaultDialog {
     
-    private RSMTree m_tree = null;
+    private IdentificationTree m_tree = null;
     private ArrayList<DDataset> m_selectedDatasetList = null;
     private ArrayList<RSMDataSetNode> m_selectedRSMDSNodeList = null;
     
     private boolean m_userSetSize = false;
     
-    public TreeSelectionDialog(Window parent, RSMTree tree, String title) {
+    public TreeSelectionDialog(Window parent, IdentificationTree tree, String title) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
      
         // hide default and help buttons
@@ -47,7 +47,7 @@ public class TreeSelectionDialog extends DefaultDialog {
  
     }
     
-    public TreeSelectionDialog(Window parent, RSMTree tree, String title, int width, int height) {
+    public TreeSelectionDialog(Window parent, IdentificationTree tree, String title, int width, int height) {
         this(parent, tree, title);
         
         setSize(width, height);

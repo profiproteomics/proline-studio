@@ -45,6 +45,7 @@ public class ProjectExplorerPanel extends JPanel {
     private JButton m_propertiesProjectButton;
     private JComboBox<ProjectItem> m_projectsComboBox = null;
     private JScrollPane m_identificationTreeScrollPane = null;
+    private JScrollPane m_quantificationTreeScrollPane = null;
 
     public static ProjectExplorerPanel getProjectExplorerPanel() {
         if (m_singleton == null) {
@@ -70,6 +71,9 @@ public class ProjectExplorerPanel extends JPanel {
         m_identificationTreeScrollPane = new JScrollPane();
         m_identificationTreeScrollPane.getViewport().setBackground(Color.white);
 
+        m_quantificationTreeScrollPane = new JScrollPane();
+        m_quantificationTreeScrollPane.getViewport().setBackground(Color.white);
+        
 
         // ---- Add Objects to panel
         c.gridx = 0;
@@ -89,6 +93,8 @@ public class ProjectExplorerPanel extends JPanel {
         c.gridwidth = 2;
         add(m_identificationTreeScrollPane, c);
 
+        c.gridy++;
+        add(m_quantificationTreeScrollPane, c);
 
     }
 
@@ -97,7 +103,10 @@ public class ProjectExplorerPanel extends JPanel {
         ConnectAction.setConnectionType(true, true);
 
         m_projectsComboBox.removeAllItems();
+        
         m_identificationTreeScrollPane.setViewportView(null);
+        
+        m_quantificationTreeScrollPane.setViewportView(null);
     }
 
     private JPanel createButtonPanel() {
@@ -378,6 +387,7 @@ public class ProjectExplorerPanel extends JPanel {
 
         if (projectItem == null) {
             m_identificationTreeScrollPane.setViewportView(null);
+            m_quantificationTreeScrollPane.setViewportView(null);
             return;
         }
 
@@ -387,9 +397,11 @@ public class ProjectExplorerPanel extends JPanel {
             RSMTree identificationTree = RSMTree.getTree(projectData);
 
             m_identificationTreeScrollPane.setViewportView(identificationTree);
+            //JPM.TODO
 
         } else {
             m_identificationTreeScrollPane.setViewportView(null);
+            m_quantificationTreeScrollPane.setViewportView(null);
         }
     }
 

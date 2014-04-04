@@ -143,6 +143,11 @@ public class DefaultDialog extends javax.swing.JDialog {
         m_internalPanel.add(component, c);
  
     }
+    
+    protected void replaceInternaleComponent(Component component) {
+        m_internalPanel.removeAll();
+        setInternalComponent(component);
+    }
 
     public void setButtonVisible(int buttonId, boolean visible) {
         switch (buttonId) {

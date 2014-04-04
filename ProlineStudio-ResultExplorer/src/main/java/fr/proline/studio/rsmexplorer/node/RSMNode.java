@@ -21,7 +21,8 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
     public enum NodeTypes {
 
         TREE_PARENT,
-        PROJECT,
+        PROJECT_IDENTIFICATION,
+        PROJECT_QUANTITATION,
         DATA_SET,
         DATA_ALL_IMPORTED,
         HOUR_GLASS
@@ -101,4 +102,24 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
     @Override
     public abstract Sheet createSheet();
     
+    
+    public abstract RSMNode copyNode();
+    
+    public void copyChildren(RSMNode copyParent) {
+        int nbChildren = getChildCount();
+
+        for (int i = 0; i < nbChildren; i++) {
+            RSMNode childNode = (RSMNode) getChildAt(i);
+            if (childNode.isChanging()) {
+                // do not copy changing nodes
+                continue;
+            }
+     
+           RSMNode childCopy = childNode.copyNode();
+           if (childCopy == null) {
+               continue;
+           }
+           copyParent.add(childCopy);  
+        }
+    }
 }

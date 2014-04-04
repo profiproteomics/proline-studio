@@ -5,7 +5,7 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
+import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
 import java.util.Set;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
@@ -26,7 +26,7 @@ public class DisplayAllRsetAction extends AbstractRSMAction {
         
         RSMNode node = selectedNodes[0];
         
-        RSMProjectNode projectNode = (RSMProjectNode) node.getParent();
+        RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) node.getParent();
         
         Project p = projectNode.getProject();
         

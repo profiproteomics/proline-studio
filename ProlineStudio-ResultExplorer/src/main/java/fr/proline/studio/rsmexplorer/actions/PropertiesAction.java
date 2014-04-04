@@ -94,7 +94,7 @@ public class PropertiesAction extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
-            if ((type!=RSMNode.NodeTypes.PROJECT) && (type!=RSMNode.NodeTypes.DATA_SET)) {
+            if ((type!=RSMNode.NodeTypes.PROJECT_IDENTIFICATION) && (type!=RSMNode.NodeTypes.DATA_SET)) {
                 setEnabled(false);
                 return;
             }

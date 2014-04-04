@@ -3,7 +3,7 @@ package fr.proline.studio.rsmexplorer.node;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
-import fr.proline.studio.dam.data.ProjectData;
+import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProjectTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -19,16 +19,16 @@ import org.openide.nodes.Node.Property;
  * Node for the opened Projects
  * @author JM235353
  */
-public class RSMProjectNode extends RSMNode {
+public class RSMProjectIdentificationNode extends RSMNode {
 
     
-    public RSMProjectNode(AbstractData data) {
-        super(RSMNode.NodeTypes.PROJECT, data);
+    public RSMProjectIdentificationNode(AbstractData data) {
+        super(RSMNode.NodeTypes.PROJECT_IDENTIFICATION, data);
     }
 
 
     public Project getProject() {
-        return ((ProjectData) getData()).getProject();
+        return ((ProjectIdentificationData) getData()).getProject();
     }
     
     @Override
@@ -52,7 +52,7 @@ public class RSMProjectNode extends RSMNode {
             project.setName(newName + "...");
             ((DefaultTreeModel) IdentificationTree.getCurrentTree().getModel()).nodeChanged(this);
 
-            final RSMProjectNode projectNode = this;
+            final RSMProjectIdentificationNode projectNode = this;
             
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -114,6 +114,13 @@ public class RSMProjectNode extends RSMNode {
         }
         
         return sheet;
+    }
+    
+    @Override
+    public RSMNode copyNode() {
+        RSMNode copy = new RSMProjectIdentificationNode(getData());
+        copyChildren(copy);
+        return copy;
     }
     
 }

@@ -5,7 +5,8 @@ import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.data.AbstractData;
-import fr.proline.studio.dam.data.ProjectData;
+import fr.proline.studio.dam.data.ProjectIdentificationData;
+import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProjectTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -17,6 +18,7 @@ import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddProjectDialog;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
+import fr.proline.studio.rsmexplorer.node.QuantitationTree;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.PropertiesProviderInterface;
 import java.awt.*;
@@ -45,7 +47,7 @@ public class ProjectExplorerPanel extends JPanel {
     private JButton m_propertiesProjectButton;
     private JComboBox<ProjectItem> m_projectsComboBox = null;
     private JScrollPane m_identificationTreeScrollPane = null;
-    private JScrollPane m_quantificationTreeScrollPane = null;
+    private JScrollPane m_quantitationTreeScrollPane = null;
 
     public static ProjectExplorerPanel getProjectExplorerPanel() {
         if (m_singleton == null) {
@@ -71,8 +73,8 @@ public class ProjectExplorerPanel extends JPanel {
         m_identificationTreeScrollPane = new JScrollPane();
         m_identificationTreeScrollPane.getViewport().setBackground(Color.white);
 
-        m_quantificationTreeScrollPane = new JScrollPane();
-        m_quantificationTreeScrollPane.getViewport().setBackground(Color.white);
+        m_quantitationTreeScrollPane = new JScrollPane();
+        m_quantitationTreeScrollPane.getViewport().setBackground(Color.white);
         
 
         // ---- Add Objects to panel
@@ -94,7 +96,7 @@ public class ProjectExplorerPanel extends JPanel {
         add(m_identificationTreeScrollPane, c);
 
         c.gridy++;
-        add(m_quantificationTreeScrollPane, c);
+        add(m_quantitationTreeScrollPane, c);
 
     }
 
@@ -106,7 +108,7 @@ public class ProjectExplorerPanel extends JPanel {
         
         m_identificationTreeScrollPane.setViewportView(null);
         
-        m_quantificationTreeScrollPane.setViewportView(null);
+        m_quantitationTreeScrollPane.setViewportView(null);
     }
 
     private JPanel createButtonPanel() {
@@ -181,8 +183,9 @@ public class ProjectExplorerPanel extends JPanel {
                     }
 
                     // Create a temporary node in the Project List
-                    ProjectData projectData = new ProjectData(projectName);
-                    final ProjectItem projectItem = new ProjectItem(projectData);
+                    ProjectIdentificationData projectIdentificationData = new ProjectIdentificationData(projectName);
+                    ProjectQuantitationData projectQuantitationData = new ProjectQuantitationData(projectName);
+                    final ProjectItem projectItem = new ProjectItem(projectIdentificationData, projectQuantitationData);
                     projectItem.setIsChanging(true);
 
                     m_projectsComboBox.insertItemAt(projectItem, insertionIndex);
@@ -210,7 +213,7 @@ public class ProjectExplorerPanel extends JPanel {
                     };
 
 
-                    CreateProjectTask task = new CreateProjectTask(callback, projectName, projectDescription, owner.getId(), projectData);
+                    CreateProjectTask task = new CreateProjectTask(callback, projectName, projectDescription, owner.getId(), projectIdentificationData, projectQuantitationData);
                     AccessServiceThread.getAccessServiceThread().addTask(task);
 
                 }
@@ -223,7 +226,7 @@ public class ProjectExplorerPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
 
                 final ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
-                ProjectData projectData = projectItem.getProjectData();
+                ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
                 final Project project = projectData.getProject();
 
                 AddProjectDialog dialog = AddProjectDialog.getModifyProjectDialog(WindowManager.getDefault().getMainWindow(), project);
@@ -276,7 +279,7 @@ public class ProjectExplorerPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
 
                 ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
-                ProjectData projectData = projectItem.getProjectData();
+                ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
                 String projectName = projectData.getName();
 
                 String dialogName = "Properties : " + projectName;
@@ -327,10 +330,11 @@ public class ProjectExplorerPanel extends JPanel {
 
                         int nbProjects = projectList.size();
                         if (nbProjects > 0) {
-                            m_projectsComboBox.addItem(new ProjectItem(null)); // Null Project corresponds to Select a Project Item
+                            m_projectsComboBox.addItem(new ProjectItem(null, null)); // Null Project corresponds to Select a Project Item
                         }
                         for (int i = 0; i < nbProjects; i++) {
-                            m_projectsComboBox.addItem(new ProjectItem((ProjectData) projectList.get(i)));
+                            ProjectIdentificationData identificationData = (ProjectIdentificationData) projectList.get(i);
+                            m_projectsComboBox.addItem(new ProjectItem(identificationData, new ProjectQuantitationData(identificationData.getProject())));
                         }
 
                         m_addProjectButton.setEnabled(true);
@@ -343,12 +347,12 @@ public class ProjectExplorerPanel extends JPanel {
                                 ProjectItem item = (ProjectItem) m_projectsComboBox.getSelectedItem();
                                 getProjectExplorerPanel().selectProject(item);
 
-                                if ((item != null) && (item.getProjectData() != null) && (!item.isChanging())) {
+                                if ((item != null) && (item.getProjectIdentificationData() != null) && (!item.isChanging())) {
                                     m_editProjectButton.setEnabled(true);
                                     m_propertiesProjectButton.setEnabled(true);
 
                                     Preferences preferences = NbPreferences.root();
-                                    preferences.put("DefaultSelectedProject", item.getProjectData().getName());
+                                    preferences.put("DefaultSelectedProject", item.getProjectIdentificationData().getName());
                                 } else {
                                     m_editProjectButton.setEnabled(false);
                                     m_propertiesProjectButton.setEnabled(false);
@@ -387,21 +391,23 @@ public class ProjectExplorerPanel extends JPanel {
 
         if (projectItem == null) {
             m_identificationTreeScrollPane.setViewportView(null);
-            m_quantificationTreeScrollPane.setViewportView(null);
+            m_quantitationTreeScrollPane.setViewportView(null);
             return;
         }
 
-        ProjectData projectData = projectItem.getProjectData();
+        ProjectIdentificationData projectIdentificationData = projectItem.getProjectIdentificationData();
+        ProjectQuantitationData projectQuantitationData = projectItem.getProjectQuantitationData();
 
-        if ((!projectItem.isChanging()) && (projectData != null)) {
-            IdentificationTree identificationTree = IdentificationTree.getTree(projectData);
+        if ((!projectItem.isChanging()) && (projectIdentificationData != null)) {
+            IdentificationTree identificationTree = IdentificationTree.getTree(projectIdentificationData);
+            QuantitationTree quantitationTree = QuantitationTree.getTree(projectQuantitationData);
 
             m_identificationTreeScrollPane.setViewportView(identificationTree);
-            //JPM.TODO
+            m_quantitationTreeScrollPane.setViewportView(quantitationTree);
 
         } else {
             m_identificationTreeScrollPane.setViewportView(null);
-            m_quantificationTreeScrollPane.setViewportView(null);
+            m_quantitationTreeScrollPane.setViewportView(null);
         }
     }
 
@@ -424,7 +430,7 @@ public class ProjectExplorerPanel extends JPanel {
                 l.setIcon(IconManager.getIcon(IconManager.IconType.HOUR_GLASS));
                 l.setText("Loading Projects...");
             } else {
-                if (projectItem.getProjectData() == null) {
+                if (projectItem.getProjectIdentificationData() == null) {
                     l.setIcon(null);
                 } else {
                     if (projectItem.isChanging()) {
@@ -440,15 +446,21 @@ public class ProjectExplorerPanel extends JPanel {
 
     public static class ProjectItem implements PropertiesProviderInterface {
 
-        private ProjectData m_projectData;
+        private ProjectIdentificationData m_projectIdentificationData;
+        private ProjectQuantitationData m_projectQuantitationData;
         private boolean m_isChanging = false;
 
-        public ProjectItem(ProjectData projectData) {
-            m_projectData = projectData;
+        public ProjectItem(ProjectIdentificationData projectIdentificationData, ProjectQuantitationData projectQuantitationData) {
+            m_projectIdentificationData = projectIdentificationData;
+            m_projectQuantitationData = projectQuantitationData;
         }
 
-        public ProjectData getProjectData() {
-            return m_projectData;
+        public ProjectIdentificationData getProjectIdentificationData() {
+            return m_projectIdentificationData;
+        }
+        
+        public ProjectQuantitationData getProjectQuantitationData() {
+            return m_projectQuantitationData;
         }
 
         public void setIsChanging(boolean v) {
@@ -461,15 +473,15 @@ public class ProjectExplorerPanel extends JPanel {
 
         @Override
         public String toString() {
-            if (m_projectData == null) {
+            if (m_projectIdentificationData == null) {
                 return "< Select a Project >";
             }
-            return m_projectData.getName();
+            return m_projectIdentificationData.getName();
         }
 
         @Override
         public Sheet createSheet() {
-            Project p = m_projectData.getProject();
+            Project p = m_projectIdentificationData.getProject();
 
             Sheet sheet = Sheet.createDefault();
 

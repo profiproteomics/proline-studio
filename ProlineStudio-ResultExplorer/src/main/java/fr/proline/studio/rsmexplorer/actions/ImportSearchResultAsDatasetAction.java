@@ -17,7 +17,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ImportIdentificationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
+import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.task.CertifyIdentificationTask;
@@ -48,8 +48,8 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
         
         // retrieve project id
         long projectId = 0;
-        if (n.getType() == RSMNode.NodeTypes.PROJECT) {
-            RSMProjectNode projectNode = (RSMProjectNode) n;
+        if (n.getType() == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+            RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) n;
             projectId = projectNode.getProject().getId();
         } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
             RSMDataSetNode dataSetNode = (RSMDataSetNode) n;
@@ -72,8 +72,8 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             DDataset parentDataset = null;
             boolean isParentAProject = false;
             RSMDataSetNode parentDatasetNode = null;
-            if (n.getType() == RSMNode.NodeTypes.PROJECT) {
-                RSMProjectNode projectNode = (RSMProjectNode) n;
+            if (n.getType() == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+                RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) n;
                 project = projectNode.getProject();
                 isParentAProject = true;
             } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
@@ -289,7 +289,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
         }
 
         // we can always add an identification directly to a project
-        if (node.getType() == RSMNode.NodeTypes.PROJECT) {
+        if (node.getType() == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
             setEnabled(true);
             return;
         }

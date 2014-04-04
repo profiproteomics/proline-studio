@@ -174,8 +174,8 @@ public class RSMTransferHandler extends TransferHandler {
                     return false;
                 }
                 dropProjectId = dropDatasetNode.getDataset().getProject().getId();
-            } else if ( nodeType == RSMNode.NodeTypes.PROJECT) {
-                RSMProjectNode dropProjectNode = (RSMProjectNode) dropRSMNode;
+            } else if ( nodeType == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+                RSMProjectIdentificationNode dropProjectNode = (RSMProjectIdentificationNode) dropRSMNode;
                 dropProjectId = dropProjectNode.getProject().getId();
                 if (((JTree.DropLocation) support.getDropLocation()).getChildIndex() == 0) {
                     // drop can not been done in Project before the All imported
@@ -281,8 +281,8 @@ public class RSMTransferHandler extends TransferHandler {
         DDataset parentDataset = null;
         RSMDataSetNode parentDatasetNode = null;
 
-        if (dropRSMNode.getType() == RSMNode.NodeTypes.PROJECT) {
-            RSMProjectNode projectNode = (RSMProjectNode) dropRSMNode;
+        if (dropRSMNode.getType() == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+            RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) dropRSMNode;
             project = projectNode.getProject();
         } else if (dropRSMNode.getType() == RSMNode.NodeTypes.DATA_SET) {
             parentDatasetNode = (RSMDataSetNode) dropRSMNode;
@@ -430,8 +430,8 @@ public class RSMTransferHandler extends TransferHandler {
                 RSMDataSetNode datasetNode = ((RSMDataSetNode) parentNode);
                 databaseParentObject = datasetNode.getDataset();
                 //nodeToBeChanged.add(datasetNode);
-            } else if (type == RSMNode.NodeTypes.PROJECT) {
-                RSMProjectNode projectNode = ((RSMProjectNode) parentNode);
+            } else if (type == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+                RSMProjectIdentificationNode projectNode = ((RSMProjectIdentificationNode) parentNode);
                 databaseParentObject = projectNode.getProject();
             }
 

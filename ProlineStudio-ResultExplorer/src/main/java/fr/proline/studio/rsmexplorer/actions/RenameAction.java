@@ -6,7 +6,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
+import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -37,8 +37,8 @@ public class RenameAction extends AbstractRSMAction {
 
             datasetNode.rename(newName);
             
-        } else if (nodeType == RSMNode.NodeTypes.PROJECT) {
-            RSMProjectNode projectNode = (RSMProjectNode) n;
+        } else if (nodeType == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+            RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) n;
             Project project = projectNode.getProject();
             
             String name = project.getName();
@@ -82,7 +82,7 @@ public class RenameAction extends AbstractRSMAction {
 
         RSMNode node = selectedNodes[0];
         RSMNode.NodeTypes nodeType = node.getType();
-        if ((nodeType != RSMNode.NodeTypes.DATA_SET) && (nodeType != RSMNode.NodeTypes.PROJECT )) {
+        if ((nodeType != RSMNode.NodeTypes.DATA_SET) && (nodeType != RSMNode.NodeTypes.PROJECT_IDENTIFICATION )) {
             setEnabled(false);
             return;
         }

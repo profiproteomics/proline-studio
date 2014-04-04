@@ -36,4 +36,9 @@ public class RSMTreeParentNode extends RSMNode {
         return null; // should never be called
     }
     
+        @Override
+    public RSMNode copyNode() {
+        return null;
+    }
+    
 }

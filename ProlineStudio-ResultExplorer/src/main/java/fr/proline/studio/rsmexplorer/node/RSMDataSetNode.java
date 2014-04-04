@@ -268,4 +268,14 @@ public class RSMDataSetNode extends RSMNode {
         return PropertiesAction.createSheet(dataset);
         
     }
+    
+    @Override
+    public RSMNode copyNode() {
+        if (isTrash()) {
+            return null;
+        }
+        RSMNode copy = new RSMDataSetNode(getData());
+        copyChildren(copy);
+        return copy;
+    }
 }

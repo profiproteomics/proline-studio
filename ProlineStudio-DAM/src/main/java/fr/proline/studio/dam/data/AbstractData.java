@@ -14,12 +14,9 @@ public abstract class AbstractData {
     public enum DataTypes {
 
         MAIN,
-        PROJECT,
+        PROJECT_IDENTIFICATION,
+        PROJECT_QUANTITATION,
         DATA_SET,
-        //IDENTIFICATION,
-        //IDENTIFICATION_FRACTION,
-        //RESULT_SET,
-        //RESULT_SUMMARY,
         ALL_IMPORTED
     }
     protected String m_name;

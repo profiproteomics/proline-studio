@@ -9,7 +9,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ImportIdentificationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMAllImportedNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
+import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
         // only RSMAllImportedNode selected for this action
         final RSMAllImportedNode allImportedNode = (RSMAllImportedNode) selectedNodes[0];
         
-        RSMProjectNode projectNode = (RSMProjectNode) allImportedNode.getParent();
+        RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) allImportedNode.getParent();
         Project project =  projectNode.getProject();
         
         

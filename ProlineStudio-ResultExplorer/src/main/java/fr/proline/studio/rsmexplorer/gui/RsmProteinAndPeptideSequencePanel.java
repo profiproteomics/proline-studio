@@ -59,7 +59,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         m_editorPane = new javax.swing.JEditorPane();
         m_sequenceScrollPane.setViewportView(m_editorPane);
 
-                m_editorPane.setEditable(false);
+        m_editorPane.setEditable(false);
         m_editorPane.setContentType("text/html");
 
         

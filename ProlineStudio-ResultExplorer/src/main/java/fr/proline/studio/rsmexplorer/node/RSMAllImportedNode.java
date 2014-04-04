@@ -31,4 +31,8 @@ public class RSMAllImportedNode extends RSMNode {
     public void loadDataForProperties(Runnable callback) {
     }
     
+    @Override
+    public RSMNode copyNode() {
+        return null;
+    }
 }

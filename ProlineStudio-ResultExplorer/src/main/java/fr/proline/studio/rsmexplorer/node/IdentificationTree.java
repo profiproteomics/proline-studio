@@ -5,7 +5,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.AbstractData;
-import fr.proline.studio.dam.data.ProjectData;
+import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -14,7 +14,6 @@ import fr.proline.studio.rsmexplorer.actions.*;
 import fr.proline.studio.utils.ActionRegistry;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
@@ -25,18 +24,17 @@ import javax.swing.tree.*;
  * Tree of projects and datasets
  * @author JM235353
  */
-public class IdentificationTree extends JTree implements TreeWillExpandListener, MouseListener {
+public class IdentificationTree extends RSMTree implements TreeWillExpandListener {
 
-    private RSMTreeModel m_model;
+    
     private boolean m_isMainTree;
-    //private static RSMTree m_instance = null;
 
-    private static HashMap<ProjectData, IdentificationTree> treeMap = new HashMap<>();
+    private static HashMap<ProjectIdentificationData, IdentificationTree> treeMap = new HashMap<>();
     private static IdentificationTree m_currentTree = null;
     
     private boolean m_loadingDone = false;
     
-    public static IdentificationTree getTree(ProjectData projectData) {
+    public static IdentificationTree getTree(ProjectIdentificationData projectData) {
         
         IdentificationTree tree = treeMap.get(projectData);
         if (tree == null) {
@@ -54,7 +52,7 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
     }
     
 
-    private IdentificationTree(ProjectData projectData) {
+    private IdentificationTree(ProjectIdentificationData projectData) {
 
         setEditable(true);
         
@@ -87,24 +85,14 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
 
     }
 
-    private void initTree(RSMNode top) {
-        m_model = new RSMTreeModel(top);
-        setModel(m_model);
-
-        // rendering of the tree
-        putClientProperty("JTree.lineStyle", "Horizontal");
+    @Override
+    protected final void initTree(RSMNode top) {
+        super.initTree(top);
         
-        RSMTreeRenderer renderer = new RSMTreeRenderer();
-        setCellRenderer(renderer);
-        if (isEditable()) {
-            setCellEditor(new RSMTreeCellEditor(this, renderer));
-        }
-        
-        // -- listeners
-        addTreeWillExpandListener(this); // used for lazy loading
-        addMouseListener(this);         // used for popup triggering
-
+        addTreeWillExpandListener(this);
     }
+
+    
     
     public static void clearAll() {
         treeMap.clear();
@@ -127,7 +115,7 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
         if (isEditable()) {
             RSMNode node = (RSMNode) path.getLastPathComponent();
             RSMNode.NodeTypes nodeType = node.getType();
-            if ((nodeType == RSMNode.NodeTypes.DATA_SET) || (nodeType == RSMNode.NodeTypes.PROJECT)) {
+            if ((nodeType == RSMNode.NodeTypes.DATA_SET) || (nodeType == RSMNode.NodeTypes.PROJECT_IDENTIFICATION)) {
                 return true;
             }
         }
@@ -143,8 +131,6 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
         if (rsetNode == null) {
             return null;
         }
-
-        rsetNode = findResultSetNodeRootParent(rsetNode);
 
         return new IdentificationTree(rsetNode);
 
@@ -164,7 +150,14 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
 
     }
 
-     private RSMDataSetNode findDataSetNode(RSMNode node, long dsetId, long projectId) {
+    public RSMNode copyRootNodeForSelection() {
+        RSMNode node = (RSMNode) m_model.getRoot();
+        return node.copyNode();
+        
+    }
+    
+    
+    private RSMDataSetNode findDataSetNode(RSMNode node, long dsetId, long projectId) {
 
         int nbChildren = node.getChildCount();
 
@@ -177,9 +170,9 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
                 if ((datasetId != null) && (datasetId.longValue() == dsetId)) {
                     return dataSetNode;
                 }
-                
-            } else if (childType == RSMNode.NodeTypes.PROJECT) {
-                RSMProjectNode projectNode = ((RSMProjectNode) childNode);
+
+            } else if (childType == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+                RSMProjectIdentificationNode projectNode = ((RSMProjectIdentificationNode) childNode);
                 if (projectNode.getProject().getId() != projectId) {
                     // we are not in the right project
                     continue;
@@ -211,8 +204,8 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
                 if ((resultSetId != null) && (resultSetId.intValue() == rsetId)) {
                     return dataSetNode;
                 }
-            } else if (childType == RSMNode.NodeTypes.PROJECT) {
-                RSMProjectNode projectNode = ((RSMProjectNode) childNode);
+            } else if (childType == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+                RSMProjectIdentificationNode projectNode = ((RSMProjectIdentificationNode) childNode);
                 if (projectNode.getProject().getId() != projectId) {
                     // we are not in the right project
                     continue;
@@ -230,78 +223,9 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
         return null;
     }
 
-    private RSMDataSetNode findResultSetNodeRootParent(RSMDataSetNode node) {
-
-        /*RSMDataSetNode resultSetRootParent = node;
-        RSMNode parentNode = (RSMNode) node.getParent();
-        while (parentNode != null) {
-            if (parentNode.getType() == RSMNode.NodeTypes.DATA_SET) {
-                RSMDataSetNode datasetParentNode = (RSMDataSetNode) parentNode;
-                
-                resultSetRootParent = (RSMDataSetNode) parentNode;
-            }
-            parentNode = (RSMNode) parentNode.getParent();
-        }
-
-        return resultSetRootParent;*/
-        //JPM.TODO : no longer correct for the way I use Dataset
-        return node;
-    }
-
-    public void setSelection(ArrayList<ResultSummary> rsmArray) {
-
-        if (!loadingMap.isEmpty()) {
-            // Tree is loading, we must postpone the selection
-            selectionFromrsmArray = rsmArray;
-            return;
-        }
-
-        RSMNode rootNode = (RSMNode) m_model.getRoot();
-        ArrayList<TreePath> selectedPathArray = new ArrayList<>(rsmArray.size());
-
-        ArrayList<RSMNode> nodePath = new ArrayList<>();
-        nodePath.add(rootNode);
-        setSelectionImpl(rootNode, nodePath, rsmArray, selectedPathArray);
 
 
-        TreePath[] selectedPaths = selectedPathArray.toArray(new TreePath[selectedPathArray.size()]);
 
-        setSelectionPaths(selectedPaths);
-
-    }
-    private ArrayList<ResultSummary> selectionFromrsmArray = null;
-
-    private void setSelectionImpl(RSMNode parentNode, ArrayList<RSMNode> nodePath, ArrayList<ResultSummary> rsmArray, ArrayList<TreePath> selectedPathArray) {
-        Enumeration en = parentNode.children();
-        while (en.hasMoreElements()) {
-            RSMNode node = (RSMNode) en.nextElement();
-            if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
-
-                RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
-                Long rsmId = dataSetNode.getResultSummaryId();
-                if (rsmId != null) {
-
-
-                    int size = rsmArray.size();
-                    for (int i = 0; i < size; i++) {
-                        ResultSummary rsmItem = rsmArray.get(i);
-                        if (rsmItem.getId() == rsmId.longValue()) {
-                            nodePath.add(node);
-                            TreePath path = new TreePath(nodePath.toArray());
-                            selectedPathArray.add(path);
-                            nodePath.remove(nodePath.size() - 1);
-                            break;
-                        }
-                    }
-                }
-            }
-            if (!node.isLeaf()) {
-                nodePath.add(node);
-                setSelectionImpl(node, nodePath, rsmArray, selectedPathArray);
-            }
-        }
-        nodePath.remove(nodePath.size() - 1);
-    }
 
     
     @Override
@@ -341,70 +265,7 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
         
 
     }
-    private void startLoading(final RSMNode nodeToLoad) {
 
-        
-        
-        // check if the loading is necessary :
-        // it is necessary only if we have an hour glass child
-        // which correspond to data not already loaded
-        if (nodeToLoad.getChildCount() == 0) {
-            return;
-        }
-        RSMNode childNode = (RSMNode) nodeToLoad.getChildAt(0);
-        if (childNode.getType() != RSMNode.NodeTypes.HOUR_GLASS) {
-            return;
-        }
-
-        // register hour glass which is expanded
-        loadingMap.put(nodeToLoad.getData(), nodeToLoad);
-
-        final ArrayList<AbstractData> childrenList = new ArrayList<>();
-        final AbstractData parentData = nodeToLoad.getData();
-
-        if (nodeToLoad.getType() == RSMNode.NodeTypes.TREE_PARENT) {
-            nodeToLoad.setIsChanging(true);
-            m_model.nodeChanged(nodeToLoad);
-        }
-        
-        // Callback used only for the synchronization with the AccessDatabaseThread
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return false;
-            }
-
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                SwingUtilities.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        
-                        if (nodeToLoad.getType() == RSMNode.NodeTypes.TREE_PARENT) {
-                            nodeToLoad.setIsChanging(false);
-                            m_model.nodeChanged(nodeToLoad);
-                        }
-                        
-                        dataLoaded(parentData, childrenList);
-
-                        if (loadingMap.isEmpty() && (selectionFromrsmArray != null)) {
-                            // A selection has been postponed, we do it now
-                            setSelection(selectionFromrsmArray);
-                            selectionFromrsmArray = null;
-                        }
-                    }
-                });
-
-            }
-        };
-
-        
-
-        parentData.load(callback, childrenList);
-    }
     
     
     /**
@@ -506,11 +367,11 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
         
         
         // search Project Node
-        RSMProjectNode projectNode = null;
+        RSMProjectIdentificationNode projectNode = null;
         RSMNode parentNodeCur = (RSMNode) keptNodes.get(0).getParent();
         while (parentNodeCur != null) {
-            if (parentNodeCur instanceof RSMProjectNode) {
-                projectNode = (RSMProjectNode) parentNodeCur;
+            if (parentNodeCur instanceof RSMProjectIdentificationNode) {
+                projectNode = (RSMProjectIdentificationNode) parentNodeCur;
                 break;
             }
             parentNodeCur = (RSMNode) parentNodeCur.getParent();
@@ -568,8 +429,8 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
                 RSMDataSetNode datasetNode = ((RSMDataSetNode) parentNode);
                 databaseParentObject = datasetNode.getDataset();
                 //nodeToBeChanged.add(datasetNode);
-            } else if (type == RSMNode.NodeTypes.PROJECT) {
-                RSMProjectNode projectNodeS = ((RSMProjectNode) parentNode);
+            } else if (type == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+                RSMProjectIdentificationNode projectNodeS = ((RSMProjectIdentificationNode) parentNode);
                 databaseParentObject = projectNodeS.getProject();
             }
 
@@ -602,28 +463,9 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
         
     }
         
-    private static HashMap<AbstractData, RSMNode> loadingMap = new HashMap<>();
-
-    public  void dataLoaded(AbstractData data, List<AbstractData> list) {
-
-        RSMNode parentNode = loadingMap.remove(data);
+    
 
 
-        parentNode.remove(0); // remove the first child which correspond to the hour glass
-
-        
-        int indexToInsert = 0;
-        Iterator<AbstractData> it = list.iterator();
-        while (it.hasNext()) {
-            AbstractData dataCur = it.next();
-            parentNode.insert(RSMChildFactory.createNode(dataCur), indexToInsert);
-            indexToInsert++;
-        }
-        
-        m_model.nodeStructureChanged(parentNode);
-
-
-    }
     
     public void expandNodeIfNeeded(RSMNode n) {
         final TreePath pathToExpand = new TreePath(n.getPath());
@@ -644,7 +486,7 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
      * Return an array of all selected nodes of the tree
      * @return 
      */
-    public RSMNode[] getSelectedNodes() {
+    /*public RSMNode[] getSelectedNodes() {
         TreePath[] paths = getSelectionModel().getSelectionPaths();
         
         int nbPath = paths.length;
@@ -656,7 +498,7 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
         }
 
         return nodes;
-    }
+    }*/
     
     private void triggerPopup(MouseEvent e) {
         
@@ -976,7 +818,7 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
     public void mouseExited(MouseEvent e) {}
 
 
-    private class RSMTreeRenderer extends DefaultTreeCellRenderer {
+    public static class RSMTreeRenderer extends DefaultTreeCellRenderer {
 
         public RSMTreeRenderer() {
         }
@@ -994,7 +836,7 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
         }
     }
     
-    private class RSMTreeCellEditor extends DefaultTreeCellEditor {
+    public static class RSMTreeCellEditor extends DefaultTreeCellEditor {
         public RSMTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer) {
             super(tree, renderer);
         }
@@ -1012,31 +854,26 @@ public class IdentificationTree extends JTree implements TreeWillExpandListener,
         }
     }
     
-    private class RSMTreeModel extends DefaultTreeModel {
+    /*private class RSMTreeModel extends DefaultTreeModel {
 
         public RSMTreeModel(TreeNode root) {
             super(root, false);
         }
 
-        /**
-         * This sets the user object of the TreeNode identified by path and
-         * posts a node changed. If you use custom user objects in the TreeModel
-         * you're going to need to subclass this and set the user object of the
-         * changed node to something meaningful.
-         */
+
         @Override
         public void valueForPathChanged(TreePath path, Object newValue) {
             RSMNode rsmNode = (RSMNode) path.getLastPathComponent();
 
-            if (rsmNode.getType()== RSMNode.NodeTypes.PROJECT) {
-                RSMProjectNode projectNode = (RSMProjectNode) rsmNode;
+            if (rsmNode.getType()== RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+                RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) rsmNode;
                 Project project = projectNode.getProject();
-                ((RSMProjectNode) rsmNode).changeNameAndDescription(newValue.toString(), project.getDescription());
+                ((RSMProjectIdentificationNode) rsmNode).changeNameAndDescription(newValue.toString(), project.getDescription());
             } else if (rsmNode.getType()== RSMNode.NodeTypes.DATA_SET) {
                 ((RSMDataSetNode) rsmNode).rename(newValue.toString());
             }
         }
-    }
+    }*/
 
     
 }

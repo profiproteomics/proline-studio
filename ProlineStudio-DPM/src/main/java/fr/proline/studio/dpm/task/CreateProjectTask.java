@@ -9,10 +9,11 @@ import fr.proline.core.orm.uds.Dataset;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import fr.proline.studio.dam.data.ProjectData;
+import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import javax.persistence.EntityManager;
@@ -26,15 +27,17 @@ public class CreateProjectTask extends AbstractServiceTask {
     private String m_name;
     private String m_description;
     private long m_ownerId;
-    private ProjectData m_projectData;
+    private ProjectIdentificationData m_projectIdentificationData;
+    private ProjectQuantitationData m_projectQuantificationData;
     
-    public CreateProjectTask(AbstractServiceCallback callback, String name, String description, long ownerId, ProjectData projectData) {
+    public CreateProjectTask(AbstractServiceCallback callback, String name, String description, long ownerId, ProjectIdentificationData projectIdentificationData, ProjectQuantitationData projectQuantificationData) {
         super(callback, true /*synchronous*/, new TaskInfo("Add Project named "+name, true, TASK_LIST_INFO));
         
         m_name = name;
         m_description = description;
         m_ownerId = ownerId;
-        m_projectData = projectData;
+        m_projectIdentificationData = projectIdentificationData;
+        m_projectQuantificationData = projectQuantificationData;
     }
     
     @Override
@@ -128,7 +131,8 @@ public class CreateProjectTask extends AbstractServiceTask {
 
             //entityManagerUDS.persist(trashDataset);
             
-            m_projectData.setProject(p);
+            m_projectIdentificationData.setProject(p);
+            m_projectQuantificationData.setProject(p);
             
             entityManagerUDS.getTransaction().commit();
 

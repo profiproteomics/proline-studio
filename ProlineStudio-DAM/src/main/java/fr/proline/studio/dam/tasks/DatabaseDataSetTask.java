@@ -56,6 +56,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private Long m_datasetId = null;
     private List<Long> m_dsChildRSMIds = null;
     private List<String> m_dsNames = null;
+    private boolean m_identificationDataset;
     
     private int m_action;
     
@@ -83,10 +84,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param project
      * @param list 
      */
-    public void initLoadParentDataset(Project project, List<AbstractData> list) {
+    public void initLoadParentDataset(Project project, List<AbstractData> list, boolean identificationDataset) {
         setTaskInfo(new TaskInfo("Load Data for Project "+project.getName(), false, TASK_LIST_INFO));
         m_project = project;
         m_list = list;
+        m_identificationDataset = identificationDataset;
         m_action = LOAD_PARENT_DATASET;
         setPriority(Priority.HIGH_1);
     }
@@ -329,11 +331,19 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             //JPM.HACK : there is a join done by Hibernate if we read the Aggregation at once,
             // But some Aggregation are null (for identifications) -> identifications are not loaded
             // So we load aggregations afterwards
-//            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type<>:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
-            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
-            dataSetQuery.setParameter("projectId", projectId);
-//            dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
-            List<DDataset> datasetListSelected = dataSetQuery.getResultList();
+            
+            List<DDataset> datasetListSelected;
+            if (m_identificationDataset) {
+                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type<>:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+                dataSetQuery.setParameter("projectId", projectId);
+                dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+                datasetListSelected = dataSetQuery.getResultList();
+            } else {
+                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type=:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+                dataSetQuery.setParameter("projectId", projectId);
+                dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+                datasetListSelected = dataSetQuery.getResultList();
+            }
 
 
             ArrayList<Long> idList = new ArrayList<>();

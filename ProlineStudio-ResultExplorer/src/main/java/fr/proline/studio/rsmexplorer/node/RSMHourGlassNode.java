@@ -42,5 +42,10 @@ public class RSMHourGlassNode extends RSMNode {
         return null; // should never be called
     }
 
+    @Override
+    public RSMNode copyNode() {
+        RSMNode copy = new RSMHourGlassNode(getData());
+        return copy;
+    }
     
 }

@@ -1,6 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.studio.dam.data.ProjectData;
+import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
@@ -96,7 +96,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             while (it.hasNext()) {
                 Project projectCur = it.next();
 
-                ProjectData projectDataCur = new ProjectData(projectCur);
+                ProjectIdentificationData projectDataCur = new ProjectIdentificationData(projectCur);
                 projectDataCur.setHasChildren(true); // always has a Trash
                 //projectMap.put(projectIdCur, projectDataCur);
                 m_list.add(projectDataCur);

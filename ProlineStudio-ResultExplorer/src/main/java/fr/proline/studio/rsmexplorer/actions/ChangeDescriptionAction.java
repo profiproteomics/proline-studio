@@ -6,7 +6,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
+import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -27,7 +27,7 @@ public class ChangeDescriptionAction extends AbstractRSMAction {
         final RSMNode n = selectedNodes[0];
 
 
-        RSMProjectNode projectNode = (RSMProjectNode) n;
+        RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) n;
         Project project = projectNode.getProject();
 
         String description = project.getDescription();
@@ -68,7 +68,7 @@ public class ChangeDescriptionAction extends AbstractRSMAction {
 
         RSMNode node = selectedNodes[0];
         RSMNode.NodeTypes nodeType = node.getType();
-        if (nodeType != RSMNode.NodeTypes.PROJECT ) {
+        if (nodeType != RSMNode.NodeTypes.PROJECT_IDENTIFICATION ) {
             setEnabled(false);
             return;
         }

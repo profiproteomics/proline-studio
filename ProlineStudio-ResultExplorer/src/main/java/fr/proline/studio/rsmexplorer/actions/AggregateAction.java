@@ -13,7 +13,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddAggregateDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMProjectNode;
+import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.util.ArrayList;
 import javax.swing.tree.DefaultTreeModel;
@@ -54,7 +54,7 @@ public class AggregateAction extends AbstractRSMAction {
         
                 final RSMNode n = selectedNodes[iNode];
             
-                boolean isParentAProject = (n.getType() == RSMNode.NodeTypes.PROJECT);
+                boolean isParentAProject = (n.getType() == RSMNode.NodeTypes.PROJECT_IDENTIFICATION);
 
                 // check if a child has already the same name with a number suffix
                 int suffixNumber = 0;
@@ -115,8 +115,8 @@ public class AggregateAction extends AbstractRSMAction {
                 Project project = null;
                 DDataset parentDataset = null;
                 RSMDataSetNode parentDatasetNode = null;
-                if (n.getType() == RSMNode.NodeTypes.PROJECT) {
-                    project = ((RSMProjectNode) n).getProject();
+                if (n.getType() == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+                    project = ((RSMProjectIdentificationNode) n).getProject();
                     parentDataset = null;
                 } else if (n.getType() == RSMNode.NodeTypes.DATA_SET) {
                     parentDatasetNode = ((RSMDataSetNode) n);
@@ -185,7 +185,7 @@ public class AggregateAction extends AbstractRSMAction {
             }
                 
             // we can always add an aggregate directly to a project
-            if (node.getType() == RSMNode.NodeTypes.PROJECT) {
+            if (node.getType() == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
                 continue;
             }
             

@@ -21,8 +21,11 @@ public class RSMChildFactory  {
             case MAIN:
                 result = new RSMTreeParentNode(key);
                 break;
-            case PROJECT:
-                result = new RSMProjectNode(key);
+            case PROJECT_IDENTIFICATION:
+                result = new RSMProjectIdentificationNode(key);
+                break;
+            case PROJECT_QUANTITATION:
+                result = new RSMProjectQuantitationNode(key);
                 break;
             case DATA_SET:
                 result = new RSMDataSetNode(key);

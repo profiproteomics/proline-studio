@@ -64,6 +64,11 @@ public class DataSetData extends AbstractData {
         }
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
+    
     public Aggregation.ChildNature getAggregateType() {
         if (m_dataset == null) {
             return m_temporaryAggregateType;

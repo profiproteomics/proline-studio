@@ -48,7 +48,6 @@ public class CreateXICDialog extends DefaultDialog {
         setHelpURL(null); //JPM.TODO
 
         setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
-        setStatusVisible(false);
 
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));

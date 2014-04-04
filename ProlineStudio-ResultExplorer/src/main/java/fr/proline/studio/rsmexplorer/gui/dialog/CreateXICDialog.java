@@ -25,9 +25,10 @@ import javax.swing.tree.TreePath;
  */
 public class CreateXICDialog extends DefaultDialog {
 
-    private static final int STEP_PANEL_DEFINE_NUMBERS = 0;
-    private static final int STEP_PANEL_DEFINE_SAMPLE_ANALYSIS = 1;
-    private int m_step = STEP_PANEL_DEFINE_NUMBERS;
+    private static final int STEP_PANEL_DEFINE_GROUPS = 0;
+    private static final int STEP_PANEL_MODIFY_GROUPS = 1;
+    private static final int STEP_PANEL_DEFINE_SAMPLE_ANALYSIS = 2;
+    private int m_step = STEP_PANEL_DEFINE_GROUPS;
     private static CreateXICDialog m_singletonDialog = null;
 
     public static CreateXICDialog getDialog(Window parent) {
@@ -50,6 +51,7 @@ public class CreateXICDialog extends DefaultDialog {
         setStatusVisible(false);
 
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
+        setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
 
         setInternalComponent(DefineBioGroupsPanel.getDefineBioGroupsPanel());
 
@@ -59,16 +61,45 @@ public class CreateXICDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
 
-        if (m_step == STEP_PANEL_DEFINE_NUMBERS) {
+        if (m_step == STEP_PANEL_DEFINE_GROUPS) {
+            
+            // check values
+            DefineBioGroupsPanel defineBioGroupsPanel = DefineBioGroupsPanel.getDefineBioGroupsPanel();
+            String quantitationName = defineBioGroupsPanel.getQuantitationName();
+            if (quantitationName.length() == 0) {
+
+                setStatus(true, "You must fill the Quantitation Name");
+                highlight(defineBioGroupsPanel.getQuantitationNameTextField());
+                return false;
+
+            }
+            
+            String groupPrefix = defineBioGroupsPanel.getGroupPrefix();
+            if (groupPrefix.length() == 0) {
+
+                setStatus(true, "You must fill the Group Prefix");
+                highlight(defineBioGroupsPanel.getGroupPrefixTextField());
+                return false;
+
+            }
+            
+            String samplePrefix = defineBioGroupsPanel.getSamplePrefix();
+            if (samplePrefix.length() == 0) {
+
+                setStatus(true, "You must fill the Sample Prefix");
+                highlight(defineBioGroupsPanel.getSamplePrefixTextField());
+                return false;
+
+            }
+            
+            
             setButtonName(DefaultDialog.BUTTON_OK, "OK");
             setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
 
-            DefineBioGroupsPanel defineBioGroupsPanel = DefineBioGroupsPanel.getDefineBioGroupsPanel();
+            
             int nbGroups = defineBioGroupsPanel.getGroupNumber();
-            String groupPrefix = defineBioGroupsPanel.getGroupPrefix();
 
             int nbSamples = defineBioGroupsPanel.getSampleNumber();
-            String samplePrefix = defineBioGroupsPanel.getSamplePrefix();
 
 
             JScrollPane scrollPane = new JScrollPane();
@@ -83,11 +114,13 @@ public class CreateXICDialog extends DefaultDialog {
             revalidate();
             repaint();
 
-            m_step = STEP_PANEL_DEFINE_SAMPLE_ANALYSIS;
+            m_step = STEP_PANEL_MODIFY_GROUPS;
 
             return false;
-        } else { // STEP_PANEL_DEFINE_SAMPLE_ANALYSIS
+        } else if (m_step == STEP_PANEL_MODIFY_GROUPS) { // STEP_PANEL_DEFINE_SAMPLE_ANALYSIS
 
+            return true;
+        } else {  // STEP_PANEL_DEFINE_SAMPLE_ANALYSIS
             return true;
         }
 
@@ -101,6 +134,7 @@ public class CreateXICDialog extends DefaultDialog {
     public static class DefineBioGroupsPanel extends JPanel {
 
         private static DefineBioGroupsPanel m_panel = null;
+        private JTextField m_quantitationNameTextField;
         private JTextField m_samplePrefixTextField;
         private JSpinner m_nbSamplesSpinner;
         private JTextField m_groupPrefixTextField;
@@ -123,8 +157,20 @@ public class CreateXICDialog extends DefaultDialog {
             c.insets = new java.awt.Insets(5, 5, 5, 5);
 
 
+            JLabel quantitationNameLabel = new JLabel("Quantitation Name:");
+            m_quantitationNameTextField = new JTextField(30);
             c.gridx = 0;
             c.gridy = 0;
+            add(quantitationNameLabel, c);
+            
+            c.gridx++;
+            c.weightx = 1;
+            add(m_quantitationNameTextField, c);
+            
+            
+            c.gridx = 0;
+            c.gridwidth = 2;
+            c.gridy++;
             add(createBiologicalGroupPanel(), c);
 
             c.gridy++;
@@ -158,15 +204,18 @@ public class CreateXICDialog extends DefaultDialog {
             p.add(defaultPrefixLabel, c);
 
             c.gridx++;
+            c.weightx = 1;
             p.add(m_groupPrefixTextField, c);
-
+            c.weightx = 0;
+            
             c.gridx = 0;
             c.gridy++;
             p.add(numberLabel, c);
 
             c.gridx++;
+            c.weightx = 1;
             p.add(m_nbGroupsSpinner, c);
-
+            c.weightx = 0;
 
             return p;
         }
@@ -194,25 +243,41 @@ public class CreateXICDialog extends DefaultDialog {
             p.add(defaultPrefixLabel, c);
 
             c.gridx++;
+            c.weightx = 1;
             p.add(m_samplePrefixTextField, c);
-
+            c.weightx = 0;
+            
             c.gridx = 0;
             c.gridy++;
             p.add(numberLabel, c);
 
             c.gridx++;
+            c.weightx = 1;
             p.add(m_nbSamplesSpinner, c);
-
+            c.weightx = 0;
 
             return p;
         }
 
+        public String getQuantitationName() {
+            return m_quantitationNameTextField.getText().trim();
+        }
+        public JTextField getQuantitationNameTextField() {
+            return m_quantitationNameTextField;
+        }
+        
         public String getSamplePrefix() {
             return m_samplePrefixTextField.getText().trim();
+        }
+        public JTextField getSamplePrefixTextField() {
+            return m_samplePrefixTextField;
         }
 
         public String getGroupPrefix() {
             return m_groupPrefixTextField.getText().trim();
+        }
+        public JTextField getGroupPrefixTextField() {
+            return m_groupPrefixTextField;
         }
 
         public int getSampleNumber() {

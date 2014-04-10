@@ -51,7 +51,9 @@ public class RSMDataSetNode extends RSMNode {
                 } else {
                     return getIcon(IconManager.IconType.RSET);
                 }
-                
+            case QUANTITATION: {
+                return getIcon(IconManager.IconType.QUANT);
+            }
             case AGGREGATE:
 
                 //Aggregation.ChildNature aggregateType = ((DataSetData) getData()).getAggregateType();

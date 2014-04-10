@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.gui.dialog.CreateXICDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;

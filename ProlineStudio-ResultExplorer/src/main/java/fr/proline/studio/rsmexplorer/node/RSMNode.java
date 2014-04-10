@@ -25,7 +25,10 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
         PROJECT_QUANTITATION,
         DATA_SET,
         DATA_ALL_IMPORTED,
-        HOUR_GLASS
+        HOUR_GLASS,
+        BIOLOGICAL_SAMPLE,
+        BIOLOGICAL_GROUP,
+        BIOLOGICAL_SAMPLE_ANALYSIS
     }
     private static Action[] m_actionInstance = null;
     protected NodeTypes m_type;

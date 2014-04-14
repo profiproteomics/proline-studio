@@ -6,6 +6,7 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.node.xic.RSMBiologicalSampleNode;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.xic.RSMBiologicalGroupNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -39,15 +40,61 @@ public class ModifyBioGroupsPanel extends JPanel {
 
     private ModifyBioGroupsPanel(int nbGroups, String defaultGroupPrefix, int nbSamples, final String defaultSamplePrefix) {
 
-        final JPanel _p = this;
+        JPanel wizardPanel = createWizardPanel();
+        JPanel mainPanel = createMainPanel(nbGroups, defaultGroupPrefix, nbSamples, defaultSamplePrefix);
+        
+        
+        setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
 
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
+        add(wizardPanel, c);
+
+
+        c.gridy++;
+        c.weighty = 1;
+        
+        add(mainPanel, c);
+
+    }
+    
+    private JPanel createWizardPanel() {
+        JPanel wizardPanel = new JPanel();
+        wizardPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        JLabel wizardLabel = new JLabel("<html><b>Step 2:</b> Modify names and add/remove Biological Samples.</html>");
+        wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
+        
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
+        c.weighty = 1;
+        wizardPanel.add(wizardLabel, c);
+        
+        return wizardPanel;
+    }
+    
+    
+    private JPanel createMainPanel(int nbGroups, String defaultGroupPrefix, int nbSamples, final String defaultSamplePrefix) {
+
+
+        
         sampleAnalysisMap = new HashMap<>();
 
         groupsList = new ArrayList<>(nbGroups);
         samplesMap = new HashMap<>();
 
-
-        setLayout(new GridBagLayout());
+        final JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridBagLayout());
         final GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -59,18 +106,12 @@ public class ModifyBioGroupsPanel extends JPanel {
         JLabel biologicalGroupsLabel = new JLabel("Biological Groups");
         Font boldFont = biologicalGroupsLabel.getFont().deriveFont(Font.BOLD);
         biologicalGroupsLabel.setFont(boldFont);
-        add(biologicalGroupsLabel, c);
+        mainPanel.add(biologicalGroupsLabel, c);
 
         c.gridx++;
         JLabel biologicalSamplesLabel = new JLabel("Biological Samples");
         biologicalSamplesLabel.setFont(boldFont);
-        add(biologicalSamplesLabel, c);
-
-        /*
-         * c.gridx = 4; JLabel sampleAnalysisLabel = new JLabel("Sample
-         * Analysis"); sampleAnalysisLabel.setFont(boldFont);
-         * add(sampleAnalysisLabel, c);
-         */
+        mainPanel.add(biologicalSamplesLabel, c);
 
 
         c.gridy++;
@@ -78,7 +119,7 @@ public class ModifyBioGroupsPanel extends JPanel {
             c.gridx = 0;
             final JTextField groupTextField = new JTextField(defaultGroupPrefix + " " + String.valueOf(i), 30);
             c.weightx = 1;
-            add(groupTextField, c);
+            mainPanel.add(groupTextField, c);
             c.weightx = 0;
             groupsList.add(groupTextField);
 
@@ -98,7 +139,7 @@ public class ModifyBioGroupsPanel extends JPanel {
                 final JTextField sampleTextField = new JTextField(defaultSamplePrefix + " " + String.valueOf(j), 30);
 
                 c.weightx = 1;
-                add(sampleTextField, c);
+                mainPanel.add(sampleTextField, c);
                 c.weightx = 0;
                 samplesList.add(sampleTextField);
 
@@ -109,57 +150,21 @@ public class ModifyBioGroupsPanel extends JPanel {
                 boolean visible = (j == nbSamples - 1);
                 JButton deleteSampleButton = createDeleteSampleButton(visible, samplesList, deleteButtonList, sampleTextField, groupTextField, separator, addButton, this);
                 deleteButtonList.add(deleteSampleButton);
-                /*
-                 * final JButton deleteSampleButton = new
-                 * JButton(IconManager.getIcon(IconManager.IconType.CROSS_SMALL7));
-                 * deleteSampleButton.setMargin(new Insets(1, 1, 1, 1));
-                 * deleteSampleButton.setVisible(j == nbSamples - 1);
-                 */
+
                 c.fill = GridBagConstraints.NONE;
 
-                add(deleteSampleButton, c);
+                mainPanel.add(deleteSampleButton, c);
                 c.fill = GridBagConstraints.BOTH;
 
 
 
 
-                /*
-                 * c.gridx++; JButton sampleAnalysisButton = new
-                 * JButton(IconManager.getIcon(IconManager.IconType.ARROW_8X7));
-                 * sampleAnalysisButton.setMargin(new Insets(1, 1, 1, 1));
-                 * sampleAnalysisButton.addActionListener(new ActionListener() {
-                 *
-                 * @Override public void actionPerformed(ActionEvent e) {
-                 * ArrayList<DataSetData> datasetList =
-                 * sampleAnalysisMap.get(sampleTextField);
-                 *
-                 * // data from jlist is copied to previous sampleTextField
-                 * DefaultListModel model = (DefaultListModel)
-                 * m_sampleAnalysisList.getModel(); if (m_currentSampleTextField
-                 * != null) {
-                 *
-                 * ArrayList<DataSetData> list =
-                 * sampleAnalysisMap.get(m_currentSampleTextField);
-                 * list.clear(); int size = model.getSize(); for (int
-                 * i=0;i<size; i++) { list.add((DataSetData) model.get(i)); } }
-                 *
-                 *
-                 * // copy data from newly selected sample Text Field to JList
-                 * m_currentSampleTextField = sampleTextField;
-                 * ArrayList<DataSetData> list =
-                 * sampleAnalysisMap.get(sampleTextField);
-                 *
-                 * model.clear(); for (int i=0;i<list.size();i++) {
-                 * model.addElement(list.get(i)); } }
-                 *
-                 * }); add(sampleAnalysisButton, c);
-                 */
                 c.gridy++;
             }
 
             addButton.setMargin(new Insets(1, 1, 1, 1));
             c.fill = GridBagConstraints.NONE;
-            add(addButton, c);
+            mainPanel.add(addButton, c);
             c.fill = GridBagConstraints.BOTH;
 
             addButton.addActionListener(new ActionListener() {
@@ -176,7 +181,7 @@ public class ModifyBioGroupsPanel extends JPanel {
                     c.gridwidth = 1;
                     c.weightx = 1;
                     c.weighty = 0;
-                    _p.add(sampleTextField, c);
+                    mainPanel.add(sampleTextField, c);
                     c.weightx = 0;
                     samplesList.add(sampleTextField);
 
@@ -184,7 +189,7 @@ public class ModifyBioGroupsPanel extends JPanel {
 
                     deleteButtonList.get(deleteButtonList.size() - 1).setVisible(false);
 
-                    JButton deleteSampleButton = createDeleteSampleButton(true, samplesList, deleteButtonList, sampleTextField, groupTextField, separator, addButton, _p);
+                    JButton deleteSampleButton = createDeleteSampleButton(true, samplesList, deleteButtonList, sampleTextField, groupTextField, separator, addButton, mainPanel);
                     deleteButtonList.add(deleteSampleButton);
                     c.gridx++;
                     c.fill = GridBagConstraints.NONE;
@@ -193,15 +198,15 @@ public class ModifyBioGroupsPanel extends JPanel {
 
                     deleteButtonList.get(deleteButtonList.size() - 1).setVisible(true);
 
-                    _p.remove(addButton);
+                    mainPanel.remove(addButton);
                     c.gridy++;
                     c.fill = GridBagConstraints.NONE;
-                    _p.add(addButton, c);
+                    mainPanel.add(addButton, c);
                     c.fill = GridBagConstraints.BOTH;
 
 
-                    _p.revalidate();
-                    _p.repaint();
+                    mainPanel.revalidate();
+                    mainPanel.repaint();
                 }
             });
 
@@ -211,7 +216,7 @@ public class ModifyBioGroupsPanel extends JPanel {
                 // add separator
                 c.gridx = 0;
                 c.gridwidth = 3;
-                add(separator, c);
+                mainPanel.add(separator, c);
                 c.gridwidth = 1;
                 c.gridy++;
             }
@@ -223,19 +228,9 @@ public class ModifyBioGroupsPanel extends JPanel {
         c.gridy += 100;
         c.weighty = 1;
         c.gridwidth = 2;
-        add(Box.createGlue(), c);
+        mainPanel.add(Box.createGlue(), c);
 
-        /*
-         * c.gridheight = c.gridy; c.weightx = 1; c.weighty = 1; c.gridx = 4;
-         * c.gridy = 1;
-         *
-         *
-         *
-         * JPanel sampleAnalysisPanel = createSampleAnalysisPanel();
-         *
-         * add(sampleAnalysisPanel, c);
-         */
-
+        return mainPanel;
     }
 
     private JButton createDeleteSampleButton(boolean visible, final ArrayList<JTextField> samplesList, final ArrayList<JButton> deleteButtonList, final JTextField sampleTextField, final JTextField groupTextField, final JSeparator separator, final JButton addButton, final JPanel p) {
@@ -269,15 +264,15 @@ public class ModifyBioGroupsPanel extends JPanel {
         return deleteSampleButton;
     }
 
-    public RSMNode generateTreeNodes() {
+    public RSMNode generateTreeNodes(String quantitationName) {
 
-        RSMDataSetNode rootQuantitationNode = new RSMDataSetNode(new DataSetData("Quantitation", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
+        RSMDataSetNode rootQuantitationNode = new RSMDataSetNode(new DataSetData(quantitationName, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
 
         for (int i = 0; i < groupsList.size(); i++) {
             JTextField groupTextField = groupsList.get(i);
             ArrayList<JTextField> sampleList = samplesMap.get(groupTextField);
 
-            RSMBiologicalSampleNode biologicalGroupNode = new RSMBiologicalSampleNode(new DataSetData(groupTextField.getText().toString(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            RSMBiologicalGroupNode biologicalGroupNode = new RSMBiologicalGroupNode(new DataSetData(groupTextField.getText().toString(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             rootQuantitationNode.add(biologicalGroupNode);
             for (int j = 0; j < sampleList.size(); j++) {
                 JTextField sampleTextField = sampleList.get(j);

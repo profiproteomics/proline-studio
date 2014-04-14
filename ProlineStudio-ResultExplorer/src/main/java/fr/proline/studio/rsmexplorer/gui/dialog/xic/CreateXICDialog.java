@@ -32,7 +32,7 @@ public class CreateXICDialog extends DefaultDialog {
     public CreateXICDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-        setTitle("Create XIC Quantitation");
+        setTitle("XIC Quantitation Wizard");
 
         setHelpURL(null); //JPM.TODO
 
@@ -112,7 +112,8 @@ public class CreateXICDialog extends DefaultDialog {
 
             
             JScrollPane scrollPane = new JScrollPane();
-            SetSampleAnalysisPanel defineSampleAnalysisPanel = new SetSampleAnalysisPanel(ModifyBioGroupsPanel.getDefinePanel().generateTreeNodes());
+            String quantitationName = DefineBioGroupsPanel.getDefineBioGroupsPanel().getQuantitationName();
+            SetSampleAnalysisPanel defineSampleAnalysisPanel = new SetSampleAnalysisPanel(ModifyBioGroupsPanel.getDefinePanel().generateTreeNodes(quantitationName));
             scrollPane.setViewportView(defineSampleAnalysisPanel);
 
             replaceInternaleComponent(scrollPane);

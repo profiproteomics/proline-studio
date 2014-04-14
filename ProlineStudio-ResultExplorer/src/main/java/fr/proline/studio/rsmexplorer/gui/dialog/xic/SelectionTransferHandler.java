@@ -23,10 +23,10 @@ public class SelectionTransferHandler extends TransferHandler {
     
     private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
-    private boolean m_isSource;
+    private boolean m_isSelectionTree;
     
-    public SelectionTransferHandler(boolean isSource) {
-        m_isSource = isSource;
+    public SelectionTransferHandler(boolean isSelectionTree) {
+        m_isSelectionTree = isSelectionTree;
     }
     
     @Override
@@ -38,7 +38,7 @@ public class SelectionTransferHandler extends TransferHandler {
     @Override
     protected Transferable createTransferable(JComponent c) {
 
-        if (m_isSource) {
+        if (m_isSelectionTree) {
             SelectionTree tree = (SelectionTree) c;
 
             RSMNode[] selectedNodes = tree.getSelectedNodes();
@@ -50,10 +50,12 @@ public class SelectionTransferHandler extends TransferHandler {
                 if (!node.isLeaf()) {
                     return null;
                 }
-                if (node.getType() != RSMNode.NodeTypes.DATA_SET) {
+                if (node.isChanging()) {
                     return null;
                 }
-                if (node.isChanging()) {
+
+                RSMNode.NodeTypes type = node.getType();
+                if (type != RSMNode.NodeTypes.DATA_SET) {
                     return null;
                 }
 
@@ -62,23 +64,66 @@ public class SelectionTransferHandler extends TransferHandler {
                 if (!datasetNode.hasResultSummary()) {
                     return null;
                 }
-                
+
                 keptNodes.add(datasetNode);
+
+
+
+ 
             } 
             
-
-
-
             SelectionTransferable.TransferData data = new SelectionTransferable.TransferData();
-            data.setNodeList(keptNodes);
+            data.setDatasetList(keptNodes);
             Integer transferKey =  SelectionTransferable.register(data);
 
             
             
             return new SelectionTransferable(transferKey);
 
+
+
+
+        } else {
+            DesignTree tree = (DesignTree) c;
+
+            RSMNode[] selectedNodes = tree.getSelectedNodes();
+            ArrayList<RSMBiologicalSampleAnalysisNode> keptNodes = new ArrayList<>();
+            
+            int nbSelectedNode = selectedNodes.length;
+            for (int i=0;i<nbSelectedNode;i++) {
+                RSMNode node = selectedNodes[i];
+                if (!node.isLeaf()) {
+                    return null;
+                }
+
+
+                RSMNode.NodeTypes type = node.getType();
+                if (type!= RSMNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
+                    return null;
+                }
+                RSMBiologicalSampleAnalysisNode sampleAnalysisNode = (RSMBiologicalSampleAnalysisNode) node;
+                if (!sampleAnalysisNode.hasResultSummary()) {
+                    return null;
+                }
+
+                keptNodes.add(sampleAnalysisNode);
+
+
+                
+                
+            } 
+            
+            SelectionTransferable.TransferData data = new SelectionTransferable.TransferData();
+            data.setSampleAnalysisList(keptNodes);
+            Integer transferKey =  SelectionTransferable.register(data);
+
+            
+            
+            return new SelectionTransferable(transferKey);
+
+
         }
-        return null;
+
     }
 
     
@@ -87,7 +132,7 @@ public class SelectionTransferHandler extends TransferHandler {
     protected void exportDone(JComponent source, Transferable data, int action) {
 
         // clean all transferred data
-        if (m_isSource) {
+        if (m_isSelectionTree) {
             SelectionTransferable.clearRegisteredData();
         }
     }
@@ -95,7 +140,7 @@ public class SelectionTransferHandler extends TransferHandler {
     @Override
     public boolean canImport(TransferHandler.TransferSupport support) {
 
-        if (!m_isSource) {
+        if (!m_isSelectionTree) {
 
             support.setShowDropLocation(true);
             if (support.isDataFlavorSupported(SelectionTransferable.RSMNodeList_FLAVOR)) {
@@ -162,21 +207,48 @@ public class SelectionTransferHandler extends TransferHandler {
         }
 
 
-        ArrayList<RSMDataSetNode> nodeList = (ArrayList<RSMDataSetNode>) data.getNodeList();
-        int nbNodes = nodeList.size();
-        for (int i = 0; i < nbNodes; i++) {
-            RSMDataSetNode node = nodeList.get(i);
+        ArrayList<RSMDataSetNode> datasetList = (ArrayList<RSMDataSetNode>) data.getDatasetList();
+        if (datasetList != null) {
+            int nbNodes = datasetList.size();
+            for (int i = 0; i < nbNodes; i++) {
+                RSMDataSetNode node = datasetList.get(i);
 
-            // create the new node
-            RSMBiologicalSampleAnalysisNode sampleAnalysisNode = new RSMBiologicalSampleAnalysisNode(node.getData());
-            
-            // add to new parent
-            treeModel.insertNodeInto(sampleAnalysisNode, dropRSMNode, childIndex);
+                // create the new node
+                RSMBiologicalSampleAnalysisNode sampleAnalysisNode = new RSMBiologicalSampleAnalysisNode(node.getData());
 
-            childIndex++;
+                // add to new parent
+                treeModel.insertNodeInto(sampleAnalysisNode, dropRSMNode, childIndex);
 
+                childIndex++;
+
+            }
+        } else {
+            ArrayList<RSMBiologicalSampleAnalysisNode> sampleAnalysisList = (ArrayList<RSMBiologicalSampleAnalysisNode>) data.getSampleAnalysisList();
+            int nbNodes = sampleAnalysisList.size();
+            for (int i = 0; i < nbNodes; i++) {
+                RSMNode node = sampleAnalysisList.get(i);
+
+
+                // specific case when the node is moved in its parent
+                int indexChild;
+                if (dropRSMNode.isNodeChild(node)) {
+                    // we are moving the node in its parent
+                    indexChild = dropRSMNode.getIndex(node);
+                    if (indexChild < childIndex) {
+                        childIndex--;
+                    }
+                }
+
+                // remove from parent (required when drag and dropped in the same parent)
+                treeModel.removeNodeFromParent(node);
+
+                // add to new parent
+                treeModel.insertNodeInto(node, dropRSMNode, childIndex);
+
+                childIndex++;
+
+            }
         }
-
         return true;
 
 

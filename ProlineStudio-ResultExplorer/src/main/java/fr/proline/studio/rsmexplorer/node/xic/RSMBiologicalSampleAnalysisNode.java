@@ -4,7 +4,9 @@
  */
 package fr.proline.studio.rsmexplorer.node.xic;
 
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.AbstractData;
+import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
@@ -18,6 +20,15 @@ public class RSMBiologicalSampleAnalysisNode extends RSMNode {
 
     public RSMBiologicalSampleAnalysisNode(AbstractData data) {
         super(RSMNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS, data);
+    }
+    
+    public boolean hasResultSummary() {
+        DDataset dataSet = ((DataSetData) getData()).getDataset();
+        return (dataSet.getResultSummaryId() != null);
+    }
+
+    public Long getResultSummaryId() {
+        return ((DataSetData) getData()).getDataset().getResultSummaryId();
     }
     
     @Override

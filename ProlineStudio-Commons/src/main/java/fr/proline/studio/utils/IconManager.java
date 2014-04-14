@@ -85,7 +85,9 @@ public class IconManager {
         EDIT_SMALL_10X10,
         IDENTIFICATION,
         ARROW_8X7,
-        ARROW;
+        ARROW,
+        ARROW_CURVED,
+        WAND_HAT;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -289,9 +291,14 @@ public class IconManager {
             case IDENTIFICATION:
                 return "fr/proline/studio/images/identification.png";  
             case ARROW_8X7:
-                return "fr/proline/studio/images/arrow8x7.png";  
+                return "fr/proline/studio/images/arrow8x7.png";
             case ARROW:
-                return "fr/proline/studio/images/arrow.png";  
+                return "fr/proline/studio/images/arrow.png";
+            case ARROW_CURVED:
+                return "fr/proline/studio/images/arrow-curve-180.png";
+            case WAND_HAT:
+                return "fr/proline/studio/images/wand-hat.png";
+
         }
 
 

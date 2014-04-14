@@ -2,6 +2,8 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
+import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.xic.RSMBiologicalSampleAnalysisNode;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -82,18 +84,29 @@ public class SelectionTransferable implements Transferable, Serializable {
     
     public static class TransferData {
 
-        private ArrayList<RSMDataSetNode> m_dataList = null;
+        private ArrayList<RSMDataSetNode> m_datasetList = null;
+        private ArrayList<RSMBiologicalSampleAnalysisNode> m_biologicalSampleAnalysisList = null;
+        
+        
         
         public TransferData() {
             
         }
 
-        public void setNodeList(ArrayList<RSMDataSetNode> list) {
-            m_dataList = list;
+        public void setDatasetList(ArrayList<RSMDataSetNode> list) {
+            m_datasetList = list;
         }
 
-        public ArrayList<RSMDataSetNode> getNodeList() {
-            return m_dataList;
+        public ArrayList<RSMDataSetNode> getDatasetList() {
+            return m_datasetList;
+        }
+
+        public void setSampleAnalysisList(ArrayList<RSMBiologicalSampleAnalysisNode> list) {
+            m_biologicalSampleAnalysisList = list;
+        }
+
+        public ArrayList<RSMBiologicalSampleAnalysisNode> getSampleAnalysisList() {
+            return m_biologicalSampleAnalysisList;
         }
         
     }

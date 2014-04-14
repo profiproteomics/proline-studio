@@ -7,10 +7,14 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dpm.task.ValidationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.*;
 import fr.proline.studio.utils.IconManager;
-import java.awt.*;
+import java.awt.Dialog;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -281,19 +285,24 @@ public class ValidationDialog extends DefaultDialog {
                     m_psmPrefiltersSelectedPanel.add(new JLabel("   "), c);
                 }
                 
-                c.gridx++;
+                c.gridx++;               
                 JLabel prefilterNameLabel = new JLabel(p.getName());
                 prefilterNameLabel.setHorizontalAlignment(JLabel.RIGHT);
                 m_psmPrefiltersSelectedPanel.add(prefilterNameLabel, c);
 
-                c.gridx++;
-                JLabel cmpLabel = new JLabel(((String) p.getAssociatedData()));
-                cmpLabel.setHorizontalAlignment(JLabel.CENTER);
-                m_psmPrefiltersSelectedPanel.add(cmpLabel, c);
+                if(p.hasComponent()){
+                    c.gridx++;
+                    JLabel cmpLabel = new JLabel(((String) p.getAssociatedData()));
+                    cmpLabel.setHorizontalAlignment(JLabel.CENTER);
+                    m_psmPrefiltersSelectedPanel.add(cmpLabel, c);
                 
-                c.weightx = 1;
-                c.gridx++;
-                m_psmPrefiltersSelectedPanel.add(p.getComponent(), c);
+                    c.weightx = 1;
+                    c.gridx++;
+                    m_psmPrefiltersSelectedPanel.add(p.getComponent(), c);
+                } else {
+                    c.gridx++;
+                    c.gridx++;                                        
+                }
 
                 c.weightx = 0;
                 c.gridx++;
@@ -738,20 +747,25 @@ public class ValidationDialog extends DefaultDialog {
     }
 
     private void createParameters() {
-        m_psmPrefilterParameters = new AbstractParameter[7];
+        m_psmPrefilterParameters = new AbstractParameter[9];
         m_psmPrefilterParameters[0] = null;
-        m_psmPrefilterParameters[1] = new IntegerParameter("RANK", "Rank", new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
+        m_psmPrefilterParameters[1] = new IntegerParameter(ValidationTask.RANK_FILTER_KEY, ValidationTask.RANK_FILTER_NAME, new JTextField(6), new Integer(5), new Integer(0), new Integer(10));
         m_psmPrefilterParameters[1].setAssociatedData("<=");
-        m_psmPrefilterParameters[2] = new IntegerParameter("PEP_SEQ_LENGTH", "Length", new JTextField(6), new Integer(4), new Integer(4), null);
+        m_psmPrefilterParameters[2] = new IntegerParameter(ValidationTask.PEP_LENGTH_FILTER_KEY, ValidationTask.PEP_LENGTH_FILTER_NAME, new JTextField(6), new Integer(4), new Integer(4), null);
         m_psmPrefilterParameters[2].setAssociatedData(">=");
-        m_psmPrefilterParameters[3] = new DoubleParameter("SCORE", "Score", new JTextField(6), new Double(0), new Double(0), (Double) null);
+        m_psmPrefilterParameters[3] = new DoubleParameter(ValidationTask.SCORE_FILTER_KEY, ValidationTask.SCORE_FILTER_NAME, new JTextField(6), new Double(0), new Double(0), (Double) null);
         m_psmPrefilterParameters[3].setAssociatedData(">=");
-        m_psmPrefilterParameters[4] = new DoubleParameter("MASCOT_EVALUE", "e-Value", new JTextField(6), new Double(1), new Double(0), new Double(1));
+        m_psmPrefilterParameters[4] = new DoubleParameter(ValidationTask.MASCOT_EVAL_FILTER_KEY, ValidationTask.MASCOT_EVAL_FILTER_NAME, new JTextField(6), new Double(1), new Double(0), new Double(1));
         m_psmPrefilterParameters[4].setAssociatedData("<=");
-        m_psmPrefilterParameters[5] = new DoubleParameter("SCORE_IT_P-VALUE", "Identity p-Value", new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        m_psmPrefilterParameters[5] = new DoubleParameter(ValidationTask.MASCOT_IT_SCORE_FILTER_KEY, ValidationTask.MASCOT_IT_SCORE_FILTER_NAME, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
         m_psmPrefilterParameters[5].setAssociatedData("=");   
-        m_psmPrefilterParameters[6] = new DoubleParameter("SCORE_HT_P-VALUE", "Homology p-Value", new JTextField(6), new Double(0.05), new Double(0), new Double(1));
+        m_psmPrefilterParameters[6] = new DoubleParameter(ValidationTask.MASCOT_HT_SCORE_FILTER_KEY, ValidationTask.MASCOT_HT_SCORE_FILTER_NAME, new JTextField(6), new Double(0.05), new Double(0), new Double(1));
         m_psmPrefilterParameters[6].setAssociatedData("=");
+        JCheckBox singlePerQueryCB = new JCheckBox("post FDR");
+        m_psmPrefilterParameters[7] = new BooleanParameter(ValidationTask.SINGLE_PSM_QUERY_FILTER_KEY, ValidationTask.SINGLE_PSM_QUERY_FILTER_NAME, singlePerQueryCB, false);
+        m_psmPrefilterParameters[7].setAssociatedData(":");        
+        m_psmPrefilterParameters[8] = new NoneParameter(ValidationTask.SINGLE_PSM_RANK_FILTER_KEY, ValidationTask.SINGLE_PSM_RANK_FILTER_NAME);
+//        m_psmPrefilterParameters[8].setAssociatedData("=");
 
         for (int i = 0; i < m_psmPrefilterParameters.length; i++) {
             AbstractParameter p = m_psmPrefilterParameters[i];
@@ -764,7 +778,7 @@ public class ValidationDialog extends DefaultDialog {
 
         m_proteinPrefilterParameters = new AbstractParameter[2];
         m_proteinPrefilterParameters[0] = null;
-        m_proteinPrefilterParameters[1] = new IntegerParameter("SPECIFIC_PEP", "Specific Peptides", new JTextField(6), new Integer(1), new Integer(1), null);
+        m_proteinPrefilterParameters[1] = new IntegerParameter(ValidationTask.SPECIFIC_PEP_FILTER_KEY, ValidationTask.SPECIFIC_PEP_FILTER_NAME, new JTextField(6), new Integer(1), new Integer(1), null);
         m_proteinPrefilterParameters[1].setAssociatedData(">=");
         
          for (int i = 0; i < m_proteinPrefilterParameters.length; i++) {

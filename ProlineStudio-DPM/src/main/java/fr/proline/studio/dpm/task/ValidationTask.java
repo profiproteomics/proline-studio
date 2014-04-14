@@ -24,6 +24,28 @@ public class ValidationTask extends AbstractServiceTask {
     private Integer[] m_resultSummaryId = null;
     private String m_scoringType = null;
     
+        //PSM PreFilter
+    public static String RANK_FILTER_KEY = "RANK";
+    public static String RANK_FILTER_NAME = "Rank";
+    public static String SCORE_FILTER_KEY = "SCORE";
+    public static String SCORE_FILTER_NAME = "Score";
+    public static String PEP_LENGTH_FILTER_KEY = "PEP_SEQ_LENGTH";
+    public static String PEP_LENGTH_FILTER_NAME = "Length";
+    public static String MASCOT_EVAL_FILTER_KEY = "MASCOT_EVALUE";
+    public static String MASCOT_EVAL_FILTER_NAME = "e-Value";
+    public static String MASCOT_IT_SCORE_FILTER_KEY = "SCORE_IT_P-VALUE";
+    public static String MASCOT_IT_SCORE_FILTER_NAME = "Identity p-Value";
+    public static String MASCOT_HT_SCORE_FILTER_KEY = "SCORE_HT_P-VALUE";
+    public static String MASCOT_HT_SCORE_FILTER_NAME = "Homology p-Value";
+    public static String SINGLE_PSM_QUERY_FILTER_KEY = "SINGLE_PSM_PER_QUERY";
+    public static String SINGLE_PSM_QUERY_FILTER_NAME = "Single PSM per MS Query";               
+    public static String SINGLE_PSM_RANK_FILTER_KEY = "SINGLE_PSM_PER_RANK";
+    public static String SINGLE_PSM_RANK_FILTER_NAME = "Single PSM per Rank";               
+    
+    //Protein PreFilter
+    public static String SPECIFIC_PEP_FILTER_KEY = "SPECIFIC_PEP";
+    public static String SPECIFIC_PEP_FILTER_NAME = "Specific Peptides";               
+    
     public ValidationTask(AbstractServiceCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, String scoringType) {
         super(callback, false /*asynchronous*/, new TaskInfo("Validation of Search Result "+dataset.getName(), true, TASK_LIST_INFO));
         m_dataset = dataset;
@@ -51,40 +73,54 @@ public class ValidationTask extends AbstractServiceTask {
             // Peptide Pre-Filters
             ArrayList pepFilters = new ArrayList();
             
-            if (m_argumentsMap.containsKey("RANK")) {
+            if (m_argumentsMap.containsKey(RANK_FILTER_KEY)) {
                 HashMap filterCfg = new HashMap();
-                filterCfg.put("parameter", "RANK");
-                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("RANK")) );
+                filterCfg.put("parameter", RANK_FILTER_KEY);
+                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(RANK_FILTER_KEY)) );
                 pepFilters.add(filterCfg);
             }
-            if (m_argumentsMap.containsKey("SCORE")) {
+            if (m_argumentsMap.containsKey(SCORE_FILTER_KEY)) {
                 HashMap filterCfg = new HashMap();
-                filterCfg.put("parameter", "SCORE");
-                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("SCORE")));
+                filterCfg.put("parameter", SCORE_FILTER_KEY);
+                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get(SCORE_FILTER_KEY)));
                 pepFilters.add(filterCfg);
             }
-            if (m_argumentsMap.containsKey("MASCOT_EVALUE")) {
+            if (m_argumentsMap.containsKey(MASCOT_EVAL_FILTER_KEY)) {
                 HashMap filterCfg = new HashMap();
-                filterCfg.put("parameter", "MASCOT_EVALUE");
-                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("MASCOT_EVALUE")));
+                filterCfg.put("parameter", MASCOT_EVAL_FILTER_KEY);
+                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get(MASCOT_EVAL_FILTER_KEY)));
                 pepFilters.add(filterCfg);
             }
-            if (m_argumentsMap.containsKey("PEP_SEQ_LENGTH")) {
+            if (m_argumentsMap.containsKey(PEP_LENGTH_FILTER_KEY)) {
                 HashMap filterCfg = new HashMap();
-                filterCfg.put("parameter", "PEP_SEQ_LENGTH");
-                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("PEP_SEQ_LENGTH")));
+                filterCfg.put("parameter", PEP_LENGTH_FILTER_KEY);
+                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(PEP_LENGTH_FILTER_KEY)));
                 pepFilters.add(filterCfg);
             }
-            if (m_argumentsMap.containsKey("SCORE_IT_P-VALUE")) {
+            if (m_argumentsMap.containsKey(MASCOT_IT_SCORE_FILTER_KEY)) {
                 HashMap filterCfg = new HashMap();
-                filterCfg.put("parameter", "SCORE_IT_P-VALUE");
-                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("SCORE_IT_P-VALUE")));
+                filterCfg.put("parameter", MASCOT_IT_SCORE_FILTER_KEY);
+                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get(MASCOT_IT_SCORE_FILTER_KEY)));
                 pepFilters.add(filterCfg);
             }
-            if (m_argumentsMap.containsKey("SCORE_HT_P-VALUE")) {
+            if (m_argumentsMap.containsKey(MASCOT_HT_SCORE_FILTER_KEY)) {
                 HashMap filterCfg = new HashMap();
-                filterCfg.put("parameter", "SCORE_HT_P-VALUE");
-                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get("SCORE_HT_P-VALUE")));
+                filterCfg.put("parameter", MASCOT_HT_SCORE_FILTER_KEY);
+                filterCfg.put("threshold", Float.valueOf(m_argumentsMap.get(MASCOT_HT_SCORE_FILTER_KEY)));
+                pepFilters.add(filterCfg);
+            }
+            if (m_argumentsMap.containsKey(SINGLE_PSM_QUERY_FILTER_KEY)) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", SINGLE_PSM_QUERY_FILTER_KEY);
+                filterCfg.put("threshold", 1);
+                filterCfg.put("post_validation", Boolean.valueOf(m_argumentsMap.get(SINGLE_PSM_QUERY_FILTER_KEY)));
+                pepFilters.add(filterCfg);
+            }
+            if (m_argumentsMap.containsKey(SINGLE_PSM_RANK_FILTER_KEY)) {
+                HashMap filterCfg = new HashMap();
+                filterCfg.put("parameter", SINGLE_PSM_RANK_FILTER_KEY);
+                filterCfg.put("threshold", 1);
+//                filterCfg.put("post_validation", Boolean.valueOf(m_argumentsMap.get(SINGLE_PSM_RANK_FILTER_KEY)));
                 pepFilters.add(filterCfg);
             }
             params.put("pep_match_filters",pepFilters);
@@ -108,10 +144,10 @@ public class ValidationTask extends AbstractServiceTask {
             // Protein Pre-Filters
             ArrayList proteinFilters = new ArrayList();
             
-            if (m_argumentsMap.containsKey("SPECIFIC_PEP")) {
+            if (m_argumentsMap.containsKey(SPECIFIC_PEP_FILTER_KEY)) {
                 HashMap filterCfg = new HashMap();
-                filterCfg.put("parameter", "SPECIFIC_PEP");
-                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get("SPECIFIC_PEP")) );
+                filterCfg.put("parameter", SPECIFIC_PEP_FILTER_KEY);
+                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(SPECIFIC_PEP_FILTER_KEY)) );
                 proteinFilters.add(filterCfg);
             }
             

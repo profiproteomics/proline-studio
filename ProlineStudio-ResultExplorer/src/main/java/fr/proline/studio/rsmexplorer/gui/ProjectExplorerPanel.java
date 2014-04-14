@@ -95,8 +95,8 @@ public class ProjectExplorerPanel extends JPanel {
         c.gridwidth = 2;
         add(m_identificationTreeScrollPane, c);
 
-        c.gridy++;
-        add(m_quantitationTreeScrollPane, c);
+        //c.gridy++;
+        //add(m_quantitationTreeScrollPane, c);  // Put back to have quantitation
 
     }
 

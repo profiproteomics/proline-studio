@@ -14,7 +14,12 @@ public class BooleanParameter extends AbstractParameter {
     public BooleanParameter(String key, String name, Class graphicalType, Boolean defaultValue) {
         super(key, name, Boolean.class, graphicalType);
         m_defaultValue = defaultValue;
-
+    }
+    
+    public BooleanParameter(String key, String name, JComponent component, Boolean defaultValue) {
+        super(key, name, Boolean.class,  component.getClass());
+        m_defaultValue = defaultValue;
+        m_parameterComponent = component;
     }
 
     @Override

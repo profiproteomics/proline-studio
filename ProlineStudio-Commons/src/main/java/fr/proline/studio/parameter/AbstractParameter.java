@@ -42,6 +42,14 @@ public abstract class AbstractParameter {
     
     public abstract String getStringValue();
     public abstract Object getObjectValue();
+    /**
+     * Specify if a component should be associated to the label for this parameter. 
+     * Default is true;
+     * @return 
+     */
+    public Boolean hasComponent(){
+        return true;
+    }
     
     /**
      * Returns if the parameter wants its name to be displayed in the panel

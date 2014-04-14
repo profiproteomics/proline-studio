@@ -70,10 +70,11 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             
             String parameterValue = preferences.get(prefixKey+suffixKey, null);
             
-            
-            c.gridx = 1;
-            c.weightx = 1;
-            m_parametersPanel.add(parameter.getComponent(parameterValue), c);
+            if(parameter.hasComponent()){
+                c.gridx = 1;
+                c.weightx = 1;
+                m_parametersPanel.add(parameter.getComponent(parameterValue), c);
+            }
 
             c.gridy++;
 
@@ -103,12 +104,11 @@ public class ParameterList extends ArrayList<AbstractParameter> {
 
             String parameterValue = preferences.get(prefixKey+suffixKey, null);
             
-            
-            c.gridx = 1;
-            c.weightx = 1;
-            p.add(parameter.getComponent(parameterValue), c);
-
-            
+            if(parameter.hasComponent()){
+              c.gridx = 1;
+              c.weightx = 1;
+              p.add(parameter.getComponent(parameterValue), c);
+            }           
 
         }
     }
@@ -131,6 +131,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 }
             }
             
+            //Used to initialize values            
             parameter.getComponent(parameterValue);
         }
     }

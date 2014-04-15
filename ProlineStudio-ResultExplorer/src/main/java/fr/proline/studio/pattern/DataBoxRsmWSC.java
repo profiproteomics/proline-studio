@@ -1,7 +1,11 @@
 package fr.proline.studio.pattern;
 
 
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessServiceThread;
@@ -12,8 +16,15 @@ import fr.proline.studio.dpm.task.RetrieveSpectralCountTask;
 import fr.proline.studio.dpm.task.SpectralCountTask;
 import fr.proline.studio.rsmexplorer.actions.SpectralCountAction;
 import fr.proline.studio.rsmexplorer.gui.WSCResultPanel;
+import fr.proline.studio.rsmexplorer.node.QuantitationTree;
+import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
+import fr.proline.studio.rsmexplorer.node.RSMNode;
 import java.util.ArrayList;
 import java.util.Map;
+import javax.persistence.EntityManager;
+import javax.swing.tree.DefaultTreeModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +88,10 @@ public class DataBoxRsmWSC extends AbstractDataBox {
         final Long[] _refIdfRSMId = new Long[1];
         final Long[] _refIdfDSId = new Long[1];
         
+        QuantitationTree tree = QuantitationTree.getCurrentTree();
+        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+        final RSMDataSetNode[] _quantitationNode = new RSMDataSetNode[1];
+        
         AbstractServiceCallback callback = new AbstractServiceCallback() {
             
             @Override
@@ -108,23 +123,60 @@ public class DataBoxRsmWSC extends AbstractDataBox {
                             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                                 if (!success) {
-                                   ((WSCResultPanel)m_panel).setData(null); 
+                                    ((WSCResultPanel) m_panel).setData(null);
+                                } else {
+                                    ((WSCResultPanel) m_panel).setData(readScResult);
                                 }
-                                    ((WSCResultPanel)m_panel).setData(readScResult);
 
                             }
                         };
                         
                         readScResult.loadData(refDSRSM, callback);
-                        System.out.println(scResultAsJson);
+                        //System.out.println(scResultAsJson);
 
                     } else {
                         String scResultAsJson = _spCountJSON[0];
                         SpectralCountResultData scResult = new SpectralCountResultData(m_refDataset, m_datasetRsms, scResultAsJson, m_refDataset.getProject());
                         ((WSCResultPanel)m_panel).setData(scResult); 
+                        
+                        
+                        final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
+                        
+                        AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
+
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return true;
+                            }
+
+                            @Override
+                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                if (success) {
+                                    ((DataSetData) _quantitationNode[0].getData()).setDataset(readDatasetList.get(0));
+                                    _quantitationNode[0].setIsChanging(false);
+                                    treeModel.nodeChanged(_quantitationNode[0]);
+                                } else {
+                                    treeModel.removeNodeFromParent(_quantitationNode[0]);
+                                }
+                            }
+                        };
+                        
+                        
+                        DatabaseDataSetTask task = new DatabaseDataSetTask(readDatasetCallback);
+                        task.initLoadDataset(_quantiDatasetId[0], readDatasetList);
+                        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+                        
+
+
+                        
+                        
                     }                                     
                 } else {
                     ((WSCResultPanel)m_panel).setData(null);
+                    
+                    if (!m_readData) {
+                        treeModel.removeNodeFromParent(_quantitationNode[0]);
+                    }
                 }
                 
                 setLoaded(loadingId);
@@ -132,10 +184,24 @@ public class DataBoxRsmWSC extends AbstractDataBox {
         };
                       
         AbstractServiceTask task;
-        if(m_readData){
-            task = new RetrieveSpectralCountTask(callback, m_refDataset, _refIdfRSMId, _refIdfDSId, _spCountJSON);          
+        if (m_readData){
+            task = new RetrieveSpectralCountTask(callback, m_refDataset, _refIdfRSMId, _refIdfDSId, _spCountJSON);       
+
+            
         } else {
             task = new SpectralCountTask(callback,  m_refDataset, m_datasetRsms, m_qttDSName, m_qttDSDescr, _quantiDatasetId, _spCountJSON);
+            
+                        
+            // add node for the quantitation dataset which will be created
+            DataSetData quantitationData = new DataSetData(m_qttDSName, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION );
+                
+            final RSMDataSetNode quantitationNode = new RSMDataSetNode(quantitationData);
+            _quantitationNode[0] = quantitationNode;
+            quantitationNode.setIsChanging(true);
+            
+            RSMNode rootNode = (RSMNode) treeModel.getRoot();
+            treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount());
+            
         }            
         AccessServiceThread.getAccessServiceThread().addTask(task);
 

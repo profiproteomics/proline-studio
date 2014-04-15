@@ -1,35 +1,20 @@
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.core.orm.uds.Project;
-import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.gui.DatasetAction;
 import fr.proline.studio.rsmexplorer.actions.*;
-import fr.proline.studio.utils.ActionRegistry;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import javax.swing.*;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeWillExpandListener;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.ExpandVetoException;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
+
 
 /**
  *
  * @author JM235353
  */
 public class QuantitationTree extends RSMTree {
-    
-    private RSMTreeModel m_model;
+
     private boolean m_isMainTree;
     
     private static HashMap<ProjectQuantitationData, QuantitationTree> treeMap = new HashMap<>();
@@ -77,25 +62,6 @@ public class QuantitationTree extends RSMTree {
     }
 
     
-     
-    /**
-     * Return an array of all selected nodes of the tree
-     * @return 
-     */
-    /*public RSMNode[] getSelectedNodes() {
-        TreePath[] paths = getSelectionModel().getSelectionPaths();
-        
-        int nbPath = paths.length;
-        
-        RSMNode[] nodes = new RSMNode[nbPath];
-        
-        for (int i=0;i<nbPath;i++) {
-            nodes[i] = (RSMNode) paths[i].getLastPathComponent();
-        }
-
-        return nodes;
-    }*/
-    
      private void triggerPopup(MouseEvent e) {
         
         // retrieve selected nodes
@@ -108,35 +74,64 @@ public class QuantitationTree extends RSMTree {
             return;
         }
         RSMNode n = selectedNodes[0];
-        if (! n.isRoot()) {
-            return;
-        }
+        boolean isRootPopup = n.isRoot();
+
+         JPopupMenu popup;
+         ArrayList<AbstractRSMAction> actions;
         
-        
-        if (m_rootPopup == null) {
-                // create the actions
-                m_rootActions = new ArrayList<>(1);  // <--- get in sync
+         if (isRootPopup) {
+             if (m_rootPopup == null) {
+                 // create the actions
+                 m_rootActions = new ArrayList<>(1);  // <--- get in sync
 
-                CreateXICAction createXICAction = new CreateXICAction();
-                
-                m_rootActions.add(createXICAction);
+                 CreateXICAction createXICAction = new CreateXICAction();
+
+                 m_rootActions.add(createXICAction);
 
 
 
-                // add actions to popup
-                m_rootPopup = new JPopupMenu();
-                for (int i = 0; i < m_rootActions.size(); i++) {
-                    AbstractRSMAction action = m_rootActions.get(i);
-                    if (action == null) {
-                        m_rootPopup.addSeparator();
-                    } else {
-                        m_rootPopup.add(action.getPopupPresenter());
-                    }
-                }
-            }
-            
-            JPopupMenu popup = m_rootPopup;
-            ArrayList<AbstractRSMAction> actions = m_rootActions;
+                 // add actions to popup
+                 m_rootPopup = new JPopupMenu();
+                 for (int i = 0; i < m_rootActions.size(); i++) {
+                     AbstractRSMAction action = m_rootActions.get(i);
+                     if (action == null) {
+                         m_rootPopup.addSeparator();
+                     } else {
+                         m_rootPopup.add(action.getPopupPresenter());
+                     }
+                 }
+             }
+
+             popup = m_rootPopup;
+             actions = m_rootActions;
+         } else {
+             if (m_mainPopup == null) {
+                 // create the actions
+                 m_mainActions = new ArrayList<>(1);  // <--- get in sync
+
+                 RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
+
+                 m_mainActions.add(retrieveSCDataAction);
+
+
+
+                 // add actions to popup
+                 m_mainPopup = new JPopupMenu();
+                 for (int i = 0; i < m_mainActions.size(); i++) {
+                     AbstractRSMAction action = m_mainActions.get(i);
+                     if (action == null) {
+                         m_mainPopup.addSeparator();
+                     } else {
+                         m_mainPopup.add(action.getPopupPresenter());
+                     }
+                 }
+             }
+
+             popup = m_mainPopup;
+             actions = m_mainActions;
+
+         }
+
 
         
         
@@ -156,7 +151,8 @@ public class QuantitationTree extends RSMTree {
     }
     private JPopupMenu m_rootPopup;
     private ArrayList<AbstractRSMAction> m_rootActions;
-
+    private JPopupMenu m_mainPopup;
+    private ArrayList<AbstractRSMAction> m_mainActions;
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -195,7 +191,7 @@ public class QuantitationTree extends RSMTree {
                 }
             }
 
-        } else if (e.getClickCount() == 2) {
+        }/* else if (e.getClickCount() == 2) {
             
             // display All imported rset on double click
             RSMNode[] selectedNodes = getSelectedNodes();
@@ -206,7 +202,7 @@ public class QuantitationTree extends RSMTree {
                     new DisplayAllRsetAction().actionPerformed(selectedNodes, e.getX(), e.getY());
                 }
             }
-        }
+        }*/
 
 
 
@@ -226,26 +222,5 @@ public class QuantitationTree extends RSMTree {
     @Override
     public void mouseExited(MouseEvent e) {}
 
-    
-    
-    /*private class RSMTreeModel extends DefaultTreeModel {
 
-        public RSMTreeModel(TreeNode root) {
-            super(root, false);
-        }
-
-
-        @Override
-        public void valueForPathChanged(TreePath path, Object newValue) {
-            RSMNode rsmNode = (RSMNode) path.getLastPathComponent();
-
-            if (rsmNode.getType()== RSMNode.NodeTypes.PROJECT_QUANTITATION) {  //JPM.TODO
-                RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) rsmNode;
-                Project project = projectNode.getProject();
-                ((RSMProjectIdentificationNode) rsmNode).changeNameAndDescription(newValue.toString(), project.getDescription());
-            } else if (rsmNode.getType()== RSMNode.NodeTypes.DATA_SET) {
-                ((RSMDataSetNode) rsmNode).rename(newValue.toString());
-            }
-        }
-    }*/
 }

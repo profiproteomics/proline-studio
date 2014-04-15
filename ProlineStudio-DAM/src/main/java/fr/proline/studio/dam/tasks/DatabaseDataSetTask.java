@@ -72,6 +72,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int MODIFY_MERGED_DATASET = 9;
     private final static int EMPTY_TRASH = 10;
     private final static int LOAD_DATASET_AND_RSM_INFO = 11;
+    private final static int LOAD_DATASET = 12;
      
     private static final Object WRITE_DATASET_LOCK = new Object();
     
@@ -229,6 +230,16 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         setPriority(Priority.HIGH_1);
     }
     
+    public void initLoadDataset(Long datasetId, ArrayList<DDataset> returnedDatasetList) {
+        setTaskInfo(new TaskInfo("Load DataSet "+datasetId, false, TASK_LIST_INFO));
+        m_datasetId = datasetId;
+        m_datasetList = returnedDatasetList;
+        m_action = LOAD_DATASET;
+        setPriority(Priority.HIGH_1);
+    }
+    
+    
+    
     @Override
     public boolean needToFetch() {
 
@@ -261,6 +272,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case MODIFY_MERGED_DATASET:
             case EMPTY_TRASH:
             case LOAD_DATASET_AND_RSM_INFO:
+            case LOAD_DATASET:
                 return true; // done one time
          
         }
@@ -311,6 +323,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return emptyTrash();
             case LOAD_DATASET_AND_RSM_INFO : 
                 return fetchDatasetWithIDAndRSMInfo();
+            case LOAD_DATASET:
+                return fetchDataset();
         }
         
         return false; // should never happen
@@ -616,6 +630,31 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
+            entityManagerUDS.getTransaction().rollback();
+            return false;
+        } finally {
+            entityManagerUDS.close();
+        }
+
+        return true;
+    }
+    
+    private boolean fetchDataset() {
+                
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            // *** load dataset for specified id
+            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
+            dataSetQuery.setParameter("dsId", m_datasetId);
+            DDataset ddataSet = dataSetQuery.getSingleResult();
+            m_datasetList.add(ddataSet);
+
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
             entityManagerUDS.getTransaction().rollback();
             return false;

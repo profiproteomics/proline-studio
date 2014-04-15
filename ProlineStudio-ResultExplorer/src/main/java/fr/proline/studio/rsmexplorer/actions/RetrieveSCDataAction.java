@@ -26,7 +26,7 @@ public class RetrieveSCDataAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
   
     public RetrieveSCDataAction() {
-        super(NbBundle.getMessage(RetrieveSCDataAction.class, "CTL_RetrieveSCAction"));
+        super(NbBundle.getMessage(RetrieveSCDataAction.class, "CTL_RetrieveSCAction"), false);
     }
     
     @Override

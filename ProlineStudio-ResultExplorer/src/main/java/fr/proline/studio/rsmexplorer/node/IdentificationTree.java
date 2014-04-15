@@ -676,8 +676,8 @@ public class IdentificationTree extends RSMTree implements TreeWillExpandListene
                 SpectralCountAction spectralCountAction = new SpectralCountAction();
                 m_mainActions.add(spectralCountAction); 
                   
-                RetrieveSCDataAction getSCAction = new RetrieveSCDataAction();
-                m_mainActions.add(getSCAction); 
+                //RetrieveSCDataAction getSCAction = new RetrieveSCDataAction();
+                //m_mainActions.add(getSCAction); 
                 
                 m_mainActions.add(null);  // separator
                 

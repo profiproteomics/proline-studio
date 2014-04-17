@@ -30,7 +30,7 @@ public class CreateXICAction extends AbstractRSMAction {
     
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
-         setEnabled(true);
+         setEnabled(false); // put back
     }
     
 }

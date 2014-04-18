@@ -2,12 +2,15 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.SequenceMatchPK;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.ps.PeptidePtm;
+import fr.proline.module.seq.BioSequenceProvider;
+import fr.proline.module.seq.dto.BioSequenceWrapper;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -15,10 +18,9 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.*;
+import java.util.List;
 import java.awt.event.ActionListener;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLEditorKit;
@@ -111,22 +113,78 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     private final int HIGHLIGHT_OTHER_MODIFICATION         = 0x10;
     
 
-    public void setData(DProteinMatch pm, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
+    public void setData(Long rsmId, DProteinMatch pm, DPeptideInstance selectedPeptide, DPeptideInstance[] peptideInstances) {
         
-        if ((pm == null) || (pm.getBioSequence() == null)) {
+        if (pm == null) {
+            m_editorPane.setText("");
+            return;
+        }
+
+        if (peptideInstances == null) {
+            m_editorPane.setText("");
+            return;
+        }
+        
+        String accession = pm.getAccession();
+        ArrayList<String> values = new ArrayList<>();
+        values.add(accession);
+ 
+
+        Map<String, List<BioSequenceWrapper>> result = BioSequenceProvider.findBioSequencesBySEDbIdentValues(values);
+ 
+        List<BioSequenceWrapper> bioSequenceWrapperList = result.get(accession);
+        if (bioSequenceWrapperList == null) {
+            m_editorPane.setText("Protein Sequence not available in database");
+            return;
+        }
+        
+        BioSequenceWrapper biosequenceWrapperSelected = null;
+        int nb = bioSequenceWrapperList.size();
+        for (int i=0;i<nb;i++) {
+            biosequenceWrapperSelected = bioSequenceWrapperList.get(i);
+            
+            String sequence = biosequenceWrapperSelected.getSequence();
+            
+            // check for different peptides that the sequences math to the biosequence
+            int nbPeptides = peptideInstances.length;
+            for (int j = 0; j < nbPeptides; j++) {
+
+                DPeptideMatch peptideMatch = peptideInstances[j].getBestPeptideMatch();
+                String peptideSequence = peptideMatch.getPeptide().getSequence();
+                int start = peptideMatch.getSequenceMatch().getId().getStart();
+                int stop = peptideMatch.getSequenceMatch().getId().getStop();
+                if (stop>sequence.length()) {
+                    biosequenceWrapperSelected = null;
+                    break;
+                }
+                
+                String subSequence = sequence.substring(start-1, stop);
+                if (subSequence.compareTo(peptideSequence) != 0) {
+                    biosequenceWrapperSelected = null;
+                    break;
+                }
+            }
+            if (biosequenceWrapperSelected != null) {
+                break;
+            }
+        }
+        
+        
+        
+        if (biosequenceWrapperSelected == null) {
             m_editorPane.setText("Protein Sequence not available in database");
 
             return;
         }
         
         
-        String sequence = null;
+        /*String sequence = null;
         fr.proline.core.orm.msi.BioSequence bioSequenceMSI = pm.getBioSequence();
         if (pm.getBioSequence() != null) {
             sequence = pm.getBioSequence().getSequence();
-        }
+        }*/
         
-        
+        String sequence = biosequenceWrapperSelected.getSequence();
         int sequenceLength = sequence.length();
         
         int[] highlights = new int[sequenceLength];

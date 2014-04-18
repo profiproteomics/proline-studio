@@ -48,13 +48,13 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
        
         
         if ((proteinMatch == null) || (resultSummary == null)) {
-            ((RsmProteinAndPeptideSequencePanel) m_panel).setData(null, null, null);
+            ((RsmProteinAndPeptideSequencePanel) m_panel).setData(null, null, null, null);
             return;
         }
 
         PeptideSet peptideSet = proteinMatch.getPeptideSet(resultSummary.getId());
         if (peptideSet == null) {
-            ((RsmProteinAndPeptideSequencePanel) m_panel).setData(null, null, null);
+            ((RsmProteinAndPeptideSequencePanel) m_panel).setData(null, null, null, null);
             return;
         }
         
@@ -79,6 +79,6 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         } 
         
         
-        ((RsmProteinAndPeptideSequencePanel) m_panel).setData(proteinMatch, selectedPeptide, peptideInstances);
+        ((RsmProteinAndPeptideSequencePanel) m_panel).setData(resultSummary.getId() , proteinMatch, selectedPeptide, peptideInstances);
     }
 }

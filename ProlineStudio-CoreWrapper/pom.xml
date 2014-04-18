@@ -65,6 +65,12 @@
       <version>${core.version}</version>
     </dependency>
 
+        <dependency> 
+            <groupId>fr.proline</groupId> 
+            <artifactId>PM-SequenceRepository</artifactId> 
+            <version>0.0.1-SNAPSHOT</version> 
+        </dependency>
+
     <dependency>
       <groupId>fr.proline</groupId>
       <artifactId>Proline-OM</artifactId>
@@ -137,6 +143,8 @@
             <publicPackage>fr.proline.core.utils.serialization</publicPackage>
             <publicPackage>fr.proline.module</publicPackage>
             <publicPackage>fr.proline.module.parser.mascot</publicPackage>
+            <publicPackage>fr.proline.module.seq</publicPackage>
+            <publicPackage>fr.proline.module.seq.dto</publicPackage>
             <publicPackage>fr.proline.repository.*</publicPackage>
             <publicPackage>fr.proline.util.*</publicPackage>
             <publicPackage>javax.annotation</publicPackage>

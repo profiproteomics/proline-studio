@@ -173,11 +173,15 @@
                         <publicPackage>fr.proline.studio.utils</publicPackage>
                         <publicPackage>fr.proline.util</publicPackage>
                         <publicPackage>javax.xml.parsers</publicPackage>
+                        <publicPackage>javax.xml.transform</publicPackage>
+                        <publicPackage>javax.xml.transform.dom</publicPackage>
+                        <publicPackage>javax.xml.transform.stream</publicPackage>
                         <publicPackage>org.jdesktop.beans</publicPackage>
                         <publicPackage>org.jdesktop.swingx.*</publicPackage>
                         <publicPackage>org.rosuda.REngine</publicPackage>
                         <publicPackage>org.rosuda.REngine.Rserve</publicPackage>
                         <publicPackage>org.rosuda.REngine.Rserve.protocol</publicPackage>
+                        <publicPackage>org.w3c.dom</publicPackage>
                         <publicPackage>org.xml.sax</publicPackage>
                         <publicPackage>org.xml.sax.ext</publicPackage>
                         <publicPackage>org.xml.sax.helpers</publicPackage>

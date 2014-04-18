@@ -176,13 +176,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
 
             return;
         }
-        
-        
-        /*String sequence = null;
-        fr.proline.core.orm.msi.BioSequence bioSequenceMSI = pm.getBioSequence();
-        if (pm.getBioSequence() != null) {
-            sequence = pm.getBioSequence().getSequence();
-        }*/
+  
         
         String sequence = biosequenceWrapperSelected.getSequence();
         int sequenceLength = sequence.length();

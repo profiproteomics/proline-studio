@@ -266,6 +266,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
     
     private void fetchBiosequence(EntityManager entityManagerMSI, SubTask subTask) {
 
+        /*
         List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
         
         // temporary Map to link a bioSequenceId to a ProteinMatch
@@ -305,7 +306,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             }
 
         }
-
+        * */ //JPM.TODO
     }
     
     

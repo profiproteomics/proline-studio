@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.progress.ProgressInterface;
 import java.util.ArrayList;
@@ -119,14 +120,10 @@ public class ProteinTableModel extends FilterTableModel {
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return proteinMatch.getPeptideSet(m_rsmId).getPeptideCount();
             case COLTYPE_PROTEIN_MASS:
-                fr.proline.core.orm.msi.BioSequence bioSequenceMSI = proteinMatch.getBioSequence();
-                if (bioSequenceMSI != null) {
-                    return new Float(bioSequenceMSI.getMass());
+                DBioSequence bioSequence = proteinMatch.getDBioSequence();
+                if (bioSequence != null) {
+                    return new Float(bioSequence.getMass());
                 }
-                /*fr.proline.core.orm.pdi.BioSequence bioSequencePDI = proteinMatch.getTransientData().getBioSequencePDI();
-                if (bioSequencePDI != null) {
-                    return new Float(bioSequencePDI.getMass());
-                }*/
                 return null;
         }
         return null; // should never happen

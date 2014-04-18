@@ -125,17 +125,17 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
                 subSet.add(proteinMatch);
             }
 
-            Long bioSequenceId = proteinMatch.getBioSequenceId();
+            /*Long bioSequenceId = proteinMatch.getBioSequenceId();
             if (bioSequenceId != null) {
                 biosequenceToProteinMap.put(bioSequenceId, proteinMatch);
-            } else {
+            } else {*/  //JPM.TODO
                 accessionToProteinMap.put(proteinMatch.getAccession(), proteinMatch);
-            }
+            //}
 
         }
 
         // retrieve biosequence
-        if (!biosequenceToProteinMap.isEmpty()) {
+        /*if (!biosequenceToProteinMap.isEmpty()) {
             Set idSet = biosequenceToProteinMap.keySet();
             List<Integer> ids = new ArrayList<>(idSet.size());
             ids.addAll(idSet);
@@ -154,7 +154,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
                 pm.setBioSequence(bioSequence);
             }
 
-        }
+        }*/ //JPM.TODO
 
 
 

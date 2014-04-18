@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
@@ -116,11 +117,11 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
             case COLTYPE_PROTEIN_MASS:
                 LazyData lazyData = getLazyData(row,col);
                 
-                fr.proline.core.orm.msi.BioSequence bioSequenceMSI = proteinMatch.getBioSequence();
-                if (bioSequenceMSI != null) {
-                    lazyData.setData(new Float(bioSequenceMSI.getMass()));
+                DBioSequence bioSequence = proteinMatch.getDBioSequence();
+                if (bioSequence != null) {
+                    lazyData.setData(new Float(bioSequence.getMass()));
                     return lazyData;
-                } else if (proteinMatch.isBiosequenceSet()) {
+                } else if (proteinMatch.isDBiosequenceSet()) {
                     lazyData.setData("");
                     return lazyData;
                 }

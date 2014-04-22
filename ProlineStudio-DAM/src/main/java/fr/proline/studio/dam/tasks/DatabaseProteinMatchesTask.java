@@ -124,7 +124,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
         return true; // should not happen
     }
     
-        /**
+    /**
      * Fetch data of a Subtask
      *
      * @return
@@ -134,29 +134,21 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
         if (slice == null) {
             return true; // nothing to do : should not happen
         }
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
-        
+
         try {
 
-            entityManagerMSI.getTransaction().begin();
 
             switch (slice.getSubTaskId()) {
                 case SUB_TASK_BIOSEQUENCE:
-                    fetchBiosequence(entityManagerMSI, slice);
+                    fetchBiosequence(slice);
                     break;
-
 
             }
 
-
-            entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
             return false;
-        } finally {
-            entityManagerMSI.close();
         }
 
         return true;
@@ -169,7 +161,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().begin();
 
             // Load Proteins for PeptideMatch
-            TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(protm.id, protm.accession, protm.score, protm.peptideCount, protm.resultSet.id, protm.description, protm.bioSequenceId)  FROM ProteinMatch protm WHERE protm.resultSet.id=:resultSetId ORDER BY protm.score DESC", DProteinMatch.class);
+            TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(protm.id, protm.accession, protm.score, protm.peptideCount, protm.resultSet.id, protm.description)  FROM ProteinMatch protm WHERE protm.resultSet.id=:resultSetId ORDER BY protm.score DESC", DProteinMatch.class);
             proteinMatchQuery.setParameter("resultSetId", m_rset.getId());
             List<DProteinMatch> proteinMatchList = proteinMatchQuery.getResultList();
 
@@ -196,7 +188,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_BIOSEQUENCE, m_proteinMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
-            fetchBiosequence(entityManagerMSI, subTask);
+            fetchBiosequence(subTask);
 
             
             
@@ -220,7 +212,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             entityManagerMSI.getTransaction().begin();
 
             // Load Proteins for PeptideMatch
-            TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(protm.id, protm.accession, protm.score, protm.peptideCount, protm.resultSet.id, protm.description, protm.bioSequenceId) FROM ProteinMatch protm, SequenceMatch sm, PeptideMatch pepm, fr.proline.core.orm.msi.Peptide p WHERE pepm.id=:peptideMatchId AND  pepm.peptideId=p.id AND p.id=sm.id.peptideId AND sm.resultSetId=pepm.resultSet.id AND sm.id.proteinMatchId=protm.id ORDER BY protm.score DESC", DProteinMatch.class);
+            TypedQuery<DProteinMatch> proteinMatchQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(protm.id, protm.accession, protm.score, protm.peptideCount, protm.resultSet.id, protm.description) FROM ProteinMatch protm, SequenceMatch sm, PeptideMatch pepm, fr.proline.core.orm.msi.Peptide p WHERE pepm.id=:peptideMatchId AND  pepm.peptideId=p.id AND p.id=sm.id.peptideId AND sm.resultSetId=pepm.resultSet.id AND sm.id.proteinMatchId=protm.id ORDER BY protm.score DESC", DProteinMatch.class);
             proteinMatchQuery.setParameter("peptideMatchId", m_peptideMatch.getId());
             List<DProteinMatch> proteinMatchList = proteinMatchQuery.getResultList();
 
@@ -246,7 +238,7 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
             SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_BIOSEQUENCE, m_proteinMatchIds.size(), SLICE_SIZE);
 
             // execute the first slice now
-            fetchBiosequence(entityManagerMSI, subTask);
+            fetchBiosequence(subTask);
 
             
             
@@ -264,49 +256,22 @@ public class DatabaseProteinMatchesTask extends AbstractDatabaseSlicerTask {
         return true;
     }
     
-    private void fetchBiosequence(EntityManager entityManagerMSI, SubTask subTask) {
-
-        /*
+    private void fetchBiosequence(SubTask subTask) {
+        
         List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
         
-        // temporary Map to link a bioSequenceId to a ProteinMatch
-        HashMap<Long, DProteinMatch> biosequenceToProteinMap = new HashMap<>();
-        HashMap<String, DProteinMatch> accessionToProteinMap = new HashMap<>();
-
+        ArrayList<DProteinMatch> proteinMatchList = new ArrayList<>(sliceOfProteinMatchIds.size());
+        
         Iterator<Long> itId = sliceOfProteinMatchIds.iterator();
         while (itId.hasNext()) {
             Long proteinMatchId =  itId.next();
             DProteinMatch proteinMatch = m_proteinMatchMap.get(proteinMatchId);
-
-            Long bioSequenceId = proteinMatch.getBioSequenceId();
-            if (bioSequenceId != null) {
-                biosequenceToProteinMap.put(bioSequenceId, proteinMatch);
-            } else {
-                accessionToProteinMap.put(proteinMatch.getAccession(), proteinMatch);
-            }
+            proteinMatchList.add(proteinMatch);
 
         }
+        
+        DatabaseBioSequenceTask.fetchData(proteinMatchList, null);
 
-        // retrieve biosequence
-        if (biosequenceToProteinMap.size() > 0) {
-            Set idSet = biosequenceToProteinMap.keySet();
-            List<Integer> ids = new ArrayList<>(idSet.size());
-            ids.addAll(idSet);
-
-
-            TypedQuery<BioSequence> biosequenceQuery = entityManagerMSI.createQuery("SELECT bs FROM BioSequence bs WHERE bs.id IN (:listId)", BioSequence.class);
-            biosequenceQuery.setParameter("listId", ids);
-
-            List<BioSequence> l = biosequenceQuery.getResultList();
-            Iterator<BioSequence> itBiosequence = l.iterator();
-            while (itBiosequence.hasNext()) {
-                BioSequence bioSequence = itBiosequence.next();
-                DProteinMatch pm = biosequenceToProteinMap.get(bioSequence.getId());
-                pm.setBioSequence(bioSequence);
-            }
-
-        }
-        * */ //JPM.TODO
     }
     
     

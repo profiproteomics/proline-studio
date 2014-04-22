@@ -487,7 +487,7 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         
         List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
 
-        TypedQuery<DProteinMatch> typicalProteinQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession, pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pm.bioSequenceId, pepset) FROM PeptideSetProteinMatchMap pset_to_pm JOIN pset_to_pm.proteinMatch as pm JOIN pset_to_pm.peptideSet as pepset WHERE pm.id IN (:listId) AND pset_to_pm.resultSummary.id=:rsmId", DProteinMatch.class);
+        TypedQuery<DProteinMatch> typicalProteinQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession, pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pepset) FROM PeptideSetProteinMatchMap pset_to_pm JOIN pset_to_pm.proteinMatch as pm JOIN pset_to_pm.peptideSet as pepset WHERE pm.id IN (:listId) AND pset_to_pm.resultSummary.id=:rsmId", DProteinMatch.class);
         typicalProteinQuery.setParameter("listId", sliceOfProteinMatchIds);
         typicalProteinQuery.setParameter("rsmId", m_rsm.getId());
 

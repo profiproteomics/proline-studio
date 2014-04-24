@@ -33,7 +33,6 @@ import fr.proline.studio.stats.ValuesForStatsAbstract;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.LazyData;
 import fr.proline.studio.utils.LazyTable;
-import fr.proline.studio.utils.LazyTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -377,7 +376,10 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         // create objects
         m_scrollPane = new JScrollPane();
         m_peptideMatchTable = new PeptideMatchTable();
-        m_peptideMatchTable.setModel(new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !m_startingPanel));
+        PeptideMatchTableModel peptideMatchTableModel = new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !m_startingPanel);
+        m_peptideMatchTable.setModel(peptideMatchTableModel);
+        m_peptideMatchTable.displayColumnAsPercentage(peptideMatchTableModel.convertColToColUsed(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE));
+
         m_peptideMatchTable.getColumnExt(PeptideMatchTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
         
         m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_peptideMatchTable);
@@ -571,8 +573,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                 }
             });*/
 
-            displayColumnAsPercentage(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE);
-
+            
         }
         //private FloatRenderer m_deltaMozRenderer = null;
 

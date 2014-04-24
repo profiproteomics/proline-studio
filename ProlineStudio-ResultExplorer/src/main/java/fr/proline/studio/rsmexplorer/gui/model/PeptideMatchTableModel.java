@@ -661,7 +661,8 @@ public class PeptideMatchTableModel extends LazyTableModel {
               }
             }
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
-            case COLTYPE_PEPTIDE_CHARGE: {
+            case COLTYPE_PEPTIDE_CHARGE: 
+            case COLTYPE_PEPTIDE_RANK: {
                 return ((IntegerFilter) filter).filter((Integer)data);
             }
             case COLTYPE_PEPTIDE_MSQUERY: {

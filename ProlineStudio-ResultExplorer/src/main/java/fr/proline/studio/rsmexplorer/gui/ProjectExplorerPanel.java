@@ -87,16 +87,18 @@ public class ProjectExplorerPanel extends JPanel {
         c.weightx = 0;
         add(buttonsPanel, c);
 
-
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, m_identificationTreeScrollPane, m_quantitationTreeScrollPane);
+        splitPane.setResizeWeight(0.5);
+        
         c.gridy++;
         c.gridx = 0;
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 2;
-        add(m_identificationTreeScrollPane, c);
+        add(splitPane, c);
 
         c.gridy++;
-        add(m_quantitationTreeScrollPane, c);  // Put back to have quantitation
+        add(m_quantitationTreeScrollPane, c);
 
     }
 

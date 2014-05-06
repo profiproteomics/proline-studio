@@ -110,9 +110,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publicPackages>
-                        <publicPackage>fr.proline.studio.dpm</publicPackage>
-                        <publicPackage>fr.proline.studio.dpm.data</publicPackage>
-                        <publicPackage>fr.proline.studio.dpm.task</publicPackage>
+                        <publicPackage>fr.proline.studio.dpm.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

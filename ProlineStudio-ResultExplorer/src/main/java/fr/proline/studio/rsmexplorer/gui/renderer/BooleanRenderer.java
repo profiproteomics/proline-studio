@@ -4,7 +4,6 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.TableCellRenderer;
 
 /**
  * Renderer for booleans : show a green tick for TRUE, show nothing for FALSE
@@ -13,7 +12,6 @@ import javax.swing.table.TableCellRenderer;
 public class BooleanRenderer extends org.jdesktop.swingx.renderer.DefaultTableRenderer {
 
     public BooleanRenderer() {
-        //setHorizontalAlignment(JLabel.CENTER);
     }
     
     @Override

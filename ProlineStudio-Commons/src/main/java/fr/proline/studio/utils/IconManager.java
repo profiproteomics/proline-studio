@@ -87,7 +87,9 @@ public class IconManager {
         ARROW_8X7,
         ARROW,
         ARROW_CURVED,
-        WAND_HAT;
+        WAND_HAT,
+        FILE,
+        FOLDER;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -298,6 +300,11 @@ public class IconManager {
                 return "fr/proline/studio/images/arrow-curve-180.png";
             case WAND_HAT:
                 return "fr/proline/studio/images/wand-hat.png";
+            case FILE:
+                return "fr/proline/studio/images/document.png";
+            case FOLDER:
+                return "fr/proline/studio/images/folder-horizontal.png";
+                
 
         }
 

@@ -6,9 +6,8 @@ import fr.proline.studio.dpm.task.FileSystemBrowseTask;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
 import javax.swing.Icon;
-import javax.swing.UIManager;
+import fr.proline.studio.utils.IconManager;
 import javax.swing.filechooser.FileSystemView;
 
 /**
@@ -49,7 +48,7 @@ public class ServerFileSystemView extends FileSystemView {
             return null;
         }
 
-        return UIManager.getIcon(f.isDirectory() ? "FileView.directoryIcon" : "FileView.fileIcon");
+        return f.isDirectory() ? IconManager.getIcon(IconManager.IconType.FOLDER) : IconManager.getIcon(IconManager.IconType.FILE);
 
     }
     
@@ -70,7 +69,7 @@ public class ServerFileSystemView extends FileSystemView {
     
     @Override
     public File createNewFolder(File containingDir) throws IOException {
-        throw new UnsupportedOperationException("Not supported.");
+        throw new IOException("It is not allowed to create a directory.");
     }
 
     @Override

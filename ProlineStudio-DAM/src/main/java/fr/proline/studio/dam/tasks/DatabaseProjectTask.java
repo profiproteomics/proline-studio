@@ -83,6 +83,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
     private boolean loadProject() {
 
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        boolean result = true;
         try {
             entityManagerUDS.getTransaction().begin();
 
@@ -126,6 +127,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
             entityManagerUDS.getTransaction().rollback();
+            result = false;
         } finally {
             entityManagerUDS.close();
         }
@@ -135,7 +137,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
         //AccessDatabaseThread.getAccessDatabaseThread().addTask(msiConnection);
 
 
-        return true;
+        return result;
     }
 
     private boolean changeNameDescriptionProject() {

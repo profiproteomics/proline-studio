@@ -169,10 +169,10 @@ public class ProjectExplorerPanel extends JPanel {
                     UserAccount owner = UDSDataManager.getUDSDataManager().getProjectUser();
 
                     // look where to put the node (alphabetical order)
-                    int insertionIndex = 1;
+                    int insertionIndex = 0;
                     ComboBoxModel<ProjectItem> model = m_projectsComboBox.getModel();
                     int nbChildren = model.getSize();
-                    for (int i = 1; i < nbChildren; i++) {
+                    for (int i = 0; i < nbChildren; i++) {
                         ProjectItem item = model.getElementAt(i);
 
                         String itemProjectName = item.toString();

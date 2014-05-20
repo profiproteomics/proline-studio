@@ -1,58 +1,58 @@
 package fr.proline.studio.dpm.task;
 
-import com.google.api.client.http.*;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
-import fr.proline.repository.AbstractDatabaseConnector;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.HashMap;
 import java.util.Map;
-
- 
+import fr.proline.security.*;
+import java.math.BigDecimal;
 
 /**
- * Task to connect to the server the first time and get back the
- * parameters to connect to the UDS
- * @author jm235353
+ *
+ * @author JM235353
  */
-public class ServerConnectionTask extends AbstractServiceTask {
+public class UserAccountTask extends AbstractServiceTask {
 
-    private String m_serverURL;
+    private String m_userName;
     private String m_password;
-    private HashMap<Object, Object> m_databaseProperties;  // out parameter
-
+    private String m_serverURL;
+    private String[] m_databasePassword;
     
-    public ServerConnectionTask(AbstractServiceCallback callback, String serverURL, String password, HashMap<Object, Object> databaseProperties) {
-        super(callback, true /*synchronous*/, new TaskInfo("Connection to Server "+serverURL, false, TASK_LIST_INFO));
-        
-        m_serverURL = serverURL;
+    
+    public UserAccountTask(AbstractServiceCallback callback, String serverURL, String userName, String password, String[] databasePassword) {
+        super(callback, true /** synchronous */, new TaskInfo("Check User " + userName, false, TASK_LIST_INFO));
+
+        m_userName = userName;
         m_password = password;
-        m_databaseProperties = databaseProperties;
+        m_serverURL = serverURL;
+        m_databasePassword = databasePassword;
     }
     
-    
-
     @Override
     public boolean askService() {
-
-        
-        
 
         try {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
             request.setId(m_id);
-            request.setMethod("template"); 
+            request.setMethod("authenticate"); 
             
             Map<String, Object> params = new HashMap<>();
-            //params.put("password", password);  //JPM.TODO
+            params.put("user_login", m_userName);
+            params.put("password_hash", SecurityUtils.sha256Hex(m_password));
+            params.put("need_db_pwd", Boolean.TRUE);
+            EncryptionManager encryptionMgr = EncryptionManager.getEncryptionManager();
+            params.put("public_key", encryptionMgr.getPublicKeyAsString());
+            
             request.setParameters(params); //JPM.TODO : check if we can set null parameters
 
             HttpResponse response;
             try {
-                response = postRequest(m_serverURL, "admin/connection/"+request.getMethod()+getIdString(), request); //JPM.TODO
+                response = postRequest(m_serverURL, "admin/user_account/"+request.getMethod()+getIdString(), request); //JPM.TODO
             } catch (Exception e) {
                 m_taskError = new TaskError("Server Connection Failed.");
                 m_loggerProline.error(getClass().getSimpleName()+" failed", m_taskError.getErrorTitle());
@@ -87,25 +87,35 @@ public class ServerConnectionTask extends AbstractServiceTask {
             // retrieve database parameters
             ArrayMap result = (ArrayMap) jsonResult.get("result");
             if (result == null) {
-                m_taskError = new TaskError("Internal Error : Dabasase Parameters not returned");
+                m_taskError = new TaskError("Internal Error : No Result received");
                 return false;
             }
             
-            String databaseUser = (String) result.get("javax.persistence.jdbc.user");
-            String databaseDriver = (String) result.get("javax.persistence.jdbc.driver");
-            String databaseURL = (String) result.get("javax.persistence.jdbc.url");
-      
-            if ((databaseUser == null) || (databaseDriver == null) || (databaseURL == null)) {
-                 m_taskError = new TaskError("Internal Error : Dabasase Parameters uncomplete");
+            String errorMessage = (String) result.get("error_message");
+            if (errorMessage != null) {
+                m_taskError = new TaskError(errorMessage);
                 return false;
             }
             
-            m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_USER_KEY, databaseUser);
-            m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, m_password);
-            m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, databaseDriver);
-            m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, databaseURL);
+            BigDecimal status = (BigDecimal) result.get("status");
+            if (status == null) {
+                m_taskError = new TaskError("Internal Error : No Status received");
+                return false;
+            }
+            
+            if (status.intValue() == -1) {
+                m_taskError = new TaskError("Authentication failed");
+                return false;
+            }
+            
+            String dbPwd = (String) result.get("db_pswd");
+            if (dbPwd == null) {
+                m_taskError = new TaskError("Internal Error : No DB password received");
+                return false;
+            }
+            
+            m_databasePassword[0] = encryptionMgr.decrypt(dbPwd);
 
-   
             
         } catch (Exception e) {
             m_taskError = new TaskError(e);
@@ -116,16 +126,12 @@ public class ServerConnectionTask extends AbstractServiceTask {
 
         return true;
     }
-    
 
     @Override
-    public AbstractServiceTask.ServiceState getServiceState() {
-        // always returns STATE_DONE because to retrieve UDS parameters
+    public ServiceState getServiceState() {
+        // always returns STATE_DONE because it
         // is a synchronous service
         return AbstractServiceTask.ServiceState.STATE_DONE;
     }
-    
-    
-
     
 }

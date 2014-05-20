@@ -7,7 +7,6 @@ import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.ConnectionDialog;
 import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.node.IdentificationTree; 
 import java.awt.Window;
 import javax.swing.*;
 import org.openide.windows.WindowManager;
@@ -49,7 +48,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
         m_serverURLTextField.setText(serverConnectionManager.getServerURL());
         m_userTextField.setText(serverConnectionManager.getProjectUser());
         
-        String password = serverConnectionManager.getDatabasePassword();
+        String password = serverConnectionManager.getUserPassword();
         m_passwordField.setText(password);
         m_rememberPasswordCheckBox.setSelected(!password.isEmpty());
 
@@ -188,7 +187,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
         serverManager.setProjectUser(m_userTextField.getText());
 
         if (m_rememberPasswordCheckBox.isSelected()) {
-            serverManager.setDatabasePassword(new String(m_passwordField.getPassword()));
+            serverManager.setUserPassword(new String(m_passwordField.getPassword()));
         }
 
         

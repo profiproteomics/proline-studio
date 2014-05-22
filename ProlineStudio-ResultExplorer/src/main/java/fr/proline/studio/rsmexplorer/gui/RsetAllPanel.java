@@ -17,6 +17,7 @@ import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.actions.PropertiesAction;
 import fr.proline.studio.rsmexplorer.node.RSMTransferable;
 import fr.proline.studio.utils.DecoratedMarkerTable;
+import fr.proline.studio.utils.DecoratedTableModel;
 import fr.proline.studio.utils.PropertiesProviderInterface;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -376,7 +377,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
 
     
-    private static class ResultSetTableModel extends AbstractTableModel {
+    private static class ResultSetTableModel extends DecoratedTableModel {
 
         public static final int COLTYPE_RSET_ID = 0;
         public static final int COLTYPE_RSET_NAME = 1;
@@ -477,6 +478,11 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
                 }
             }
             return null; // should not happen
+        }
+
+        @Override
+        public String getToolTipForHeader(int col) {
+            return getColumnName(col);
         }
         
     }

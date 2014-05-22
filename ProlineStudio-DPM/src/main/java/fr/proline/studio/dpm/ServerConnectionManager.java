@@ -1,6 +1,8 @@
 package fr.proline.studio.dpm;
 
+import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseConnectionTask;
@@ -92,9 +94,9 @@ public class ServerConnectionManager {
     }
    
    private void tryServerConnection() {
-       tryServerConnection(null, m_serverURL, m_projectUser, m_userPassword);
+       tryServerConnection(null, m_serverURL, m_projectUser, m_userPassword, false);
    }
-   public void tryServerConnection(final Runnable connectionCallback, final String serverURL, final String projectUser, String userPassword) {
+   public void tryServerConnection(final Runnable connectionCallback, final String serverURL, final String projectUser, String userPassword, final boolean changingUser) {
 
        // pre-check to avoid to try a connection when the parameters are not set
        if (serverURL.length()<="http://".length()) {
@@ -138,7 +140,12 @@ public class ServerConnectionManager {
                if (success) {
                    // we now try to connect to the server
                    m_databasePassword = databasePassword[0];
-                   tryConnectToServer(connectionCallback, projectUser, serverURL, m_databasePassword);
+                   tryConnectToServer(connectionCallback, projectUser, serverURL, m_databasePassword, changingUser);
+
+
+
+                   
+                   
                } else {
                    setConnectionState(CONNECTION_SERVER_FAILED);
                    m_connectionError = getTaskError();
@@ -155,8 +162,15 @@ public class ServerConnectionManager {
  
    }
    
-   private void tryConnectToServer(final Runnable connectionCallback, final String projectUser, final String serverURL, final String databasePassword) {
-              final HashMap<Object, Object> databaseProperties = new HashMap<>();
+   private void tryConnectToServer(final Runnable connectionCallback, final String projectUser, final String serverURL, final String databasePassword, final boolean changingUser) {
+       
+       if (changingUser) {
+           // we now ask for the database connection
+           tryDatabaseConnection(connectionCallback, null, projectUser, changingUser);
+           return;
+       }
+       
+       final HashMap<Object, Object> databaseProperties = new HashMap<>();
        
        // First, we try to connect to the service 
        AbstractServiceCallback callback = new AbstractServiceCallback() {
@@ -170,7 +184,7 @@ public class ServerConnectionManager {
            public void run(boolean success) {
                if (success) {
                    // we now ask for the database connection
-                   tryDatabaseConnection(connectionCallback, databaseProperties, projectUser);
+                   tryDatabaseConnection(connectionCallback, databaseProperties, projectUser, false);
                } else {
                    setConnectionState(CONNECTION_SERVER_FAILED);
                    m_connectionError = getTaskError();
@@ -229,8 +243,21 @@ public class ServerConnectionManager {
         AccessDatabaseThread.getAccessDatabaseThread().addTask(connectionTask); 
    }
    
-   private void tryDatabaseConnection(final Runnable connectionCallback, HashMap<Object, Object> databaseProperties, String projectUser) {
+   private void tryDatabaseConnection(final Runnable connectionCallback, HashMap<Object, Object> databaseProperties, String projectUser, boolean changingUser) {
       
+       if (changingUser) {
+           // save connection parameters
+           saveParameters();
+           setConnectionState(CONNECTION_DONE);
+           
+           if (connectionCallback != null) {
+               connectionCallback.run();
+           }
+
+     
+           return;
+       }
+       
        setConnectionState(CONNECTION_DATABASE_ASKED);
        
         // ask for the connection

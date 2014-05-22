@@ -60,7 +60,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
             return false;
         }
         
-        if (m_changingUser) {
+        /*if (m_changingUser) {
             // aleady connected to the server and UDS database, we check the new user
             String projectUser = m_userTextField.getText();
             String password = new String(m_passwordField.getPassword());
@@ -96,9 +96,9 @@ public class ServerConnectionDialog extends ConnectionDialog {
             
             return true;
  
-        } else {
-            connect();
-        }
+        } else {*/
+            connect(m_changingUser);
+        //}
         
         // dialog will be closed if the connection is established
         return false;
@@ -119,7 +119,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
     
 
     
-    private void connect() {
+    private void connect(final boolean changingUser) {
     
         setBusy(true);
         
@@ -131,7 +131,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
             m_serverURLTextField.setText(serverURL);
         }
         
-        String projectUser  = m_userTextField.getText();
+        final String projectUser  = m_userTextField.getText();
         final String password = new String(m_passwordField.getPassword());
         
         
@@ -168,6 +168,26 @@ public class ServerConnectionDialog extends ConnectionDialog {
                             }
                         });
                     }
+                    
+                    if (changingUser) {
+
+                        UDSDataManager udsMgr = UDSDataManager.getUDSDataManager();
+                        boolean foundUser = false;
+                        UserAccount[] projectUsers = udsMgr.getProjectUsersArray();
+                        int nb = projectUsers.length;
+                        for (int i = 0; i < nb; i++) {
+                            UserAccount account = projectUsers[i];
+                            if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
+                                udsMgr.setProjectUser(account);
+                                foundUser = true;
+                                break;
+                            }
+                        }
+
+
+                        // start to load the data for the new user
+                        ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
+                    }
                 }
        
             }
@@ -176,7 +196,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
         
         
         ServerConnectionManager serverManager = ServerConnectionManager.getServerConnectionManager();
-        serverManager.tryServerConnection(callback, serverURL, projectUser, password);
+        serverManager.tryServerConnection(callback, serverURL, projectUser, password, changingUser);
         
     }
     
@@ -188,6 +208,8 @@ public class ServerConnectionDialog extends ConnectionDialog {
 
         if (m_rememberPasswordCheckBox.isSelected()) {
             serverManager.setUserPassword(new String(m_passwordField.getPassword()));
+        } else {
+            serverManager.setUserPassword("");
         }
 
         

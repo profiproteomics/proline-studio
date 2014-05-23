@@ -31,6 +31,16 @@ public class LazyData implements Comparable<LazyData> {
             return 1;
         }
 
+        if ((m_data instanceof String) ^ (o.m_data instanceof String)) {
+            // can happen for a column with float but some data has no value
+            // so it is returned ""
+            if (o.m_data instanceof String) {
+                return 1;
+            } else {
+                return -1;
+            }
+        }
+        
         return m_data.compareTo(o.m_data);
     }
     

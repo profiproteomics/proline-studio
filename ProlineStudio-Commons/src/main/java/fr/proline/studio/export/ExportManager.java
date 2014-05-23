@@ -53,11 +53,20 @@ public class ExportManager {
             m_exporter.startSheet(m_name);
 
             // headers
+            boolean columnTextInterface = (m_table instanceof ExportColumnTextInterface);
             int nbCol = m_table.getColumnCount();
-            m_exporter.startRow();
-            for (int j = 0; j < nbCol; j++) {
-                String colName = m_table.getColumnName(j);
-                m_exporter.addCell(colName);
+            if (columnTextInterface) {
+                m_exporter.startRow();
+                for (int j = 0; j < nbCol; j++) {
+                    String colName = ((ExportColumnTextInterface)m_table).getExportColumnName(j);
+                    m_exporter.addCell(colName);
+                }
+            } else {
+                m_exporter.startRow();
+                for (int j = 0; j < nbCol; j++) {
+                    String colName = m_table.getColumnName(j);
+                    m_exporter.addCell(colName);
+                }
             }
 
 

@@ -215,7 +215,9 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         ((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()).setData(proteinMatchArray);
 
         // Select the first row
-        m_proteinTable.getSelectionModel().setSelectionInterval(0, 0);
+        if (proteinMatchArray.length>0) {
+            m_proteinTable.getSelectionModel().setSelectionInterval(0, 0);
+        }
 
         if (proteinMatchArray != null) {
             m_markerContainerPanel.setMaxLineNumber(proteinMatchArray.length);

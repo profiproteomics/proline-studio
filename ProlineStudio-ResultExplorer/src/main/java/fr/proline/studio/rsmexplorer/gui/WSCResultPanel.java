@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.dpm.data.SpectralCountResultData;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
@@ -231,7 +232,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         return toolbar;
     }
 
-    private class ProteinTable extends LazyTable {
+    private class ProteinTable extends LazyTable implements ExportColumnTextInterface {
 
         public ProteinTable() {
             super(m_scrollPane.getVerticalScrollBar());
@@ -282,6 +283,11 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         @Override
         public int getLoadingPercentage() {
             return 0; // not used
+        }
+
+        @Override
+        public String getExportColumnName(int col) {
+            return ((WSCProteinTableModel) m_proteinTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
         }
     }
 

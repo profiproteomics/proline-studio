@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.studio.dpm.data.SpectralCountResultData;
+import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.LazyTable;
@@ -12,7 +13,7 @@ import java.util.*;
  *
  * @author JM235353
  */
-public class WSCProteinTableModel extends LazyTableModel {
+public class WSCProteinTableModel extends LazyTableModel implements ExportColumnTextInterface {
 
     public static final int COLTYPE_PROTEIN_NAME = 0;
     public static final int COLTYPE_STATUS = 1;
@@ -126,6 +127,35 @@ public class WSCProteinTableModel extends LazyTableModel {
         }
     }
 
+    @Override
+    public String getExportColumnName(int col) {
+        switch (col) {
+            case COLTYPE_PROTEIN_NAME:
+                return m_columnNames[col];
+            default: {
+                int currentRSMNbr = (col % COLNBR_PER_RSM == 0) ? col / COLNBR_PER_RSM : (col / COLNBR_PER_RSM) + 1;
+                int colSuffixIndex;
+                int modulo = col % COLNBR_PER_RSM;
+                switch (modulo) {
+                    case 0:
+                        colSuffixIndex = COLNBR_PER_RSM;
+                        break;
+                    default:
+                        colSuffixIndex = modulo;
+                        break;
+                }
+                StringBuilder sb = new StringBuilder();
+
+
+                sb.append(m_wscResult.getComputedSCDatasetNames().get(currentRSMNbr - 1));
+                sb.append(" ");
+                sb.append(m_columnNames[colSuffixIndex]);
+
+                return sb.toString();
+            }
+        }
+    }
+    
     @Override
     public String getToolTipForHeader(int col) {
         switch (col) {

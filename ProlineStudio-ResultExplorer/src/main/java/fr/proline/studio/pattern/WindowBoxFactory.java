@@ -31,7 +31,8 @@ public class WindowBoxFactory {
     }
     
     public static WindowBox getPeptidesForRsetOnlyWindowBox(String name, boolean isDecoy) {
-        // AW: here is the main loaded window configuration at start.
+        // AW: seach results / PSM set of boxes.
+    	// 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxRsetPeptide();
@@ -59,6 +60,7 @@ public class WindowBoxFactory {
     public static WindowBox getProteinMatchesForRsetWindowBox(String name, boolean isDecoy) {
         
         // create boxes
+    	// AW: search results / proteins
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataBoxRsetAllProteinMatch();
         boxes[1] = new DataboxRsetPeptidesOfProtein();
@@ -93,6 +95,7 @@ public class WindowBoxFactory {
     
     public static WindowBox getRsmPSMWindowBox(String name, boolean isDecoy) {
         // create boxes
+    	// AW: All PSM of an Identification Summary or corresponding to a Peptide Instance
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxRsmPeptide();
 
@@ -102,6 +105,7 @@ public class WindowBoxFactory {
     
     public static WindowBox getRsmPeptidesWindowBox(String name, boolean isDecoy) {
         // create boxes
+    	// AW: Identification Summary / Peptide Instances";
         AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxRsmPeptideInstances();
         boxes[1] = new DataBoxRsmProteinSetOfPeptides();

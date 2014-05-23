@@ -6,24 +6,39 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
 import fr.proline.studio.utils.IconManager;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.MouseEvent;
-import javax.swing.*;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeWillExpandListener;
-import javax.swing.tree.ExpandVetoException;
-import javax.swing.tree.TreePath;
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 
 /**
  *
  * @author JM235353
  */
 public class SetSampleAnalysisPanel extends JPanel {
-
-    public SetSampleAnalysisPanel(RSMNode rootNode) {
+    
+    private static SetSampleAnalysisPanel m_singleton = null;
+    private static RSMNode m_rootNode;
+    
+    public static SetSampleAnalysisPanel getDialog(RSMNode rootNode){
+        if(m_singleton ==null || !m_rootNode.equals(rootNode)){
+            m_singleton = new SetSampleAnalysisPanel(rootNode);
+        }
+        return m_singleton;
+    }
+    
+    public static SetSampleAnalysisPanel getDialog(){
+        if(m_singleton != null )
+            return m_singleton;
+        throw new IllegalAccessError(" Panel not initialized yet ! ");
+    }
+    
+    private SetSampleAnalysisPanel(RSMNode rootNode) {
+        m_rootNode = rootNode;
         
         JPanel wizardPanel = createWizardPanel();
         JPanel mainPanel = createMainPanel(rootNode);
@@ -127,7 +142,7 @@ public class SetSampleAnalysisPanel extends JPanel {
         c.weightx = 1;
         c.weighty = 1;
 
-        DesignTree tree = DesignTree.getDesignTree(rootNode);
+        DesignTree tree = DesignTree.getDesignTree(m_rootNode);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
 

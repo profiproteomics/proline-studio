@@ -154,35 +154,38 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             m_rset.getTransientData().setPeptideMatches(peptideMatchArray);
             
 
-            
-            /**
-             * PeptideMatches
-             */
-            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE_MATCH, m_peptideMatchIds.size(), SLICE_SIZE);
-            
-            // execute the first slice now
-            fetchPeptideMatch(entityManagerMSI, subTask);
-            
-            /**
-             * Peptide for each PeptideMatch
-             *
-             */
-            // slice the task and get the first one
-            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE, m_peptideMatchIds.size(), SLICE_SIZE);
+            int nbPeptideMatch = m_peptideMatchIds.size();
+            if (nbPeptideMatch > 0) {
 
-            // execute the first slice now
-            fetchPeptide(entityManagerMSI, subTask);
-            
-            /**
-             * MS_Query for each PeptideMatch
-             *
-             */
-            // slice the task and get the first one
-            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, m_peptideMatchIds.size(), SLICE_SIZE);
+                /**
+                 * PeptideMatches
+                 */
+                SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE_MATCH, nbPeptideMatch, SLICE_SIZE);
 
-            // execute the first slice now
-            fetchMsQuery(entityManagerMSI, subTask);
+                // execute the first slice now
+                fetchPeptideMatch(entityManagerMSI, subTask);
 
+                /**
+                 * Peptide for each PeptideMatch
+                 *
+                 */
+                // slice the task and get the first one
+                subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE, nbPeptideMatch, SLICE_SIZE);
+
+                // execute the first slice now
+                fetchPeptide(entityManagerMSI, subTask);
+
+                /**
+                 * MS_Query for each PeptideMatch
+                 *
+                 */
+                // slice the task and get the first one
+                subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, nbPeptideMatch, SLICE_SIZE);
+
+                // execute the first slice now
+                fetchMsQuery(entityManagerMSI, subTask);
+
+            }
 
             entityManagerMSI.getTransaction().commit();
             

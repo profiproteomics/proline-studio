@@ -134,8 +134,22 @@ public class RsetPeptideFragmentationTable extends LazyTable {
         for (Map.Entry<String, Long> entry : aw_Map.entrySet()) {
             objectTreeId = entry.getValue();
         }
+        
 
-        if (objectTreeId != null) {
+        if (objectTreeId == null) {
+           m_fragPanelContainer.removeAll();
+    	   JLabel noDataAvailableLabel = new JLabel("No fragmentation information avaible for the selected element");
+           noDataAvailableLabel.setBackground(Color.white);
+           noDataAvailableLabel.setOpaque(true);
+           noDataAvailableLabel.setHorizontalAlignment(SwingConstants.LEFT);
+           noDataAvailableLabel.setVerticalAlignment(SwingConstants.TOP);
+          
+           m_fragPanelContainer.setLayout(new BorderLayout());
+           m_fragPanelContainer.add(noDataAvailableLabel, BorderLayout.CENTER);
+        	LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("objectr tree id is null, no annotations to show for pm_id=" + m_peptideMatch.getId());
+        }
+        else {
+        	
             ObjectTree ot = entityManagerMSI.find(ObjectTree.class, objectTreeId); // get the objectTree from id.
 
             String clobData = ot.getClobData();
@@ -218,15 +232,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
             m_fragPanelContainer.repaint();
 
 
-        } else {
-            JLabel noDataAvailableLabel = new JLabel("Fragmentation Information is not avaible in database. To obtain this information, you must select the “Save Spectrum Matches” option in the Import Search Results Dialog.");
-            noDataAvailableLabel.setBackground(Color.white);
-            noDataAvailableLabel.setOpaque(true);
-            noDataAvailableLabel.setHorizontalAlignment(SwingConstants.LEFT);
-            noDataAvailableLabel.setVerticalAlignment(SwingConstants.TOP);
-            
-            m_fragPanelContainer.setLayout(new BorderLayout());
-            m_fragPanelContainer.add(noDataAvailableLabel, BorderLayout.CENTER);
+          
         }
 
         entityManagerMSI.getTransaction().commit();

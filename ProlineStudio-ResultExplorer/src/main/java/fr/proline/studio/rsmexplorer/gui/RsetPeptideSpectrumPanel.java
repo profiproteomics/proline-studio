@@ -11,7 +11,6 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 
 import org.jfree.chart.ChartFactory;
@@ -20,6 +19,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.title.TextTitle;
+import org.jfree.data.Range;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +92,13 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
         XYPlot plot = (XYPlot) m_chart.getPlot();
         plot.getRangeAxis().setUpperMargin(0.2);
-       
+        
+        float maxXvalue = 0;
+	    maxXvalue = (float) m_chart.getXYPlot().getDomainAxis().getUpperBound();
+	    
+	    m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(0, maxXvalue * 1.05 ));
+	
+        
         plot.setBackgroundPaint(Color.white);
 
         XYStickRenderer renderer = new XYStickRenderer();
@@ -111,10 +117,10 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         ChartPanel cp = new ChartPanel(m_chart, true);
         
         
-        cp.setMinimumDrawWidth(0);
-        cp.setMinimumDrawHeight(0);
-		cp.setMaximumDrawWidth(Integer.MAX_VALUE);
-		cp.setMaximumDrawHeight(Integer.MAX_VALUE);
+        cp.setMinimumDrawWidth(0);					//
+        cp.setMinimumDrawHeight(0);					//
+		cp.setMaximumDrawWidth(Integer.MAX_VALUE); // make the legend to have a fixed size and not strecht it 
+		cp.setMaximumDrawHeight(Integer.MAX_VALUE); // when the windows becomes bigger.
 		m_spectrumPanel = cp;
         
 		JToolBar toolbar = initToolbar();
@@ -139,7 +145,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
     
    public void setData(DPeptideMatch peptideMatch) {
-
+	   
        if (peptideMatch == m_previousPeptideMatch) {
            return;
        }
@@ -153,6 +159,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     
     private void constructSpectrumChart(DPeptideMatch pm) {
 
+    	
         final String SERIES_NAME = "spectrumData";
         if (pm == null) {
             m_dataSet.removeSeries(SERIES_NAME);
@@ -176,6 +183,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
         Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
         if (spectrum == null) {
+            
             m_dataSet.removeSeries(SERIES_NAME);
             if(spectrumAnnotations!=null) {
     			spectrumAnnotations.removeAnnotations();
@@ -194,7 +202,11 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             return;
         }
 
-
+        // AW: reset annotations in case none are to be shown.(for whatever reasons...)
+        if(spectrumAnnotations!=null) {
+			spectrumAnnotations.removeAnnotations();
+		}
+        
         byte[] intensityByteArray = spectrum.getIntensityList(); 
         byte[] massByteArray = spectrum.getMozList(); 
 
@@ -225,7 +237,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
         int size = intensityDoubleArray.length;
         if (size != massDoubleArray.length) {
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Intensity and Mass List have different size");
+            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("Intensity and Mass List have different size");
             return;
         }
 
@@ -241,8 +253,9 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         String title = "Query " + pm.getMsQuery().getInitialId() + " - " + pm.getPeptide().getSequence();
         m_chart.setTitle(title);
 
+        
         // reset X/Y zooming
-        ((ChartPanel) m_spectrumPanel).restoreAutoBounds();
+       // ((ChartPanel) m_spectrumPanel).restoreAutoBounds();
         ((ChartPanel) m_spectrumPanel).setBackground(Color.white);
  
         
@@ -250,12 +263,15 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     	final XYPlot plot = m_chart.getXYPlot();
 		//p.setRenderer(renderer);
 
-    		
+    	plot.getDomainAxis().setAutoRange(true);
+		plot.getRangeAxis().setAutoRange(true);	
 		spectrumMinX = plot.getDomainAxis().getLowerBound();
 		spectrumMaxX =  plot.getDomainAxis().getUpperBound();
 		spectrumMinY = plot.getRangeAxis().getLowerBound();
 		spectrumMaxY =  plot.getRangeAxis().getUpperBound();
-		
+		plot.getDomainAxis().setRange(new Range(0,spectrumMaxX), false, true); 
+		plot.getRangeAxis().setRange(new Range(0,spectrumMaxY), false, true);
+
 		plot.addChangeListener(new PlotChangeListener() {
 			
 			@Override
@@ -282,7 +298,12 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 						spectrumMaxX = newMaxX ;
 						spectrumMinY = newMinY ;
 						spectrumMaxY = newMaxY;
+
 						spectrumAnnotations.removeAnnotations();
+						plot.getDomainAxis().setLowerBound(newMinX);
+					    plot.getDomainAxis().setUpperBound(newMaxX);
+					    plot.getRangeAxis().setLowerBound(newMinY);
+					    plot.getRangeAxis().setUpperBound(newMaxY);
 						spectrumAnnotations.addAnnotations();
 						
 						redrawInProgress = false;

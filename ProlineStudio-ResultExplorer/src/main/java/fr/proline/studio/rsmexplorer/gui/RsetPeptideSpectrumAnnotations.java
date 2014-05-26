@@ -25,6 +25,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.TextAnchor;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -60,14 +61,14 @@ public class RsetPeptideSpectrumAnnotations {
 
 	void removeAnnotations() {
 		XYPlot p = (XYPlot) m_chart.getPlot();
-
+		
 		@SuppressWarnings("unchecked")
 		List<XYAnnotation> annotationsList =  p.getAnnotations();
 		int lsize = annotationsList.size();
 		for (int i = 0; i < lsize; i++) {
 			p.removeAnnotation(annotationsList.get(i));
 		}
-		}
+	}
 
 	class JsonProperties {
 		public int ms_query_initial_id;
@@ -151,7 +152,13 @@ public class RsetPeptideSpectrumAnnotations {
 			objectTreeId = entry.getValue();
 		}
 
-		if (objectTreeId != null) {
+		if (objectTreeId == null) {
+			removeAnnotations(); // no object tree means no JSON data to be displayed
+			LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("objectr tree id is null, no annotations to show for pm_id=" + m_peptideMatch.getId());
+            
+		}
+		else 
+		{
 			ObjectTree ot = entityManagerMSI.find(ObjectTree.class, objectTreeId); // get
 																					// the
 																					// objectTree
@@ -243,10 +250,11 @@ public class RsetPeptideSpectrumAnnotations {
 			XYTextAnnotation xyta;
 			XYPlot plot = (XYPlot) m_chart.getPlot();
 
-			// double minX = (float) plot.getDomainAxis().getLowerBound(); // this is the bounds from data.
-			// double maxX = (float) plot.getDomainAxis().getUpperBound();
-			double minY = (float) plot.getRangeAxis().getLowerBound(); // this is bounds from window
+			double minY = (float) plot.getRangeAxis().getLowerBound(); // this is the Y data range
 			double maxY = (float) plot.getRangeAxis().getUpperBound();
+			
+			
+			    
 
 			int j = 0;
 			// ************************************************************

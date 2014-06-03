@@ -9,6 +9,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.JCheckBoxList;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.WSCProteinTableModel;
@@ -52,6 +53,8 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     private ExportButton m_exportButton;    
     private JButton m_columnVisibilityButton;
     
+    private MarkerContainerPanel m_markerContainerPanel;
+    
     /**
      * Creates new form RsmProteinsOfProteinSetPanel
      */
@@ -88,6 +91,10 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
         // allow to change column visibility
         m_columnVisibilityButton.setEnabled(true);
+        
+        // update the number of lines
+        m_markerContainerPanel.setMaxLineNumber(((WSCProteinTableModel) m_proteinTable.getModel()).getRowCount());
+        
 
     }
 
@@ -185,15 +192,18 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         m_scrollPane = new javax.swing.JScrollPane();
         m_proteinTable = new ProteinTable();
 
+        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane,  m_proteinTable);
+        
         m_proteinTable.setModel(new WSCProteinTableModel(m_proteinTable));
         m_scrollPane.setViewportView(m_proteinTable);
+        m_proteinTable.setViewport(m_scrollPane.getViewport());
 
 
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        internalPanel.add(m_scrollPane, c);
+        internalPanel.add(m_markerContainerPanel, c);
 
         return internalPanel;
     }

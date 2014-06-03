@@ -70,7 +70,7 @@ public class QuantitationTree extends RSMTree {
         int nbNodes = selectedNodes.length;
 
         
-        if (nbNodes>1) {
+        if ((nbNodes>1) || (nbNodes == 0)) {
             return;
         }
         RSMNode n = selectedNodes[0];

@@ -153,13 +153,19 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
         }
 
+        ProteinTableModel tableModel = (ProteinTableModel) table.getModel();
+        if (tableModel.getRowCount() == 0) {
+            return null; // this is a wart, for an unknown reason, it happens that the first row
+            // is selected although it does not exist.
+        }
+        
         // convert according to the sorting
         selectedRow = table.convertRowIndexToModel(selectedRow);
 
 
 
-        // Retrieve ProteinSet selected
-        ProteinTableModel tableModel = (ProteinTableModel) table.getModel();
+        // Retrieve ProteinMatch selected
+
 
         return tableModel.getProteinMatch(selectedRow);
     }

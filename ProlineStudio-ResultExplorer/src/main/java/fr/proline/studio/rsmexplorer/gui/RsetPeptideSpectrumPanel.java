@@ -96,7 +96,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         float maxXvalue = 0;
 	    maxXvalue = (float) m_chart.getXYPlot().getDomainAxis().getUpperBound();
 	    
-	    m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(0, maxXvalue * 1.05 ));
+	    m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(0, maxXvalue * 1.60 ));
 	
         
         plot.setBackgroundPaint(Color.white);

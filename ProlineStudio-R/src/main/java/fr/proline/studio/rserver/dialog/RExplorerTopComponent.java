@@ -15,18 +15,20 @@ import org.openide.windows.TopComponent;
  * @author JM235353
  */
 
-@ConvertAsProperties(dtd = "-//fr.proline.studio.rserver/dialog//RExplorer//EN",
+//JPM.LATER : hide this topcomponent in the menu for the moment
+
+/*@ConvertAsProperties(dtd = "-//fr.proline.studio.rserver/dialog//RExplorer//EN",
 autostore = false)
 @TopComponent.Description(preferredID = "RExplorerTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "explorer", openAtStartup = false)
 @ActionID(category = "Window", id = "fr.proline.studio.rsmexplorer.RExplorerTopComponent")
-@ActionReference(path = "Menu/Window" /*
- * , position = 334
- */)
+@ActionReference(path = "Menu/Window"
+        //, position = 334
+ )
 @TopComponent.OpenActionRegistration(displayName = "#CTL_RExplorerAction",
-preferredID = "RExplorerTopComponent")
+preferredID = "RExplorerTopComponent")*/
 @NbBundle.Messages({
     "CTL_RExplorerAction=Statistics Tool",
     "CTL_RExplorerTopComponent=Statistics Tool",

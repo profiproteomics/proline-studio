@@ -31,16 +31,14 @@ public class FileSystemBrowseTask extends AbstractServiceTask {
     
     @Override
     public boolean askService() {
-        
-        BigDecimal idProject;
-        
+
         try {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
             request.setId(m_id);
             request.setMethod("get_directory_content");
             Map<String, Object> params = new HashMap<>();
-            params.put("dir_path", m_dirPath);
+            params.put("label", m_dirPath);
             params.put("include_files", Boolean.TRUE);
             params.put("include_dirs", Boolean.TRUE);
             request.setParameters(params);

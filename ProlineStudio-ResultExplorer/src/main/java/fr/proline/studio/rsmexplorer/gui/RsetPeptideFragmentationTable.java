@@ -124,8 +124,8 @@ public class RsetPeptideFragmentationTable extends LazyTable {
         PeptideMatch pmORM = entityManagerMSI.find(PeptideMatch.class,
                 m_peptideMatch.getId());
         DMsQuery msQuery = m_peptideMatch.isMsQuerySet() ? m_peptideMatch.getMsQuery() : null;
-        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum()
-                : null;
+        //Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum()
+        //        : null;
 
 
         Map<String, Long> aw_Map = pmORM.getObjectTreeIdByName();
@@ -170,9 +170,9 @@ public class RsetPeptideFragmentationTable extends LazyTable {
             TheoreticalFragmentSeries_AW[] fragSer = jsonProp.frag_table;
             FragmentMatch_AW[] fragMa = jsonProp.frag_matches;
 
-            if (spectrum == null) {
+            /*if (spectrum == null) {
                 return;
-            }
+            }*/
 
             m_jTable1 = new DecoratedTable();
 

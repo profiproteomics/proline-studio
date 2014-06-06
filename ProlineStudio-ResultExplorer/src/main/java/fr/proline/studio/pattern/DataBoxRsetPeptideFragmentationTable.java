@@ -55,7 +55,7 @@ public class DataBoxRsetPeptideFragmentationTable extends AbstractDataBox {
             return;
         }
 
-        boolean needToLoadData = ((!peptideMatch.isMsQuerySet())
+        /*boolean needToLoadData = ((!peptideMatch.isMsQuerySet())
                 || (!peptideMatch.getMsQuery().isSpectrumSet()));
 
         if (needToLoadData) {
@@ -93,9 +93,9 @@ public class DataBoxRsetPeptideFragmentationTable extends AbstractDataBox {
 
 
 
-        } else {
+        } else {*/
             ((RsetPeptideFragmentationTablePanel) m_panel).setData(peptideMatch);
-        }
+        //}
     }
     private Long m_previousTaskId = null;
 

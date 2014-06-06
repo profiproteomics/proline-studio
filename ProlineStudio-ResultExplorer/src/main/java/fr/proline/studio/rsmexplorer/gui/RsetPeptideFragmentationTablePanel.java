@@ -92,13 +92,13 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 			return;
 		}
 //
-		Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
+		/*Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
         
 		if (spectrum == null) {
 			if(fragmentationTable != null){
 			}
 			return;
-		}
+		}*/
 		
 		//*-*-*-*-*-*-*-*
 		

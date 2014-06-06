@@ -213,7 +213,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
                     } else {
                         Character residueBefore = sequenceMatch.getResidueBefore();
                         if (residueBefore != null) {
-                             lazyData.setData(Character.toUpperCase(residueBefore));
+                             lazyData.setData(String.valueOf(Character.toUpperCase(residueBefore)));
                         } else {
                             lazyData.setData("");
                         }
@@ -254,7 +254,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
                     } else {
                         Character residueAfter = sequenceMatch.getResidueAfter();
                         if (residueAfter != null) {
-                             lazyData.setData(Character.toUpperCase(residueAfter));
+                             lazyData.setData(String.valueOf(Character.toUpperCase(residueAfter)));
                         } else {
                             lazyData.setData("");
                         }

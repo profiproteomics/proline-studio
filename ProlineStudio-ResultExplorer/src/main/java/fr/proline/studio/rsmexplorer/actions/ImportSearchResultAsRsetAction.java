@@ -74,18 +74,11 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
             // --------------------- Pre-Import --------------------------
 
             int nbFiles = filePaths.length;
-            String[] canonicalPathArray = new String[nbFiles];
+            String[] pathArray = new String[nbFiles];
             for (int i = 0; i < nbFiles; i++) {
                 File f = filePaths[i];
 
-                // use canonicalPath when it is possible to be sure to have an unique path
-                String canonicalPath;
-                try {
-                    canonicalPath = f.getCanonicalPath();
-                } catch (IOException ioe) {
-                    canonicalPath = f.getAbsolutePath(); // should not happen
-                }
-                canonicalPathArray[i] = canonicalPath;
+                pathArray[i] = f.getPath();
             }
 
  
@@ -111,7 +104,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
                 }
             };
 
-            CertifyIdentificationTask task = new CertifyIdentificationTask(callback, parserId, parserArguments, canonicalPathArray, projectId, result);
+            CertifyIdentificationTask task = new CertifyIdentificationTask(callback, parserId, parserArguments, pathArray, projectId, result);
             AccessServiceThread.getAccessServiceThread().addTask(task);
 
 
@@ -152,17 +145,11 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
         for (int i = 0; i < nbFiles; i++) {
             File f = filePaths[i];
 
-            // use canonicalPath when it is possible to be sure to have an unique path
-            String canonicalPath;
-            try {
-                canonicalPath = f.getCanonicalPath();
-            } catch (IOException ioe) {
-                canonicalPath = f.getAbsolutePath(); // should not happen
-            }
+            String path = f.getPath();
             Long[] resultSetId = new Long[1];
 
 
-            ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, canonicalPath, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches, projectId, resultSetId);
+            ImportIdentificationTask task = new ImportIdentificationTask(callback, parserId, parserArguments, path, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches, projectId, resultSetId);
             AccessServiceThread.getAccessServiceThread().addTask(task);
         }
     }

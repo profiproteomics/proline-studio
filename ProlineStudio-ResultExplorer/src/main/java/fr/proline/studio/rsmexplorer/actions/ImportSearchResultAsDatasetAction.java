@@ -137,18 +137,11 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             }
             
             // Pre-Import files
-            final String[] canonicalPathArray = new String[nbFiles];
+            final String[] pathArray = new String[nbFiles];
             for (int i = 0; i < nbFiles; i++) {
                 File f = filePaths[i];
 
-                // use canonicalPath when it is possible to be sure to have an unique path
-                String canonicalPath;
-                try {
-                    canonicalPath = f.getCanonicalPath();
-                } catch (IOException ioe) {
-                    canonicalPath = f.getAbsolutePath(); // should not happen
-                }
-                canonicalPathArray[i] = canonicalPath;
+                pathArray[i] = f.getPath();
             }
 
  
@@ -167,7 +160,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                     if (success) {
                         // start all imports
                         for (int i=0;i<nbFiles;i++) {
-                            startImport(_project, allIdentificationNodes.get(i), _parentDataset, allDatasetNames.get(i), canonicalPathArray[i], treeModel, parserId, parserArguments, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches);
+                            startImport(_project, allIdentificationNodes.get(i), _parentDataset, allDatasetNames.get(i), pathArray[i], treeModel, parserId, parserArguments, decoyRegex, instrumentId, peaklistSoftwareId, saveSpectrumMatches);
                         }
                     } else {
                         // delete all nodes
@@ -178,7 +171,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
                 }
             };
 
-            CertifyIdentificationTask task = new CertifyIdentificationTask(callback, parserId, parserArguments, canonicalPathArray, projectId, result);
+            CertifyIdentificationTask task = new CertifyIdentificationTask(callback, parserId, parserArguments, pathArray, projectId, result);
             AccessServiceThread.getAccessServiceThread().addTask(task);
 
 

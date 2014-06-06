@@ -21,14 +21,14 @@ public class ServerFile extends File {
     private String m_serverFileName;
     
     
-    public ServerFile() {
+   /* public ServerFile() {
         super(".");
         m_serverFilePath = ".";
         m_serverFileName = ".";
         m_isDirectory = true;
         m_lastModified = 0;
         m_length = 0;
-    }
+    }*/
     
     public ServerFile(String path, String name, boolean isDirectory, long lastModified, long length) {
         super(path);

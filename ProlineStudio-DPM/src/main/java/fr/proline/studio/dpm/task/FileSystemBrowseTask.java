@@ -38,7 +38,7 @@ public class FileSystemBrowseTask extends AbstractServiceTask {
             request.setId(m_id);
             request.setMethod("get_directory_content");
             Map<String, Object> params = new HashMap<>();
-            params.put("label", m_dirPath);
+            params.put("label_path", m_dirPath);
             params.put("include_files", Boolean.TRUE);
             params.put("include_dirs", Boolean.TRUE);
             request.setParameters(params);

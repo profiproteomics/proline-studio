@@ -8,9 +8,9 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
-import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -24,45 +24,66 @@ public class RunXICTask extends AbstractServiceTask {
     private HashMap<String, ArrayList<String>> m_samplesByGroup;
     private HashMap<String, ArrayList<String>> m_samplesAnalysisBySample;
     private HashMap<String, Long> m_rsmIdBySampleAnalysis;
-    private DDataset m_quantiDS;
-            
-    public RunXICTask(AbstractServiceCallback callback,  DDataset quantiDS, HashMap<String, ArrayList<String>> samplesByGroup,HashMap<String, ArrayList<String>> samplesAnalysisBySample,HashMap<String, Long> rsmIdBySampleAnalysis, Long[] retValue  ) {
+    private String m_quantiDSName;
+    private Long m_pId;
+    private Map<String,Object> m_quantParams;
+    
+    public RunXICTask(AbstractServiceCallback callback, Long projectId,  String quantDSName,  Map<String,Object> quantParams, HashMap<String, ArrayList<String>> samplesByGroup, HashMap<String, ArrayList<String>> samplesAnalysisBySample,HashMap<String, Long> rsmIdBySampleAnalysis, Long[] retValue  ) {
         super(callback, false /** asynchronous */, new TaskInfo("Run XIC Quantitation for ", true, TASK_LIST_INFO ));
         m_xicQuantiResult = retValue;     
         m_samplesByGroup = samplesByGroup;
         m_samplesAnalysisBySample = samplesAnalysisBySample;
         m_rsmIdBySampleAnalysis = rsmIdBySampleAnalysis;
-        m_quantiDS= quantiDS;
+        m_quantiDSName = quantDSName;
+        m_pId= projectId;
+        m_quantParams = quantParams;
     }
 
     @Override
     public boolean askService() {
         //Create JSON for XIC Quanttitation service         
         try {
+            //Get Run Ids for specified RSMs
+            Map<Long, Long> runIdByRsmId = new HashMap<>();
+            for(Long rsmId : m_rsmIdBySampleAnalysis.values()){
+                ArrayList<Long> returnedRunId = new ArrayList<> ();
+                DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null, m_pId);
+                loadRunIdsTask.initLoadRunIdForRsm(rsmId, returnedRunId);
+                loadRunIdsTask.fetchData();
+                if(returnedRunId.size() >0)
+                    runIdByRsmId.put(rsmId, returnedRunId.get(0));
+                else
+                    runIdByRsmId.put(rsmId, -1l);
+            }
+            
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
 
             request.setId(m_id);
             request.setMethod("run_job");
 
+            //Create JSON parameters Strings 
 
             Map<String, Object> params = new HashMap<>();
-            params.put("name",m_quantiDS.getName());
-            params.put("description", m_quantiDS.getName());
-            params.put("project_id", m_quantiDS.getProject().getId());
+            
+            //-- Global PARAMS
+            params.put("name",m_quantiDSName);
+            params.put("description", m_quantiDSName);
+            params.put("project_id", m_pId);
             params.put("method_id", 1); //TODO Attention en dure !!! A lire la methode type = "label_free" & abundance_unit = "feature_intensity"
 
-            // experimental_design
+            
+            //-- experimental_design Params
             Map<String, Object> experimentalDesignParams = new HashMap<>();
             
             Map<Integer, String> splByNbr = new HashMap<>();
             Map<String, Integer> splNbrByName = new HashMap<>();            
             Iterator<String> groupsIt = m_samplesByGroup.keySet().iterator();
-            int ratioNumeratorGrp = 0;
-            int ratioDenominatorGrp = 0;
-            int grpNumber = 0;
-            int splNumber = 0;
-            int splAnalysisNumber = 0;
+            int ratioNumeratorGrp = 1;
+            int ratioDenominatorGrp =1;
+            int grpNumber = 1;
+            int splNumber = 1;
+            int splAnalysisNumber = 1;
             List biologicalGroupList = new ArrayList();
             
             while(groupsIt.hasNext()){
@@ -86,21 +107,25 @@ public class RunXICTask extends AbstractServiceTask {
 
             }// End go through groups
             
-            if(grpNumber>1)
-                ratioDenominatorGrp = 1; //VD TODO :  Comment gerer les ratois ?
+            if(grpNumber>2)
+                ratioDenominatorGrp = 2; //VD TODO :  Comment gerer les ratois ?
             
             Map<String, Object> ratioParams = new HashMap<>();
-            ratioParams.put("number", Integer.valueOf(0));
+            ratioParams.put("number", 1);
             ratioParams.put("numerator_group_number", ratioNumeratorGrp);
             ratioParams.put("denominator_group_number",ratioDenominatorGrp);
+            List ratioParamsList = new ArrayList();
+            ratioParamsList.add(ratioParams);
             
             Map<String, Object> groupSetupParams = new HashMap<>();
-            groupSetupParams.put("number", Integer.valueOf(0));
-            groupSetupParams.put("name", m_quantiDS.getName());
+            groupSetupParams.put("number", 1);
+            groupSetupParams.put("name", m_quantiDSName);
             groupSetupParams.put("biological_groups", biologicalGroupList);
-            groupSetupParams.put("ratio_definitions", ratioParams);
-
-            experimentalDesignParams.put("group_setups", groupSetupParams);            
+            groupSetupParams.put("ratio_definitions", ratioParamsList);
+            
+            ArrayList groupSetupParamsList = new ArrayList();
+            groupSetupParamsList.add(groupSetupParams);
+            experimentalDesignParams.put("group_setups",groupSetupParamsList );            
             
             List biologicalSampleList = new ArrayList();
             List quantChanneList = new ArrayList();
@@ -122,7 +147,8 @@ public class RunXICTask extends AbstractServiceTask {
                     Map<String, Object> quantChannelParams = new HashMap<>();
                     quantChannelParams.put("number", splAnalysisNumber++);
                     quantChannelParams.put("sample_number", splNbr);
-                    quantChannelParams.put("ident_result_summary_id", m_rsmIdBySampleAnalysis.get(nextSplAnalysis));
+                    quantChannelParams.put("ident_result_summary_id", m_rsmIdBySampleAnalysis.get(nextSplAnalysis));                    
+                    quantChannelParams.put("run_id", runIdByRsmId.get(m_rsmIdBySampleAnalysis.get(nextSplAnalysis)));
                     quantChanneList.add(quantChannelParams);
                 }
 
@@ -131,8 +157,8 @@ public class RunXICTask extends AbstractServiceTask {
 
             List masterQuantChannelsList = new ArrayList();
             Map<String, Object> masterQuantChannelParams = new HashMap<>();
-            masterQuantChannelParams.put("number", 0);
-            masterQuantChannelParams.put("name", m_quantiDS.getName());
+            masterQuantChannelParams.put("number", 1);
+            masterQuantChannelParams.put("name", m_quantiDSName);
             masterQuantChannelParams.put("quant_channels", quantChanneList);
             masterQuantChannelsList.add(masterQuantChannelParams);
             experimentalDesignParams.put("master_quant_channels", masterQuantChannelsList);
@@ -140,6 +166,51 @@ public class RunXICTask extends AbstractServiceTask {
             params.put("experimental_design", experimentalDesignParams);
 
 
+            
+            //-- quanti Params
+            /*"quantitation_config": {
+		"extraction_params": {
+			"moz_tol": "5",
+			"moz_tol_unit": "PPM"
+		},
+		"clustering_params": {
+			"moz_tol": "5",
+			"moz_tol_unit": "PPM",
+			"time_tol": "15",
+			"time_computation": "MOST_INTENSE",
+			"intensity_computation": "MOST_INTENSE"
+		},
+		"aln_method_name": "ITERATIVE",
+		"aln_params": {
+			"mass_interval": "20000",
+			"max_iterations": "3",
+			"smoothing_method_name": "TIME_WINDOW",
+			"smoothing_params": {
+				"window_size": "200",
+				"window_overlap": "20",
+				"min_window_landmarks": "50"
+			},
+			"ft_mapping_params": {
+				"moz_tol": "5",
+				"moz_tol_unit": "PPM",
+				"time_tol": "600"
+			}
+		},
+		"ft_filter": {
+			"name": "INTENSITY",
+			"operator": "GT",
+			"value": "0"
+		},
+		"ft_mapping_params": {
+			"moz_tol": "10",
+			"moz_tol_unit": "PPM",
+			"time_tol": "120"
+		},
+		"normalization_method": "MEDIAN_RATIO"
+	}*/
+           //Should already be structured like described
+            params.put("quantitation_config", m_quantParams);
+            
             request.setParameters(params);
             //m_loggerProline.debug("Will postRequest with params  project_id "+m_refDataset.getProject().getId()+" ; ref_result_summary_id "+m_refDataset.getResultSummaryId()+" ; compute_result_summary_ids "+m_resultSummaryIds);
             HttpResponse response = postRequest("dps.msq/quantify/" + request.getMethod() + getIdString(), request);

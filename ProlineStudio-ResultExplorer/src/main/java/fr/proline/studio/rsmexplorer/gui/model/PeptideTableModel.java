@@ -134,7 +134,7 @@ public class PeptideTableModel extends FilterTableModel {
                 }
                 Character residueBefore = sequenceMatch.getResidueBefore();
                 if (residueBefore != null) {
-                    return Character.toUpperCase(residueBefore);
+                    return String.valueOf(Character.toUpperCase(residueBefore));
                 } else {
                     return "";
                 }
@@ -151,7 +151,7 @@ public class PeptideTableModel extends FilterTableModel {
                 }
                 Character residueAfter= sequenceMatch.getResidueAfter();
                 if (residueAfter != null) {
-                    return Character.toUpperCase(residueAfter);
+                    return String.valueOf(Character.toUpperCase(residueAfter));
                 } else {
                     return "";
                 }

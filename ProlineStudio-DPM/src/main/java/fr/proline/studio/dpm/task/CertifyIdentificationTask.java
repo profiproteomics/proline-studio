@@ -25,16 +25,16 @@ public class CertifyIdentificationTask extends AbstractServiceTask {
     private String m_parserId;
     private HashMap<String, String> m_parserArguments;
     
-    private String[] m_canonicalFilePathArray;
+    private String[] m_pathArray;
     private long m_projectId;
     private String[] m_certifyErrorMessage = null;
     
-    public CertifyIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String[] canonicalFilePathArray, long projectId, String[] certifyErrorMessage) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Check Files to Import : "+canonicalFilePathArray[0]+", ...", true, TASK_LIST_INFO));
+    public CertifyIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String[] pathArray, long projectId, String[] certifyErrorMessage) {
+        super(callback, false /*asynchronous*/, new TaskInfo("Check Files to Import : "+pathArray[0]+", ...", true, TASK_LIST_INFO));
 
         m_parserId = parserId;
         m_parserArguments = parserArguments;
-        m_canonicalFilePathArray = canonicalFilePathArray;
+        m_pathArray = pathArray;
         m_projectId = projectId;
         m_certifyErrorMessage = certifyErrorMessage;
     }
@@ -57,7 +57,7 @@ public class CertifyIdentificationTask extends AbstractServiceTask {
             List args = new ArrayList();
 
             // retrieve the canonical server file path
-            Preferences preferences = NbPreferences.root();
+            /*Preferences preferences = NbPreferences.root();
             String serverFilePath = preferences.get("ServerIdentificationFilePath", null);
             if (serverFilePath != null) {
                 // retrieve canonical file path when it is possible
@@ -69,24 +69,14 @@ public class CertifyIdentificationTask extends AbstractServiceTask {
                     }
                 }
 
-            }
+            }*/
 
-            for (int i = 0; i < m_canonicalFilePathArray.length; i++) {
+            for (int i = 0; i < m_pathArray.length; i++) {
 
-                String canonicalFilePath = m_canonicalFilePathArray[i];
-
-                if (serverFilePath != null) {
-
-                    // if canonicalFilePath="D:\\dir1\dir2\foo.dat" and serverFilePath="D:\\dir1\";
-                    // then canonicalFilePath="dir2\foo.dat"
-                    if (canonicalFilePath.startsWith(serverFilePath)) {
-                        canonicalFilePath = canonicalFilePath.substring(serverFilePath.length());
-                    }
-                }
 
                 // add the file to parse
                 Map<String, Object> resultfile = new HashMap<>();
-                resultfile.put("path", canonicalFilePath);  // files must be accessible from web-core by the same path
+                resultfile.put("path", m_pathArray[i]);  // files must be accessible from web-core by the same path
                 resultfile.put("format", m_parserId);
 
                 args.add(resultfile);

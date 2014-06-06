@@ -113,6 +113,16 @@ public class ProjectExplorerPanel extends JPanel {
         }
 
     }
+    
+    public Project getSelectedProject(){
+        
+        ProjectItem pi = (ProjectItem) m_projectsComboBox.getSelectedItem();
+        
+        if(pi.m_projectIdentificationData ==null)
+            return null;
+        else
+            return pi.m_projectIdentificationData.getProject();
+    }
 
     public void clearAll() {
 

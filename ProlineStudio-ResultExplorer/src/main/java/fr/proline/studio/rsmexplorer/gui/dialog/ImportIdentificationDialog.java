@@ -790,24 +790,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }
         }
         
-        
-        // Prefered User File Path
-        /*String filePath = preferences.get("UserIdentificationFilePath", null);
-        if (filePath != null) {
-            File f = new File(filePath);
-            if (f.isDirectory()) {
-                m_defaultDirectory = f;
-            }
-        } else {
-            // User Server File Path for Prefered User File Path
-            String serverFilePath = preferences.get("ServerIdentificationFilePath", null);
-            if (serverFilePath != null) {
-                File f = new File(serverFilePath);
-                if (f.isDirectory()) {
-                    m_defaultDirectory = f;
-                }
-            }
-        }*/
+
     }
 
 

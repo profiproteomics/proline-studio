@@ -5,12 +5,12 @@ import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.module.seq.BioSequenceProvider;
+import fr.proline.module.seq.dto.BioSequenceWrapper;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import fr.proline.module.seq.BioSequenceProvider;
-import fr.proline.module.seq.dto.BioSequenceWrapper;
 
 /**
  * Find biosequence for a list of ProteinMatch, check the biosequence according to the validated peptides when it is possible

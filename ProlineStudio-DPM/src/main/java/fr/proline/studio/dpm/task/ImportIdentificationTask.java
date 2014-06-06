@@ -24,7 +24,7 @@ public class ImportIdentificationTask extends AbstractServiceTask {
 
     private String m_parserId;
     private HashMap<String, String> m_parserArguments;
-    private String m_canonicalFilePath;
+    private String m_filePath;
     private String m_decoyRegex;
     private long m_instrumentId;
     private long m_peaklistSoftwareId;
@@ -32,12 +32,12 @@ public class ImportIdentificationTask extends AbstractServiceTask {
     private boolean m_saveSpectrumMatches;
     private Long[] m_resultSetId = null;
     
-    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String canonicalFilePath, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches, long projectId, Long[] resultSetId) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Import Identification "+canonicalFilePath, true, TASK_LIST_INFO));
+    public ImportIdentificationTask(AbstractServiceCallback callback, String parserId, HashMap<String, String> parserArguments, String filePath, String decoyRegex, long instrumentId, long peaklistSoftwareId, boolean saveSpectrumMatches, long projectId, Long[] resultSetId) {
+        super(callback, false /*asynchronous*/, new TaskInfo("Import Identification "+filePath, true, TASK_LIST_INFO));
         
         m_parserId = parserId;
         m_parserArguments = parserArguments;
-        m_canonicalFilePath = canonicalFilePath;
+        m_filePath = filePath;
         m_decoyRegex = decoyRegex;
         m_instrumentId = instrumentId;
         m_peaklistSoftwareId = peaklistSoftwareId;
@@ -60,33 +60,11 @@ public class ImportIdentificationTask extends AbstractServiceTask {
 	    params.put("project_id", m_projectId);
             
             List args = new ArrayList();
-            
-            // retrieve the canonical server file path
-            Preferences preferences = NbPreferences.root();
-            String serverFilePath = preferences.get("ServerIdentificationFilePath", null);
-            if (serverFilePath !=null) {
-                // retrieve canonical file path when it is possible
-                File serverFile = new File(serverFilePath);
-                if (serverFile.exists() && serverFile.isDirectory()) {
-                    try {
-                        serverFilePath = serverFile.getCanonicalPath();
-                    } catch (IOException ioe) {
-                        
-                    }
-                }
-                
-                // if canonicalFilePath="D:\\dir1\dir2\foo.dat" and serverFilePath="D:\\dir1\";
-                // then canonicalFilePath="dir2\foo.dat"
-                if (m_canonicalFilePath.startsWith(serverFilePath)) {
-                    m_canonicalFilePath = m_canonicalFilePath.substring(serverFilePath.length());
-                }
-            }
-            
-            
+
             
             // add the file to parse
             Map<String, Object> resultfile = new HashMap<>();
-            resultfile.put("path", m_canonicalFilePath);  // files must be accessible from web-core by the same path
+            resultfile.put("path", m_filePath);  // files must be accessible from web-core by the same path
             resultfile.put("format", m_parserId);
             if (m_decoyRegex != null) {
                 resultfile.put("decoy_strategy", m_decoyRegex);

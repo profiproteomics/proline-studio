@@ -88,9 +88,11 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
 
 
         // Dispatch Proteins in sameSet and subSet
-        ArrayList<DProteinMatch> sameSet = new ArrayList<>(proteinMatchList.size());
+        LinkedList<DProteinMatch> sameSet = new LinkedList<>();
         ArrayList<DProteinMatch> subSet = new ArrayList<>(proteinMatchList.size());
 
+        Long idTypicalProteinMatch = proteinSet.getTypicalProteinMatch().getId();
+        
 
         Iterator<DProteinMatch> it = proteinMatchList.iterator();
         int peptitesCountInSameSet = 0;
@@ -112,7 +114,12 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
             
             if (peptideSet.getPeptideCount() == peptitesCountInSameSet) {
                 // put protein in same set
-                sameSet.add(proteinMatch);
+                if (proteinMatch.getId() == idTypicalProteinMatch) {
+                    // typical protein match is put first
+                    sameSet.addFirst(proteinMatch);
+                } else {
+                    sameSet.add(proteinMatch);
+                }
             } else {
                 // put protein in sub set
                 subSet.add(proteinMatch);

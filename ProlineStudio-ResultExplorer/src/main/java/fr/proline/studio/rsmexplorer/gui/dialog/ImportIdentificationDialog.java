@@ -254,9 +254,12 @@ public class ImportIdentificationDialog extends DefaultDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 
-                JFileChooser fchooser = new JFileChooser(ServerFileSystemView.getServerFileSystemView());
+                JFileChooser fchooser;
                 if ((m_defaultDirectory!=null) && (m_defaultDirectory.isDirectory())) {
-                    fchooser.setCurrentDirectory(m_defaultDirectory);
+                    fchooser = new JFileChooser(m_defaultDirectory, ServerFileSystemView.getServerFileSystemView());
+                } else {
+                    // should not happen in fact
+                    fchooser = new JFileChooser(ServerFileSystemView.getServerFileSystemView());
                 }
                 fchooser.setMultiSelectionEnabled(true);
 

@@ -3,6 +3,9 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dpm.serverfilesystem.RootInfo;
+import fr.proline.studio.dpm.serverfilesystem.ServerFile;
+import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.parameter.*;
@@ -84,7 +87,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private JPanel m_parserParametersPanel = null;
 
 
-    private File m_defaultDirectory = null;
+    private ServerFile m_defaultDirectory = null;
 
     public static ImportIdentificationDialog getDialog(Window parent/*, long projectId*/) {
         if (m_singletonDialog == null) {
@@ -251,7 +254,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 
-                JFileChooser fchooser = new JFileChooser();
+                JFileChooser fchooser = new JFileChooser(ServerFileSystemView.getServerFileSystemView());
                 if ((m_defaultDirectory!=null) && (m_defaultDirectory.isDirectory())) {
                     fchooser.setCurrentDirectory(m_defaultDirectory);
                 }
@@ -274,18 +277,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
                 	FileNameExtensionFilter filter = new FileNameExtensionFilter(FILE_EXTENSIONS_DESCRIPTION[i], filters[i].split(";"));
                     fchooser.addChoosableFileFilter(filter);
                 }
-//                int nbFilters = FILE_EXTENSIONS_DESCRIPTION.length;
-//                //FileNameExtensionFilter defaultFilter = null;
-//                for (int i = 0; i < nbFilters; i++) {
-//                    FileNameExtensionFilter filter = new FileNameExtensionFilter(FILE_EXTENSIONS_DESCRIPTION[i], FILE_EXTENSIONS[i]);
-//                    fchooser.addChoosableFileFilter(filter);
-//                    /*
-//                     * if (i == 0) { defaultFilter = filter;
-//                    }
-//                     */
-//                }
-                
-                //fchooser.setFileFilter(defaultFilter);
+
                 int result = fchooser.showOpenDialog(m_singletonDialog);
                 if (result == JFileChooser.APPROVE_OPTION) {
 
@@ -313,28 +305,16 @@ public class ImportIdentificationDialog extends DefaultDialog {
                         if (parserIndex >= 0) {
                             m_parserComboBox.setSelectedIndex(parserIndex);
                         }
-//                        int indexOfDot = fileName.lastIndexOf('.');
-//                        if (indexOfDot != -1) {
-//                            int parserIndex = -1;
-//                            String fileExtension = fileName.substring(indexOfDot + 1);
-//                            for (int i = 0; i < FILE_EXTENSIONS.length; i++) {
-//                                String extension = FILE_EXTENSIONS[i];
-//                                if (fileExtension.compareToIgnoreCase(extension) == 0) {
-//                                    parserIndex = i;
-//                                    break;
-//                                }
-//                            }
-//                            if (parserIndex >= 0) {
-//                                m_parserComboBox.setSelectedIndex(parserIndex);
-//                            }
-//                        }
+
                     }
                     
                     if (nbFiles>0) {
                         File f = files[0];
                         f = f.getParentFile();
                         if ((f!=null) && (f.isDirectory())) {
-                            m_defaultDirectory = f;
+                            if (f instanceof ServerFile) {
+                             m_defaultDirectory = (ServerFile) f;
+                            }
                         }
                     }
                 }
@@ -468,37 +448,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }
         });
         
-        /*
-        m_decoyComboBox.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateDecoyRegexEnabled();
-            }
-        });
-        
-        m_regexButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
-                ArrayList<String> regexArrayList = readRegexArray(null);
-                SelectRegexDialog regexDialog = SelectRegexDialog.getDialog(m_singletonDialog, regexArrayList);
-                regexDialog.setLocationRelativeTo(m_regexButton);
-                regexDialog.setVisible(true);
-                if (regexDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
-                    
-                    
-                    
-                    String selectedRegex = regexDialog.getSelectedRegex();
-                    if (selectedRegex != null) {
-                        m_decoyRegexTextField.setText(selectedRegex);
-                    }
-                    regexArrayList = regexDialog.getRegexArrayList();
-                    writeRegexArray(regexArrayList);
-                }
-            }
-        });*/
         
         return parserPanel;
     }
@@ -743,49 +693,16 @@ public class ImportIdentificationDialog extends DefaultDialog {
         }
                
 
-        // check that the server file path is defined
+
         Preferences preferences = NbPreferences.root();
-        String serverFilePath = preferences.get("ServerIdentificationFilePath", null);
-        if (serverFilePath == null) {
-            
-            OptionDialog dialog = new OptionDialog(this, "Server Search Result File Path", "Please define the file path where the search results (Mascot, Omssa files...) are saved.\nAsk to your IT Administrator if you don't know where it is.\nIf the data server is running on your computer, the file path can be empty.", "Search Result File Path", OptionDialog.OptionDialogType.TEXTFIELD);
-                    
-            // on windows, try to predict the path for identifications
-            OSType osType = OSInfo.getOSType();
-            if ((osType == OSType.WINDOWS_AMD64) || (osType == OSType.WINDOWS_X86)) {
-                File f = m_fileList.getModel().getElementAt(0);
-                try {
-                    String path = f.getCanonicalPath();
-                    int indexOfSeparator = path.indexOf(File.separatorChar);
-                    if (indexOfSeparator != -1) {
-                        path = path.substring(0, indexOfSeparator+1);
-                        dialog.setText(path);
-                    }
-                } catch (IOException ioe) {
-                    
-                } 
-            }
-            
-            dialog.setAllowEmptyText(true);
-            dialog.setLocationRelativeTo(this);
-            dialog.setVisible(true);
-            
-            if (dialog.getButtonClicked() == OptionDialog.BUTTON_OK) {
-                preferences.put("ServerIdentificationFilePath", dialog.getText());
-            } else {
-                return false;
-            }
-            
-        }
-        
-        
+
         // save parser
         String parserSelected = parameterList.toString();
         preferences.put("IdentificationParser", parserSelected);
         
         // save file path
         if (m_defaultDirectory != null) {
-          preferences.put("UserIdentificationFilePath", m_defaultDirectory.getAbsolutePath());  
+          preferences.put("IdentificationFilePath", m_defaultDirectory.getAbsolutePath());  
         }
 
         
@@ -857,8 +774,25 @@ public class ImportIdentificationDialog extends DefaultDialog {
         m_parserComboBox.setSelectedIndex(parserIndex);
         
         
+        
+        //
+        String filePath = preferences.get("IdentificationFilePath", null);
+        if (filePath == null) {
+            ArrayList<String> roots = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_RESULT_FILES);
+            if (roots.size()>=1) {
+                filePath = roots.get(0);
+            }
+        }
+        if (filePath != null) {
+            ServerFile f = new ServerFile(filePath, filePath, true, 0, 0);
+            if (f.isDirectory()) {
+                m_defaultDirectory = f;
+            }
+        }
+        
+        
         // Prefered User File Path
-        String filePath = preferences.get("UserIdentificationFilePath", null);
+        /*String filePath = preferences.get("UserIdentificationFilePath", null);
         if (filePath != null) {
             File f = new File(filePath);
             if (f.isDirectory()) {
@@ -873,7 +807,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
                     m_defaultDirectory = f;
                 }
             }
-        }
+        }*/
     }
 
 

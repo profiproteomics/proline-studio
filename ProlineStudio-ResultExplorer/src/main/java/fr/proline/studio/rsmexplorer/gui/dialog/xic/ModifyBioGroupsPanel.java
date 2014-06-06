@@ -274,7 +274,7 @@ public class ModifyBioGroupsPanel extends JPanel {
 
             RSMBiologicalGroupNode biologicalGroupNode = new RSMBiologicalGroupNode(new DataSetData(groupTextField.getText().toString(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
             rootQuantitationNode.add(biologicalGroupNode);
-            for (int j = 0; j < sampleList.size(); j++) {
+              for (int j = 0; j < sampleList.size(); j++) {
                 JTextField sampleTextField = sampleList.get(j);
                 RSMBiologicalSampleNode biologicalSampleNode = new RSMBiologicalSampleNode(new DataSetData(sampleTextField.getText().toString(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 biologicalGroupNode.add(biologicalSampleNode);

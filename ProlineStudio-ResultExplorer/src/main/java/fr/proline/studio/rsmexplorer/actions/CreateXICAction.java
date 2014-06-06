@@ -1,16 +1,17 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.RunXICTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JOptionPane;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -31,6 +32,12 @@ public class CreateXICAction extends AbstractRSMAction {
      @Override
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
          
+         if( ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject() == null){
+            JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "A project should be selected !", "Warning", JOptionPane.ERROR_MESSAGE);
+            return; 
+         }
+         
+         Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
          CreateXICDialog dialog =  CreateXICDialog.getDialog(WindowManager.getDefault().getMainWindow());
          dialog.reinit();
          dialog.setLocation(x, y);
@@ -43,7 +50,7 @@ public class CreateXICAction extends AbstractRSMAction {
             HashMap<String, ArrayList<String>> _samplesByGroup = new HashMap<>();
             HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();
             HashMap<String, Long> _rsmIdBySampleAnalysis = new HashMap<>();
-            DDataset _quantiDS  = null;
+            DataSetData _quantiDS  = null;
             
             String errorMsg = null;
             if(dialog.getDesignRSMNode() == null){
@@ -54,7 +61,7 @@ public class CreateXICAction extends AbstractRSMAction {
                 
             } else {
                 //*** Get experimental design values                
-                _quantiDS = ((DataSetData)dialog.getDesignRSMNode().getData()).getDataset();
+                _quantiDS = (DataSetData)dialog.getDesignRSMNode().getData();
                                 
                 Enumeration xicGrps = dialog.getDesignRSMNode().children();                  
                 //Iterate over Groups
@@ -91,6 +98,10 @@ public class CreateXICAction extends AbstractRSMAction {
                 }//End go through Grp
             }
             
+            Map<String,Object> params = dialog.getQuantiParameters();
+            if(params == null)
+                errorMsg = "Null Quantitation parameter !s";      
+            
             if(errorMsg != null) {
                 JOptionPane.showMessageDialog(dialog, errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);
                 return;                
@@ -117,7 +128,7 @@ public class CreateXICAction extends AbstractRSMAction {
                 }
             };
     
-            RunXICTask task = new RunXICTask(xicCallback, _quantiDS, _samplesByGroup, _samplesAnalysisBySample, _rsmIdBySampleAnalysis, _xicQuantiDataSetId);          
+            RunXICTask task = new RunXICTask(xicCallback, pID, _quantiDS.getName(), params,  _samplesByGroup, _samplesAnalysisBySample, _rsmIdBySampleAnalysis, _xicQuantiDataSetId);          
             AccessServiceThread.getAccessServiceThread().addTask(task);
             
          } //End OK entered         

@@ -43,23 +43,24 @@ public class CreateXICDialog extends DefaultDialog {
 
         setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
 
-        init();
+        setButtonName(DefaultDialog.BUTTON_OK, "Next");
+        setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
+ 
+        setInternalComponent(DefineBioGroupsPanel.getDefineBioGroupsPanel());
 
     }
     
-    private void init(){
-        
-       setButtonName(DefaultDialog.BUTTON_OK, "Next");
-       setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
- 
-       setInternalComponent(DefineBioGroupsPanel.getDefineBioGroupsPanel());
-       //TODO: reinitialize wizard panels...
-        
-    }
 
     public final void reinit(){
-        init();
-         m_step = STEP_PANEL_DEFINE_GROUPS; 
+        
+        setButtonName(DefaultDialog.BUTTON_OK, "Next");
+        setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
+        finalXICDesignNode = null;
+        m_step = STEP_PANEL_DEFINE_GROUPS; 
+        replaceInternaleComponent(DefineBioGroupsPanel.getDefineBioGroupsPanel());
+        revalidate();
+        repaint();
+         
     }
     
     public RSMNode getDesignRSMNode(){
@@ -104,12 +105,9 @@ public class CreateXICDialog extends DefaultDialog {
 
             }
             
-
-            
             int nbGroups = defineBioGroupsPanel.getGroupNumber();
 
             int nbSamples = defineBioGroupsPanel.getSampleNumber();
-
 
             JScrollPane scrollPane = new JScrollPane();
             ModifyBioGroupsPanel definePanel = ModifyBioGroupsPanel.getDefinePanel(nbGroups, groupPrefix, nbSamples, samplePrefix);
@@ -146,7 +144,9 @@ public class CreateXICDialog extends DefaultDialog {
             m_step = STEP_PANEL_DEFINE_SAMPLE_ANALYSIS;
             
             return false;
+            
         } else if (m_step == STEP_PANEL_DEFINE_SAMPLE_ANALYSIS)  {  // STEP_PANEL_DEFINE_SAMPLE_ANALYSIS
+            
              // check values
             if (finalXICDesignNode == null) {
 
@@ -183,8 +183,8 @@ public class CreateXICDialog extends DefaultDialog {
             scrollPane.setViewportView(quantPanel);
             scrollPane.createVerticalScrollBar();
             
-            replaceInternaleComponent(quantPanel);
-
+            replaceInternaleComponent(scrollPane);
+            setSize(new Dimension(500, 600));
             revalidate();
             repaint();
             
@@ -192,7 +192,9 @@ public class CreateXICDialog extends DefaultDialog {
             
             return false;
         } else { //STEP_PANEL_DEFINE_QUANT_PARAMS
+            
             // check values TODO    
+            
             return true;
         }
 

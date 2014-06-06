@@ -78,10 +78,35 @@ public class DefineQuantParamsPanel extends JPanel{
         return m_singleton;
     }
     
-    /*
-     * 
-
-
+            //-- quanti Params
+            /*"quantitation_config": {
+		"extraction_params": {
+			"moz_tol": "5",
+			"moz_tol_unit": "PPM"
+		},
+		"clustering_params": {
+			"moz_tol": "5",
+			"moz_tol_unit": "PPM",
+			"time_tol": "15",
+			"time_computation": "MOST_INTENSE",
+			"intensity_computation": "MOST_INTENSE"
+		},
+		"aln_method_name": "ITERATIVE",
+		"aln_params": {
+			"mass_interval": "20000",
+			"max_iterations": "3",
+			"smoothing_method_name": "TIME_WINDOW",
+			"smoothing_params": {
+				"window_size": "200",
+				"window_overlap": "20",
+				"min_window_landmarks": "50"
+			},
+			"ft_mapping_params": {
+				"moz_tol": "5",
+				"moz_tol_unit": "PPM",
+				"time_tol": "600"
+			}
+		},
 		"ft_filter": {
 			"name": "INTENSITY",
 			"operator": "GT",
@@ -93,33 +118,51 @@ public class DefineQuantParamsPanel extends JPanel{
 			"time_tol": "120"
 		},
 		"normalization_method": "MEDIAN_RATIO"
-     */
+	}*/
     public Map<String,Object> getQuantParams(){
         Map<String,Object> params = new HashMap<>();
-        params.put("extraction_params.moz_tol", m_extractionMoZTolTF.getText());
         
-        params.put("clustering_params.moz_tol", m_clusteringMoZTolTF.getText());
-        params.put("clustering_params.time_tol", m_clusteringTimeTolTF.getText());
-        params.put("clustering_params.time_computation", m_clusteringTimeComputationCB.getSelectedItem().toString());
-        params.put("clustering_params.intensity_computation", m_clusteringintensityComputationCB.getSelectedItem().toString());
-                
+        Map<String,Object> extRactParams = new HashMap<>();
+        extRactParams.put("moz_tol", m_extractionMoZTolTF.getText());
+        extRactParams.put("moz_tol_unit", "PPM");
+        params.put("extraction_params", extRactParams);
+        
+        Map<String,Object> clusterParams = new HashMap<>();
+        clusterParams.put("moz_tol", m_clusteringMoZTolTF.getText());
+        clusterParams.put("moz_tol_unit","PPM");
+        clusterParams.put("time_tol", m_clusteringTimeTolTF.getText());
+        clusterParams.put("time_computation", m_clusteringTimeComputationCB.getSelectedItem().toString());
+        clusterParams.put("intensity_computation", m_clusteringintensityComputationCB.getSelectedItem().toString());
+        params.put("extraction_params", clusterParams);    
+        
         params.put("aln_method_name", m_alnmMethodCB.getSelectedItem().toString());
-        params.put("aln_params.mass_interval", m_alnmMassIntervalTF.getText());
-        params.put("aln_params.max_iterations", m_alnmMaxIterationTF.getText());
-        params.put("aln_params.smoothing_method_name", m_alnmSmoothingMethodCB.getSelectedItem().toString());        
-        params.put("aln_params.smoothing_params.window_size", m_alnmSmoothingWinSizeTF.getText());
-        params.put("aln_params.smoothing_params.window_overlap", m_alnmSmoothingWinOverlapTF.getText());
-        params.put("aln_params.smoothing_params.min_window_landmarks", m_alnmSmoothingMinWinlandmarksTF.getText());
-        params.put("aln_params.ft_mapping_params.moz_tol", m_alnmFTMoZTolTF.getText());
-        params.put("aln_params.ft_mapping_params.time_tol", m_alnmFTTimeTolTF.getText());
+        Map<String,Object> alnParams = new HashMap<>();
+        alnParams.put("mass_interval", m_alnmMassIntervalTF.getText());
+        alnParams.put("max_iterations", m_alnmMaxIterationTF.getText());
+        alnParams.put("smoothing_method_name", m_alnmSmoothingMethodCB.getSelectedItem().toString());   
+        Map<String,Object> smootingParams = new HashMap<>();
+        smootingParams.put("window_size", m_alnmSmoothingWinSizeTF.getText());
+        smootingParams.put("window_overlap", m_alnmSmoothingWinOverlapTF.getText());
+        smootingParams.put("min_window_landmarks", m_alnmSmoothingMinWinlandmarksTF.getText());
+        alnParams.put("smoothing_params", smootingParams);     
+        Map<String,Object> alnFtParams = new HashMap<>();
+        alnFtParams.put("moz_tol", m_alnmFTMoZTolTF.getText());
+        alnFtParams.put("moz_tol_unit", "PPM");
+        alnFtParams.put("time_tol",  m_alnmFTTimeTolTF.getText());
+        alnParams.put("ft_mapping_params", alnFtParams);
+        params.put("aln_params", alnParams); 
 
-        params.put("ft_filter.name", m_FTFilterNameCB.getSelectedItem().toString());
-        params.put("ft_filter.operator", m_FTFilterOperatorCB.getSelectedItem().toString());
-        params.put("ft_filter.value", m_FTFilterValueTF.getText());
-        
-        params.put("ft_mapping_params.moz_tol", m_FTMappingMoZTolTF.getText());
-        params.put("ft_mapping_params.time_tol", m_FTMappingTimeTolTF.getText());
-        
+        Map<String,Object> ftParams = new HashMap<>();     
+        ftParams.put("name", m_FTFilterNameCB.getSelectedItem().toString());
+        ftParams.put("operator", m_FTFilterOperatorCB.getSelectedItem().toString());
+        ftParams.put("value", m_FTFilterValueTF.getText());
+        params.put("ft_filter", ftParams); 
+         
+        Map<String,Object> ftMappingParams = new HashMap<>();
+        ftMappingParams.put("moz_tol", m_FTMappingMoZTolTF.getText());
+        ftMappingParams.put("moz_tol_unit", "PPM");
+        ftMappingParams.put("time_tol", m_FTMappingTimeTolTF.getText());        
+        params.put("ft_mapping_params", ftMappingParams); 
         params.put("normalization_method", m_normalizationCB.getSelectedItem().toString());
         
         return params;
@@ -133,7 +176,7 @@ public class DefineQuantParamsPanel extends JPanel{
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        JLabel wizardLabel = new JLabel("<html><b>Step 3:</b> Specify quantitation parameters.</html>");
+        JLabel wizardLabel = new JLabel("<html><b>Step 4:</b> Specify quantitation parameters.</html>");
         wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
         
         c.gridx = 0;

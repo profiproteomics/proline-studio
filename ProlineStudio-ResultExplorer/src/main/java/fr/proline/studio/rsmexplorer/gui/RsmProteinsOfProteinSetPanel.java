@@ -12,9 +12,9 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
-import fr.proline.studio.rsmexplorer.gui.renderer.BooleanRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.SamesetRenderer;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.BorderLayout;
@@ -196,17 +196,14 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
             return;
         }
         
-        // Modify Panel Border Title
-        //((ProteinGroupProteinSelectedPanel) ViewTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(typicalProtein.getAccession());
-        //JPM.TODO
-
 
         // Modify protein description
         m_proteinNameTextField.setText(typicalProtein.getDescription());
 
 
         // Modify the Model
-        ((ProteinTableModel) m_proteinTable.getModel()).setData(proteinSet.getResultSummaryId(), sameSetArray, subSetArray);
+        
+        ((ProteinTableModel) m_proteinTable.getModel()).setData(proteinSet.getResultSummaryId(), proteinSet.getTypicalProteinMatch().getId() ,sameSetArray, subSetArray);
 
         // Select the Row
         int row = ((ProteinTableModel) m_proteinTable.getModel()).findRowToSelect(searchedText);
@@ -218,8 +215,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
     private void clearData() {
         m_proteinNameTextField.setText("");
-        //((ProteinGroupProteinSelectedPanel) ViewTopComponent.getPanel(ProteinGroupProteinSelectedPanel.class)).updateTitle(null); //JPM.TODO
-        ((ProteinTableModel) m_proteinTable.getModel()).setData(-1, null, null);
+        ((ProteinTableModel) m_proteinTable.getModel()).setData(-1, -1, null, null);
 
     }
 
@@ -247,7 +243,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
         public ProteinTable() {
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(Float.class)) ) );
-            setDefaultRenderer(Boolean.class, new BooleanRenderer());
+            setDefaultRenderer(ProteinTableModel.Sameset.class, new SamesetRenderer());
             
         
         }

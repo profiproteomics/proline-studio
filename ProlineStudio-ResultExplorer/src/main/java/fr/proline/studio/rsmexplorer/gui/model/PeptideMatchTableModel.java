@@ -662,7 +662,9 @@ public class PeptideMatchTableModel extends LazyTableModel {
             }
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
             case COLTYPE_PEPTIDE_CHARGE: 
-            case COLTYPE_PEPTIDE_RANK: {
+            case COLTYPE_PEPTIDE_RANK:
+            case COLTYPE_PEPTIDE_START:
+            case COLTYPE_PEPTIDE_STOP: {
                 return ((IntegerFilter) filter).filter((Integer)data);
             }
             case COLTYPE_PEPTIDE_MSQUERY: {
@@ -703,6 +705,14 @@ public class PeptideMatchTableModel extends LazyTableModel {
             }
             
             m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_SCORE
+            
+            // COLTYPE_PEPTIDE_START and COLTYPE_PEPTIDE_STOP
+            if (m_hasPrevNextAA) {
+                m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx)); colIdx++; // COLTYPE_PEPTIDE_START
+                m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx)); colIdx++; // COLTYPE_PEPTIDE_STOP
+            }
+            
+            
             m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_MSQUERY
             m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_RANK
             m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_CALCULATED_MASS

@@ -12,35 +12,34 @@ import java.util.ArrayList;
  */
 public class ProteinTableModel extends FilterTableModel {
 
-    public static final int COLTYPE_PROTEIN_ID             = 0;
-    public static final int COLTYPE_PROTEIN_NAME           = 1;
-    public static final int COLTYPE_PROTEIN_DESCRIPTION    = 2;
-    public static final int COLTYPE_SAMESET_SUBSET         = 3;
-    public static final int COLTYPE_PROTEIN_SCORE          = 4;
+    public static final int COLTYPE_PROTEIN_ID = 0;
+    public static final int COLTYPE_PROTEIN_NAME = 1;
+    public static final int COLTYPE_PROTEIN_DESCRIPTION = 2;
+    public static final int COLTYPE_SAMESET_SUBSET = 3;
+    public static final int COLTYPE_PROTEIN_SCORE = 4;
     public static final int COLTYPE_PROTEIN_PEPTIDES_COUNT = 5;
-    public static final int COLTYPE_PROTEIN_MASS           = 6;
-    private static final String[] m_columnNames = {"Id","Protein", "Description","Same Set", "Score", "Peptides", "Mass"};
+    public static final int COLTYPE_PROTEIN_MASS = 6;
+    private static final String[] m_columnNames = {"Id", "Protein", "Description", "Same Set", "Score", "Peptides", "Mass"};
     private DProteinMatch[] m_sameSetMatches = null;
     private DProteinMatch[] m_subSetMatches = null;
     private Long m_rsmId = null;
-
+    private long m_typicalProteinMatchId;
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
-
     private ProgressInterface m_progressInterface = null;
 
     public ProteinTableModel(ProgressInterface progressInterface) {
         m_progressInterface = progressInterface;
     }
-    
+
     public DProteinMatch getProteinMatch(int row) {
 
         int rowFiltered = row;
         if ((!m_isFiltering) && (m_filteredIds != null)) {
             rowFiltered = m_filteredIds.get(row).intValue();
         }
-        
+
         int sameSetNb = m_sameSetMatches.length;
         if (rowFiltered < sameSetNb) {
             return m_sameSetMatches[rowFiltered];
@@ -57,7 +56,7 @@ public class ProteinTableModel extends FilterTableModel {
     public String getColumnName(int col) {
         return m_columnNames[col];
     }
-    
+
     @Override
     public String getToolTipForHeader(int col) {
         return getColumnName(col);
@@ -77,7 +76,7 @@ public class ProteinTableModel extends FilterTableModel {
             case COLTYPE_PROTEIN_SCORE:
                 return Float.class;
             case COLTYPE_SAMESET_SUBSET:
-                return Boolean.class;
+                return Sameset.class;
         }
         return null;
     }
@@ -87,17 +86,17 @@ public class ProteinTableModel extends FilterTableModel {
         if (m_sameSetMatches == null) {
             return 0;
         }
-        
+
         if ((!m_isFiltering) && (m_filteredIds != null)) {
             return m_filteredIds.size();
         }
-        
+
         return m_sameSetMatches.length + m_subSetMatches.length;
     }
 
     @Override
     public Object getValueAt(int row, int col) {
- 
+
         // Retrieve Protein Match
         DProteinMatch proteinMatch = getProteinMatch(row);
 
@@ -109,13 +108,15 @@ public class ProteinTableModel extends FilterTableModel {
             case COLTYPE_PROTEIN_DESCRIPTION:
                 return proteinMatch.getDescription();
             case COLTYPE_SAMESET_SUBSET:
-                if (row<m_sameSetMatches.length) {
-                    return Boolean.TRUE;
+                if (proteinMatch.getId() == m_typicalProteinMatchId) {
+                    return Sameset.getSameset(Sameset.TYPICAL_SAMESET);
+                } else if (row < m_sameSetMatches.length) {
+                    return Sameset.getSameset(Sameset.SAMESET);
                 } else {
-                    return Boolean.FALSE;
+                    return Sameset.getSameset(Sameset.SUBSET);
                 }
             case COLTYPE_PROTEIN_SCORE:
-                Float score = Float.valueOf(proteinMatch.getPeptideSet(m_rsmId).getScore() );
+                Float score = Float.valueOf(proteinMatch.getPeptideSet(m_rsmId).getScore());
                 return score;
             case COLTYPE_PROTEIN_PEPTIDES_COUNT:
                 return proteinMatch.getPeptideSet(m_rsmId).getPeptideCount();
@@ -128,27 +129,27 @@ public class ProteinTableModel extends FilterTableModel {
         }
         return null; // should never happen
     }
-    
 
-    public void setData(long rsmId, DProteinMatch[] sameSetMatches, DProteinMatch[] subSetMatches) {
+    public void setData(long rsmId, long typicalProteinMatchId, DProteinMatch[] sameSetMatches, DProteinMatch[] subSetMatches) {
         m_rsmId = rsmId;
+        m_typicalProteinMatchId = typicalProteinMatchId;
         m_sameSetMatches = sameSetMatches;
         m_subSetMatches = subSetMatches;
-   
+
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();
         } else {
             fireTableDataChanged();
         }
-        
+
 
     }
-    
+
     public int findRowToSelect(String searchedText) {
-        
+
         //JPM.TODO ?
-        
+
         int rowToBeSelected = 0;
         if ((searchedText != null) && (searchedText.length() > 0)) {
 
@@ -164,20 +165,20 @@ public class ProteinTableModel extends FilterTableModel {
 
         return rowToBeSelected;
     }
-    
+
     @Override
     public void filter() {
-        
+
         if (m_sameSetMatches == null) {
             // filtering not possible for the moment
             m_filteringAsked = true;
             return;
         }
-        
+
         m_isFiltering = true;
         try {
 
-            int nbData = m_sameSetMatches.length+m_subSetMatches.length;
+            int nbData = m_sameSetMatches.length + m_subSetMatches.length;
             if (m_filteredIds == null) {
                 m_filteredIds = new ArrayList<>(nbData);
             } else {
@@ -196,40 +197,39 @@ public class ProteinTableModel extends FilterTableModel {
         }
         fireTableDataChanged();
     }
-        
-        @Override
+
+    @Override
     public boolean filter(int row, int col) {
         Filter filter = getColumnFilter(col);
         if ((filter == null) || (!filter.isUsed())) {
             return true;
         }
-        
+
         Object data = getValueAt(row, col);
         if (data == null) {
             return true; // should not happen
         }
-        
+
         switch (col) {
             case COLTYPE_PROTEIN_NAME: {
-                return ((StringFilter) filter).filter((String)data);
+                return ((StringFilter) filter).filter((String) data);
             }
             case COLTYPE_PROTEIN_DESCRIPTION: {
-                return ((StringFilter) filter).filter((String)data);
+                return ((StringFilter) filter).filter((String) data);
             }
             case COLTYPE_PROTEIN_SCORE:
             case COLTYPE_PROTEIN_MASS: {
-                return ((DoubleFilter) filter).filter((Float)data);
+                return ((DoubleFilter) filter).filter((Float) data);
             }
             case COLTYPE_PROTEIN_PEPTIDES_COUNT: {
-                return ((IntegerFilter) filter).filter((Integer)data);
+                return ((IntegerFilter) filter).filter((Integer) data);
             }
-    
+
         }
-        
+
         return true; // should never happen
     }
-        
-        
+
     @Override
     public void initFilters() {
         if (m_filters == null) {
@@ -242,18 +242,44 @@ public class ProteinTableModel extends FilterTableModel {
             m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
             m_filters[COLTYPE_PROTEIN_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PROTEIN_PEPTIDES_COUNT));
             m_filters[COLTYPE_PROTEIN_MASS] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_MASS));
-        } 
+        }
     }
 
-        @Override
-        public int getLoadingPercentage() {
-            return m_progressInterface.getLoadingPercentage();
-        }
+    @Override
+    public int getLoadingPercentage() {
+        return m_progressInterface.getLoadingPercentage();
+    }
 
-        @Override
-        public boolean isLoaded() {
-            return m_progressInterface.isLoaded();
-        }
-
+    @Override
+    public boolean isLoaded() {
+        return m_progressInterface.isLoaded();
+    }
     
+    
+    public static class Sameset {
+        
+        private static final int TYPICAL_SAMESET  = 0;
+        private static final int SAMESET  = 1;
+        private static final int SUBSET  = 2;
+
+        private int m_type;
+        
+        private static Sameset[] samesetArray = { new Sameset(TYPICAL_SAMESET), new Sameset(SAMESET), new Sameset(SUBSET) };
+        
+        private Sameset(int type) {
+            m_type = type;
+        }
+        
+        public static Sameset getSameset(int type) {
+            return samesetArray[type];
+        }
+        
+        public boolean isTypical() {
+            return (m_type == TYPICAL_SAMESET);
+        }
+        
+        public boolean isSameset() {
+            return (m_type == SAMESET);
+        }
+    }
 }

@@ -24,6 +24,7 @@ public class IconManager {
         TICK_SMALL,
         SAME_SET,
         SUB_SET,
+        TYPICAL,
         ADD_REMOVE,
         HOUR_GLASS,
         HOUR_GLASS_MINI9,
@@ -172,6 +173,8 @@ public class IconManager {
                 return "fr/proline/studio/images/sameset.png";
             case SUB_SET:
                 return "fr/proline/studio/images/subset.png";
+            case TYPICAL:
+                return "fr/proline/studio/images/typical.png";
             case ADD_REMOVE:
                 return "fr/proline/studio/images/addremove.png";
             case HOUR_GLASS:

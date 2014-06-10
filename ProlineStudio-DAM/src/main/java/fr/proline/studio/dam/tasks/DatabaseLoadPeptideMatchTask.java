@@ -646,7 +646,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         
 
         StringBuilder sb = new StringBuilder();
-        DPeptideMatch prevPeptideMatch = null;
+        long prevPeptideMatchId = -1;
 
         List<Object[]> msQueries = proteinSetQuery.getResultList();
         Iterator<Object[]> it = msQueries.iterator();
@@ -655,18 +655,25 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             String proteinName = (String) resCur[0];
             Long peptideMatchId = (Long) resCur[1];
 
-            DPeptideMatch peptideMatch = m_peptideMatchMap.get(peptideMatchId);
-
-            if ((prevPeptideMatch != null) && (peptideMatch != prevPeptideMatch)) {
-                prevPeptideMatch.setProteinSetStringList(sb.toString());
-                sb.setLength(0);
-                sb.append(proteinName);
+            if (peptideMatchId != prevPeptideMatchId) {
+                if (prevPeptideMatchId != -1) {
+                    DPeptideMatch prevPeptideMatch = m_peptideMatchMap.get(prevPeptideMatchId);
+                    prevPeptideMatch.setProteinSetStringList(sb.toString());
+                    sb.setLength(0);
+                    sb.append(proteinName);
+                } else {
+                    sb.append(proteinName);
+                }
             } else {
                 sb.append(", ").append(proteinName);
             }
-            prevPeptideMatch = peptideMatch;
+
+            prevPeptideMatchId = peptideMatchId;
         }
-        prevPeptideMatch.setProteinSetStringList(sb.toString());
+        if (prevPeptideMatchId != -1) {
+            DPeptideMatch prevPeptideMatch = m_peptideMatchMap.get(prevPeptideMatchId);
+            prevPeptideMatch.setProteinSetStringList(sb.toString());
+        }
     }
 
 }

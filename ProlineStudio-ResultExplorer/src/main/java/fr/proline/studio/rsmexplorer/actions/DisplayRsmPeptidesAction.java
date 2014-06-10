@@ -29,8 +29,16 @@ public class DisplayRsmPeptidesAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
 
-        // only one node selected for this action
-        RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[0];
+        int nbNodes = selectedNodes.length;
+        for (int i = 0; i < nbNodes; i++) {
+            RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[i];
+
+            actionImpl(dataSetNode);
+        }
+
+    }
+
+    private void actionImpl(RSMDataSetNode dataSetNode) {
         
         final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
         
@@ -88,22 +96,29 @@ public class DisplayRsmPeptidesAction extends AbstractRSMAction {
     public void updateEnabled(RSMNode[] selectedNodes) {
 
         int nbSelectedNodes = selectedNodes.length;
+        
 
-        // we disallow to display multiple peptides window
-        if (nbSelectedNodes != 1) {
+        if (nbSelectedNodes <0) {
             setEnabled(false);
             return;
         }
+        
+        for (int i=0;i<nbSelectedNodes;i++) {
+            RSMNode node = selectedNodes[i];
+            if (node.getType() != RSMNode.NodeTypes.DATA_SET) {
+                setEnabled(false);
+                return;
+            }
 
-        RSMNode node = selectedNodes[0];
-        if (node.getType() != RSMNode.NodeTypes.DATA_SET) {
-            setEnabled(false);
-            return;
+            RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
+            if (! dataSetNode.hasResultSummary()) {
+                setEnabled(false);
+                return;
+            }
         }
 
-        RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
-
-        setEnabled(dataSetNode.hasResultSummary());
+        
+        setEnabled(true);
 
     }
     

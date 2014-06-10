@@ -30,24 +30,32 @@ public class DisplayRsetProteinMatchesAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
 
-        // only one node selected for this action
-        RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[0];
-        
+        int nbNodes = selectedNodes.length;
+        for (int i = 0; i < nbNodes; i++) {
+            RSMDataSetNode dataSetNode = (RSMDataSetNode) selectedNodes[i];
+
+            actionImpl(dataSetNode);
+        }
+
+    }
+   
+    private void actionImpl(RSMDataSetNode dataSetNode) {
+
         final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
-        
-        if (! dataSetNode.hasResultSet()) {
+
+        if (!dataSetNode.hasResultSet()) {
             return; // should not happen
         }
-        
+
         ResultSet rset = dataSetNode.getResultSet();
 
-        
+
         if (rset != null) {
-        
+
             // prepare window box
-            WindowBox wbox =  WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName()+" Proteins", false);
+            WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName() + " Proteins", false);
             wbox.setEntryData(dataSet.getProject().getId(), rset);
-            
+
 
 
             // open a window to display the window box
@@ -55,13 +63,13 @@ public class DisplayRsetProteinMatchesAction extends AbstractRSMAction {
             win.open();
             win.requestActive();
         } else {
-            
-            final WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName()+" Proteins", false);
+
+            final WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName() + " Proteins", false);
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();
             win.requestActive();
-            
+
             // we have to load the result set
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -84,29 +92,35 @@ public class DisplayRsetProteinMatchesAction extends AbstractRSMAction {
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
         }
-
     }
-   
+    
     @Override
     public void updateEnabled(RSMNode[] selectedNodes) {
 
         int nbSelectedNodes = selectedNodes.length;
         
-        // we disallow to display multiple peptides window
-        if (nbSelectedNodes != 1) {
+
+        if (nbSelectedNodes <0) {
             setEnabled(false);
             return;
         }
         
-        RSMNode node = selectedNodes[0];
-        if (node.getType() != RSMNode.NodeTypes.DATA_SET) {
-            setEnabled(false);
-            return;
+        for (int i=0;i<nbSelectedNodes;i++) {
+            RSMNode node = selectedNodes[i];
+            if (node.getType() != RSMNode.NodeTypes.DATA_SET) {
+                setEnabled(false);
+                return;
+            }
+
+            RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
+            if (! dataSetNode.hasResultSet()) {
+                setEnabled(false);
+                return;
+            }
         }
+
         
-        RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
-        
-        setEnabled(dataSetNode.hasResultSet());
+        setEnabled(true);
 
     }
     

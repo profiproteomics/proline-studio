@@ -451,7 +451,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
 
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
-                return ((StringFilter) filter).filter(((Peptide) data).getSequence());
+                return ((StringFilter) filter).filter(((DPeptideMatch) data).getPeptide().getSequence());
             }
                 
             case COLTYPE_PEPTIDE_PTM: {

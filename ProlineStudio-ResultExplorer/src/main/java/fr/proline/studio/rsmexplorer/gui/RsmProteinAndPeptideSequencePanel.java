@@ -16,6 +16,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.utils.DataFormat;
 import fr.proline.studio.utils.GlobalValues;
 import java.awt.*;
 import java.util.List;
@@ -207,8 +208,18 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             hightlight(((DPeptideMatch)selectedPeptide.getBestPeptideMatch()), true, highlights);
         }
 
-       
-        m_editorPane.setText(constructDisplayedSequence(sequence, highlights));
+        // calculate coverage
+        int noCoverageNumber = 0;
+        for (int i=0;i<sequenceLength;i++) {
+            if (highlights[i] == HIGHLIGHT_NONE) {
+                noCoverageNumber++;
+            }
+        }
+        double coverage = (((double)(sequenceLength-noCoverageNumber)) / ((double) sequenceLength))*100.0d;
+        String coverageFormatted = DataFormat.format(coverage, 2);
+        
+        
+        m_editorPane.setText(constructDisplayedSequence(sequence, highlights, coverageFormatted));
         
         m_editorPane.setCaretPosition(0);
 
@@ -257,7 +268,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             }
     }
     
-    private String constructDisplayedSequence(String sequence, int[] highlights) {
+    private String constructDisplayedSequence(String sequence, int[] highlights, String coverageFormatted) {
 
 
 
@@ -322,6 +333,10 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         sb.append("<span class='nter_cter'>&nbsp;&nbsp;</span>&nbsp;N/C-ter PTM&nbsp;&nbsp;&nbsp;&nbsp;");
         sb.append("<span class='modif'>&nbsp;&nbsp;</span>&nbsp;AA PTM&nbsp;&nbsp;&nbsp;&nbsp;");
         sb.append("<span class='modif_nter_cter'>&nbsp;&nbsp;</span>&nbsp;N/C-ter and AA PTM");
+        
+        sb.append("<br><br>");
+        
+        sb.append("Coverage : ").append(coverageFormatted).append('%');
         
         sb.append("</p></body></html>");
         

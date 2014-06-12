@@ -1,8 +1,11 @@
 package fr.proline.studio.utils;
 
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.HashMap;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import org.openide.util.ImageUtilities;
 
@@ -94,7 +97,8 @@ public class IconManager {
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
-
+    private static HashMap<IconType, String> m_iconURLMap = new HashMap<>(); 
+    
     
     public static Image getImage(IconType iconType) {
         ImageIcon icon = getIcon(iconType);
@@ -159,6 +163,36 @@ public class IconManager {
     }
     private static Image miniHourGlassImage = null;
 
+    public static String getURLForIcon(IconType iconType) {
+        
+        String imageURL = m_iconURLMap.get(iconType);
+        if (imageURL == null) {
+
+            Image i = IconManager.getImage(iconType);
+            BufferedImage bimage = new BufferedImage(i.getWidth(null), i.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+            // Draw the image on to the buffered image
+            Graphics2D bGr = bimage.createGraphics();
+            bGr.drawImage(i, 0, 0, null);
+            bGr.dispose();
+
+
+
+            try {
+                File f = File.createTempFile("tmpicon", ".png", new File("."));
+                f.deleteOnExit();
+                ImageIO.write(bimage, "png", f);
+
+                imageURL = f.toURI().toURL().toString();
+                m_iconURLMap.put(iconType, imageURL);
+
+            } catch (Exception e) {
+            }
+        }
+        
+        return imageURL;
+    }
+    
     private static String getIconFilePath(IconType iconType) {
         switch (iconType) {
             case OK:

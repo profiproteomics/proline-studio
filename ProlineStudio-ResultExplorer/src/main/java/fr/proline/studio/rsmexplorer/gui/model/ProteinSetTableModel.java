@@ -51,7 +51,13 @@ public class ProteinSetTableModel extends LazyTableModel {
     
         @Override
     public String getToolTipForHeader(int col) {
-        return getColumnName(col);
+        if (col == COLTYPE_PROTEINS_COUNT) {
+            String urlSameset = IconManager.getURLForIcon(IconManager.IconType.SAME_SET);
+            String urlSubset = IconManager.getURLForIcon(IconManager.IconType.SUB_SET);
+            return "<html>Number of Proteins ( Sameset <img src=\"" + urlSameset + "\">&nbsp;,&nbsp; Subset <img src=\"" + urlSubset + "\">)</html>";
+        } else {
+            return getColumnName(col);
+        }
     }
 
     @Override
@@ -215,7 +221,7 @@ public class ProteinSetTableModel extends LazyTableModel {
         }
         return null; // should never happen
     }
-    private static StringBuilder sb = new StringBuilder(20);
+    private static StringBuilder m_sb = new StringBuilder(20);
 
 
     
@@ -448,16 +454,31 @@ public class ProteinSetTableModel extends LazyTableModel {
             m_subSetCount = subSetCount;
         }
         
+        public String toHtml() {
+                       
+            String urlSameset = IconManager.getURLForIcon(IconManager.IconType.SAME_SET);
+            String urlSubset = IconManager.getURLForIcon(IconManager.IconType.SUB_SET);
+            
+            m_sb.setLength(0);
+            m_sb.append("<html>");
+            m_sb.append((int) (m_sameSetCount + m_subSetCount));
+            m_sb.append("&nbsp;&nbsp;(").append(m_sameSetCount).append("&nbsp;<img src=\"").append(urlSameset).append("\">");
+            m_sb.append("&nbsp;,&nbsp;").append(m_subSetCount).append("&nbsp;<img src=\"").append(urlSubset).append("\">&nbsp;");
+            m_sb.append(')');
+            m_sb.append("</html>");
+            return m_sb.toString(); 
+        }
+        
         @Override
         public String toString() {
-            sb.setLength(0);
-            sb.append((int) (m_sameSetCount + m_subSetCount));
-            sb.append(" (");
-            sb.append(m_sameSetCount);
-            sb.append(',');
-            sb.append(m_subSetCount);
-            sb.append(')');
-            return sb.toString();
+            
+
+            m_sb.setLength(0);
+            m_sb.append((int) (m_sameSetCount + m_subSetCount));
+            m_sb.append(" (").append(m_sameSetCount);
+            m_sb.append(",").append(m_subSetCount);
+            m_sb.append(')');
+            return m_sb.toString();
         }
         
         @Override

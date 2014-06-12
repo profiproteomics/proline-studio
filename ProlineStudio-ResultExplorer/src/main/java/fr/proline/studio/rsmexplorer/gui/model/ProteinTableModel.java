@@ -4,6 +4,8 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.utils.IconManager;
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -19,7 +21,8 @@ public class ProteinTableModel extends FilterTableModel {
     public static final int COLTYPE_PROTEIN_SCORE = 4;
     public static final int COLTYPE_PROTEIN_PEPTIDES_COUNT = 5;
     public static final int COLTYPE_PROTEIN_MASS = 6;
-    private static final String[] m_columnNames = {"Id", "Protein", "Description", "Same Set", "Score", "Peptides", "Mass"};
+    private static final String[] m_columnNames = {"Id", "Protein", "Description", "Sameset / Subset", "Score", "Peptides", "Mass"};
+     
     private DProteinMatch[] m_sameSetMatches = null;
     private DProteinMatch[] m_subSetMatches = null;
     private Long m_rsmId = null;
@@ -59,8 +62,18 @@ public class ProteinTableModel extends FilterTableModel {
 
     @Override
     public String getToolTipForHeader(int col) {
-        return getColumnName(col);
+
+        if (col == COLTYPE_SAMESET_SUBSET) {
+            String urlTypical = IconManager.getURLForIcon(IconManager.IconType.TYPICAL);
+            String urlSameset = IconManager.getURLForIcon(IconManager.IconType.SAME_SET);
+            String urlSubset = IconManager.getURLForIcon(IconManager.IconType.SUB_SET);
+            return "<html><img src=\"" + urlTypical + "\">&nbsp;Typical Protein in Sameset<br><img src=\"" + urlSameset + "\">&nbsp;Sameset<br><img src=\"" + urlSubset + "\">&nbsp;Subset</html>";
+        } else {
+            return getColumnName(col);
+        }
+
     }
+
 
     @Override
     public Class getColumnClass(int col) {

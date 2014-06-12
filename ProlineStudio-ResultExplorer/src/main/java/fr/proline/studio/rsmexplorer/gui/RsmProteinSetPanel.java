@@ -19,6 +19,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ProteinCountRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -314,7 +315,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             
-            setDefaultRenderer(ProteinSetTableModel.ProteinCount.class, new DefaultRightAlignRenderer(new DefaultTableRenderer()));
+            setDefaultRenderer(ProteinSetTableModel.ProteinCount.class, new ProteinCountRenderer());
             
 
         }

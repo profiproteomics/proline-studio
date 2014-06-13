@@ -23,7 +23,7 @@ public class Installer extends ModuleInstall {
     public void restored() {
 
         // set the proline version for the application title
-        System.setProperty("netbeans.buildnumber", "Beta 3d"); 
+        System.setProperty("netbeans.buildnumber", "Beta 2 rc1"); 
         
         // initialize the connection to the server as soon as possible
         ServerConnectionManager.getServerConnectionManager();

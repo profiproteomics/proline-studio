@@ -7,6 +7,8 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.prefs.Preferences;
 import javax.swing.JTable;
@@ -94,16 +96,43 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
                     // wart for proteins starting with sp|
                     info = info.substring(3, info.length());
                 }
+                info = encode(info);
                 
                 Desktop.getDesktop().browse(new URL(template + info).toURI());
             }
-        } catch (Exception ex) {
+        } catch (URISyntaxException | IOException ex) {
             // should not happen
             LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", ex);
         }
 
 
     }
+    
+    private static String encode(String input) {
+        StringBuilder resultStr = new StringBuilder();
+        for (char ch : input.toCharArray()) {
+            if (isUnsafe(ch)) {
+                resultStr.append('%');
+                resultStr.append(toHex(ch / 16));
+                resultStr.append(toHex(ch % 16));
+            } else {
+                resultStr.append(ch);
+            }
+        }
+        return resultStr.toString();
+    }
+
+    private static char toHex(int ch) {
+        return (char) (ch < 10 ? '0' + ch : 'A' + ch - 10);
+    }
+
+    private static boolean isUnsafe(char ch) {
+        if (ch > 128 || ch < 0) {
+            return true;
+        }
+        return " %$&+,/:;=?@<>#%".indexOf(ch) >= 0;
+    }
+
 
     @Override
     public void mousePressed(MouseEvent e) { }

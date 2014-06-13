@@ -12,6 +12,7 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.utils.LazyData;
+import fr.proline.studio.utils.RelativePainterHighlighter;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -139,6 +140,8 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
     public void setData(DProteinMatch[] proteinMatchArray) {
         m_proteinMatchArray = proteinMatchArray;
 
+        updateMinMax();
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();
@@ -146,6 +149,30 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
             fireTableDataChanged();
         }
         
+
+    }
+    
+    private void updateMinMax() {
+        
+        if (m_proteinMatchArray == null) {
+            return;
+        }
+
+        RelativePainterHighlighter.NumberRelativizer relativizer = m_table.getRelativizer();
+        if (relativizer == null) {
+            return;
+        }
+
+        double maxScore = 0;
+        int size = getRowCount();
+        for (int i = 0; i < size; i++) {
+            DProteinMatch proteinMatch = m_proteinMatchArray[i];
+            double score = proteinMatch.getScore();
+            if (score > maxScore) {
+                maxScore = score;
+            }
+        }
+        relativizer.setMax(maxScore);
 
     }
     

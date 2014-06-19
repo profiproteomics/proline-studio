@@ -7,6 +7,8 @@ import fr.proline.studio.dpm.serverfilesystem.RootInfo;
 import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.InfoDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.parameter.*;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.IconManager;

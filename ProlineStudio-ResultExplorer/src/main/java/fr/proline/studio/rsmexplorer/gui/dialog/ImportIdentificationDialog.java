@@ -27,6 +27,9 @@ import java.util.prefs.Preferences;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openide.util.NbPreferences;
+import org.openide.windows.WindowManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -82,6 +85,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
     private JPanel m_parserParametersPanel = null;
 
+    private boolean m_rootPathError = false;
 
     private ServerFile m_defaultDirectory = null;
 
@@ -249,6 +253,17 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                
+                if (m_rootPathError) {
+                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Server has returned no Root Path for Result Files. There is a problem with the server installation, please contact your administrator.");
+            
+                    InfoDialog errorDialog = new InfoDialog(m_singletonDialog, InfoDialog.InfoType.WARNING, "Root Path Error", "Server has returned no Root Path for Result Files.\nThere is a problem with the server installation, please contact your administrator.");
+                    errorDialog.setButtonVisible(OptionDialog.BUTTON_CANCEL, false);
+                    errorDialog.setLocationRelativeTo(m_singletonDialog);
+                    errorDialog.setVisible(true);
+                    return;
+                }
+                
                 
                 JFileChooser fchooser;
                 if ((m_defaultDirectory!=null) && (m_defaultDirectory.isDirectory())) {
@@ -772,12 +787,22 @@ public class ImportIdentificationDialog extends DefaultDialog {
         // select the parser
         m_parserComboBox.setSelectedIndex(parserIndex);
         
+
+
+        ArrayList<String> roots = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_RESULT_FILES);
+        if ((roots == null) || (roots.isEmpty())) {
+            // check that the server has sent me at least one root path
+            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Server has returned no Root Path for Result Files. There is a problem with the server installation, please contact your administrator.");
+            m_rootPathError = true;
+            return;
+        } else {
+            m_rootPathError = false;
+        }
         
         
         //
         String filePath = preferences.get("IdentificationFilePath", null);
         if (filePath == null) {
-            ArrayList<String> roots = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_RESULT_FILES);
             if (roots.size()>=1) {
                 filePath = roots.get(0);
             }

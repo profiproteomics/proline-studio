@@ -8,7 +8,7 @@ import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.HashMap;
 import java.util.Map;
-import fr.proline.security.*;
+import fr.profi.util.security.*;
 import java.math.BigDecimal;
 
 /**

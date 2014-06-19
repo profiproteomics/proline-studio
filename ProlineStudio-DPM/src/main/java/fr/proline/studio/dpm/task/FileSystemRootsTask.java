@@ -68,7 +68,11 @@ public class FileSystemRootsTask extends AbstractServiceTask {
             }
 
             ArrayList result = (ArrayList) jsonResult.get("result");
-            if (result != null) { // result is null when directory is empty
+            if ((result == null) || (result.isEmpty())) {
+                 m_taskError = new TaskError("No Root Path","Server has returned no Root Path. There is a problem with the server installation, please contact your administrator.");
+                 m_loggerProline. error("Server has returned no Root Path. There is a problem with the server installation, please contact your administrator.");
+                 return false;
+            } else  {
                 for (int i = 0; i < result.size(); i++) {
                     ArrayMap fileMap = (ArrayMap) result.get(i);
                     String label = (String) fileMap.get("label");

@@ -12,11 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-
 import javax.swing.RowSorter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -39,6 +37,7 @@ import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
+
 import javax.swing.*;
 
 
@@ -146,7 +145,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
           
            m_fragPanelContainer.setLayout(new BorderLayout());
            m_fragPanelContainer.add(noDataAvailableLabel, BorderLayout.CENTER);
-        	LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("objectr tree id is null, no annotations to show for pm_id=" + m_peptideMatch.getId());
+           LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("objectr tree id is null, no framgentation table to display for pm_id=" + m_peptideMatch.getId());
         }
         else {
         	
@@ -330,6 +329,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 		private int m_sizeMaxSeries;
 
 		private String[][] m_matrix;
+		private float[][] m_matrixIntensity;
 
 		private String[] m_columnNames;
 		
@@ -392,19 +392,26 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 				}
 			}
 
-			m_columnNames = new String[fragSer.length + 3];
+			m_columnNames = new String[fragSer.length + 3 + fragSer.length];
 			int i = 0;
 			m_columnNames[i++] = "amino acid";
 			m_columnNames[i++] = abcSerieName + " ion";
 
 			for (TheoreticalFragmentSeries_AW currentFrag : fragSer) {
-				m_columnNames[i++] = currentFrag.frag_series;
+				m_columnNames[i++] = currentFrag.frag_series + " (M)";
 
 			}
 
 			m_columnNames[i] = xyzSerieName + " ion";
 
-			m_matrix = new String[sizeMaxSeries][fragSer.length + 3];
+			i++;
+			for (TheoreticalFragmentSeries_AW currentFragSer : fragSer) {
+				m_columnNames[i ] = currentFragSer.frag_series + " (I)";
+				i++;
+			}
+			
+			m_matrix = new String[sizeMaxSeries][m_columnNames.length];
+			m_matrixIntensity = new float[sizeMaxSeries][m_columnNames.length];
 
 			double roundTol = 0.0001; // could be put to zero but in case some rounding happens at other's code.
 			int nbFound = 0;
@@ -426,7 +433,6 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 						if ((fragMa[i].calculated_moz - roundTol <= (fragSer[j].masses[k]))
 								&& (fragMa[i].calculated_moz + roundTol >= fragSer[j].masses[k])) {
 							nbFound++;
-
 							if (fragSer[j].frag_series.toUpperCase().contains(
 									"A")
 									|| fragSer[j].frag_series.toUpperCase()
@@ -434,6 +440,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 									|| fragSer[j].frag_series.toUpperCase()
 											.contains("C")) {
 								m_matrix[k][j + 2] = "ABC";
+								
 							} else if (fragSer[j].frag_series.toUpperCase()
 									.contains("X")
 									|| fragSer[j].frag_series.toUpperCase()
@@ -447,6 +454,8 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 										"AW: strange, there is no ABC nor XYZ ions..."
 												+ fragSer[j].frag_series);
 							}
+							m_matrixIntensity[k][j +2 ] = fragMa[i].intensity; // assign matching peak intensity
+							m_matrix[k][j + 2] += "intensity";
 
 						} else {
 
@@ -491,7 +500,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 			if (columnIndex == 1) {
 				return Integer.class;
 			}
-			if (columnIndex == m_columnNames.length - 1) {
+			if (columnIndex == m_fragSer.length  + 2) { 
 				return Integer.class;
 			}
 
@@ -515,16 +524,34 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 				return rowIndex + 1;
 			}
 
-			if (columnIndex == m_columnNames.length - 1) {
+			if (columnIndex == m_fragSer.length + 3 /*m_columnNames.length*/ - 1) {
 				return m_sizeMaxSeries - rowIndex;
 			}
 
-			TheoreticalFragmentSeries_AW currentFragSer = m_fragSer[columnIndex - 2];
-
-			if (currentFragSer.masses[rowIndex] != 0) {
-				return (double) Math
-						.round(currentFragSer.masses[rowIndex] * 10000) / 10000;
-			} else {
+			if(columnIndex < m_fragSer.length + 3) { // return mass value
+				TheoreticalFragmentSeries_AW currentFragSer = m_fragSer[columnIndex - 2];
+	
+				if (currentFragSer.masses[rowIndex] != 0) {
+					return (double) Math
+							.round(currentFragSer.masses[rowIndex] * 10000) / 10000;
+				} else {
+					return null;
+				}
+			}
+			else if (columnIndex > m_fragSer.length +2 && columnIndex < m_columnNames.length)// return intensity value
+			{
+				//return(m_fragMa[columnIndex - 3 - m_fragSer.length ].intensity);
+				//return(m_fragMa[columnIndex - 3 - m_fragSer.length].intensity);
+				if(m_matrixIntensity[rowIndex][columnIndex- m_fragSer.length - 1] >0 ) {
+					return (double) Math.round(m_matrixIntensity[rowIndex][columnIndex- m_fragSer.length - 1] * 10000) / 10000;
+				}else
+					return null;
+				
+				
+				//return(m_fragSer[columnIndex - 2 - m_fragSer.length - 3].intensity[rowIndex]);
+			}
+			else
+			{
 				return null;
 			}
 

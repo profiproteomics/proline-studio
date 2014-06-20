@@ -213,6 +213,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 
             m_jTable1.setModel(fragmentationTableModel);
             m_jTable1.setVisible(true);
+            m_hideFragIntensityButton.showFragmentsIntensity(m_jTable1, startCol, endCol, false); // hide intensity by default
 
             cr.setSelectMatrix(fragmentationTableModel.getMatrix());
 

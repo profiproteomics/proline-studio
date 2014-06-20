@@ -6,12 +6,15 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -19,6 +22,8 @@ import javax.swing.RowSorter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.jdesktop.swingx.JXTable;
+import org.openide.windows.WindowManager;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
@@ -32,9 +37,13 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.export.ExportDialog;
 import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.DecoratedTable;
+import fr.proline.studio.utils.HideFragmentsTableIntensityButton;
+import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
 
@@ -51,7 +60,8 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 	protected JPanel m_fragPanelContainer;
 	private static JScrollPane jScrollFragPane = new JScrollPane();
 	private DPeptideMatch m_peptideMatch;
-	
+	private HideFragmentsTableIntensityButton m_hideFragIntensityButton = null;
+    
 	private DecoratedTable m_jTable1;
 
 	public RsetPeptideFragmentationTable(AbstractDataBox m_dBox, JPanel fragPanel, DPeptideMatch pepMatch) {
@@ -174,10 +184,28 @@ public class RsetPeptideFragmentationTable extends LazyTable {
             }*/
 
             m_jTable1 = new DecoratedTable();
-
-            FragmentationTableModel fragmentationTableModel = new FragmentationTableModel(m_jTable1, false);
+            
+            
+            JPanel internalPanel = new JPanel();
+            
+            JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+            toolbar.setFloatable(false);
+            ExportButton m_exportButton = new ExportButton(null, "Fragmentation Table", m_jTable1);
+            toolbar.add(m_exportButton);
+           
+            int startCol= 0 ;
+            int endCol= 0;
+            boolean hideIntensity= false;
+            m_hideFragIntensityButton = new HideFragmentsTableIntensityButton(m_jTable1, startCol, endCol, hideIntensity);
+            toolbar.add(m_hideFragIntensityButton);
+            
+            
+            
+            
+            
+            FragmentationTableModel fragmentationTableModel = new FragmentationTableModel(m_jTable1, false, m_hideFragIntensityButton);
             fragmentationTableModel.setData(fragMa, fragSer, m_peptideMatch.getPeptide().getSequence());
-
+            
             RowSorter<TableModel> sorter = new TableRowSorter<TableModel>(fragmentationTableModel);
             FragTableCustomRenderer cr = new FragTableCustomRenderer();
             m_jTable1.setDefaultRenderer(Double.class, cr);
@@ -197,13 +225,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 
             m_fragPanelContainer.setLayout(new BorderLayout());
 
-            JPanel internalPanel = new JPanel();
             
-            JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-            toolbar.setFloatable(false);
-            ExportButton m_exportButton = new ExportButton(null, "Fragmentation Table", m_jTable1);
-            toolbar.add(m_exportButton);
-
             internalPanel.setLayout(new GridBagLayout());
             GridBagConstraints c = new GridBagConstraints();
             c.anchor = GridBagConstraints.NORTHWEST;
@@ -334,11 +356,12 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 		private String[] m_columnNames;
 		
         private boolean m_forRSM;
+        private HideFragmentsTableIntensityButton m_hideFragIntensityButton;
 
 
-		public FragmentationTableModel(DecoratedTable table, boolean forRSM) { // constructor
+		public FragmentationTableModel(DecoratedTable table, boolean forRSM, HideFragmentsTableIntensityButton hideFragIntensButton ) { // constructor
 			    super(null);
-		        
+			    m_hideFragIntensityButton = hideFragIntensButton;
 		        m_forRSM = forRSM;
 		  
 		}
@@ -405,10 +428,24 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 			m_columnNames[i] = xyzSerieName + " ion";
 
 			i++;
+			
 			for (TheoreticalFragmentSeries_AW currentFragSer : fragSer) {
 				m_columnNames[i ] = currentFragSer.frag_series + " (I)";
 				i++;
 			}
+			
+			
+			// set the interval that helps decide which columns to hide/show in fragmentation table (intensity).
+			if(m_hideFragIntensityButton != null) {
+				LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("setting startPos and endPos for frag table to " + fragSer.length + 2 + " " + 2 * fragSer.length + 3);
+				m_hideFragIntensityButton.setInterval(fragSer.length + 2, 2 * fragSer.length + 3);
+			}
+			else
+			{
+				LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug(" hide button is null for parameters :" + fragSer.length + 2 + " " + 2 * fragSer.length + 3);
+				
+			}
+			
 			
 			m_matrix = new String[sizeMaxSeries][m_columnNames.length];
 			m_matrixIntensity = new float[sizeMaxSeries][m_columnNames.length];
@@ -683,4 +720,5 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 
 	
 
+	
 }

@@ -104,9 +104,9 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 
 	protected class FragmentMatch_AW {
 		public String label;
-		public Double moz;
-		public Double calculated_moz;
-		public Float intensity;
+		public double moz;
+		public double calculated_moz;
+		public double intensity;
 		public int charge = 0; // the charge taken from the serie (++ means
 								// double charged)
 
@@ -165,6 +165,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 
             String jsonProperties = clobData;
 
+           
             JsonParser parser = new JsonParser();
             Gson gson = new Gson();
 
@@ -352,7 +353,7 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 		private int m_sizeMaxSeries;
 
 		private String[][] m_matrix;
-		private float[][] m_matrixIntensity;
+		private double[][] m_matrixIntensity;
 
 		private String[] m_columnNames;
 		
@@ -438,18 +439,18 @@ public class RsetPeptideFragmentationTable extends LazyTable {
 			
 			// set the interval that helps decide which columns to hide/show in fragmentation table (intensity).
 			if(m_hideFragIntensityButton != null) {
-				LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("setting startPos and endPos for frag table to " + fragSer.length + 2 + " " + 2 * fragSer.length + 3);
+				//LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("setting startPos and endPos for frag table to " + fragSer.length + 2 + " " + 2 * fragSer.length + 3);
 				m_hideFragIntensityButton.setInterval(fragSer.length + 2, 2 * fragSer.length + 3);
 			}
 			else
 			{
-				LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug(" hide button is null for parameters :" + fragSer.length + 2 + " " + 2 * fragSer.length + 3);
+				//LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug(" hide button is null for parameters :" + fragSer.length + 2 + " " + 2 * fragSer.length + 3);
 				
 			}
 			
 			
 			m_matrix = new String[sizeMaxSeries][m_columnNames.length];
-			m_matrixIntensity = new float[sizeMaxSeries][m_columnNames.length];
+			m_matrixIntensity = new double[sizeMaxSeries][m_columnNames.length];
 
 			double roundTol = 0.0001; // could be put to zero but in case some rounding happens at other's code.
 			int nbFound = 0;

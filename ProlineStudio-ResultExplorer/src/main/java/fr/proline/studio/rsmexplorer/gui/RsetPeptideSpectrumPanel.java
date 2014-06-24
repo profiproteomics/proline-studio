@@ -12,6 +12,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Rectangle;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -32,6 +33,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -47,6 +49,10 @@ import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRendererState;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.graphics2d.svg.SVGGraphics2D;
+import org.jfree.graphics2d.svg.SVGUtils;
+
+import fr.proline.studio.export.ExportPictureWrapper;
 
 /**
  * Panel used to display a Spectrum of a PeptideMatch
@@ -70,6 +76,9 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 	    
     private DefaultXYDataset m_dataSet;
     private JFreeChart m_chart;
+    private File m_svgFile; // svg file (saved at each rendering) 
+    private SVGGraphics2D m_svgChart;
+    private ExportPictureWrapper m_picWrapper; 
     
     private DPeptideMatch m_previousPeptideMatch = null;
     
@@ -123,6 +132,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 		cp.setMaximumDrawHeight(Integer.MAX_VALUE); // when the windows becomes bigger.
 		m_spectrumPanel = cp;
         
+	         
+		//
 		JToolBar toolbar = initToolbar();
 
         add(toolbar, BorderLayout.WEST);
@@ -136,7 +147,10 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-        ExportButton exportImageButton = new ExportButton("Spectre", m_spectrumPanel);
+        m_picWrapper = new ExportPictureWrapper();
+        m_picWrapper.setFile(m_svgFile);
+     
+        ExportButton exportImageButton = new ExportButton("Spectre", m_spectrumPanel, m_picWrapper);
         toolbar.add(exportImageButton);
         return toolbar;
 
@@ -154,9 +168,32 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         constructSpectrumChart(peptideMatch);
         spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
         spectrumAnnotations.addAnnotations();
+        
+        // link with the svg spectrum graph (to add also in RsetPeptideSpectrumAnnotations.addAnnotations in zoom change section : plotChanged)
+         writeToSVG();
+         
+   	   //}
+        
+        
  
     }
-    
+   
+     public void writeToSVG() { //, String svgElement) {
+		try {
+			File f = new File("svg_temp.svg"/*"C://Users//walter//Desktop//SVGBarChartDemoTransparency.svg"*/);
+			SVGGraphics2D g2 = new SVGGraphics2D(800, 600);
+	        Rectangle r = new Rectangle(0, 0,800,600);
+	        m_chart.draw(g2, r);
+	        m_svgChart = g2;
+	        m_svgFile = f;
+	        m_picWrapper.setFile(m_svgFile);
+	        SVGUtils.writeToSVG(f, m_svgChart.getSVGElement());	
+		} catch (Exception e) {
+			// TODO: handle exception
+		} 
+		
+	}
+     
     private void constructSpectrumChart(DPeptideMatch pm) {
 
     	
@@ -306,6 +343,10 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 					    plot.getRangeAxis().setUpperBound(newMaxY);
 						spectrumAnnotations.addAnnotations();
 						
+						// update svg graphics
+						writeToSVG();
+				         
+				         //----
 						redrawInProgress = false;
 					}
 				}
@@ -316,6 +357,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         /// ----
     }
     
+    
+   
     
     
     @Override

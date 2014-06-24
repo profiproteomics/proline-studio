@@ -2,18 +2,24 @@ package fr.proline.studio.export;
 
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Files;
 import java.util.prefs.Preferences;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
 import org.jdesktop.swingx.JXTable;
 import org.openide.util.NbPreferences;
+import org.slf4j.LoggerFactory;
+
 
 /**
  *
@@ -34,6 +40,7 @@ public class ExportDialog extends DefaultDialog {
 
     private JXTable m_table = null;
     private JPanel m_panel = null;
+    private ExportPictureWrapper m_svgFileWrapper = null;
     
     private DefaultDialog.ProgressTask m_task = null;
     
@@ -50,18 +57,20 @@ public class ExportDialog extends DefaultDialog {
         return m_singletonExcelDialog;
     }
     
-    public static ExportDialog getDialog(Window parent, JPanel panel, String exportName) {
+    public static ExportDialog getDialog(Window parent, JPanel panel, ExportPictureWrapper svgFileWrapper, String exportName) {
         if (m_singletonImageDialog == null) {
             m_singletonImageDialog = new ExportDialog(parent, ExporterFactory.EXPORT_IMAGE);
         }
 
         m_singletonImageDialog.m_panel = panel;
+        m_singletonImageDialog.m_svgFileWrapper = svgFileWrapper;
         m_singletonImageDialog.m_exportName = exportName;
 
         return m_singletonImageDialog;
     }
     
-        
+    
+    
     public static ExportDialog getDialog(Window parent) {
         if (m_singletonServerDialog == null) {
             m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER);
@@ -241,20 +250,44 @@ public class ExportDialog extends DefaultDialog {
             preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
             
         } else {
-
-            BufferedImage bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB); 
-            Graphics g = bi.createGraphics();
-            m_panel.paint(g);
-            g.dispose();
+        	BufferedImage bi = null;
+        	Graphics g = null; 
+        	if(m_panel != null) { // then we treat as bitmap output only 
+	            bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB);
+	            g = bi.createGraphics();
+	            m_panel.paint(g);
+	            g.dispose();
+        	}
+        	else
+        	{
+        		
+        	}
             try {
-                ImageIO.write(bi,"png",new File(fileName));
+            	ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
+    	
+    			if(exporterInfo.getFileExtension().contains("png")) {
+    				LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting png file...to:" + f.toPath().toString());
+    	            ImageIO.write(bi,"png",new File(fileName));
+    			}
+    			else { // svg output
+    				if(exporterInfo.getFileExtension().contains("svg")) {
+    					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting svg file...to:" + f.toPath().toString());
+        	            Files.copy(m_svgFileWrapper.m_graphicFile.toPath(), f.toPath());
+    				}
+    				else {
+    					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting png file (as default)...to:" + f.toPath().toString());
+        	            ImageIO.write(bi,"png",new File(fileName));
+    				}
+    			}
+            	
+            	
+               
             } catch (Exception e) {
-                // should not happen
+            	LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("error " + e.getMessage() + " while exporting picture");
             }
             
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
-            
             setVisible(false);
         }
         

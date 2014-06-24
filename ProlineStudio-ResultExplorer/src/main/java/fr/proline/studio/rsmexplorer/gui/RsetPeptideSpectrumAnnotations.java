@@ -405,6 +405,7 @@ public class RsetPeptideSpectrumAnnotations {
 											// highlight the AA)
 			boolean abcPrevFound = false;
 			
+			String surroundingCharacters = "" ;
 								
 			for (int i = 0; i < sizeABCserie; i++) { // loop through the series points
 
@@ -424,7 +425,7 @@ public class RsetPeptideSpectrumAnnotations {
 						fragTable[1][i ] = abcPrev + getMassFromAminoAcid(peptideSequence.charAt(i));
 					}
 					String aa = "" + peptideSequence.charAt(i);
-					xyta = new XYTextAnnotation(" " + aa + " ", (abcPrev + fragTable[1][i]) / 2, maxY - (maxY - minY) * 0.15);
+					xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTable[1][i]) / 2, maxY - (maxY - minY) * 0.15);
 					if(abcPrevFound 
 					|| i == 0/*abcSerieFirstElementPosition  */
 					|| i == (sizeABCserie-1	)	        ) {// 2 consecutives fragments matching,
@@ -473,7 +474,7 @@ public class RsetPeptideSpectrumAnnotations {
 					if(i == 0) {
 						abcPrev = fragTableTheo[1][0] - getMassFromAminoAcid(peptideSequence.charAt(i));
 					}
-					xyta = new XYTextAnnotation(" " + aa, (abcPrev + fragTableTheo[1][i]) / 2, maxY - (maxY - minY) * 0.15);
+					xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTableTheo[1][i]) / 2, maxY - (maxY - minY) * 0.15);
 					xyta.setPaint(new Color(51, 153, 255));
 					xyta.setFont(new Font(null, Font.BOLD, 11));
 					xyta.setBackgroundPaint(Color.white);
@@ -507,7 +508,7 @@ public class RsetPeptideSpectrumAnnotations {
 						fragTable[6][i ] = xyzPrev + getMassFromAminoAcid(peptideSequence.charAt(i));
 					}
 					String aa = "" + peptideSequence.charAt(i);
-					xyta = new XYTextAnnotation(" " + aa + " ", (xyzPrev + fragTable[6][i]) / 2, maxY - (maxY - minY) * 0.25);
+					xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTable[6][i]) / 2, maxY - (maxY - minY) * 0.25);
 					if(xyzPrevFound 
 					|| i == sizeXYZserie -1 
 					|| i == 0		        ) {// 2 consecutives fragments matching,
@@ -556,7 +557,7 @@ public class RsetPeptideSpectrumAnnotations {
 					if(i == sizeXYZserie -1 ) {
 						xyzPrev = fragTableTheo[6][i ] - getMassFromAminoAcid(peptideSequence.charAt(i));
 					}
-					xyta = new XYTextAnnotation(" " + aa, (xyzPrev + fragTableTheo[6][i]) / 2, maxY - (maxY - minY) * 0.25);
+					xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTableTheo[6][i]) / 2, maxY - (maxY - minY) * 0.25);
 					xyta.setPaint(new Color(255, 85, 85));
 					xyta.setFont(new Font(null, Font.BOLD, 11));
 					xyta.setBackgroundPaint(Color.white);

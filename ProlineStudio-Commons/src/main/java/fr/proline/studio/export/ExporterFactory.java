@@ -20,7 +20,8 @@ public class ExporterFactory {
         EXCEL_XML,
         EXCEL_2003,
         CSV,
-        PNG
+        PNG,
+        SVG
     };
     
     public static  ArrayList<ExporterInfo> getList(int exportType) {
@@ -42,10 +43,11 @@ public class ExporterFactory {
              if (m_listImage != null) {
                 return m_listImage;
             }
-            m_listImage = new ArrayList<>(1);
+            m_listImage = new ArrayList<>(2);
 
 
             m_listImage.add(new ExporterInfo(ExporterType.PNG, "PNG (.png)", "png"));
+            m_listImage.add(new ExporterInfo(ExporterType.PNG, "SVG (.svg)", "svg"));
 
             return m_listImage;
         } else { // EXPORT_FROM_SERVER

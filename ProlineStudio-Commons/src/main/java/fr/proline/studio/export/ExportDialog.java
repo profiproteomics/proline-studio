@@ -1,5 +1,6 @@
 package fr.proline.studio.export;
 
+
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
 
@@ -268,16 +269,18 @@ public class ExportDialog extends DefaultDialog {
     			if(exporterInfo.getFileExtension().contains("png")) {
     				LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting png file...to:" + f.toPath().toString());
     	            ImageIO.write(bi,"png",new File(fileName));
+    				Files.copy(m_svgFileWrapper.m_graphicFile2.toPath() , new File(fileName + "_HR.png").toPath());
+    				
     			}
-    			else { // svg output
-    				if(exporterInfo.getFileExtension().contains("svg")) {
+    			else if(exporterInfo.getFileExtension().contains("svg")) { // svg output
+    				
     					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting svg file...to:" + f.toPath().toString());
         	            Files.copy(m_svgFileWrapper.m_graphicFile.toPath(), f.toPath());
-    				}
-    				else {
-    					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting png file (as default)...to:" + f.toPath().toString());
-        	            ImageIO.write(bi,"png",new File(fileName));
-    				}
+    			}	
+    			else if(exporterInfo.getFileExtension().contains("wmf")) {
+    					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting wmf file...to:" + f.toPath().toString());
+    					Files.copy(m_svgFileWrapper.m_graphicFile.toPath(), f.toPath());
+    			
     			}
             	
             	

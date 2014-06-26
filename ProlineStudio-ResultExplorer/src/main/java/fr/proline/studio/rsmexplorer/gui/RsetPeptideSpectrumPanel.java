@@ -3,37 +3,17 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 
-import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.Spectrum;
-import fr.proline.core.orm.msi.dto.DMsQuery;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Rectangle;
-
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.title.TextTitle;
-import org.jfree.data.Range;
-import org.jfree.data.xy.DefaultXYDataset;
-import org.slf4j.LoggerFactory;
-
-import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.gui.HourglassPanel;
-import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
-
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -41,18 +21,39 @@ import java.nio.FloatBuffer;
 
 import javax.swing.JToolBar;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.event.PlotChangeEvent;
 import org.jfree.chart.event.PlotChangeListener;
 import org.jfree.chart.plot.CrosshairState;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRendererState;
+import org.jfree.chart.title.TextTitle;
+import org.jfree.data.Range;
+import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
+import org.slf4j.LoggerFactory;
 
+//import org.freehep.graphicsio.emf.EMFGraphics2D;
+
+import fr.proline.core.orm.msi.Peptide;
+import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DMsQuery;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportPictureWrapper;
+import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.pattern.AbstractDataBox;
+import fr.proline.studio.pattern.DataBoxPanelInterface;
 
 /**
  * Panel used to display a Spectrum of a PeptideMatch
@@ -76,6 +77,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 	    
     private DefaultXYDataset m_dataSet;
     private JFreeChart m_chart;
+    private File m_pngFile;
     private File m_svgFile; // svg file (saved at each rendering) 
     private SVGGraphics2D m_svgChart;
     private ExportPictureWrapper m_picWrapper; 
@@ -158,26 +160,37 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     
 
     
-   public void setData(DPeptideMatch peptideMatch) {
-	   
-       if (peptideMatch == m_previousPeptideMatch) {
-           return;
-       }
-       m_previousPeptideMatch = peptideMatch;
-       
-        constructSpectrumChart(peptideMatch);
-        spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
-        spectrumAnnotations.addAnnotations();
-        
-        // link with the svg spectrum graph (to add also in RsetPeptideSpectrumAnnotations.addAnnotations in zoom change section : plotChanged)
-         writeToSVG();
-         
-   	   //}
-        
-        
- 
-    }
+	 public void setData(DPeptideMatch peptideMatch) {
+		   
+	       if (peptideMatch == m_previousPeptideMatch) {
+	           return;
+	       }
+	       m_previousPeptideMatch = peptideMatch;
+	       
+	        constructSpectrumChart(peptideMatch);
+	        spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
+	        spectrumAnnotations.addAnnotations();
+	        
+	        // link with the svg spectrum graph (to add also in RsetPeptideSpectrumAnnotations.addAnnotations in zoom change section : plotChanged)
+	         writeToSVG();
+	        // writeToWMF();
+	         writeToPNG();
+	
+	 
+	  }
    
+	  public void writeToPNG() {
+		   m_pngFile = new File ("spectrum_tmp_3000x2000.png");
+		   m_picWrapper.setFile2(m_pngFile);
+	   try {
+		    ChartUtilities.saveChartAsPNG(m_pngFile,m_chart,3000,2000);
+	   } catch (IOException e) {
+		     e.printStackTrace();
+	   }
+	       
+		   
+	 }
+	   
      public void writeToSVG() { //, String svgElement) {
 		try {
 			File f = new File("svg_temp.svg"/*"C://Users//walter//Desktop//SVGBarChartDemoTransparency.svg"*/);
@@ -187,12 +200,42 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 	        m_svgChart = g2;
 	        m_svgFile = f;
 	        m_picWrapper.setFile(m_svgFile);
+	        
 	        SVGUtils.writeToSVG(f, m_svgChart.getSVGElement());	
 		} catch (Exception e) {
 			// TODO: handle exception
 		} 
 		
 	}
+     
+//     public void writeToWMF() { //, String svgElement) {
+// 		
+//    		File f = new File("svg_temp.wmf"/*"C://Users//walter//Desktop//SVGBarChartDemoTransparency.svg"*/);
+//     		
+//    		try {
+// 			
+// 			
+// 	        int width = 800;
+//            int height = 600;
+//            EMFGraphics2D g2d;
+//	          
+//			
+//				g2d = new EMFGraphics2D(f,new Dimension(width,height));
+//			 g2d.startExport();
+//            m_chart.draw((Graphics2D)g2d.create(),new Rectangle(width,height));
+//            g2d.endExport();
+//            g2d.closeStream();
+//
+//     
+// 	       //m_svgChart = g2d;
+// 	        m_svgFile = f;
+// 	        m_picWrapper.setFile(m_svgFile);
+// 	       // SVGUtils.writeToSVG(f, m_svgChart.getSVGElement());	
+// 		} catch (Exception e) {
+// 			// TODO: handle exception
+// 		} 
+// 		
+// 	}
      
     private void constructSpectrumChart(DPeptideMatch pm) {
 
@@ -345,6 +388,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 						
 						// update svg graphics
 						writeToSVG();
+						writeToPNG();
+						//writeToWMF();
 				         
 				         //----
 						redrawInProgress = false;

@@ -99,10 +99,11 @@ public class ExportButton extends JButton implements ActionListener {
         if (m_table != null) {
             dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_table, m_exportName);
         }
-//        else if(m_fileWrapper != null){
-//        	dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_panel, m_fileWrapper, m_exportName);
-//        }
-        else {
+
+        else if (m_fileWrapper == null){ // then png output only
+            dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_panel, m_exportName);
+        }
+        else { 
             dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_panel,m_fileWrapper, m_exportName);
         }
         

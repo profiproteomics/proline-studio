@@ -11,10 +11,12 @@ public class ExporterFactory {
     public static final int EXPORT_TABLE = 1;
     public static final int EXPORT_IMAGE = 2;
     public static final int EXPORT_FROM_SERVER = 3;
+    public static final int EXPORT_IMAGE2 = 4;
 
     private static ArrayList<ExporterInfo> m_listTable = null;
     private static ArrayList<ExporterInfo> m_listImage = null;
     private static ArrayList<ExporterInfo> m_listServer= null;
+    private static ArrayList<ExporterInfo> m_listImage2 = null;
     
     public enum ExporterType {
         EXCEL_XML,
@@ -37,19 +39,33 @@ public class ExporterFactory {
             m_listTable.add(new ExporterInfo(ExporterType.EXCEL_XML, "Excel (.xlsx)", "xlsx"));
             m_listTable.add(new ExporterInfo(ExporterType.EXCEL_2003, "Excel 2003 (.xls)", "xls"));
             m_listTable.add(new ExporterInfo(ExporterType.CSV, "CSV (.csv)", "csv"));
+           
 
             return m_listTable;
         } else if (exportType == EXPORT_IMAGE) {
-             if (m_listImage != null) {
-                return m_listImage;
-            }
-            m_listImage = new ArrayList<>(2);
+            if (m_listImage != null) {
+               return m_listImage;
+           }
+           m_listImage = new ArrayList<>(1);
 
 
-            m_listImage.add(new ExporterInfo(ExporterType.PNG, "PNG (.png)", "png"));
-            m_listImage.add(new ExporterInfo(ExporterType.PNG, "SVG (.svg)", "svg"));
+           m_listImage.add(new ExporterInfo(ExporterType.PNG, "PNG (.png)", "png"));
+          
+           return m_listImage;
+           
+        } else if (exportType == EXPORT_IMAGE2) {
+            if (m_listImage2 != null) {
+               return m_listImage2;
+           }
+           m_listImage2 = new ArrayList<>(3);
 
-            return m_listImage;
+
+           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "current size PNG (.png)", "png"));
+           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "3000x2000 pixels PNG (.png)", "png"));
+           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "SVG (.svg)", "svg"));
+          // m_listImage.add(new ExporterInfo(ExporterType.PNG, "WMF (.WMF)", "wmf"));
+
+           return m_listImage2;
         } else { // EXPORT_FROM_SERVER
             
             if (m_listServer != null) {

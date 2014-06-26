@@ -39,17 +39,17 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
-       </dependency>
+    </dependency>
     <dependency>
-	   <groupId>org.jfree</groupId>
-		  <artifactId>jfreechart</artifactId>
-		  <version>1.0.17</version>
-		</dependency>
-		<dependency>
-		<groupId>org.jfree</groupId>
-		  <artifactId>jfreesvg</artifactId>
-		  <version>1.9</version>
-		</dependency>
+        <groupId>org.jfree</groupId>
+        <artifactId>jfreechart</artifactId>
+        <version>1.0.17</version>
+    </dependency>
+    <dependency>
+        <groupId>jfree</groupId>
+        <artifactId>jfreesvg</artifactId>
+        <version>1.9</version>
+    </dependency>
 		
   </dependencies>
 

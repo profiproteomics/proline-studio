@@ -444,7 +444,7 @@ public class RsetPeptideSpectrumAnnotations {
 				
 					if(!(i == sizeABCserie-1)) { // do not draw triangle and number if last element
 					// draw the triangle above the b number peak
-						xyta = new XYTextAnnotation("\u25BE", fragTableTheo[1][i], fragTable[0][i] + (maxY - minY) * 0.055);
+						xyta = new XYTextAnnotation("" /*"\u25BE"*/, fragTableTheo[1][i], fragTable[0][i] + (maxY - minY) * 0.055);
 						xyta.setPaint(new Color(51, 153, 255));
 						plot.addAnnotation(xyta);
 						// draw the b number over the peak
@@ -527,7 +527,7 @@ public class RsetPeptideSpectrumAnnotations {
 				
 					if(!(i == 0)) { // do not draw triangle and number if last element
 					// draw the triangle above the b number peak
-						xyta = new XYTextAnnotation("\u25BE", fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.01);
+						xyta = new XYTextAnnotation("" /*"\u25BE"*/, fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.01);
 						xyta.setPaint(new Color(255, 85, 85));
 						plot.addAnnotation(xyta);
 						// draw the b number over the peak

@@ -14,6 +14,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.WSCProteinTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.BooleanRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.search.AbstractSearch;
@@ -248,7 +249,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             super(m_scrollPane.getVerticalScrollBar());
             setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(Float.class))));
             setDefaultRenderer(Boolean.class, new BooleanRenderer());
-
+            setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
         }
 
         public boolean selectProtein(Integer row) {
@@ -400,11 +401,16 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         }
     }
     
-    public class ColumnsVisibilityDialog extends DefaultDialog {
+    private class ColumnsVisibilityDialog extends DefaultDialog {
 
         private JCheckBoxList m_rsmList;
         private JCheckBoxList m_spectralCountList;
         
+        private JRadioButton m_noOverviewRB;
+        private JRadioButton m_basicSCOverviewRB;
+        private JRadioButton m_specificSCOverviewRB;
+        private JRadioButton m_weightedSCOverviewRB;
+
         public ColumnsVisibilityDialog(Window parent, ProteinTable table, WSCProteinTableModel proteinTableModel) {
             super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
@@ -464,18 +470,18 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             }
             
             
-
+             int overviewType = proteinTableModel.getOverviewType();
+            boolean overviewColumnVisible = ((TableColumnExt) columns.get(WSCProteinTableModel.COLTYPE_OVERVIEW)).isVisible();
             
             
-            
-            JPanel internalPanel = createInternalPanel(rsmList, visibilityRsmList, typeList, visibilityTypeList);
+            JPanel internalPanel = createInternalPanel(rsmList, visibilityRsmList, typeList, visibilityTypeList, overviewColumnVisible, overviewType);
             setInternalComponent(internalPanel);
 
 
             
         }
 
-        private JPanel createInternalPanel(List<String> rsmList, List<Boolean> visibilityList, List<String> typeList, List<Boolean> visibilityTypeList) {
+        private JPanel createInternalPanel(List<String> rsmList, List<Boolean> visibilityList, List<String> typeList, List<Boolean> visibilityTypeList, boolean overviewColumnVisible, int overviewType) {
             JPanel internalPanel = new JPanel();
 
             internalPanel.setLayout(new GridBagLayout());
@@ -486,8 +492,10 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
             JLabel idSummaryLabel = new JLabel("Identification Summaries");
             JLabel informationLabel = new JLabel("Information");
+            JLabel overviewLabel = new JLabel("Overview");
             
-            JSeparator separator = new JSeparator(JSeparator.VERTICAL);
+            JSeparator separator1 = new JSeparator(JSeparator.VERTICAL);
+            JSeparator separator2 = new JSeparator(JSeparator.VERTICAL);
 
             JScrollPane rsmScrollPane = new JScrollPane();
             m_rsmList = new JCheckBoxList(rsmList, visibilityList);
@@ -497,6 +505,11 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             m_spectralCountList = new JCheckBoxList(typeList, visibilityTypeList); 
             spectralCountScrollPane.setViewportView(m_spectralCountList);
 
+            JScrollPane overviewScrollPane = new JScrollPane();
+            overviewScrollPane.setViewportView(createOverviewPanel(overviewColumnVisible, overviewType));
+
+            
+            
             c.gridx = 0;
             c.gridy = 0;
             
@@ -512,7 +525,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             c.weightx = 0;
             c.weighty = 1;
             c.gridheight = 2;
-            internalPanel.add(separator, c);
+            internalPanel.add(separator1, c);
             
 
             c.gridx++;
@@ -527,21 +540,100 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             internalPanel.add(spectralCountScrollPane, c);
 
 
+            c.gridy = 0;
+            c.gridx++;
+            c.weightx = 0;
+            c.weighty = 1;
+            c.gridheight = 2;
+            internalPanel.add(separator2, c);
+            
+
+            c.gridx++;
+            c.gridheight = 1;
+            c.weightx = 0;
+            c.weighty = 0;
+            internalPanel.add(overviewLabel, c);
+            
+            c.gridy++;
+            c.weightx = 1;
+            c.weighty = 1;
+            internalPanel.add(overviewScrollPane, c);
+            
             return internalPanel;
         }
 
-        /*
-         * @Override public void pack() { if (m_userSetSize) { // forbid pack by
-         * overloading the method return; } super.pack();
-    }
-         */
+        private JPanel createOverviewPanel(boolean overviewColumnVisible, int overviewType) {
+            JPanel overviewPanel = new JPanel();
+            overviewPanel.setBackground(Color.white);
+
+            overviewPanel.setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.anchor = GridBagConstraints.NORTHWEST; 
+            c.fill = GridBagConstraints.BOTH;
+            c.insets = new java.awt.Insets(0, 0, 0, 0);
+            
+            m_noOverviewRB = new JRadioButton("No Overview");
+            m_basicSCOverviewRB = new JRadioButton("Overview on Basic SC");
+            m_specificSCOverviewRB = new JRadioButton("Overview on Specific SC");
+            m_weightedSCOverviewRB = new JRadioButton("Overview on Weighted SC");
+            m_noOverviewRB.setBackground(Color.white);
+            m_basicSCOverviewRB.setBackground(Color.white);
+            m_specificSCOverviewRB.setBackground(Color.white);
+            m_weightedSCOverviewRB.setBackground(Color.white);
+            
+            ButtonGroup group = new ButtonGroup();
+            group.add(m_noOverviewRB);
+            group.add(m_basicSCOverviewRB);
+            group.add(m_specificSCOverviewRB);
+            group.add(m_weightedSCOverviewRB);
+            
+            if (!overviewColumnVisible) {
+                m_noOverviewRB.setSelected(true);
+            } else {
+                switch (overviewType) {
+                    case WSCProteinTableModel.COLTYPE_BSC:
+                        m_basicSCOverviewRB.setSelected(true);
+                        break;
+                    case WSCProteinTableModel.COLTYPE_SSC:
+                        m_specificSCOverviewRB.setSelected(true);
+                        break;
+                    case WSCProteinTableModel.COLTYPE_WSC:
+                        m_weightedSCOverviewRB.setSelected(true);
+                        break;
+
+                }
+            }
+            
+            c.gridx = 0;
+            c.gridy = 0;
+            c.weightx = 1;
+            
+            overviewPanel.add(m_noOverviewRB, c);
+            
+            c.gridy++;
+            overviewPanel.add(m_basicSCOverviewRB, c);
+            
+            c.gridy++;
+            overviewPanel.add(m_specificSCOverviewRB, c);
+            
+            c.gridy++;
+            overviewPanel.add(m_weightedSCOverviewRB, c);
+
+            c.gridy++;
+            c.weighty = 1;
+            overviewPanel.add(Box.createHorizontalGlue(), c);
+            
+            
+            return overviewPanel;
+        }
+        
         @Override
         protected boolean okCalled() {
 
             WSCProteinTableModel model = ((WSCProteinTableModel) m_proteinTable.getModel());
             
             List<TableColumn> columns = m_proteinTable.getColumns(true);
-            for (int i=1;i<columns.size();i++) {
+            for (int i=WSCProteinTableModel.COLTYPE_STATUS;i<columns.size();i++) {
                 int rsmCur = model.getRsmNumber(i);
                 int type = model.getTypeNumber(i);
                 boolean visible = m_rsmList.isVisible(rsmCur) && m_spectralCountList.isVisible(type);
@@ -550,7 +642,23 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
                     ((TableColumnExt) columns.get(i)).setVisible(visible);
                 }
             }
+            
+            if (m_basicSCOverviewRB.isSelected()) {
+                model.setOverviewType(WSCProteinTableModel.COLTYPE_BSC);
+            } else if (m_specificSCOverviewRB.isSelected()) {
+                model.setOverviewType(WSCProteinTableModel.COLTYPE_SSC);
+            } else if (m_weightedSCOverviewRB.isSelected()) {
+                model.setOverviewType(WSCProteinTableModel.COLTYPE_WSC);
+            }
+            
+            boolean overviewVisible = !m_noOverviewRB.isSelected();
+            boolean columnVisible = ((TableColumnExt) columns.get(WSCProteinTableModel.COLTYPE_OVERVIEW)).isVisible();
+            if (overviewVisible ^ columnVisible) {
+                ((TableColumnExt) columns.get(WSCProteinTableModel.COLTYPE_OVERVIEW)).setVisible(overviewVisible);
+            }
 
+            
+            
 
             return true;
         }

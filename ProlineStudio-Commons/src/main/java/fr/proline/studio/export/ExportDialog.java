@@ -294,7 +294,7 @@ public class ExportDialog extends DefaultDialog {
     				}
     				
     			} else if(exporterInfo.getName().contains("jfreesvg")) {
-    					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting wmf file...to:" + f.toPath().toString());
+    					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting jfresvg file...to:" + f.toPath().toString());
     					Files.copy(m_svgFileWrapper.m_graphicFile.toPath(), f.toPath());
     			
     			} else if(exporterInfo.getName().contains("batik")) { // svg output

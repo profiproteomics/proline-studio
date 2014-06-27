@@ -11,6 +11,7 @@ import fr.proline.core.orm.uds.ExternalDb;
 import fr.proline.core.orm.uds.IdentificationDataset;
 import fr.proline.core.orm.msi.SearchSettingsSeqDatabaseMap;
 import fr.proline.core.orm.msi.Enzyme;
+import fr.proline.core.orm.uds.*;
 
 import fr.proline.core.orm.uds.repository.ExternalDbRepository;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
@@ -383,9 +384,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             }
             
             
-            // Load Aggregation separately
+            // Load Aggregation and QuantitationMethod separately
             if (!m_list.isEmpty()) {
 
+                // Load Aggregation
                 Query aggregationQuery = entityManagerUDS.createQuery("SELECT d.id, d.aggregation FROM Dataset d WHERE d.id IN (:listId)");
                 aggregationQuery.setParameter("listId", idList);
                 List<Object[]> results = aggregationQuery.getResultList();
@@ -396,6 +398,21 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     Aggregation aggregation = (Aggregation) resCur[1];
                     ddatasetMap.get(id).setAggregation(aggregation);
                 }
+                
+                
+                // Load QuantitationMethod
+                Query quantitationQuery = entityManagerUDS.createQuery("SELECT d.id, d.method FROM Dataset d WHERE d.id IN (:listId)");
+                quantitationQuery.setParameter("listId", idList);
+                results = quantitationQuery.getResultList();
+                itAgg = results.iterator();
+                while (itAgg.hasNext()) {
+                    Object[] resCur = itAgg.next();
+                    Long id = (Long) resCur[0];
+                    QuantitationMethod quantitationMethod = (QuantitationMethod) resCur[1];
+                    ddatasetMap.get(id).setQuantitationMethod(quantitationMethod);
+                }
+                
+                
         
             }
             
@@ -503,9 +520,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 ddatasetMap.put(id, datasetCur);
             }
             
-            // Load Aggregation separately
+            // Load Aggregation and QuantitationMethod separately
             if (!m_list.isEmpty()) {
 
+                // Load Aggregation
                 Query aggregationQuery = entityManagerUDS.createQuery("SELECT d.id, d.aggregation FROM Dataset d WHERE d.id IN (:listId)");
                 aggregationQuery.setParameter("listId", idList);
                 List<Object[]> results = aggregationQuery.getResultList();
@@ -515,6 +533,18 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     Long id = (Long) resCur[0];
                     Aggregation aggregation = (Aggregation) resCur[1];
                     ddatasetMap.get(id).setAggregation(aggregation);
+                }
+                
+                // Load QuantitationMethod
+                Query quantitationQuery = entityManagerUDS.createQuery("SELECT d.id, d.method FROM Dataset d WHERE d.id IN (:listId)");
+                quantitationQuery.setParameter("listId", idList);
+                results = quantitationQuery.getResultList();
+                it = results.iterator();
+                while (it.hasNext()) {
+                    Object[] resCur = it.next();
+                    Long id = (Long) resCur[0];
+                    QuantitationMethod quantitationMethod = (QuantitationMethod) resCur[1];
+                    ddatasetMap.get(id).setQuantitationMethod(quantitationMethod);
                 }
         
             }

@@ -13,12 +13,16 @@ public class AccessDatabaseWorkerThread extends Thread {
     
     private AbstractDatabaseTask m_action = null;
     
+    private static int m_threadCounter = 0;
+    
     private AccessDatabaseWorkerPool m_workerPool = null;
     
     public AccessDatabaseWorkerThread(AccessDatabaseWorkerPool workerPool) {
-        m_workerPool = workerPool;
+        super("AccessDatabaseWorkerThread"+m_threadCounter);
+        m_threadCounter++;
         
-        setName("AccessDatabaseWorkerThread"); // useful for debugging
+        m_workerPool = workerPool;
+
     }
     
     public synchronized boolean isAvailable() {

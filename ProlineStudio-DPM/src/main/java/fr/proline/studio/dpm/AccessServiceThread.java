@@ -23,7 +23,7 @@ public class AccessServiceThread extends Thread {
     }
     
     private AccessServiceThread() {
-        
+        super("AccessServiceThread"); // useful for debugging
     }
     
         /**

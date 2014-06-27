@@ -19,7 +19,7 @@ public class ExportPictureWrapper {
 	}
 	
 	public void setFile3(File svgFile) {
-		m_graphicFile2 = svgFile;
+		m_graphicFile3 = svgFile;
 	}
 	
 	

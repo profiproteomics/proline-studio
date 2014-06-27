@@ -21,6 +21,8 @@ import java.nio.FloatBuffer;
 
 import javax.swing.JToolBar;
 
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2DIOException;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
@@ -43,6 +45,9 @@ import org.jfree.graphics2d.svg.SVGUtils;
 import org.slf4j.LoggerFactory;
 
 //import org.freehep.graphicsio.emf.EMFGraphics2D;
+
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
 
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.Spectrum;
@@ -171,9 +176,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 	        spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
 	        spectrumAnnotations.addAnnotations();
 	        
-	        // link with the svg spectrum graph (to add also in RsetPeptideSpectrumAnnotations.addAnnotations in zoom change section : plotChanged)
 	         writeToSVG();
-	        // writeToWMF();
 	         writeToPNG();
 	
 	 
@@ -190,10 +193,16 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 	       
 		   
 	 }
-	   
-     public void writeToSVG() { //, String svgElement) {
-		try {
-			File f = new File("svg_temp.svg"/*"C://Users//walter//Desktop//SVGBarChartDemoTransparency.svg"*/);
+	
+	 public void writeToSVG() {  
+			writeToSVG_jfreesvg();
+			writeToSVG_batik();
+			
+	 }   
+	    
+     public void writeToSVG_jfreesvg() {  
+
+			File f = new File("svg_temp.svg");
 			SVGGraphics2D g2 = new SVGGraphics2D(800, 600);
 	        Rectangle r = new Rectangle(0, 0,800,600);
 	        m_chart.draw(g2, r);
@@ -201,41 +210,35 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 	        m_svgFile = f;
 	        m_picWrapper.setFile(m_svgFile);
 	        
-	        SVGUtils.writeToSVG(f, m_svgChart.getSVGElement());	
-		} catch (Exception e) {
-			// TODO: handle exception
-		} 
+	        try {
+				SVGUtils.writeToSVG(f, m_svgChart.getSVGElement());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}	
+
 		
 	}
-     
-//     public void writeToWMF() { //, String svgElement) {
-// 		
-//    		File f = new File("svg_temp.wmf"/*"C://Users//walter//Desktop//SVGBarChartDemoTransparency.svg"*/);
-//     		
-//    		try {
-// 			
-// 			
-// 	        int width = 800;
-//            int height = 600;
-//            EMFGraphics2D g2d;
-//	          
-//			
-//				g2d = new EMFGraphics2D(f,new Dimension(width,height));
-//			 g2d.startExport();
-//            m_chart.draw((Graphics2D)g2d.create(),new Rectangle(width,height));
-//            g2d.endExport();
-//            g2d.closeStream();
-//
-//     
-// 	       //m_svgChart = g2d;
-// 	        m_svgFile = f;
-// 	        m_picWrapper.setFile(m_svgFile);
-// 	       // SVGUtils.writeToSVG(f, m_svgChart.getSVGElement());	
-// 		} catch (Exception e) {
-// 			// TODO: handle exception
-// 		} 
-// 		
-// 	}
+ 
+	
+	public void writeToSVG_batik() {  
+		File f = new File("svg_batik_temp.svg");
+		m_picWrapper.setFile3(f);
+		  
+	    DOMImplementation mySVGDOM= org.apache.batik.dom.GenericDOMImplementation.getDOMImplementation();
+        Document document = mySVGDOM.createDocument(null, "svg", null);
+        org.apache.batik.svggen.SVGGraphics2D my_svg_generator = new org.apache.batik.svggen.SVGGraphics2D(document);
+        m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 800,600), null);
+        
+		
+		try {
+			my_svg_generator.stream("svg_batik_temp.svg");
+		} catch (SVGGraphics2DIOException e) {
+			
+			e.printStackTrace();
+		}
+	
+	}
+			
      
     private void constructSpectrumChart(DPeptideMatch pm) {
 

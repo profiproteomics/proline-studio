@@ -293,17 +293,16 @@ public class ExportDialog extends DefaultDialog {
 	    				ImageIO.write(bi,"png",new File(fileName));
     				}
     				
-    			}
-    			else if(exporterInfo.getFileExtension().contains("svg")) { // svg output
-    				
-    					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting svg file...to:" + f.toPath().toString());
-        	            Files.copy(m_svgFileWrapper.m_graphicFile.toPath(), f.toPath());
-    			}	
-    			else if(exporterInfo.getFileExtension().contains("wmf")) {
+    			} else if(exporterInfo.getName().contains("jfreesvg")) {
     					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting wmf file...to:" + f.toPath().toString());
     					Files.copy(m_svgFileWrapper.m_graphicFile.toPath(), f.toPath());
     			
-    			}
+    			} else if(exporterInfo.getName().contains("batik")) { // svg output
+    				
+    					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting svg file...to:" + f.toPath().toString());
+        	            Files.copy(m_svgFileWrapper.m_graphicFile3.toPath(), f.toPath());
+    			}	
+    			
             	
             	
                

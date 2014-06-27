@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.actions;
 
 
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.pattern.WindowBox;
@@ -75,6 +76,19 @@ public class RetrieveSCDataAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
+        
+        DDataset d =  ((DataSetData) datasetNode.getData()).getDataset();
+        QuantitationMethod quantitationMethod = d.getQuantitationMethod();
+        if (quantitationMethod == null) {
+            setEnabled(false);
+            return;
+        }
+        
+        if (quantitationMethod.getAbundanceUnit().compareTo("spectral_counts") != 0) { // Spectral count
+            setEnabled(false);
+            return;
+        } 
+        
         setEnabled(true);        
     }
 

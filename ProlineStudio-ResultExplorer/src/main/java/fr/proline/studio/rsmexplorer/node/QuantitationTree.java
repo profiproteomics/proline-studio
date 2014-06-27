@@ -107,13 +107,15 @@ public class QuantitationTree extends RSMTree {
          } else {
              if (m_mainPopup == null) {
                  // create the actions
-                 m_mainActions = new ArrayList<>(1);  // <--- get in sync
+                 m_mainActions = new ArrayList<>(2);  // <--- get in sync
 
                  RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
-
                  m_mainActions.add(retrieveSCDataAction);
 
-
+                 ExportXICAction exportXICAction = new ExportXICAction();
+                 m_mainActions.add(exportXICAction);
+                 
+                 
 
                  // add actions to popup
                  m_mainPopup = new JPopupMenu();

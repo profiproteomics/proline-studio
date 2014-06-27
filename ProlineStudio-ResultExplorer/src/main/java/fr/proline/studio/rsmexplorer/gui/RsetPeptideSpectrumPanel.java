@@ -221,7 +221,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
  
 	
 	public void writeToSVG_batik() {  
-		File f = new File("svg_batik_temp.svg");
+		File f = new File("svg_temp2.svg");
 		m_picWrapper.setFile3(f);
 		  
 	    DOMImplementation mySVGDOM= org.apache.batik.dom.GenericDOMImplementation.getDOMImplementation();
@@ -231,7 +231,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
 		
 		try {
-			my_svg_generator.stream("svg_batik_temp.svg");
+			my_svg_generator.stream(f.getName());
 		} catch (SVGGraphics2DIOException e) {
 			
 			e.printStackTrace();

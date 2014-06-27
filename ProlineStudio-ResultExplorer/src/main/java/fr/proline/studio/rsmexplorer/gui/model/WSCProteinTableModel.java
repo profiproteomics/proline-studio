@@ -3,29 +3,34 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.studio.dpm.data.SpectralCountResultData;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.*;
+import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
+import java.awt.Color;
 import java.util.*;
 
 /**
- * Table Model for Proteins
+ * Table Model for Spectral Count
  *
  * @author JM235353
  */
 public class WSCProteinTableModel extends LazyTableModel implements ExportColumnTextInterface {
 
     public static final int COLTYPE_PROTEIN_NAME = 0;
-    public static final int COLTYPE_STATUS = 1;
-    public static final int COLTYPE_PEPTIDE_NUMBER = 2;
-    public static final int COLTYPE_BSC = 3;
-    public static final int COLTYPE_SSC = 4;
-    public static final int COLTYPE_WSC = 5;
+    public static final int COLTYPE_OVERVIEW = 1;
+    public static final int COLTYPE_STATUS = 2;
+    public static final int COLTYPE_PEPTIDE_NUMBER = 3;
+    public static final int COLTYPE_BSC = 4;
+    public static final int COLTYPE_SSC = 5;
+    public static final int COLTYPE_WSC = 6;
     
-    private static final String[] m_columnNames = {"Protein", "Status", "Peptide Number", "Basic SC", "Specific SC", "Weighted SC"};
-    private static final String[] m_columnTooltips = {"Protein", "Status", "Peptide Number", "Basic Spectral Count", "Specific Spectral Count", "Weighted Spectral Count"};
+    public int m_overviewType = COLTYPE_BSC;
+    
+    private static final String[] m_columnNames = {"Protein", "Overview", "Status", "Peptide Number", "Basic SC", "Specific SC", "Weighted SC"};
+    private static final String[] m_columnTooltips = {"Protein",  "Overview", "Status", "Peptide Number", "Basic Spectral Count", "Specific Spectral Count", "Weighted Spectral Count"};
     private static final Class[] m_columnTypes = {String.class, Integer.class, Float.class, Float.class, Float.class};
-    private static final int COLNBR_PER_RSM = m_columnNames.length - 1;
+    private static final int COLNBR_PER_RSM = m_columnNames.length - 2;
     
     private SpectralCountResultData m_wscResult = null;
     private List<String> m_protMatchNames = new ArrayList();
@@ -46,20 +51,29 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
 
         return m_protMatchNames.get(row);
     }
+    
+    public void setOverviewType(int overviewType) {
+        m_overviewType = overviewType;
+        fireTableDataChanged();
+    }
+    
+    public int getOverviewType() {
+        return m_overviewType;
+    }
 
     @Override
     public int getColumnCount() {
         if (m_wscResult == null) {
             return 1;
         }
-        return 1 + (m_wscResult.getComputedSCRSMIds().size() * COLNBR_PER_RSM);
+        return 2 + (m_wscResult.getComputedSCRSMIds().size() * COLNBR_PER_RSM);
     }
 
     public int getColumStart(int rsmIndex) {
-        return 1+rsmIndex*COLNBR_PER_RSM;
+        return 2+rsmIndex*COLNBR_PER_RSM;
     }
     public int getColumStop(int rsmIndex) {
-        return (1+rsmIndex)*COLNBR_PER_RSM;
+        return 1+(1+rsmIndex)*COLNBR_PER_RSM;
     }
     
     public int getRsmCount() {
@@ -79,38 +93,31 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
     }
     
     public int getByRsmCount() {
-        return m_columnNames.length-1;
+        return m_columnNames.length-2;
     }
     
     public String getByRsmColumnName(int index) {
-        return m_columnNames[index+1];
+        return m_columnNames[index+2];
     }
     
     public int getRsmNumber(int col) {
-        return (col-1) / COLNBR_PER_RSM;
+        return (col-2) / COLNBR_PER_RSM;
     }
     
     public int getTypeNumber(int col) {
-        return (col-1) % COLNBR_PER_RSM;
+        return (col-2) % COLNBR_PER_RSM;
     }
     
     @Override
     public String getColumnName(int col) {
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
+            case COLTYPE_OVERVIEW:
                 return m_columnNames[col];
             default: {
-                int currentRSMNbr = (col % COLNBR_PER_RSM == 0) ? col / COLNBR_PER_RSM : (col / COLNBR_PER_RSM) + 1;
-                int colSuffixIndex;
-                int modulo = col % COLNBR_PER_RSM;
-                switch (modulo) {
-                    case 0:
-                        colSuffixIndex = COLNBR_PER_RSM;
-                        break;
-                    default:
-                        colSuffixIndex = modulo;
-                        break;
-                }
+                int currentRSMNbr = getRsmNumber(col)+1;
+                int colSuffixIndex = getTypeNumber(col)+2;
+
                 StringBuilder sb = new StringBuilder();
 
                 String rsmHtmlColor = CyclicColorPalette.getHTMLColor(currentRSMNbr - 1);
@@ -131,19 +138,11 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
     public String getExportColumnName(int col) {
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
+            case COLTYPE_OVERVIEW:
                 return m_columnNames[col];
             default: {
-                int currentRSMNbr = (col % COLNBR_PER_RSM == 0) ? col / COLNBR_PER_RSM : (col / COLNBR_PER_RSM) + 1;
-                int colSuffixIndex;
-                int modulo = col % COLNBR_PER_RSM;
-                switch (modulo) {
-                    case 0:
-                        colSuffixIndex = COLNBR_PER_RSM;
-                        break;
-                    default:
-                        colSuffixIndex = modulo;
-                        break;
-                }
+                int currentRSMNbr = getRsmNumber(col)+1;
+                int colSuffixIndex = getTypeNumber(col);
                 StringBuilder sb = new StringBuilder();
 
 
@@ -160,19 +159,11 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
     public String getToolTipForHeader(int col) {
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
+            case COLTYPE_OVERVIEW:
                 return m_columnTooltips[col];
             default: {
-                int currentRSMNbr = (col % COLNBR_PER_RSM == 0) ? col / COLNBR_PER_RSM : (col / COLNBR_PER_RSM) + 1;
-                int colSuffixIndex;
-                int modulo = col % COLNBR_PER_RSM;
-                switch (modulo) {
-                    case 0:
-                        colSuffixIndex = COLNBR_PER_RSM;
-                        break;
-                    default:
-                        colSuffixIndex = modulo;
-                        break;
-                }
+                int currentRSMNbr = getRsmNumber(col)+1;
+                int colSuffixIndex = getTypeNumber(col)+2;
                 StringBuilder sb = new StringBuilder();
 
                 String rsmHtmlColor = CyclicColorPalette.getHTMLColor(currentRSMNbr - 1);
@@ -193,18 +184,11 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
                 return String.class;
+            case COLTYPE_OVERVIEW:
+                return CompareValueRenderer.CompareValue.class; 
             default:
-                int modulo = col % COLNBR_PER_RSM;
-                int colSuffixIndex;
-                switch (modulo) {
-                    case 0:
-                        colSuffixIndex = COLNBR_PER_RSM;
-                        break;
-                    default:
-                        colSuffixIndex = modulo;
-                        break;
-                }
-                return m_columnTypes[colSuffixIndex - 1];
+                int colSuffixIndex = getTypeNumber(col);
+                return m_columnTypes[colSuffixIndex];
         }
     }
 
@@ -219,7 +203,7 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
     }
 
     @Override
-    public Object getValueAt(int row, int col) {
+    public Object getValueAt(final int row, int col) {
 
         int rowFiltered = row;
         if ((!m_isFiltering) && (m_filteredIds != null)) {
@@ -232,39 +216,74 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
         switch (col) {
             case COLTYPE_PROTEIN_NAME:
                 return proteinMatchName;
+            case COLTYPE_OVERVIEW:
+                return new CompareValueRenderer.CompareValue() {
 
+                    @Override
+                    public int getNumberColumns() {
+                        return getRsmCount();
+                    }
+
+                    @Override
+                    public Color getColor(int col) {
+                        return CyclicColorPalette.getColor(col);
+                    }
+
+                    @Override
+                    public double getValue(int col) {
+                        if (m_overviewType == -1) {
+                            return 0; // should not happen
+                        }
+                       int realCol = m_overviewType+col*getByRsmCount();
+                       return ((Float)getValueAt(row, realCol)).doubleValue();
+                    }
+
+                    @Override
+                    public double getMaximumValue() {
+                        int nbCols = getNumberColumns();
+                        double maxValue = 0;
+                        for (int i=0;i<nbCols;i++) {
+                            double v = getValue(i);
+                            if (v>maxValue) {
+                                maxValue = v;
+                            }
+                        }
+                        return maxValue;
+                        
+                    }
+                };
             default: {
-                int currentRSMNbr = (col % COLNBR_PER_RSM == 0) ? col / COLNBR_PER_RSM : (col / COLNBR_PER_RSM) + 1;
+                int currentRSMNbr = getRsmNumber(col)+1;
                 Long rsmID = m_wscResult.getComputedSCRSMIds().get(currentRSMNbr - 1);
                 Map<String, SpectralCountResultData.SpectralCountsStruct> rsmResult = m_wscResult.getRsmSCResult(rsmID);
                 SpectralCountResultData.SpectralCountsStruct searchedProtSC = rsmResult.get(proteinMatchName);
-                int modulo = col % COLNBR_PER_RSM;
-                switch (modulo) {
-                    case 1:
+                int colSuffixIndex = getTypeNumber(col)+2;
+                switch (colSuffixIndex) {
+                    case COLTYPE_STATUS:
                         if (searchedProtSC != null) {
                             return searchedProtSC.getProtMatchStatus();
                         } else {
                             return "";
                         }
-                    case 2:
+                    case COLTYPE_PEPTIDE_NUMBER:
                         if (searchedProtSC != null) {
                             return searchedProtSC.getPeptideNumber();
                         } else {
                             return null;
                         }
-                    case 3:
+                    case COLTYPE_BSC:
                         if (searchedProtSC != null) {
                             return searchedProtSC.getBsc();
                         } else {
                             return Float.NaN;
                         }
-                    case 4:
+                    case COLTYPE_SSC:
                         if (searchedProtSC != null) {
                             return searchedProtSC.getSsc();
                         } else {
                             return Float.NaN;
                         }
-                    case 0:
+                    case COLTYPE_WSC:
                         if (searchedProtSC != null) {
                             return searchedProtSC.getWsc();
                         } else {
@@ -286,6 +305,16 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
         }
         m_protMatchNames = new ArrayList(names);
 
+        // calculate maximum value
+        /*m_maximumValue = 0;
+        for (int row=0; row<getRowCount(); row++) {
+            for (int rsm=0;rsm<getRsmCount();rsm++) {
+                double v = ((Float) getValueAt(row, COLTYPE_BSC + rsm*COLNBR_PER_RSM)).doubleValue();
+                if (v>m_maximumValue) {
+                    m_maximumValue = v;
+                }
+            }
+        }*/
 
         if (m_filteringAsked) {
             m_filteringAsked = false;
@@ -328,20 +357,20 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
             m_filters[COLTYPE_PROTEIN_NAME] = new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME));
-            for (int i = 1; i < nbCol; i++) {
-                int modulo = i % COLNBR_PER_RSM;
-                switch (modulo) {
-                    case 1:
+            m_filters[COLTYPE_OVERVIEW] = null;
+            for (int i = COLTYPE_STATUS; i < nbCol; i++) {
+                int colSuffixIndex = getTypeNumber(i)+2;
+                switch (colSuffixIndex) {
+                    case COLTYPE_STATUS:
                         m_filters[i] = new StringFilter(getColumnName(i));
                         break;
-                    case 2:
+                    case COLTYPE_PEPTIDE_NUMBER:
                         m_filters[i] = new IntegerFilter(getColumnName(i));
                         break;
                     default:
                         m_filters[i] = new DoubleFilter(getColumnName(i));
                         break;
                 }
-
 
             }
         }
@@ -395,13 +424,12 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
             return ((StringFilter) filter).filter((String) data);
         }
 
-        int modulo = col % COLNBR_PER_RSM;
-        int colSuffixIndex = (modulo == 0) ? COLNBR_PER_RSM : modulo;
+        int colSuffixIndex = getTypeNumber(col)+2;
 
-        if (colSuffixIndex == 1) { // COLTYPE_STATUS
+        if (colSuffixIndex == COLTYPE_STATUS) { // COLTYPE_STATUS
             return ((StringFilter) filter).filter((String) data);
         }
-        if (colSuffixIndex == 2) { // COLTYPE_PEPTIDE_NUMBER
+        if (colSuffixIndex == COLTYPE_PEPTIDE_NUMBER) {
             return ((IntegerFilter) filter).filter((Integer) data);
         }
 

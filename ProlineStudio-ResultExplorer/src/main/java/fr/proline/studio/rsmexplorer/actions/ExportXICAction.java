@@ -8,7 +8,7 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.DownloadFileTask;
-import fr.proline.studio.dpm.task.ExportRSMTask;
+import fr.proline.studio.dpm.task.ExportXICTask;
 import fr.proline.studio.export.ExportDialog;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
@@ -108,7 +108,7 @@ public class ExportXICAction extends AbstractRSMAction {
                 };
 
 
-                ExportRSMTask task = new ExportRSMTask(exportCallback, xicDatasetNode.getDataset(), _filePath);
+                ExportXICTask task = new ExportXICTask(exportCallback, xicDatasetNode.getDataset(), _filePath);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
 
                 

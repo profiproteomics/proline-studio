@@ -37,7 +37,7 @@ public class ServiceStatusThread extends Thread {
     private static Logger logger = LoggerFactory.getLogger("ProlineStudio.DPM");
     
     private ServiceStatusThread() {
-        
+        super("ServiceStatusThread"); // useful for debugging
     }
     
     /**

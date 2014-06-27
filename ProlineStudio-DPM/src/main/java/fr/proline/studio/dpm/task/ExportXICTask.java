@@ -42,10 +42,12 @@ public class ExportXICTask extends AbstractServiceTask {
             params.put("output_mode", "STREAM"); // use of a stream, (do not export to file)
             params.put("project_id", m_dataset.getProject().getId());
             params.put("data_set_id", m_dataset.getId());
+            params.put("export_type", "master_quant_peptides");
+            
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("dps.msq/export/" + request.getMethod() + getIdString(), request);
+            HttpResponse response = postRequest("dps.msq/export_quant_dataset/" + request.getMethod() + getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 

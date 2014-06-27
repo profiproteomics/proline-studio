@@ -27,6 +27,8 @@ public class AccessDatabaseThread extends Thread {
     private AccessDatabaseWorkerPool m_workerPool = null;
     
     private AccessDatabaseThread() {
+         super("AccessDatabaseThread"); // useful for debugging
+         
         m_actions = new PriorityQueue<>();
         m_actionMap = new HashMap<>();
         m_priorityChangements = new HashMap<>();
@@ -34,7 +36,6 @@ public class AccessDatabaseThread extends Thread {
         
         m_workerPool = AccessDatabaseWorkerPool.getWorkerPool();
 
-        setName("AccessDatabaseThread"); // useful for debugging
     }
 
     public static AccessDatabaseThread getAccessDatabaseThread() {

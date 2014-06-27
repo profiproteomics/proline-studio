@@ -16,8 +16,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <core.version>0.1.3</core.version>
-    <util.version>0.0.6</util.version>
+    <core.version>0.2.0-SNAPSHOT</core.version>
+    <util.version>0.0.7-SNAPSHOT</util.version>
   </properties>
 
   <dependencies>
@@ -75,7 +75,7 @@
         <dependency> 
             <groupId>fr.proline</groupId> 
             <artifactId>PM-SequenceRepository</artifactId> 
-            <version>0.0.1</version> 
+            <version>0.0.2-SNAPSHOT</version> 
         </dependency>
 
     <dependency>
@@ -107,6 +107,7 @@
             <!--<publicPackage>javax.xml.transform.*</publicPackage>-->
             <publicPackage>fr.profi.jdbc</publicPackage>
             <publicPackage>fr.profi.jdbc.easy</publicPackage>
+            <publicPackage>fr.profi.util.security</publicPackage>
             <publicPackage>fr.proline.api.service</publicPackage>
             <publicPackage>fr.proline.context</publicPackage>
             <publicPackage>fr.proline.core.algo.msi</publicPackage>
@@ -154,7 +155,8 @@
             <publicPackage>fr.proline.module.seq.dto</publicPackage>
             <publicPackage>fr.proline.repository.*</publicPackage>
             <publicPackage>fr.proline.security</publicPackage>
-            <publicPackage>fr.proline.util.*</publicPackage>
+            <publicPackage>fr.proline.util</publicPackage>
+            <publicPackage>fr.proline.util.version</publicPackage>
             <publicPackage>javax.annotation</publicPackage>
             <publicPackage>javax.annotation.concurrent</publicPackage>
             <publicPackage>javax.annotation.meta</publicPackage>

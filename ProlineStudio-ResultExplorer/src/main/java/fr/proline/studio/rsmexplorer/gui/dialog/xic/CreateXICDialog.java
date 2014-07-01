@@ -109,8 +109,8 @@ public class CreateXICDialog extends DefaultDialog {
         
         for(Long rsmId : rsmIDs){
             ArrayList<Long> returnedRunId = new ArrayList<> ();
-            DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null, pID);
-            loadRunIdsTask.initLoadRunIdForRsm(rsmId, returnedRunId);
+            DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
+            loadRunIdsTask.initLoadRunIdForRsm(pID, rsmId, returnedRunId);
             loadRunIdsTask.fetchData();
             if(returnedRunId.size() >0)
                 runIdByRsmId.put(rsmId, returnedRunId.get(0));
@@ -354,7 +354,7 @@ public class CreateXICDialog extends DefaultDialog {
             JScrollPane scrollPane = new JScrollPane();
             String quantitationName = DefineBioGroupsPanel.getDefineBioGroupsPanel().getQuantitationName();
             finalXICDesignNode = ModifyBioGroupsPanel.getDefinePanel().generateTreeNodes(quantitationName);
-            SetSampleAnalysisPanel defineSampleAnalysisPanel = SetSampleAnalysisPanel.getDialog(finalXICDesignNode);
+            SetSampleAnalysisPanel defineSampleAnalysisPanel = SetSampleAnalysisPanel.getPanel(finalXICDesignNode);
             scrollPane.setViewportView(defineSampleAnalysisPanel);
 
             replaceInternaleComponent(scrollPane);
@@ -373,12 +373,12 @@ public class CreateXICDialog extends DefaultDialog {
             if (finalXICDesignNode == null) {
 
                 setStatus(true, "You must correctly define your experimental design");
-                highlight(SetSampleAnalysisPanel.getDialog());
+                highlight(SetSampleAnalysisPanel.getPanel());
                 return false;
 
             }
 
-             Enumeration xicGrps = finalXICDesignNode.children();
+            Enumeration xicGrps = finalXICDesignNode.children();
             //Iterate over Groups
             while (xicGrps.hasMoreElements()) {
                 RSMNode grpNode = (RSMNode) xicGrps.nextElement();
@@ -388,7 +388,7 @@ public class CreateXICDialog extends DefaultDialog {
                     RSMNode splNode = (RSMNode) grpSpls.nextElement();
                     if (splNode.getChildCount() < 1) {
                         setStatus(true, "You must specify at least one identifications summary for each sample.");
-                        highlight(SetSampleAnalysisPanel.getDialog());
+                        highlight(SetSampleAnalysisPanel.getPanel());
                         return false;
                     }
                 }

@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.node.xic.RSMRunNode;
 import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 
@@ -31,7 +32,6 @@ public class DesignTree extends RSMTree {
         setTransferHandler(handler);
 
         setDragEnabled(true);
-        //setDropMode(DropMode.);
 
         initTree(top);
     }
@@ -40,6 +40,18 @@ public class DesignTree extends RSMTree {
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        if (e.getClickCount() == 2) {
+            
+            RSMNode[] selectedNodes = getSelectedNodes();
+            int nbNodes = selectedNodes.length;
+            if (nbNodes == 1) {
+                RSMNode n = selectedNodes[0];
+                if (n instanceof RSMRunNode) {
+                    RSMRunNode runNode = (RSMRunNode) n;
+                    //JPM.TODO
+                }
+            }
+        }
     }
 
     @Override

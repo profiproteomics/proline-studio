@@ -20,11 +20,12 @@ public class ExportRSMTask extends AbstractServiceTask {
 
     private DDataset m_dataset;
     private String[] m_filePathResult;
+    private boolean m_exportAllPSMs;
     
-    public ExportRSMTask(AbstractServiceCallback callback, DDataset dataset, String[] filePathInfo) {
+    public ExportRSMTask(AbstractServiceCallback callback, DDataset dataset, boolean exportAllPSMs, String[] filePathInfo) {
         super(callback, false /** asynchronous */, new TaskInfo("Export Identification Summary " + dataset.getName(), true, TASK_LIST_INFO));
         m_dataset = dataset;
-      
+        m_exportAllPSMs =  exportAllPSMs;
         m_filePathResult = filePathInfo;
     }
     
@@ -53,8 +54,19 @@ public class ExportRSMTask extends AbstractServiceTask {
         rsmIdents.add(rsmIdent);
         params.put("rsm_identifiers",rsmIdents);
 
+        /*
+         * "ALL_PEP_MATCHES_XLSX" -> AllPSMViewSetTemplateAsXLSX,
+         * "IRMA_LIKE_TSV" -> IRMaLikeViewSetTemplateAsTSV,
+         * "IRMA_LIKE_XLSX" -> IRMaLikeViewSetTemplateAsXLSX,
+         * "IRMA_LIKE_FULL_XLSX" -> IRMaLikeFullViewSetTemplateAsXLSX
+         */
+        
         Map<String, Object> extraParams = new HashMap<>();
-        extraParams.put("template_name", "IRMA_LIKE_XLSX"); //************ TODO Liste des templates possibles ?! 
+        if(m_exportAllPSMs){
+            extraParams.put("template_name", "IRMA_LIKE_FULL_XLSX"); //************ TODO Liste des templates possibles ?! 
+        } else {
+            extraParams.put("template_name", "IRMA_LIKE_XLSX"); //************ TODO Liste des templates possibles ?! 
+        }
         params.put("extra_params", extraParams);
         
         request.setParameters(params);

@@ -27,7 +27,19 @@ public class RunXICTask extends AbstractServiceTask {
     private String m_quantiDSName;
     private Long m_pId;
     private Map<String,Object> m_quantParams;
+    private Map<String,Object> m_expDesignParams;
+    private boolean useExistingJSON =false;
     
+    public RunXICTask(AbstractServiceCallback callback, Long projectId,  String quantDSName,  Map<String,Object> quantParams, Map<String,Object> expDesignParams, Long[] retValue  ) {
+        super(callback, false /** asynchronous */, new   TaskInfo("Run XIC Quantitation for ", true, TASK_LIST_INFO ));
+        m_xicQuantiResult = retValue;     
+        m_expDesignParams = expDesignParams;
+        m_quantiDSName = quantDSName;
+        m_pId= projectId;
+        m_quantParams = quantParams;
+        useExistingJSON= true;
+    }
+        
     public RunXICTask(AbstractServiceCallback callback, Long projectId,  String quantDSName,  Map<String,Object> quantParams, HashMap<String, ArrayList<String>> samplesByGroup, HashMap<String, ArrayList<String>> samplesAnalysisBySample,HashMap<String, Long> rsmIdBySampleAnalysis, Long[] retValue  ) {
         super(callback, false /** asynchronous */, new TaskInfo("Run XIC Quantitation for ", true, TASK_LIST_INFO ));
         m_xicQuantiResult = retValue;     
@@ -43,18 +55,6 @@ public class RunXICTask extends AbstractServiceTask {
     public boolean askService() {
         //Create JSON for XIC Quanttitation service         
         try {
-            //Get Run Ids for specified RSMs
-            Map<Long, Long> runIdByRsmId = new HashMap<>();
-            for(Long rsmId : m_rsmIdBySampleAnalysis.values()){
-                ArrayList<Long> returnedRunId = new ArrayList<> ();
-                DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null, m_pId);
-                loadRunIdsTask.initLoadRunIdForRsm(rsmId, returnedRunId);
-                loadRunIdsTask.fetchData();
-                if(returnedRunId.size() >0)
-                    runIdByRsmId.put(rsmId, returnedRunId.get(0));
-                else
-                    runIdByRsmId.put(rsmId, -1l);
-            }
             
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
@@ -72,99 +72,115 @@ public class RunXICTask extends AbstractServiceTask {
             params.put("project_id", m_pId);
             params.put("method_id", 1); //TODO Attention en dure !!! A lire la methode type = "label_free" & abundance_unit = "feature_intensity"
 
-            
-            //-- experimental_design Params
-            Map<String, Object> experimentalDesignParams = new HashMap<>();
-            
-            Map<Integer, String> splByNbr = new HashMap<>();
-            Map<String, Integer> splNbrByName = new HashMap<>();            
-            Iterator<String> groupsIt = m_samplesByGroup.keySet().iterator();
-            int ratioNumeratorGrp = 1;
-            int ratioDenominatorGrp =1;
-            int grpNumber = 1;
-            int splNumber = 1;
-            int splAnalysisNumber = 1;
-            List biologicalGroupList = new ArrayList();
-            
-            while(groupsIt.hasNext()){
-                
-                String grpName = groupsIt.next();
-                List<String> grpSamples= m_samplesByGroup.get(grpName);
-                List<Integer> splNumbers = new ArrayList(grpSamples.size());
-                for(int i=0; i<grpSamples.size(); i++){
-                    String splName = grpSamples.get(i);
- 
-                    splByNbr.put(splNumber, splName);
-                    splNbrByName.put(splName, splNumber);
-                    splNumbers.add(splNumber++);
+            if(useExistingJSON){
+                params.put("experimental_design", m_expDesignParams);
+            }else {
+                            //Get Run Ids for specified RSMs
+                Map<Long, Long> runIdByRsmId = new HashMap<>();
+                for(Long rsmId : m_rsmIdBySampleAnalysis.values()){
+                    ArrayList<Long> returnedRunId = new ArrayList<> ();
+                    DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null, m_pId);
+                    loadRunIdsTask.initLoadRunIdForRsm(rsmId, returnedRunId);
+                    loadRunIdsTask.fetchData();
+                    if(returnedRunId.size() >0)
+                        runIdByRsmId.put(rsmId, returnedRunId.get(0));
+                    else
+                        runIdByRsmId.put(rsmId, -1l);
                 }
                 
-                Map<String, Object> biologicalGroupParams = new HashMap<>();
-                biologicalGroupParams.put("number", grpNumber++);
-                biologicalGroupParams.put("name", grpName);
-                biologicalGroupParams.put("sample_numbers", splNumbers);
-                biologicalGroupList.add(biologicalGroupParams);
+                //-- experimental_design Params
+                Map<String, Object> experimentalDesignParams = new HashMap<>();
 
-            }// End go through groups
-            
-            if(grpNumber>2)
-                ratioDenominatorGrp = 2; //VD TODO :  Comment gerer les ratois ?
-            
-            Map<String, Object> ratioParams = new HashMap<>();
-            ratioParams.put("number", 1);
-            ratioParams.put("numerator_group_number", ratioNumeratorGrp);
-            ratioParams.put("denominator_group_number",ratioDenominatorGrp);
-            List ratioParamsList = new ArrayList();
-            ratioParamsList.add(ratioParams);
-            
-            Map<String, Object> groupSetupParams = new HashMap<>();
-            groupSetupParams.put("number", 1);
-            groupSetupParams.put("name", m_quantiDSName);
-            groupSetupParams.put("biological_groups", biologicalGroupList);
-            groupSetupParams.put("ratio_definitions", ratioParamsList);
-            
-            ArrayList groupSetupParamsList = new ArrayList();
-            groupSetupParamsList.add(groupSetupParams);
-            experimentalDesignParams.put("group_setups",groupSetupParamsList );            
-            
-            List biologicalSampleList = new ArrayList();
-            List quantChanneList = new ArrayList();
-            
-            Iterator<String> samplesIt =  m_samplesAnalysisBySample.keySet().iterator();
-            while(samplesIt.hasNext()){
-                String nextSpl = samplesIt.next();
-                Integer splNbr = splNbrByName.get(nextSpl);
+                Map<Integer, String> splByNbr = new HashMap<>();
+                Map<String, Integer> splNbrByName = new HashMap<>();            
+                Iterator<String> groupsIt = m_samplesByGroup.keySet().iterator();
+                int ratioNumeratorGrp = 1;
+                int ratioDenominatorGrp =1;
+                int grpNumber = 1;
+                int splNumber = 1;
+                int splAnalysisNumber = 1;
+                List biologicalGroupList = new ArrayList();
+
+                while(groupsIt.hasNext()){
+
+                    String grpName = groupsIt.next();
+                    List<String> grpSamples= m_samplesByGroup.get(grpName);
+                    List<Integer> splNumbers = new ArrayList(grpSamples.size());
+                    for(int i=0; i<grpSamples.size(); i++){
+                        String splName = grpSamples.get(i);
+
+                        splByNbr.put(splNumber, splName);
+                        splNbrByName.put(splName, splNumber);
+                        splNumbers.add(splNumber++);
+                    }
+
+                    Map<String, Object> biologicalGroupParams = new HashMap<>();
+                    biologicalGroupParams.put("number", grpNumber++);
+                    biologicalGroupParams.put("name", grpName);
+                    biologicalGroupParams.put("sample_numbers", splNumbers);
+                    biologicalGroupList.add(biologicalGroupParams);
+
+                }// End go through groups
+
+                if(grpNumber>2)
+                    ratioDenominatorGrp = 2; //VD TODO :  Comment gerer les ratois ?
+
+                Map<String, Object> ratioParams = new HashMap<>();
+                ratioParams.put("number", 1);
+                ratioParams.put("numerator_group_number", ratioNumeratorGrp);
+                ratioParams.put("denominator_group_number",ratioDenominatorGrp);
+                List ratioParamsList = new ArrayList();
+                ratioParamsList.add(ratioParams);
+
+                Map<String, Object> groupSetupParams = new HashMap<>();
+                groupSetupParams.put("number", 1);
+                groupSetupParams.put("name", m_quantiDSName);
+                groupSetupParams.put("biological_groups", biologicalGroupList);
+                groupSetupParams.put("ratio_definitions", ratioParamsList);
+
+                ArrayList groupSetupParamsList = new ArrayList();
+                groupSetupParamsList.add(groupSetupParams);
+                experimentalDesignParams.put("group_setups",groupSetupParamsList );            
+
+                List biologicalSampleList = new ArrayList();
+                List quantChanneList = new ArrayList();
+
+                Iterator<String> samplesIt =  m_samplesAnalysisBySample.keySet().iterator();
+                while(samplesIt.hasNext()){
+                    String nextSpl = samplesIt.next();
+                    Integer splNbr = splNbrByName.get(nextSpl);
+
+                    Map<String, Object> biologicalSampleParams = new HashMap<>();
+                    biologicalSampleParams.put("number", splNbr);
+                    biologicalSampleParams.put("name", nextSpl);
+
+                    biologicalSampleList.add(biologicalSampleParams);
+
+                    List<String> splAnalysis = m_samplesAnalysisBySample.get(nextSpl);
+                    for(int i =0; i<splAnalysis.size(); i++){
+                        String nextSplAnalysis = splAnalysis.get(i);
+                        Map<String, Object> quantChannelParams = new HashMap<>();
+                        quantChannelParams.put("number", splAnalysisNumber++);
+                        quantChannelParams.put("sample_number", splNbr);
+                        quantChannelParams.put("ident_result_summary_id", m_rsmIdBySampleAnalysis.get(nextSplAnalysis));                    
+                        quantChannelParams.put("run_id", runIdByRsmId.get(m_rsmIdBySampleAnalysis.get(nextSplAnalysis)));
+                        quantChanneList.add(quantChannelParams);
+                    }
+
+                } // End go through samples
+                experimentalDesignParams.put("biological_samples", biologicalSampleList);
+
+                List masterQuantChannelsList = new ArrayList();
+                Map<String, Object> masterQuantChannelParams = new HashMap<>();
+                masterQuantChannelParams.put("number", 1);
+                masterQuantChannelParams.put("name", m_quantiDSName);
+                masterQuantChannelParams.put("quant_channels", quantChanneList);
+                masterQuantChannelsList.add(masterQuantChannelParams);
+                experimentalDesignParams.put("master_quant_channels", masterQuantChannelsList);
                 
-                Map<String, Object> biologicalSampleParams = new HashMap<>();
-                biologicalSampleParams.put("number", splNbr);
-                biologicalSampleParams.put("name", nextSpl);
-
-                biologicalSampleList.add(biologicalSampleParams);
-                    
-                List<String> splAnalysis = m_samplesAnalysisBySample.get(nextSpl);
-                for(int i =0; i<splAnalysis.size(); i++){
-                    String nextSplAnalysis = splAnalysis.get(i);
-                    Map<String, Object> quantChannelParams = new HashMap<>();
-                    quantChannelParams.put("number", splAnalysisNumber++);
-                    quantChannelParams.put("sample_number", splNbr);
-                    quantChannelParams.put("ident_result_summary_id", m_rsmIdBySampleAnalysis.get(nextSplAnalysis));                    
-                    quantChannelParams.put("run_id", runIdByRsmId.get(m_rsmIdBySampleAnalysis.get(nextSplAnalysis)));
-                    quantChanneList.add(quantChannelParams);
-                }
-
-            } // End go through samples
-            experimentalDesignParams.put("biological_samples", biologicalSampleList);
-
-            List masterQuantChannelsList = new ArrayList();
-            Map<String, Object> masterQuantChannelParams = new HashMap<>();
-            masterQuantChannelParams.put("number", 1);
-            masterQuantChannelParams.put("name", m_quantiDSName);
-            masterQuantChannelParams.put("quant_channels", quantChanneList);
-            masterQuantChannelsList.add(masterQuantChannelParams);
-            experimentalDesignParams.put("master_quant_channels", masterQuantChannelsList);
-
-            params.put("experimental_design", experimentalDesignParams);
-
+                params.put("experimental_design", experimentalDesignParams);
+            }
+            
 
             
             //-- quanti Params

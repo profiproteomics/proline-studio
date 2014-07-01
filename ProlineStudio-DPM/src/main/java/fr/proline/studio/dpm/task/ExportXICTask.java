@@ -111,7 +111,7 @@ public class ExportXICTask extends AbstractServiceTask {
 
             request.setParameters(params);
 
-            HttpResponse response = postRequest("dps.msq/export/" + request.getMethod() + getIdString(), request);
+            HttpResponse response = postRequest("dps.msq/export_quant_dataset/" + request.getMethod() + getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -165,13 +165,13 @@ public class ExportXICTask extends AbstractServiceTask {
                     }
 
                     // retrieve file path
-                    ArrayList exportedFilePathList = (ArrayList) resultMap.get("result");
-                    if (exportedFilePathList == null) {
+                    String exportedFilePath = (String) resultMap.get("result");
+                    if (exportedFilePath == null || exportedFilePath.isEmpty()) {
                         m_loggerProline.error(getClass().getSimpleName() + " failed : No file path returned.");
                         return ServiceState.STATE_FAILED;
                     }
 
-                    m_filePathResult[0] = (String) exportedFilePathList.get(0);
+                    m_filePathResult[0] = (String) exportedFilePath;
 
 
                     return ServiceState.STATE_DONE;

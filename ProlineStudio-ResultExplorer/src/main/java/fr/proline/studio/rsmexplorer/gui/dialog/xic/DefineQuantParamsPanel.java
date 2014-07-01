@@ -133,7 +133,7 @@ public class DefineQuantParamsPanel extends JPanel{
         clusterParams.put("time_tol", m_clusteringTimeTolTF.getText());
         clusterParams.put("time_computation", m_clusteringTimeComputationCB.getSelectedItem().toString());
         clusterParams.put("intensity_computation", m_clusteringintensityComputationCB.getSelectedItem().toString());
-        params.put("extraction_params", clusterParams);    
+        params.put("clustering_params", clusterParams);    
         
         params.put("aln_method_name", m_alnmMethodCB.getSelectedItem().toString());
         Map<String,Object> alnParams = new HashMap<>();

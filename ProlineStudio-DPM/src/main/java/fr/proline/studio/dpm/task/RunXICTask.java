@@ -79,8 +79,8 @@ public class RunXICTask extends AbstractServiceTask {
                 Map<Long, Long> runIdByRsmId = new HashMap<>();
                 for(Long rsmId : m_rsmIdBySampleAnalysis.values()){
                     ArrayList<Long> returnedRunId = new ArrayList<> ();
-                    DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null, m_pId);
-                    loadRunIdsTask.initLoadRunIdForRsm(rsmId, returnedRunId);
+                    DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
+                    loadRunIdsTask.initLoadRunIdForRsm(m_pId, rsmId, returnedRunId);
                     loadRunIdsTask.fetchData();
                     if(returnedRunId.size() >0)
                         runIdByRsmId.put(rsmId, returnedRunId.get(0));

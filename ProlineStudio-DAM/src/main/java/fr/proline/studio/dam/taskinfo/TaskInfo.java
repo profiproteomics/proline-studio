@@ -15,6 +15,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
     private String m_idList = null;
     private String m_requestContent = null;
     private String m_requestURL = null;
+    private boolean m_hidden = false;
     
     private int m_state;
     private int m_updateState = -1;
@@ -38,7 +39,11 @@ public class TaskInfo implements Comparable<TaskInfo> {
     private static int INC_ID = 0;
     
     public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList) {
-        m_taskDescription = taskDescription;
+        this(taskDescription, askBeforeExitingApp, idList, false);
+    }
+    
+    public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList, boolean hidden) {
+              m_taskDescription = taskDescription;
         m_askBeforeExitingApp = askBeforeExitingApp;
         m_idList = idList;
        
@@ -49,7 +54,9 @@ public class TaskInfo implements Comparable<TaskInfo> {
         m_success = true;
         m_taskError = null;
         
-        m_askTimestamp = System.currentTimeMillis();
+        m_hidden = hidden;
+        
+        m_askTimestamp = System.currentTimeMillis();  
     }
 
     public TaskInfo(TaskInfo src) {
@@ -195,6 +202,10 @@ public class TaskInfo implements Comparable<TaskInfo> {
         return m_endTimestamp;
     }
 
+    public boolean isHidden() {
+        return m_hidden;
+    }
+    
     public long getDuration() {
         if (m_duration != -1) {
             return m_duration;
@@ -254,7 +265,8 @@ public class TaskInfo implements Comparable<TaskInfo> {
         to.m_duration = from.m_duration;
         to.m_percentage = from.m_percentage;
         to.m_requestContent = from.m_requestContent;
-        to.m_requestURL = from.m_requestURL;        
+        to.m_requestURL = from.m_requestURL;      
+        to.m_hidden = from.m_hidden;
     }
     
     @Override

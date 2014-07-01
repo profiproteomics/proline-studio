@@ -218,7 +218,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             if (m_taskInfoList == null) {
                 m_taskInfoList = new ArrayList<>(128);
             }
-            boolean updateDone = TaskInfoManager.getTaskInfoManager().copyData(m_taskInfoList);
+            boolean updateDone = TaskInfoManager.getTaskInfoManager().copyData(m_taskInfoList, false);
 
             if (updateDone) {
                 fireTableDataChanged();

@@ -93,7 +93,7 @@ public class TaskInfoManager {
         return (m_curUpdate != m_lastUpdate);
     }
     
-    public synchronized boolean copyData(ArrayList<TaskInfo> destinationList) {
+    public synchronized boolean copyData(ArrayList<TaskInfo> destinationList, boolean copyHiddenTasksTasks) {
         
         if ((m_curUpdate == m_lastUpdate) && (!destinationList.isEmpty())) {
             return false;
@@ -107,6 +107,11 @@ public class TaskInfoManager {
         Iterator<TaskInfo> it = m_tasks.iterator(); 
         while (it.hasNext()) {
             TaskInfo infoCur = it.next();
+            
+            // if needed, hide to user some minor task (if there is no error) 
+            if ((!copyHiddenTasksTasks) && (infoCur.isHidden()) && (infoCur.getTaskError() == null)) {
+                continue;
+            }
             
             if (index<sizeDestination) {
                 infoCur.copyData(destinationList.get(index));

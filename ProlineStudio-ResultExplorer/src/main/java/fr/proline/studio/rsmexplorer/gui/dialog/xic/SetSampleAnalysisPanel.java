@@ -24,16 +24,17 @@ public class SetSampleAnalysisPanel extends JPanel {
     private static SetSampleAnalysisPanel m_singleton = null;
     private static RSMNode m_rootNode;
     
-    public static SetSampleAnalysisPanel getDialog(RSMNode rootNode){
-        if(m_singleton ==null || !m_rootNode.equals(rootNode)){
+    public static SetSampleAnalysisPanel getPanel(RSMNode rootNode) {
+        if((m_singleton == null) || (!m_rootNode.equals(rootNode))){
             m_singleton = new SetSampleAnalysisPanel(rootNode);
         }
         return m_singleton;
     }
     
-    public static SetSampleAnalysisPanel getDialog(){
-        if(m_singleton != null )
+    public static SetSampleAnalysisPanel getPanel() {
+        if (m_singleton != null) {
             return m_singleton;
+        }
         throw new IllegalAccessError(" Panel not initialized yet ! ");
     }
     
@@ -142,7 +143,7 @@ public class SetSampleAnalysisPanel extends JPanel {
         c.weightx = 1;
         c.weighty = 1;
 
-        DesignTree tree = DesignTree.getDesignTree(m_rootNode);
+        DesignTree tree = DesignTree.getDesignTree(rootNode);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
 

@@ -1,13 +1,15 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Window;
-import java.util.Enumeration;
-import java.util.Map;
+import java.util.*;
 import javax.swing.JScrollPane;
 
 
@@ -66,6 +68,226 @@ public class CreateXICDialog extends DefaultDialog {
     public RSMNode getDesignRSMNode(){
         return finalXICDesignNode;
     }
+    
+    /*
+     * Return map reflecting JSON obhject for experimental_design :
+        "biological_samples": [{
+                "name": "ff 0",
+                "number": 0
+        }],
+        "master_quant_channels": [{
+                "quant_channels": [{
+                        "ident_result_summary_id": 6,
+                        "number": 0,
+                        "sample_number": 0
+                }],
+                "name": "TEST 0206",
+                "number": 0
+        }],
+        "group_setups": [{
+                "biological_groups": [{
+                        "name": "br 0",
+                        "number": 0,
+                        "sample_numbers": [0]
+                }],
+                "ratio_definitions": [{
+                        "denominator_group_number": 0,
+                        "numerator_group_number": 0,
+                        "number": 0
+                }],
+                "name": "TEST 0206",
+                "number": 0
+        }]
+     
+     * @throws IllegalAccessException 
+     */
+    
+    private HashMap<Long, Long> getRunIdForRSMs(Collection<Long> rsmIDs){
+        //Get Run Ids for specified RSMs
+        Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
+        HashMap<Long, Long> runIdByRsmId = new HashMap<>();
+        
+        for(Long rsmId : rsmIDs){
+            ArrayList<Long> returnedRunId = new ArrayList<> ();
+            DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null, pID);
+            loadRunIdsTask.initLoadRunIdForRsm(rsmId, returnedRunId);
+            loadRunIdsTask.fetchData();
+            if(returnedRunId.size() >0)
+                runIdByRsmId.put(rsmId, returnedRunId.get(0));
+            else
+                runIdByRsmId.put(rsmId, -1l);          
+        }
+        
+        return runIdByRsmId;
+    }
+
+    public Map<String, Object>  getDesignParameters() throws IllegalAccessException {
+        if(finalXICDesignNode==null)
+            throw new IllegalAccessException("Design parameters have not been set.");
+        
+        Map<String,Object> experimentalDesignParams = new HashMap<>();
+                       
+        String errorMsg = null;
+             
+        //Number used for Experimental Design data 
+        int ratioNumeratorGrp = 1;
+        int ratioDenominatorGrp =1;
+        int grpNumber = 1;
+        int splNumber = 1;
+        int splAnalysisNumber = 1;
+        
+        List _biologicalGroupList = new ArrayList();
+        HashMap<String, Long> _rsmIdBySampleAnalysis = new HashMap<>();
+        HashMap<Long, Long> _runIdByRSMId = new HashMap<>();
+        HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();
+        Map<String, Integer> splNbrByName = new HashMap<>();            
+                
+        Enumeration xicGrps = finalXICDesignNode.children();   
+        while(xicGrps.hasMoreElements()&& errorMsg==null){
+            RSMNode grpNode = (RSMNode) xicGrps.nextElement();
+            String grpName = grpNode.getData().getName();
+            
+            //Iterate over Samples
+            Enumeration grpSpls  = grpNode.children();      
+            List<Integer> splNumbers = new ArrayList();
+            
+            while(grpSpls.hasMoreElements() && errorMsg==null){
+                RSMNode splNode = (RSMNode) grpSpls.nextElement();
+                String sampleName = grpName+splNode.getData().getName();                
+                splNbrByName.put(sampleName, splNumber);
+                splNumbers.add(splNumber++);
+                 
+                //Iterate over SampleAnalysis
+                Enumeration identRSMs  = splNode.children();      
+                ArrayList<String> splAnalysisNames = new ArrayList<>();
+                while(identRSMs.hasMoreElements()){
+                    //VD TODO TEST child type
+                    RSMNode qChannelNode = (RSMNode) identRSMs.nextElement();
+                    String spAnalysisName = qChannelNode.getData().getName();
+                    splAnalysisNames.add(spAnalysisName);
+                    if(!DataSetData.class.isInstance(qChannelNode.getData())){
+                        errorMsg = "Invalide Sample Analysis specified ";
+                        break;
+                    }
+                    _rsmIdBySampleAnalysis.put(spAnalysisName, ((DataSetData)qChannelNode.getData()).getDataset().getResultSummaryId());                            
+                }
+                _samplesAnalysisBySample.put(sampleName, splAnalysisNames);
+            } //End go through group's sample
+                         
+            Map<String, Object> biologicalGroupParams = new HashMap<>();
+            biologicalGroupParams.put("number", grpNumber++);
+            biologicalGroupParams.put("name", grpName);
+            biologicalGroupParams.put("sample_numbers", splNumbers);
+            _biologicalGroupList.add(biologicalGroupParams);
+
+        }// End go through groups
+        
+        //Read Run IDs
+        _runIdByRSMId = getRunIdForRSMs(_rsmIdBySampleAnalysis.values());
+        
+        if(errorMsg!=null)
+            throw new IllegalAccessException(errorMsg);
+        
+        if(grpNumber>2)
+            ratioDenominatorGrp = 2; //VD TODO :  Comment gerer les ratois ?
+            
+        Map<String, Object> ratioParams = new HashMap<>();
+        ratioParams.put("number", 1);
+        ratioParams.put("numerator_group_number", ratioNumeratorGrp);
+        ratioParams.put("denominator_group_number",ratioDenominatorGrp);
+        List ratioParamsList = new ArrayList();
+        ratioParamsList.add(ratioParams);
+            
+        Map<String, Object> groupSetupParams = new HashMap<>();
+        groupSetupParams.put("number", 1);
+        groupSetupParams.put("name", finalXICDesignNode.getData().getName());
+        groupSetupParams.put("biological_groups", _biologicalGroupList);
+        groupSetupParams.put("ratio_definitions", ratioParamsList);
+            
+        ArrayList groupSetupParamsList = new ArrayList();
+        groupSetupParamsList.add(groupSetupParams);
+        experimentalDesignParams.put("group_setups",groupSetupParamsList );            
+            
+        List biologicalSampleList = new ArrayList();
+        List quantChanneList = new ArrayList();
+            
+        Iterator<String> samplesIt =  splNbrByName.keySet().iterator();
+        while(samplesIt.hasNext()){
+            String nextSpl = samplesIt.next();
+            Integer splNbr = splNbrByName.get(nextSpl);
+                
+            Map<String, Object> biologicalSampleParams = new HashMap<>();
+            biologicalSampleParams.put("number", splNbr);
+            biologicalSampleParams.put("name", nextSpl);
+
+            biologicalSampleList.add(biologicalSampleParams);
+                    
+            List<String> splAnalysis = _samplesAnalysisBySample.get(nextSpl);
+            for(int i =0; i<splAnalysis.size(); i++){
+                String nextSplAnalysis = splAnalysis.get(i);
+                Map<String, Object> quantChannelParams = new HashMap<>();
+                quantChannelParams.put("number", splAnalysisNumber++);
+                quantChannelParams.put("sample_number", splNbr);
+                quantChannelParams.put("ident_result_summary_id", _rsmIdBySampleAnalysis.get(nextSplAnalysis));                    
+                quantChannelParams.put("run_id", _runIdByRSMId.get(_rsmIdBySampleAnalysis.get(nextSplAnalysis)));
+                quantChanneList.add(quantChannelParams);
+            }
+
+        } // End go through samples
+        experimentalDesignParams.put("biological_samples", biologicalSampleList);
+
+        List masterQuantChannelsList = new ArrayList();
+        Map<String, Object> masterQuantChannelParams = new HashMap<>();
+        masterQuantChannelParams.put("number", 1);
+        masterQuantChannelParams.put("name", finalXICDesignNode.getData().getName());
+        masterQuantChannelParams.put("quant_channels", quantChanneList);
+        masterQuantChannelsList.add(masterQuantChannelParams);
+       
+        experimentalDesignParams.put("master_quant_channels", masterQuantChannelsList);
+ 
+        return experimentalDesignParams;
+    }
+                  
+            /*"quantitation_config": {
+		"extraction_params": {
+			"moz_tol": "5",
+			"moz_tol_unit": "PPM"
+		},
+		"clustering_params": {
+			"moz_tol": "5",
+			"moz_tol_unit": "PPM",
+			"time_tol": "15",
+			"time_computation": "MOST_INTENSE",
+			"intensity_computation": "MOST_INTENSE"
+		},
+		"aln_method_name": "ITERATIVE",
+		"aln_params": {
+			"mass_interval": "20000",
+			"max_iterations": "3",
+			"smoothing_method_name": "TIME_WINDOW",
+			"smoothing_params": {
+				"window_size": "200",
+				"window_overlap": "20",
+				"min_window_landmarks": "50"
+			},
+			"ft_mapping_params": {
+				"moz_tol": "5",
+				"moz_tol_unit": "PPM",
+				"time_tol": "600"
+			}
+		},
+		"ft_filter": {
+			"name": "INTENSITY",
+			"operator": "GT",
+			"value": "0"
+		},
+		"ft_mapping_params": {
+			"moz_tol": "10",
+			"moz_tol_unit": "PPM",
+			"time_tol": "120"
+		},
+		"normalization_method": "MEDIAN_RATIO"
+	}*/
     
     public Map<String, Object> getQuantiParameters(){
         return DefineQuantParamsPanel.getDefineQuantPanel().getQuantParams();
@@ -184,7 +406,6 @@ public class CreateXICDialog extends DefaultDialog {
             scrollPane.createVerticalScrollBar();
             
             replaceInternaleComponent(scrollPane);
-            setSize(new Dimension(500, 600));
             revalidate();
             repaint();
             

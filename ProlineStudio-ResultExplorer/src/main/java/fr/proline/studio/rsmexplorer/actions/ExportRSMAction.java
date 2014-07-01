@@ -100,8 +100,8 @@ public class ExportRSMAction extends AbstractRSMAction {
                     }
                 };
 
-
-                ExportRSMTask task = new ExportRSMTask(exportCallback, dataSetNode.getDataset(), _filePath);
+                Boolean isExportAllPSMs = dialog.exportAllPSMs();
+                ExportRSMTask task = new ExportRSMTask(exportCallback, dataSetNode.getDataset(),isExportAllPSMs, _filePath);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
 
                 

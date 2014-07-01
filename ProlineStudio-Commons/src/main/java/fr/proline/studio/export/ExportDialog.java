@@ -29,9 +29,8 @@ import org.slf4j.LoggerFactory;
 public class ExportDialog extends DefaultDialog {
 
 
-
-	private static ExportDialog m_singletonImageDialog = null;
-	private static ExportDialog m_singletonImage2Dialog = null;
+    private static ExportDialog m_singletonImageDialog = null;
+    private static ExportDialog m_singletonImage2Dialog = null;
     private static ExportDialog m_singletonExcelDialog = null;
     private static ExportDialog m_singletonServerDialog = null;
  
@@ -39,6 +38,7 @@ public class ExportDialog extends DefaultDialog {
     
     private JTextField m_fileTextField;
     private JComboBox m_exporTypeCombobox;
+    private JCheckBox m_exportAllPSMsChB;
 
     private JXTable m_table = null;
     private JPanel m_panel = null;
@@ -195,12 +195,23 @@ public class ExportDialog extends DefaultDialog {
         c.gridwidth = 1;
         exportPanel.add(addFileButton, c);
 
+        if(m_exportType == ExporterFactory.EXPORT_FROM_SERVER){
+            //Allow specific parameter in this case
+            c.gridy++;
+            c.gridx = 0;
+            c.gridwidth = 2;
+            m_exportAllPSMsChB = new JCheckBox(" Export all PSMs");
+            exportPanel.add(m_exportAllPSMsChB, c);
+        }
+        
+        
         m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
         m_exporTypeCombobox.setSelectedIndex(0);
 
 
         c.gridy++;
         c.gridx = 0;
+        c.gridwidth = 1;
         exportPanel.add(new JLabel("Export Type:"), c);
 
         c.gridx++;
@@ -212,6 +223,12 @@ public class ExportDialog extends DefaultDialog {
 
     public String getFileName() {
         return m_fileTextField.getText().trim();
+    }
+    
+    public Boolean exportAllPSMs(){
+        if(m_exportType == ExporterFactory.EXPORT_FROM_SERVER)
+            return m_exportAllPSMsChB.isSelected();
+        else return null;
     }
     
     public ExporterFactory.ExporterInfo getExporterInfo() {

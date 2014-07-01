@@ -28,7 +28,8 @@ public abstract class RSMNode extends DefaultMutableTreeNode implements Cloneabl
         HOUR_GLASS,
         BIOLOGICAL_SAMPLE,
         BIOLOGICAL_GROUP,
-        BIOLOGICAL_SAMPLE_ANALYSIS
+        BIOLOGICAL_SAMPLE_ANALYSIS,
+        RUN
     }
     private static Action[] m_actionInstance = null;
     protected NodeTypes m_type;

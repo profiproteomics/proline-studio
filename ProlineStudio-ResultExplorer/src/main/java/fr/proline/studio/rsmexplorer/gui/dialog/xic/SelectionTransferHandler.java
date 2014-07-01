@@ -1,9 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.rsmexplorer.node.xic.RSMBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.node.xic.RSMBiologicalSampleNode;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.xic.RSMRunNode;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
@@ -216,6 +218,11 @@ public class SelectionTransferHandler extends TransferHandler {
                 // create the new node
                 RSMBiologicalSampleAnalysisNode sampleAnalysisNode = new RSMBiologicalSampleAnalysisNode(node.getData());
 
+                // put a Run node in it
+  
+                RSMRunNode runNode = new RSMRunNode(new RunInfoData(), node.getDataset().getProject().getId() , node.getResultSetId());
+                sampleAnalysisNode.add(runNode);
+                
                 // add to new parent
                 treeModel.insertNodeInto(sampleAnalysisNode, dropRSMNode, childIndex);
 

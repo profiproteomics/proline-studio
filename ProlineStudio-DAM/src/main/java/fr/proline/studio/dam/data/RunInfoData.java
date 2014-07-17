@@ -1,6 +1,7 @@
 package fr.proline.studio.dam.data;
 
 import fr.proline.core.orm.uds.RawFile;
+import fr.proline.core.orm.uds.Run;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import java.util.List;
 
@@ -12,6 +13,7 @@ public class RunInfoData extends AbstractData {
     
     private String m_peakListPath = null;
     private RawFile m_rawFile = null;
+    private Run m_run = null;
     private String m_message = null;
     
     public RunInfoData() {
@@ -56,6 +58,20 @@ public class RunInfoData extends AbstractData {
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
         // nothing to do
+    }
+
+    /**
+     * @return the m_run
+     */
+    public Run getRun() {
+        return m_run;
+    }
+
+    /**
+     * @param m_run the m_run to set
+     */
+    public void setRun(Run run) {
+        this.m_run = run;
     }
 
 }

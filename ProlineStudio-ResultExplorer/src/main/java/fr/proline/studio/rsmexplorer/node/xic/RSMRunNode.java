@@ -12,6 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.xic.DesignTree;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.utils.IconManager;
+import java.io.File;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
@@ -86,7 +87,9 @@ public class RSMRunNode extends RSMNode {
                 if (m_rawFileList.isEmpty()) {
                     ((RunInfoData) getData()).setMessage("<html><font color='#FF0000'>No Raw File found, select one</font></html>");
                 } else if (m_rawFileList.size() == 1) {
+                    // TODO : how to choose the right rawfile or run instead of the first one ??
                     ((RunInfoData) getData()).setRawFile(m_rawFileList.get(0));
+                    ((RunInfoData) getData()).setRun(m_rawFileList.get(0).getRuns().get(0));
                 } else {
                     ((RunInfoData) getData()).setMessage("<html><font color='#FF0000'>Multiple Raw Files found, select one</font></html>");
                 }
@@ -126,5 +129,17 @@ public class RSMRunNode extends RSMNode {
 
     @Override
     public void loadDataForProperties(Runnable callback) {
+    }
+
+    public void setRawFile(File selectedFile) {
+        String searchString = selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.'));
+        search(searchString);
+        // how to test search success or failure ??
+        
+        // if not found, register RawFile and set it to RunInfoData
+        // Question : register immediatly RawFile & Run or did it at the end ?? -> better solution at the end
+        RawFile rawFile = new RawFile();
+        rawFile.setRawFileName(selectedFile.getPath());
+        ((RunInfoData) getData()).setRawFile(rawFile);
     }
 }

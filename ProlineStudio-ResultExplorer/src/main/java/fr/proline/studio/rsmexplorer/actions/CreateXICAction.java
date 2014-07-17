@@ -48,6 +48,12 @@ public class CreateXICAction extends AbstractRSMAction {
             Map<String,Object> expParams = null;
             
             String errorMsg = null;
+            
+            Map<String,Object> quantParams = dialog.getQuantiParameters();
+            if(quantParams == null)
+                errorMsg = "Null Quantitation parameters !";      
+            
+            
             if(dialog.getDesignRSMNode() == null){
                 errorMsg = "No experimental design defined";
                 
@@ -55,6 +61,9 @@ public class CreateXICAction extends AbstractRSMAction {
                 errorMsg = "Invalide Quantitation Dataset specified ";                    
                 
             } else {
+                
+                dialog.registerRawFiles();
+                
                 //*** Get experimental design values                
                 _quantiDS = (DataSetData)dialog.getDesignRSMNode().getData();
                                 
@@ -65,9 +74,6 @@ public class CreateXICAction extends AbstractRSMAction {
                 }
             }
             
-            Map<String,Object> quantParams = dialog.getQuantiParameters();
-            if(quantParams == null)
-                errorMsg = "Null Quantitation parameters !";      
             
             if(errorMsg != null) {
                 JOptionPane.showMessageDialog(dialog, errorMsg, "Warning", JOptionPane.ERROR_MESSAGE);

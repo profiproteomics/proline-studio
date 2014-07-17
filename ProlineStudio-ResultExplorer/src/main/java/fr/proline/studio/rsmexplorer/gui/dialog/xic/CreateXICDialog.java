@@ -1,15 +1,24 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.core.orm.uds.RawFile;
+import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
+import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.task.AbstractServiceCallback;
+import fr.proline.studio.dpm.task.RegisterRawFileTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.xic.RSMRunNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.util.*;
+import javax.persistence.EntityManager;
 import javax.swing.JScrollPane;
 
 
@@ -112,13 +121,91 @@ public class CreateXICDialog extends DefaultDialog {
             DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
             loadRunIdsTask.initLoadRunIdForRsm(pID, rsmId, returnedRunId);
             loadRunIdsTask.fetchData();
-            if(returnedRunId.size() >0)
+            if(returnedRunId.size() >0) {
                 runIdByRsmId.put(rsmId, returnedRunId.get(0));
-            else
-                runIdByRsmId.put(rsmId, -1l);          
+            } else {
+                runIdByRsmId.put(rsmId, -1l);
+            }
         }
         
         return runIdByRsmId;
+    }
+
+    public String registerRawFiles() {
+
+        long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        Project project = entityManagerUDS.find(Project.class, pID);
+
+        final Object mutexFileRegistered = new Object();
+        String errorMsg = null;
+        Enumeration xicGrps = finalXICDesignNode.children();
+        while (xicGrps.hasMoreElements() && errorMsg == null) {
+            RSMNode grpNode = (RSMNode) xicGrps.nextElement();
+            //Iterate over Samples
+            Enumeration grpSpls = grpNode.children();
+            while (grpSpls.hasMoreElements() && errorMsg == null) {
+                RSMNode bioSplNode = (RSMNode) grpSpls.nextElement();
+                //Iterate over SampleAnalysis
+                Enumeration identRSMs = bioSplNode.children();
+                while (identRSMs.hasMoreElements()) {
+                    RSMNode bioSplAnalysisNode = (RSMNode) identRSMs.nextElement();
+                    Enumeration runNodes = bioSplAnalysisNode.children();
+                    while (runNodes.hasMoreElements()) {
+                        RSMRunNode runNode = (RSMRunNode) runNodes.nextElement();
+                        RunInfoData runData = (RunInfoData) runNode.getData();
+                        ArrayList<RawFile> returnedRaw = new ArrayList<>();
+                        DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
+                        loadRunIdsTask.initSearchRawFile(runData.getRawFile().getRawFileName(), returnedRaw);
+                        loadRunIdsTask.fetchData();
+                        if (returnedRaw.size() == 1) {
+                            if (!project.getRawFiles().contains(runData.getRawFile())) {
+                                // TODO update Project - rawFile map
+                            } 
+                        } else if (returnedRaw.size() > 1) {
+                            errorMsg = "More than one rawFile with name " + runData.getRawFile().getRawFileName() + " found.";
+                            return errorMsg;
+                        } else {
+                            // RawFile does not exists, create it
+                            try {
+                                synchronized (mutexFileRegistered) {
+                                    AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+                                        @Override
+                                        public boolean mustBeCalledInAWT() {
+                                            return false;
+                                        }
+
+                                        @Override
+                                        public void run(boolean success) {
+                                            synchronized (mutexFileRegistered) {
+                                                mutexFileRegistered.notifyAll();
+                                            }
+                                        }
+                                    };
+                                    // TODO : get the right instrumentId !!! 
+                                    long instrumentID = 1;
+                                    RegisterRawFileTask task = new RegisterRawFileTask(callback, runData.getRawFile().getRawFileName(), instrumentID, project.getOwner().getId(), runData);
+                                    AccessServiceThread.getAccessServiceThread().addTask(task);
+                                    // wait untill the files are loaded
+                                    mutexFileRegistered.wait();
+                                }
+                                
+                            } catch (InterruptedException ie) {
+                                // should not happen
+                            } 
+                        }
+                        //  then map IdentificationDataset to RawFile and Run
+                        DatabaseRunsTask registerRunIdsTask = new DatabaseRunsTask(null);
+                        registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData)bioSplAnalysisNode.getData()).getDataset().getId(), runData.getRawFile(), runData.getRun());
+                        registerRunIdsTask.fetchData();
+                        
+                    }
+                }
+            }
+        } //End go through group's sample
+
+        return errorMsg;
     }
 
     public Map<String, Object>  getDesignParameters() throws IllegalAccessException {

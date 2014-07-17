@@ -1,11 +1,9 @@
 
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.MsiSearch;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.IdentificationDataset;
 import fr.proline.core.orm.uds.RawFile;
-import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.Run;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -24,6 +22,10 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     private long m_projectId = -1;
     private Long m_rsmId = null;
     private Long m_rsetId = null;
+    private Long m_datasetId = null;
+    private RawFile m_rawfile = null;
+    private Run m_run = null;
+    
     private List<Long> m_runIds = null;
     private String[] m_resultPath = null;
     private String m_searchString = null;
@@ -34,6 +36,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     private final static int LOAD_RUN_FOR_RSM = 0;
     private final static int LOAD_PEAKLIST_PATH = 1;
     private final static int SEARCH_RAWFILE = 2;
+    private final static int REGISTER_IDENTIFICATION_DATASET_RUN = 3;
      
     public DatabaseRunsTask(AbstractDatabaseCallback callback){
         super(callback, null);
@@ -76,6 +79,20 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         m_action = LOAD_PEAKLIST_PATH;
     }
     
+     /**
+     * Register map between IdentificationDataset & Run
+     *
+     * @return
+     */
+    public void initRegisterIdentificationDatasetRun(long datasetId, RawFile rawfile, Run run) {
+        setTaskInfo(new TaskInfo(" Register Run for Dataset with id "+datasetId, false, TASK_LIST_INFO));
+        m_datasetId = datasetId;
+        m_rawfile = rawfile;
+        m_run = run;
+        
+        m_action = REGISTER_IDENTIFICATION_DATASET_RUN;
+    }
+    
     @Override
     public boolean fetchData() {
         switch (m_action) {
@@ -85,6 +102,8 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
                 return fetchPeaklistPath();
             case SEARCH_RAWFILE:
                 return searchRawFile();
+            case REGISTER_IDENTIFICATION_DATASET_RUN:
+                return registerIdentificationDatasetRun();
         }
         
         return false; 
@@ -181,7 +200,10 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
             String searchStringSql = m_searchString.replaceAll("\\*", "%").replaceAll("\\?","_");
             searchQuery.setParameter("search", searchStringSql);
             List<RawFile> rawFileList = searchQuery.getResultList();
-
+            // force loading of runs
+            for (RawFile r : rawFileList) {
+                r.getRuns().size();
+            }
             m_rawfileFounds.clear();
             m_rawfileFounds.addAll(rawFileList);
 
@@ -198,15 +220,32 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         return true;
     }
     
-    @Override
-    public boolean needToFetch() {
-        switch (m_action) {
-            case LOAD_RUN_FOR_RSM:
-            case LOAD_PEAKLIST_PATH:
-            case SEARCH_RAWFILE:
-                return true;
+    
+    public boolean registerIdentificationDatasetRun() {
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        try {
+            entityManagerUDS.getTransaction().begin();
+            IdentificationDataset idf = entityManagerUDS.find(IdentificationDataset.class, m_datasetId);
+            RawFile mergedRaw = entityManagerUDS.find(RawFile.class, m_rawfile.getRawFileName());
+            Run mergedRun = entityManagerUDS.find(Run.class, m_run.getId());
+            idf.setRawFile(mergedRaw);
+            idf.setRun(mergedRun);
+            entityManagerUDS.flush();
+            entityManagerUDS.getTransaction().commit();
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
+            entityManagerUDS.getTransaction().rollback();
+            return false;
+        } finally {
+            entityManagerUDS.close();
         }
         
+        return true;
+    }
+    
+    @Override
+    public boolean needToFetch() {
         return true; // should never be called
     }
     

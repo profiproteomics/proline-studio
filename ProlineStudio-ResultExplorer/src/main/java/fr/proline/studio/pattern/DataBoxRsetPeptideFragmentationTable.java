@@ -2,13 +2,8 @@ package fr.proline.studio.pattern;
 
 
 
-import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadSpectrumsTask;
-import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsetPeptideFragmentationTablePanel;
 
 /**

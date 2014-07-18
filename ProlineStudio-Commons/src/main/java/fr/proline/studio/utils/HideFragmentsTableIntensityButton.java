@@ -21,7 +21,7 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 
 /**
- * Button to export data of a table or image of a JPanel
+ * Button to toggle display of intensity/masses from the fragmentation table
  * @author AW
  */
 public class HideFragmentsTableIntensityButton extends JButton implements ActionListener {

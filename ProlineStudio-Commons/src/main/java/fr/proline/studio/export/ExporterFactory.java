@@ -57,13 +57,13 @@ public class ExporterFactory {
             if (m_listImage2 != null) {
                return m_listImage2;
            }
-           m_listImage2 = new ArrayList<>(4);
+           m_listImage2 = new ArrayList<>(2);
 
 
            m_listImage2.add(new ExporterInfo(ExporterType.PNG, "current size PNG (.png)", "png"));
-           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "3000x2000 pixels PNG (.png)", "png"));
-           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "SVG batik (.svg)", "svg"));
-           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "SVG jfreesvg (.svg)", "svg"));
+          // m_listImage2.add(new ExporterInfo(ExporterType.PNG, "3000x2000 pixels PNG (.png)", "png"));
+           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "SVG (.svg)", "svg"));
+          // m_listImage2.add(new ExporterInfo(ExporterType.PNG, "SVG jfreesvg (.svg)", "svg"));
           // m_listImage.add(new ExporterInfo(ExporterType.PNG, "WMF (.WMF)", "wmf"));
 
            return m_listImage2;

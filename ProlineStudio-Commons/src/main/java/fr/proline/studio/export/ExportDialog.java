@@ -1,6 +1,5 @@
 package fr.proline.studio.export;
 
-
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
 
@@ -10,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.prefs.Preferences;
 
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author JM235353
  */
-public class ExportDialog extends DefaultDialog {
+public class ExportDialog extends DefaultDialog  {
 
 
     private static ExportDialog m_singletonImageDialog = null;
@@ -42,11 +42,13 @@ public class ExportDialog extends DefaultDialog {
 
     private JXTable m_table = null;
     private JPanel m_panel = null;
-    private ExportPictureWrapper m_svgFileWrapper = null;
+    private ImageExporterInterface m_imageExporter = null;
     
     private DefaultDialog.ProgressTask m_task = null;
     
     private String m_exportName = null;
+    
+      
     
     public static ExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
@@ -67,19 +69,19 @@ public class ExportDialog extends DefaultDialog {
         }
 
         m_singletonImageDialog.m_panel = panel;
-        m_singletonImageDialog.m_svgFileWrapper = null;
+        m_singletonImageDialog.m_imageExporter = null;
         m_singletonImageDialog.m_exportName = exportName;
 
         return m_singletonImageDialog;
     }
     
-    public static ExportDialog getDialog(Window parent, JPanel panel, ExportPictureWrapper svgFileWrapper, String exportName) {
+    public static ExportDialog getDialog(Window parent, JPanel panel, ImageExporterInterface imageExporter, String exportName) {
         if (m_singletonImage2Dialog == null) {
             m_singletonImage2Dialog = new ExportDialog(parent, ExporterFactory.EXPORT_IMAGE2);
         }
 
         m_singletonImage2Dialog.m_panel = panel;
-        m_singletonImage2Dialog.m_svgFileWrapper = svgFileWrapper;
+        m_singletonImage2Dialog.m_imageExporter = imageExporter;
         m_singletonImage2Dialog.m_exportName = exportName;
 
         return m_singletonImage2Dialog;
@@ -284,40 +286,37 @@ public class ExportDialog extends DefaultDialog {
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
             
-        } else if (m_exportType == ExporterFactory.EXPORT_IMAGE2
-                ||  (m_exportType == ExporterFactory.EXPORT_IMAGE)) {
+        } else if (m_exportType == ExporterFactory.EXPORT_IMAGE) {
         	BufferedImage bi = null;
         	Graphics g = null; 
-        	if(m_panel != null) { // then we treat as bitmap output only 
-	            bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB);
-	            g = bi.createGraphics();
-	            m_panel.paint(g);
-	            g.dispose();
-        	}
-        	else
-        	{
-        		
-        	}
+        	
+            bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB);
+            g = bi.createGraphics();
+            m_panel.paint(g);
+            g.dispose();
+        	try {
+				ImageIO.write(bi,"png",new File(fileName));
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+    	
+	
+        } else if (m_exportType == ExporterFactory.EXPORT_IMAGE2) {
+        	
             try {
             	ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
     	
-    			if(exporterInfo.getFileExtension().contains("png")) {
-    				LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting png file...to:" + f.toPath().toString());
-    	            if(exporterInfo.getName().contains("3000x2000")) {
-    					Files.copy(m_svgFileWrapper.m_graphicFile2.toPath() , new File(fileName).toPath());
-    				} 
-    				else {
-	    				ImageIO.write(bi,"png",new File(fileName));
-    				}
+    			if(exporterInfo.getName().contains("png")) {
+    	
+    				LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting png file...to: " + f.toPath().toString());
+    				m_imageExporter.generatePngImage(fileName);
+ 
+    			} else if(exporterInfo.getName().contains("svg")) { // svg output
     				
-    			} else if(exporterInfo.getName().contains("jfreesvg")) {
-    					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting jfresvg file...to:" + f.toPath().toString());
-    					Files.copy(m_svgFileWrapper.m_graphicFile.toPath(), f.toPath());
-    			
-    			} else if(exporterInfo.getName().contains("batik")) { // svg output
-    				
-    					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting svg file...to:" + f.toPath().toString());
-        	            Files.copy(m_svgFileWrapper.m_graphicFile3.toPath(), f.toPath());
+					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting svg file...to: " + f.toPath().toString());
+					m_imageExporter.generateSvgImage(fileName);
+        	         
     			}	
     			
             	
@@ -336,6 +335,17 @@ public class ExportDialog extends DefaultDialog {
         return false;
 
     }
+    
+//    @Override
+//    public void generateSvgImage(String filePath) {
+//    	
+//    }
+//    
+//    @Override
+//	public String getSupportedFormats() {
+//    	return "";
+//    }
+//	
     
     @Override
     public void setVisible(boolean v) {

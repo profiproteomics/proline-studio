@@ -6,10 +6,8 @@ package fr.proline.studio.rsmexplorer.gui;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -21,7 +19,6 @@ import java.nio.FloatBuffer;
 
 import javax.swing.JToolBar;
 
-import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2DIOException;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -41,7 +38,6 @@ import org.jfree.data.Range;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
-import org.jfree.graphics2d.svg.SVGUtils;
 import org.slf4j.LoggerFactory;
 
 //import org.freehep.graphicsio.emf.EMFGraphics2D;
@@ -54,7 +50,7 @@ import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ExportPictureWrapper;
+import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -64,7 +60,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
  * Panel used to display a Spectrum of a PeptideMatch
  * @author JM235353
  */
-public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxPanelInterface {
+public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxPanelInterface, ImageExporterInterface {
 
     /**
 	 * 
@@ -83,15 +79,30 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     private DefaultXYDataset m_dataSet;
     private JFreeChart m_chart;
     private File m_pngFile;
-    private File m_svgFile; // svg file (saved at each rendering) 
-    private SVGGraphics2D m_svgChart;
-    private ExportPictureWrapper m_picWrapper; 
-    
+  
     private DPeptideMatch m_previousPeptideMatch = null;
     
     private javax.swing.JPanel m_spectrumPanel;
 
+
+    @Override // declared in ProlineStudioCommons ImageExporterInterface
+	 public void generateSvgImage(String file) {
+	   	writeToSVG(file);
+	 }
+
+    @Override // declared in ProlineStudioCommons ImageExporterInterface
+	 public void generatePngImage(String file) {
+	   	writeToPNG(file);
+	 }
+
+	 @Override
+	 public String getSupportedFormats() {
+		 return "png,svg";
+	 }
+	 
     
+	 
+	 
     private RsetPeptideSpectrumAnnotations spectrumAnnotations= null;
     /**
      * Creates new form RsetPeptideSpectrumPanel
@@ -123,10 +134,12 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         plot.setRenderer(renderer);
         
         initComponents();
-
+        
         
     }
-
+    
+    
+     
    
     private void initComponents() {
         setLayout(new BorderLayout());
@@ -154,17 +167,20 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-        m_picWrapper = new ExportPictureWrapper();
-        m_picWrapper.setFile(m_svgFile);
+        //m_picWrapper = new ExportPictureWrapper();
+        //m_picWrapper.setFile(m_svgFile);
      
-        ExportButton exportImageButton = new ExportButton("Spectre", m_spectrumPanel, m_picWrapper);
+        ExportButton exportImageButton = new ExportButton("Spectre", (ImageExporterInterface) this);
         toolbar.add(exportImageButton);
         return toolbar;
 
     }
     
+  
+    
 
     
+ 
 	 public void setData(DPeptideMatch peptideMatch) {
 		   
 	       if (peptideMatch == m_previousPeptideMatch) {
@@ -176,17 +192,14 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 	        spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
 	        spectrumAnnotations.addAnnotations();
 	        
-	         writeToSVG();
-	         writeToPNG();
-	
+	    
 	 
 	  }
    
-	  public void writeToPNG() {
-		   m_pngFile = new File ("spectrum_tmp_3000x2000.png");
-		   m_picWrapper.setFile2(m_pngFile);
+	  public void writeToPNG(String fileName) {
+		   m_pngFile = new File (fileName);
 	   try {
-		    ChartUtilities.saveChartAsPNG(m_pngFile,m_chart,3000,2000);
+		    ChartUtilities.saveChartAsPNG(m_pngFile,m_chart,m_spectrumPanel.getWidth(),m_spectrumPanel.getHeight());
 	   } catch (IOException e) {
 		     e.printStackTrace();
 	   }
@@ -194,47 +207,47 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 		   
 	 }
 	
-	 public void writeToSVG() {  
-			writeToSVG_jfreesvg();
-			writeToSVG_batik();
+	  
+	
+	  
+	 public void writeToSVG(String file) {  
+		//	writeToSVG_jfreesvg();
+			writeToSVG_batik(file);
 			
 	 }   
 	    
-     public void writeToSVG_jfreesvg() {  
-
-			File f = new File("svg_temp.svg");
-			SVGGraphics2D g2 = new SVGGraphics2D(800, 600);
-	        Rectangle r = new Rectangle(0, 0,800,600);
-	        m_chart.draw(g2, r);
-	        m_svgChart = g2;
-	        m_svgFile = f;
-	        m_picWrapper.setFile(m_svgFile);
-	        
-	        try {
-				SVGUtils.writeToSVG(f, m_svgChart.getSVGElement());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}	
-
-		
-	}
+//     public void writeToSVG_jfreesvg() {  
+//
+//			File f = new File("svg_temp.svg");
+//			SVGGraphics2D g2 = new SVGGraphics2D(800, 600);
+//	        Rectangle r = new Rectangle(0, 0,800,600);
+//	        m_chart.draw(g2, r);
+//	        m_svgChart = g2;
+//	        m_svgFile = f;
+//	//        m_picWrapper.setFile(m_svgFile);
+//	        
+//	        try {
+//				SVGUtils.writeToSVG(f, m_svgChart.getSVGElement());
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}	
+//
+//		
+//	}
  
 	
-	public void writeToSVG_batik() {  
-		File f = new File("svg_temp_batik.svg");
-		m_svgFile = f;
-		m_picWrapper.setFile3( m_svgFile);
-		  
+	public void writeToSVG_batik(String fileName) {  
 	    DOMImplementation mySVGDOM= org.apache.batik.dom.GenericDOMImplementation.getDOMImplementation();
         Document document = mySVGDOM.createDocument(null, "svg", null);
         org.apache.batik.svggen.SVGGraphics2D my_svg_generator = new org.apache.batik.svggen.SVGGraphics2D(document);
-        m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 800,600), null);
+        //m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 800,600), null);
+        // draw a rectangle of the size that determines the scale of the axis graduations.
+        m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, m_spectrumPanel.getWidth(),m_spectrumPanel.getHeight()), null);
         
 		
 		try {
-			my_svg_generator.stream(f.getName());
+			my_svg_generator.stream(fileName);
 		} catch (SVGGraphics2DIOException e) {
-			
 			e.printStackTrace();
 		}
 	
@@ -389,12 +402,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 					    plot.getRangeAxis().setLowerBound(newMinY);
 					    plot.getRangeAxis().setUpperBound(newMaxY);
 						spectrumAnnotations.addAnnotations();
-						
-						// update svg graphics
-						writeToSVG();
-						writeToPNG();
-						//writeToWMF();
-				         
+						         
 				         //----
 						redrawInProgress = false;
 					}

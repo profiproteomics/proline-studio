@@ -18,6 +18,7 @@ import javax.persistence.EntityManager;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYLineAnnotation;
+import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.ValueMarker;
@@ -254,7 +255,9 @@ public class RsetPeptideSpectrumAnnotations {
 			double maxY = (float) plot.getRangeAxis().getUpperBound();
 			
 			
-			    
+			Color abc_serie_color = new Color(51, 153, 255);
+			Color xyz_serie_color = new Color(255, 85, 85);
+    
 
 			int j = 0;
 			// ************************************************************
@@ -308,13 +311,13 @@ public class RsetPeptideSpectrumAnnotations {
 
 			plot.clearRangeMarkers();
 			Marker target = new ValueMarker(maxY - (maxY - minY) * 0.25);
-			target.setPaint(new Color(255, 85, 85));
+			target.setPaint(xyz_serie_color);
 			target.setLabel(xyzSerieName);
 			target.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
 			target.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
 			plot.addRangeMarker(target);
 			Marker target2 = new ValueMarker(maxY - (maxY - minY) * 0.15);
-			target2.setPaint(new Color(51, 153, 255));
+			target2.setPaint(abc_serie_color);
 			target2.setLabel(abcSerieName);
 			target2.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
 			target2.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
@@ -413,7 +416,7 @@ public class RsetPeptideSpectrumAnnotations {
 				// place separators marks------
 				if (abcPrev != 0 && i>0) {
 					xyta = new XYTextAnnotation("|", abcPrev, maxY - (maxY - minY) * 0.15);
-					xyta.setPaint(new Color(51, 153, 255));
+					xyta.setPaint(abc_serie_color);
 					plot.addAnnotation(xyta);
 				}
 
@@ -431,10 +434,10 @@ public class RsetPeptideSpectrumAnnotations {
 					|| i == (sizeABCserie-1	)	        ) {// 2 consecutives fragments matching,
 						// or first element or last element, then highlight the AA
 						xyta.setPaint(Color.white);
-						xyta.setBackgroundPaint(new Color(51, 153, 255));
+						xyta.setBackgroundPaint(abc_serie_color);
 						
 					} else {
-						xyta.setPaint(new Color(51, 153, 255));
+						xyta.setPaint(abc_serie_color);
 						xyta.setBackgroundPaint(Color.white);
 					}
 					xyta.setFont(new Font(null, Font.BOLD, 11));
@@ -443,14 +446,21 @@ public class RsetPeptideSpectrumAnnotations {
 					abcPrevFound = true;
 				
 					if(!(i == sizeABCserie-1)) { // do not draw triangle and number if last element
-					// draw the triangle above the b number peak
-						xyta = new XYTextAnnotation("" /*"\u25BE"*/, fragTableTheo[1][i], fragTable[0][i] + (maxY - minY) * 0.055);
-						xyta.setPaint(new Color(51, 153, 255));
-						plot.addAnnotation(xyta);
+						// draw the triangle above the b number peak &
 						// draw the b number over the peak
-						xyta = new XYTextAnnotation(abcSerieName + (i + 1), fragTableTheo[1][i], fragTable[0][i] + (maxY - minY) * 0.08);
-						xyta.setPaint(new Color(51, 153, 255));
-						plot.addAnnotation(xyta);
+						final XYPointerAnnotation pointer = new XYPointerAnnotation(abcSerieName + (i + 1), 
+								fragTableTheo[1][i], 
+								fragTable[0][i] + (maxY - minY) * 0.055,
+                                6.0 * Math.PI / 4.0);
+						pointer.setBaseRadius(5.0);
+						pointer.setTipRadius(0.0);
+						pointer.setArrowWidth(2);
+						pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
+						pointer.setArrowPaint(abc_serie_color);;
+						pointer.setPaint(abc_serie_color);
+						pointer.setTextAnchor(TextAnchor.BOTTOM_CENTER);
+						plot.addAnnotation(pointer);
+					
 						// dashed vertical bar over the b number
 						float yAboveBar = (float) ((maxY - minY) * 0.091);
 						float dash[] = { 5.0f };
@@ -458,7 +468,7 @@ public class RsetPeptideSpectrumAnnotations {
 						if (fragTable[0][i] + yAboveBar < fragTableTheo[0][i]) { 
 							BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
 							XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[1][i], fragTable[0][i] + yAboveBar, fragTableTheo[1][i],
-									fragTableTheo[0][i], stk, new Color(51, 153, 255));
+									fragTableTheo[0][i], stk, abc_serie_color);
 							plot.addAnnotation(line);
 						}
 					}
@@ -475,7 +485,7 @@ public class RsetPeptideSpectrumAnnotations {
 						abcPrev = fragTableTheo[1][0] - getMassFromAminoAcid(peptideSequence.charAt(i));
 					}
 					xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTableTheo[1][i]) / 2, maxY - (maxY - minY) * 0.15);
-					xyta.setPaint(new Color(51, 153, 255));
+					xyta.setPaint(abc_serie_color);
 					xyta.setFont(new Font(null, Font.BOLD, 11));
 					xyta.setBackgroundPaint(Color.white);
 					plot.addAnnotation(xyta);
@@ -496,7 +506,7 @@ public class RsetPeptideSpectrumAnnotations {
 				// place separators marks------
 				if (xyzPrev != 0) {
 					xyta = new XYTextAnnotation("|", xyzPrev, maxY - (maxY - minY) * 0.25);
-					xyta.setPaint(new Color(255, 85, 85));
+					xyta.setPaint(xyz_serie_color);
 					plot.addAnnotation(xyta);
 				}
 
@@ -514,10 +524,10 @@ public class RsetPeptideSpectrumAnnotations {
 					|| i == 0		        ) {// 2 consecutives fragments matching,
 						// or first element or last element, then highlight the AA
 						xyta.setPaint(Color.white);
-						xyta.setBackgroundPaint(new Color(255, 85, 85));
+						xyta.setBackgroundPaint(xyz_serie_color);
 						
 					} else {
-						xyta.setPaint(new Color(255, 85, 85));
+						xyta.setPaint(xyz_serie_color);
 						xyta.setBackgroundPaint(Color.white);
 					}
 					xyta.setFont(new Font(null, Font.BOLD, 11));
@@ -526,14 +536,25 @@ public class RsetPeptideSpectrumAnnotations {
 					xyzPrevFound = true;
 				
 					if(!(i == 0)) { // do not draw triangle and number if last element
-					// draw the triangle above the b number peak
+						// 	draw the b number over the peak &
+						// draw the triangle above the b number peak
 						xyta = new XYTextAnnotation("" /*"\u25BE"*/, fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.01);
-						xyta.setPaint(new Color(255, 85, 85));
+						xyta.setPaint(xyz_serie_color);
 						plot.addAnnotation(xyta);
-						// draw the b number over the peak
-						xyta = new XYTextAnnotation(xyzSerieName + (sizeXYZserie - i), fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.035);
-						xyta.setPaint(new Color(255, 85, 85));
-						plot.addAnnotation(xyta);
+						final XYPointerAnnotation pointer = new XYPointerAnnotation(xyzSerieName + (sizeXYZserie - i), 
+								fragTableTheo[6][i], 
+								fragTable[5][i] + (maxY - minY) * 0.01,
+                                6.0 * Math.PI / 4.0);
+						pointer.setBaseRadius(5.0);
+						pointer.setTipRadius(0.0);
+						pointer.setArrowWidth(2);
+						pointer.setArrowPaint(xyz_serie_color);;
+						pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
+						pointer.setPaint(xyz_serie_color);
+						pointer.setTextAnchor(TextAnchor.BOTTOM_CENTER);
+						plot.addAnnotation(pointer);
+
+						
 						// dashed vertical bar over the b number
 						float yAboveBar = (float) ((maxY - minY) * 0.041);
 						float dash[] = { 5.0f };
@@ -541,7 +562,7 @@ public class RsetPeptideSpectrumAnnotations {
 						if (fragTable[5][i] + yAboveBar < fragTableTheo[5][i]) { 
 							BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
 							XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[6][i], fragTable[5][i] + yAboveBar, fragTableTheo[6][i],
-									fragTableTheo[5][i], stk, new Color(255, 85, 85));
+									fragTableTheo[5][i], stk, xyz_serie_color);
 							plot.addAnnotation(line);
 						}
 					}
@@ -558,7 +579,7 @@ public class RsetPeptideSpectrumAnnotations {
 						xyzPrev = fragTableTheo[6][i ] - getMassFromAminoAcid(peptideSequence.charAt(i));
 					}
 					xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTableTheo[6][i]) / 2, maxY - (maxY - minY) * 0.25);
-					xyta.setPaint(new Color(255, 85, 85));
+					xyta.setPaint(xyz_serie_color);
 					xyta.setFont(new Font(null, Font.BOLD, 11));
 					xyta.setBackgroundPaint(Color.white);
 					plot.addAnnotation(xyta);

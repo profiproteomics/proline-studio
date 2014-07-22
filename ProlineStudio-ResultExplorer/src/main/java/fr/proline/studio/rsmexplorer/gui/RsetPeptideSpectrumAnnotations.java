@@ -415,10 +415,12 @@ public class RsetPeptideSpectrumAnnotations {
 				
 				// place separators marks------
 				if (abcPrev != 0 && i>0) {
-					xyta = new XYTextAnnotation("|", abcPrev, maxY - (maxY - minY) * 0.15);
-					xyta.setPaint(abc_serie_color);
-					plot.addAnnotation(xyta);
-				}
+					float dash[] = { 10.0f };
+					BasicStroke stk = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+					XYLineAnnotation line = new XYLineAnnotation(abcPrev, maxY - (maxY - minY) *0.14,
+							abcPrev, maxY - (maxY - minY) *0.16
+							, stk, abc_serie_color);
+					plot.addAnnotation(line);				}
 
 				// draw the outlined AA : B series
 				if((fragTable[1][i] != 0) || ((i == sizeABCserie-1) && abcPrevFound) ) // if some data
@@ -505,9 +507,12 @@ public class RsetPeptideSpectrumAnnotations {
 				
 				// place separators marks------
 				if (xyzPrev != 0) {
-					xyta = new XYTextAnnotation("|", xyzPrev, maxY - (maxY - minY) * 0.25);
-					xyta.setPaint(xyz_serie_color);
-					plot.addAnnotation(xyta);
+					float dash[] = { 10.0f };
+					BasicStroke stk = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+					XYLineAnnotation line = new XYLineAnnotation(xyzPrev, maxY - (maxY - minY) *0.24,
+							xyzPrev, maxY - (maxY - minY) *0.26
+							, stk, xyz_serie_color);
+					plot.addAnnotation(line);
 				}
 
 				// draw the outlined AA : Y series

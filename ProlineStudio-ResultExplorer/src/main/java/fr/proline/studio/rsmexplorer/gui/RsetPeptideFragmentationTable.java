@@ -7,6 +7,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
@@ -510,16 +512,12 @@ public class RsetPeptideFragmentationTable extends JPanel {
                 }
             } else if (columnIndex > m_fragSer.length + 2 && columnIndex < m_columnNames.length)// return intensity value
             {
-                //return(m_fragMa[columnIndex - 3 - m_fragSer.length ].intensity);
-                //return(m_fragMa[columnIndex - 3 - m_fragSer.length].intensity);
+                
                 if (m_matrixIntensity[rowIndex][columnIndex - m_fragSer.length - 1] > 0) {
-                    return (double) Math.round(m_matrixIntensity[rowIndex][columnIndex - m_fragSer.length - 1] * 10000) / 10000;
+                   return  new BigDecimal(m_matrixIntensity[rowIndex][columnIndex- m_fragSer.length - 1], new MathContext(3));
                 } else {
                     return null;
                 }
-
-
-                //return(m_fragSer[columnIndex - 2 - m_fragSer.length - 3].intensity[rowIndex]);
             } else {
                 return null;
             }

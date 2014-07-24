@@ -643,7 +643,7 @@ public class IdentificationTree extends RSMTree implements TreeWillExpandListene
             if (m_mainPopup == null) {
 
                 // create the actions
-                m_mainActions = new ArrayList<>(11);  // <--- get in sync
+                m_mainActions = new ArrayList<>(12);  // <--- get in sync
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction();
                 m_mainActions.add(displayRsetAction);
@@ -669,6 +669,9 @@ public class IdentificationTree extends RSMTree implements TreeWillExpandListene
                 
                 ChangeTypicalProteinAction changeTypicalProteinAction = new ChangeTypicalProteinAction();
                 m_mainActions.add(changeTypicalProteinAction);
+                
+                GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
+                m_mainActions.add(generateSpectrumMatchesAction);
                 
                 //CompareWithSCAction computeSCAction = new CompareWithSCAction(); //JPM.BETA : removed Spectral count for beta
                 //m_mainActions.add(computeSCAction); 

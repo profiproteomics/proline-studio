@@ -115,7 +115,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         float maxXvalue = 0;
         maxXvalue = (float) m_chart.getXYPlot().getDomainAxis().getUpperBound();
         
-        m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(0, maxXvalue * 1.60));
+        //m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(0, maxXvalue * 1.60));
         
         
         plot.setBackgroundPaint(Color.white);
@@ -306,7 +306,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         }
         
         
-        
+        double precursorMass = spectrum.getPrecursorMoz()*spectrum.getPrecursorCharge(); // used for setting spectrum display range
+		        
         
         ByteBuffer intensityByteBuffer = ByteBuffer.wrap(intensityByteArray).order(ByteOrder.LITTLE_ENDIAN);
         FloatBuffer intensityFloatBuffer = intensityByteBuffer.asFloatBuffer();
@@ -351,14 +352,16 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         final XYPlot plot = m_chart.getXYPlot();
         //p.setRenderer(renderer);
 
-        plot.getDomainAxis().setAutoRange(true);
-        plot.getRangeAxis().setAutoRange(true);
-        spectrumMinX = plot.getDomainAxis().getLowerBound();
-        spectrumMaxX = plot.getDomainAxis().getUpperBound();
-        spectrumMinY = plot.getRangeAxis().getLowerBound();
-        spectrumMaxY = plot.getRangeAxis().getUpperBound();
-        plot.getDomainAxis().setRange(new Range(0, spectrumMaxX), false, true);
-        plot.getRangeAxis().setRange(new Range(0, spectrumMaxY), false, true);
+    	plot.getDomainAxis().setAutoRange(true);
+		plot.getRangeAxis().setAutoRange(true);	
+		spectrumMinX = 0; //plot.getDomainAxis().getLowerBound();
+		spectrumMaxX = precursorMass;
+		 //plot.getDomainAxis().getUpperBound();
+		spectrumMinY = 0;//plot.getRangeAxis().getLowerBound();
+		spectrumMaxY =  plot.getRangeAxis().getUpperBound();
+		plot.getDomainAxis().setRange(new Range(0,spectrumMaxX), false, true); 
+		plot.getRangeAxis().setRange(new Range(0,spectrumMaxY), false, true);
+
         
         plot.addChangeListener(new PlotChangeListener() {
             

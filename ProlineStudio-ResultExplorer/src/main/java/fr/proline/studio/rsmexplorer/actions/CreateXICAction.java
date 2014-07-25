@@ -1,15 +1,25 @@
 package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.RunXICTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
+import fr.proline.studio.rsmexplorer.node.QuantitationTree;
+import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import java.util.*;
 import javax.swing.JOptionPane;
+import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
@@ -82,6 +92,10 @@ public class CreateXICAction extends AbstractRSMAction {
             
             m_logger.debug(" Will Compute XIC Quanti with on "+ ((List)expParams.get("biological_samples")).size()+"samples.");              
 
+            QuantitationTree tree = QuantitationTree.getCurrentTree();
+            final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+            final RSMDataSetNode[] _quantitationNode = new RSMDataSetNode[1];
+      
             // CallBack for Xic Quantitation Service
             AbstractServiceCallback xicCallback = new AbstractServiceCallback() {
 
@@ -94,15 +108,52 @@ public class CreateXICAction extends AbstractRSMAction {
                 public void run(boolean success) {
                     if (success) {
                         m_logger.debug(" XIC SUCCESS : "+_xicQuantiDataSetId[0]);
+                        final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
                         
+                        AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
+
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return true;
+                            }
+
+                            @Override
+                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                if (success) {
+                                    ((DataSetData) _quantitationNode[0].getData()).setDataset(readDatasetList.get(0));
+                                    _quantitationNode[0].setIsChanging(false);
+                                    treeModel.nodeChanged(_quantitationNode[0]);
+                                } else {
+                                    treeModel.removeNodeFromParent(_quantitationNode[0]);
+                                }
+                            }
+                        };
+                        
+                        
+                        DatabaseDataSetTask task = new DatabaseDataSetTask(readDatasetCallback);
+                        task.initLoadDataset(_xicQuantiDataSetId[0], readDatasetList);
+                        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+                        
+
                     } else {
                         m_logger.debug(" XIC ERROR ");
-
+                        treeModel.removeNodeFromParent(_quantitationNode[0]);
                     }
                 }
             };
     
             RunXICTask task = new RunXICTask(xicCallback, pID, _quantiDS.getName(), quantParams,  expParams, _xicQuantiDataSetId);          
+
+            // add node for the quantitation dataset which will be created
+            DataSetData quantitationData = new DataSetData(_quantiDS.getName(), Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION );
+                
+            final RSMDataSetNode quantitationNode = new RSMDataSetNode(quantitationData);
+            _quantitationNode[0] = quantitationNode;
+            quantitationNode.setIsChanging(true);
+            
+            RSMNode rootNode = (RSMNode) treeModel.getRoot();
+            treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount());
+            
             AccessServiceThread.getAccessServiceThread().addTask(task);
             
          } //End OK entered         

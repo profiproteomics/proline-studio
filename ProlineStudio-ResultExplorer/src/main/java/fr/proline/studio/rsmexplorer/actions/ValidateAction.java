@@ -13,11 +13,13 @@ import fr.proline.studio.rsmexplorer.gui.dialog.ValidationDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.dpm.task.ChangeTypicalProteinTask;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -90,8 +92,7 @@ public class ValidateAction extends AbstractRSMAction {
 
             // retrieve parameters
             final HashMap<String, String> parserArguments = dialog.getArguments();
-            final String regex = dialog.getTypicalProteinRegex();
-            final boolean regexOnAccession = dialog.isTYpicalProteinOnAccession();
+            final List<ChangeTypicalRule> changeTypicalRules  = dialog.getChangeTypicalRules();
             final String scoringType = dialog.getScoringType();
 
             IdentificationTree tree = IdentificationTree.getCurrentTree();
@@ -120,7 +121,7 @@ public class ValidateAction extends AbstractRSMAction {
                         @Override
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                            askValidation(dataSetNode, parserArguments, regex, regexOnAccession, scoringType);
+                            askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType);
                         }
                     };
 
@@ -129,7 +130,7 @@ public class ValidateAction extends AbstractRSMAction {
                     AccessDatabaseThread.getAccessDatabaseThread().addTask(taskRemoveValidation);
                 } else {
                     // there is no result summary, we start validation at once
-                    askValidation(dataSetNode, parserArguments, regex, regexOnAccession, scoringType);
+                    askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType);
                 }
 
 
@@ -140,7 +141,7 @@ public class ValidateAction extends AbstractRSMAction {
         }
     }
 
-    private void askValidation(final RSMDataSetNode dataSetNode, HashMap<String, String> parserArguments, final String regex, final boolean regexOnAccession, final String scoringType) {
+    private void askValidation(final RSMDataSetNode dataSetNode, HashMap<String, String> parserArguments, final List<ChangeTypicalRule> changeTypicalRules, final String scoringType) {
 
         final DDataset d = dataSetNode.getDataset();
 
@@ -158,7 +159,7 @@ public class ValidateAction extends AbstractRSMAction {
             public void run(boolean success) {
                 if (success) {
 
-                    updateDataset(dataSetNode, d, _resultSummaryId[0], getTaskInfo(), regex, regexOnAccession);
+                    updateDataset(dataSetNode, d, _resultSummaryId[0], getTaskInfo(), changeTypicalRules);
 
 
                 } else {
@@ -178,7 +179,7 @@ public class ValidateAction extends AbstractRSMAction {
         AccessServiceThread.getAccessServiceThread().addTask(task);
     }
 
-    private void changeTypicalProtein(final RSMDataSetNode datasetNode, String regex, boolean regexOnAccession) {
+    private void changeTypicalProtein(final RSMDataSetNode datasetNode, List<ChangeTypicalRule> changeTypicalRules) {
         
                 final DDataset d = datasetNode.getDataset();
 
@@ -202,12 +203,11 @@ public class ValidateAction extends AbstractRSMAction {
                     }
                 };
 
-
-                ChangeTypicalProteinTask task = new ChangeTypicalProteinTask(callback, d, regex, regexOnAccession);
+                ChangeTypicalProteinTask task = new ChangeTypicalProteinTask(callback, d, changeTypicalRules);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
     }
     
-    private void updateDataset(final RSMDataSetNode datasetNode, final DDataset d, long resultSummaryId, TaskInfo taskInfo, final String regex, final boolean regexOnAccession) {
+    private void updateDataset(final RSMDataSetNode datasetNode, final DDataset d, long resultSummaryId, TaskInfo taskInfo, final List<ChangeTypicalRule> changeTypicalRules) {
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -219,8 +219,8 @@ public class ValidateAction extends AbstractRSMAction {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                if (success && (regex!=null)) {
-                    changeTypicalProtein(datasetNode, regex, regexOnAccession);
+                if (success && changeTypicalRules!=null && !changeTypicalRules.isEmpty()) {
+                    changeTypicalProtein(datasetNode, changeTypicalRules);
                 } else {
 
                     datasetNode.setIsChanging(false);

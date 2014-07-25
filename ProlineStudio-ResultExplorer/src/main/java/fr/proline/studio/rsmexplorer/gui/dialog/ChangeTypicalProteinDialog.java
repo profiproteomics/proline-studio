@@ -1,17 +1,15 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
-import java.util.prefs.Preferences;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
+import java.util.List;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
-import org.openide.util.NbPreferences;
+import javax.swing.JTextArea;
 
 /**
  *
@@ -20,17 +18,23 @@ import org.openide.util.NbPreferences;
 public class ChangeTypicalProteinDialog extends DefaultDialog {
     
     private static ChangeTypicalProteinDialog m_singletonDialog = null;
-
-    public static final String[] REGEX_TARGET_OPTIONS = { "Protein Accession", "Protein Description" };
+    private ChangeTypicalProteinPanel changePanel = null;
+//
+//    public static final String[] REGEX_TARGET_OPTIONS = { "Protein Accession", "Protein Description" };
+//    private static final Integer NBR_RULES = 3;
+//    private JTextField[] m_regexTextFields = null;
+//    private JComboBox[] m_regexTargetComboboxs = null;
     
-    private JTextField m_regexTextField = null;
-    private JComboBox m_regexTargetCombobox = null;
+//    private List<ChangeTypicalRule> m_changeTypicalRules = null;
+    
+    
+//    private JTextField m_regexTextField = null;
+//    private JComboBox m_regexTargetCombobox = null;
     
     public static ChangeTypicalProteinDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new ChangeTypicalProteinDialog(parent);
         }
-
 
         return m_singletonDialog;
     }
@@ -41,16 +45,21 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
         setTitle("Change Typical Protein");
         
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:changetypicalprot");
-        
+//        m_regexTextFields = new JTextField[NBR_RULES];
+//        m_regexTargetComboboxs = new JComboBox[NBR_RULES];
+//        m_changeTypicalRules = new ArrayList<>(NBR_RULES);
         setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
         setStatusVisible(false);
 
-        setInternalComponent(createInternalPanel());
+        changePanel = new ChangeTypicalProteinPanel();
+        setInternalComponent(changePanel);
+//        setInternalComponent(createInternalPanel());
 
         restoreInitialParameters();
     }
     
     private JPanel createInternalPanel() {
+        
         JPanel internalPanel = new JPanel(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -60,67 +69,42 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
 
         c.gridx = 0;
         c.gridy = 0;
-        internalPanel.add(new JLabel("Typical Protein Match :"), c);
-
-        c.gridx++;
-        m_regexTextField = new JTextField(16);
-        internalPanel.add(m_regexTextField, c);
-
-        c.gridx++;
-        internalPanel.add(new JLabel("on"), c);
+        JTextArea helpTxt = new JTextArea("Specify rules to satisfy for choosing typical protein, in priority order");
+        helpTxt.setRows(2);
+        helpTxt.setForeground(Color.gray);
+        internalPanel.add(helpTxt, c);
         
-        m_regexTargetCombobox = new JComboBox(REGEX_TARGET_OPTIONS);
-        c.gridx++;
-        internalPanel.add(m_regexTargetCombobox, c);
-        
+        changePanel = new ChangeTypicalProteinPanel();
         c.gridy++;
-        c.gridx = 1;
-        JLabel regexHelpLabel = new JLabel("( * = any string ; ? = any character )");
-        regexHelpLabel.setForeground(Color.gray);
-        internalPanel.add(regexHelpLabel, c);
+        c.gridwidth=2;
+        internalPanel.add(changePanel, c);
         
         return internalPanel;
     }
     
-    public String getRegex() {
-        return wildcardToRegex(m_regexTextField.getText().trim());
-    }
     
-    private String wildcardToRegex(String text) {
-        String escapedText = "^"+escapeRegex(text)+"$";
+    
+    public List<ChangeTypicalRule> getChangeTypicalRules() {
+        return changePanel.getChangeTypicalRules();
+//        
+//        for(int i=0; i<NBR_RULES; i++){
+//            if(!m_regexTextFields[i].getText().trim().isEmpty()){
+//                m_changeTypicalRules.set(i, new ChangeTypicalRule(wildcardToRegex(m_regexTextFields[i].getText().trim()), m_regexTargetComboboxs[i].getSelectedIndex() == 0));
+//            }
+//        }
+//        return m_changeTypicalRules;
+    }
         
-        String wildcardsFilter = escapedText.replaceAll("\\*", ".*").replaceAll("\\?", ".");
-        return wildcardsFilter;
-    } 
-    private String escapeRegex(String s) {
-
-        int len = s.length();
-        if (len == 0) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder(len * 2);
-        for (int i = 0; i < len; i++) {
-            char c = s.charAt(i);
-            if ("[](){}.+$^|#\\".indexOf(c) != -1) {
-                sb.append("\\");
-            }
-            sb.append(c);
-        }
-        return sb.toString();
-    }
-    
-    public boolean regexOnAccession() {
-        return (m_regexTargetCombobox.getSelectedIndex() == 0);
-    }
+     
     
     @Override
     protected boolean okCalled() {
-        Preferences preferences = NbPreferences.root();
-        preferences.put("TypicalProteinRegex", m_regexTextField.getText().trim());
-        
-        preferences.putBoolean("TypicalProteinRegexOnAccession", (m_regexTargetCombobox.getSelectedIndex() == 0));
-
+//        Preferences preferences = NbPreferences.root();
+//        for(int i=0; i<NBR_RULES; i++){
+//            preferences.put("TypicalProteinRegex_"+i, m_regexTextFields[i].getText().trim());        
+//            preferences.putBoolean("TypicalProteinRegexOnAccession_"+i, (m_regexTargetComboboxs[i].getSelectedIndex() == 0));
+//        }
+        changePanel.savePreference();
         return true;
     }
 
@@ -130,17 +114,18 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
     }
 
     private void restoreInitialParameters() {
-        Preferences preferences = NbPreferences.root();
-        String regex = preferences.get("TypicalProteinRegex", "*");
-        m_regexTextField.setText(regex);
-        
-        boolean regexOnAccession = preferences.getBoolean("TypicalProteinRegexOnAccession", Boolean.TRUE);
-        if (regexOnAccession) {
-            m_regexTargetCombobox.setSelectedIndex(0);
-        } else {
-            m_regexTargetCombobox.setSelectedIndex(1);
-        }
-
+        changePanel.restoreInitialParameters();
+//        Preferences preferences = NbPreferences.root();
+//        for(int i=0; i<NBR_RULES; i++){
+//            String regex = preferences.get("TypicalProteinRegex_"+i, "*");   
+//            m_regexTextFields[i].setText(regex);
+//            boolean regexOnAccession = preferences.getBoolean("TypicalProteinRegexOnAccession_"+i, Boolean.TRUE);
+//            if (regexOnAccession) {
+//                m_regexTargetComboboxs[i].setSelectedIndex(0);
+//            } else {
+//                m_regexTargetComboboxs[i].setSelectedIndex(1);
+//            }
+//        }
     }
     
 }

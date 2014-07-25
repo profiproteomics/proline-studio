@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.ChangeTypicalProteinTask;
@@ -14,6 +13,8 @@ import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.studio.dpm.data.ChangeTypicalRule;
+import java.util.List;
 
 /**
  *
@@ -38,8 +39,7 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
 
         if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
 
-            String regex = dialog.getRegex();
-            boolean regexOnAccession = dialog.regexOnAccession();
+            List<ChangeTypicalRule> rules = dialog.getChangeTypicalRules();
 
             IdentificationTree tree = IdentificationTree.getCurrentTree();
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
@@ -83,7 +83,7 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
                 };
 
 
-                ChangeTypicalProteinTask task = new ChangeTypicalProteinTask(callback, d, regex, regexOnAccession);
+                ChangeTypicalProteinTask task = new ChangeTypicalProteinTask(callback, d, rules);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
 
 

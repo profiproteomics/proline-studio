@@ -103,7 +103,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
         m_dataSet = new DefaultXYDataset();
         m_chart = ChartFactory.createXYLineChart("", "m/z", "intensity", m_dataSet, PlotOrientation.VERTICAL, true, true, false);
-        
+        m_chart.setNotify(false);
         m_chart.removeLegend();
         m_chart.setBackgroundPaint(Color.white);
         TextTitle textTitle = m_chart.getTitle();
@@ -183,10 +183,11 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             return;
         }
         m_previousPeptideMatch = peptideMatch;
-        
+        m_chart.setNotify(false);
         constructSpectrumChart(peptideMatch);
         spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
         spectrumAnnotations.addAnnotations();
+        m_chart.setNotify(true);
     }
     
     public void writeToPNG(String fileName) {

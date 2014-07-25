@@ -72,6 +72,8 @@ public class IconManager {
         EXPORT,
         EXPORT_IMAGE,
         QUANT,
+        QUANT_SC,
+        QUANT_XIC,
         CHART,
         BOOK,
         BOOK_OPEN,
@@ -299,6 +301,10 @@ public class IconManager {
                 return "fr/proline/studio/images/chart.png";
             case QUANT:
                 return "fr/proline/studio/images/chart-quant.png";
+            case QUANT_XIC:
+                return "fr/proline/studio/images/chart-quantXic.png";
+            case QUANT_SC:
+                return "fr/proline/studio/images/chart-quantSC.png";                
             case BOOK:
                 return "fr/proline/studio/images/book.png";
             case BOOK_OPEN:

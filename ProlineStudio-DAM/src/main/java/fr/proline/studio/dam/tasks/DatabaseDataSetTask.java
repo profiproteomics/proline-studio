@@ -31,6 +31,7 @@ import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import javax.persistence.NoResultException;
 
 /**
  * Used to load dataset in two cases :
@@ -682,7 +683,25 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             dataSetQuery.setParameter("dsId", m_datasetId);
             DDataset ddataSet = dataSetQuery.getSingleResult();
             m_datasetList.add(ddataSet);
-
+            
+            Dataset.DatasetType datasetType = ddataSet.getType();
+            if(datasetType.equals(Dataset.DatasetType.AGGREGATE)){
+                 // Load Aggregation
+                TypedQuery<Aggregation>  aggregationQuery = entityManagerUDS.createQuery("SELECT d.aggregation FROM Dataset d WHERE d.id = :dsId", Aggregation.class);
+                aggregationQuery.setParameter("dsId", m_datasetId);
+                Aggregation aggregation = aggregationQuery.getSingleResult();
+                ddataSet.setAggregation(aggregation);
+            }
+            
+            if(datasetType.equals(Dataset.DatasetType.QUANTITATION)){
+                // Load QuantitationMethod
+                TypedQuery<QuantitationMethod> quantitationQuery = entityManagerUDS.createQuery("SELECT d.method FROM Dataset d WHERE d.id = :dsId", QuantitationMethod.class);
+                quantitationQuery.setParameter("dsId", m_datasetId);
+                QuantitationMethod quantitationMethod = quantitationQuery.getSingleResult();
+                ddataSet.setQuantitationMethod(quantitationMethod);
+             } 
+            
+            entityManagerUDS.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);

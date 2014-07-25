@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.node;
 
-import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.rsmexplorer.actions.*;
 import java.awt.event.MouseEvent;
@@ -107,14 +106,19 @@ public class QuantitationTree extends RSMTree {
          } else {
              if (m_mainPopup == null) {
                  // create the actions
-                 m_mainActions = new ArrayList<>(2);  // <--- get in sync
+                 m_mainActions = new ArrayList<>(4);  // <--- get in sync
 
                  RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
                  m_mainActions.add(retrieveSCDataAction);
 
-                 ExportXICAction exportXICAction = new ExportXICAction();
-                 m_mainActions.add(exportXICAction);
+                 ExportXICAction exportXICActionIons = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPEP_IONS);
+                 m_mainActions.add(exportXICActionIons);
                  
+                 ExportXICAction exportXICActionPep = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPEPS);
+                 m_mainActions.add(exportXICActionPep);
+                 
+                 ExportXICAction exportXICActionProtSet = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPROT_SETS);
+                 m_mainActions.add(exportXICActionProtSet);
                  
 
                  // add actions to popup

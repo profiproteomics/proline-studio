@@ -477,7 +477,18 @@ public class CreateXICDialog extends DefaultDialog {
                         setStatus(true, "You must specify at least one identifications summary for each sample.");
                         highlight(SetSampleAnalysisPanel.getPanel());
                         return false;
-                    }
+                    } else {
+                         //Iterate over Samples Analysis  => RSMs
+                        Enumeration splAnalysis = splNode.children();
+                        while (splAnalysis.hasMoreElements()) {
+                            RSMNode splAnalysisNode = (RSMNode) splAnalysis.nextElement();
+                            if (splAnalysisNode.getChildCount() != 1 ||  ((RunInfoData)((RSMNode)splAnalysisNode.getChildAt(0)).getData()).getRawFile()==null) {
+                                setStatus(true, "You must specify a Raw(meDb) File for each identification.");
+                                highlight(SetSampleAnalysisPanel.getPanel());
+                                return false;   
+                            }
+                        }                        
+                    } //End found Analysis for sample
                 }
             }
 

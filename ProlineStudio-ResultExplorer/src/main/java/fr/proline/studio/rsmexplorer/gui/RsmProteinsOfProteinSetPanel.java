@@ -98,14 +98,14 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
         
         
-        m_proteinTable.displayColumnAsPercentage(ProteinTableModel.COLTYPE_PROTEIN_SCORE);
-        TableColumn accColumn = m_proteinTable.getColumnModel().getColumn(ProteinTableModel.COLTYPE_PROTEIN_NAME);
-        URLCellRenderer renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", ProteinTableModel.COLTYPE_PROTEIN_NAME);
+        m_proteinTable.displayColumnAsPercentage(ProteinTableModel.Column.PROTEIN_SCORE.ordinal());
+        TableColumn accColumn = m_proteinTable.getColumnModel().getColumn(ProteinTableModel.Column.PROTEIN_NAME.ordinal());
+        URLCellRenderer renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", ProteinTableModel.Column.PROTEIN_NAME.ordinal());
         accColumn.setCellRenderer(renderer);
         m_proteinTable.addMouseListener(renderer);
         
         // hide the id column  (must be done after the URLCellRenderer is set)
-        m_proteinTable.getColumnExt(ProteinTableModel.COLTYPE_PROTEIN_ID).setVisible(false);
+        m_proteinTable.getColumnExt(ProteinTableModel.Column.PROTEIN_ID.ordinal()).setVisible(false);
         
         c.gridx = 0;
         c.gridy = 0;

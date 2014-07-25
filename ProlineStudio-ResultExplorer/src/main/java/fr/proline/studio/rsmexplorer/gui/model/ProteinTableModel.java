@@ -14,14 +14,24 @@ import java.util.ArrayList;
  */
 public class ProteinTableModel extends FilterTableModel {
 
-    public static final int COLTYPE_PROTEIN_ID = 0;
-    public static final int COLTYPE_PROTEIN_NAME = 1;
-    public static final int COLTYPE_PROTEIN_DESCRIPTION = 2;
-    public static final int COLTYPE_SAMESET_SUBSET = 3;
-    public static final int COLTYPE_PROTEIN_SCORE = 4;
-    public static final int COLTYPE_PROTEIN_PEPTIDES_COUNT = 5;
-    public static final int COLTYPE_PROTEIN_MASS = 6;
-    private static final String[] m_columnNames = {"Id", "Protein", "Description", "Sameset / Subset", "Score", "Peptides", "Mass"};
+    public enum Column {
+        PROTEIN_ID("Id", Long.class),
+        PROTEIN_NAME("Protein", String.class),
+        PROTEIN_DESCRIPTION("Description", String.class),
+        SAMESET_SUBSET("Sameset / Subset", Sameset.class),
+        PROTEIN_SCORE("Score", Float.class),
+        PROTEIN_PEPTIDES_COUNT("Peptides", Integer.class),
+        PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT("Unique Seq.", Integer.class),
+        PROTEIN_MASS("Mass", Float.class);
+        
+        String name; 
+        Class clazz;
+        
+        Column(String n, Class cl) {
+            name = n; 
+            clazz = cl;
+        }
+    }
      
     private DProteinMatch[] m_sameSetMatches = null;
     private DProteinMatch[] m_subSetMatches = null;
@@ -52,18 +62,18 @@ public class ProteinTableModel extends FilterTableModel {
 
     @Override
     public int getColumnCount() {
-        return m_columnNames.length;
+        return Column.values().length;
     }
 
     @Override
     public String getColumnName(int col) {
-        return m_columnNames[col];
+        return Column.values()[col].name;
     }
 
     @Override
     public String getToolTipForHeader(int col) {
 
-        if (col == COLTYPE_SAMESET_SUBSET) {
+        if (col == Column.SAMESET_SUBSET.ordinal()) {
             String urlTypical = IconManager.getURLForIcon(IconManager.IconType.TYPICAL);
             String urlSameset = IconManager.getURLForIcon(IconManager.IconType.SAME_SET);
             String urlSubset = IconManager.getURLForIcon(IconManager.IconType.SUB_SET);
@@ -77,21 +87,7 @@ public class ProteinTableModel extends FilterTableModel {
 
     @Override
     public Class getColumnClass(int col) {
-        switch (col) {
-            case COLTYPE_PROTEIN_ID:
-                return Long.class;
-            case COLTYPE_PROTEIN_NAME:
-            case COLTYPE_PROTEIN_DESCRIPTION:
-                return String.class;
-            case COLTYPE_PROTEIN_PEPTIDES_COUNT:
-                return Integer.class;
-            case COLTYPE_PROTEIN_MASS:
-            case COLTYPE_PROTEIN_SCORE:
-                return Float.class;
-            case COLTYPE_SAMESET_SUBSET:
-                return Sameset.class;
-        }
-        return null;
+        return Column.values()[col].clazz;
     }
 
     @Override
@@ -113,14 +109,14 @@ public class ProteinTableModel extends FilterTableModel {
         // Retrieve Protein Match
         DProteinMatch proteinMatch = getProteinMatch(row);
 
-        switch (col) {
-            case COLTYPE_PROTEIN_ID:
+        switch (Column.values()[col]) {
+            case PROTEIN_ID:
                 return proteinMatch.getId();
-            case COLTYPE_PROTEIN_NAME:
+            case PROTEIN_NAME:
                 return proteinMatch.getAccession();
-            case COLTYPE_PROTEIN_DESCRIPTION:
+            case PROTEIN_DESCRIPTION:
                 return proteinMatch.getDescription();
-            case COLTYPE_SAMESET_SUBSET:
+            case SAMESET_SUBSET:
                 if (proteinMatch.getId() == m_typicalProteinMatchId) {
                     return Sameset.getSameset(Sameset.TYPICAL_SAMESET);
                 } else if (row < m_sameSetMatches.length) {
@@ -128,12 +124,16 @@ public class ProteinTableModel extends FilterTableModel {
                 } else {
                     return Sameset.getSameset(Sameset.SUBSET);
                 }
-            case COLTYPE_PROTEIN_SCORE:
+            case PROTEIN_SCORE:
                 Float score = Float.valueOf(proteinMatch.getPeptideSet(m_rsmId).getScore());
                 return score;
-            case COLTYPE_PROTEIN_PEPTIDES_COUNT:
+            case PROTEIN_PEPTIDES_COUNT:
                 return proteinMatch.getPeptideSet(m_rsmId).getPeptideCount();
-            case COLTYPE_PROTEIN_MASS:
+            case PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT: 
+                try { 
+                    return ((Integer)proteinMatch.getPeptideSet(m_rsmId).getSerializedPropertiesAsMap().get("unique_sequence_count"));
+                } catch (Exception e) { return null;}
+            case PROTEIN_MASS:
                 DBioSequence bioSequence = proteinMatch.getDBioSequence();
                 if (bioSequence != null) {
                     return new Float(bioSequence.getMass());
@@ -169,7 +169,7 @@ public class ProteinTableModel extends FilterTableModel {
             String searchedTextUpper = searchedText.toUpperCase();
 
             for (int row = 0; row < getRowCount(); row++) {
-                String proteinName = ((String) getValueAt(row, COLTYPE_PROTEIN_NAME)).toUpperCase();
+                String proteinName = ((String) getValueAt(row, Column.PROTEIN_NAME.ordinal())).toUpperCase();
                 if (proteinName.indexOf(searchedTextUpper) != -1) {
                     rowToBeSelected = row;
                 }
@@ -223,18 +223,18 @@ public class ProteinTableModel extends FilterTableModel {
             return true; // should not happen
         }
 
-        switch (col) {
-            case COLTYPE_PROTEIN_NAME: {
+        switch (Column.values()[col]) {
+            case PROTEIN_NAME: {
                 return ((StringFilter) filter).filter((String) data);
             }
-            case COLTYPE_PROTEIN_DESCRIPTION: {
+            case PROTEIN_DESCRIPTION: {
                 return ((StringFilter) filter).filter((String) data);
             }
-            case COLTYPE_PROTEIN_SCORE:
-            case COLTYPE_PROTEIN_MASS: {
+            case PROTEIN_SCORE:
+            case PROTEIN_MASS: {
                 return ((DoubleFilter) filter).filter((Float) data);
             }
-            case COLTYPE_PROTEIN_PEPTIDES_COUNT: {
+            case PROTEIN_PEPTIDES_COUNT: {
                 return ((IntegerFilter) filter).filter((Integer) data);
             }
 
@@ -248,13 +248,14 @@ public class ProteinTableModel extends FilterTableModel {
         if (m_filters == null) {
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
-            m_filters[COLTYPE_PROTEIN_NAME] = null;
-            m_filters[COLTYPE_PROTEIN_NAME] = new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME));
-            m_filters[COLTYPE_PROTEIN_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_PROTEIN_DESCRIPTION));
-            m_filters[COLTYPE_SAMESET_SUBSET] = null; //JPM.TODO
-            m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
-            m_filters[COLTYPE_PROTEIN_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PROTEIN_PEPTIDES_COUNT));
-            m_filters[COLTYPE_PROTEIN_MASS] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_MASS));
+            m_filters[Column.PROTEIN_NAME.ordinal()] = null;
+            m_filters[Column.PROTEIN_NAME.ordinal()] = new StringFilter(getColumnName(Column.PROTEIN_NAME.ordinal()));
+            m_filters[Column.PROTEIN_DESCRIPTION.ordinal()] = new StringFilter(getColumnName(Column.PROTEIN_DESCRIPTION.ordinal()));
+            m_filters[Column.SAMESET_SUBSET.ordinal()] = null; //JPM.TODO
+            m_filters[Column.PROTEIN_SCORE.ordinal()] = new DoubleFilter(getColumnName(Column.PROTEIN_SCORE.ordinal()));
+            m_filters[Column.PROTEIN_PEPTIDES_COUNT.ordinal()] = new IntegerFilter(getColumnName(Column.PROTEIN_PEPTIDES_COUNT.ordinal()));
+            m_filters[Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal()] = new IntegerFilter(getColumnName(Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal()));            
+            m_filters[Column.PROTEIN_MASS.ordinal()] = new DoubleFilter(getColumnName(Column.PROTEIN_MASS.ordinal()));
         }
     }
 

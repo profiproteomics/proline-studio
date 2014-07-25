@@ -22,7 +22,8 @@ public class ProteinSetTableModel extends LazyTableModel {
     public static final int COLTYPE_PEPTIDES_COUNT = 5;
     public static final int COLTYPE_SPECTRAL_COUNT = 6;
     public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 7;
-    private static final String[] m_columnNames = {"Id", "Protein Set", "Description", "Score", "Proteins", "Peptides", "Peptide Match Count", "Specific Peptide Match Count"};
+    public static final int COLTYPE_UNIQUE_SEQUENCES_COUNT = 8;
+    private static final String[] m_columnNames = {"Id", "Protein Set", "Description", "Score", "Proteins", "Peptides", "Peptide Match Count", "Specific Peptide Match Count", "Unique Seq. Count"};
     
     private DProteinSet[] m_proteinSets = null;
     
@@ -77,6 +78,7 @@ public class ProteinSetTableModel extends LazyTableModel {
             case COLTYPE_PROTEIN_SCORE:
             case COLTYPE_PROTEINS_COUNT:
                 return DatabaseProteinSetsTask.SUB_TASK_SAMESET_SUBSET_COUNT;
+            case COLTYPE_UNIQUE_SEQUENCES_COUNT:
             case COLTYPE_PEPTIDES_COUNT:
                 return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
             case COLTYPE_SPECTRAL_COUNT:
@@ -164,8 +166,6 @@ public class ProteinSetTableModel extends LazyTableModel {
                 
             case COLTYPE_PROTEINS_COUNT: {
                 
-                
-                
                 LazyData lazyData = getLazyData(row,col);
                 
                 Integer sameSetCount = proteinSet.getSameSetCount();
@@ -196,6 +196,25 @@ public class ProteinSetTableModel extends LazyTableModel {
                     givePriorityTo(m_taskId, row, col);
                 } else {
                     lazyData.setData( proteinMatch.getPeptideSet(rsmId).getPeptideCount() );
+                }
+                return lazyData;
+   
+            }
+                case COLTYPE_UNIQUE_SEQUENCES_COUNT: {
+                
+                LazyData lazyData = getLazyData(row,col);
+                DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
+                
+                if (proteinMatch == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+                   Integer value = -1;  // pas tres propre mais NaN n'existe pas pour les Integer
+                   try { 
+                        value = ((Integer)proteinMatch.getPeptideSet(rsmId).getSerializedPropertiesAsMap().get("unique_sequence_count"));
+                    } catch (Exception e) { }
+                   
+                    lazyData.setData( value );
                 }
                 return lazyData;
    
@@ -408,6 +427,7 @@ public class ProteinSetTableModel extends LazyTableModel {
             case COLTYPE_PROTEINS_COUNT:
             case COLTYPE_PEPTIDES_COUNT:
             case COLTYPE_SPECTRAL_COUNT:
+            case COLTYPE_UNIQUE_SEQUENCES_COUNT:
             case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
                 return ((IntegerFilter) filter).filter((Integer)data);
             }
@@ -431,6 +451,7 @@ public class ProteinSetTableModel extends LazyTableModel {
             m_filters[COLTYPE_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT));
             m_filters[COLTYPE_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECTRAL_COUNT));
             m_filters[COLTYPE_SPECIFIC_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECIFIC_SPECTRAL_COUNT));
+            m_filters[COLTYPE_UNIQUE_SEQUENCES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_UNIQUE_SEQUENCES_COUNT));            
         }
     }
 

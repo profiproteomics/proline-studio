@@ -7,6 +7,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.dpm.task.ValidationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.*;
@@ -18,6 +19,7 @@ import java.awt.Window;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import org.openide.util.NbPreferences;
@@ -69,8 +71,7 @@ public class ValidationDialog extends DefaultDialog {
     private JCheckBox m_proteinFdrCheckbox = null;
 
     private JCheckBox m_typicalProteinMatchCheckBox;
-    private JTextField m_regexTextField = null;
-    private JComboBox m_regexTargetCombobox = null;
+    private ChangeTypicalProteinPanel changeTypicalPanel = null;
     
     private JComboBox m_proteinScoringTypeCbx = null;
     
@@ -177,7 +178,7 @@ public class ValidationDialog extends DefaultDialog {
         internalPanel.add(createProteinSetFilterPanel(), c);
 
         c.gridy++;
-        internalPanel.add(typicalProteinPanel(), c);
+        internalPanel.add(createTypicalProteinPanel(), c);
         
         
         return internalPanel;
@@ -445,9 +446,9 @@ public class ValidationDialog extends DefaultDialog {
         return proteinSetFilterPanel;
     }
 
-    private JPanel typicalProteinPanel() {
+    private JPanel createTypicalProteinPanel() {
         JPanel typicalProteinPanel = new JPanel(new GridBagLayout());
-        typicalProteinPanel.setBorder(BorderFactory.createTitledBorder(" Typical Protein Match "));
+        typicalProteinPanel.setBorder(BorderFactory.createTitledBorder("Set Typical Protein Match "));
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -456,7 +457,8 @@ public class ValidationDialog extends DefaultDialog {
 
         c.gridx = 0;
         c.gridy = 0;
-        m_typicalProteinMatchCheckBox = new JCheckBox("Containing Text :");
+//        c.gridwidth = 2;
+        m_typicalProteinMatchCheckBox = new JCheckBox("Using rules (in priority order):");
         m_typicalProteinMatchCheckBox.setHorizontalAlignment(SwingConstants.RIGHT);
         typicalProteinPanel.add(m_typicalProteinMatchCheckBox, c);
 
@@ -465,24 +467,15 @@ public class ValidationDialog extends DefaultDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 boolean enabled = m_typicalProteinMatchCheckBox.isSelected();
-                m_regexTextField.setEnabled(enabled);
-                m_regexTargetCombobox.setEnabled(enabled);
+                changeTypicalPanel.enableRules(enabled);
             }
         });
         
-        c.gridx++;
-        m_regexTextField = new JTextField(16);
-        typicalProteinPanel.add(m_regexTextField, c);
-
         c.gridx=0;
         c.gridy++;
-        JLabel onMatchLabel = new JLabel("on");
-        onMatchLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        typicalProteinPanel.add(onMatchLabel, c);
-        
-        m_regexTargetCombobox = new JComboBox(ChangeTypicalProteinDialog.REGEX_TARGET_OPTIONS);
-        c.gridx++;
-        typicalProteinPanel.add(m_regexTargetCombobox, c);
+        c.gridwidth = 2;
+        changeTypicalPanel = new ChangeTypicalProteinPanel();
+        typicalProteinPanel.add(changeTypicalPanel, c);
 
         return typicalProteinPanel;
     }
@@ -724,19 +717,8 @@ public class ValidationDialog extends DefaultDialog {
         boolean useTypicalProteinRegex = preferences.getBoolean("UseTypicalProteinRegex", true);
         
         m_typicalProteinMatchCheckBox.setSelected(useTypicalProteinRegex);
-        
-        String regex = preferences.get("TypicalProteinRegex", "*");
-        m_regexTextField.setText(regex);
-        m_regexTextField.setEnabled(useTypicalProteinRegex);
-        
-                
-        boolean regexOnAccession = preferences.getBoolean("TypicalProteinRegexOnAccession", Boolean.TRUE);
-        if (regexOnAccession) {
-            m_regexTargetCombobox.setSelectedIndex(0);
-        } else {
-            m_regexTargetCombobox.setSelectedIndex(1);
-        }
-        m_regexTargetCombobox.setEnabled(useTypicalProteinRegex);
+        changeTypicalPanel.restoreInitialParameters();
+        changeTypicalPanel.enableRules(useTypicalProteinRegex);
     }
     
     private void updateproteinFdrObjects(boolean enabled) {
@@ -817,48 +799,13 @@ public class ValidationDialog extends DefaultDialog {
     public HashMap<String, String> getArguments() {
         return m_parameterList.getValues();
     }
-
-    public String getTypicalProteinRegex() {
-        
-        String regex = m_regexTextField.getText().trim();
-        if (regex.length() == 0) {
-            return null;
-        }
-        if (regex.compareTo("*") == 0) {
-            return null;
-        }
-        
-        return wildcardToRegex(regex);
+    
+    public List<ChangeTypicalRule> getChangeTypicalRules() {
+        return changeTypicalPanel.getChangeTypicalRules();
     }
     
-    private String wildcardToRegex(String text) {
-        String escapedText = "^"+escapeRegex(text)+"$";
-        
-        String wildcardsFilter = escapedText.replaceAll("\\*", ".*").replaceAll("\\?", ".");
-        return wildcardsFilter;
-    } 
-    private String escapeRegex(String s) {
-
-        int len = s.length();
-        if (len == 0) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder(len * 2);
-        for (int i = 0; i < len; i++) {
-            char c = s.charAt(i);
-            if ("[](){}.+$^|#\\".indexOf(c) != -1) {
-                sb.append("\\");
-            }
-            sb.append(c);
-        }
-        return sb.toString();
-    }
     
-    public boolean isTYpicalProteinOnAccession() {
-        return (m_regexTargetCombobox.getSelectedIndex() == 0);
-    }
-    
+       
     public String getScoringType() {
         return SCORING_TYPE_VALUES[m_proteinScoringTypeCbx.getSelectedIndex()];
     }
@@ -912,11 +859,10 @@ public class ValidationDialog extends DefaultDialog {
         Preferences preferences = NbPreferences.root();
         
         // save scoring type
-         preferences.put("TypicalProteinRegex", m_proteinScoringTypeCbx.getSelectedItem().toString());
+         preferences.put("ValidationScoringType", m_proteinScoringTypeCbx.getSelectedItem().toString());
         
         // save specific Typical Protein parameters
-        preferences.put("TypicalProteinRegex", m_regexTextField.getText().trim());
-        preferences.putBoolean("TypicalProteinRegexOnAccession", (m_regexTargetCombobox.getSelectedIndex() == 0));
+         changeTypicalPanel.savePreference();
         preferences.putBoolean("UseTypicalProteinRegex", m_typicalProteinMatchCheckBox.isSelected());
 
         

@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
@@ -52,7 +53,14 @@ public class RSMDataSetNode extends RSMNode {
                     return getIcon(IconManager.IconType.RSET);
                 }
             case QUANTITATION: {
-                return getIcon(IconManager.IconType.QUANT);
+                if (dataset == null || dataset.getQuantitationMethod() == null)
+                    return getIcon(IconManager.IconType.QUANT);
+                if (dataset.getQuantitationMethod().getAbundanceUnit().compareTo("feature_intensity")== 0) { // XIC
+                    return getIcon(IconManager.IconType.QUANT_XIC);            
+                } else if(dataset.getQuantitationMethod().getAbundanceUnit().compareTo("spectral_counts") == 0) { // Spectral count
+                    return getIcon(IconManager.IconType.QUANT_SC);
+                } else 
+                    return getIcon(IconManager.IconType.QUANT);
             }
             case AGGREGATE:
 

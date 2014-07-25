@@ -1,18 +1,11 @@
 package fr.proline.studio.rsmexplorer.node;
 
 import fr.proline.core.orm.uds.Project;
-import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseProjectTask;
-import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
-import javax.swing.tree.DefaultTreeModel;
-import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
-import org.openide.nodes.Node.Property;
 
 
 /**

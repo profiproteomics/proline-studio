@@ -31,16 +31,18 @@ public class WindowBoxFactory {
     }
     
     public static WindowBox getPeptidesForRsetOnlyWindowBox(String name, boolean isDecoy) {
-        // AW: seach results / PSM set of boxes.
+        // AW: search results / PSM set of boxes.
     	// 
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[4];
+        AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxRsetPeptide();
         boxes[1] = new DataBoxRsetPeptideSpectrum();
-       // boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
-        boxes[2] = new DataBoxRsetPeptideFragmentationTable();
+        boxes[2] = new DataBoxRsetPeptideSpectrumError();
         boxes[2].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
-        boxes[3] = new DataBoxRsetProteinsForPeptideMatch();
+       // boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[3] = new DataBoxRsetPeptideFragmentationTable();
+        boxes[3].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[4] = new DataBoxRsetProteinsForPeptideMatch();
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
@@ -123,15 +125,17 @@ public class WindowBoxFactory {
     public static WindowBox getProteinSetsWindowBox(String name, boolean isDecoy) {
         
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[6];
+        AbstractDataBox[] boxes = new AbstractDataBox[7];
         boxes[0] = new DataBoxRsmAllProteinSet();
         boxes[1] = new DataBoxRsmProteinsOfProteinSet();
         boxes[2] = new DataBoxRsmPeptidesOfProtein();
         boxes[3] = new DataBoxRsmProteinAndPeptideSequence();
         boxes[4] = new DataBoxRsetPeptideSpectrum();
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
-        boxes[5] = new DataBoxRsetPeptideFragmentationTable();
-        boxes[5].setLayout(AbstractDataBox.DataBoxLayout.TABBED);        
+        boxes[5] = new DataBoxRsetPeptideSpectrumError();
+        boxes[5].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[6] = new DataBoxRsetPeptideFragmentationTable();
+        boxes[6].setLayout(AbstractDataBox.DataBoxLayout.TABBED);        
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;
         

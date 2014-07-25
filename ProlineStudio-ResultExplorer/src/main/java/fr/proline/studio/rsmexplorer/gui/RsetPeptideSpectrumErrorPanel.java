@@ -108,7 +108,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 	    public RsetPeptideSpectrumErrorPanel() {
 	        
 	        m_dataSet = new DefaultXYDataset();
-	        m_chart = ChartFactory.createXYLineChart("", "m/z", "Data Mass Error", m_dataSet, PlotOrientation.VERTICAL, true, true, false);
+	        m_chart = ChartFactory.createXYLineChart("", "m/z", "Delta Mass Error", m_dataSet, PlotOrientation.VERTICAL, true, true, false);
 	        m_chart.setNotify(false); // disable notifications. has to be enalbed once all graph is constructed to catch events...
 	        m_chart.removeLegend();
 	        m_chart.setBackgroundPaint(Color.white);

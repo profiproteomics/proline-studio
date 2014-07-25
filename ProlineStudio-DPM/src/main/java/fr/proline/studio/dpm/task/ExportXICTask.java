@@ -8,7 +8,6 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,11 +19,12 @@ public class ExportXICTask extends AbstractServiceTask {
 
     private DDataset m_dataset;
     private String[] m_filePathResult;
+    private String m_exportType;
     
-    public ExportXICTask(AbstractServiceCallback callback, DDataset dataset, String[] filePathInfo) {
+    public ExportXICTask(AbstractServiceCallback callback, DDataset dataset, String exportTypeParam, String[] filePathInfo) {
         super(callback, false /** asynchronous */, new TaskInfo("Export XIC " + dataset.getName(), true, TASK_LIST_INFO));
         m_dataset = dataset;
-      
+        m_exportType = exportTypeParam;
         m_filePathResult = filePathInfo;
     }
     
@@ -42,7 +42,7 @@ public class ExportXICTask extends AbstractServiceTask {
             params.put("output_mode", "STREAM"); // use of a stream, (do not export to file)
             params.put("project_id", m_dataset.getProject().getId());
             params.put("data_set_id", m_dataset.getId());
-            params.put("export_type", "master_quant_peptides");
+            params.put("export_type", m_exportType);
             
 
             request.setParameters(params);

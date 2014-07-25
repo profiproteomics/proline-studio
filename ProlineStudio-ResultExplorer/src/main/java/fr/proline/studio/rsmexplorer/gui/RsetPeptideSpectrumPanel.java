@@ -79,6 +79,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     private File m_pngFile;
     private DPeptideMatch m_previousPeptideMatch = null;
     private javax.swing.JPanel m_spectrumPanel;
+    private JButton m_generateMatchButton;
     
     @Override // declared in ProlineStudioCommons ImageExporterInterface
     public void generateSvgImage(String file) {
@@ -161,17 +162,18 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         ExportButton exportImageButton = new ExportButton("Spectre", (ImageExporterInterface) this);
         toolbar.add(exportImageButton);
         
-        JButton generateMatchButton = new JButton();
-        generateMatchButton.setIcon(IconManager.getIcon(IconManager.IconType.PLUS11));
-        generateMatchButton.setToolTipText("Generate & Store Spectrum Match");
-        generateMatchButton.addActionListener(new ActionListener() {
+        m_generateMatchButton = new JButton();
+        m_generateMatchButton.setIcon(IconManager.getIcon(IconManager.IconType.FRAGMENTATION));
+        m_generateMatchButton.setToolTipText("Generate & Store Spectrum Match");
+        m_generateMatchButton.addActionListener(new ActionListener() {
             
             @Override
             public void actionPerformed(ActionEvent e) {
+                m_generateMatchButton.setEnabled(false);
                 generateSpectrumMatch();
             }            
         });
-        toolbar.add(generateMatchButton);
+        toolbar.add(m_generateMatchButton);
         
         return toolbar;
         
@@ -237,6 +239,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
                 } else {
                     m_logger.error("Fail to generate spectrum matches for peptide_match.id=" + m_previousPeptideMatch.getId());
                 }
+                m_generateMatchButton.setEnabled(true);
             }
         };
         

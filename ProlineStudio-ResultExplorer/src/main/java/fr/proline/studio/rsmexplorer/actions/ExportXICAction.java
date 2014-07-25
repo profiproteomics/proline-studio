@@ -25,10 +25,33 @@ import org.slf4j.LoggerFactory;
  */
 public class ExportXICAction extends AbstractRSMAction {
  
+  public enum ExportType {
+        MASTER_QPEP_IONS("master_quant_peptide_ions", "Quant Peptides ions"),MASTER_QPEPS("master_quant_peptides", "Quant Peptides"), MASTER_QPROT_SETS("master_quant_protein_sets", "Quant Proteins Sets");
+        
+        private String m_value;
+        private String m_label;
+
+        public String getAsParameter() {
+            return m_value;
+        }
+        
+        public String getAsLabel() {
+            return m_label;
+        }
+
+        private ExportType(String value, String label) {
+            this.m_value = value;
+            this.m_label = label;    
+        }
+        
+    };
+    
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-  
-    public ExportXICAction() {
-        super(NbBundle.getMessage(RetrieveSCDataAction.class, "CTL_ExportXICAction"), false);
+    private ExportType m_exportType = null;
+    
+    public ExportXICAction(ExportType type) {
+        super(NbBundle.getMessage(ExportXICAction.class, "CTL_PrefixExportXICAction")+type.getAsLabel(), false);
+        m_exportType = type; 
     }
     
     @Override
@@ -39,7 +62,7 @@ public class ExportXICAction extends AbstractRSMAction {
         final RSMDataSetNode xicDatasetNode = (RSMDataSetNode) selectedNodes[0];
         
 
-        final ExportDialog dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow());
+        final ExportDialog dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(),false);
         
         DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
 
@@ -93,8 +116,8 @@ public class ExportXICAction extends AbstractRSMAction {
                         if (success) {
 
                             String fileName = dialog.getFileName();
-                            if (!fileName.endsWith(".xlsx")) {
-                                fileName += ".xlsx";
+                            if (!fileName.endsWith(".xls")) {
+                                fileName += ".xls";
                             }
                             DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath[0]);
                             AccessServiceThread.getAccessServiceThread().addTask(task);
@@ -108,7 +131,7 @@ public class ExportXICAction extends AbstractRSMAction {
                 };
 
 
-                ExportXICTask task = new ExportXICTask(exportCallback, xicDatasetNode.getDataset(), _filePath);
+                ExportXICTask task = new ExportXICTask(exportCallback, xicDatasetNode.getDataset(), m_exportType.getAsParameter(), _filePath);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
 
                 

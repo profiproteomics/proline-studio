@@ -7,8 +7,11 @@ import com.google.api.client.util.ArrayMap;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,14 +21,12 @@ import java.util.Map;
 public class ChangeTypicalProteinTask extends AbstractServiceTask {
 
     private DDataset m_dataset;
-    private String m_regex;
-    private boolean m_onAccession; // regex done on accession or description of Proteins
+    private List<ChangeTypicalRule> m_rules;
     
-    public ChangeTypicalProteinTask(AbstractServiceCallback callback, DDataset dataset, String regex, boolean onAccession) {
+    public ChangeTypicalProteinTask(AbstractServiceCallback callback, DDataset dataset, List<ChangeTypicalRule> rules) {
         super(callback, false /** asynchronous */, new TaskInfo("Change Typical Protein on Identification Summary " + dataset.getName(), true, TASK_LIST_INFO));
         m_dataset = dataset;
-        m_regex = regex;
-        m_onAccession = onAccession;
+        m_rules=rules;
     }
     
     
@@ -42,9 +43,16 @@ public class ChangeTypicalProteinTask extends AbstractServiceTask {
             Map<String, Object> params = new HashMap<>();
             params.put("project_id", m_dataset.getProject().getId());
             params.put("result_summary_id", m_dataset.getResultSummaryId());
-            params.put("rule_regex", m_regex);
-            params.put("rule_on_ac", Boolean.valueOf(m_onAccession));
-
+            
+            // Peptide Pre-Filters
+            ArrayList allRules = new ArrayList();                
+            for(ChangeTypicalRule nextRule : m_rules){
+                Map<String, Object> ruleParams = new HashMap<>();
+                ruleParams.put("rule_regex", nextRule.getRulePattern());
+                ruleParams.put("rule_on_ac", Boolean.valueOf(nextRule.getApplyOnAccession()));
+                allRules.add(ruleParams);
+            }
+            params.put("change_typical_rules", allRules);
             
             request.setParameters(params);
 

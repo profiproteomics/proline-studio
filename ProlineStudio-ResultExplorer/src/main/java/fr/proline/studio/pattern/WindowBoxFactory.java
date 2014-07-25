@@ -39,7 +39,6 @@ public class WindowBoxFactory {
         boxes[1] = new DataBoxRsetPeptideSpectrum();
         boxes[2] = new DataBoxRsetPeptideSpectrumError();
         boxes[2].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
-       // boxes[1].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         boxes[3] = new DataBoxRsetPeptideFragmentationTable();
         boxes[3].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         boxes[4] = new DataBoxRsetProteinsForPeptideMatch();

@@ -39,6 +39,7 @@ public class ExportDialog extends DefaultDialog  {
     private JTextField m_fileTextField;
     private JComboBox m_exporTypeCombobox;
     private JCheckBox m_exportAllPSMsChB;
+    private Boolean m_showExportAllPSMsChB;
 
     private JXTable m_table = null;
     private JPanel m_panel = null;
@@ -88,9 +89,9 @@ public class ExportDialog extends DefaultDialog  {
     }
     
     
-    public static ExportDialog getDialog(Window parent) {
+    public static ExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption) {
         if (m_singletonServerDialog == null) {
-            m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER);
+            m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption);
         }
 
         
@@ -104,8 +105,12 @@ public class ExportDialog extends DefaultDialog  {
     
     
     private ExportDialog(Window parent, int type) {
+     this(parent, type, null);   
+    }
+            
+    private ExportDialog(Window parent, int type, Boolean showExportAllPSMsOption) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-
+        m_showExportAllPSMsChB = showExportAllPSMsOption;
         m_exportType = type;
         
         setTitle("Export");
@@ -197,7 +202,7 @@ public class ExportDialog extends DefaultDialog  {
         c.gridwidth = 1;
         exportPanel.add(addFileButton, c);
 
-        if(m_exportType == ExporterFactory.EXPORT_FROM_SERVER){
+        if(m_exportType == ExporterFactory.EXPORT_FROM_SERVER && m_showExportAllPSMsChB){
             //Allow specific parameter in this case
             c.gridy++;
             c.gridx = 0;

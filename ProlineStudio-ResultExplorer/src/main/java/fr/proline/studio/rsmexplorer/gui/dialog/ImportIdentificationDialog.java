@@ -29,8 +29,6 @@ import java.util.prefs.Preferences;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.openide.util.NbPreferences;
-import org.openide.windows.WindowManager;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -49,7 +47,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private final static String[] PARSER_NAMES = {"Mascot", "Omssa"};
     // ABU : added a map to consider the case when a parser handles more than one extensions
     // the key is the extension, the value is the id of the parser in the other arrays
-    private static Map<String, Integer> EXTENSION_TO_PARSER = new HashMap<String, Integer>();
+    private static final Map<String, Integer> EXTENSION_TO_PARSER = new HashMap<String, Integer>();
     static {
     	EXTENSION_TO_PARSER.put("dat", 0);
     	EXTENSION_TO_PARSER.put("omx", 1);
@@ -278,19 +276,23 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
                 // ABU : for each parser, add all its extensions
                 String[] filters = new String[FILE_EXTENSIONS_DESCRIPTION.length];
-                for(String key : EXTENSION_TO_PARSER.keySet()) {
-                	int i = EXTENSION_TO_PARSER.get(key);
-                	if(filters[i] == null) { filters[i] = ""; }
-                	if(!filters[i].equals("")) { filters[i] += ";"; }
-                	if(key.contains(".")) { // if the extension contains a dot, only keep what is on its right (ie. "omx.bz2" -> "bz2")
-                		int indexOfDot = key.lastIndexOf('.');
-                    	filters[i] += key.substring(indexOfDot + 1);
-                	} else {
-                    	filters[i] += key;
-                	}
+                for (String key : EXTENSION_TO_PARSER.keySet()) {
+                    int i = EXTENSION_TO_PARSER.get(key);
+                    if (filters[i] == null) {
+                        filters[i] = "";
+                    }
+                    if (!filters[i].equals("")) {
+                        filters[i] += ";";
+                    }
+                    if (key.contains(".")) { // if the extension contains a dot, only keep what is on its right (ie. "omx.bz2" -> "bz2")
+                        int indexOfDot = key.lastIndexOf('.');
+                        filters[i] += key.substring(indexOfDot + 1);
+                    } else {
+                        filters[i] += key;
+                    }
                 }
                 for (int i = 0; i < filters.length; i++) { // extensions with a dot inside will not be considered
-                	FileNameExtensionFilter filter = new FileNameExtensionFilter(FILE_EXTENSIONS_DESCRIPTION[i], filters[i].split(";"));
+                    FileNameExtensionFilter filter = new FileNameExtensionFilter(FILE_EXTENSIONS_DESCRIPTION[i], filters[i].split(";"));
                     fchooser.addChoosableFileFilter(filter);
                 }
 
@@ -885,8 +887,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
         ParameterList parameterList = new ParameterList("Omssa Parser");
         
         Preferences preferences = NbPreferences.root();
-        parameterList.add(new FileParameter("usermod.xml.file", "Usermods file path", JTextField.class, preferences.get("Omssa_Parser.Usermods_file_path", ""), "Usermods XML File", "xml"));
-        parameterList.add(new FileParameter("ptm.composition.file", "PTM composition file path", JTextField.class, preferences.get("Omssa_Parser.PTM_composition_file_path", ""), "PTM composition File", "txt"));
+        parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "usermod.xml.file", "Usermods file path", JTextField.class, preferences.get("Omssa_Parser.Usermods_file_path", ""), "Usermods XML File", "xml"));
+        parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "ptm.composition.file", "PTM composition file path", JTextField.class, preferences.get("Omssa_Parser.PTM_composition_file_path", ""), "PTM composition File", "txt"));
 //        parameterList.add(new BooleanParameter("fasta.contains.target", "Fasta contains target entries", JCheckBox.class, Boolean.TRUE));
 //        parameterList.add(new BooleanParameter("fasta.contains.decoy", "Fasta contains decoy entries", JCheckBox.class, Boolean.TRUE));
 

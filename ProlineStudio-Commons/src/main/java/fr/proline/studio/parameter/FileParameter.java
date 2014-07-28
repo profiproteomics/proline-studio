@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
 
 /**
  * Parameter of type File, displayed as a Textfield with a button to open a file browser.
@@ -16,12 +17,14 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class FileParameter extends AbstractParameter {
 
 
+    private FileSystemView m_fsv;
     private String m_defaultValue;
     private String m_fileFilterName;
     private String m_fileFilterExtension;
 
-    public FileParameter(String key, String name, Class graphicalType, String defaultValue, String fileFilterName, String fileFilterExtension) {
+    public FileParameter(FileSystemView fsv, String key, String name, Class graphicalType, String defaultValue, String fileFilterName, String fileFilterExtension) {
         super(key, name, String.class, graphicalType);
+        m_fsv = fsv;
         m_defaultValue = defaultValue;
         m_fileFilterName = fileFilterName;
         m_fileFilterExtension = fileFilterExtension;
@@ -51,7 +54,7 @@ public class FileParameter extends AbstractParameter {
                 @Override
                 public void actionPerformed(ActionEvent e) {
 
-                    JFileChooser fchooser = new JFileChooser();
+                    JFileChooser fchooser = (m_fsv!=null) ? new JFileChooser(m_fsv) : new JFileChooser();
   
                     fchooser.setMultiSelectionEnabled(false);
 

@@ -20,6 +20,7 @@ import java.awt.Window;
 import java.util.*;
 import javax.persistence.EntityManager;
 import javax.swing.JScrollPane;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -133,10 +134,19 @@ public class CreateXICDialog extends DefaultDialog {
 
     public String registerRawFiles() {
 
+        
         long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
+        
+        Project project = null;
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
-        Project project = entityManagerUDS.find(Project.class, pID);
-
+        try {
+            project = entityManagerUDS.find(Project.class, pID);
+         } catch (Exception e) {
+             LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", e);
+         } finally {
+            entityManagerUDS.close();
+        }
+        
         final Object mutexFileRegistered = new Object();
         String errorMsg = null;
         Enumeration xicGrps = finalXICDesignNode.children();

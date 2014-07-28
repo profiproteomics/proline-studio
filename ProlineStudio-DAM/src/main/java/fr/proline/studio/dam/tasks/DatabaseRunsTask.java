@@ -230,7 +230,6 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
             Run mergedRun = entityManagerUDS.find(Run.class, m_run.getId());
             idf.setRawFile(mergedRaw);
             idf.setRun(mergedRun);
-            entityManagerUDS.flush();
             entityManagerUDS.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);

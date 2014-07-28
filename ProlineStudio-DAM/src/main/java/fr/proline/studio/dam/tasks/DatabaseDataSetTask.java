@@ -418,33 +418,12 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             }
             
             
-            
-            boolean hasTrash = false;
+
             if (trash != null) {
                 m_list.add(new DataSetData(trash));
-                hasTrash = true;
             }
             
-            // add Trash if it not exists
-            // ----------- no longer needed -----------------
-            /*if (!hasTrash) {
 
-                Project mergedProject = entityManagerUDS.merge(m_project);
-                Dataset trashDataset = new Dataset(mergedProject);
-                trashDataset.setType(Dataset.DatasetType.TRASH);
-
-                Aggregation aggregation = UDSDataManager.getUDSDataManager().getAggregation(Aggregation.ChildNature.OTHER);
-                Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
-                trashDataset.setAggregation(mergedAggregation);
-
-                trashDataset.setName("Trash");
-                trashDataset.setChildrenCount(0); // trash is empty
-
-                trashDataset.setNumber(m_list.size());
-
-                entityManagerUDS.persist(trashDataset);
-
-            }*/
     
             
             m_project.getTransientData().setChildrenNumber(m_list.size());

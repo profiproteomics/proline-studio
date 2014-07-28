@@ -219,7 +219,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         String coverageFormatted = DataFormat.format(coverage, 2);
         
         
-        m_editorPane.setText(constructDisplayedSequence(sequence, highlights, coverageFormatted));
+        m_editorPane.setText(constructDisplayedSequence(pm, sequence, highlights, coverageFormatted));
         
         m_editorPane.setCaretPosition(0);
 
@@ -268,7 +268,7 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
             }
     }
     
-    private String constructDisplayedSequence(String sequence, int[] highlights, String coverageFormatted) {
+    private String constructDisplayedSequence(DProteinMatch pm, String sequence, int[] highlights, String coverageFormatted) {
 
 
 
@@ -337,6 +337,10 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         sb.append("<br><br>");
         
         sb.append("Coverage : ").append(coverageFormatted).append('%');
+        
+        sb.append("<br><br>");
+        
+        sb.append(pm.getAccession()).append(" : ").append(pm.getDescription());
         
         sb.append("</p></body></html>");
         

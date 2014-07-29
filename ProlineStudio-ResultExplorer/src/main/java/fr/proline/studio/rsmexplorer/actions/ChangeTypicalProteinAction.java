@@ -24,7 +24,7 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
 
     
     public ChangeTypicalProteinAction() {
-        super(NbBundle.getMessage(ValidateAction.class, "CTL_ChangeTypicalProtein"));
+        super(NbBundle.getMessage(ChangeTypicalProteinAction.class, "CTL_ChangeTypicalProtein"));
     }
 
     @Override

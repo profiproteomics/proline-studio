@@ -1,7 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions;
 
-import fr.proline.core.orm.uds.Dataset;
-import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.DownloadFileTask;

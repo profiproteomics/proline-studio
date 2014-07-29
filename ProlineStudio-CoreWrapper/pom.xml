@@ -107,6 +107,7 @@
             <!--<publicPackage>javax.xml.transform.*</publicPackage>-->
             <publicPackage>fr.profi.jdbc</publicPackage>
             <publicPackage>fr.profi.jdbc.easy</publicPackage>
+            <publicPackage>fr.profi.util</publicPackage>
             <publicPackage>fr.profi.util.security</publicPackage>
             <publicPackage>fr.proline.api.service</publicPackage>
             <publicPackage>fr.proline.context</publicPackage>
@@ -157,6 +158,7 @@
             <publicPackage>fr.proline.security</publicPackage>
             <publicPackage>fr.proline.util</publicPackage>
             <publicPackage>fr.proline.util.version</publicPackage>
+            <publicPackage>javassist</publicPackage>
             <publicPackage>javax.annotation</publicPackage>
             <publicPackage>javax.annotation.concurrent</publicPackage>
             <publicPackage>javax.annotation.meta</publicPackage>
@@ -171,6 +173,7 @@
             <publicPackage>org.apache.commons.logging</publicPackage>
             <publicPackage>org.apache.commons.logging.impl</publicPackage>
             <publicPackage>org.hibernate</publicPackage>
+            <publicPackage>org.jboss.logging</publicPackage>
             <publicPackage>org.joda.time</publicPackage>
             <publicPackage>org.joda.time.format</publicPackage>
             <publicPackage>org.w3c.dom</publicPackage>

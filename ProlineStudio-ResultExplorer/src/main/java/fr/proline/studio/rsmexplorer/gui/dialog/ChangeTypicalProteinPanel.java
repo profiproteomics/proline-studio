@@ -49,8 +49,6 @@ public class ChangeTypicalProteinPanel extends javax.swing.JPanel {
             c.gridy++;
         }
         
-        
-//        c.gridx = 1;
         JLabel regexHelpLabel = new JLabel("( * = any string ; ? = any character )");
         regexHelpLabel.setForeground(Color.gray);
         add(regexHelpLabel, c);                  

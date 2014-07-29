@@ -92,9 +92,9 @@ public class ExportDialog extends DefaultDialog  {
     public static ExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption) {
         if (m_singletonServerDialog == null) {
             m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption);
+        } else if(!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)){
+            m_singletonServerDialog = new ExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption);
         }
-
-        
 
         return m_singletonServerDialog;
     }

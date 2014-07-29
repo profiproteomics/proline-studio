@@ -289,7 +289,7 @@ public class DefineQuantParamsPanel extends JPanel{
         clusteringPanel.add(new JLabel("time tolerance:"), c);
         c.gridx++;       
         m_clusteringTimeTolTF = new JTextField(10);
-        m_clusteringTimeTolTF.setText("5"); //VDS : TODO Manage Preference !
+        m_clusteringTimeTolTF.setText("15"); //VDS : TODO Manage Preference !
         clusteringPanel.add(m_clusteringTimeTolTF, c);
 
         c.gridy++;

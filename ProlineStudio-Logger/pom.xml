@@ -53,6 +53,7 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.slf4j</publicPackage>
+                        <publicPackage>org.slf4j.helpers</publicPackage>
                         <publicPackage>org.slf4j.spi</publicPackage>
                     </publicPackages>
                 </configuration>

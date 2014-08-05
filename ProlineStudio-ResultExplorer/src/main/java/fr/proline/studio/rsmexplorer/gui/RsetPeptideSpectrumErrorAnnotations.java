@@ -56,7 +56,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 		DPeptideMatch m_peptideMatch;
 		double m_spectrumMaxY = 0; // y range from data...will be updated and then available for caller.
 		double m_spectrumMinY = 0;
-		double m_precursorMass = 0;
+		
 		
 		public RsetPeptideSpectrumErrorAnnotations(AbstractDataBox dBox, DefaultXYDataset dSet, JFreeChart chrt, DPeptideMatch pepMatch) {
 			m_dataBox = dBox;
@@ -197,7 +197,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 					return;
 				}
 				
-				m_precursorMass = spectrum.getPrecursorMoz()*spectrum.getPrecursorCharge(); // used for setting spectrum display range
+				//double m_precursorMass = spectrum.getPrecursorMoz()*spectrum.getPrecursorCharge(); // used for setting spectrum display range
 				byte[] intensityByteArray = spectrum.getIntensityList(); // package$EasyLzma$.MODULE$.uncompress(spectrum.getIntensityList());
 				byte[] massByteArray = spectrum.getMozList(); // package$EasyLzma$.MODULE$.uncompress(spectrum.getMozList());
 				ByteBuffer intensityByteBuffer = ByteBuffer.wrap(intensityByteArray).order(ByteOrder.LITTLE_ENDIAN);

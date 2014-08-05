@@ -55,8 +55,11 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.IconManager;
+
 import java.awt.event.ActionEvent;
+
 import javax.swing.JButton;
+
 import org.slf4j.Logger;
 
 /**
@@ -70,10 +73,10 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     private static final long serialVersionUID = 1L;
     private AbstractDataBox m_dataBox;
     private static boolean redrawInProgress = false; // to ensure no circular loop in changeEven when triggered by zooming the graph... 
-    private double spectrumMinX = 0;
-    private double spectrumMaxX = 0;
-    private double spectrumMinY = 0;
-    private double spectrumMaxY = 0;
+    private double m_spectrumMinX = 0;
+    private double m_spectrumMaxX = 0;
+    private double m_spectrumMinY = 0;
+    private double m_spectrumMaxY = 0;
     private DefaultXYDataset m_dataSet;
     private JFreeChart m_chart;
     private File m_pngFile;
@@ -133,7 +136,21 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     
     private void initComponents() {
         setLayout(new BorderLayout());
-        ChartPanel cp = new ChartPanel(m_chart, true);
+        ChartPanel cp = new ChartPanel(m_chart, true) {
+            @Override
+            public void restoreAutoBounds(){
+            	
+            	XYPlot plot=(XYPlot)getChart().getPlot();
+                double domainStart = plot.getDomainAxis().getDefaultAutoRange().getLowerBound();;
+            	double domainEnd =  plot.getDomainAxis().getDefaultAutoRange().getUpperBound();
+            	double rangeStart = plot.getRangeAxis().getDefaultAutoRange().getLowerBound();
+            	double rangeEnd =  plot.getRangeAxis().getDefaultAutoRange().getUpperBound();
+                plot.getDomainAxis().setAutoRange(false);
+                plot.getDomainAxis().setRange(domainStart,domainEnd);
+                plot.getRangeAxis().setRange(rangeStart,rangeEnd);
+                
+            }
+        };
         
         
         cp.setMinimumDrawWidth(0);					//
@@ -188,6 +205,9 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         m_chart.setNotify(false);
         constructSpectrumChart(peptideMatch);
         spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
+     // set default auto bounds in case there is no annotations (which sets new autobounds)
+        m_chart.getXYPlot().getRangeAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getRangeAxis().getLowerBound(),m_chart.getXYPlot().getRangeAxis().getUpperBound()));
+        m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getDomainAxis().getLowerBound(),m_chart.getXYPlot().getDomainAxis().getUpperBound()));
         spectrumAnnotations.addAnnotations();
         m_chart.setNotify(true);
     }
@@ -358,14 +378,15 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
     	plot.getDomainAxis().setAutoRange(true);
 		plot.getRangeAxis().setAutoRange(true);	
-		spectrumMinX = 0; //plot.getDomainAxis().getLowerBound();
-		spectrumMaxX = precursorMass;
+		m_spectrumMinX = 0; //plot.getDomainAxis().getLowerBound();
+		m_spectrumMaxX = precursorMass;
 		 //plot.getDomainAxis().getUpperBound();
-		spectrumMinY = 0;//plot.getRangeAxis().getLowerBound();
-		spectrumMaxY =  plot.getRangeAxis().getUpperBound();
-		plot.getDomainAxis().setRange(new Range(0,spectrumMaxX), false, true); 
-		plot.getRangeAxis().setRange(new Range(0,spectrumMaxY), false, true);
-
+		m_spectrumMinY = 0;//plot.getRangeAxis().getLowerBound();
+		m_spectrumMaxY =  plot.getRangeAxis().getUpperBound();
+		plot.getDomainAxis().setRange(new Range(0,m_spectrumMaxX), false, true); 
+		plot.getRangeAxis().setRange(new Range(0,m_spectrumMaxY), false, true);
+		plot.getDomainAxis().setDefaultAutoRange(new Range(0,m_spectrumMaxX)); // set new default zoom for x axis
+		plot.getRangeAxis().setDefaultAutoRange(new Range(0,m_spectrumMaxY)); //           "              y axis		
         
         plot.addChangeListener(new PlotChangeListener() {
             
@@ -382,17 +403,17 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
                 // only if zoom change do the following:
 
                 if (!redrawInProgress) {
-                    if (newMinX != spectrumMinX
-                            || newMaxX != spectrumMaxX
-                            || newMinY != spectrumMinY
-                            || newMaxY != spectrumMaxY) {
+                    if (newMinX != m_spectrumMinX
+                            || newMaxX != m_spectrumMaxX
+                            || newMinY != m_spectrumMinY
+                            || newMaxY != m_spectrumMaxY) {
                         
                         redrawInProgress = true;
                         
-                        spectrumMinX = newMinX;
-                        spectrumMaxX = newMaxX;
-                        spectrumMinY = newMinY;
-                        spectrumMaxY = newMaxY;
+                        m_spectrumMinX = newMinX;
+                        m_spectrumMaxX = newMaxX;
+                        m_spectrumMinY = newMinY;
+                        m_spectrumMaxY = newMaxY;
                         
                         spectrumAnnotations.removeAnnotations();
                         plot.getDomainAxis().setLowerBound(newMinX);

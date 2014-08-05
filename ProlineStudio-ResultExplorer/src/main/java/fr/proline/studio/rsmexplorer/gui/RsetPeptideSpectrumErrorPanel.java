@@ -68,10 +68,10 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 		private AbstractDataBox m_dataBox;
 	    
 		private static boolean redrawInProgress = false ; // to ensure no circular loop in changeEven when triggered by zooming the graph... 
-		private double spectrumMinX = 0;
-	    private double spectrumMaxX = 0;
-	    private double spectrumMinY = 0;
-	    private double spectrumMaxY = 0;
+		private double m_spectrumMinX = 0;
+	    private double m_spectrumMaxX = 0;
+	    private double m_spectrumMinY = 0;
+	    private double m_spectrumMaxY = 0;
 		    
 		    
 	    private DefaultXYDataset m_dataSet;
@@ -109,7 +109,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 	        
 	        m_dataSet = new DefaultXYDataset();
 	        m_chart = ChartFactory.createXYLineChart("", "m/z", "Delta Mass Error", m_dataSet, PlotOrientation.VERTICAL, true, true, false);
-	        m_chart.setNotify(false); // disable notifications. has to be enalbed once all graph is constructed to catch events...
+	        m_chart.setNotify(true); // disable notifications. commented as it was "hard" to get it back...doesn't respond properly otherwise to mouse control
 	        m_chart.removeLegend();
 	        m_chart.setBackgroundPaint(Color.white);
 	        TextTitle textTitle = m_chart.getTitle();
@@ -141,7 +141,21 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 	   
 	    private void initComponents() {
 	        setLayout(new BorderLayout());
-	        ChartPanel cp = new ChartPanel(m_chart, true);
+	        ChartPanel cp = new ChartPanel(m_chart, true) {
+	            @Override
+	            public void restoreAutoBounds(){
+	            	
+	            	XYPlot plot=(XYPlot)getChart().getPlot();
+	                double domainStart = plot.getDomainAxis().getDefaultAutoRange().getLowerBound();;
+	            	double domainEnd =  plot.getDomainAxis().getDefaultAutoRange().getUpperBound();
+	            	double rangeStart = plot.getRangeAxis().getDefaultAutoRange().getLowerBound();
+	            	double rangeEnd =  plot.getRangeAxis().getDefaultAutoRange().getUpperBound();
+	                plot.getDomainAxis().setAutoRange(false);
+	                plot.getDomainAxis().setRange(domainStart,domainEnd);
+	                plot.getRangeAxis().setRange(rangeStart,rangeEnd);
+	                
+	            }
+	        };
 	        
 	        
 	        cp.setMinimumDrawWidth(0);					//
@@ -179,7 +193,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 	 
 		 public void setData(DPeptideMatch peptideMatch) {
 
-			   m_chart.setNotify(false);
+			   //m_chart.setNotify(false);
 		       if (peptideMatch == m_previousPeptideMatch) {
 		           return;
 		       }
@@ -188,20 +202,25 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 		        constructSpectrumErrorChart(peptideMatch);
 		        spectrumErrorAnnotations = new RsetPeptideSpectrumErrorAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
 		        spectrumErrorAnnotations.addErrorAnnotations();
-		        double spectrumMinY = spectrumErrorAnnotations.m_spectrumMinY;
-		        double spectrumMaxY = spectrumErrorAnnotations.m_spectrumMaxY;
-		        double precursormOz = spectrumErrorAnnotations.m_precursorMass;
-		        if(spectrumMinY <= 0 &&  spectrumMaxY >=0) { 
-		        	if(spectrumMinY < spectrumMaxY) {
-			        	double biggest = Math.max(Math.abs(spectrumMinY), Math.abs(spectrumMaxY));
+		        //m_chart.setNotify(true); // re enable notifications on actions on the chart. (such as zoom, etc).
+
+		        m_spectrumMinY = spectrumErrorAnnotations.m_spectrumMinY;
+		        m_spectrumMaxY = spectrumErrorAnnotations.m_spectrumMaxY;
+		        if(m_spectrumMinY <= 0 &&  m_spectrumMaxY >=0) { 
+		        	if(m_spectrumMinY < m_spectrumMaxY) {
+			        	double biggest = Math.max(Math.abs(m_spectrumMinY), Math.abs(m_spectrumMaxY));
 			        	m_chart.getXYPlot().getRangeAxis().setRange(new Range(-biggest*1.5,biggest*2.5), true, true);
-						//m_chart.getXYPlot().getRangeAxis().setAutoRangeMinimumSize(2*(biggest));
-			        	m_chart.getXYPlot().getDomainAxis().setRange(new Range(0,precursormOz));
+			        	m_chart.getXYPlot().getRangeAxis().setAutoRangeMinimumSize(2*(biggest));
+						m_chart.getXYPlot().getRangeAxis().setDefaultAutoRange(new Range(-biggest*1.5,biggest*2.5));
+						
 		        	}
 		        }
-		 
-		        m_chart.setNotify(true); // re enable notifications on actions on the chart. (such as zoom, etc).
-		  }
+		 // set default auto bounds in case there is no annotations (which sets new autobounds)
+		       
+		        
+		        
+		        
+		        }
 	   
 		  public void writeToPNG(String fileName) {
 			   m_pngFile = new File (fileName);
@@ -330,7 +349,8 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 	        for (int i=0;i<intensityDoubleArray.length;i++) {
 	            intensityDoubleArray[i] = (double) intensityFloatBuffer.get();
 	        }
-	        
+	        double precursorMass = spectrum.getPrecursorMoz()*spectrum.getPrecursorCharge(); // used for setting spectrum display range
+
 	        ByteBuffer massByteBuffer = ByteBuffer.wrap(massByteArray).order(ByteOrder.LITTLE_ENDIAN);
 	        DoubleBuffer massDoubleBuffer = massByteBuffer.asDoubleBuffer();
 	        double[] massDoubleArray = new double[massDoubleBuffer.remaining()]; 
@@ -367,15 +387,16 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 	    	final XYPlot plot = m_chart.getXYPlot();
 			//p.setRenderer(renderer);
 
-	    	plot.getDomainAxis().setAutoRange(true);
-			plot.getRangeAxis().setAutoRange(true);	
-			spectrumMinX = plot.getDomainAxis().getLowerBound();
-			spectrumMaxX =  plot.getDomainAxis().getUpperBound();
-			spectrumMinY = -0.05 ; //plot.getRangeAxis().getLowerBound();
-			spectrumMaxY = 0.05 ; // plot.getRangeAxis().getUpperBound();
-			plot.getDomainAxis().setRange(new Range(0,spectrumMaxX), true, true);
-			plot.getRangeAxis().setRange(new Range(spectrumMinY,spectrumMaxY), true, true);
+	    	m_spectrumMinX = 0; //plot.getDomainAxis().getLowerBound();
+			m_spectrumMaxX =  precursorMass; // plot.getDomainAxis().getUpperBound();
+			m_spectrumMinY = -0.5 ; //plot.getRangeAxis().getLowerBound();
+			m_spectrumMaxY = 0.5 ; // plot.getRangeAxis().getUpperBound();
+			plot.getDomainAxis().setRange(new Range(0,m_spectrumMaxX), true, true);
+			plot.getRangeAxis().setRange(new Range(m_spectrumMinY,m_spectrumMaxY), true, true);
 			plot.setRangeZeroBaselineVisible(true);
+			plot.getRangeAxis().setDefaultAutoRange(new Range(m_spectrumMinY,m_spectrumMaxY));
+			plot.getDomainAxis().setDefaultAutoRange(new Range(0,m_spectrumMaxX));
+			
 			
 			
 			plot.addChangeListener(new PlotChangeListener() {
@@ -393,17 +414,17 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 					// only if zoom change do the following:
 					
 					if(!redrawInProgress) {
-						if(newMinX != spectrumMinX ||
-						   newMaxX != spectrumMaxX ||
-						   newMinY != spectrumMinY ||
-						   newMaxY != spectrumMaxY  ) {
+						if(newMinX != m_spectrumMinX ||
+						   newMaxX != m_spectrumMaxX ||
+						   newMinY != m_spectrumMinY ||
+						   newMaxY != m_spectrumMaxY  ) {
 							
 							redrawInProgress = true;
 							
-							spectrumMinX = newMinX ;
-							spectrumMaxX = newMaxX ;
-							spectrumMinY = newMinY ;
-							spectrumMaxY = newMaxY;
+							m_spectrumMinX = newMinX ;
+							m_spectrumMaxX = newMaxX ;
+							m_spectrumMinY = newMinY ;
+							m_spectrumMaxY = newMaxY;
 
 							spectrumErrorAnnotations.removeErrorAnnotations();
 							plot.getDomainAxis().setLowerBound(newMinX);

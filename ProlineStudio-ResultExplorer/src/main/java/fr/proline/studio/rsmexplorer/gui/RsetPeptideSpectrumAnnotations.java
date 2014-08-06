@@ -3,6 +3,8 @@ package fr.proline.studio.rsmexplorer.gui;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -39,6 +41,7 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.pattern.AbstractDataBox;
+
 import org.slf4j.Logger;
 
 // created by AW
@@ -438,6 +441,10 @@ public class RsetPeptideSpectrumAnnotations {
                                 pointer.setArrowPaint(abc_serie_color);;
                                 pointer.setPaint(abc_serie_color);
                                 pointer.setTextAnchor(TextAnchor.BOTTOM_CENTER);
+                                pointer.setToolTipText("<html>"
+        								+ "m/z: " + fragTable[1][i] + "<br>" 
+        								+ "intensity: " + fragTable[0][i]
+        								+ "</html>");
                                 plot.addAnnotation(pointer);
 
                                 // dashed vertical bar over the b number
@@ -531,6 +538,10 @@ public class RsetPeptideSpectrumAnnotations {
                                 pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
                                 pointer.setPaint(xyz_serie_color);
                                 pointer.setTextAnchor(TextAnchor.BOTTOM_CENTER);
+                                pointer.setToolTipText("<html>"
+        								+ "m/z: " + fragTable[6][i] + "<br>" 
+        								+ "intensity: " + fragTable[5][i]
+        								+ "</html>");
                                 plot.addAnnotation(pointer);
 
 

@@ -14,7 +14,7 @@ public class PlotPanel extends JPanel {
     
     private PlotAbstract m_plot = null;
     
-    public final static int GAP_FIGURES_Y = 30;
+    public final static int GAP_FIGURES_Y = 50;
     public final static int GAP_FIGURES_X = 30;
     public final static int GAP_END_AXIS = 10;
 

@@ -5,6 +5,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class PropertiesAction extends AbstractRSMAction {
 
     public PropertiesAction() {
-        super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"));
+        super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

@@ -96,6 +96,8 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         // update the number of lines
         m_markerContainerPanel.setMaxLineNumber(((WSCProteinTableModel) m_proteinTable.getModel()).getRowCount());
         
+        // table is sortable
+        m_proteinTable.setSortable(true);
 
     }
 

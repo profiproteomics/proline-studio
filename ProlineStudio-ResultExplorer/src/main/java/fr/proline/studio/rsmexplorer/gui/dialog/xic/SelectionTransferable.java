@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.xic.RSMBiologicalSampleAnalysisNode;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -85,11 +84,22 @@ public class SelectionTransferable implements Transferable, Serializable {
     public static class TransferData {
 
         private ArrayList<RSMDataSetNode> m_datasetList = null;
-        private ArrayList<RSMBiologicalSampleAnalysisNode> m_biologicalSampleAnalysisList = null;
+        private ArrayList<RSMNode> m_designList = null;
         
         
         
         public TransferData() {
+            
+        }
+        
+        public boolean isDesignData() {
+            return (m_designList != null);
+        }
+        public RSMNode.NodeTypes getDesignNodeType() {
+            if ((m_designList == null) || (m_designList.isEmpty())) {
+                return null;
+            }
+            return m_designList.get(0).getType();
             
         }
 
@@ -101,12 +111,12 @@ public class SelectionTransferable implements Transferable, Serializable {
             return m_datasetList;
         }
 
-        public void setSampleAnalysisList(ArrayList<RSMBiologicalSampleAnalysisNode> list) {
-            m_biologicalSampleAnalysisList = list;
+        public void setDesignList(ArrayList<RSMNode> list) {
+            m_designList = list;
         }
 
-        public ArrayList<RSMBiologicalSampleAnalysisNode> getSampleAnalysisList() {
-            return m_biologicalSampleAnalysisList;
+        public ArrayList<RSMNode> getDesignList() {
+            return m_designList;
         }
         
     }

@@ -17,6 +17,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.ValidationDialog;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +33,7 @@ import org.openide.windows.WindowManager;
 public class ValidateAction extends AbstractRSMAction {
 
     public ValidateAction() {
-        super(NbBundle.getMessage(ValidateAction.class, "CTL_ValidateAction"));
+        super(NbBundle.getMessage(ValidateAction.class, "CTL_ValidateAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

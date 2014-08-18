@@ -13,6 +13,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.spectralcount.SpectralCountDialo
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class SpectralCountAction extends AbstractRSMAction {
     final static public String DS_LIST_PROPERTIES="dsList";
     
     public SpectralCountAction() {
-        super(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"));
+        super(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
     
     @Override

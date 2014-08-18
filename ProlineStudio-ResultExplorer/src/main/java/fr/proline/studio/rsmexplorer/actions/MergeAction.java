@@ -14,6 +14,7 @@ import fr.proline.studio.dpm.task.MergeTask;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -27,7 +28,7 @@ import org.openide.util.NbBundle;
 public class MergeAction extends AbstractRSMAction {
 
     public MergeAction() {
-        super(NbBundle.getMessage(AddAction.class, "CTL_MergeAction"));
+        super(NbBundle.getMessage(AddAction.class, "CTL_MergeAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

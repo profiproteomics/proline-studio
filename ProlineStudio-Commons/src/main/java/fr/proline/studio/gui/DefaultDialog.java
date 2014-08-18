@@ -535,16 +535,21 @@ public class DefaultDialog extends javax.swing.JDialog {
     
     public void highlight(Component c) {
         
+        highlight(c, null);
+    }
+    
+    public void highlight(Component c, Rectangle zone) {
+
         if (m_highlightGlassPane == null) {
             m_highlightGlassPane = new HighlightGlassPane();
         }
-        m_highlightGlassPane.setComponent(c);
-                
+        m_highlightGlassPane.setComponent(c, zone);
+
         setGlassPane(m_highlightGlassPane);
-        
-        
+
+
         m_highlightGlassPane.highlight();
-        
+
 
     }
     
@@ -694,10 +699,8 @@ public class DefaultDialog extends javax.swing.JDialog {
 
         }
 
-        public void setComponent(Component c) {
-            
-            final int PAD = 10;
-            
+        private void setComponent(Component c) {
+
             m_comp = c;
             
             m_x = -PAD;
@@ -705,6 +708,22 @@ public class DefaultDialog extends javax.swing.JDialog {
             m_width = c.getWidth()+PAD*2;
             m_height = c.getHeight()+PAD*2;
         }
+        
+        public void setComponent(Component c, Rectangle r) {
+
+            if (r == null) {
+                setComponent(c);
+                return;
+            }
+
+            m_comp = c;
+
+            m_x = -PAD+r.x;
+            m_y = -PAD+r.y;
+            m_width = r.width + PAD * 2;
+            m_height = r.height + PAD * 2;
+        }
+        private static final int PAD = 10;
         
         public void highlight() {
             

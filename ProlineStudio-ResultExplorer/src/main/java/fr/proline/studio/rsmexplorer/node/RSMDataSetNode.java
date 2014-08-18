@@ -54,7 +54,7 @@ public class RSMDataSetNode extends RSMNode {
                 }
             case QUANTITATION: {
                 if (dataset == null || dataset.getQuantitationMethod() == null)
-                    return getIcon(IconManager.IconType.QUANT);
+                    return getIcon(IconManager.IconType.QUANT_XIC);
                 if (dataset.getQuantitationMethod().getAbundanceUnit().compareTo("feature_intensity")== 0) { // XIC
                     return getIcon(IconManager.IconType.QUANT_XIC);            
                 } else if(dataset.getQuantitationMethod().getAbundanceUnit().compareTo("spectral_counts") == 0) { // Spectral count

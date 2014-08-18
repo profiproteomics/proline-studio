@@ -8,6 +8,7 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.Iterator;
 import java.util.Set;
 import org.openide.util.NbBundle;
@@ -21,7 +22,7 @@ import org.openide.windows.WindowManager;
 public class DisconnectAction extends AbstractRSMAction {
 
     public DisconnectAction() {
-        super(NbBundle.getMessage(ConnectAction.class, "CTL_DisconnectAction"));
+        super(NbBundle.getMessage(ConnectAction.class, "CTL_DisconnectAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
     
     @Override

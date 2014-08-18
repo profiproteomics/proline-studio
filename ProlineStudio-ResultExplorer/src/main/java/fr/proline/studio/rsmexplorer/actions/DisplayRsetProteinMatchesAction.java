@@ -15,6 +15,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import org.openide.util.NbBundle;
 
 /**
@@ -24,7 +25,7 @@ import org.openide.util.NbBundle;
 public class DisplayRsetProteinMatchesAction extends AbstractRSMAction {
 
    public DisplayRsetProteinMatchesAction() {
-       super(NbBundle.getMessage(DisplayRsetPeptidesAction.class, "CTL_DisplayProteinMatchesAction"));
+       super(NbBundle.getMessage(DisplayRsetPeptidesAction.class, "CTL_DisplayProteinMatchesAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
    }
 
     @Override

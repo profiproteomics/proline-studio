@@ -13,6 +13,7 @@ import fr.proline.studio.export.ExportDialog;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ public class ExportXICAction extends AbstractRSMAction {
     private ExportType m_exportType = null;
     
     public ExportXICAction(ExportType type) {
-        super(NbBundle.getMessage(ExportXICAction.class, "CTL_PrefixExportXICAction")+type.getAsLabel(), false);
+        super(NbBundle.getMessage(ExportXICAction.class, "CTL_PrefixExportXICAction")+type.getAsLabel(), RSMTree.TreeType.TREE_QUANTITATION);
         m_exportType = type; 
     }
     

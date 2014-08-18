@@ -9,6 +9,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 
@@ -19,7 +20,7 @@ import org.openide.util.NbBundle;
 public class EmptyTrashAction extends AbstractRSMAction {
 
     public EmptyTrashAction() {
-        super(NbBundle.getMessage(DeleteAction.class, "CTL_EmptyTrashAction"));
+        super(NbBundle.getMessage(DeleteAction.class, "CTL_EmptyTrashAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
     
 

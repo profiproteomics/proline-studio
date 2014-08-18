@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;
@@ -19,7 +20,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private JMenu m_menu;
     
     public DisplayRsmAction() {
-        super(NbBundle.getMessage(AddAction.class, "CTL_DisplayRsmAction"));
+        super(NbBundle.getMessage(AddAction.class, "CTL_DisplayRsmAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

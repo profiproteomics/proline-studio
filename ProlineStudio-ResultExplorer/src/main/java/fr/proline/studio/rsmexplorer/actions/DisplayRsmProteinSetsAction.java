@@ -12,6 +12,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import org.openide.util.NbBundle;
 
 /**
@@ -21,7 +22,7 @@ import org.openide.util.NbBundle;
 public class DisplayRsmProteinSetsAction extends AbstractRSMAction {
 
     public DisplayRsmProteinSetsAction() {
-        super(NbBundle.getMessage(DisplayRsmProteinSetsAction.class, "CTL_DisplayProteinSetsAction"));
+        super(NbBundle.getMessage(DisplayRsmProteinSetsAction.class, "CTL_DisplayProteinSetsAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

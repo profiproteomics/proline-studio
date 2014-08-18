@@ -7,10 +7,7 @@ import fr.proline.studio.dpm.task.CertifyIdentificationTask;
 import fr.proline.studio.dpm.task.ImportIdentificationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ImportIdentificationDialog;
-import fr.proline.studio.rsmexplorer.node.RSMAllImportedNode;
-import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
-import fr.proline.studio.rsmexplorer.node.IdentificationTree;
+import fr.proline.studio.rsmexplorer.node.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +28,7 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
     private static HashMap<Long, ArrayList<ChangeListener>> m_listenerMap = new HashMap<>();
     
     public ImportSearchResultAsRsetAction() {
-        super(NbBundle.getMessage(ImportSearchResultAsRsetAction.class, "CTL_AddSearchResult"));
+        super(NbBundle.getMessage(ImportSearchResultAsRsetAction.class, "CTL_AddSearchResult"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
     
     @Override

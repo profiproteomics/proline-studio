@@ -9,6 +9,7 @@ import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.GenerateSpectrumMatchTask;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import org.openide.util.NbBundle;
 
 /**
@@ -18,7 +19,7 @@ import org.openide.util.NbBundle;
 public class GenerateSpectrumMatchesAction extends AbstractRSMAction {
 
     public GenerateSpectrumMatchesAction() {
-        super(NbBundle.getMessage(GenerateSpectrumMatchesAction.class, "CTL_GenerateSpectrumMatchesAction"));
+        super(NbBundle.getMessage(GenerateSpectrumMatchesAction.class, "CTL_GenerateSpectrumMatchesAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
    

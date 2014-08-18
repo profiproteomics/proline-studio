@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.actions;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +17,7 @@ import org.openide.util.NbBundle;
 public class DeleteAction extends AbstractRSMAction {
 
     public DeleteAction() {
-        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"));
+        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

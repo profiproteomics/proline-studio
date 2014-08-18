@@ -21,8 +21,8 @@ import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.task.CertifyIdentificationTask;
+import fr.proline.studio.rsmexplorer.node.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.tree.DefaultTreeModel;
@@ -37,7 +37,7 @@ import org.openide.windows.WindowManager;
 public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
 
     public ImportSearchResultAsDatasetAction() {
-        super(NbBundle.getMessage(ImportSearchResultAsDatasetAction.class, "CTL_IdentificationAction"));
+        super(NbBundle.getMessage(ImportSearchResultAsDatasetAction.class, "CTL_IdentificationAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.RawFile;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
@@ -11,37 +13,39 @@ import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.RegisterRawFileTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
+import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.xic.RSMBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.node.xic.RSMRunNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
-import java.awt.Dimension;
 import java.awt.Window;
 import java.util.*;
 import javax.persistence.EntityManager;
 import javax.swing.JScrollPane;
+import javax.swing.tree.TreePath;
 import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * Dialog to build a XIC Design
  * @author JM235353
  */
 public class CreateXICDialog extends DefaultDialog {
 
-    private static final int STEP_PANEL_DEFINE_GROUPS = 0;
-    private static final int STEP_PANEL_MODIFY_GROUPS = 1;
-    private static final int STEP_PANEL_DEFINE_SAMPLE_ANALYSIS = 2;
-    private static final int STEP_PANEL_DEFINE_QUANT_PARAMS = 3;
-    private int m_step = STEP_PANEL_DEFINE_GROUPS;
+    
+    private static final int STEP_PANEL_CREATE_XIC_DESIGN = 0;
+    private static final int STEP_PANEL_DEFINE_XIC_PARAMS = 1;
+    private int m_step = STEP_PANEL_CREATE_XIC_DESIGN;
+    
     private static CreateXICDialog m_singletonDialog = null;
+    
     private RSMNode finalXICDesignNode = null;
 
     public static CreateXICDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new CreateXICDialog(parent);
         }
-
 
         return m_singletonDialog;
     }
@@ -55,11 +59,9 @@ public class CreateXICDialog extends DefaultDialog {
 
         setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
 
-        setButtonName(DefaultDialog.BUTTON_OK, "Next");
-        setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
- 
-        setInternalComponent(DefineBioGroupsPanel.getDefineBioGroupsPanel());
-
+        setSize(700, 500);
+        setResizable(true);
+        
     }
     
 
@@ -68,11 +70,18 @@ public class CreateXICDialog extends DefaultDialog {
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         finalXICDesignNode = null;
-        m_step = STEP_PANEL_DEFINE_GROUPS; 
-        replaceInternaleComponent(DefineBioGroupsPanel.getDefineBioGroupsPanel());
+        m_step = STEP_PANEL_CREATE_XIC_DESIGN;
+        finalXICDesignNode = new RSMDataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
+
+        replaceInternaleComponent(CreateXICDesignPanel.getPanel(finalXICDesignNode));
         revalidate();
         repaint();
          
+    }
+    
+    @Override
+    public void pack() {
+        // forbid pack by overloading the method
     }
     
     public RSMNode getDesignRSMNode(){
@@ -117,7 +126,7 @@ public class CreateXICDialog extends DefaultDialog {
         Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
         HashMap<Long, Long> runIdByRsmId = new HashMap<>();
         
-        for(Long rsmId : rsmIDs){
+        for (Long rsmId : rsmIDs) {
             ArrayList<Long> returnedRunId = new ArrayList<> ();
             DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
             loadRunIdsTask.initLoadRunIdForRsm(pID, rsmId, returnedRunId);
@@ -222,8 +231,9 @@ public class CreateXICDialog extends DefaultDialog {
     }
 
     public Map<String, Object>  getDesignParameters() throws IllegalAccessException {
-        if(finalXICDesignNode==null)
+        if (finalXICDesignNode==null) {
             throw new IllegalAccessException("Design parameters have not been set.");
+        }
         
         Map<String,Object> experimentalDesignParams = new HashMap<>();
                        
@@ -396,113 +406,10 @@ public class CreateXICDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
 
-        if (m_step == STEP_PANEL_DEFINE_GROUPS) {
+        if (m_step == STEP_PANEL_CREATE_XIC_DESIGN)  {
             
-            // check values
-            DefineBioGroupsPanel defineBioGroupsPanel = DefineBioGroupsPanel.getDefineBioGroupsPanel();
-            String quantitationName = defineBioGroupsPanel.getQuantitationName();
-            if (quantitationName.length() == 0) {
-
-                setStatus(true, "You must fill the Quantitation Name");
-                highlight(defineBioGroupsPanel.getQuantitationNameTextField());
+            if ((!checkDesignStructure(finalXICDesignNode)) || (!checkRawFiles(finalXICDesignNode))) {
                 return false;
-
-            }
-            
-            String groupPrefix = defineBioGroupsPanel.getGroupPrefix();
-            if (groupPrefix.length() == 0) {
-
-                setStatus(true, "You must fill the Group Prefix");
-                highlight(defineBioGroupsPanel.getGroupPrefixTextField());
-                return false;
-
-            }
-            
-            String samplePrefix = defineBioGroupsPanel.getSamplePrefix();
-            if (samplePrefix.length() == 0) {
-
-                setStatus(true, "You must fill the Sample Prefix");
-                highlight(defineBioGroupsPanel.getSamplePrefixTextField());
-                return false;
-
-            }
-            
-            int nbGroups = defineBioGroupsPanel.getGroupNumber();
-
-            int nbSamples = defineBioGroupsPanel.getSampleNumber();
-
-            JScrollPane scrollPane = new JScrollPane();
-            ModifyBioGroupsPanel definePanel = ModifyBioGroupsPanel.getDefinePanel(nbGroups, groupPrefix, nbSamples, samplePrefix);
-            scrollPane.setViewportView(definePanel);
-
-            replaceInternaleComponent(scrollPane);
-
-            setResizable(true);
-            setSize(new Dimension(600, 500));
-
-            revalidate();
-            repaint();
-
-            m_step = STEP_PANEL_MODIFY_GROUPS;
-
-            return false;
-        } else if (m_step == STEP_PANEL_MODIFY_GROUPS) {
-
-            // check values
-                 
-            
-            JScrollPane scrollPane = new JScrollPane();
-            String quantitationName = DefineBioGroupsPanel.getDefineBioGroupsPanel().getQuantitationName();
-            finalXICDesignNode = ModifyBioGroupsPanel.getDefinePanel().generateTreeNodes(quantitationName);
-            SetSampleAnalysisPanel defineSampleAnalysisPanel = SetSampleAnalysisPanel.getPanel(finalXICDesignNode);
-            scrollPane.setViewportView(defineSampleAnalysisPanel);
-
-            replaceInternaleComponent(scrollPane);
-
-
-            revalidate();
-            repaint();
-            
-            m_step = STEP_PANEL_DEFINE_SAMPLE_ANALYSIS;
-            
-            return false;
-            
-        } else if (m_step == STEP_PANEL_DEFINE_SAMPLE_ANALYSIS)  {  // STEP_PANEL_DEFINE_SAMPLE_ANALYSIS
-            
-             // check values
-            if (finalXICDesignNode == null) {
-
-                setStatus(true, "You must correctly define your experimental design");
-                highlight(SetSampleAnalysisPanel.getPanel());
-                return false;
-
-            }
-
-            Enumeration xicGrps = finalXICDesignNode.children();
-            //Iterate over Groups
-            while (xicGrps.hasMoreElements()) {
-                RSMNode grpNode = (RSMNode) xicGrps.nextElement();
-                //Iterate over Samples
-                Enumeration grpSpls = grpNode.children();
-                while (grpSpls.hasMoreElements()) {
-                    RSMNode splNode = (RSMNode) grpSpls.nextElement();
-                    if (splNode.getChildCount() < 1) {
-                        setStatus(true, "You must specify at least one identifications summary for each sample.");
-                        highlight(SetSampleAnalysisPanel.getPanel());
-                        return false;
-                    } else {
-                         //Iterate over Samples Analysis  => RSMs
-                        Enumeration splAnalysis = splNode.children();
-                        while (splAnalysis.hasMoreElements()) {
-                            RSMNode splAnalysisNode = (RSMNode) splAnalysis.nextElement();
-                            if (splAnalysisNode.getChildCount() != 1 ||  ((RunInfoData)((RSMNode)splAnalysisNode.getChildAt(0)).getData()).getRawFile()==null) {
-                                setStatus(true, "You must specify a Raw(meDb) File for each identification.");
-                                highlight(SetSampleAnalysisPanel.getPanel());
-                                return false;   
-                            }
-                        }                        
-                    } //End found Analysis for sample
-                }
             }
 
             // change to ok button
@@ -520,7 +427,7 @@ public class CreateXICDialog extends DefaultDialog {
             revalidate();
             repaint();
             
-            m_step = STEP_PANEL_DEFINE_QUANT_PARAMS;
+            m_step = STEP_PANEL_DEFINE_XIC_PARAMS;
             
             return false;
         } else { //STEP_PANEL_DEFINE_QUANT_PARAMS
@@ -530,6 +437,85 @@ public class CreateXICDialog extends DefaultDialog {
             return true;
         }
 
+    }
+    
+    private boolean checkDesignStructure(RSMNode parentNode) {
+        RSMNode.NodeTypes type = parentNode.getType();
+     
+        switch(type) {
+            case DATA_SET:
+                if (parentNode.isLeaf()) {
+                    showErrorOnNode(parentNode, "Your XIC Design is empty.");
+                    return false;
+                }
+                break;
+            case BIOLOGICAL_GROUP:
+                if (parentNode.isLeaf()) {
+                    showErrorOnNode(parentNode, "You must add at least one Biological Sample for each Biological Group.");
+                    return false;
+                }
+                break;
+            case BIOLOGICAL_SAMPLE:
+                if (parentNode.isLeaf()) {
+                    showErrorOnNode(parentNode, "You must add at least one Identification for each Biological Sample.");
+                    return false;
+                }
+                break;
+        }
+        
+        Enumeration children = parentNode.children();
+        //Iterate over Groups
+        while (children.hasMoreElements()) {
+            RSMNode rsmNode = (RSMNode) children.nextElement();
+            if (!checkDesignStructure(rsmNode)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    
+    private boolean checkRawFiles(RSMNode node) {
+        RSMNode.NodeTypes type = node.getType();
+        if (type == RSMNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
+            RSMBiologicalSampleAnalysisNode sampleAnalysisNode = (RSMBiologicalSampleAnalysisNode) node;
+            if (sampleAnalysisNode.getChildCount() != 1 ||  ((RunInfoData)((RSMNode)sampleAnalysisNode.getChildAt(0)).getData()).getRawFile()==null) {
+                showErrorOnNode((RSMNode)sampleAnalysisNode.getChildAt(0), "You must specify a Raw(meDb) File for each identification.");
+                return false;
+            }
+        }
+
+        Enumeration children = node.children();
+        //Iterate over Groups
+        while (children.hasMoreElements()) {
+            RSMNode rsmNode = (RSMNode) children.nextElement();
+            if (!checkRawFiles(rsmNode)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    
+    private void showErrorOnNode(RSMNode node, String error) {
+
+        // expand parentnode if needed
+        RSMNode parentNode = (RSMNode) node.getParent();
+        if (parentNode != null) {
+            TreePath pathToExpand = new TreePath(parentNode.getPath());
+            if (!DesignTree.getDesignTree().isExpanded(pathToExpand)) {
+
+                DesignTree.getDesignTree().expandPath(pathToExpand);
+            }
+        }
+
+        // scroll to node if needed
+        TreePath path = new TreePath(node.getPath());
+        DesignTree.getDesignTree().scrollPathToVisible(path);
+
+        // display error
+        setStatus(true, error);
+        highlight(DesignTree.getDesignTree(), DesignTree.getDesignTree().getPathBounds(path));
     }
 
     @Override

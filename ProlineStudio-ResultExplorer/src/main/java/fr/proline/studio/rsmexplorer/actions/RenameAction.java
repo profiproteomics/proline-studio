@@ -7,6 +7,7 @@ import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -17,7 +18,7 @@ import org.openide.windows.WindowManager;
 public class RenameAction extends AbstractRSMAction {
 
     public RenameAction() {
-        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"));
+        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

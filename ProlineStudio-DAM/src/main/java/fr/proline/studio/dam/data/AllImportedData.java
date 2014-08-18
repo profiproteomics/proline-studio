@@ -1,6 +1,7 @@
 package fr.proline.studio.dam.data;
 
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ public class AllImportedData extends AbstractData {
     
     
     @Override
-    public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority) {
         
     }
 

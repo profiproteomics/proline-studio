@@ -11,7 +11,7 @@ import java.text.DecimalFormat;
  */
 public class XAxis extends Axis {
 
-    private DecimalFormat m_df;
+
     
     public XAxis() {
     }
@@ -30,25 +30,21 @@ public class XAxis extends Axis {
         m_maxTick = ticks.getTickMax();
         double tickSpacing = ticks.getTickSpacing();
         
-        String pattern;
         int digits = ticks.getDigits();
-        if (digits <= 0) {
-            pattern = "#";  // number like "3"
-        } else if (digits>3) { // 3 is 
-            pattern = ("0.0E0"); // scientific notation for numbers with too much digits "0.0000532"
-        } else {
-            pattern = "#.";
-            while (digits > 0) {
-                pattern += "#";
-                digits--;
-            }
-        }
-        m_df = new DecimalFormat(pattern);
         
+        if (digits != m_digits) {
+            m_df = selectDecimalFormat(digits);
+            m_digits = digits;
+        }
         
         int pixelStart = valueToPixel(m_minTick);
         int pixelStop = valueToPixel(m_maxTick);
         g.drawLine(pixelStart, m_y, pixelStop, m_y);
+        
+        if (pixelStart >= pixelStop) { // avoid infinite loop when histogram is flat
+            return;
+        }
+        
         
         FontMetrics metrics = g.getFontMetrics(g.getFont());
         int height = metrics.getHeight();

@@ -2,6 +2,7 @@ package fr.proline.studio.graphics;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.text.DecimalFormat;
 
 /**
  * Base class for axis
@@ -21,6 +22,10 @@ public abstract class Axis {
     // Min tick and max tick
     protected double m_minTick; 
     protected double m_maxTick;
+    
+    protected DecimalFormat m_df;
+    protected int m_digits = -1;
+    
     
     public Axis() {
     }
@@ -61,5 +66,19 @@ public abstract class Axis {
         return m_maxTick;
     }
 
-    
+    protected DecimalFormat selectDecimalFormat(int digits) {
+        String pattern;
+        if (digits <= 0) {
+            pattern = "#";  // number like "3"
+        } else if (digits > 3) { // 3 is 
+            pattern = ("0.0E0"); // scientific notation for numbers with too much digits "0.0000532"
+        } else {
+            pattern = "#.";
+            while (digits > 0) {
+                pattern += "#";
+                digits--;
+            }
+        }
+        return new DecimalFormat(pattern);
+    }
 }

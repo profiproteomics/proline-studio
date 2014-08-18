@@ -4,6 +4,7 @@ import fr.proline.studio.dpm.data.SpectralCountResultData;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer.CompareValue;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
@@ -237,6 +238,14 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
                        int realCol = m_overviewType+col*getByRsmCount();
                        return ((Float)getValueAt(row, realCol)).doubleValue();
                     }
+                    
+                    public double getValueNoNaN(int col) {
+                        double val = getValue(col);
+                        if (val != val) { // NaN value
+                            return 0;
+                        }
+                        return val;
+                    }
 
                     @Override
                     public double getMaximumValue() {
@@ -250,6 +259,33 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
                         }
                         return maxValue;
                         
+                    }
+
+                    @Override
+                    public double calculateComparableValue() {
+                        int nbColumns = getNumberColumns();
+                        double mean = 0;
+                        for (int i=0;i<nbColumns;i++) {
+                            mean += getValueNoNaN(i);
+                        }
+                        mean /= nbColumns;
+                        
+                        double maxDiff = 0;
+                        for (int i=0;i<nbColumns;i++) {
+                            double diff = getValueNoNaN(i)-mean;
+                            if (diff<0) {
+                                diff = -diff;
+                            }
+                            if (diff>maxDiff) {
+                                maxDiff = diff;
+                            }
+                        }
+                        return maxDiff / mean;
+                    }
+                    
+                    @Override
+                    public int compareTo(CompareValue o) {
+                        return Double.compare(calculateComparableValue(), o.calculateComparableValue());
                     }
                 };
             default: {
@@ -454,6 +490,6 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
 
     @Override
     public int getSubTaskId(int col) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return -1;
     }
 }

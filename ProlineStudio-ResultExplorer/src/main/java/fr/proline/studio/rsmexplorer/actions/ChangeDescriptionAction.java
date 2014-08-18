@@ -7,6 +7,7 @@ import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -17,7 +18,7 @@ import org.openide.windows.WindowManager;
 public class ChangeDescriptionAction extends AbstractRSMAction {
    
     public ChangeDescriptionAction() {
-        super(NbBundle.getMessage(ChangeDescriptionAction.class, "CTL_ChangeDescriptionAction"));
+        super(NbBundle.getMessage(ChangeDescriptionAction.class, "CTL_ChangeDescriptionAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

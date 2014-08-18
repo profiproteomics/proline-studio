@@ -4,14 +4,14 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.awt.event.MouseListener;
 import java.util.*;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
+import javax.swing.tree.*;
 
 /**
  *
@@ -19,7 +19,13 @@ import javax.swing.tree.TreePath;
  */
 public abstract class RSMTree extends JTree implements MouseListener {
  
-    
+    public enum TreeType {
+
+        TREE_IDENTIFICATION,
+        TREE_QUANTITATION,
+        TREE_SELECTION,
+        TREE_XIC_DESIGN
+    }
     
     
     protected RSMTreeModel m_model;
@@ -27,7 +33,7 @@ public abstract class RSMTree extends JTree implements MouseListener {
     protected HashMap<AbstractData, RSMNode> loadingMap = new HashMap<>();
     
     protected void initTree(RSMNode top) {
-        m_model = new RSMTreeModel(top);
+        m_model = new RSMTreeModel(this, top);
         setModel(m_model);
 
         // rendering of the tree
@@ -36,7 +42,7 @@ public abstract class RSMTree extends JTree implements MouseListener {
         IdentificationTree.RSMTreeRenderer renderer = new IdentificationTree.RSMTreeRenderer();
         setCellRenderer(renderer);
         if (isEditable()) {
-            setCellEditor(new IdentificationTree.RSMTreeCellEditor(this, renderer));
+            setCellEditor(new RSMTreeCellEditor(this, renderer));
         }
 
         // -- listeners
@@ -131,7 +137,84 @@ public abstract class RSMTree extends JTree implements MouseListener {
 
     }
     
-        public void setSelection(ArrayList<ResultSummary> rsmArray) {
+    
+
+    public void loadAllAtOnce(final RSMNode nodeToLoad) {
+        if (nodeToLoad.getChildCount() == 0) {
+            return;
+        }
+        RSMNode childNode = (RSMNode) nodeToLoad.getChildAt(0);
+        if (childNode.getType() != RSMNode.NodeTypes.HOUR_GLASS) {
+            int nbChildren = nodeToLoad.getChildCount();
+            for (int i = 0; i < nbChildren; i++) {
+                loadAllAtOnce((RSMNode) nodeToLoad.getChildAt(i));
+            }
+            return; 
+        }
+        
+        // register hour glass which is expanded
+        loadingMap.put(nodeToLoad.getData(), nodeToLoad);
+        
+        final ArrayList<AbstractData> childrenList = new ArrayList<>();
+        final AbstractData parentData = nodeToLoad.getData();
+
+        if (nodeToLoad.getType() == RSMNode.NodeTypes.TREE_PARENT) {
+            nodeToLoad.setIsChanging(true);
+            m_model.nodeChanged(nodeToLoad);
+        }
+        
+        // Callback used only for the synchronization with the AccessDatabaseThread
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                if (nodeToLoad.getType() == RSMNode.NodeTypes.TREE_PARENT) {
+                    nodeToLoad.setIsChanging(false);
+                    m_model.nodeChanged(nodeToLoad);
+                }
+
+                dataLoadedAtOnce(parentData, childrenList);
+            }
+        };
+
+        
+
+        parentData.load(callback, childrenList, Priority.TOP);
+        
+    }
+    protected void dataLoadedAtOnce(AbstractData data, List<AbstractData> list) {
+
+        RSMNode parentNode = loadingMap.remove(data);
+
+
+        parentNode.remove(0); // remove the first child which correspond to the hour glass
+
+
+        int indexToInsert = 0;
+        Iterator<AbstractData> it = list.iterator();
+        while (it.hasNext()) {
+            AbstractData dataCur = it.next();
+            parentNode.insert(RSMChildFactory.createNode(dataCur), indexToInsert);
+            indexToInsert++;
+        }
+
+        m_model.nodeStructureChanged(parentNode);
+
+        int nbChildren = parentNode.getChildCount();
+        for (int i=0;i<nbChildren;i++) {
+            loadAllAtOnce((RSMNode) parentNode.getChildAt(i));
+        }
+
+    }
+    
+    
+    public void setSelection(ArrayList<ResultSummary> rsmArray) {
 
         if (!loadingMap.isEmpty()) {
             // Tree is loading, we must postpone the selection
@@ -204,11 +287,31 @@ public abstract class RSMTree extends JTree implements MouseListener {
         return nodes;
     }
     
-    
-    protected class RSMTreeModel extends DefaultTreeModel {
+    public void expandNodeIfNeeded(RSMNode n) {
+        final TreePath pathToExpand = new TreePath(n.getPath());
+        if (!isExpanded(pathToExpand)) {
 
-        public RSMTreeModel(TreeNode root) {
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    expandPath(pathToExpand);
+                }
+            });
+        }
+    }
+    
+    public abstract void rename(RSMNode rsmNode, String newName);
+
+    
+    
+    public class RSMTreeModel extends DefaultTreeModel {
+
+        private RSMTree m_parentTree = null;
+        
+        public RSMTreeModel(RSMTree parentTree, TreeNode root) {
             super(root, false);
+            m_parentTree = parentTree;
         }
 
         /**
@@ -221,16 +324,26 @@ public abstract class RSMTree extends JTree implements MouseListener {
         public void valueForPathChanged(TreePath path, Object newValue) {
             RSMNode rsmNode = (RSMNode) path.getLastPathComponent();
 
-            if (rsmNode.getType()== RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
-                RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) rsmNode;
-                Project project = projectNode.getProject();
-                ((RSMProjectIdentificationNode) rsmNode).changeNameAndDescription(newValue.toString(), project.getDescription());
-            } else if (rsmNode.getType() == RSMNode.NodeTypes.PROJECT_QUANTITATION) {  //JPM.TODO
-                RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) rsmNode;
-                Project project = projectNode.getProject();
-                ((RSMProjectIdentificationNode) rsmNode).changeNameAndDescription(newValue.toString(), project.getDescription());
-            } else if (rsmNode.getType() == RSMNode.NodeTypes.DATA_SET) {
-                ((RSMDataSetNode) rsmNode).rename(newValue.toString());
+            m_parentTree.rename(rsmNode, newValue.toString());
+
+        }
+    }
+    
+    public static class RSMTreeCellEditor extends DefaultTreeCellEditor {
+
+        public RSMTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer) {
+            super(tree, renderer);
+        }
+
+        @Override
+        protected void determineOffset(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row) {
+            renderer.getTreeCellRendererComponent(tree, value, isSelected, expanded, leaf, row, true);
+            editingIcon = renderer.getIcon();
+
+            if (editingIcon != null) {
+                offset = renderer.getIconTextGap() + editingIcon.getIconWidth();
+            } else {
+                offset = renderer.getIconTextGap();
             }
         }
     }

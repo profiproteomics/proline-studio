@@ -92,11 +92,13 @@ public class IconManager {
         IDENTIFICATION,
         ARROW_8X7,
         ARROW,
-        ARROW_CURVED,
+        DRAG_AND_DROP,
         WAND_HAT,
         FILE,
         FOLDER,
-        FRAGMENTATION;
+        FRAGMENTATION,
+        BIOLOGICAL_GROUP,
+        BIOLOGICAL_SAMPLE;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -340,8 +342,8 @@ public class IconManager {
                 return "fr/proline/studio/images/arrow8x7.png";
             case ARROW:
                 return "fr/proline/studio/images/arrow.png";
-            case ARROW_CURVED:
-                return "fr/proline/studio/images/arrow-curve-180.png";
+            case DRAG_AND_DROP:
+                return "fr/proline/studio/images/dragAndDrop.png";
             case WAND_HAT:
                 return "fr/proline/studio/images/wand-hat.png";
             case FILE:
@@ -350,6 +352,10 @@ public class IconManager {
                 return "fr/proline/studio/images/folder-horizontal.png";
              case FRAGMENTATION:
                 return "fr/proline/studio/images/fragmentation.png";
+            case BIOLOGICAL_GROUP:
+                return "fr/proline/studio/images/biologicalGroup.png";
+            case BIOLOGICAL_SAMPLE:
+                return "fr/proline/studio/images/biologicalSample.png";
 
         }
 

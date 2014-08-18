@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dpm.data;
 
 /**
- *
+ * Pattern rule for Typical Proteins
  * @author VD225637
  */
 public class ChangeTypicalRule {

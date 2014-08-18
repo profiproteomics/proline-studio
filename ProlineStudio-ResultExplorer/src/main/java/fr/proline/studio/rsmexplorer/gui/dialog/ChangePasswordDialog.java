@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.dpm.ServerConnectionManager;
@@ -13,7 +9,7 @@ import java.awt.Window;
 import javax.swing.*;
 
 /**
- *
+ * Dialog to let the user change his password
  * @author VD225637
  */
 public class ChangePasswordDialog extends DefaultDialog {

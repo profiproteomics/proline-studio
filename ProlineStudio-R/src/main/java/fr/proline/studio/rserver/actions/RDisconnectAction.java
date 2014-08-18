@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rserver.actions;
 
 import fr.proline.studio.rserver.RServerManager;
@@ -10,7 +6,7 @@ import fr.proline.studio.rserver.node.RTree;
 import javax.swing.tree.DefaultTreeModel;
 
 /**
- *
+ * Action to disconnect from the Proline Server
  * @author JM235353
  */
 public class RDisconnectAction extends AbstractRAction {

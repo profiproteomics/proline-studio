@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rserver.actions;
 
 import fr.proline.studio.gui.DefaultDialog;
@@ -13,7 +9,7 @@ import javax.swing.tree.DefaultTreeModel;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Action to connect to the Proline Server
  * @author JM235353
  */
 public class RConnectAction extends AbstractRAction {

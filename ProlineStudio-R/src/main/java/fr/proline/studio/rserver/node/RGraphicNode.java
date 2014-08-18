@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rserver.node;
 
 import fr.proline.studio.rserver.data.AbstractRData;
@@ -9,7 +5,7 @@ import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 
 /**
- *
+ * R Node
  * @author JM235353
  */
 public class RGraphicNode extends RNode {

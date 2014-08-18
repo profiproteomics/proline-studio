@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.node.xic;
 
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -13,7 +9,7 @@ import javax.swing.ImageIcon;
 import org.openide.nodes.Sheet;
 
 /**
- *
+ * Biological Sample Analysis Node used in XIC Design Tree
  * @author JM235353
  */
 public class RSMBiologicalSampleAnalysisNode extends RSMNode {

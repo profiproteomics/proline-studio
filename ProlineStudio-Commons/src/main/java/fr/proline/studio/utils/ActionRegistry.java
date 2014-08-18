@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.utils;
 
 import java.lang.Class;
@@ -10,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
-import javax.swing.JMenuItem;
 
 /**
  *

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
@@ -15,7 +11,7 @@ import javax.swing.*;
 import org.openide.util.NbPreferences;
 
 /**
- *
+ * Panel to change the typical proteins of Protein Groups of Identification Results
  * @author VD225637
  */
 public class ChangeTypicalProteinPanel extends javax.swing.JPanel {

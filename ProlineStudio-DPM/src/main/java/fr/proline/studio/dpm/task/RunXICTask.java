@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dpm.task;
 
 import com.google.api.client.http.HttpResponse;
@@ -15,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 /**
- *
+ * XIC Quantitation Task
  * @author vd225637
  */
 public class RunXICTask extends AbstractServiceTask {

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.node.xic;
 
 import fr.proline.studio.dam.data.AbstractData;
@@ -11,7 +7,7 @@ import javax.swing.ImageIcon;
 import org.openide.nodes.Sheet;
 
 /**
- *
+ * Biologic Group node used in XIC Design Tree
  * @author JM235353
  */
 public class RSMBiologicalGroupNode extends RSMNode {

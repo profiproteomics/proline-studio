@@ -10,12 +10,12 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 
 /**
- *
+ * Tree to select the identifications to drag and drop to the XIC design tree
  * @author JM235353
  */
 public class SelectionTree extends RSMTree implements TreeWillExpandListener {
 
-    public SelectionTree(RSMNode top) {
+    public SelectionTree(RSMNode top, boolean loadAllAtOnce) {
 
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
@@ -23,11 +23,15 @@ public class SelectionTree extends RSMTree implements TreeWillExpandListener {
         setTransferHandler(handler);
 
         setDragEnabled(true);
-        //setDropMode(DropMode.);
 
         initTree(top);
 
-        startLoading(top);
+        if (loadAllAtOnce) {
+            loadAllAtOnce(top);
+        } else {
+            startLoading(top);
+        }
+        
 
     }
 
@@ -39,18 +43,11 @@ public class SelectionTree extends RSMTree implements TreeWillExpandListener {
     }
 
     @Override
+    public void rename(RSMNode rsmNode, String newName) {
+    }
+    
+    @Override
     public void mouseClicked(MouseEvent e) {
-        /*
-         * if (e.getClickCount() == 2) {
-         *
-         * // display All imported rset on double click RSMNode[] selectedNodes
-         * = getSelectedNodes(); int nbNodes = selectedNodes.length; for (int i
-         * = 0; i < nbNodes; i++) { RSMNode n = selectedNodes[i]; if
-         * ((n.getType() == RSMNode.NodeTypes.DATA_SET) && ((RSMDataSetNode)
-         * n).hasResultSummary()) { // add node to JList DefaultListModel
-         * listModel = (DefaultListModel) m_jlist.getModel();
-         * listModel.addElement(n.getData()); } } }
-         */
     }
 
     @Override

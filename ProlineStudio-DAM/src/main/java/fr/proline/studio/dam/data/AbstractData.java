@@ -2,6 +2,8 @@ package fr.proline.studio.dam.data;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import java.util.List;
 
 /**
@@ -45,7 +47,10 @@ public abstract class AbstractData {
      *
      * @param list
      */
-    public abstract void load(AbstractDatabaseCallback callback, List<AbstractData> list);
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
+        load(callback, list, null);
+    }
+    public abstract void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority);
 
     /**
      * Subclasses must overriden this method to give the name of the data

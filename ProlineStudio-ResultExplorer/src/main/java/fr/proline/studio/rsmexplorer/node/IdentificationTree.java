@@ -113,9 +113,21 @@ public class IdentificationTree extends RSMTree implements TreeWillExpandListene
     @Override
     public boolean isPathEditable(TreePath path) {
         if (isEditable()) {
+            
+            if (path.getPathCount() == 1) {
+                // root is not editable
+                return false;
+            }
+            
             RSMNode node = (RSMNode) path.getLastPathComponent();
             RSMNode.NodeTypes nodeType = node.getType();
-            if ((nodeType == RSMNode.NodeTypes.DATA_SET) || (nodeType == RSMNode.NodeTypes.PROJECT_IDENTIFICATION)) {
+            if (nodeType == RSMNode.NodeTypes.DATA_SET) {
+                RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
+                if (dataSetNode.isInTrash()) {
+                    return false;
+                }
+                return true;
+            } else if (nodeType == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
                 return true;
             }
         }
@@ -463,42 +475,20 @@ public class IdentificationTree extends RSMTree implements TreeWillExpandListene
         
     }
         
-    
-
-
-    
-    public void expandNodeIfNeeded(RSMNode n) {
-        final TreePath pathToExpand = new TreePath(n.getPath());
-        if (!isExpanded(pathToExpand)) {
-
-            SwingUtilities.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    expandPath(pathToExpand);
-                }
-            });
+    @Override
+    public void rename(RSMNode rsmNode, String newName) {
+        if (rsmNode.getType() == RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
+            RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) rsmNode;
+            Project project = projectNode.getProject();
+            ((RSMProjectIdentificationNode) rsmNode).changeNameAndDescription(newName, project.getDescription());
+        } else if (rsmNode.getType() == RSMNode.NodeTypes.DATA_SET) {
+            ((RSMDataSetNode) rsmNode).rename(newName);
         }
     }
-    
-    
-    /**
-     * Return an array of all selected nodes of the tree
-     * @return 
-     */
-    /*public RSMNode[] getSelectedNodes() {
-        TreePath[] paths = getSelectionModel().getSelectionPaths();
-        
-        int nbPath = paths.length;
-        
-        RSMNode[] nodes = new RSMNode[nbPath];
-        
-        for (int i=0;i<nbPath;i++) {
-            nodes[i] = (RSMNode) paths[i].getLastPathComponent();
-        }
 
-        return nodes;
-    }*/
+
+    
+
     
     private void triggerPopup(MouseEvent e) {
         
@@ -839,44 +829,9 @@ public class IdentificationTree extends RSMTree implements TreeWillExpandListene
         }
     }
     
-    public static class RSMTreeCellEditor extends DefaultTreeCellEditor {
-        public RSMTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer) {
-            super(tree, renderer);
-        }
-        
-        @Override
-        protected void determineOffset(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row) {
-            renderer.getTreeCellRendererComponent(tree, value, isSelected, expanded, leaf, row, true);
-            editingIcon = renderer.getIcon();
-            
-            if(editingIcon != null) {
-                offset = renderer.getIconTextGap() + editingIcon.getIconWidth();
-            } else {
-                offset = renderer.getIconTextGap();
-            }
-        }
-    }
+
+
     
-    /*private class RSMTreeModel extends DefaultTreeModel {
-
-        public RSMTreeModel(TreeNode root) {
-            super(root, false);
-        }
-
-
-        @Override
-        public void valueForPathChanged(TreePath path, Object newValue) {
-            RSMNode rsmNode = (RSMNode) path.getLastPathComponent();
-
-            if (rsmNode.getType()== RSMNode.NodeTypes.PROJECT_IDENTIFICATION) {
-                RSMProjectIdentificationNode projectNode = (RSMProjectIdentificationNode) rsmNode;
-                Project project = projectNode.getProject();
-                ((RSMProjectIdentificationNode) rsmNode).changeNameAndDescription(newValue.toString(), project.getDescription());
-            } else if (rsmNode.getType()== RSMNode.NodeTypes.DATA_SET) {
-                ((RSMDataSetNode) rsmNode).rename(newValue.toString());
-            }
-        }
-    }*/
 
     
 }

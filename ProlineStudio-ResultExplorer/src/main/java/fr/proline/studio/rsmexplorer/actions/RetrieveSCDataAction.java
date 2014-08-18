@@ -10,6 +10,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class RetrieveSCDataAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
   
     public RetrieveSCDataAction() {
-        super(NbBundle.getMessage(RetrieveSCDataAction.class, "CTL_RetrieveSCAction"), false);
+        super(NbBundle.getMessage(RetrieveSCDataAction.class, "CTL_RetrieveSCAction"), RSMTree.TreeType.TREE_QUANTITATION);
     }
     
     @Override

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.rsmexplorer.node.IdentificationTree;
@@ -9,36 +5,35 @@ import fr.proline.studio.rsmexplorer.node.RSMNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import javax.swing.Box;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
+
 
 
 /**
- *
+ * Panel to create the XIC DesignTree by drag and drop
  * @author JM235353
  */
-public class SetSampleAnalysisPanel extends JPanel {
+public class CreateXICDesignPanel extends JPanel {
     
-    private static SetSampleAnalysisPanel m_singleton = null;
-    private static RSMNode m_rootNode;
+    private static CreateXICDesignPanel m_singleton = null;
     
-    public static SetSampleAnalysisPanel getPanel(RSMNode rootNode) {
-        if((m_singleton == null) || (!m_rootNode.equals(rootNode))){
-            m_singleton = new SetSampleAnalysisPanel(rootNode);
+    private RSMNode m_rootNode;
+    
+    public static CreateXICDesignPanel getPanel(RSMNode rootNode) {
+        if((m_singleton == null) || (!m_singleton.m_rootNode.equals(rootNode))){
+            m_singleton = new CreateXICDesignPanel(rootNode);
         }
         return m_singleton;
     }
     
-    public static SetSampleAnalysisPanel getPanel() {
+    public static CreateXICDesignPanel getPanel() {
         if (m_singleton != null) {
             return m_singleton;
         }
         throw new IllegalAccessError(" Panel not initialized yet ! ");
     }
     
-    private SetSampleAnalysisPanel(RSMNode rootNode) {
+    private CreateXICDesignPanel(RSMNode rootNode) {
         m_rootNode = rootNode;
         
         JPanel wizardPanel = createWizardPanel();
@@ -71,42 +66,52 @@ public class SetSampleAnalysisPanel extends JPanel {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-
+        
+        JPanel designTreePanel = createDesignTreePanel(rootNode);
+        JPanel selectionTreePanel = createSelectionTreePanel();
+        
+        JPanel framePanel = new JPanel(new GridBagLayout());
+        framePanel.setBorder(BorderFactory.createTitledBorder(" XIC Design "));
+        
+        
+        JSplitPane sp = new JSplitPane();
+        sp.setLeftComponent(designTreePanel);
+        sp.setRightComponent(selectionTreePanel);
+        sp.setResizeWeight(0.5);
+        
+        final GridBagConstraints cFrame = new GridBagConstraints();
+        cFrame.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        cFrame.gridx = 0;
+        cFrame.gridy = 0;
+        cFrame.gridwidth = 2;
+        cFrame.weightx = 1;
+        cFrame.weighty = 0;
+        cFrame.anchor = GridBagConstraints.NORTH;
+        cFrame.fill = GridBagConstraints.NONE;
+        framePanel.add(new JLabel("Drag & Drop", IconManager.getIcon(IconManager.IconType.DRAG_AND_DROP), JLabel.LEADING), cFrame);
+        
+        cFrame.anchor = GridBagConstraints.NORTHWEST;
+        cFrame.fill = GridBagConstraints.BOTH;
+        cFrame.gridwidth = 1;
+        cFrame.gridy++;
+        cFrame.weighty = 1;
+        framePanel.add(sp, cFrame);
+        
+        
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        c.gridheight = 4;
-        JPanel designTreePanel = createDesignTreePanel(rootNode);
-        mainPanel.add(designTreePanel, c);
-
-        c.gridx++;
-        c.weightx = 0;
-        c.weighty = 1;
-        c.gridheight = 1;
-        mainPanel.add(Box.createGlue(), c);
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        mainPanel.add(framePanel, c);
         
-        c.gridy++;
-        c.weighty = 0;
-        mainPanel.add(new JLabel(IconManager.getIcon(IconManager.IconType.ARROW_CURVED)), c);
-        
-        c.gridy++;
-        mainPanel.add(new JLabel("Drag & Drop"), c);
-        
-        c.gridy++;
-        c.weighty = 1;
-        mainPanel.add(Box.createGlue(), c);
-        
-        c.gridy = 0;
-        c.gridx++;
-        c.weightx = 1;
-        c.weighty = 1;
-        c.gridheight = 4;
-        JPanel selectionTreePanel = createSelectionTreePanel();
-        mainPanel.add(selectionTreePanel, c);
         
         return mainPanel;
     }
+    
+
 
     private JPanel createWizardPanel() {
         JPanel wizardPanel = new JPanel();
@@ -116,7 +121,7 @@ public class SetSampleAnalysisPanel extends JPanel {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        JLabel wizardLabel = new JLabel("<html><b>Step 3:</b> Drag and Drop Identification Summaries as Sample Analysis in Biological Samples.</html>");
+        JLabel wizardLabel = new JLabel("<html><b>Step 1:</b> Drag and Drop Identification Summaries to create your XIC Design.</html>");
         wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
 
         c.gridx = 0;
@@ -168,7 +173,7 @@ public class SetSampleAnalysisPanel extends JPanel {
         c.weighty = 1;
 
 
-        SelectionTree tree = new SelectionTree(IdentificationTree.getCurrentTree().copyRootNodeForSelection());
+        SelectionTree tree = new SelectionTree(IdentificationTree.getCurrentTree().copyRootNodeForSelection(), true);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
 

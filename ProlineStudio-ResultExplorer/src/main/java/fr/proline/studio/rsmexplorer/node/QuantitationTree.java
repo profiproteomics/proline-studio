@@ -59,9 +59,14 @@ public class QuantitationTree extends RSMTree {
     public static QuantitationTree getCurrentTree() {
         return m_currentTree;
     }
+    
+    @Override
+    public void rename(RSMNode rsmNode, String newName) {
+        //JPM.TODO (setEditable must be done on tree)
+    }
 
     
-     private void triggerPopup(MouseEvent e) {
+    private void triggerPopup(MouseEvent e) {
         
         // retrieve selected nodes
         RSMNode[] selectedNodes = getSelectedNodes();

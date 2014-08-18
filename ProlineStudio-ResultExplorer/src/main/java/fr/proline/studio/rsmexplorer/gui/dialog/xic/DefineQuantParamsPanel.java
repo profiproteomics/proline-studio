@@ -177,7 +177,7 @@ public class DefineQuantParamsPanel extends JPanel{
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        JLabel wizardLabel = new JLabel("<html><b>Step 4:</b> Specify quantitation parameters.</html>");
+        JLabel wizardLabel = new JLabel("<html><b>Step 2:</b> Specify quantitation parameters.</html>");
         wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
         
         c.gridx = 0;

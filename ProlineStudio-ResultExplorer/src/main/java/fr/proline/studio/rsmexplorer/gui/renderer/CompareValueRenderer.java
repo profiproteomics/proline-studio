@@ -12,7 +12,7 @@ import javax.swing.table.TableCellRenderer;
 
 
 /**
- *
+ * Class used to render a comparison between values in a JTable 
  * @author JM235353
  */
 public class CompareValueRenderer implements TableCellRenderer, ExportTextInterface {
@@ -50,22 +50,22 @@ public class CompareValueRenderer implements TableCellRenderer, ExportTextInterf
     }
 
 
-    public abstract static class CompareValue {
+    public abstract static class CompareValue implements Comparable<CompareValue> {
         
         public abstract int getNumberColumns();
-        
         public abstract Color getColor(int col);
         public abstract double getValue(int col);
         public abstract double getMaximumValue();
+        public abstract double calculateComparableValue();
     }
     
     
     public static class CompareValuePanel extends JPanel {
         
         
-        private static int DELTA_X = 6; 
-        private static int DELTA_Y = 2;
-        private static int DIM_Y = 20;
+        private static final int DELTA_X = 6; 
+        private static final int DELTA_Y = 2;
+        private static final int DIM_Y = 20;
         
         private CompareValue m_v;
         private Color m_selectionBackground;
@@ -81,7 +81,7 @@ public class CompareValueRenderer implements TableCellRenderer, ExportTextInterf
         
         @Override
         public Dimension getPreferredSize() {
-            int width = (m_v.getNumberColumns() + 2) * DELTA_X;
+            int width = (m_v.getNumberColumns() + 2) * (DELTA_X+2);
             return new Dimension(width, DIM_Y);
         }
         
@@ -100,9 +100,9 @@ public class CompareValueRenderer implements TableCellRenderer, ExportTextInterf
                 double maxValue = m_v.getMaximumValue();
                 double value = m_v.getValue(i);
                 int height = (int) Math.round((value/maxValue)*(DIM_Y-2*DELTA_Y));
-                g.fillRect((i+1)*DELTA_X, DIM_Y-height-DELTA_Y, DELTA_X , height);
+                g.fillRect((i+1)*(DELTA_X+2), DIM_Y-height-DELTA_Y, DELTA_X , height);
                 g.setColor(Color.gray);
-                g.drawRect((i+1)*DELTA_X, DIM_Y-height-DELTA_Y, DELTA_X , height); 
+                g.drawRect((i+1)*(DELTA_X+2), DIM_Y-height-DELTA_Y, DELTA_X , height); 
                 
             }
 

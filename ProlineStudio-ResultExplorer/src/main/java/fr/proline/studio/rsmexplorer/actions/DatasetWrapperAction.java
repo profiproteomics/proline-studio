@@ -5,6 +5,7 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.gui.DatasetAction;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 
 /**
  *
@@ -15,7 +16,7 @@ public class DatasetWrapperAction extends AbstractRSMAction {
     private DatasetAction wrappedAction;
     
     public DatasetWrapperAction(DatasetAction action) {
-        super((String)action.getValue(NAME));
+        super((String)action.getValue(NAME), RSMTree.TreeType.TREE_IDENTIFICATION);
         this.wrappedAction = action;
     }
     

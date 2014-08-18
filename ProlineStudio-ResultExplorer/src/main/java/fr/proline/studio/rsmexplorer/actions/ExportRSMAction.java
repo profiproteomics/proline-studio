@@ -8,6 +8,7 @@ import fr.proline.studio.export.ExportDialog;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ public class ExportRSMAction extends AbstractRSMAction {
      protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
      
     public ExportRSMAction(){
-        super("Export...");        
+        super("Export...", RSMTree.TreeType.TREE_IDENTIFICATION);    
     }
     
         @Override

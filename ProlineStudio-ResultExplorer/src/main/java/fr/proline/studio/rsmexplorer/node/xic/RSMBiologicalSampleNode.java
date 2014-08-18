@@ -18,7 +18,7 @@ public class RSMBiologicalSampleNode extends RSMNode {
     
     @Override
     public ImageIcon getIcon() {
-        return getIcon(IconManager.IconType.QUANT);
+        return getIcon(IconManager.IconType.BIOLOGICAL_SAMPLE);
     }
 
     @Override

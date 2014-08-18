@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.actions;
 
 
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;
@@ -18,7 +19,7 @@ public class AddAction extends AbstractRSMAction {
     private JMenu m_menu;
     
    public AddAction() {
-       super(NbBundle.getMessage(AddAction.class, "CTL_AddAction"));
+       super(NbBundle.getMessage(AddAction.class, "CTL_AddAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
    }
 
     @Override

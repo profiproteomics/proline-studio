@@ -17,6 +17,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
 import fr.proline.studio.rsmexplorer.node.QuantitationTree;
 import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
 import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.*;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
@@ -33,7 +34,7 @@ public class CreateXICAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
     public CreateXICAction() {
-        super(NbBundle.getMessage(ConnectAction.class, "CTL_CreateXIC"), false);
+        super(NbBundle.getMessage(ConnectAction.class, "CTL_CreateXIC"), RSMTree.TreeType.TREE_QUANTITATION);
     }
     
      @Override

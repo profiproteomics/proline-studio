@@ -14,6 +14,7 @@ import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
+import fr.proline.studio.rsmexplorer.node.RSMTree;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
 
     
     public ChangeTypicalProteinAction() {
-        super(NbBundle.getMessage(ChangeTypicalProteinAction.class, "CTL_ChangeTypicalProtein"));
+        super(NbBundle.getMessage(ChangeTypicalProteinAction.class, "CTL_ChangeTypicalProtein"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

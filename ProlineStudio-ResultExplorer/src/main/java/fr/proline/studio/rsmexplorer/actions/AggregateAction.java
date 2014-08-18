@@ -11,10 +11,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddAggregateDialog;
-import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
-import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMProjectIdentificationNode;
-import fr.proline.studio.rsmexplorer.node.IdentificationTree;
+import fr.proline.studio.rsmexplorer.node.*;
 import java.util.ArrayList;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
@@ -28,7 +25,7 @@ public class AggregateAction extends AbstractRSMAction {
 
     
     public AggregateAction() {
-        super(NbBundle.getMessage(AggregateAction.class, "CTL_AggregateAction"));
+        super(NbBundle.getMessage(AggregateAction.class, "CTL_AggregateAction"), RSMTree.TreeType.TREE_IDENTIFICATION);
     }
 
     

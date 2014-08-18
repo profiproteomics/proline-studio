@@ -3,6 +3,7 @@ package fr.proline.studio.dam.data;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import java.util.List;
 
@@ -50,10 +51,13 @@ public class ProjectQuantitationData extends AbstractData {
     }
 
     @Override
-    public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority) {
 
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
         task.initLoadParentDataset(m_project, list, false);
+        if (priority != null) {
+            task.setPriority(priority);
+        }
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }

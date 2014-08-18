@@ -5,6 +5,7 @@ import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import java.util.List;
 
@@ -63,6 +64,10 @@ public class DataSetData extends AbstractData {
             return m_dataset.getName();
         }
     }
+    
+    public void setTemporaryName(String name) {
+        m_temporaryName = name;
+    }
 
     @Override
     public String toString() {
@@ -88,13 +93,14 @@ public class DataSetData extends AbstractData {
     }
     
     @Override
-    public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority) {
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
 
         task.initLoadChildrenDataset(m_dataset, list);
+        if (priority != null) {
+            task.setPriority(priority);
+        }
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-
 
     }
 }

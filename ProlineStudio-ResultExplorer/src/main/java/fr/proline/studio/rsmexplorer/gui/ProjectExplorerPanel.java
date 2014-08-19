@@ -15,7 +15,7 @@ import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.CreateProjectTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
-import fr.proline.studio.rsmexplorer.actions.identification.ConnectAction;
+import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddProjectDialog;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;

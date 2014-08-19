@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.actions.identification;
+package fr.proline.studio.rsmexplorer.actions;
 
 
 import fr.proline.studio.dpm.ServerConnectionManager;
@@ -28,7 +28,7 @@ import org.openide.windows.WindowManager;
  * @author jm235353
  */
 
-@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.ConnectAction")
+@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.identification.ConnectAction")
 @ActionRegistration(displayName = "#CTL_ConnectAction")
 @ActionReferences({
     @ActionReference(path = "Menu/File", position = 100)

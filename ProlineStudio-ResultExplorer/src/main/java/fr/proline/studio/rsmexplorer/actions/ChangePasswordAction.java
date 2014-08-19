@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.actions.identification;
+package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
@@ -23,7 +23,7 @@ import org.openide.windows.WindowManager;
  *
  * @author jm235353
  */
-@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.ChangePasswordAction")
+@ActionID(category = "File", id = "fr.proline.studio.rsmexplorer.actions.identification.ChangePasswordAction")
 @ActionRegistration(displayName = "#CTL_ChangePasswordAction")
 @ActionReferences({
     @ActionReference(path = "Menu/File", position = 200)

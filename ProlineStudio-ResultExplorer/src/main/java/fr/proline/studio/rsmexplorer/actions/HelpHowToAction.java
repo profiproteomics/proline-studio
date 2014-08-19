@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.actions.identification;
+package fr.proline.studio.rsmexplorer.actions;
 
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
@@ -12,21 +12,20 @@ import org.openide.util.NbBundle.Messages;
 import org.slf4j.LoggerFactory;
 
 @ActionID(category = "Help",
-id = "fr.proline.studio.rsmexplorer.actions.HelpProlineAction")
-@ActionRegistration(displayName = "#CTL_HelpProlineAction")
+id = "fr.proline.studio.rsmexplorer.actions.HelpHowToAction")
+@ActionRegistration(displayName = "#CTL_HelpHowToAction")
 @ActionReferences({
-    @ActionReference(path = "Menu/Help", position = 150, separatorAfter = 175)
+    @ActionReference(path = "Menu/Help", position = 125)
 })
-@Messages("CTL_HelpProlineAction=Proline Help")
-public final class HelpProlineAction implements ActionListener {
+@Messages("CTL_HelpHowToAction=How to")
+public final class HelpHowToAction implements ActionListener {
 
-    @Override
     public void actionPerformed(ActionEvent e) {
 
 
         if (Desktop.isDesktopSupported()) { // JDK 1.6.0
 
-            String url = "http://biodev.extra.cea.fr/docs/proline/doku.php";
+            String url = "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:start";
 
             try {
                 Desktop.getDesktop().browse(new URL(url).toURI());
@@ -34,7 +33,6 @@ public final class HelpProlineAction implements ActionListener {
                 LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", ex);
             }
         }
-
 
     }
 }

@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;

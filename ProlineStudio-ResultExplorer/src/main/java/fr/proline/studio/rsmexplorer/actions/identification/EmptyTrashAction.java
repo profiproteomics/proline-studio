@@ -20,7 +20,7 @@ import org.openide.util.NbBundle;
 public class EmptyTrashAction extends AbstractRSMAction {
 
     public EmptyTrashAction() {
-        super(NbBundle.getMessage(DeleteAction.class, "CTL_EmptyTrashAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(EmptyTrashAction.class, "CTL_EmptyTrashAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
     
 

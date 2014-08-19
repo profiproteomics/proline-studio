@@ -19,7 +19,7 @@ import org.openide.windows.WindowManager;
 public class DisplayAllRsetAction extends AbstractRSMAction {
 
     public DisplayAllRsetAction() {
-        super(NbBundle.getMessage(ConnectAction.class, "CTL_DisplayAllRset"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(DisplayAllRsetAction.class, "CTL_DisplayAllRset"), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
     
     @Override

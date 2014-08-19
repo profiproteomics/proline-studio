@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 
+import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.TaskLogTopComponent;

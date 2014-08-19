@@ -3,9 +3,9 @@ package fr.proline.studio.rsmexplorer.gui.dialog.spectralcount;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.rsmexplorer.node.IdentificationTree;
-import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
-import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -93,8 +93,8 @@ public class TreeSelectionPanel extends JPanel {
         return returnedList;
     }
     
-    public ArrayList<RSMDataSetNode> getSelectedRSMDSNodeList() {
-        ArrayList<RSMDataSetNode> returnedList = new ArrayList<>();
+    public ArrayList<DataSetNode> getSelectedRSMDSNodeList() {
+        ArrayList<DataSetNode> returnedList = new ArrayList<>();
         getSelectedData(null, returnedList);
         return returnedList;
     }
@@ -107,13 +107,13 @@ public class TreeSelectionPanel extends JPanel {
         return m_tree;
     }
 
-    public void getSelectedData(ArrayList<DDataset> selectedDatasetList, ArrayList<RSMDataSetNode> selectedRSMDSNodeList) {
+    public void getSelectedData(ArrayList<DDataset> selectedDatasetList, ArrayList<DataSetNode> selectedRSMDSNodeList) {
         TreePath[] paths = m_tree.getSelectionPaths();
         int size = paths.length;
         for (int i = 0; i < size; i++) {
-            RSMNode node = (RSMNode) paths[i].getLastPathComponent();
-            if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
-                RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
+            AbstractNode node = (AbstractNode) paths[i].getLastPathComponent();
+            if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
+                DataSetNode dataSetNode = (DataSetNode) node;
 
                 if (selectedDatasetList!=null) {
                     selectedDatasetList.add(dataSetNode.getDataset());

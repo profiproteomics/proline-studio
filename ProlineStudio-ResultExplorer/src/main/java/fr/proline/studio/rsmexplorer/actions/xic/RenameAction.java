@@ -3,35 +3,35 @@ package fr.proline.studio.rsmexplorer.actions.xic;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
-import fr.proline.studio.rsmexplorer.actions.AbstractRSMAction;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.DesignTree;
-import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
+import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
 /**
- * Rename a Node in a Xic DesignTree
+ * Rename a Node in a Xic XICDesignTree
  * @author JM235353
  */
 public class RenameAction extends AbstractRSMAction {
 
     public RenameAction() {
-        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), RSMTree.TreeType.TREE_XIC_DESIGN);
+        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), AbstractTree.TreeType.TREE_XIC_DESIGN);
     }
 
     @Override
-    public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
+    public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
         // only one node selected for this action
-        final RSMNode n = selectedNodes[0];
+        final AbstractNode n = selectedNodes[0];
 
         
-        RSMNode.NodeTypes nodeType = n.getType();
-        if ((nodeType == RSMNode.NodeTypes.BIOLOGICAL_GROUP)
-                || (nodeType == RSMNode.NodeTypes.BIOLOGICAL_SAMPLE)
-                || (nodeType == RSMNode.NodeTypes.DATA_SET)) {
+        AbstractNode.NodeTypes nodeType = n.getType();
+        if ((nodeType == AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
+                || (nodeType == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
+                || (nodeType == AbstractNode.NodeTypes.DATA_SET)) {
 
             DataSetData data = ((DataSetData) n.getData());
 
@@ -44,7 +44,7 @@ public class RenameAction extends AbstractRSMAction {
 
             if (name.compareTo(newName) != 0) {
                 data.setTemporaryName(newName);
-                ((DefaultTreeModel) DesignTree.getDesignTree().getModel()).nodeChanged(n);
+                ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(n);
             }
         }
 
@@ -70,7 +70,7 @@ public class RenameAction extends AbstractRSMAction {
     }
     
     @Override
-    public void updateEnabled(RSMNode[] selectedNodes) {
+    public void updateEnabled(AbstractNode[] selectedNodes) {
 
         int nbSelectedNodes = selectedNodes.length;
 
@@ -80,11 +80,11 @@ public class RenameAction extends AbstractRSMAction {
             return;
         }
 
-        RSMNode node = selectedNodes[0];
-        RSMNode.NodeTypes nodeType = node.getType();
-        if ((nodeType != RSMNode.NodeTypes.BIOLOGICAL_GROUP)
-                && (nodeType != RSMNode.NodeTypes.BIOLOGICAL_SAMPLE)
-                && (nodeType != RSMNode.NodeTypes.DATA_SET)) {
+        AbstractNode node = selectedNodes[0];
+        AbstractNode.NodeTypes nodeType = node.getType();
+        if ((nodeType != AbstractNode.NodeTypes.BIOLOGICAL_GROUP)
+                && (nodeType != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)
+                && (nodeType != AbstractNode.NodeTypes.DATA_SET)) {
             setEnabled(false);
             return;
         }

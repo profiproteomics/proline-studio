@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.Window;

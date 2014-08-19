@@ -1,8 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.spectralcount;
 
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.node.IdentificationTree;
-import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Dimension;
@@ -57,7 +57,7 @@ public class SpectralCountDialog extends DefaultDialog {
         return SpectralCountNamePanel.getSpectralCountNamePanel().getSpectralCountDescription();
     }
     
-    public ArrayList<RSMDataSetNode> getSelectedRSMDSNodeList() {
+    public ArrayList<DataSetNode> getSelectedRSMDSNodeList() {
         return TreeSelectionPanel.getTreeSelectionPanel().getSelectedRSMDSNodeList();
     }
     

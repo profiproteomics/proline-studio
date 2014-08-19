@@ -15,11 +15,11 @@ import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.AbstractServiceTask;
 import fr.proline.studio.dpm.task.RetrieveSpectralCountTask;
 import fr.proline.studio.dpm.task.SpectralCountTask;
-import fr.proline.studio.rsmexplorer.actions.SpectralCountAction;
+import fr.proline.studio.rsmexplorer.actions.identification.SpectralCountAction;
 import fr.proline.studio.rsmexplorer.gui.WSCResultPanel;
-import fr.proline.studio.rsmexplorer.node.QuantitationTree;
-import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
-import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.tree.DefaultTreeModel;
@@ -88,7 +88,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
         
         QuantitationTree tree = QuantitationTree.getCurrentTree();
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-        final RSMDataSetNode[] _quantitationNode = new RSMDataSetNode[1];
+        final DataSetNode[] _quantitationNode = new DataSetNode[1];
         
         AbstractServiceCallback callback = new AbstractServiceCallback() {
             
@@ -193,11 +193,11 @@ public class DataBoxRsmWSC extends AbstractDataBox {
             // add node for the quantitation dataset which will be created
             DataSetData quantitationData = new DataSetData(m_qttDSName, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION );
                 
-            final RSMDataSetNode quantitationNode = new RSMDataSetNode(quantitationData);
+            final DataSetNode quantitationNode = new DataSetNode(quantitationData);
             _quantitationNode[0] = quantitationNode;
             quantitationNode.setIsChanging(true);
             
-            RSMNode rootNode = (RSMNode) treeModel.getRoot();
+            AbstractNode rootNode = (AbstractNode) treeModel.getRoot();
             treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount());
             
         }            

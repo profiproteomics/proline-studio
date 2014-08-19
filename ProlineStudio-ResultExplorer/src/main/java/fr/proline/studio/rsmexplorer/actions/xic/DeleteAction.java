@@ -1,43 +1,43 @@
 package fr.proline.studio.rsmexplorer.actions.xic;
 
-import fr.proline.studio.rsmexplorer.actions.AbstractRSMAction;
-import fr.proline.studio.rsmexplorer.gui.dialog.xic.DesignTree;
-import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.RSMTree;
+import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
+import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
 import org.openide.util.NbBundle;
 
 /**
- * Delete a Node in a Xic DesignTree
+ * Delete a Node in a Xic XICDesignTree
  * @author JM235353
  */
 public class DeleteAction  extends AbstractRSMAction {
     
     public DeleteAction() {
-        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), RSMTree.TreeType.TREE_XIC_DESIGN);
+        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), AbstractTree.TreeType.TREE_XIC_DESIGN);
     }
 
     @Override
-    public void actionPerformed(RSMNode[] selectedNodes, int x, int y) {
+    public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
         
         int nbSelectedNode = selectedNodes.length;
 
-        DesignTree tree = DesignTree.getDesignTree();
-        RSMTree.RSMTreeModel model = (RSMTree.RSMTreeModel) tree.getModel();
+        XICDesignTree tree = XICDesignTree.getDesignTree();
+        AbstractTree.RSMTreeModel model = (AbstractTree.RSMTreeModel) tree.getModel();
         
         // we must keep only parent nodes
         // if a child and its parent are selected, we keep only the parent
-        ArrayList<RSMNode> keptNodes = new ArrayList<>(nbSelectedNode);
+        ArrayList<AbstractNode> keptNodes = new ArrayList<>(nbSelectedNode);
         keptNodes.add(selectedNodes[0]);
         mainloop:
         for (int i = 1; i < nbSelectedNode; i++) {
-            RSMNode curNode = selectedNodes[i];
+            AbstractNode curNode = selectedNodes[i];
 
             // look for an ancestor
             int nbKeptNodes = keptNodes.size();
             for (int j = 0; j < nbKeptNodes; j++) {
 
-                RSMNode curKeptNode = keptNodes.get(j);
+                AbstractNode curKeptNode = keptNodes.get(j);
                 if (curNode.isNodeAncestor(curKeptNode)) {
                     // ancestor is already in kept node
                     continue mainloop;
@@ -46,7 +46,7 @@ public class DeleteAction  extends AbstractRSMAction {
             // look for children and remove them
             for (int j = nbKeptNodes - 1; j >= 0; j--) {
 
-                RSMNode curKeptNode = keptNodes.get(j);
+                AbstractNode curKeptNode = keptNodes.get(j);
                 if (curKeptNode.isNodeAncestor(curNode)) {
                     // we have found a children
                     keptNodes.remove(j);
@@ -59,7 +59,7 @@ public class DeleteAction  extends AbstractRSMAction {
 
         int nbKeptNodes = keptNodes.size();
         for (int i=0;i<nbKeptNodes;i++) {
-            RSMNode nodeCur = keptNodes.get(i);
+            AbstractNode nodeCur = keptNodes.get(i);
             model.removeNodeFromParent(nodeCur);
         }
 
@@ -68,15 +68,15 @@ public class DeleteAction  extends AbstractRSMAction {
     
     
     @Override
-    public void updateEnabled(RSMNode[] selectedNodes) {
+    public void updateEnabled(AbstractNode[] selectedNodes) {
 
         int nbSelectedNode = selectedNodes.length;
         for (int i = 0; i < nbSelectedNode; i++) {
-            RSMNode node = selectedNodes[i];
+            AbstractNode node = selectedNodes[i];
 
-            RSMNode.NodeTypes type = node.getType();
+            AbstractNode.NodeTypes type = node.getType();
 
-            if ((type != RSMNode.NodeTypes.BIOLOGICAL_GROUP) && (type != RSMNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) && (type != RSMNode.NodeTypes.BIOLOGICAL_SAMPLE)) {
+            if ((type != AbstractNode.NodeTypes.BIOLOGICAL_GROUP) && (type != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) && (type != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE)) {
                 setEnabled(false);
                 return;
             }

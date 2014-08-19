@@ -3,9 +3,9 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
-import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.awt.Dialog;
 import java.awt.Window;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class TreeSelectionDialog extends DefaultDialog {
     
     private IdentificationTree m_tree = null;
     private ArrayList<DDataset> m_selectedDatasetList = null;
-    private ArrayList<RSMDataSetNode> m_selectedRSMDSNodeList = null;
+    private ArrayList<DataSetNode> m_selectedRSMDSNodeList = null;
     
     private boolean m_userSetSize = false;
     
@@ -75,8 +75,8 @@ public class TreeSelectionDialog extends DefaultDialog {
         return returnedList;
     }
     
-    public ArrayList<RSMDataSetNode> getSelectedRSMDSNodeList() {
-        ArrayList<RSMDataSetNode> returnedList = m_selectedRSMDSNodeList;
+    public ArrayList<DataSetNode> getSelectedRSMDSNodeList() {
+        ArrayList<DataSetNode> returnedList = m_selectedRSMDSNodeList;
         m_selectedDatasetList = null; // avoid a potential memory leak
         m_selectedRSMDSNodeList = null;
         return returnedList;
@@ -97,9 +97,9 @@ public class TreeSelectionDialog extends DefaultDialog {
         
         int size = paths.length;
         for (int i=0;i<size;i++) {
-            RSMNode node = (RSMNode) paths[i].getLastPathComponent();
-            if (node.getType() == RSMNode.NodeTypes.DATA_SET) {
-                RSMDataSetNode dataSetNode = (RSMDataSetNode) node;
+            AbstractNode node = (AbstractNode) paths[i].getLastPathComponent();
+            if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
+                DataSetNode dataSetNode = (DataSetNode) node;
 
                 m_selectedDatasetList.add(dataSetNode.getDataset());
                 m_selectedRSMDSNodeList.add(dataSetNode);

@@ -5,7 +5,7 @@ import fr.proline.studio.dam.UDSDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.ConnectionDialog;
-import fr.proline.studio.rsmexplorer.actions.ConnectAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ConnectAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import java.awt.Window;
 import javax.swing.*;

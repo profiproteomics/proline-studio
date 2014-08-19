@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.utils.IconManager;
@@ -12,9 +8,10 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 
 /**
- *
+ * Panel to set the different parameters for the XIC Quantitation
  * @author VD225637
  */
 public class DefineQuantParamsPanel extends JPanel{
@@ -65,7 +62,6 @@ public class DefineQuantParamsPanel extends JPanel{
 
         c.gridy++;
         c.weighty = 1;
-        
         add(createMainPanel(), c);
         
     }
@@ -119,6 +115,7 @@ public class DefineQuantParamsPanel extends JPanel{
 		},
 		"normalization_method": "MEDIAN_RATIO"
 	}*/
+    
     public Map<String,Object> getQuantParams(){
         Map<String,Object> params = new HashMap<>();
         
@@ -192,6 +189,7 @@ public class DefineQuantParamsPanel extends JPanel{
     private JPanel createMainPanel() {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
+        mainPanel.setBorder(createTitledBorder(" XIC Parameters ", 0));
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -199,7 +197,7 @@ public class DefineQuantParamsPanel extends JPanel{
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         JLabel extractionMoZTolLabel = new JLabel("Extraction moz tolerance (ppm):");
-        m_extractionMoZTolTF = new JTextField(10);
+        m_extractionMoZTolTF = new JTextField();
         m_extractionMoZTolTF.setText("5"); //VDS : TODO Manage Preference !
         c.gridx = 0;
         c.gridy = 0;
@@ -228,7 +226,7 @@ public class DefineQuantParamsPanel extends JPanel{
         c.gridx = 0;
         c.weightx = 0;
         c.gridwidth = 1;
-        mainPanel.add(new JLabel("Normalzation "), c);
+        mainPanel.add(new JLabel("Normalization "), c);
         m_normalizationCB = new JComboBox();
         m_normalizationCB.addItem("INTENSITY_SUM");
         m_normalizationCB.addItem("MEDIAN_INTENSITY");
@@ -268,50 +266,56 @@ public class DefineQuantParamsPanel extends JPanel{
     private JPanel createClusteringPanel(){
         
         JPanel clusteringPanel = new JPanel(new GridBagLayout());
-        clusteringPanel.setBorder(BorderFactory.createTitledBorder(" Clustering "));
+        clusteringPanel.setBorder(createTitledBorder(" Clustering ", 1));
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.VERTICAL;
+        c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         c.gridx = 0;
         c.gridy = 0;                
         clusteringPanel.add(new JLabel("moz tolerance (ppm):"), c);        
-        c.gridx++;       
-        m_clusteringMoZTolTF = new JTextField(10);
+        c.gridx++;  
+        c.weightx = 1;
+        m_clusteringMoZTolTF = new JTextField();
         m_clusteringMoZTolTF.setText("5"); //VDS : TODO Manage Preference !
         clusteringPanel.add(m_clusteringMoZTolTF, c);
-        
+        c.weightx = 0;
         
         c.gridy++;
         c.gridx = 0;
         clusteringPanel.add(new JLabel("time tolerance:"), c);
         c.gridx++;       
-        m_clusteringTimeTolTF = new JTextField(10);
+        c.weightx = 1;
+        m_clusteringTimeTolTF = new JTextField();
         m_clusteringTimeTolTF.setText("15"); //VDS : TODO Manage Preference !
         clusteringPanel.add(m_clusteringTimeTolTF, c);
+        c.weightx = 0;
 
         c.gridy++;
         c.gridx = 0;
         clusteringPanel.add(new JLabel("time computation:"), c);
-        c.gridx++;               
+        c.gridx++;    
+        c.weightx = 1;
         m_clusteringTimeComputationCB = new JComboBox();
         m_clusteringTimeComputationCB.addItem("MOST_INTENSE");
         m_clusteringTimeComputationCB.addItem("MEDIAN");
         m_clusteringTimeComputationCB.setSelectedItem("MOST_INTENSE");//VDS : TODO Manage Preference !
         clusteringPanel.add(m_clusteringTimeComputationCB, c);
+        c.weightx = 0;
 
         c.gridy++;
         c.gridx = 0;
         clusteringPanel.add(new JLabel("intensity computation:"), c);
         c.gridx++;       
+        c.weightx = 1;
         m_clusteringintensityComputationCB = new JComboBox();
         m_clusteringintensityComputationCB.addItem("MOST_INTENSE");
         m_clusteringintensityComputationCB.addItem("SUM");
         m_clusteringintensityComputationCB.setSelectedItem("MOST_INTENSE");//VDS : TODO Manage Preference !
         clusteringPanel.add(m_clusteringintensityComputationCB, c);
-
+        c.weightx = 0;
 
         return clusteringPanel;                
     }
@@ -319,7 +323,7 @@ public class DefineQuantParamsPanel extends JPanel{
     private JPanel createAlignementPanel(){
         
         JPanel alignmentPanel = new JPanel(new GridBagLayout());
-        alignmentPanel.setBorder(BorderFactory.createTitledBorder(" Alignment "));
+        alignmentPanel.setBorder(createTitledBorder(" Alignment ", 1));
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -329,34 +333,39 @@ public class DefineQuantParamsPanel extends JPanel{
         c.gridx = 0;
         c.gridy = 0;                
         alignmentPanel.add(new JLabel("method:"), c);        
-        c.gridx++;       
+        c.gridx++;     
+        c.weightx = 1;
         m_alnmMethodCB = new JComboBox();
         m_alnmMethodCB.addItem("EXHAUSTIVE");
         m_alnmMethodCB.addItem("ITERATIVE");
         m_alnmMethodCB.setSelectedItem("ITERATIVE");//VDS : TODO Manage Preference !
         alignmentPanel.add(m_alnmMethodCB, c);
-        
+        c.weightx = 0;
         
         c.gridy++;
         c.gridx = 0;
         alignmentPanel.add(new JLabel("mass interval:"), c);
-        c.gridx++;       
-        m_alnmMassIntervalTF = new JTextField(10);
+        c.gridx++;     
+        c.weightx = 1;
+        m_alnmMassIntervalTF = new JTextField();
         m_alnmMassIntervalTF.setText("20000"); //VDS TODO : hide ? see DBO description
         m_alnmMassIntervalTF.setEditable(false);//VDS - DBO info :  Mass Interval (hidden / non-editable)
         alignmentPanel.add(m_alnmMassIntervalTF, c);
-
+        c.weightx = 0;
+        
         c.gridy++;
         c.gridx = 0;
         alignmentPanel.add(new JLabel("max iteration:"), c);
         c.gridx++;   
-        m_alnmMaxIterationTF = new JTextField(10);
+        c.weightx = 1;
+        m_alnmMaxIterationTF = new JTextField();
         m_alnmMaxIterationTF.setText("3"); //VDS: TODO Manage Preference !
         alignmentPanel.add(m_alnmMaxIterationTF, c);
+        c.weightx = 0;
 
-              // Add Alignement Smoothing specific params
+        // Add Alignement Smoothing specific params
         JPanel smootingPanel = new JPanel(new GridBagLayout());
-        smootingPanel.setBorder(BorderFactory.createTitledBorder(" Smoothing "));
+        smootingPanel.setBorder(createTitledBorder(" Smoothing ", 2));
 
         GridBagConstraints c1 = new GridBagConstraints();
         c1.anchor = GridBagConstraints.NORTHWEST;
@@ -366,37 +375,45 @@ public class DefineQuantParamsPanel extends JPanel{
         c1.gridx = 0;
         c1.gridy = 0;                
         smootingPanel.add(new JLabel("method:"), c1);        
-        c1.gridx++;       
+        c1.gridx++;     
+        c1.weightx = 1;
         m_alnmSmoothingMethodCB = new JComboBox();
         m_alnmSmoothingMethodCB.addItem("LANDMARK_RANGE");
         m_alnmSmoothingMethodCB.addItem("LOESS");
         m_alnmSmoothingMethodCB.addItem("TIME_WINDOW");
         m_alnmSmoothingMethodCB.setSelectedItem("TIME_WINDOW");//VDS : TODO Manage Preference !
         smootingPanel.add(m_alnmSmoothingMethodCB, c1);
+        c1.weightx = 0;
                 
         c1.gridy++;
         c1.gridx = 0;
         smootingPanel.add(new JLabel("alignment time interval:"), c1);
-        c1.gridx++;   
-        m_alnmSmoothingWinSizeTF = new JTextField(10);
+        c1.gridx++;  
+        c1.weightx = 1;
+        m_alnmSmoothingWinSizeTF = new JTextField();
         m_alnmSmoothingWinSizeTF.setText("200");//VDS : TODO Manage Preference !
         smootingPanel.add(m_alnmSmoothingWinSizeTF, c1);
+        c1.weightx = 0;
     
         c1.gridy++;
         c1.gridx = 0;
         smootingPanel.add(new JLabel("sliding window overlap (%):"), c1);
         c1.gridx++;   
-        m_alnmSmoothingWinOverlapTF = new JTextField(10);
+        c1.weightx = 1;
+        m_alnmSmoothingWinOverlapTF = new JTextField();
         m_alnmSmoothingWinOverlapTF.setText("20");//VDS : TODO Manage Preference !
         smootingPanel.add(m_alnmSmoothingWinOverlapTF, c1);
+        c1.weightx = 0;
 
         c1.gridy++;
         c1.gridx = 0;
         smootingPanel.add(new JLabel("minimum number of landmarks :"), c1);
-        c1.gridx++;   
-        m_alnmSmoothingMinWinlandmarksTF = new JTextField(10);
+        c1.gridx++; 
+        c1.weightx = 1;
+        m_alnmSmoothingMinWinlandmarksTF = new JTextField();
         m_alnmSmoothingMinWinlandmarksTF.setText("50");//VDS : TODO Manage Preference !
         smootingPanel.add(m_alnmSmoothingMinWinlandmarksTF, c1);
+        c1.weightx = 0;
         
         c.gridy++;
         c.gridx = 0;
@@ -407,7 +424,7 @@ public class DefineQuantParamsPanel extends JPanel{
         
         // Add Alignement  FT mapping specific params
         JPanel ftParamsPanel = new JPanel(new GridBagLayout());
-        ftParamsPanel.setBorder(BorderFactory.createTitledBorder(" Feature mapping params "));
+        ftParamsPanel.setBorder(createTitledBorder(" Feature Mapping Params ", 2));
 
         c1 = new GridBagConstraints();
         c1.anchor = GridBagConstraints.NORTHWEST;
@@ -418,17 +435,21 @@ public class DefineQuantParamsPanel extends JPanel{
         c1.gridy = 0;                
         ftParamsPanel.add(new JLabel("moz tolerance (ppm):"), c1);        
         c1.gridx++;       
-        m_alnmFTMoZTolTF = new JTextField(10);
+        c1.weightx = 1;
+        m_alnmFTMoZTolTF = new JTextField();
         m_alnmFTMoZTolTF.setText("5");//VDS : TODO Manage Preference !
         ftParamsPanel.add(m_alnmFTMoZTolTF, c1);
+        c1.weightx = 0;
         
         c1.gridx = 0;
         c1.gridy++;                
         ftParamsPanel.add(new JLabel("time tolerance:"), c1);        
-        c1.gridx++;       
-        m_alnmFTTimeTolTF = new JTextField(10);
+        c1.gridx++;   
+        c1.weightx = 1;
+        m_alnmFTTimeTolTF = new JTextField();
         m_alnmFTTimeTolTF.setText("600");//VDS : TODO Manage Preference !
         ftParamsPanel.add(m_alnmFTTimeTolTF, c1);
+        c1.weightx = 0;
         
         c.gridy++;
         c.gridx = 0;
@@ -439,10 +460,10 @@ public class DefineQuantParamsPanel extends JPanel{
         return alignmentPanel;                
     }           
     
-      private JPanel createFTPanel(){
+    private JPanel createFTPanel(){
         
         JPanel ftPanel = new JPanel(new GridBagLayout());
-        ftPanel.setBorder(BorderFactory.createTitledBorder(" Feature Filter "));
+        ftPanel.setBorder(createTitledBorder(" Feature Filter ", 1));
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -472,13 +493,13 @@ public class DefineQuantParamsPanel extends JPanel{
         c.gridx = 0;
         ftPanel.add(new JLabel("value:"), c);
         c.gridx++;       
-        m_FTFilterValueTF = new JTextField(10);
+        m_FTFilterValueTF = new JTextField();
         m_FTFilterValueTF.setText("0");//VDS : TODO Manage Preference !
         ftPanel.add(m_FTFilterValueTF, c);
 
          // Add FT mapping specific params
         JPanel ftParamsPanel = new JPanel(new GridBagLayout());
-        ftParamsPanel.setBorder(BorderFactory.createTitledBorder(" Mapping params "));
+        ftParamsPanel.setBorder(createTitledBorder(" Mapping Params ", 2));
 
         GridBagConstraints c1 = new GridBagConstraints();
         c1.anchor = GridBagConstraints.NORTHWEST;
@@ -489,17 +510,21 @@ public class DefineQuantParamsPanel extends JPanel{
         c1.gridy = 0;                
         ftParamsPanel.add(new JLabel("moz tolerance (ppm):"), c1);        
         c1.gridx++;       
-        m_FTMappingMoZTolTF = new JTextField(10);
+        c1.weightx = 1;
+        m_FTMappingMoZTolTF = new JTextField();
         m_FTMappingMoZTolTF.setText("10");//VDS : TODO Manage Preference !
         ftParamsPanel.add(m_FTMappingMoZTolTF, c1);
+        c1.weightx = 0;
         
         c1.gridx = 0;
         c1.gridy++;                
         ftParamsPanel.add(new JLabel("time tolerance:"), c1);        
-        c1.gridx++;       
-        m_FTMappingTimeTolTF = new JTextField(10);
+        c1.gridx++;     
+        c1.weightx = 1;
+        m_FTMappingTimeTolTF = new JTextField();
         m_FTMappingTimeTolTF.setText("120");//VDS : TODO Manage Preference !
         ftParamsPanel.add(m_FTMappingTimeTolTF, c1);
+        c1.weightx = 0;
         
         c.gridy++;
         c.gridx = 0;
@@ -511,6 +536,19 @@ public class DefineQuantParamsPanel extends JPanel{
         return ftPanel;                
     }
     
+    private TitledBorder createTitledBorder(String title, int level) {
+        switch (level) {
+            case 0:
+                return BorderFactory.createTitledBorder("<html> <b>" + title + "</b></html>");
+            case 1:
+                return BorderFactory.createTitledBorder("<html><font color='#0000FF'>&nbsp;&#x25A0;&nbsp;</font> <b>" + title + "</b></html>");
+            case 2:
+            default:
+                return BorderFactory.createTitledBorder("<html><font color='#009999'>&nbsp;&#x25A0;&nbsp;</font> <b>" + title + "</b></html>");
+        }
+
+
+    }
     
     
 }

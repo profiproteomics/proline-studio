@@ -7,7 +7,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseRsetTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.actions.ImportSearchResultAsRsetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsRsetAction;
 import fr.proline.studio.rsmexplorer.gui.RsetAllPanel;
 import java.util.ArrayList;
 import javax.swing.event.ChangeEvent;

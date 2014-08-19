@@ -1,7 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
-import fr.proline.studio.rsmexplorer.node.IdentificationTree;
-import fr.proline.studio.rsmexplorer.node.RSMNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.SelectionTree;
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -10,16 +12,16 @@ import javax.swing.*;
 
 
 /**
- * Panel to create the XIC DesignTree by drag and drop
+ * Panel to create the XIC XICDesignTree by drag and drop
  * @author JM235353
  */
 public class CreateXICDesignPanel extends JPanel {
     
     private static CreateXICDesignPanel m_singleton = null;
     
-    private RSMNode m_rootNode;
+    private AbstractNode m_rootNode;
     
-    public static CreateXICDesignPanel getPanel(RSMNode rootNode) {
+    public static CreateXICDesignPanel getPanel(AbstractNode rootNode) {
         if((m_singleton == null) || (!m_singleton.m_rootNode.equals(rootNode))){
             m_singleton = new CreateXICDesignPanel(rootNode);
         }
@@ -33,7 +35,7 @@ public class CreateXICDesignPanel extends JPanel {
         throw new IllegalAccessError(" Panel not initialized yet ! ");
     }
     
-    private CreateXICDesignPanel(RSMNode rootNode) {
+    private CreateXICDesignPanel(AbstractNode rootNode) {
         m_rootNode = rootNode;
         
         JPanel wizardPanel = createWizardPanel();
@@ -59,7 +61,7 @@ public class CreateXICDesignPanel extends JPanel {
 
     }
     
-    public final JPanel createMainPanel(RSMNode rootNode) {
+    public final JPanel createMainPanel(AbstractNode rootNode) {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
         final GridBagConstraints c = new GridBagConstraints();
@@ -134,7 +136,7 @@ public class CreateXICDesignPanel extends JPanel {
     }
     
     
-    private JPanel createDesignTreePanel(RSMNode rootNode) {
+    private JPanel createDesignTreePanel(AbstractNode rootNode) {
         JPanel designTreePanel = new JPanel();
 
         designTreePanel.setLayout(new GridBagLayout());
@@ -148,7 +150,7 @@ public class CreateXICDesignPanel extends JPanel {
         c.weightx = 1;
         c.weighty = 1;
 
-        DesignTree tree = DesignTree.getDesignTree(rootNode);
+        XICDesignTree tree = XICDesignTree.getDesignTree(rootNode);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
 

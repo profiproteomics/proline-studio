@@ -14,8 +14,8 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
-import fr.proline.studio.rsmexplorer.actions.PropertiesAction;
-import fr.proline.studio.rsmexplorer.node.RSMTransferable;
+import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
+import fr.proline.studio.rsmexplorer.tree.identification.IdTransferable;
 import fr.proline.studio.utils.DecoratedMarkerTable;
 import fr.proline.studio.utils.DecoratedTableModel;
 import fr.proline.studio.utils.PropertiesProviderInterface;
@@ -526,13 +526,13 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
             }
             
-            RSMTransferable.TransferData data = new RSMTransferable.TransferData();
+            IdTransferable.TransferData data = new IdTransferable.TransferData();
             data.setResultSetList(resultSetList);
-            Integer transferKey =  RSMTransferable.register(data);
+            Integer transferKey =  IdTransferable.register(data);
 
             
             
-            return new RSMTransferable(transferKey, m_dataBox.getProjectId());
+            return new IdTransferable(transferKey, m_dataBox.getProjectId());
             
         }
         
@@ -546,7 +546,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         protected void exportDone(JComponent source, Transferable data, int action) {
 
             // clean all transferred data
-            RSMTransferable.clearRegisteredData();
+            IdTransferable.clearRegisteredData();
         }
     }
     

@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.actions.HelpAction;
+import fr.proline.studio.rsmexplorer.actions.identification.HelpAction;
 import java.awt.*;
 import javax.swing.*;
 

@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.RawFile;
@@ -13,10 +14,10 @@ import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.RegisterRawFileTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.node.RSMDataSetNode;
-import fr.proline.studio.rsmexplorer.node.RSMNode;
-import fr.proline.studio.rsmexplorer.node.xic.RSMBiologicalSampleAnalysisNode;
-import fr.proline.studio.rsmexplorer.node.xic.RSMRunNode;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Window;
@@ -40,7 +41,7 @@ public class CreateXICDialog extends DefaultDialog {
     
     private static CreateXICDialog m_singletonDialog = null;
     
-    private RSMNode finalXICDesignNode = null;
+    private AbstractNode finalXICDesignNode = null;
 
     public static CreateXICDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -59,7 +60,7 @@ public class CreateXICDialog extends DefaultDialog {
 
         setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
 
-        setSize(700, 500);
+        setSize(640, 500);
         setResizable(true);
         
     }
@@ -71,7 +72,7 @@ public class CreateXICDialog extends DefaultDialog {
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         finalXICDesignNode = null;
         m_step = STEP_PANEL_CREATE_XIC_DESIGN;
-        finalXICDesignNode = new RSMDataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
+        finalXICDesignNode = new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
 
         replaceInternaleComponent(CreateXICDesignPanel.getPanel(finalXICDesignNode));
         revalidate();
@@ -84,7 +85,7 @@ public class CreateXICDialog extends DefaultDialog {
         // forbid pack by overloading the method
     }
     
-    public RSMNode getDesignRSMNode(){
+    public AbstractNode getDesignRSMNode(){
         return finalXICDesignNode;
     }
     
@@ -157,18 +158,18 @@ public class CreateXICDialog extends DefaultDialog {
 
                 Enumeration xicGrps = finalXICDesignNode.children();
                 while (xicGrps.hasMoreElements() && errorMsg == null) {
-                    RSMNode grpNode = (RSMNode) xicGrps.nextElement();
+                    AbstractNode grpNode = (AbstractNode) xicGrps.nextElement();
                     //Iterate over Samples
                     Enumeration grpSpls = grpNode.children();
                     while (grpSpls.hasMoreElements() && errorMsg == null) {
-                        RSMNode bioSplNode = (RSMNode) grpSpls.nextElement();
+                        AbstractNode bioSplNode = (AbstractNode) grpSpls.nextElement();
                         //Iterate over SampleAnalysis
                         Enumeration identRSMs = bioSplNode.children();
                         while (identRSMs.hasMoreElements()) {
-                            RSMNode bioSplAnalysisNode = (RSMNode) identRSMs.nextElement();
+                            AbstractNode bioSplAnalysisNode = (AbstractNode) identRSMs.nextElement();
                             Enumeration runNodes = bioSplAnalysisNode.children();
                             while (runNodes.hasMoreElements()) {
-                                RSMRunNode runNode = (RSMRunNode) runNodes.nextElement();
+                                XICRunNode runNode = (XICRunNode) runNodes.nextElement();
                                 RunInfoData runData = (RunInfoData) runNode.getData();
                                 ArrayList<RawFile> returnedRaw = new ArrayList<>();
                                 DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
@@ -254,7 +255,7 @@ public class CreateXICDialog extends DefaultDialog {
                 
         Enumeration xicGrps = finalXICDesignNode.children();   
         while(xicGrps.hasMoreElements()&& errorMsg==null){
-            RSMNode grpNode = (RSMNode) xicGrps.nextElement();
+            AbstractNode grpNode = (AbstractNode) xicGrps.nextElement();
             String grpName = grpNode.getData().getName();
             
             //Iterate over Samples
@@ -262,7 +263,7 @@ public class CreateXICDialog extends DefaultDialog {
             List<Integer> splNumbers = new ArrayList();
             
             while(grpSpls.hasMoreElements() && errorMsg==null){
-                RSMNode splNode = (RSMNode) grpSpls.nextElement();
+                AbstractNode splNode = (AbstractNode) grpSpls.nextElement();
                 String sampleName = grpName+splNode.getData().getName();                
                 splNbrByName.put(sampleName, splNumber);
                 splNumbers.add(splNumber++);
@@ -272,7 +273,7 @@ public class CreateXICDialog extends DefaultDialog {
                 ArrayList<String> splAnalysisNames = new ArrayList<>();
                 while(identRSMs.hasMoreElements()){
                     //VD TODO TEST child type
-                    RSMNode qChannelNode = (RSMNode) identRSMs.nextElement();
+                    AbstractNode qChannelNode = (AbstractNode) identRSMs.nextElement();
                     String spAnalysisName = qChannelNode.getData().getName();
                     splAnalysisNames.add(spAnalysisName);
                     if(!DataSetData.class.isInstance(qChannelNode.getData())){
@@ -439,8 +440,8 @@ public class CreateXICDialog extends DefaultDialog {
 
     }
     
-    private boolean checkDesignStructure(RSMNode parentNode) {
-        RSMNode.NodeTypes type = parentNode.getType();
+    private boolean checkDesignStructure(AbstractNode parentNode) {
+        AbstractNode.NodeTypes type = parentNode.getType();
      
         switch(type) {
             case DATA_SET:
@@ -466,7 +467,7 @@ public class CreateXICDialog extends DefaultDialog {
         Enumeration children = parentNode.children();
         //Iterate over Groups
         while (children.hasMoreElements()) {
-            RSMNode rsmNode = (RSMNode) children.nextElement();
+            AbstractNode rsmNode = (AbstractNode) children.nextElement();
             if (!checkDesignStructure(rsmNode)) {
                 return false;
             }
@@ -475,12 +476,12 @@ public class CreateXICDialog extends DefaultDialog {
         return true;
     }
     
-    private boolean checkRawFiles(RSMNode node) {
-        RSMNode.NodeTypes type = node.getType();
-        if (type == RSMNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
-            RSMBiologicalSampleAnalysisNode sampleAnalysisNode = (RSMBiologicalSampleAnalysisNode) node;
-            if (sampleAnalysisNode.getChildCount() != 1 ||  ((RunInfoData)((RSMNode)sampleAnalysisNode.getChildAt(0)).getData()).getRawFile()==null) {
-                showErrorOnNode((RSMNode)sampleAnalysisNode.getChildAt(0), "You must specify a Raw(meDb) File for each identification.");
+    private boolean checkRawFiles(AbstractNode node) {
+        AbstractNode.NodeTypes type = node.getType();
+        if (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
+            XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) node;
+            if (sampleAnalysisNode.getChildCount() != 1 ||  ((RunInfoData)((AbstractNode)sampleAnalysisNode.getChildAt(0)).getData()).getRawFile()==null) {
+                showErrorOnNode((AbstractNode)sampleAnalysisNode.getChildAt(0), "You must specify a Raw(meDb) File for each identification.");
                 return false;
             }
         }
@@ -488,7 +489,7 @@ public class CreateXICDialog extends DefaultDialog {
         Enumeration children = node.children();
         //Iterate over Groups
         while (children.hasMoreElements()) {
-            RSMNode rsmNode = (RSMNode) children.nextElement();
+            AbstractNode rsmNode = (AbstractNode) children.nextElement();
             if (!checkRawFiles(rsmNode)) {
                 return false;
             }
@@ -497,25 +498,25 @@ public class CreateXICDialog extends DefaultDialog {
         return true;
     }
     
-    private void showErrorOnNode(RSMNode node, String error) {
+    private void showErrorOnNode(AbstractNode node, String error) {
 
         // expand parentnode if needed
-        RSMNode parentNode = (RSMNode) node.getParent();
+        AbstractNode parentNode = (AbstractNode) node.getParent();
         if (parentNode != null) {
             TreePath pathToExpand = new TreePath(parentNode.getPath());
-            if (!DesignTree.getDesignTree().isExpanded(pathToExpand)) {
+            if (!XICDesignTree.getDesignTree().isExpanded(pathToExpand)) {
 
-                DesignTree.getDesignTree().expandPath(pathToExpand);
+                XICDesignTree.getDesignTree().expandPath(pathToExpand);
             }
         }
 
         // scroll to node if needed
         TreePath path = new TreePath(node.getPath());
-        DesignTree.getDesignTree().scrollPathToVisible(path);
+        XICDesignTree.getDesignTree().scrollPathToVisible(path);
 
         // display error
         setStatus(true, error);
-        highlight(DesignTree.getDesignTree(), DesignTree.getDesignTree().getPathBounds(path));
+        highlight(XICDesignTree.getDesignTree(), XICDesignTree.getDesignTree().getPathBounds(path));
     }
 
     @Override

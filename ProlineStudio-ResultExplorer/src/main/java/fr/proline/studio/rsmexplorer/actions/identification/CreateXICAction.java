@@ -35,7 +35,7 @@ public class CreateXICAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
     public CreateXICAction() {
-        super(NbBundle.getMessage(ConnectAction.class, "CTL_CreateXIC"), AbstractTree.TreeType.TREE_QUANTITATION);
+        super(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC"), AbstractTree.TreeType.TREE_QUANTITATION);
     }
     
      @Override

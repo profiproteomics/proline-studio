@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
-import fr.proline.studio.rsmexplorer.tree.xic.SelectionTree;
+import fr.proline.studio.rsmexplorer.tree.xic.XICSelectionTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
@@ -175,7 +175,7 @@ public class CreateXICDesignPanel extends JPanel {
         c.weighty = 1;
 
 
-        SelectionTree tree = new SelectionTree(IdentificationTree.getCurrentTree().copyRootNodeForSelection(), true);
+        XICSelectionTree tree = new XICSelectionTree(IdentificationTree.getCurrentTree().copyRootNodeForSelection(), true);
         JScrollPane treeScrollPane = new JScrollPane();
         treeScrollPane.setViewportView(tree);
 

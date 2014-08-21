@@ -17,7 +17,7 @@ import java.util.HashMap;
  */
 public class XICSelectionTransferable implements Transferable, Serializable {
     
-    public final static DataFlavor RSMNodeList_FLAVOR = new DataFlavor(SelectionTree.class, "Drag and drop Identification Summary");
+    public final static DataFlavor RSMNodeList_FLAVOR = new DataFlavor(XICSelectionTree.class, "Drag and drop Identification Summary");
 
     
     private Integer m_transferKey = null;

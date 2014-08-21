@@ -22,7 +22,7 @@ public class ChildFactory  {
         AbstractData.DataTypes type = key.getDataType();
         switch (type) {
             case MAIN:
-                result = new RSMTreeParentNode(key);
+                result = new TreeParentNode(key);
                 break;
             case PROJECT_IDENTIFICATION:
                 result = new IdProjectIdentificationNode(key);

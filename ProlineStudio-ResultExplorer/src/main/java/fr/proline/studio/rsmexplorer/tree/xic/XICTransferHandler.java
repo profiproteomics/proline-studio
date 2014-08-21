@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Management of the drag and drop from the SelectionTree to the XIC XICDesignTree
+ * Management of the drag and drop from the XICSelectionTree to the XIC XICDesignTree
  * @author JM235353
  */
 public class XICTransferHandler extends TransferHandler {
@@ -48,7 +48,7 @@ public class XICTransferHandler extends TransferHandler {
     protected Transferable createTransferable(JComponent c) {
 
         if (m_isSelectionTree) {
-            SelectionTree tree = (SelectionTree) c;
+            XICSelectionTree tree = (XICSelectionTree) c;
 
             AbstractNode[] selectedNodes = tree.getSelectedNodes();
             ArrayList<DataSetNode> keptNodes = new ArrayList<>();

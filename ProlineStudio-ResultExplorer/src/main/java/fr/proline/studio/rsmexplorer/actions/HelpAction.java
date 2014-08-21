@@ -15,7 +15,7 @@ import org.openide.util.NbBundle.Messages;
 import org.openide.windows.WindowManager;
 
 @ActionID(category = "Help",
-id = "fr.proline.studio.rsmexplorer.gui.dialog.HelpAction")
+id = "fr.proline.studio.rsmexplorer.actions.HelpAction")
 @ActionRegistration(displayName = "#CTL_HelpAction")
 @ActionReferences({
     @ActionReference(path = "Menu/Help", position = 100)

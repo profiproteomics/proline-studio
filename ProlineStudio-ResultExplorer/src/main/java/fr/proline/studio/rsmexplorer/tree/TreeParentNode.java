@@ -9,9 +9,9 @@ import org.openide.nodes.Sheet;
  * Node used a the Tree Parent
  * @author JM235353
  */
-public class RSMTreeParentNode extends AbstractNode {
+public class TreeParentNode extends AbstractNode {
  
-    public RSMTreeParentNode(AbstractData data) {
+    public TreeParentNode(AbstractData data) {
         super(AbstractNode.NodeTypes.TREE_PARENT, data);
     }
 

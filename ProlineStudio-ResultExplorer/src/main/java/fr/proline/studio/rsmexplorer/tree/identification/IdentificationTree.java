@@ -557,47 +557,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         
         JPopupMenu popup;
         ArrayList<AbstractRSMAction> actions;
-        
-        /*if (rootNodeSelected && (nbNodes >= 1)) {
-            if (nbNodes > 1) {
-                // the root node is selected and multiple nodes are
-                // selected : we do not show the popup
-                return;
-            }
 
-            // we show the popup to connect or disconnect
-            if (m_rootPopup == null) {
-                // create the actions
-                m_rootActions = new ArrayList<>(4);  // <--- get in sync
-
-                AddProjectAction addProjectAction = new AddProjectAction();
-                m_rootActions.add(addProjectAction);
-                
-                m_rootActions.add(null);  // separator
-                
-                
-                ConnectAction connectAction = new ConnectAction();
-                m_rootActions.add(connectAction);
-
-                DisconnectAction disconnectAction = new DisconnectAction();
-                m_rootActions.add(disconnectAction);
-
-                // add actions to popup
-                m_rootPopup = new JPopupMenu();
-                for (int i = 0; i < m_rootActions.size(); i++) {
-                    AbstractRSMAction action = m_rootActions.get(i);
-                    if (action == null) {
-                        m_rootPopup.addSeparator();
-                    } else {
-                        m_rootPopup.add(action.getPopupPresenter());
-                    }
-                }
-            }
-            
-            popup = m_rootPopup;
-            actions = m_rootActions;
-            
-        } else */
         if (trashNodeSelected && (nbNodes == 1)) {
             
             // creation of the popup if needed

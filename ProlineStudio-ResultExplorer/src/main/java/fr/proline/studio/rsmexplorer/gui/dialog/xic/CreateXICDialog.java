@@ -13,6 +13,8 @@ import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.RegisterRawFileTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.parameter.ParameterError;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -58,7 +60,7 @@ public class CreateXICDialog extends DefaultDialog {
 
         setHelpURL(null); //JPM.TODO
 
-        setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
+      
 
         setSize(640, 500);
         setResizable(true);
@@ -70,6 +72,7 @@ public class CreateXICDialog extends DefaultDialog {
         
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
+        setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
         finalXICDesignNode = null;
         m_step = STEP_PANEL_CREATE_XIC_DESIGN;
         finalXICDesignNode = new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
@@ -428,16 +431,36 @@ public class CreateXICDialog extends DefaultDialog {
             revalidate();
             repaint();
             
+            setButtonVisible(DefaultDialog.BUTTON_DEFAULT, true);
             m_step = STEP_PANEL_DEFINE_XIC_PARAMS;
             
             return false;
         } else { //STEP_PANEL_DEFINE_QUANT_PARAMS
             
-            // check values TODO    
+            ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
             
+            // check parameters
+            ParameterError error = parameterList.checkParameters();
+            if (error != null) {
+                setStatus(true, error.getErrorMessage());
+                highlight(error.getParameterComponent());
+                return false;
+            }
+
+            // Save Parameters        
+            parameterList.saveParameters();
+
             return true;
         }
 
+    }
+    
+    @Override
+    protected boolean defaultCalled() {
+        ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
+        parameterList.initDefaults();
+
+        return false;
     }
     
     private boolean checkDesignStructure(AbstractNode parentNode) {

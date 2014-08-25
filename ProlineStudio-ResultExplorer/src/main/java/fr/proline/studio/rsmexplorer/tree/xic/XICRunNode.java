@@ -151,6 +151,9 @@ public class XICRunNode extends AbstractNode {
         // we search the raw file in the database, if we found it, we set this one
         // if we do not find it, we use the one choosed by the user
 
+        setIsChanging(true);
+        m_treeModel.nodeChanged(this);
+        
         String searchString = selectedFile.getName().substring(0, selectedFile.getName().lastIndexOf('.'));
 
         final ArrayList<RawFile> m_rawFileList = new ArrayList<>();
@@ -177,6 +180,7 @@ public class XICRunNode extends AbstractNode {
                     rawFile.setRawFileName(selectedFile.getPath());
                     ((RunInfoData) getData()).setRawFile(rawFile);
                 }
+                setIsChanging(false);
                 m_treeModel.nodeChanged(_this);
                 
                 warnParent(false);

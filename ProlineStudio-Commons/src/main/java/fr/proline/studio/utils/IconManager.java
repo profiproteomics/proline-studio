@@ -37,6 +37,7 @@ public class IconManager {
         RSET_DECOY,
         RSM,
         RSM_DECOY,
+        RSM_ERROR,
         VIAL,
         PROJECT,
         USER,
@@ -232,6 +233,8 @@ public class IconManager {
                 return "fr/proline/studio/images/resultSummary.png";
             case RSM_DECOY:
                 return "fr/proline/studio/images/resultSummaryDecoy.png";
+            case RSM_ERROR:
+                return "fr/proline/studio/images/resultSummaryError.png";
             case VIAL:
                 return "fr/proline/studio/images/vial.png";
             case PROJECT:

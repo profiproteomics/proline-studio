@@ -421,13 +421,10 @@ public class CreateXICDialog extends DefaultDialog {
             setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
  
             //Update panel
-            
-            JScrollPane scrollPane = new JScrollPane();            
+         
             DefineQuantParamsPanel quantPanel =  DefineQuantParamsPanel.getDefineQuantPanel();
-            scrollPane.setViewportView(quantPanel);
-            scrollPane.createVerticalScrollBar();
-            
-            replaceInternaleComponent(scrollPane);
+            quantPanel.resetScrollbar();
+            replaceInternaleComponent(quantPanel);
             revalidate();
             repaint();
             

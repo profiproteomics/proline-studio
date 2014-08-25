@@ -114,6 +114,10 @@ public class XICDesignTree extends AbstractTree {
             if (n instanceof XICRunNode) {
                 XICRunNode runNode = (XICRunNode) n;
 
+                if (runNode.isChanging()) {
+                    return;
+                }
+                
                 if (m_fileChooser == null) {
                     if ((m_defaultDirectory != null) && (m_defaultDirectory.isDirectory())) {
                         m_fileChooser = new JFileChooser(m_defaultDirectory, ServerFileSystemView.getServerFileSystemView());

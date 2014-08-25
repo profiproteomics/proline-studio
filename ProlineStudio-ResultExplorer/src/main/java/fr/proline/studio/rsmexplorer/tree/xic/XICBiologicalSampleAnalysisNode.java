@@ -6,6 +6,7 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
+import javax.swing.tree.DefaultTreeModel;
 import org.openide.nodes.Sheet;
 
 /**
@@ -14,8 +15,18 @@ import org.openide.nodes.Sheet;
  */
 public class XICBiologicalSampleAnalysisNode extends AbstractNode {
 
+    boolean m_hasError = true;
+    
     public XICBiologicalSampleAnalysisNode(AbstractData data) {
         super(AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS, data);
+    }
+    
+    public void setChildError(DefaultTreeModel m_treeModel, boolean error) {
+        if (m_hasError ^ error) {
+            m_hasError = error;
+            m_treeModel.nodeChanged(this);
+        }
+        
     }
     
     public boolean hasResultSummary() {
@@ -29,7 +40,11 @@ public class XICBiologicalSampleAnalysisNode extends AbstractNode {
     
     @Override
     public ImageIcon getIcon() {
-        return getIcon(IconManager.IconType.RSM);
+        if (m_hasError) {
+            return getIcon(IconManager.IconType.RSM_ERROR);
+        } else {
+            return getIcon(IconManager.IconType.RSM);
+        }
     }
 
     @Override

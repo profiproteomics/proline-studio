@@ -4,12 +4,8 @@ import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
-import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
@@ -105,41 +101,6 @@ public class XICTransferHandler extends TransferHandler {
             
             
             return new XICSelectionTransferable(transferKey);
-
-            
-            /*
-            AbstractNode[] selectedNodes = tree.getSelectedNodes();
-            ArrayList<RSMBiologicalSampleAnalysisNode> keptNodes = new ArrayList<>();
-            
-            int nbSelectedNode = selectedNodes.length;
-            for (int i=0;i<nbSelectedNode;i++) {
-                AbstractNode node = selectedNodes[i];
-
-
-                AbstractNode.NodeTypes type = node.getType();
-                if (type!= AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
-                    return null;
-                }
-                XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) node;
-                if (!sampleAnalysisNode.hasResultSummary()) {
-                    return null;
-                }
-
-                keptNodes.add(sampleAnalysisNode);
-
-
-                
-                
-            } 
-            
-            XICSelectionTransferable.TransferData data = new XICSelectionTransferable.TransferData();
-            data.setSampleAnalysisList(keptNodes);
-            Integer transferKey =  XICSelectionTransferable.register(data);
-
-            
-            
-            return new XICSelectionTransferable(transferKey);*/
-
 
         }
 
@@ -333,7 +294,7 @@ public class XICTransferHandler extends TransferHandler {
 
                     // put a Run node in it
 
-                    XICRunNode runNode = new XICRunNode(new RunInfoData(), node.getDataset().getProject().getId(), node.getResultSetId());
+                    XICRunNode runNode = new XICRunNode(new RunInfoData(), node.getDataset().getProject().getId(), node.getResultSetId(), treeModel);
                     sampleAnalysisNode.add(runNode);
 
                     // add to new parent

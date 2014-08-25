@@ -9,7 +9,6 @@ import fr.proline.studio.rsmexplorer.actions.xic.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.xic.RenameAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
-import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -104,14 +103,17 @@ public class XICDesignTree extends AbstractTree {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        
-        AbstractNode[] selectedNodes = getSelectedNodes();
-        int nbNodes = selectedNodes.length;
-        if (nbNodes == 1) {
-            AbstractNode n = selectedNodes[0];
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            
+            TreePath path = getPathForLocation(e.getX(), e.getY());
+            if (path == null) {
+                return;
+            }
+            AbstractNode n = (AbstractNode) path.getLastPathComponent();
+
             if (n instanceof XICRunNode) {
                 XICRunNode runNode = (XICRunNode) n;
-                
+
                 if (m_fileChooser == null) {
                     if ((m_defaultDirectory != null) && (m_defaultDirectory.isDirectory())) {
                         m_fileChooser = new JFileChooser(m_defaultDirectory, ServerFileSystemView.getServerFileSystemView());
@@ -122,13 +124,13 @@ public class XICDesignTree extends AbstractTree {
                 }
                 int result = m_fileChooser.showOpenDialog(this);
                 if (result == JFileChooser.APPROVE_OPTION) {
-                    
+
 
                     runNode.setRawFile(m_fileChooser.getSelectedFile());
                 }
             }
-        }
 
+        }
     }
     private JFileChooser m_fileChooser = null;
 

@@ -264,7 +264,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         };
         
         
-        GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(spectrumMatchCallback, m_dataBox.getProjectId(), m_previousPeptideMatch.getResultSetId(), null, m_previousPeptideMatch.getId());
+        GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(spectrumMatchCallback, null, m_dataBox.getProjectId(), m_previousPeptideMatch.getResultSetId(), null, m_previousPeptideMatch.getId());
         AccessServiceThread.getAccessServiceThread().addTask(task);
         
     }

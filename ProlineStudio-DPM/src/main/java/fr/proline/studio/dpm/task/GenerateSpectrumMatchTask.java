@@ -23,8 +23,8 @@ public class GenerateSpectrumMatchTask extends AbstractServiceTask {
     private Long m_resultSummaryId;
     private Long m_peptideMatchId = null;
     
-    public GenerateSpectrumMatchTask(AbstractServiceCallback callback, Long projectId, Long resultSetId, Long resultSummaryId, Long peptideMatchId) {
-        super(callback, false /** asynchronous */, new TaskInfo("Generate Spectrum Match(s)", true, TASK_LIST_INFO));
+    public GenerateSpectrumMatchTask(AbstractServiceCallback callback, String datasetName, Long projectId, Long resultSetId, Long resultSummaryId, Long peptideMatchId) {
+        super(callback, false /** asynchronous */,  new TaskInfo( ((datasetName != null) ? "Generate Spectrum Matches for "+datasetName : "Generate Spectrum Match"), true, TASK_LIST_INFO));
         m_projectId = projectId;
         m_resultSetId = resultSetId;
         m_resultSummaryId = resultSummaryId;

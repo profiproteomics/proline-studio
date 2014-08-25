@@ -78,6 +78,7 @@ public class DefineQuantParamsPanel extends JPanel{
     private JCheckBox m_detectFeatureChB;
     private JCheckBox m_validatedPSMsChB;
     
+    private JScrollPane m_scrollPane;
     
     private DefineQuantParamsPanel() {
        
@@ -97,9 +98,13 @@ public class DefineQuantParamsPanel extends JPanel{
         add(createWizardPanel(), c);
 
 
+        JPanel mainPanel = createMainPanel();
+        m_scrollPane = new JScrollPane();
+        m_scrollPane.setViewportView(mainPanel);
+        m_scrollPane.createVerticalScrollBar();
         c.gridy++;
         c.weighty = 1;
-        add(createMainPanel(), c);
+        add(m_scrollPane, c);
         
     }
    
@@ -109,6 +114,10 @@ public class DefineQuantParamsPanel extends JPanel{
         }
 
         return m_singleton;
+    }
+    
+    public void resetScrollbar() {
+        m_scrollPane.getVerticalScrollBar().setValue(0);
     }
     
     public final void createParameters() {

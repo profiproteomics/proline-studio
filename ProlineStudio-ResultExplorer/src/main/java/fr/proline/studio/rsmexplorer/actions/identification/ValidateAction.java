@@ -42,7 +42,7 @@ public class ValidateAction extends AbstractRSMAction {
         int nbAlreadyValidated = 0;
 
         int nbNodes = selectedNodes.length;
-        ArrayList<DDataset> datasetList = new ArrayList<DDataset>(nbNodes);
+        ArrayList<DDataset> datasetList = new ArrayList<>(nbNodes);
         for (int i = 0; i < nbNodes; i++) {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
             DDataset d = dataSetNode.getDataset();

@@ -104,14 +104,17 @@ public class FileParameter extends AbstractParameter {
         if (m_graphicalType.equals(JTextField.class)) {
             JTextField textField = (JTextField) m_parameterComponent;
             String path = textField.getText();
-            File f = new File(path);
-            if (! f.exists()) {
-                return new ParameterError(path+" file does not exist", m_parameterComponent);
-            } else if (f.isDirectory() ) {
-                return new ParameterError(path+" is a directory", m_parameterComponent);
-            } else if (! f.canRead() ) {
-                return new ParameterError(path+" is not readable", m_parameterComponent);
+            if(path.isEmpty()) {
+            	return new ParameterError(path+" file is missing", m_parameterComponent);
             }
+//            File f = new File(path);
+//            if (! f.exists()) {
+//                return new ParameterError(path+" file does not exist", m_parameterComponent);
+//            } else if (f.isDirectory() ) {
+//                return new ParameterError(path+" is a directory", m_parameterComponent);
+//            } else if (! f.canRead() ) {
+//                return new ParameterError(path+" is not readable", m_parameterComponent);
+//            }
 
         }
         

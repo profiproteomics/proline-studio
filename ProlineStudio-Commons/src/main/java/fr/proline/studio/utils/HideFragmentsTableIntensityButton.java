@@ -47,7 +47,7 @@ public class HideFragmentsTableIntensityButton extends JButton implements Action
 
         if (columns != null) {
             if (columns.size() > 0) {
-                for (int i = columns.size() - 1; i > 0; i--) { // use all columns but check for an identifier in the title
+                for (int i = columns.size() - 1; i >= 0; i--) { // use all columns but check for an identifier in the title
                     TableColumn currentColumn = columns.get(i);
                     TableColumnExt tce = m_table.getColumnExt(currentColumn.getIdentifier());
                     if (tce.getTitle().contains(intensityStringIdentifier)) {

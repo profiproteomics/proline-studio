@@ -200,7 +200,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             
         } 
         
-        private FloatRenderer m_deltaMozRenderer = null;
+        //private FloatRenderer m_deltaMozRenderer = null;
         
         /** 
          * Called whenever the value of the selection changes.
@@ -214,7 +214,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
 
             
             m_dataBox.propagateDataChanged(DPeptideInstance.class);
-
+            m_dataBox.propagateDataChanged(DPeptideMatch.class);
         }
         
  

@@ -69,6 +69,8 @@ import org.slf4j.Logger;
  */
 public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxPanelInterface, ImageExporterInterface {
     
+    public static final String SERIES_NAME = "spectrumData";
+    
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private static final long serialVersionUID = 1L;
     private AbstractDataBox m_dataBox;
@@ -84,6 +86,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     private javax.swing.JPanel m_spectrumPanel;
     private JButton m_generateMatchButton;
     
+    private RsetPeptideSpectrumAnnotations m_spectrumAnnotations = null;
+    
     @Override // declared in ProlineStudioCommons ImageExporterInterface
     public void generateSvgImage(String file) {
         writeToSVG(file);
@@ -98,7 +102,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     public String getSupportedFormats() {
         return "png,svg";
     }
-    private RsetPeptideSpectrumAnnotations spectrumAnnotations = null;
+   
 
     /**
      * Creates new form RsetPeptideSpectrumPanel
@@ -115,13 +119,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
         XYPlot plot = (XYPlot) m_chart.getPlot();
         plot.getRangeAxis().setUpperMargin(0.2);
-        
-        float maxXvalue = 0;
-        maxXvalue = (float) m_chart.getXYPlot().getDomainAxis().getUpperBound();
-        
-        //m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(0, maxXvalue * 1.60));
-        
-        
+
         plot.setBackgroundPaint(Color.white);
         
         XYStickRenderer renderer = new XYStickRenderer();
@@ -169,7 +167,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
     }
     
-    public final JToolBar initToolbar() {
+    private JToolBar initToolbar() {
         
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
@@ -202,13 +200,15 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             return;
         }
         m_previousPeptideMatch = peptideMatch;
+        
         m_chart.setNotify(false);
         constructSpectrumChart(peptideMatch);
-        spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
-     // set default auto bounds in case there is no annotations (which sets new autobounds)
+        m_spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
+        
+        // set default auto bounds in case there is no annotations (which sets new autobounds)
         m_chart.getXYPlot().getRangeAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getRangeAxis().getLowerBound(),m_chart.getXYPlot().getRangeAxis().getUpperBound()));
         m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getDomainAxis().getLowerBound(),m_chart.getXYPlot().getDomainAxis().getUpperBound()));
-        spectrumAnnotations.addAnnotations();
+        m_spectrumAnnotations.addAnnotations();
         m_chart.setNotify(true);
     }
     
@@ -217,7 +217,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         try {
             ChartUtilities.saveChartAsPNG(m_pngFile, m_chart, m_spectrumPanel.getWidth(), m_spectrumPanel.getHeight());
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToPNG", e);
         }
     }
     
@@ -237,7 +237,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         try {
             my_svg_generator.stream(fileName);
         } catch (SVGGraphics2DIOException e) {
-            e.printStackTrace();
+            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToSVG_batik", e);
         }
         
     }
@@ -270,54 +270,33 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     }
     
     private void constructSpectrumChart(DPeptideMatch pm) {
-        
-        
-        final String SERIES_NAME = "spectrumData";
+
+        // clear all data
+        m_dataSet.removeSeries(SERIES_NAME);
+        if (m_spectrumAnnotations != null) {
+            m_spectrumAnnotations.removeAnnotations();
+        }
+ 
         if (pm == null) {
-            m_dataSet.removeSeries(SERIES_NAME);
-            if (spectrumAnnotations != null) {
-                spectrumAnnotations.removeAnnotations();
-            }
-            
-            return;
-        }
-        
-        DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
-        if (msQuery == null) {
-            m_dataSet.removeSeries(SERIES_NAME);
-            if (spectrumAnnotations != null) {
-                spectrumAnnotations.removeAnnotations();
-            }
-            
-            
-            return;
-        }
-        
-        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
-        if (spectrum == null) {
-            
-            m_dataSet.removeSeries(SERIES_NAME);
-            if (spectrumAnnotations != null) {
-                spectrumAnnotations.removeAnnotations();
-            }
-            
             return;
         }
         
         Peptide p = pm.getPeptide();
         if (p == null) {
-            m_dataSet.removeSeries(SERIES_NAME);
-            if (spectrumAnnotations != null) {
-                spectrumAnnotations.removeAnnotations();
-            }
-            
+            return;
+        }
+        
+        DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
+        if (msQuery == null) {
+            return;
+        }
+        
+        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
+        if (spectrum == null) {
             return;
         }
 
-        // AW: reset annotations in case none are to be shown.(for whatever reasons...)
-        if (spectrumAnnotations != null) {
-            spectrumAnnotations.removeAnnotations();
-        }
+
         
         byte[] intensityByteArray = spectrum.getIntensityList();
         byte[] massByteArray = spectrum.getMozList();
@@ -325,7 +304,6 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
         if ((intensityByteArray == null) || (massByteArray == null)) {
             // should not happen
-            m_dataSet.removeSeries(SERIES_NAME);
             return;
         }
         
@@ -363,7 +341,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
 
         // Set title
-        String title = "Query " + pm.getMsQuery().getInitialId() + " - " + pm.getPeptide().getSequence();
+        String title = "Query " + msQuery.getInitialId() + " - " + p.getSequence();
         m_chart.setTitle(title);
 
 
@@ -415,12 +393,12 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
                         m_spectrumMinY = newMinY;
                         m_spectrumMaxY = newMaxY;
                         
-                        spectrumAnnotations.removeAnnotations();
+                        m_spectrumAnnotations.removeAnnotations();
                         plot.getDomainAxis().setLowerBound(newMinX);
                         plot.getDomainAxis().setUpperBound(newMaxX);
                         plot.getRangeAxis().setLowerBound(newMinY);
                         plot.getRangeAxis().setUpperBound(newMaxY);
-                        spectrumAnnotations.addAnnotations();
+                        m_spectrumAnnotations.addAnnotations();
 
                         //----
                         redrawInProgress = false;
@@ -432,6 +410,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
         /// ----
     }
+
     
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
@@ -466,7 +445,6 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
                 org.jfree.ui.RectangleEdge xAxisLocation = plot.getDomainAxisEdge();
                 org.jfree.ui.RectangleEdge yAxisLocation = plot.getRangeAxisEdge();
                 double transX = domainAxis.valueToJava2D(x, dataArea, xAxisLocation);
-                double transOX = domainAxis.valueToJava2D(0, dataArea, xAxisLocation);
                 double transY = rangeAxis.valueToJava2D(y, dataArea, yAxisLocation);
                 double transOY = rangeAxis.valueToJava2D(0, dataArea, yAxisLocation);
                 g2.setPaint(getItemPaint(series, item));

@@ -13,22 +13,16 @@ import fr.proline.studio.rsmexplorer.gui.RsetPeptideFragmentationTablePanel;
 public class DataBoxRsetPeptideFragmentationTable extends AbstractDataBox {
 
 
-	 public DataBoxRsetPeptideFragmentationTable() {
-			// Name of this databox
-			m_name = "Fragmentation Table";
-			m_description = "Fragmentation table of a Peptide";
+    public DataBoxRsetPeptideFragmentationTable() {
+        // Name of this databox
+        m_name = "Fragmentation Table";
+        m_description = "Fragmentation table of a Peptide";
 
-	        // Register in parameters
-	        GroupParameter inParameter = new GroupParameter();
-	        inParameter.addParameter(DPeptideMatch.class, false);
-	        registerInParameter(inParameter);
+        // Register in parameters
+        GroupParameter inParameter = new GroupParameter();
+        inParameter.addParameter(DPeptideMatch.class, false);
+        registerInParameter(inParameter);
 
-	        inParameter = new GroupParameter();
-	        inParameter.addParameter(DPeptideInstance.class, false);
-	        registerInParameter(inParameter);
-
-	        // Register possible out parameters
-	        // none
 
     }
     @Override

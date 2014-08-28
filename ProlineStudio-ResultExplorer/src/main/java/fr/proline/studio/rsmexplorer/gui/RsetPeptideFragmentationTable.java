@@ -6,7 +6,6 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.text.DecimalFormat;
@@ -18,9 +17,6 @@ import javax.persistence.EntityManager;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.RowSorter;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +29,13 @@ import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.gui.HourglassPanel;
-import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.rsmexplorer.spectrum.FragmentMatch_AW;
+import fr.proline.studio.rsmexplorer.spectrum.FragmentationJsonProperties;
+import fr.proline.studio.rsmexplorer.spectrum.TheoreticalFragmentSeries_AW;
 import fr.proline.studio.utils.DecoratedTable;
+import fr.proline.studio.utils.DecoratedTableModel;
 import fr.proline.studio.utils.HideFragmentsTableIntensityButton;
-import fr.proline.studio.utils.LazyTableModel;
 
 import javax.swing.*;
 
@@ -49,130 +44,89 @@ public class RsetPeptideFragmentationTable extends JPanel {
     /**
      * Created by AW
      */
-    private static final long serialVersionUID = 1L;
-    
-    private JScrollPane jScrollFragPane = new JScrollPane();
+
     private DPeptideMatch m_peptideMatch;
     private HideFragmentsTableIntensityButton m_hideFragIntensityButton = null;
-    private DecoratedTable m_jTable1;
+    private DecoratedTable m_table;
     private FragTableCustomRenderer m_matrixRenderer;
 
     public RsetPeptideFragmentationTable() {
-        initComponent(new FragmentMatch_AW[0], new TheoreticalFragmentSeries_AW[0]);
+        initComponent();
     }
 
-    private void initComponent(FragmentMatch_AW[] fragMa, TheoreticalFragmentSeries_AW[] fragSer) {
+    private void initComponent() {
         setLayout(new BorderLayout());
-        m_jTable1 = new DecoratedTable();
-        JPanel internalPanel = new JPanel();
+        
+        m_table = new DecoratedTable();
+        
+        JToolBar toolbar = createToolbar();
+        JPanel internalPanel = createInternalPanel();
+        
+        add(internalPanel, BorderLayout.CENTER);
+        add(toolbar, BorderLayout.WEST);
 
+    }
+    
+    private JToolBar createToolbar() {
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-        ExportButton m_exportButton = new ExportButton(null, "Fragmentation Table", m_jTable1);
+        ExportButton m_exportButton = new ExportButton(null, "Fragmentation Table", m_table);
         toolbar.add(m_exportButton);
 
-        m_hideFragIntensityButton = new HideFragmentsTableIntensityButton(m_jTable1, false);
+        m_hideFragIntensityButton = new HideFragmentsTableIntensityButton(m_table, false);
         toolbar.add(m_hideFragIntensityButton);
-
-
-        FragmentationTableModel fragmentationTableModel = new FragmentationTableModel(m_jTable1);
-        fragmentationTableModel.setData(fragMa, fragSer, "");
-
-        m_matrixRenderer = new FragTableCustomRenderer();
-        m_jTable1.setDefaultRenderer(Double.class, m_matrixRenderer);
-        m_jTable1.setSortable(false);
-        m_jTable1.setModel(fragmentationTableModel);
-        m_jTable1.setVisible(true);
-        m_hideFragIntensityButton.updateFragmentsIntensityVisibility();
-
-        m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
-
-        jScrollFragPane = new JScrollPane(m_jTable1);
-        jScrollFragPane.setViewportView(m_jTable1);
-
+        return toolbar;
+    }
+    
+    private JPanel createInternalPanel() {
+        JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        
+        FragmentationTableModel fragmentationTableModel = new FragmentationTableModel(m_table);
+        //fragmentationTableModel.setData(new FragmentMatch_AW[0], new TheoreticalFragmentSeries_AW[0], "");
 
-        JScrollPane m_scrollPane = new JScrollPane();
+        m_matrixRenderer = new FragTableCustomRenderer();
+        m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
+        
+        m_table.setDefaultRenderer(Double.class, m_matrixRenderer);
+        m_table.setSortable(false);
+        m_table.setModel(fragmentationTableModel);
+        m_hideFragIntensityButton.updateFragmentsIntensityVisibility();
 
 
-        m_scrollPane.setViewportView(m_jTable1);
-        m_jTable1.setFillsViewportHeight(true);
-
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(m_table);
+        m_table.setFillsViewportHeight(true);
 
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        c.gridwidth = 3;
-        internalPanel.add(m_scrollPane, c);
-
-        add(internalPanel, BorderLayout.CENTER);
-        add(toolbar, BorderLayout.WEST);
-
+        internalPanel.add(scrollPane, c);
+        
+        return internalPanel;
     }
 
 
-    private class JsonProperties {
 
-        public int ms_query_initial_id;
-        public int peptide_match_rank;
-        public TheoreticalFragmentSeries_AW[] frag_table;
-        public FragmentMatch_AW[] frag_matches;
-    }
 
-    protected class TheoreticalFragmentSeries_AW {
-
-        public String frag_series;
-        public double[] masses;
-        public int charge = 1; // default to 1 because it is used to multiply
-        // the m/z to obtain real mass values for aa
-        // calculation
-
-        public void computeCharge() {
-            this.charge = 0;
-            if (frag_series != null) {
-                for (int i = 0; i < frag_series.length(); i++) {
-                    if (frag_series.charAt(i) == '+') {
-                        this.charge++;
-                    }
-                }
-            }
-            if (this.charge == 0) {
-                this.charge = 1;
-            }
-
-        }
-    }
-
-    protected class FragmentMatch_AW {
-
-        public String label;
-        public double moz;
-        public double calculated_moz;
-        public double intensity;
-        public int charge = 0; // the charge taken from the serie (++ means
-        // double charged)
-
-        public void computeChargeFromLabel() {
-            this.charge = 0;
-            if (label != null) {
-                for (int i = 0; i < label.length(); i++) {
-                    if (label.charAt(i) == '+') {
-                        this.charge++;
-                    }
-                }
-            }
-
-        }
-    }
 
     public void updateFragmentationTable(DPeptideMatch pepMatch, AbstractDataBox dataBox) {
 
         m_peptideMatch = pepMatch;
+
+        if (m_peptideMatch == null) {
+            FragmentationTableModel fragmentationTableModel = ((FragmentationTableModel)m_table.getModel());
+            fragmentationTableModel.reinitData();
+            m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
+            return;
+        }
+        
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(dataBox.getProjectId()).getEntityManagerFactory().createEntityManager();
 
         try {
@@ -189,7 +143,9 @@ public class RsetPeptideFragmentationTable extends JPanel {
 
 
             if (objectTreeId == null) {
-                updateTableData(new FragmentMatch_AW[0], new TheoreticalFragmentSeries_AW[0], "");
+                FragmentationTableModel fragmentationTableModel = ((FragmentationTableModel)m_table.getModel());
+                fragmentationTableModel.reinitData();
+                m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
                 LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("objectr tree id is null, no framgentation table to display for pm_id=" + m_peptideMatch.getId());
             } else {
 
@@ -201,7 +157,7 @@ public class RsetPeptideFragmentationTable extends JPanel {
                 Gson gson = new Gson();
 
                 JsonObject array = parser.parse(jsonProperties).getAsJsonObject();
-                JsonProperties jsonProp = gson.fromJson(array, JsonProperties.class);
+                FragmentationJsonProperties jsonProp = gson.fromJson(array, FragmentationJsonProperties.class);
 
                 // compute the charge for each fragment match from the label
                 for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
@@ -226,106 +182,48 @@ public class RsetPeptideFragmentationTable extends JPanel {
     }
 
     private void updateTableData(FragmentMatch_AW[] fragMa, TheoreticalFragmentSeries_AW[] fragSer, String peptideSequence) {
-        FragmentationTableModel fragmentationTableModel = new FragmentationTableModel(m_jTable1);
+        
+        FragmentationTableModel fragmentationTableModel = ((FragmentationTableModel)m_table.getModel());
         fragmentationTableModel.setData(fragMa, fragSer, peptideSequence);
         m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
-        m_jTable1.setModel(fragmentationTableModel);
-//        ((FragmentationTableModel)m_jTable1.getModel()).setData(fragMa, fragSer, peptideSequence);                
-//        m_matrixRenderer.setSelectMatrix(((FragmentationTableModel)m_jTable1.getModel()).getMatrix());
-//        ((FragmentationTableModel)m_jTable1.getModel()).fireTableStructureChanged();
         m_hideFragIntensityButton.updateFragmentsIntensityVisibility();
                 
     } 
-    
-    public static double getMassFromAminoAcid(char aa) {
-        HashMap<Character, Double> aaHashMap = new HashMap<>();
 
-        aaHashMap.put('A', (double) 71.03711);
-        aaHashMap.put('C', (double) 103.00919);
-        aaHashMap.put('D', (double) 115.02694);
-        aaHashMap.put('E', (double) 129.04259);
-        aaHashMap.put('F', (double) 147.06841);
-        aaHashMap.put('G', (double) 57.02146);
-        aaHashMap.put('H', (double) 137.05891);
-        aaHashMap.put('I', (double) 113.08406);
-        aaHashMap.put('K', (double) 128.09496);
-        aaHashMap.put('L', (double) 113.08406);
-        aaHashMap.put('M', (double) 131.04049);
-        aaHashMap.put('N', (double) 114.04293);
-        aaHashMap.put('P', (double) 97.05276);
-        aaHashMap.put('Q', (double) 128.05858);
-        aaHashMap.put('R', (double) 156.10111);
-        aaHashMap.put('S', (double) 87.03203);
-        aaHashMap.put('T', (double) 101.04768);
-        aaHashMap.put('V', (double) 99.06841);
-        aaHashMap.put('W', (double) 186.07931);
-        aaHashMap.put('Y', (double) 163.06333);
 
-        return aaHashMap.get(aa);
+    public static class FragmentationTableModel extends DecoratedTableModel {
 
-    }
 
-    // the getAminoAcidName is not used but could be in the future...
-    public String getAminoAcidName(double deltaMass, double tolerance) {
-
-        // scan the spectrum to find potential aminoacids
-        HashMap<Double, Character> aaHashMap = new HashMap<>();
-
-        aaHashMap.put((double) 71.03711, 'A');
-        aaHashMap.put((double) 103.00919, 'C');
-        aaHashMap.put((double) 115.02694, 'D');
-        aaHashMap.put((double) 129.04259, 'E');
-        aaHashMap.put((double) 147.06841, 'F');
-        aaHashMap.put((double) 57.02146, 'G');
-        aaHashMap.put((double) 137.05891, 'H');
-        aaHashMap.put((double) 113.08406, 'I');
-        aaHashMap.put((double) 128.09496, 'K');
-        aaHashMap.put((double) 113.08406, 'L');
-        aaHashMap.put((double) 131.04049, 'M');
-        aaHashMap.put((double) 114.04293, 'N');
-        aaHashMap.put((double) 97.05276, 'P');
-        aaHashMap.put((double) 128.05858, 'Q');
-        aaHashMap.put((double) 156.10111, 'R');
-        aaHashMap.put((double) 87.03203, 'S');
-        aaHashMap.put((double) 101.04768, 'T');
-        aaHashMap.put((double) 99.06841, 'V');
-        aaHashMap.put((double) 186.07931, 'W');
-        aaHashMap.put((double) 163.06333, 'Y');
-
-        double toleranceCalc = tolerance;
-        for (double aaMass : aaHashMap.keySet()) {
-            if ((aaMass - toleranceCalc < deltaMass)
-                    && (aaMass + toleranceCalc > deltaMass)) {
-                return (aaHashMap.get(aaMass).toString());
-            }
-        }
-
-        NumberFormat formatter = new DecimalFormat("#0.000");
-
-        return ("" + formatter.format(deltaMass)); // return ("*");
-
-    }
-
-    public static class FragmentationTableModel extends LazyTableModel implements ProgressInterface {
-
-        /**
-         *
-         */
-        private static final long serialVersionUID = 1L;
-        private TheoreticalFragmentSeries_AW[] m_fragSer;
-        private FragmentMatch_AW[] m_fragMa;
-        private String m_peptideSequence;
-        private int m_sizeMaxSeries;
-        private String[][] m_matrix;
-        private double[][] m_matrixIntensity;
-        private String[] m_columnNames;
+        private TheoreticalFragmentSeries_AW[] m_fragSer = null;
+        private String m_peptideSequence = null;
+        private int m_sizeMaxSeries = 0;
+        private String[][] m_matrix = null;
+        private double[][] m_matrixIntensity = null;
+        private String[] m_columnNames = null;
 
         public FragmentationTableModel(DecoratedTable table) { // constructor
-            super(null);
         }
 
+        public void reinitData() {
+            reinitDataImpl();
+            fireTableStructureChanged();
+                    
+        }
+        
+        private void reinitDataImpl() {
+            m_fragSer = null;
+            m_peptideSequence = null;
+            m_sizeMaxSeries = 0;
+            m_matrix = null;
+            m_matrixIntensity = null;
+            m_columnNames = null;
+        }
+        
+        
         public void setData(FragmentMatch_AW[] fragMa, TheoreticalFragmentSeries_AW[] fragSer, String peptideSequence) {
-            m_fragMa = fragMa;
+            
+            reinitDataImpl();
+            
             m_fragSer = fragSer;
             m_peptideSequence = peptideSequence;
 
@@ -438,6 +336,7 @@ public class RsetPeptideFragmentationTable extends JPanel {
                 }
             }
 
+            fireTableStructureChanged();
         }
 
         public String[][] getMatrix() {
@@ -461,6 +360,9 @@ public class RsetPeptideFragmentationTable extends JPanel {
 
         @Override
         public int getColumnCount() {
+            if (m_columnNames == null) {
+                return 0;
+            }
             return m_columnNames.length;
         }
 
@@ -524,37 +426,6 @@ public class RsetPeptideFragmentationTable extends JPanel {
 
         }
 
-        @Override
-        public boolean isLoaded() {
-            return m_table.isLoaded();
-        }
-
-        @Override
-        public int getLoadingPercentage() {
-            return m_table.getLoadingPercentage();
-        }
-
-        @Override
-        public void initFilters() {
-            // TODO Auto-generated method stub
-        }
-
-        @Override
-        public void filter() {
-            // TODO Auto-generated method stub
-        }
-
-        @Override
-        public boolean filter(int row, int col) {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public int getSubTaskId(int col) {
-            // TODO Auto-generated method stub
-            return 0;
-        }
     }
 
     public static class FragTableCustomRenderer extends org.jdesktop.swingx.renderer.DefaultTableRenderer {
@@ -602,8 +473,7 @@ public class RsetPeptideFragmentationTable extends JPanel {
                     // if true
                     // in
                     // selectMatrix
-                    foregroundColor = (isSelected) ? EXTRA_LIGHT_BLUE_COLOR
-                            : LIGHT_BLUE_COLOR;
+                    foregroundColor = (isSelected) ? EXTRA_LIGHT_BLUE_COLOR : LIGHT_BLUE_COLOR;
                 } else if (m_selectMatrix[row][column].contains("XYZ")) {
                     foregroundColor = (isSelected) ? EXTRA_LIGHT_RED_COLOR
                             : LIGHT_RED_COLOR;

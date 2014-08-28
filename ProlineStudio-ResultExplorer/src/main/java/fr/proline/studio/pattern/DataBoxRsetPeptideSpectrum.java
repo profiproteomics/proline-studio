@@ -2,7 +2,9 @@ package fr.proline.studio.pattern;
 
 
 
-import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.core.orm.msi.Spectrum;
+import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -27,12 +29,11 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         inParameter.addParameter(DPeptideMatch.class, false);
         registerInParameter(inParameter);
 
-        inParameter = new GroupParameter();
-        inParameter.addParameter(DPeptideInstance.class, false);
-        registerInParameter(inParameter);
-
         // Register possible out parameters
-        // none
+        GroupParameter outParameter = new GroupParameter();
+        outParameter.addParameter(DMsQuery.class, false);
+        outParameter.addParameter(Spectrum.class, false);
+        registerOutParameter(outParameter);
     }
 
     @Override
@@ -52,8 +53,8 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             return;
         }
 
-        boolean needToLoadData = ((!peptideMatch.isMsQuerySet())
-                || (!peptideMatch.getMsQuery().isSpectrumSet()));
+        boolean needToLoadData = ((!peptideMatch.isMsQuerySet()) ||
+                                  (!peptideMatch.getMsQuery().isSpectrumSet()));
 
         if (needToLoadData) {
 
@@ -99,5 +100,33 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         }
     }
     private Long m_previousTaskId = null;
+    
+    @Override
+    public Object getData(boolean getArray, Class parameterType) {
+        if (parameterType!= null ) {
+            if (parameterType.equals(MsQuery.class)) {
+                DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
+                if (peptideMatch != null) {
+                    DMsQuery msQuery = peptideMatch.getMsQuery();
+                    if (msQuery != null) {
+                        return msQuery;
+                    }
+                }
+            }
+            if (parameterType.equals(Spectrum.class)) {
+                DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
+                if (peptideMatch != null) {
+                    DMsQuery msQuery = peptideMatch.getMsQuery();
+                    if (msQuery != null) {
+                        Spectrum spectrum = msQuery.getSpectrum();
+                        if (spectrum != null) {
+                            return spectrum;
+                        }
+                    }
+                }
+            }
+        }
+        return super.getData(getArray, parameterType);
+    }
 
 }

@@ -345,189 +345,193 @@ public class RsetPeptideSpectrumAnnotations {
 
             String surroundingCharacters = "";
 
-            for (int i = 0; i < sizeABCserie; i++) { // loop through the series points
-
-
-                // place separators marks------
-                if (abcPrev != 0 && i > 0) {
-                    float dash[] = {10.0f};
-                    BasicStroke stk = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
-                    XYLineAnnotation line = new XYLineAnnotation(abcPrev, maxY - (maxY - minY) * 0.14,
-                            abcPrev, maxY - (maxY - minY) * 0.16, stk, abc_serie_color);
-                    plot.addAnnotation(line);
-                }
-
-                // draw the outlined AA : B series
-                if ((fragTable[1][i] != 0) || ((i == sizeABCserie - 1) && abcPrevFound)) // if some data
-                {
-                    if (i == (sizeABCserie - 1)) { // if last element to be highlighted
-                        abcPrevFound = true;
-                        fragTable[1][i] = abcPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
-                    }
-                    String aa = "" + peptideSequence.charAt(i);
-                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTable[1][i]) / 2, maxY - (maxY - minY) * 0.15);
-                    if (abcPrevFound || i == 0 || i == (sizeABCserie - 1)) {
-                        // 2 consecutives fragments matching, or first element or last element, then highlight the AA
-                        xyta.setPaint(Color.white);
-                        xyta.setBackgroundPaint(abc_serie_color);
-
-                    } else {
-                        xyta.setPaint(abc_serie_color);
-                        xyta.setBackgroundPaint(Color.white);
-                    }
-                    xyta.setFont(new Font(null, Font.BOLD, 11));
-                    plot.addAnnotation(xyta);
-                    abcPrev = fragTableTheo[1][i]; // 
-                    abcPrevFound = true;
-
-                    if (!(i == sizeABCserie - 1)) {
-                        // do not draw triangle and number if last element
-                        // draw the triangle above the b number peak &
-                        // draw the b number over the peak
-                        final XYPointerAnnotation pointer = new XYPointerAnnotation(abcSerieName + (i + 1),
-                                fragTableTheo[1][i],
-                                fragTable[0][i] + (maxY - minY) * 0.055,
-                                6.0 * Math.PI / 4.0);
-                        pointer.setBaseRadius(5.0);
-                        pointer.setTipRadius(0.0);
-                        pointer.setArrowWidth(2);
-                        pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
-                        pointer.setArrowPaint(abc_serie_color);;
-                        pointer.setPaint(abc_serie_color);
-                        pointer.setTextAnchor(TextAnchor.BOTTOM_CENTER);
-                        pointer.setToolTipText("<html>"
-                                + "m/z: " + fragTable[1][i] + "<br>"
-                                + "intensity: " + fragTable[0][i]
-                                + "</html>");
-                        plot.addAnnotation(pointer);
-
-                        // dashed vertical bar over the b number
-                        float yAboveBar = (float) ((maxY - minY) * 0.091);
-                        float dash[] = {5.0f};
-                        // draw only dashline if the y or b tag is not above the y/b line
-                        if (fragTable[0][i] + yAboveBar < fragTableTheo[0][i]) {
-                            BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
-                            XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[1][i], fragTable[0][i] + yAboveBar, fragTableTheo[1][i],
-                                    fragTableTheo[0][i], stk, abc_serie_color);
-                            plot.addAnnotation(line);
-                        }
-                    }
-                } else // draw the regular expected (but not found) aa
-                {
-                    abcPrevFound = false;
-                    String aa = "" + peptideSequence.charAt(i);
-                    if (i == sizeABCserie - 1) { // last element not highlighted
-                        fragTableTheo[1][i] = abcPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
-                    }
-                    if (i == 0) {
-                        abcPrev = fragTableTheo[1][0] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
-                    }
-                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTableTheo[1][i]) / 2, maxY - (maxY - minY) * 0.15);
-                    xyta.setPaint(abc_serie_color);
-                    xyta.setFont(new Font(null, Font.BOLD, 11));
-                    xyta.setBackgroundPaint(Color.white);
-                    plot.addAnnotation(xyta);
-
-                    abcPrev = fragTableTheo[1][i];
-                    abcPrevFound = false;
-                }
+            if(!abcSerieName.equals("")) {
+	            for (int i = 0; i < sizeABCserie; i++) { // loop through the series points
+	
+	
+	                // place separators marks------
+	                if (abcPrev != 0 && i > 0) {
+	                    float dash[] = {10.0f};
+	                    BasicStroke stk = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+	                    XYLineAnnotation line = new XYLineAnnotation(abcPrev, maxY - (maxY - minY) * 0.14,
+	                            abcPrev, maxY - (maxY - minY) * 0.16, stk, abc_serie_color);
+	                    plot.addAnnotation(line);
+	                }
+	
+	                // draw the outlined AA : B series
+	                if ((fragTable[1][i] != 0) || ((i == sizeABCserie - 1) && abcPrevFound)) // if some data
+	                {
+	                    if (i == (sizeABCserie - 1)) { // if last element to be highlighted
+	                        abcPrevFound = true;
+	                        fragTable[1][i] = abcPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+	                    }
+	                    String aa = "" + peptideSequence.charAt(i);
+	                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTable[1][i]) / 2, maxY - (maxY - minY) * 0.15);
+	                    if (abcPrevFound || i == 0 || i == (sizeABCserie - 1)) {
+	                        // 2 consecutives fragments matching, or first element or last element, then highlight the AA
+	                        xyta.setPaint(Color.white);
+	                        xyta.setBackgroundPaint(abc_serie_color);
+	
+	                    } else {
+	                        xyta.setPaint(abc_serie_color);
+	                        xyta.setBackgroundPaint(Color.white);
+	                    }
+	                    xyta.setFont(new Font(null, Font.BOLD, 11));
+	                    plot.addAnnotation(xyta);
+	                    abcPrev = fragTableTheo[1][i]; // 
+	                    abcPrevFound = true;
+	
+	                    if (!(i == sizeABCserie - 1)) {
+	                        // do not draw triangle and number if last element
+	                        // draw the triangle above the b number peak &
+	                        // draw the b number over the peak
+	                        final XYPointerAnnotation pointer = new XYPointerAnnotation(abcSerieName + (i + 1),
+	                                fragTableTheo[1][i],
+	                                fragTable[0][i] + (maxY - minY) * 0.055,
+	                                6.0 * Math.PI / 4.0);
+	                        pointer.setBaseRadius(5.0);
+	                        pointer.setTipRadius(0.0);
+	                        pointer.setArrowWidth(2);
+	                        pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
+	                        pointer.setArrowPaint(abc_serie_color);;
+	                        pointer.setPaint(abc_serie_color);
+	                        pointer.setTextAnchor(TextAnchor.BOTTOM_CENTER);
+	                        pointer.setToolTipText("<html>"
+	                                + "m/z: " + fragTable[1][i] + "<br>"
+	                                + "intensity: " + fragTable[0][i]
+	                                + "</html>");
+	                        plot.addAnnotation(pointer);
+	
+	                        // dashed vertical bar over the b number
+	                        float yAboveBar = (float) ((maxY - minY) * 0.091);
+	                        float dash[] = {5.0f};
+	                        // draw only dashline if the y or b tag is not above the y/b line
+	                        if (fragTable[0][i] + yAboveBar < fragTableTheo[0][i]) {
+	                            BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+	                            XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[1][i], fragTable[0][i] + yAboveBar, fragTableTheo[1][i],
+	                                    fragTableTheo[0][i], stk, abc_serie_color);
+	                            plot.addAnnotation(line);
+	                        }
+	                    }
+	                } else // draw the regular expected (but not found) aa
+	                {
+	                    abcPrevFound = false;
+	                    String aa = "" + peptideSequence.charAt(i);
+	                    if (i == sizeABCserie - 1) { // last element not highlighted
+	                        fragTableTheo[1][i] = abcPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+	                    }
+	                    if (i == 0) {
+	                        abcPrev = fragTableTheo[1][0] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+	                    }
+	                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTableTheo[1][i]) / 2, maxY - (maxY - minY) * 0.15);
+	                    xyta.setPaint(abc_serie_color);
+	                    xyta.setFont(new Font(null, Font.BOLD, 11));
+	                    xyta.setBackgroundPaint(Color.white);
+	                    plot.addAnnotation(xyta);
+	
+	                    abcPrev = fragTableTheo[1][i];
+	                    abcPrevFound = false;
+	                }
+	            }
             }
 
             //--------------------- xyz
             double xyzPrev = 0;
             //if(fragTable[6][0] != 0))	
-            for (int i = sizeXYZserie - 1; i >= 0; i--) { // loop through the series points
-
-
-                // place separators marks------
-                if (xyzPrev != 0) {
-                    float dash[] = {10.0f};
-                    BasicStroke stk = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
-                    XYLineAnnotation line = new XYLineAnnotation(xyzPrev, maxY - (maxY - minY) * 0.24,
-                            xyzPrev, maxY - (maxY - minY) * 0.26, stk, xyz_serie_color);
-                    plot.addAnnotation(line);
-                }
-
-                // draw the outlined AA : Y series
-                if ((fragTable[6][i] != 0) || ((i == 0) && xyzPrevFound)) // if some data
-                {
-                    if (i == 0) { // if last element to be highlighted
-                        xyzPrevFound = true;
-                        fragTable[6][i] = xyzPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
-                    }
-                    String aa = "" + peptideSequence.charAt(i);
-                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTable[6][i]) / 2, maxY - (maxY - minY) * 0.25);
-                    if (xyzPrevFound
-                            || i == sizeXYZserie - 1
-                            || i == 0) {// 2 consecutives fragments matching,
-                        // or first element or last element, then highlight the AA
-                        xyta.setPaint(Color.white);
-                        xyta.setBackgroundPaint(xyz_serie_color);
-
-                    } else {
-                        xyta.setPaint(xyz_serie_color);
-                        xyta.setBackgroundPaint(Color.white);
-                    }
-                    xyta.setFont(new Font(null, Font.BOLD, 11));
-                    plot.addAnnotation(xyta);
-                    xyzPrev = fragTableTheo[6][i]; // 
-                    xyzPrevFound = true;
-
-                    if (!(i == 0)) { // do not draw triangle and number if last element
-                        // 	draw the b number over the peak &
-                        // draw the triangle above the b number peak
-                        xyta = new XYTextAnnotation("" /*
-                                 * "\u25BE"
-                                 */, fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.01);
-                        xyta.setPaint(xyz_serie_color);
-                        plot.addAnnotation(xyta);
-                        final XYPointerAnnotation pointer = new XYPointerAnnotation(xyzSerieName + (sizeXYZserie - i),
-                                fragTableTheo[6][i],
-                                fragTable[5][i] + (maxY - minY) * 0.01,
-                                6.0 * Math.PI / 4.0);
-                        pointer.setBaseRadius(5.0);
-                        pointer.setTipRadius(0.0);
-                        pointer.setArrowWidth(2);
-                        pointer.setArrowPaint(xyz_serie_color);;
-                        pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
-                        pointer.setPaint(xyz_serie_color);
-                        pointer.setTextAnchor(TextAnchor.BOTTOM_CENTER);
-                        pointer.setToolTipText("<html>"
-                                + "m/z: " + fragTable[6][i] + "<br>"
-                                + "intensity: " + fragTable[5][i]
-                                + "</html>");
-                        plot.addAnnotation(pointer);
-
-
-                        // dashed vertical bar over the b number
-                        float yAboveBar = (float) ((maxY - minY) * 0.041);
-                        float dash[] = {5.0f};
-                        // draw only dashline if the y or b tag is not above the y/b line
-                        if (fragTable[5][i] + yAboveBar < fragTableTheo[5][i]) {
-                            BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
-                            XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[6][i], fragTable[5][i] + yAboveBar, fragTableTheo[6][i],
-                                    fragTableTheo[5][i], stk, xyz_serie_color);
-                            plot.addAnnotation(line);
-                        }
-                    }
-                } else // draw the regular expected (but not found) aa
-                {
-                    String aa = "" + peptideSequence.charAt(i);
-                    if (i == 0) { // first element not highlighted
-                        fragTableTheo[6][i] = xyzPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
-                    }
-                    if (i == sizeXYZserie - 1) {
-                        xyzPrev = fragTableTheo[6][i] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
-                    }
-                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTableTheo[6][i]) / 2, maxY - (maxY - minY) * 0.25);
-                    xyta.setPaint(xyz_serie_color);
-                    xyta.setFont(new Font(null, Font.BOLD, 11));
-                    xyta.setBackgroundPaint(Color.white);
-                    plot.addAnnotation(xyta);
-
-                    xyzPrev = fragTableTheo[6][i];
-                    xyzPrevFound = false;
-                }
+            if(!xyzSerieName.equals("")) {
+	            for (int i = sizeXYZserie - 1; i >= 0; i--) { // loop through the series points
+	
+	
+	                // place separators marks------
+	                if (xyzPrev != 0) {
+	                    float dash[] = {10.0f};
+	                    BasicStroke stk = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+	                    XYLineAnnotation line = new XYLineAnnotation(xyzPrev, maxY - (maxY - minY) * 0.24,
+	                            xyzPrev, maxY - (maxY - minY) * 0.26, stk, xyz_serie_color);
+	                    plot.addAnnotation(line);
+	                }
+	
+	                // draw the outlined AA : Y series
+	                if ((fragTable[6][i] != 0) || ((i == 0) && xyzPrevFound)) // if some data
+	                {
+	                    if (i == 0) { // if last element to be highlighted
+	                        xyzPrevFound = true;
+	                        fragTable[6][i] = xyzPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+	                    }
+	                    String aa = "" + peptideSequence.charAt(i);
+	                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTable[6][i]) / 2, maxY - (maxY - minY) * 0.25);
+	                    if (xyzPrevFound
+	                            || i == sizeXYZserie - 1
+	                            || i == 0) {// 2 consecutives fragments matching,
+	                        // or first element or last element, then highlight the AA
+	                        xyta.setPaint(Color.white);
+	                        xyta.setBackgroundPaint(xyz_serie_color);
+	
+	                    } else {
+	                        xyta.setPaint(xyz_serie_color);
+	                        xyta.setBackgroundPaint(Color.white);
+	                    }
+	                    xyta.setFont(new Font(null, Font.BOLD, 11));
+	                    plot.addAnnotation(xyta);
+	                    xyzPrev = fragTableTheo[6][i]; // 
+	                    xyzPrevFound = true;
+	
+	                    if (!(i == 0)) { // do not draw triangle and number if last element
+	                        // 	draw the b number over the peak &
+	                        // draw the triangle above the b number peak
+	                        xyta = new XYTextAnnotation("" /*
+	                                 * "\u25BE"
+	                                 */, fragTableTheo[6][i], fragTable[5][i] + (maxY - minY) * 0.01);
+	                        xyta.setPaint(xyz_serie_color);
+	                        plot.addAnnotation(xyta);
+	                        final XYPointerAnnotation pointer = new XYPointerAnnotation(xyzSerieName + (sizeXYZserie - i),
+	                                fragTableTheo[6][i],
+	                                fragTable[5][i] + (maxY - minY) * 0.01,
+	                                6.0 * Math.PI / 4.0);
+	                        pointer.setBaseRadius(5.0);
+	                        pointer.setTipRadius(0.0);
+	                        pointer.setArrowWidth(2);
+	                        pointer.setArrowPaint(xyz_serie_color);;
+	                        pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
+	                        pointer.setPaint(xyz_serie_color);
+	                        pointer.setTextAnchor(TextAnchor.BOTTOM_CENTER);
+	                        pointer.setToolTipText("<html>"
+	                                + "m/z: " + fragTable[6][i] + "<br>"
+	                                + "intensity: " + fragTable[5][i]
+	                                + "</html>");
+	                        plot.addAnnotation(pointer);
+	
+	
+	                        // dashed vertical bar over the b number
+	                        float yAboveBar = (float) ((maxY - minY) * 0.041);
+	                        float dash[] = {5.0f};
+	                        // draw only dashline if the y or b tag is not above the y/b line
+	                        if (fragTable[5][i] + yAboveBar < fragTableTheo[5][i]) {
+	                            BasicStroke stk = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+	                            XYLineAnnotation line = new XYLineAnnotation(fragTableTheo[6][i], fragTable[5][i] + yAboveBar, fragTableTheo[6][i],
+	                                    fragTableTheo[5][i], stk, xyz_serie_color);
+	                            plot.addAnnotation(line);
+	                        }
+	                    }
+	                } else // draw the regular expected (but not found) aa
+	                {
+	                    String aa = "" + peptideSequence.charAt(i);
+	                    if (i == 0) { // first element not highlighted
+	                        fragTableTheo[6][i] = xyzPrev + SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+	                    }
+	                    if (i == sizeXYZserie - 1) {
+	                        xyzPrev = fragTableTheo[6][i] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(i));
+	                    }
+	                    xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (xyzPrev + fragTableTheo[6][i]) / 2, maxY - (maxY - minY) * 0.25);
+	                    xyta.setPaint(xyz_serie_color);
+	                    xyta.setFont(new Font(null, Font.BOLD, 11));
+	                    xyta.setBackgroundPaint(Color.white);
+	                    plot.addAnnotation(xyta);
+	
+	                    xyzPrev = fragTableTheo[6][i];
+	                    xyzPrevFound = false;
+	                }
+	            }
             }
 
 

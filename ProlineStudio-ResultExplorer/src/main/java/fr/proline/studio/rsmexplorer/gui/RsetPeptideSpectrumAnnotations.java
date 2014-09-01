@@ -68,6 +68,8 @@ public class RsetPeptideSpectrumAnnotations {
         for (int i = 0; i < lsize; i++) {
             p.removeAnnotation(annotationsList.get(i));
         }
+        
+        p.clearRangeMarkers();
     }
 
 

@@ -67,7 +67,7 @@ public class FileParameter extends AbstractParameter {
                     if (result == JFileChooser.APPROVE_OPTION) {
 
                         File file = fchooser.getSelectedFile();
-                        textField.setText(file.getAbsolutePath());
+                        textField.setText(file.getPath());
                     }
                 }
             });

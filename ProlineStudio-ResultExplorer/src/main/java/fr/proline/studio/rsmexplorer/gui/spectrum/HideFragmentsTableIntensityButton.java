@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.spectrum;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import fr.proline.studio.rsmexplorer.gui.spectrum.RsetPeptideFragmentationTable;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.JButton;
 

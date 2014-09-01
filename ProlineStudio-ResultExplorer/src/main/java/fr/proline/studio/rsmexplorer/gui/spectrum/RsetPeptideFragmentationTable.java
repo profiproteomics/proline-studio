@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.gui;
+package fr.proline.studio.rsmexplorer.gui.spectrum;
 
 
 import java.awt.Color;
@@ -16,9 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
-import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData;
-import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData.FragmentMatch_AW;
-import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries_AW;
+import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.FragmentMatch_AW;
+import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries_AW;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.DecoratedTableModel;
 import java.util.List;

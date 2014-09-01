@@ -1,6 +1,5 @@
-package fr.proline.studio.rsmexplorer.gui;
+package fr.proline.studio.rsmexplorer.gui.spectrum;
 
-import fr.proline.studio.rsmexplorer.spectrum.SpectrumFragmentationUtil;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -28,7 +27,6 @@ import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.rsmexplorer.spectrum.*;
 
 // created by AW
 //

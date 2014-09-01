@@ -12,8 +12,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadSpectrumsTask;
 import fr.proline.studio.dam.tasks.DatabaseObjectTreeTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.gui.RsetPeptideSpectrumPanel;
-import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData;
+import fr.proline.studio.rsmexplorer.gui.spectrum.RsetPeptideSpectrumPanel;
+import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData;
 
 /**
  * Databox for a Spectrum

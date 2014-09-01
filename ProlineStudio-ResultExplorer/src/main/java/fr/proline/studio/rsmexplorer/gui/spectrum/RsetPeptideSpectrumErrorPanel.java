@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.gui;
+package fr.proline.studio.rsmexplorer.gui.spectrum;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -50,7 +50,6 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData;
 
 
 /**

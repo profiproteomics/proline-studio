@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.spectrum;
+package fr.proline.studio.rsmexplorer.gui.spectrum;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

@@ -1,8 +1,8 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.rsmexplorer.gui.RsetPeptideFragmentationTablePanel;
-import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData;
+import fr.proline.studio.rsmexplorer.gui.spectrum.RsetPeptideFragmentationTablePanel;
+import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData;
 
 /**
  *

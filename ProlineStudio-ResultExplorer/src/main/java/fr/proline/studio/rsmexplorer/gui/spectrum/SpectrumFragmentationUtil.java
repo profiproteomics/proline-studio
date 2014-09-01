@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.spectrum;
+package fr.proline.studio.rsmexplorer.gui.spectrum;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

@@ -36,17 +36,15 @@ import fr.proline.studio.rsmexplorer.spectrum.*;
 // 
 public class RsetPeptideSpectrumErrorAnnotations {
 
-    AbstractDataBox m_dataBox;
-    DefaultXYDataset m_dataSet;
+
     JFreeChart m_chart;
     DPeptideMatch m_peptideMatch;
     private PeptideFragmentationData m_peptideFragmentationData;
     double m_spectrumMaxY = 0; // y range from data...will be updated and then available for caller.
     double m_spectrumMinY = 0;
 
-    public RsetPeptideSpectrumErrorAnnotations(AbstractDataBox dBox, DefaultXYDataset dSet, JFreeChart chrt, DPeptideMatch pepMatch, PeptideFragmentationData peptideFragmentationData) {
-        m_dataBox = dBox;
-        m_dataSet = dSet;
+    public RsetPeptideSpectrumErrorAnnotations(JFreeChart chrt, DPeptideMatch pepMatch, PeptideFragmentationData peptideFragmentationData) {
+
         m_chart = chrt;
         m_peptideMatch = pepMatch;
         m_peptideFragmentationData = peptideFragmentationData;

@@ -73,7 +73,6 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     private DefaultXYDataset m_dataSet;
     private JFreeChart m_chart;
     private File m_pngFile;
-    private DPeptideMatch m_previousPeptideMatch = null;
     private JPanel m_spectrumPanel;
 
     private RsetPeptideSpectrumErrorAnnotations m_spectrumErrorAnnotations = null;
@@ -181,13 +180,10 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 
     public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
 
-        if (peptideMatch == m_previousPeptideMatch) {
-            return;
-        }
-        m_previousPeptideMatch = peptideMatch;
+
 
         constructSpectrumErrorChart(peptideMatch);
-        m_spectrumErrorAnnotations = new RsetPeptideSpectrumErrorAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch, peptideFragmentationData);
+        m_spectrumErrorAnnotations = new RsetPeptideSpectrumErrorAnnotations(m_chart, peptideMatch, peptideFragmentationData);
         m_spectrumErrorAnnotations.addErrorAnnotations();
 
 

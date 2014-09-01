@@ -84,6 +84,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     private JFreeChart m_chart;
     private File m_pngFile;
     private DPeptideMatch m_previousPeptideMatch = null;
+    private boolean m_previousFragmentationSet = false;
     private javax.swing.JPanel m_spectrumPanel;
     private JButton m_generateMatchButton;
     
@@ -189,6 +190,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
                 generateSpectrumMatch();
             }            
         });
+        m_generateMatchButton.setEnabled(false);
         toolbar.add(m_generateMatchButton);
         
         return toolbar;
@@ -197,10 +199,13 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     
     public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
         
-        if (peptideMatch == m_previousPeptideMatch) {
+        if ( (peptideMatch == m_previousPeptideMatch) && ((peptideFragmentationData== null) || ((peptideFragmentationData!= null) && (m_previousFragmentationSet))) ) {
             return;
         }
         m_previousPeptideMatch = peptideMatch;
+        m_previousFragmentationSet = (peptideFragmentationData!=null);
+        
+        m_generateMatchButton.setEnabled(peptideFragmentationData == null);
         
         m_chart.setNotify(false);
         constructSpectrumChart(peptideMatch);
@@ -258,7 +263,6 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
                 } else {
                     m_logger.error("Fail to generate spectrum matches for peptide_match.id=" + m_previousPeptideMatch.getId());
                 }
-                m_generateMatchButton.setEnabled(true);
             }
         };
         

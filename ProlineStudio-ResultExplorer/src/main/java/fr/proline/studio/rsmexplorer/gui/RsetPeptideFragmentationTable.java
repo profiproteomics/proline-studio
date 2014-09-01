@@ -1,216 +1,139 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import java.awt.BorderLayout;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
-import fr.proline.core.orm.msi.ObjectTree;
-import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
-import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.rsmexplorer.spectrum.FragmentMatch_AW;
-import fr.proline.studio.rsmexplorer.spectrum.FragmentationJsonProperties;
-import fr.proline.studio.rsmexplorer.spectrum.TheoreticalFragmentSeries_AW;
+
+import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData;
+import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData.FragmentMatch_AW;
+import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries_AW;
 import fr.proline.studio.utils.DecoratedTable;
 import fr.proline.studio.utils.DecoratedTableModel;
-import fr.proline.studio.utils.HideFragmentsTableIntensityButton;
+import java.util.List;
 
-import javax.swing.*;
+import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.table.TableColumnExt;
 
-public class RsetPeptideFragmentationTable extends JPanel {
+
+public class RsetPeptideFragmentationTable extends DecoratedTable {
 
     /**
      * Created by AW
      */
 
-    private DPeptideMatch m_peptideMatch;
-    private HideFragmentsTableIntensityButton m_hideFragIntensityButton = null;
-    private DecoratedTable m_table;
     private FragTableCustomRenderer m_matrixRenderer;
 
+    private boolean m_fragmentsIntensityVisible = false;
+    
     public RsetPeptideFragmentationTable() {
-        initComponent();
-    }
+        
+        RsetPeptideFragmentationTable.FragmentationTableModel fragmentationTableModel = new RsetPeptideFragmentationTable.FragmentationTableModel();
 
-    private void initComponent() {
-        setLayout(new BorderLayout());
-        
-        m_table = new DecoratedTable();
-        
-        JToolBar toolbar = createToolbar();
-        JPanel internalPanel = createInternalPanel();
-        
-        add(internalPanel, BorderLayout.CENTER);
-        add(toolbar, BorderLayout.WEST);
-
-    }
-    
-    private JToolBar createToolbar() {
-        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-        toolbar.setFloatable(false);
-        ExportButton m_exportButton = new ExportButton(null, "Fragmentation Table", m_table);
-        toolbar.add(m_exportButton);
-
-        m_hideFragIntensityButton = new HideFragmentsTableIntensityButton(m_table, false);
-        toolbar.add(m_hideFragIntensityButton);
-        return toolbar;
-    }
-    
-    private JPanel createInternalPanel() {
-        JPanel internalPanel = new JPanel();
-        internalPanel.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-        
-        
-        FragmentationTableModel fragmentationTableModel = new FragmentationTableModel(m_table);
-        //fragmentationTableModel.setData(new FragmentMatch_AW[0], new TheoreticalFragmentSeries_AW[0], "");
-
-        m_matrixRenderer = new FragTableCustomRenderer();
+        m_matrixRenderer = new RsetPeptideFragmentationTable.FragTableCustomRenderer();
         m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
+        setModel(fragmentationTableModel);
+        setDefaultRenderer(Double.class, m_matrixRenderer);
+        setSortable(false);
         
-        m_table.setDefaultRenderer(Double.class, m_matrixRenderer);
-        m_table.setSortable(false);
-        m_table.setModel(fragmentationTableModel);
-        m_hideFragIntensityButton.updateFragmentsIntensityVisibility();
-
-
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setViewportView(m_table);
-        m_table.setFillsViewportHeight(true);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-        internalPanel.add(scrollPane, c);
-        
-        return internalPanel;
+        updateFragmentsIntensityVisibility(false);
     }
 
 
 
 
+    public void setData(DPeptideMatch pepMatch, PeptideFragmentationData petpideFragmentationData) {
 
-    public void updateFragmentationTable(DPeptideMatch pepMatch, AbstractDataBox dataBox) {
-
-        m_peptideMatch = pepMatch;
-
-        if (m_peptideMatch == null) {
-            FragmentationTableModel fragmentationTableModel = ((FragmentationTableModel)m_table.getModel());
+        setAllColumnsVisibles(); //JPM.HACK : bug between columns visibility and update of the model of a JXTable
+        
+        FragmentationTableModel fragmentationTableModel = ((FragmentationTableModel) getModel());
+        
+        if (petpideFragmentationData == null) {
             fragmentationTableModel.reinitData();
             m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
-            return;
+
+        } else {
+            fragmentationTableModel.setData(petpideFragmentationData, pepMatch.getPeptide().getSequence());
+            m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
+            updateFragmentsIntensityVisibility();
         }
+
         
-        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(dataBox.getProjectId()).getEntityManagerFactory().createEntityManager();
 
-        try {
-
-            entityManagerMSI.getTransaction().begin();
-            PeptideMatch pmORM = entityManagerMSI.find(PeptideMatch.class,m_peptideMatch.getId());
-
-            Map<String, Long> aw_Map = pmORM.getObjectTreeIdByName();
-
-            Long objectTreeId = null;
-            for (Map.Entry<String, Long> entry : aw_Map.entrySet()) {
-                objectTreeId = entry.getValue();
-            }
+    }
 
 
-            if (objectTreeId == null) {
-                FragmentationTableModel fragmentationTableModel = ((FragmentationTableModel)m_table.getModel());
-                fragmentationTableModel.reinitData();
-                m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
-                LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug("objectr tree id is null, no framgentation table to display for pm_id=" + m_peptideMatch.getId());
-            } else {
+    public final void updateFragmentsIntensityVisibility() {
+        updateFragmentsIntensityVisibility(m_fragmentsIntensityVisible);
+    }
+    public final void updateFragmentsIntensityVisibility(boolean visible) {
 
-                ObjectTree ot = entityManagerMSI.find(ObjectTree.class, objectTreeId); // get the objectTree from id.
-                String clobData = ot.getClobData();
-                String jsonProperties = clobData;
+        m_fragmentsIntensityVisible = visible;
+        
+        final String intensityStringIdentifier = "(I)";
 
-                JsonParser parser = new JsonParser();
-                Gson gson = new Gson();
+        // get all columns including hidden ones
+        List<TableColumn> columns = getColumns(true);
 
-                JsonObject array = parser.parse(jsonProperties).getAsJsonObject();
-                FragmentationJsonProperties jsonProp = gson.fromJson(array, FragmentationJsonProperties.class);
+        if (columns != null) {
+            for (int i = 0; i < columns.size(); i++) { // use all columns but check for an identifier in the title
 
-                // compute the charge for each fragment match from the label
-                for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
-                    fragMa.computeChargeFromLabel();
+                TableColumnExt tce = (TableColumnExt) columns.get(i);
+                if (tce.getTitle().indexOf(intensityStringIdentifier) != -1) {
+                    tce.setVisible(visible);
                 }
 
-                TheoreticalFragmentSeries_AW[] fragSer = jsonProp.frag_table;
-                FragmentMatch_AW[] fragMa = jsonProp.frag_matches;
-                
-                updateTableData(fragMa, fragSer, m_peptideMatch.getPeptide().getSequence());
             }
-
-            entityManagerMSI.getTransaction().commit();
-
-        } catch (Exception e) {
-            entityManagerMSI.getTransaction().rollback();
-        } finally {
-
-            entityManagerMSI.close();
         }
 
     }
 
-    private void updateTableData(FragmentMatch_AW[] fragMa, TheoreticalFragmentSeries_AW[] fragSer, String peptideSequence) {
-        
-        FragmentationTableModel fragmentationTableModel = ((FragmentationTableModel)m_table.getModel());
-        fragmentationTableModel.setData(fragMa, fragSer, peptideSequence);
-        m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
-        m_hideFragIntensityButton.updateFragmentsIntensityVisibility();
-                
-    } 
+    public void setAllColumnsVisibles() {
+        List<TableColumn> columns = getColumns(true);
+        if (columns != null) {
+            for (int i = 0; i < columns.size(); i++) { // use all columns but check for an identifier in the title
+
+                TableColumnExt tce = (TableColumnExt) columns.get(i);
+
+                tce.setVisible(true);
+
+
+            }
+        }
+    }
 
 
     public static class FragmentationTableModel extends DecoratedTableModel {
 
+        private  TheoreticalFragmentSeries_AW[] m_fragSer;
+        private String m_peptideSequence;
+        private int m_sizeMaxSeries;
+        private String[][] m_matrix;
+        private double[][] m_matrixIntensity;
+        private String[] m_columnNames;
 
-        private TheoreticalFragmentSeries_AW[] m_fragSer = null;
-        private String m_peptideSequence = null;
-        private int m_sizeMaxSeries = 0;
-        private String[][] m_matrix = null;
-        private double[][] m_matrixIntensity = null;
-        private String[] m_columnNames = null;
-
-        public FragmentationTableModel(DecoratedTable table) { // constructor
+        public FragmentationTableModel() { // constructor
+            initData();
         }
 
         public void reinitData() {
-            reinitDataImpl();
+            initData();
             fireTableStructureChanged();
                     
         }
         
-        private void reinitDataImpl() {
+        private void initData() {
             m_fragSer = null;
             m_peptideSequence = null;
             m_sizeMaxSeries = 0;
@@ -220,17 +143,18 @@ public class RsetPeptideFragmentationTable extends JPanel {
         }
         
         
-        public void setData(FragmentMatch_AW[] fragMa, TheoreticalFragmentSeries_AW[] fragSer, String peptideSequence) {
+        public void setData(PeptideFragmentationData petpideFragmentationData, String peptideSequence) {
             
-            reinitDataImpl();
+            initData();
             
-            m_fragSer = fragSer;
+            m_fragSer = petpideFragmentationData.getFragmentSeries();
+            FragmentMatch_AW[] fragMa = petpideFragmentationData.getFragmentMatch();
             m_peptideSequence = peptideSequence;
 
             int sizeMaxSeries = 0;
-            for (int i = 0; i < fragSer.length; i++) {
-                if (fragSer[i].masses.length > sizeMaxSeries) {
-                    sizeMaxSeries = fragSer[i].masses.length;
+            for (int i = 0; i < m_fragSer.length; i++) {
+                if (m_fragSer[i].masses.length > sizeMaxSeries) {
+                    sizeMaxSeries = m_fragSer[i].masses.length;
                 }
 
             }
@@ -240,15 +164,15 @@ public class RsetPeptideFragmentationTable extends JPanel {
             // get series names
             String xyzSerieName = "";
             String abcSerieName = "";
-            for (int i = 0; i < fragSer.length; i++) {
-                switch (fragSer[i].frag_series.charAt(0)) {
+            for (int i = 0; i < m_fragSer.length; i++) {
+                switch (m_fragSer[i].frag_series.charAt(0)) {
                     case 'a': // either a,b or c do:
                     case 'b':
                     case 'c':
-                        if (fragSer[i].frag_series.length() > 1) {
+                        if (m_fragSer[i].frag_series.length() > 1) {
                             // then it is either a ++ or a b-H2O and so on...
                         } else { // it's a 'a/b/c' ion
-                            abcSerieName = "" + fragSer[i].frag_series.charAt(0);
+                            abcSerieName = "" + m_fragSer[i].frag_series.charAt(0);
                         }
                         break;
                     case 'v':
@@ -256,33 +180,33 @@ public class RsetPeptideFragmentationTable extends JPanel {
                     case 'x':
                     case 'y':
 
-                        if (fragSer[i].frag_series.length() > 1) {
+                        if (m_fragSer[i].frag_series.length() > 1) {
                             // then it is either a ++ or a b-H2O and so on...
                         } else { // it's a 'x/y/z' ion
-                            xyzSerieName = "" + fragSer[i].frag_series.charAt(0);
+                            xyzSerieName = "" + m_fragSer[i].frag_series.charAt(0);
                         }
                         break;
                     case 'z':
-                        xyzSerieName = "" + fragSer[i].frag_series.charAt(0);
+                        xyzSerieName = "" + m_fragSer[i].frag_series.charAt(0);
                         break;
                     default:
                         break;
                 }
             }
 
-            m_columnNames = new String[fragSer.length + 3 + fragSer.length];
+            m_columnNames = new String[m_fragSer.length + 3 + m_fragSer.length];
             int i = 0;
             m_columnNames[i++] = "amino acid";
             m_columnNames[i++] = abcSerieName + " ion";
 
-            for (TheoreticalFragmentSeries_AW currentFrag : fragSer) {
+            for (TheoreticalFragmentSeries_AW currentFrag : m_fragSer) {
                 m_columnNames[i++] = currentFrag.frag_series + " (M)";
             }
 
             m_columnNames[i] = xyzSerieName + " ion";
             i++;
 
-            for (TheoreticalFragmentSeries_AW currentFragSer : fragSer) {
+            for (TheoreticalFragmentSeries_AW currentFragSer : m_fragSer) {
                 m_columnNames[i] = currentFragSer.frag_series + " (I)";
                 i++;
             }
@@ -293,10 +217,10 @@ public class RsetPeptideFragmentationTable extends JPanel {
             double roundTol = 0.0001; // could be put to zero but in case some rounding happens at other's code.
             int nbFound = 0;
 
-            for (int j = 0; j < fragSer.length; j++) { // loop through
+            for (int j = 0; j < m_fragSer.length; j++) { // loop through
                 // theoFragment series
                 // here
-                for (int k = 0; k < fragSer[j].masses.length; k++) { // loop
+                for (int k = 0; k < m_fragSer[j].masses.length; k++) { // loop
                     // through
                     // masses
                     // for
@@ -307,24 +231,24 @@ public class RsetPeptideFragmentationTable extends JPanel {
                         // fragMatches with
                         // theoFragSeries
 
-                        if ((fragMa[i].calculated_moz - roundTol <= (fragSer[j].masses[k]))
-                                && (fragMa[i].calculated_moz + roundTol >= fragSer[j].masses[k])) {
+                        if ((fragMa[i].calculated_moz - roundTol <= (m_fragSer[j].masses[k]))
+                                && (fragMa[i].calculated_moz + roundTol >= m_fragSer[j].masses[k])) {
                             nbFound++;
-                            if (fragSer[j].frag_series.toUpperCase().contains(
+                            if (m_fragSer[j].frag_series.toUpperCase().contains(
                                     "A")
-                                    || fragSer[j].frag_series.toUpperCase().contains("B")
-                                    || fragSer[j].frag_series.toUpperCase().contains("C")) {
+                                    || m_fragSer[j].frag_series.toUpperCase().contains("B")
+                                    || m_fragSer[j].frag_series.toUpperCase().contains("C")) {
                                 m_matrix[k][j + 2] = "ABC";
 
-                            } else if (fragSer[j].frag_series.toUpperCase().contains("X")
-                                    || fragSer[j].frag_series.toUpperCase().contains("Y")
-                                    || fragSer[j].frag_series.toUpperCase().contains("Z")) {
+                            } else if (m_fragSer[j].frag_series.toUpperCase().contains("X")
+                                    || m_fragSer[j].frag_series.toUpperCase().contains("Y")
+                                    || m_fragSer[j].frag_series.toUpperCase().contains("Z")) {
                                 m_matrix[k][j + 2] = "XYZ";
                             } else {
                                 LoggerFactory.getLogger(
                                         "ProlineStudio.ResultExplorer").error(
                                         "AW: strange, there is no ABC nor XYZ ions..."
-                                        + fragSer[j].frag_series);
+                                        + m_fragSer[j].frag_series);
                             }
                             m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
                             m_matrix[k][j + 2] += "intensity";
@@ -447,8 +371,7 @@ public class RsetPeptideFragmentationTable extends JPanel {
         public Component getTableCellRendererComponent(JTable table,
                 Object value, boolean isSelected, boolean hasFocus, int row,
                 int column) {
-            Component component = super.getTableCellRendererComponent(table,
-                    value, isSelected, hasFocus, row, column);
+            Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
             // prepare needed fonts
             if (m_fontPlain == null) {

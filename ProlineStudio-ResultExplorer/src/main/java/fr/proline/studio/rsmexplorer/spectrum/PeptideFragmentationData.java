@@ -1,0 +1,97 @@
+package fr.proline.studio.rsmexplorer.spectrum;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import fr.proline.core.orm.msi.ObjectTree;
+
+/**
+ *
+ * @author JM235353
+ */
+public class PeptideFragmentationData {
+
+    private TheoreticalFragmentSeries_AW[] m_fragSer;
+    private FragmentMatch_AW[] m_fragMa;
+
+    public PeptideFragmentationData(ObjectTree objectTree) {
+        String clobData = objectTree.getClobData();
+        String jsonProperties = clobData;
+
+        JsonParser parser = new JsonParser();
+        Gson gson = new Gson();
+
+        JsonObject array = parser.parse(jsonProperties).getAsJsonObject();
+        FragmentationJsonProperties jsonProp = gson.fromJson(array, FragmentationJsonProperties.class);
+
+        // compute the charge for each fragment match from the label
+        for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
+            fragMa.computeChargeFromLabel();
+        }
+
+        m_fragSer = jsonProp.frag_table;
+        m_fragMa = jsonProp.frag_matches;
+
+    }
+
+    public TheoreticalFragmentSeries_AW[] getFragmentSeries() {
+        return m_fragSer;
+    }
+
+    public FragmentMatch_AW[] getFragmentMatch() {
+        return m_fragMa;
+    }
+
+    public static class FragmentMatch_AW {
+
+        public String label;
+        public Double moz;
+        public Double calculated_moz;
+        public Float intensity;
+        public int charge = 0; // the charge taken from the serie (++ means double charged)
+
+        public void computeChargeFromLabel() {
+            this.charge = 0;
+            if (label != null) {
+                for (int i = 0; i < label.length(); i++) {
+                    if (label.charAt(i) == '+') {
+                        this.charge++;
+                    }
+                }
+            }
+
+        }
+    }
+
+    public static class FragmentationJsonProperties {
+
+        public int ms_query_initial_id;
+        public int peptide_match_rank;
+        public TheoreticalFragmentSeries_AW[] frag_table;
+        public FragmentMatch_AW[] frag_matches;
+    }
+
+    public class TheoreticalFragmentSeries_AW {
+
+        public String frag_series;
+        public double[] masses;
+        public int charge = 1; // default to 1 because it is used to multiply
+        // the m/z to obtain real mass values for aa
+        // calculation
+
+        public void computeCharge() {
+            this.charge = 0;
+            if (frag_series != null) {
+                for (int i = 0; i < frag_series.length(); i++) {
+                    if (frag_series.charAt(i) == '+') {
+                        this.charge++;
+                    }
+                }
+            }
+            if (this.charge == 0) {
+                this.charge = 1;
+            }
+
+        }
+    }
+}

@@ -46,7 +46,7 @@ public class GenerateSpectrumMatchTask extends AbstractServiceTask {
             params.put("project_id", m_projectId);
             params.put("result_set_id", m_resultSetId);
             if (m_peptideMatchId != null) {
-                List<Long> peptideMatches = new ArrayList<Long>();
+                List<Long> peptideMatches = new ArrayList<>();
                 peptideMatches.add(m_peptideMatchId);
                 params.put("peptide_match_ids", peptideMatches);
             } else {

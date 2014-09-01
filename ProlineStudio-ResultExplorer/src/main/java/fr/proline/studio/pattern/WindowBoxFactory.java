@@ -39,7 +39,7 @@ public class WindowBoxFactory {
         boxes[1] = new DataBoxRsetPeptideSpectrum();
         boxes[2] = new DataBoxRsetPeptideSpectrumError();
         boxes[2].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
-        boxes[3] = new DataBoxRsetPeptideFragmentationTable();
+        boxes[3] = new DataBoxRsetPeptideFragmentation();
         boxes[3].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         boxes[4] = new DataBoxRsetProteinsForPeptideMatch();
         
@@ -133,7 +133,7 @@ public class WindowBoxFactory {
         boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         boxes[5] = new DataBoxRsetPeptideSpectrumError();
         boxes[5].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
-        boxes[6] = new DataBoxRsetPeptideFragmentationTable();
+        boxes[6] = new DataBoxRsetPeptideFragmentation();
         boxes[6].setLayout(AbstractDataBox.DataBoxLayout.TABBED);        
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;

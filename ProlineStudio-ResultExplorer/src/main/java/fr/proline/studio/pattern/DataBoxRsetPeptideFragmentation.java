@@ -2,18 +2,23 @@ package fr.proline.studio.pattern;
 
 
 
-import fr.proline.core.orm.msi.dto.DPeptideInstance;
+import fr.proline.core.orm.msi.ObjectTree;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseObjectTreeTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsetPeptideFragmentationTablePanel;
+import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData;
 
 /**
  *
  * @author AW
  */
-public class DataBoxRsetPeptideFragmentationTable extends AbstractDataBox {
+public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
 
 
-    public DataBoxRsetPeptideFragmentationTable() {
+    public DataBoxRsetPeptideFragmentation() {
         // Name of this databox
         m_name = "Fragmentation Table";
         m_description = "Fragmentation table of a Peptide";
@@ -39,19 +44,21 @@ public class DataBoxRsetPeptideFragmentationTable extends AbstractDataBox {
     public void dataChanged() {
         final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
 
-        if (peptideMatch == null) {
-            ((RsetPeptideFragmentationTablePanel ) m_panel).setData(null);
+        if (peptideMatch == m_previousPeptideMatch) {
             return;
         }
-
-        /*boolean needToLoadData = ((!peptideMatch.isMsQuerySet())
-                || (!peptideMatch.getMsQuery().isSpectrumSet()));
-
-        if (needToLoadData) {
-
+        m_previousPeptideMatch = peptideMatch;
+        
+        if (peptideMatch == null) {
+            ((RsetPeptideFragmentationTablePanel ) m_panel).setData(null, null);
+            return;
+        }
+        
+        
             final int loadingId = setLoading();
 
-            //final String searchedText = searchTextBeingDone; //JPM.TODO
+            
+            final ObjectTree[] objectTreeResult = new ObjectTree[1];
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                 @Override
@@ -62,15 +69,22 @@ public class DataBoxRsetPeptideFragmentationTable extends AbstractDataBox {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-
-                    ((RsetPeptideFragmentationTablePanel) m_panel).setData(peptideMatch);
+                    ObjectTree objectTree = objectTreeResult[0];
+                    PeptideFragmentationData peptideFragmentationData = (objectTree!=null) ? new PeptideFragmentationData(objectTree) : null;
+                    ((RsetPeptideFragmentationTablePanel) m_panel).setData(peptideMatch, peptideFragmentationData); 
+                  
                     
+
                     setLoaded(loadingId);
+                    
+                    if (finished) {
+                        unregisterTask(taskId);
+                    }
                 }
             };
 
             // Load data if needed asynchronously
-            DatabaseLoadSpectrumsTask task = new DatabaseLoadSpectrumsTask(callback, getProjectId(), peptideMatch);
+            DatabaseObjectTreeTask task = new DatabaseObjectTreeTask(callback, getProjectId(), peptideMatch, objectTreeResult);
             Long taskId = task.getId();
             if (m_previousTaskId != null) {
                 // old task is suppressed if it has not been already done
@@ -81,12 +95,10 @@ public class DataBoxRsetPeptideFragmentationTable extends AbstractDataBox {
 
 
 
+            
 
-        } else {*/
-            ((RsetPeptideFragmentationTablePanel) m_panel).setData(peptideMatch);
-        //}
     }
     private Long m_previousTaskId = null;
-
+    private DPeptideMatch m_previousPeptideMatch = null;
 
 }

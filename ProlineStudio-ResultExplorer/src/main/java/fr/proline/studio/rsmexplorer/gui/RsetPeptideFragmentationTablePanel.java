@@ -2,15 +2,22 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 
+import fr.proline.core.orm.msi.ObjectTree;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.export.ExportButton;
 
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.spectrum.HideFragmentsTableIntensityButton;
+import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 
 /**
  * Panel used to display a Spectrum of a PeptideMatch
@@ -22,29 +29,58 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 
     private AbstractDataBox m_dataBox;
 
-    private DPeptideMatch m_previousPeptideMatch = null;
     private RsetPeptideFragmentationTable m_fragmentationTable = null;
-
+    private HideFragmentsTableIntensityButton m_hideFragIntensityButton = null;
+    
     public RsetPeptideFragmentationTablePanel() {
         setLayout(new BorderLayout());
+        
         m_fragmentationTable = new RsetPeptideFragmentationTable();
-        add(m_fragmentationTable, BorderLayout.CENTER);
+        
+        JToolBar toolbar = createToolbar();
+        JPanel internalPanel = createInternalPanel();
+        
+        add(internalPanel, BorderLayout.CENTER);
+        add(toolbar, BorderLayout.WEST);
     }
 
-    public void setData(DPeptideMatch peptideMatch) {
+        
+    private JToolBar createToolbar() {
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+        ExportButton m_exportButton = new ExportButton(null, "Fragmentation Table", m_fragmentationTable);
+        toolbar.add(m_exportButton); //JPM.TODO
 
-        if (peptideMatch == m_previousPeptideMatch) {
-            return;
-        }
-        m_previousPeptideMatch = peptideMatch;
+        m_hideFragIntensityButton = new HideFragmentsTableIntensityButton(m_fragmentationTable, false);
+        toolbar.add(m_hideFragIntensityButton);
+        return toolbar;
+    }
+    
+    private JPanel createInternalPanel() {
+        JPanel internalPanel = new JPanel();
+        internalPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
 
-        updateFragmentationTable(peptideMatch);
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(m_fragmentationTable);
+        m_fragmentationTable.setFillsViewportHeight(true);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
+        c.weighty = 1;
+        internalPanel.add(scrollPane, c);
+        
+        return internalPanel;
     }
 
-    private void updateFragmentationTable(DPeptideMatch pm) {
-
- 
-        m_fragmentationTable.updateFragmentationTable(pm, m_dataBox);
+    
+    public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData petpideFragmentationData) {
+        m_fragmentationTable.setData(peptideMatch, petpideFragmentationData);
     }
 
     @Override

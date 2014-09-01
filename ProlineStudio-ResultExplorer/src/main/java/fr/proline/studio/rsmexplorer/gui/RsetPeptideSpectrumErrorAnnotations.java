@@ -39,9 +39,7 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.rsmexplorer.spectrum.FragmentMatch_AW;
-import fr.proline.studio.rsmexplorer.spectrum.FragmentationJsonProperties;
-import fr.proline.studio.rsmexplorer.spectrum.TheoreticalFragmentSeries_AW;
+import fr.proline.studio.rsmexplorer.spectrum.*;
 
 // created by AW
 //
@@ -111,30 +109,9 @@ public class RsetPeptideSpectrumErrorAnnotations {
 
             } else {
                 ObjectTree ot = entityManagerMSI.find(ObjectTree.class, objectTreeId); // get
-                // the
-                // objectTree
-                // from
-                // id.
-
-                String clobData = ot.getClobData();
-                String jsonProperties = clobData;
-                LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug(
-                        "objectr tree for pm_id=" + m_peptideMatch.getId() + " "
-                        + m_peptideMatch.getPeptide().getSequence() + "\n" + jsonProperties);
-
-                JsonParser parser = new JsonParser();
-                Gson gson = new Gson();
-
-                JsonObject array = parser.parse(jsonProperties).getAsJsonObject();
-                FragmentationJsonProperties jsonProp = gson.fromJson(array, FragmentationJsonProperties.class);
-
-                // compute the charge for each fragment match from the label
-                for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
-                    fragMa.computeChargeFromLabel();
-                }
-
-                TheoreticalFragmentSeries_AW[] fragSer = jsonProp.frag_table;
-                FragmentMatch_AW[] fragMa = jsonProp.frag_matches;
+                PeptideFragmentationData peptideFragmentationData = new PeptideFragmentationData(ot);
+                PeptideFragmentationData.TheoreticalFragmentSeries_AW[] fragSer = peptideFragmentationData.getFragmentSeries();
+                PeptideFragmentationData.FragmentMatch_AW[] fragMa = peptideFragmentationData.getFragmentMatch();
 
                 if (spectrum == null) {
                     m_dataSet.removeSeries(SERIES_NAME);
@@ -169,17 +146,7 @@ public class RsetPeptideSpectrumErrorAnnotations {
                     data[1][i] = intensityDoubleArray[i];
                 }
 
-                @SuppressWarnings("unused")
-                class SpectrumMatchAW { // not used at the moment but perhaps later
-
-                    TheoreticalFragmentSeries_AW[] fragmentationTable;
-                    FragmentMatch_AW[] fragmentMatches;
-
-                    public SpectrumMatchAW(TheoreticalFragmentSeries_AW[] fragT, FragmentMatch_AW[] fragMatches) {
-                        this.fragmentationTable = fragT;
-                        this.fragmentMatches = fragMatches;
-                    }
-                }
+                
 
 
 

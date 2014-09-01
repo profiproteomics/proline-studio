@@ -46,7 +46,7 @@ public class SpectrumFragmentationUtil {
     }
 
     // the getAminoAcidName is not used but could be in the future...
-    public static String getAminoAcidName(double deltaMass, double tolerance) {
+    /*public static String getAminoAcidName(double deltaMass, double tolerance) {
 
         // scan the spectrum to find potential aminoacids
         if (m_aaNameHashMap == null) {
@@ -87,7 +87,7 @@ public class SpectrumFragmentationUtil {
 
         return m_aaDeltaMassFormatter.format(deltaMass);
 
-    }
+    }*/
     
     
     

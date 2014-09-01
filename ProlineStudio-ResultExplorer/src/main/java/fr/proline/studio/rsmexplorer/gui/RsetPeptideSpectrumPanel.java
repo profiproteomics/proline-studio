@@ -54,6 +54,8 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.DataBoxRsetPeptideSpectrum;
+import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData;
 import fr.proline.studio.utils.IconManager;
 
 import java.awt.event.ActionEvent;
@@ -194,7 +196,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
     }
     
-    public void setData(DPeptideMatch peptideMatch) {
+    public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
         
         if (peptideMatch == m_previousPeptideMatch) {
             return;
@@ -203,7 +205,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         
         m_chart.setNotify(false);
         constructSpectrumChart(peptideMatch);
-        m_spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
+        m_spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch, peptideFragmentationData);
         
         // set default auto bounds in case there is no annotations (which sets new autobounds)
         m_chart.getXYPlot().getRangeAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getRangeAxis().getLowerBound(),m_chart.getXYPlot().getRangeAxis().getUpperBound()));
@@ -253,9 +255,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             @Override
             public void run(boolean success) {
                 if (success) {
-                    DPeptideMatch peptideMatch = m_previousPeptideMatch;
-                    m_previousPeptideMatch = null;
-                    setData(peptideMatch);
+                   ((DataBoxRsetPeptideSpectrum)m_dataBox).loadAnnotations(m_previousPeptideMatch);
                 } else {
                     m_logger.error("Fail to generate spectrum matches for peptide_match.id=" + m_previousPeptideMatch.getId());
                 }
@@ -273,9 +273,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
 
         // clear all data
         m_dataSet.removeSeries(SERIES_NAME);
-        if (m_spectrumAnnotations != null) {
-            m_spectrumAnnotations.removeAnnotations();
-        }
+
  
         if (pm == null) {
             return;
@@ -392,8 +390,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
                         m_spectrumMaxX = newMaxX;
                         m_spectrumMinY = newMinY;
                         m_spectrumMaxY = newMaxY;
-                        
-                        m_spectrumAnnotations.removeAnnotations();
+
                         plot.getDomainAxis().setLowerBound(newMinX);
                         plot.getDomainAxis().setUpperBound(newMaxX);
                         plot.getRangeAxis().setLowerBound(newMinY);

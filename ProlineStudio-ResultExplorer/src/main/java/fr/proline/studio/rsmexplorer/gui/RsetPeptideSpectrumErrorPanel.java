@@ -50,6 +50,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData;
 
 
 /**
@@ -76,6 +77,8 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     private JPanel m_spectrumPanel;
 
     private RsetPeptideSpectrumErrorAnnotations m_spectrumErrorAnnotations = null;
+    
+    private static final String SERIES_NAME = "spectrumData";
     
     @Override // declared in ProlineStudioCommons ImageExporterInterface
     public void generateSvgImage(String file) {
@@ -176,7 +179,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 
     }
 
-    public void setData(DPeptideMatch peptideMatch) {
+    public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
 
         if (peptideMatch == m_previousPeptideMatch) {
             return;
@@ -184,7 +187,7 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
         m_previousPeptideMatch = peptideMatch;
 
         constructSpectrumErrorChart(peptideMatch);
-        m_spectrumErrorAnnotations = new RsetPeptideSpectrumErrorAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch);
+        m_spectrumErrorAnnotations = new RsetPeptideSpectrumErrorAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch, peptideFragmentationData);
         m_spectrumErrorAnnotations.addErrorAnnotations();
 
 
@@ -260,51 +263,27 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 
     private void constructSpectrumErrorChart(DPeptideMatch pm) {
 
+        // clear all data
+        m_dataSet.removeSeries(SERIES_NAME);
 
-        final String SERIES_NAME = "spectrumData";
+ 
         if (pm == null) {
-            m_dataSet.removeSeries(SERIES_NAME);
-            if (m_spectrumErrorAnnotations != null) {
-                m_spectrumErrorAnnotations.removeErrorAnnotations();
-            }
-
             return;
         }
-
-        DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
-        if (msQuery == null) {
-            m_dataSet.removeSeries(SERIES_NAME);
-            if (m_spectrumErrorAnnotations != null) {
-                m_spectrumErrorAnnotations.removeErrorAnnotations();
-            }
-
-            return;
-        }
-
-        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
-        if (spectrum == null) {
-
-            m_dataSet.removeSeries(SERIES_NAME);
-            if (m_spectrumErrorAnnotations != null) {
-                m_spectrumErrorAnnotations.removeErrorAnnotations();
-            }
-
-            return;
-        }
-
+        
         Peptide p = pm.getPeptide();
         if (p == null) {
-            m_dataSet.removeSeries(SERIES_NAME);
-            if (m_spectrumErrorAnnotations != null) {
-                m_spectrumErrorAnnotations.removeErrorAnnotations();
-            }
-
             return;
         }
-
-        // AW: reset annotations in case none are to be shown.(for whatever reasons...)
-        if (m_spectrumErrorAnnotations != null) {
-            m_spectrumErrorAnnotations.removeErrorAnnotations();
+        
+        DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
+        if (msQuery == null) {
+            return;
+        }
+        
+        Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
+        if (spectrum == null) {
+            return;
         }
 
         byte[] intensityByteArray = spectrum.getIntensityList();
@@ -403,7 +382,6 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
                         m_spectrumMinY = newMinY;
                         m_spectrumMaxY = newMaxY;
 
-                        m_spectrumErrorAnnotations.removeErrorAnnotations();
                         plot.getDomainAxis().setLowerBound(newMinX);
                         plot.getDomainAxis().setUpperBound(newMaxX);
                         plot.getRangeAxis().setLowerBound(newMinY);

@@ -22,6 +22,7 @@ import fr.proline.studio.rsmexplorer.spectrum.PeptideFragmentationData;
 public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
     private DPeptideMatch m_previousPeptideMatch = null;
+    private PeptideFragmentationData m_fragmentationData = null;
     
     public DataBoxRsetPeptideSpectrum() {
 
@@ -38,6 +39,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DMsQuery.class, false);
         outParameter.addParameter(Spectrum.class, false);
+        outParameter.addParameter(PeptideFragmentationData.class, false);
         registerOutParameter(outParameter);
     }
 
@@ -57,6 +59,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             return;
         }
         m_previousPeptideMatch = peptideMatch;
+        m_fragmentationData = null;
         
         if (peptideMatch == null) {
             ((RsetPeptideSpectrumPanel) m_panel).setData(null, null);
@@ -113,6 +116,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
     
     public void loadAnnotations(final DPeptideMatch peptideMatch) {
 
+        final DataBoxRsetPeptideSpectrum _databox = this;
 
         final ObjectTree[] objectTreeResult = new ObjectTree[1];
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -126,10 +130,13 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 ObjectTree objectTree = objectTreeResult[0];
-                PeptideFragmentationData peptideFragmentationData = (objectTree != null) ? new PeptideFragmentationData(objectTree) : null;
+                m_fragmentationData = (objectTree != null) ? new PeptideFragmentationData(objectTree) : null;
 
-                ((RsetPeptideSpectrumPanel) m_panel).setData(peptideMatch, peptideFragmentationData);
+                ((RsetPeptideSpectrumPanel) m_panel).setData(peptideMatch, m_fragmentationData);
 
+                if (m_fragmentationData != null) {
+                    _databox.propagateDataChanged(PeptideFragmentationData.class);
+                }
 
             }
         };
@@ -164,6 +171,9 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
                         }
                     }
                 }
+            }
+            if (parameterType.equals(PeptideFragmentationData.class)) {
+                return m_fragmentationData;
             }
         }
         return super.getData(getArray, parameterType);

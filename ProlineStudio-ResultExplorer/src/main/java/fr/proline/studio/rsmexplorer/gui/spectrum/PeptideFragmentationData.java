@@ -48,7 +48,7 @@ public class PeptideFragmentationData {
         public Double moz;
         public Double calculated_moz;
         public Float intensity;
-        public int charge = 0; // the charge taken from the serie (++ means double charged)
+        public int charge = 1; // the charge taken from the serie (++ means double charged)
 
         public void computeChargeFromLabel() {
             this.charge = 0;
@@ -58,6 +58,9 @@ public class PeptideFragmentationData {
                         this.charge++;
                     }
                 }
+            }
+            if (this.charge == 0) {
+                this.charge = 1;
             }
 
         }
@@ -79,7 +82,7 @@ public class PeptideFragmentationData {
         // the m/z to obtain real mass values for aa
         // calculation
 
-        public void computeCharge() {
+        public void computeChargeFromLabel() {
             this.charge = 0;
             if (frag_series != null) {
                 for (int i = 0; i < frag_series.length(); i++) {

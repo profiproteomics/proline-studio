@@ -178,15 +178,12 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
                     case 'w':
                     case 'x':
                     case 'y':
-
+                    case 'z':
                         if (m_fragSer[i].frag_series.length() > 1) {
                             // then it is either a ++ or a b-H2O and so on...
-                        } else { // it's a 'x/y/z' ion
+                        } else { // it's a 'v/w/x/y/z' ion
                             xyzSerieName = "" + m_fragSer[i].frag_series.charAt(0);
                         }
-                        break;
-                    case 'z':
-                        xyzSerieName = "" + m_fragSer[i].frag_series.charAt(0);
                         break;
                     default:
                         break;
@@ -229,32 +226,40 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
                     for (i = 0; i < fragMa.length; i++) { // find matching
                         // fragMatches with
                         // theoFragSeries
-
-                        if ((fragMa[i].calculated_moz - roundTol <= (m_fragSer[j].masses[k]))
-                                && (fragMa[i].calculated_moz + roundTol >= m_fragSer[j].masses[k])) {
-                            nbFound++;
-                            if (m_fragSer[j].frag_series.toUpperCase().contains(
-                                    "A")
-                                    || m_fragSer[j].frag_series.toUpperCase().contains("B")
-                                    || m_fragSer[j].frag_series.toUpperCase().contains("C")) {
-                                m_matrix[k][j + 2] = "ABC";
-
-                            } else if (m_fragSer[j].frag_series.toUpperCase().contains("X")
-                                    || m_fragSer[j].frag_series.toUpperCase().contains("Y")
-                                    || m_fragSer[j].frag_series.toUpperCase().contains("Z")) {
-                                m_matrix[k][j + 2] = "XYZ";
-                            } else {
-                                LoggerFactory.getLogger(
-                                        "ProlineStudio.ResultExplorer").error(
-                                        "AW: strange, there is no ABC nor XYZ ions..."
-                                        + m_fragSer[j].frag_series);
-                            }
-                            m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
-                            m_matrix[k][j + 2] += "intensity";
-
-                        } else {
-                        }
-
+                    	fragMa[i].computeChargeFromLabel();
+						m_fragSer[j].computeChargeFromLabel();
+                    	if(fragMa[i].charge == m_fragSer[j].charge) {
+                    		if((fragMa[i].label.contains("*") && m_fragSer[j].frag_series.contains("*"))
+                    			|| (fragMa[i].label.contains("0") && m_fragSer[j].frag_series.contains("0"))
+                    			|| (!fragMa[i].label.contains("*") && !m_fragSer[j].frag_series.contains("*")) 
+                            	|| (!fragMa[i].label.contains("0") && !m_fragSer[j].frag_series.contains("0")))
+                    		{
+                    			if ((fragMa[i].calculated_moz - roundTol <= (m_fragSer[j].masses[k]))
+		                                && (fragMa[i].calculated_moz + roundTol >= m_fragSer[j].masses[k])) {
+		                            nbFound++;
+		                            if (m_fragSer[j].frag_series.toUpperCase().contains(
+		                                    "A")
+		                                    || m_fragSer[j].frag_series.toUpperCase().contains("B")
+		                                    || m_fragSer[j].frag_series.toUpperCase().contains("C")) {
+		                                m_matrix[k][j + 2] = "ABC";
+		
+		                            } else if (m_fragSer[j].frag_series.toUpperCase().contains("X")
+		                                    || m_fragSer[j].frag_series.toUpperCase().contains("Y")
+		                                    || m_fragSer[j].frag_series.toUpperCase().contains("Z")) {
+		                                m_matrix[k][j + 2] = "XYZ";
+		                            } else {
+		                                LoggerFactory.getLogger(
+		                                        "ProlineStudio.ResultExplorer").error(
+		                                        "AW: strange, there is no ABC nor XYZ ions..."
+		                                        + m_fragSer[j].frag_series);
+		                            }
+		                            m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
+		                            m_matrix[k][j + 2] += "intensity";
+		
+			                    } else {
+				                }
+	                    	}
+                    	}
                     }
                 }
             }

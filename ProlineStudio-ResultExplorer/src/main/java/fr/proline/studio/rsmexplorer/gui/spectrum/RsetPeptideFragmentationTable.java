@@ -228,38 +228,36 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
                         // theoFragSeries
                     	fragMa[i].computeChargeFromLabel();
 						m_fragSer[j].computeChargeFromLabel();
-                    	if(fragMa[i].charge == m_fragSer[j].charge) {
-                    		if((fragMa[i].label.contains("*") && m_fragSer[j].frag_series.contains("*"))
-                    			|| (fragMa[i].label.contains("0") && m_fragSer[j].frag_series.contains("0"))
-                    			|| (!fragMa[i].label.contains("*") && !m_fragSer[j].frag_series.contains("*")) 
-                            	|| (!fragMa[i].label.contains("0") && !m_fragSer[j].frag_series.contains("0")))
-                    		{
-                    			if ((fragMa[i].calculated_moz - roundTol <= (m_fragSer[j].masses[k]))
-		                                && (fragMa[i].calculated_moz + roundTol >= m_fragSer[j].masses[k])) {
-		                            nbFound++;
-		                            if (m_fragSer[j].frag_series.toUpperCase().contains(
-		                                    "A")
-		                                    || m_fragSer[j].frag_series.toUpperCase().contains("B")
-		                                    || m_fragSer[j].frag_series.toUpperCase().contains("C")) {
-		                                m_matrix[k][j + 2] = "ABC";
-		
-		                            } else if (m_fragSer[j].frag_series.toUpperCase().contains("X")
-		                                    || m_fragSer[j].frag_series.toUpperCase().contains("Y")
-		                                    || m_fragSer[j].frag_series.toUpperCase().contains("Z")) {
-		                                m_matrix[k][j + 2] = "XYZ";
-		                            } else {
-		                                LoggerFactory.getLogger(
-		                                        "ProlineStudio.ResultExplorer").error(
-		                                        "AW: strange, there is no ABC nor XYZ ions..."
-		                                        + m_fragSer[j].frag_series);
-		                            }
-		                            m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
-		                            m_matrix[k][j + 2] += "intensity";
-		
-			                    } else {
-				                }
-	                    	}
+						if(    fragMa[i].charge == m_fragSer[j].charge
+								&& fragMa[i].countSeq('*') == m_fragSer[j].countSeq('*')
+								&& fragMa[i].countSeq('0') == m_fragSer[j].countSeq('0'))
+	                    {
+                			if ((fragMa[i].calculated_moz - roundTol <= (m_fragSer[j].masses[k]))
+	                                && (fragMa[i].calculated_moz + roundTol >= m_fragSer[j].masses[k])) {
+	                            nbFound++;
+	                            if (m_fragSer[j].frag_series.toUpperCase().contains(
+	                                    "A")
+	                                    || m_fragSer[j].frag_series.toUpperCase().contains("B")
+	                                    || m_fragSer[j].frag_series.toUpperCase().contains("C")) {
+	                                m_matrix[k][j + 2] = "ABC";
+	
+	                            } else if (m_fragSer[j].frag_series.toUpperCase().contains("X")
+	                                    || m_fragSer[j].frag_series.toUpperCase().contains("Y")
+	                                    || m_fragSer[j].frag_series.toUpperCase().contains("Z")) {
+	                                m_matrix[k][j + 2] = "XYZ";
+	                            } else {
+	                                LoggerFactory.getLogger(
+	                                        "ProlineStudio.ResultExplorer").error(
+	                                        "AW: strange, there is no ABC nor XYZ ions..."
+	                                        + m_fragSer[j].frag_series);
+	                            }
+	                            m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
+	                            m_matrix[k][j + 2] += "intensity";
+	
+		                    } else {
+			                }
                     	}
+                    	
                     }
                 }
             }

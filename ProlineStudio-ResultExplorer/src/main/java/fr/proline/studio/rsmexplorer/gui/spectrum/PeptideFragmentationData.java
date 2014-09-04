@@ -64,6 +64,18 @@ public class PeptideFragmentationData {
             }
 
         }
+        public int countSeq (char ch) { // counts the number of times a subSeq appears in label
+        	// serves to count the number of * or 0 in order to compare more easily 
+        	 int occurence = 0;
+             if (label != null) {
+                 for (int i = 0; i < label.length(); i++) {
+                     if (label.charAt(i) == ch) {
+                         occurence++;
+                     }
+                 }
+             }
+             return occurence;
+        }
     }
 
     public static class FragmentationJsonProperties {
@@ -95,6 +107,19 @@ public class PeptideFragmentationData {
                 this.charge = 1;
             }
 
+        }
+        
+        public int countSeq (char ch) { // counts the number of times a subSeq appears in label
+        	// serves to count the number of * or 0 in order to compare more easily 
+        	 int occurence = 0;
+             if (frag_series != null) {
+                 for (int i = 0; i < frag_series.length(); i++) {
+                     if (frag_series.charAt(i) == ch) {
+                         occurence++;
+                     }
+                 }
+             }
+             return occurence;
         }
     }
 }

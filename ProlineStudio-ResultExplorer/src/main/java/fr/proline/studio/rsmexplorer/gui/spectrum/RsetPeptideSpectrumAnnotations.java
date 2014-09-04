@@ -225,7 +225,7 @@ public class RsetPeptideSpectrumAnnotations {
                 // loop through m_masses for each fragment series
                 for (int i = 0; i < fragMa.length; i++) {
                     // find matching fragMatches with theoFragSeries
-                    fragSer[j].computeCharge();
+                    fragSer[j].computeChargeFromLabel();
                     if (j == positionIonABC) {
                         fragTableTheo[0][nbThroughB] = maxY - (maxY - minY) * 0.15; // data[1][i];
                         // intensity for b ions

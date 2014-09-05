@@ -33,12 +33,6 @@ public class IconManager {
         HOUR_GLASS_MINI9,
         HOUR_GLASS_MINI16,
         GEL,
-        RSET,
-        RSET_DECOY,
-        RSM,
-        RSM_DECOY,
-        RSM_ERROR,
-        VIAL,
         PROJECT,
         USER,
         MAXIMIZE,
@@ -59,8 +53,6 @@ public class IconManager {
         DOCUMENT_LIST,
         WEB_LINK,
         TRASH,
-        VIAL_RSET_MERGED,
-        VIAL_RSM_MERGED,
         ALL_IMPORTED,
         PROPERTIES,
         ARROW_RIGHT_SMALL,
@@ -99,7 +91,13 @@ public class IconManager {
         FOLDER,
         FRAGMENTATION,
         BIOLOGICAL_GROUP,
-        BIOLOGICAL_SAMPLE;
+        BIOLOGICAL_SAMPLE,
+        DATASET,
+        DATASET_RSET,
+        DATASET_RSM,
+        DATASET_RSET_DECOY,
+        DATASET_RSM_DECOY,
+        DATASET_RSM_ERROR;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -225,18 +223,6 @@ public class IconManager {
                 return "fr/proline/studio/images/hourGlassMini16x16.png";
             case GEL:
                 return "fr/proline/studio/images/gel.png";
-            case RSET:
-                return "fr/proline/studio/images/resultSet.png";
-            case RSET_DECOY:
-                return "fr/proline/studio/images/resultSetDecoy.png";
-            case RSM:
-                return "fr/proline/studio/images/resultSummary.png";
-            case RSM_DECOY:
-                return "fr/proline/studio/images/resultSummaryDecoy.png";
-            case RSM_ERROR:
-                return "fr/proline/studio/images/resultSummaryError.png";
-            case VIAL:
-                return "fr/proline/studio/images/vial.png";
             case PROJECT:
                 return "fr/proline/studio/images/project.png";
             case USER:
@@ -277,10 +263,6 @@ public class IconManager {
                 return "fr/proline/studio/images/weblink.png";
             case TRASH:
                 return "fr/proline/studio/images/trash.png";
-            case VIAL_RSET_MERGED:
-                return "fr/proline/studio/images/vialMerged.png";
-            case VIAL_RSM_MERGED:
-                return "fr/proline/studio/images/vialRsmMerged.png";
             case ALL_IMPORTED:
                 return "fr/proline/studio/images/all-imported.png"; 
             case PROPERTIES:
@@ -359,7 +341,18 @@ public class IconManager {
                 return "fr/proline/studio/images/biologicalGroup.png";
             case BIOLOGICAL_SAMPLE:
                 return "fr/proline/studio/images/biologicalSample.png";
-
+            case DATASET:
+                return "fr/proline/studio/images/dataset.png";
+            case DATASET_RSET:
+                return "fr/proline/studio/images/dataset_rset.png";
+            case DATASET_RSM:
+                return "fr/proline/studio/images/dataset_rsm.png";
+            case DATASET_RSET_DECOY:
+                return "fr/proline/studio/images/dataset_rset_decoy.png";
+            case DATASET_RSM_DECOY:
+                return "fr/proline/studio/images/dataset_rsm_decoy.png";
+            case DATASET_RSM_ERROR:
+                return "fr/proline/studio/images/dataset_rsm_error.png";
         }
 
 

@@ -22,6 +22,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.TextAnchor;
+import org.slf4j.LoggerFactory;
 
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
@@ -327,8 +328,19 @@ public class RsetPeptideSpectrumErrorAnnotations {
         float orientationFactor = 0;
         TextAnchor pointerAnchor;
 
+       
         if (!abcSerieName.equals("")) {
-            for (int i = 0; i < sizeABCserie; i++) { // loop through the series points
+            if(peptideSequence.length() < sizeABCserie )  // fill sequence in case of length problem. should not happen
+	        {
+	        	LoggerFactory.getLogger(
+	                    "ProlineStudio.ResultExplorer").error(
+	                    "AW: strange, serie length is not same length as sequence length...serie length:"
+	                    + sizeABCserie + " for sequence " + peptideSequence);
+	        	for(int filler = 0 ; filler < (sizeABCserie - peptideSequence.length()); filler++) {
+	        		peptideSequence = peptideSequence + "?";	
+	        	}
+	        }    
+         	for (int i = 0; i < sizeABCserie; i++) { // loop through the series points
 
 
                 // place separators marks------

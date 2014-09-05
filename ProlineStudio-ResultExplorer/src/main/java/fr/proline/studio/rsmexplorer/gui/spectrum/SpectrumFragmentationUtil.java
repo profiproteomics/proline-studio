@@ -38,6 +38,7 @@ public class SpectrumFragmentationUtil {
             m_aaMassHashMap.put('V', (double) 99.06841);
             m_aaMassHashMap.put('W', (double) 186.07931);
             m_aaMassHashMap.put('Y', (double) 163.06333);
+            m_aaMassHashMap.put('?', (double) 100);
         }
 
 

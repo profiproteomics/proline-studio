@@ -250,7 +250,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         toolbar.setFloatable(false);
         
         if (m_startingPanel) {
-            IconManager.IconType iconType = (m_forRSM) ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSET_DECOY;
+            IconManager.IconType iconType = (m_forRSM) ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSET_DECOY;
             m_decoyButton = new JButton(IconManager.getIcon(iconType));
             m_decoyButton.setToolTipText("Display Decoy Data");
             m_decoyButton.setEnabled(false);

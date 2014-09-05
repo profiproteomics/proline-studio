@@ -131,7 +131,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
         // Decoy Button
         if (m_startingPanel) {
-            IconManager.IconType iconType = IconManager.IconType.RSET_DECOY;
+            IconManager.IconType iconType = IconManager.IconType.DATASET_RSET_DECOY;
             m_decoyButton = new JButton(IconManager.getIcon(iconType));
             m_decoyButton.setToolTipText("Display Decoy Data");
             m_decoyButton.setEnabled(false);

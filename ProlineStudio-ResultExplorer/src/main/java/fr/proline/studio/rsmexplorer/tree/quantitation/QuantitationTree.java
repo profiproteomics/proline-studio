@@ -128,7 +128,7 @@ public class QuantitationTree extends AbstractTree {
                  ExportXICAction exportXICActionPep = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPEPS);
                  m_mainActions.add(exportXICActionPep);
                  
-                 ExportXICAction exportXICActionProtSet = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPROT_SETS);
+                 ExportXICAction exportXICActionProtSet = new ExportXICAction(ExportXICAction.ExportType.BASIC_MASTER_QPROT_SETS);
                  m_mainActions.add(exportXICActionProtSet);
                  
 

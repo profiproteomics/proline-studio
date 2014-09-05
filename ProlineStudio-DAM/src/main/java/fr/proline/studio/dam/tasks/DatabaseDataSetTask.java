@@ -31,7 +31,6 @@ import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 import fr.proline.core.orm.uds.dto.DDataset;
-import javax.persistence.NoResultException;
 
 /**
  * Used to load dataset in two cases :
@@ -75,6 +74,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int EMPTY_TRASH = 10;
     private final static int LOAD_DATASET_AND_RSM_INFO = 11;
     private final static int LOAD_DATASET = 12;
+    private final static int CLEAR_DATASET = 13;
      
     private static final Object WRITE_DATASET_LOCK = new Object();
     
@@ -240,6 +240,16 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         setPriority(Priority.HIGH_1);
     }
     
+        /**
+     * Load Rset and Rsm of a dataset
+     * @param dataSet 
+     */
+    public void initClearDataset(DDataset dataset) {
+        setTaskInfo(new TaskInfo("Clear Dataset "+dataset.getName(), false, TASK_LIST_INFO));
+        m_dataset = dataset;
+
+        m_action = CLEAR_DATASET;
+    }
     
     
     @Override
@@ -275,6 +285,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case EMPTY_TRASH:
             case LOAD_DATASET_AND_RSM_INFO:
             case LOAD_DATASET:
+            case CLEAR_DATASET:
                 return true; // done one time
          
         }
@@ -327,6 +338,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return fetchDatasetWithIDAndRSMInfo();
             case LOAD_DATASET:
                 return fetchDataset();
+            case CLEAR_DATASET:
+                return clearDataset();
         }
         
         return false; // should never happen
@@ -822,6 +835,32 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             entityManagerUDS.close();
         }
         
+        return true;
+    }
+    
+    private boolean clearDataset() {
+
+
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            String renameSQL = "UPDATE Dataset d set d.resultSetId=null,d.resultSummaryId=null where d.id = :datasetId";
+            Query renameQuery = entityManagerUDS.createQuery(renameSQL);
+            renameQuery.setParameter("datasetId", m_dataset.getId());
+            renameQuery.executeUpdate();
+
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
+            entityManagerUDS.getTransaction().rollback();
+            return false;
+        } finally {
+            entityManagerUDS.close();
+        }
+
         return true;
     }
     

@@ -37,6 +37,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
         // rendering of the tree
         putClientProperty("JTree.lineStyle", "Horizontal");
+        setRowHeight(18);
 
         IdentificationTree.RSMTreeRenderer renderer = new IdentificationTree.RSMTreeRenderer();
         setCellRenderer(renderer);

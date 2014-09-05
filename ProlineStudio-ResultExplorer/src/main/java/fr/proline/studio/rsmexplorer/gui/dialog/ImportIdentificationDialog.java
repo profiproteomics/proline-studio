@@ -44,10 +44,13 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
     private static ImportIdentificationDialog m_singletonDialog = null;
     
+    private static final String OMSSA_PARSER = "Omssa Parser";
+    private static final String MASCOT_PARSER = "Mascot";
+    
     private final static String[] PARSER_NAMES = {"Mascot", "Omssa"};
     // ABU : added a map to consider the case when a parser handles more than one extensions
     // the key is the extension, the value is the id of the parser in the other arrays
-    private static final Map<String, Integer> EXTENSION_TO_PARSER = new HashMap<String, Integer>();
+    private static final Map<String, Integer> EXTENSION_TO_PARSER = new HashMap<>();
     static {
     	EXTENSION_TO_PARSER.put("dat", 0);
     	EXTENSION_TO_PARSER.put("omx", 1);
@@ -666,6 +669,12 @@ public class ImportIdentificationDialog extends DefaultDialog {
         m_parserParametersPanel.add(parameterList.getPanel(), c);
 
       
+        // allow spectrum matches for all parsers except Mascot
+        boolean allowSaveSpectrumMatches = (parameterList.toString().compareTo(MASCOT_PARSER) != 0);
+        m_saveSpectrumCheckBox.setEnabled(allowSaveSpectrumMatches);
+        if (!allowSaveSpectrumMatches) {
+            m_saveSpectrumCheckBox.setSelected(false);
+        }
     }
     
 
@@ -852,7 +861,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     }
     
     public boolean getSaveSpectrumMatches() {
-        return m_saveSpectrumCheckBox.isSelected();
+        return m_saveSpectrumCheckBox.isEnabled() && m_saveSpectrumCheckBox.isSelected();
     }
     
     public String getParserId() {
@@ -875,7 +884,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     }
     
     private ParameterList createMascotParser() {
-        ParameterList parameterList = new ParameterList("Mascot");
+        ParameterList parameterList = new ParameterList(MASCOT_PARSER);
         parameterList.add(new DoubleParameter("ion.score.cutoff", "Ion Score Cutoff", JTextField.class, new Double(0.0), new Double(0), null));
         parameterList.add(new DoubleParameter("subset.threshold", "Subset Threshold", JTextField.class, new Double(1.0), new Double(0), new Double(1)));
         parameterList.add(new StringParameter("mascot.server.url", "Mascot Server URL (including /cgi/)", JTextField.class, "http://www.matrixscience.com/cgi/", null, null));
@@ -884,7 +893,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     }
     
     private ParameterList createOmssaParser() {
-        ParameterList parameterList = new ParameterList("Omssa Parser");
+        ParameterList parameterList = new ParameterList(OMSSA_PARSER);
         
         Preferences preferences = NbPreferences.root();
         parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "usermod.xml.file", "Usermods file path", JTextField.class, preferences.get("Omssa_Parser.Usermods_file_path", ""), "Usermods XML File", "xml"));

@@ -19,7 +19,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = databox;
 
-        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
         WindowBox winBox = new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
 
         return winBox;
@@ -43,7 +43,7 @@ public class WindowBoxFactory {
         boxes[3].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
         boxes[4] = new DataBoxRsetProteinsForPeptideMatch();
         
-        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
 
         return winBox;
@@ -67,7 +67,7 @@ public class WindowBoxFactory {
         boxes[1] = new DataboxRsetPeptidesOfProtein();
 
         
-        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSET_DECOY : IconManager.IconType.RSET;
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
 
         return winBox;
@@ -100,7 +100,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxRsmPeptide();
 
-        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
         return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
     }  
     
@@ -114,7 +114,7 @@ public class WindowBoxFactory {
         boxes[3] = new DataBoxRsmPeptidesOfProtein();
         boxes[3].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
 
-        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
 
         
@@ -136,7 +136,7 @@ public class WindowBoxFactory {
         boxes[6] = new DataBoxRsetPeptideFragmentation();
         boxes[6].setLayout(AbstractDataBox.DataBoxLayout.TABBED);        
         
-        IconManager.IconType iconType = isDecoy ? IconManager.IconType.RSM_DECOY : IconManager.IconType.RSM;
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
         
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
 

@@ -252,24 +252,36 @@ public class ValidateAction extends AbstractRSMAction {
         for (int i = 0; i < nbSelectedNodes; i++) {
             AbstractNode node = selectedNodes[i];
 
-            // parent node is being created, we can not validate it (for the moment)
+            // if node is being created, we can not validate it (for the moment)
             if (node.isChanging()) {
                 setEnabled(false);
                 return;
             }
 
-            // parent node must be a dataset
+            // node must be a dataset
             if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
                 setEnabled(false);
                 return;
             }
 
-            // parent node must have a ResultSet
+            // node must have a ResultSet
             DataSetNode dataSetNode = (DataSetNode) node;
             if (!dataSetNode.hasResultSet()) {
                 setEnabled(false);
                 return;
             }
+            
+            // parent node
+            AbstractNode parentNode = (AbstractNode) dataSetNode.getParent();
+            if (parentNode.getType() == AbstractNode.NodeTypes.DATA_SET) {
+                DataSetNode parentDatasetNode = (DataSetNode) parentNode;
+                if (parentDatasetNode.hasResultSet()) {
+                    // parent is already merged (RSM or Rset), we forbid to validata a son
+                    setEnabled(false);
+                    return;
+                }
+            }
+            
         }
 
         setEnabled(true);

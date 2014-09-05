@@ -218,7 +218,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         if (m_firstPanel) {
             
             // Decoy Button
-            m_decoyButton = new JButton(IconManager.getIcon(IconManager.IconType.RSM_DECOY));
+            m_decoyButton = new JButton(IconManager.getIcon(IconManager.IconType.DATASET_RSM_DECOY));
             m_decoyButton.setToolTipText("Display Decoy Data");
             m_decoyButton.setEnabled(false);
 

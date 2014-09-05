@@ -118,7 +118,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_decoyButton = new JButton(IconManager.getIcon(IconManager.IconType.RSM_DECOY));
+        m_decoyButton = new JButton(IconManager.getIcon(IconManager.IconType.DATASET_RSM_DECOY));
         m_decoyButton.setToolTipText("Display Decoy Data");
         m_decoyButton.setEnabled(false);
 

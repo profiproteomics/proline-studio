@@ -156,6 +156,10 @@ public class CreateXICAction extends AbstractRSMAction {
             AbstractNode rootNode = (AbstractNode) treeModel.getRoot();
             treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount());
             
+            // expand the parent node to display its children
+            tree.expandNodeIfNeeded(rootNode);
+            
+            
             AccessServiceThread.getAccessServiceThread().addTask(task);
             
          } //End OK entered         

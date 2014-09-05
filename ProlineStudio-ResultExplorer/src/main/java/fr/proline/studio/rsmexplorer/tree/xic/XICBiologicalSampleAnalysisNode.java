@@ -41,9 +41,9 @@ public class XICBiologicalSampleAnalysisNode extends AbstractNode {
     @Override
     public ImageIcon getIcon() {
         if (m_hasError) {
-            return getIcon(IconManager.IconType.RSM_ERROR);
+            return getIcon(IconManager.IconType.DATASET_RSM_ERROR);
         } else {
-            return getIcon(IconManager.IconType.RSM);
+            return getIcon(IconManager.IconType.DATASET_RSM);
         }
     }
 

@@ -1,11 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.Dataset;
-import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.GenerateSpectrumMatchTask;

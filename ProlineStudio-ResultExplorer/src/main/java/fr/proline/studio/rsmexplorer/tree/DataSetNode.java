@@ -42,15 +42,15 @@ public class DataSetNode extends AbstractNode {
                 if (dataset != null) {
                     if (dataset.getResultSummaryId() == null) {
                         if (isChanging()) {
-                            return getIcon(IconManager.IconType.RSM); // will become a RSM
+                            return getIcon(IconManager.IconType.DATASET_RSM); // will become a RSM
                         } else {
-                            return getIcon(IconManager.IconType.RSET);
+                            return getIcon(IconManager.IconType.DATASET_RSET);
                         }
                     } else {
-                        return getIcon(IconManager.IconType.RSM);
+                        return getIcon(IconManager.IconType.DATASET_RSM);
                     }
                 } else {
-                    return getIcon(IconManager.IconType.RSET);
+                    return getIcon(IconManager.IconType.DATASET_RSET);
                 }
             case QUANTITATION: {
                 if (dataset == null || dataset.getQuantitationMethod() == null)
@@ -69,14 +69,14 @@ public class DataSetNode extends AbstractNode {
                 
                 if (dataset != null) {
                     if (dataset.getResultSummaryId() != null) {
-                         return getIcon(IconManager.IconType.VIAL_RSM_MERGED);
+                         return getIcon(IconManager.IconType.DATASET_RSM);  // JPM.TODO DATASET_MERGE
                     }
                     if (dataset.getResultSetId() != null) {
-                        return getIcon(IconManager.IconType.VIAL_RSET_MERGED);
+                        return getIcon(IconManager.IconType.DATASET_RSET);  // JPM.TODO DATASET_MERGE
                     }
                 }
                 
-                return getIcon(IconManager.IconType.VIAL);
+                return getIcon(IconManager.IconType.DATASET);
             case TRASH:
                 return getIcon(IconManager.IconType.TRASH);
             default:

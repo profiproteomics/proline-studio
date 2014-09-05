@@ -25,7 +25,6 @@ import java.awt.Dialog;
 import java.awt.Window;
 import java.util.*;
 import javax.persistence.EntityManager;
-import javax.swing.JScrollPane;
 import javax.swing.tree.TreePath;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +149,7 @@ public class CreateXICDialog extends DefaultDialog {
         
         long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
         
-        Project project = null;
+        Project project;
         String errorMsg = null;
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         
@@ -252,7 +251,7 @@ public class CreateXICDialog extends DefaultDialog {
         
         List _biologicalGroupList = new ArrayList();
         HashMap<String, Long> _rsmIdBySampleAnalysis = new HashMap<>();
-        HashMap<Long, Long> _runIdByRSMId = new HashMap<>();
+        HashMap<Long, Long> _runIdByRSMId;
         HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();
         Map<String, Integer> splNbrByName = new HashMap<>();            
                 

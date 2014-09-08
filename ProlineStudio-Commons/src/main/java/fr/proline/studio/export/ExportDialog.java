@@ -10,7 +10,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.prefs.Preferences;
 
 import javax.imageio.ImageIO;
@@ -44,6 +43,9 @@ public class ExportDialog extends DefaultDialog  {
     private JXTable m_table = null;
     private JPanel m_panel = null;
     private ImageExporterInterface m_imageExporter = null;
+    
+    private JFileChooser m_fchooser;
+
     
     private DefaultDialog.ProgressTask m_task = null;
     
@@ -125,16 +127,24 @@ public class ExportDialog extends DefaultDialog  {
         setButtonName(BUTTON_OK, ((m_exportType == ExporterFactory.EXPORT_IMAGE)
         					   || (m_exportType == ExporterFactory.EXPORT_IMAGE2)) ? "Export Image" : "Export");
 
-        Preferences preferences = NbPreferences.root();
-        String defaultExportPath;
         
+
+        
+        String defaultExportPath;
+        Preferences preferences = NbPreferences.root();
         if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER)) {
            defaultExportPath = preferences.get("DefaultExcelExportPath", "");
         } else { // IMAGE
            defaultExportPath = preferences.get("DefaultImageExportPath", "");
         }
+        if (defaultExportPath.length()>0) {
+            m_fchooser = new JFileChooser(new File(defaultExportPath));
+        } else {
+            m_fchooser = new JFileChooser();
+        }
+        m_fchooser.setMultiSelectionEnabled(false);
         
-        m_fileTextField.setText(defaultExportPath);
+
     }
 
     public final JPanel createExportPanel() {
@@ -161,32 +171,31 @@ public class ExportDialog extends DefaultDialog  {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                JFileChooser fchooser = new JFileChooser();
-
-                fchooser.setMultiSelectionEnabled(false);
+                    
 
                 ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
                 
                 if (exporterInfo != null) {
                     FileNameExtensionFilter filter = new FileNameExtensionFilter(exporterInfo.getName(), exporterInfo.getFileExtension());
-                    fchooser.addChoosableFileFilter(filter);
-                    fchooser.setFileFilter(filter);
+                    m_fchooser.addChoosableFileFilter(filter);
+                    m_fchooser.setFileFilter(filter);
                 }
 
-                File currentFile = new File(m_fileTextField.getText().trim());
+                String textFile = m_fileTextField.getText().trim();
 
-                if (currentFile != null) {
+                if (textFile.length()>0) {
+                    File currentFile = new File(textFile);
                     if (currentFile.isDirectory()) {
-                        fchooser.setCurrentDirectory(currentFile);
+                        m_fchooser.setCurrentDirectory(currentFile);
                     } else {
-                        fchooser.setSelectedFile(currentFile);
+                        m_fchooser.setSelectedFile(currentFile);
                     }
                 }
 
                 
-                int result = fchooser.showOpenDialog(addFileButton);
+                int result = m_fchooser.showOpenDialog(addFileButton);
                 if (result == JFileChooser.APPROVE_OPTION) {
-                    File file = fchooser.getSelectedFile();
+                    File file = m_fchooser.getSelectedFile();
                     
                     String absolutePath = file.getAbsolutePath();
                     String fileName = file.getName();
@@ -292,40 +301,36 @@ public class ExportDialog extends DefaultDialog  {
             preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
             
         } else if (m_exportType == ExporterFactory.EXPORT_IMAGE) {
-        	BufferedImage bi = null;
-        	Graphics g = null; 
-        	
-            bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB);
-            g = bi.createGraphics();
+            BufferedImage bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB);
+            Graphics g = bi.createGraphics();
             m_panel.paint(g);
             g.dispose();
-        	try {
-				ImageIO.write(bi,"png",new File(fileName));
-			} catch (IOException e) {
-				
-				e.printStackTrace();
-			}
-    	
+            try {
+                ImageIO.write(bi, "png", new File(fileName));
+            } catch (IOException e) {
+                LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error exporting png", e);
+            }
+
+            Preferences preferences = NbPreferences.root();
+            preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
 	
         } else if (m_exportType == ExporterFactory.EXPORT_IMAGE2) {
         	
             try {
-            	ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
-    	
-    			if(exporterInfo.getName().contains("png")) {
-    	
-    				LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting png file...to: " + f.toPath().toString());
-    				m_imageExporter.generatePngImage(fileName);
- 
-    			} else if(exporterInfo.getName().contains("svg")) { // svg output
-    				
-					LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting svg file...to: " + f.toPath().toString());
-					m_imageExporter.generateSvgImage(fileName);
-        	         
-    			}	
-    			
-            	
-            	
+                ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
+
+                if (exporterInfo.getName().contains("png")) {
+
+                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting png file...to: " + f.toPath().toString());
+                    m_imageExporter.generatePngImage(fileName);
+
+                } else if (exporterInfo.getName().contains("svg")) { // svg output
+
+                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting svg file...to: " + f.toPath().toString());
+                    m_imageExporter.generateSvgImage(fileName);
+
+                }
+
                
             } catch (Exception e) {
             	LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("error " + e.getMessage() + " while exporting picture");
@@ -333,24 +338,15 @@ public class ExportDialog extends DefaultDialog  {
             
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
-            setVisible(false);
+            
+            return true;
         } 
         
         
         return false;
 
     }
-    
-//    @Override
-//    public void generateSvgImage(String filePath) {
-//    	
-//    }
-//    
-//    @Override
-//	public String getSupportedFormats() {
-//    	return "";
-//    }
-//	
+	
     
     @Override
     public void setVisible(boolean v) {

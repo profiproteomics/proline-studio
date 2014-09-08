@@ -60,7 +60,7 @@ public class ExporterFactory {
            m_listImage2 = new ArrayList<>(2);
 
 
-           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "current size PNG (.png)", "png"));
+           m_listImage2.add(new ExporterInfo(ExporterType.PNG, "PNG (.png)", "png"));
           // m_listImage2.add(new ExporterInfo(ExporterType.PNG, "3000x2000 pixels PNG (.png)", "png"));
            m_listImage2.add(new ExporterInfo(ExporterType.PNG, "SVG (.svg)", "svg"));
           // m_listImage2.add(new ExporterInfo(ExporterType.PNG, "SVG jfreesvg (.svg)", "svg"));

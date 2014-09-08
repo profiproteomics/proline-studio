@@ -668,6 +668,15 @@ public class ImportIdentificationDialog extends DefaultDialog {
         ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
         m_parserParametersPanel.add(parameterList.getPanel(), c);
 
+        if(m_parserComboBox.getSelectedItem().toString().equals(MASCOT_PARSER)) {
+            // uncheck and disable checkbox "Save Spectrum Matches" for Mascot files
+        	m_saveSpectrumCheckBox.setSelected(false);
+        	m_saveSpectrumCheckBox.setEnabled(false);
+        } else {
+        	// enable and check checkbox "Save Spectrum Matches" for Mascot files
+        	m_saveSpectrumCheckBox.setSelected(true);
+        	m_saveSpectrumCheckBox.setEnabled(true);
+        }
       
         // allow spectrum matches for all parsers except Mascot
         boolean allowSaveSpectrumMatches = (parameterList.toString().compareTo(MASCOT_PARSER) != 0);

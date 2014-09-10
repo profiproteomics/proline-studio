@@ -66,10 +66,14 @@ public class RsetPeptideSpectrumErrorAnnotations {
 
         removeErrorAnnotations();
 
-        if ((m_peptideMatch == null) || (m_peptideFragmentationData.isEmpty)) {
+        if ((m_peptideMatch == null) || (m_peptideFragmentationData == null)) {
             return;
         }
 
+        if(m_peptideFragmentationData.isEmpty) {
+        	return;
+        }
+    	
         DMsQuery msQuery = m_peptideMatch.isMsQuerySet() ? m_peptideMatch.getMsQuery() : null;
         Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
 

@@ -80,7 +80,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
     private JComboBox m_instrumentsComboBox = null;
     private JComboBox m_peaklistSoftwaresComboBox = null;
-    private JCheckBox m_saveSpectrumCheckBox ;
+//    private JCheckBox m_saveSpectrumCheckBox ;
     private JComboBox m_decoyComboBox = null;
     private JLabel m_decoyAccessionRegexLabel = null;
     private JTextField m_decoyRegexTextField = null;
@@ -568,10 +568,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        saveSpectrumPanel.add(m_saveSpectrumCheckBox, c);
+//        c.gridx = 0;
+//        c.gridy = 0;
+//        c.weightx = 1;
+//        saveSpectrumPanel.add(m_saveSpectrumCheckBox, c);
         
         return saveSpectrumPanel;
     }
@@ -668,22 +668,12 @@ public class ImportIdentificationDialog extends DefaultDialog {
         ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
         m_parserParametersPanel.add(parameterList.getPanel(), c);
 
-        if(m_parserComboBox.getSelectedItem().toString().equals(MASCOT_PARSER)) {
-            // uncheck and disable checkbox "Save Spectrum Matches" for Mascot files
-        	m_saveSpectrumCheckBox.setSelected(false);
-        	m_saveSpectrumCheckBox.setEnabled(false);
-        } else {
-        	// enable and check checkbox "Save Spectrum Matches" for Mascot files
-        	m_saveSpectrumCheckBox.setSelected(true);
-        	m_saveSpectrumCheckBox.setEnabled(true);
-        }
-      
-        // allow spectrum matches for all parsers except Mascot
-        boolean allowSaveSpectrumMatches = (parameterList.toString().compareTo(MASCOT_PARSER) != 0);
-        m_saveSpectrumCheckBox.setEnabled(allowSaveSpectrumMatches);
-        if (!allowSaveSpectrumMatches) {
-            m_saveSpectrumCheckBox.setSelected(false);
-        }
+//        // allow spectrum matches for all parsers except Mascot
+//        boolean allowSaveSpectrumMatches = (parameterList.toString().compareTo(MASCOT_PARSER) != 0);
+//        m_saveSpectrumCheckBox.setEnabled(allowSaveSpectrumMatches);
+//        if (!allowSaveSpectrumMatches) {
+//            m_saveSpectrumCheckBox.setSelected(false);
+//        }
     }
     
 
@@ -870,7 +860,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
     }
     
     public boolean getSaveSpectrumMatches() {
-        return m_saveSpectrumCheckBox.isEnabled() && m_saveSpectrumCheckBox.isSelected();
+//        return m_saveSpectrumCheckBox.isEnabled() && m_saveSpectrumCheckBox.isSelected();
+    	// return false for mascot result files, true otherwise
+        return (m_parserComboBox.getSelectedItem().toString().compareTo(MASCOT_PARSER) != 0);
     }
     
     public String getParserId() {
@@ -953,9 +945,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
         m_decoyRegexParameter.setUsed(false);
         parameterList.add(m_decoyRegexParameter);
 
-        BooleanParameter saveSpectrumParameter = new BooleanParameter("save_spectrum_matches", "Save Spectrum Matches", JCheckBox.class, Boolean.FALSE);
-        m_saveSpectrumCheckBox = (JCheckBox) saveSpectrumParameter.getComponent(null);
-        parameterList.add(saveSpectrumParameter);
+//        BooleanParameter saveSpectrumParameter = new BooleanParameter("save_spectrum_matches", "Save Spectrum Matches", JCheckBox.class, Boolean.FALSE);
+//        m_saveSpectrumCheckBox = (JCheckBox) saveSpectrumParameter.getComponent(null);
+//        parameterList.add(saveSpectrumParameter);
         
         
         return parameterList;

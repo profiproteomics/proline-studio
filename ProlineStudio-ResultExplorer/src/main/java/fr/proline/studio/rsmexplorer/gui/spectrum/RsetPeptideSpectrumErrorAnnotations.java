@@ -213,6 +213,22 @@ public class RsetPeptideSpectrumErrorAnnotations {
 
        
 
+        // draw horizontal axes for abc, xyz serie name (by default b and y series)
+         plot.clearRangeMarkers();
+         Marker target = new ValueMarker(maxY - (maxY - minY) * 0.25);
+         target.setPaint(xyz_serie_color);
+         target.setLabel(xyzSerieName);
+         target.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
+         target.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
+         plot.addRangeMarker(target);
+         Marker target2 = new ValueMarker(maxY - (maxY - minY) * 0.15);
+         target2.setPaint(abc_serie_color);
+         target2.setLabel(abcSerieName);
+         target2.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
+         target2.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
+         plot.addRangeMarker(target2);
+         
+
         int sizeABCserie = fragSer[positionIonABC].masses.length;
         int sizeXYZserie = fragSer[positionIonXYZ].masses.length;
 
@@ -319,23 +335,9 @@ public class RsetPeptideSpectrumErrorAnnotations {
             }
         }
 
+        
         maxY = m_spectrumMaxY;
         minY = m_spectrumMinY;
-        // draw horizontal axes for abc, xyz serie name (by default b and y series)
-        plot.clearRangeMarkers();
-        Marker target = new ValueMarker(maxY - (maxY - minY) * 0.25);
-        target.setPaint(xyz_serie_color);
-        target.setLabel(xyzSerieName);
-        target.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
-        target.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
-        plot.addRangeMarker(target);
-        Marker target2 = new ValueMarker(maxY - (maxY - minY) * 0.15);
-        target2.setPaint(abc_serie_color);
-        target2.setLabel(abcSerieName);
-        target2.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
-        target2.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
-        plot.addRangeMarker(target2);
-        
         
         double abcPrev = fragTable[1][0] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(0));;
 

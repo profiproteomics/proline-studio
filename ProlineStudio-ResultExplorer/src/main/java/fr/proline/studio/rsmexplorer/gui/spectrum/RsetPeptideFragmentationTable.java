@@ -246,10 +246,7 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 	                                    || m_fragSer[j].frag_series.toUpperCase().contains("Z")) {
 	                                m_matrix[k][j + 2] = "XYZ";
 	                            } else {
-	                                LoggerFactory.getLogger(
-	                                        "ProlineStudio.ResultExplorer").error(
-	                                        "AW: strange, there is no ABC nor XYZ ions..."
-	                                        + m_fragSer[j].frag_series);
+	                                // immonium or anything else than abc,v,w,xyz
 	                            }
 	                            m_matrixIntensity[k][j + 2] = fragMa[i].intensity; // assign matching peak intensity
 	                            m_matrix[k][j + 2] += "intensity";

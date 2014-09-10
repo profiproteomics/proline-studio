@@ -1,8 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui.spectrum;
 
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import fr.proline.core.orm.msi.ObjectTree;
 
 /**
@@ -15,22 +18,29 @@ public class PeptideFragmentationData {
     private FragmentMatch_AW[] m_fragMa;
 
     public PeptideFragmentationData(ObjectTree objectTree) {
-        String clobData = objectTree.getClobData();
-        String jsonProperties = clobData;
-
-        JsonParser parser = new JsonParser();
-        Gson gson = new Gson();
-
-        JsonObject array = parser.parse(jsonProperties).getAsJsonObject();
-        FragmentationJsonProperties jsonProp = gson.fromJson(array, FragmentationJsonProperties.class);
-
-        // compute the charge for each fragment match from the label
-        for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
-            fragMa.computeChargeFromLabel();
+        if(objectTree!= null) {
+	    	String clobData = objectTree.getClobData();
+	        String jsonProperties = clobData;
+	        if(!jsonProperties.equals("")) {
+		        JsonParser parser = new JsonParser();
+		        Gson gson = new Gson();
+		
+		        JsonObject array = parser.parse(jsonProperties).getAsJsonObject();
+		        FragmentationJsonProperties jsonProp = gson.fromJson(array, FragmentationJsonProperties.class);
+		        // logging
+		        //LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug(
+		        //		jsonProperties
+		        //		);
+		                
+		        // compute the charge for each fragment match from the label
+		        for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
+		            fragMa.computeChargeFromLabel();
+		        }
+		
+		        m_fragSer = jsonProp.frag_table;
+		        m_fragMa = jsonProp.frag_matches;
+	        }
         }
-
-        m_fragSer = jsonProp.frag_table;
-        m_fragMa = jsonProp.frag_matches;
 
     }
 

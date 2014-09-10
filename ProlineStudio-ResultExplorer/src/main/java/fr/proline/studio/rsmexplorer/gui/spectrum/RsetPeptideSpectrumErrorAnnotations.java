@@ -165,14 +165,20 @@ public class RsetPeptideSpectrumErrorAnnotations {
 
             switch (fragSer[i].frag_series.charAt(0)) {
 
-                case 'a': // either a,b or c do:
+            
+            // this strategy is to be reviewed. in a next version, we'll be able to choose with serie to display
+            // (b and y by default on the legend axes) and show anyway all series on the graph
+
+            	case 'a': // either a,b or c do:
                 case 'b':
                 case 'c':
                     if (fragSer[i].frag_series.length() > 1) {
                         // then it is either a ++ or a b-H2O and so on...
                     } else { // it's a 'a/b/c' ion
-                        positionIonABC = i;
-                        abcSerieName = "" + fragSer[i].frag_series;
+                    	if(!abcSerieName.equals("b")) {// only if b not already defined, else we keep b
+	                        positionIonABC = i;
+	                        abcSerieName = "" + fragSer[i].frag_series;
+                    	}
                     }
                     break;
                 case 'v':
@@ -183,15 +189,19 @@ public class RsetPeptideSpectrumErrorAnnotations {
                     if (fragSer[i].frag_series.length() > 1) {
                         // then it is either a ++ or a b-H2O and so on...
                     } else { // it's a 'x/y/z' ion
-                        xyzSerieName = "" + fragSer[i].frag_series;
-                        positionIonXYZ = i;
+                    	if(!xyzSerieName.equals("y")) {// only if b not already defined, else we keep b
+	                        xyzSerieName = "" + fragSer[i].frag_series;
+	                        positionIonXYZ = i;
+                    	}
                     }
                     break;
                 case 'z': 
                     if (fragSer[i].frag_series.length() == 3) {
                         if (fragSer[i].frag_series.equals("z+1")) {
-                            xyzSerieName = "(z+1)";
-                            positionIonXYZ = i;
+                        	if(!xyzSerieName.equals("z")) {// only if y not already defined, else we keep b
+	                            xyzSerieName = "(z+1)";
+	                            positionIonXYZ = i;
+                        	}
                         }
                     }
                     break;
@@ -201,19 +211,7 @@ public class RsetPeptideSpectrumErrorAnnotations {
 
         }
 
-        plot.clearRangeMarkers();
-        Marker target = new ValueMarker(maxY - (maxY - minY) * 0.25);
-        target.setPaint(xyz_serie_color);
-        target.setLabel(xyzSerieName);
-        target.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
-        target.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
-        plot.addRangeMarker(target);
-        Marker target2 = new ValueMarker(maxY - (maxY - minY) * 0.15);
-        target2.setPaint(abc_serie_color);
-        target2.setLabel(abcSerieName);
-        target2.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
-        target2.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
-        plot.addRangeMarker(target2);
+       
 
         int sizeABCserie = fragSer[positionIonABC].masses.length;
         int sizeXYZserie = fragSer[positionIonXYZ].masses.length;
@@ -321,6 +319,24 @@ public class RsetPeptideSpectrumErrorAnnotations {
             }
         }
 
+        maxY = m_spectrumMaxY;
+        minY = m_spectrumMinY;
+        // draw horizontal axes for abc, xyz serie name (by default b and y series)
+        plot.clearRangeMarkers();
+        Marker target = new ValueMarker(maxY - (maxY - minY) * 0.25);
+        target.setPaint(xyz_serie_color);
+        target.setLabel(xyzSerieName);
+        target.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
+        target.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
+        plot.addRangeMarker(target);
+        Marker target2 = new ValueMarker(maxY - (maxY - minY) * 0.15);
+        target2.setPaint(abc_serie_color);
+        target2.setLabel(abcSerieName);
+        target2.setLabelAnchor(RectangleAnchor.TOP_RIGHT);
+        target2.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
+        plot.addRangeMarker(target2);
+        
+        
         double abcPrev = fragTable[1][0] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(0));;
 
         boolean xyzPrevFound = false; // indicates if last iteration was a

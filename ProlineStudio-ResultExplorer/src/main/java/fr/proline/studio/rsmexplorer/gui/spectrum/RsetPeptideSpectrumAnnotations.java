@@ -162,8 +162,10 @@ public class RsetPeptideSpectrumAnnotations {
                     if (fragSer[i].frag_series.length() > 1) {
                         // then it is either a ++ or a b-H2O and so on...
                     } else { // it's a 'a/b/c' ion
-                        positionIonABC = i;
-                        abcSerieName = "" + fragSer[i].frag_series;
+                    	if(!abcSerieName.equals("b")) {// only if b not already defined, else we keep b
+	                        positionIonABC = i;
+	                        abcSerieName = "" + fragSer[i].frag_series;
+                        }
                     }
                     break;
                 case 'v':
@@ -174,15 +176,19 @@ public class RsetPeptideSpectrumAnnotations {
                     if (fragSer[i].frag_series.length() > 1) {
                         // then it is either a ++ or a b-H2O and so on...
                     } else { // it's a 'x/y/z' ion
-                        xyzSerieName = "" + fragSer[i].frag_series;
-                        positionIonXYZ = i;
+                    	if(!xyzSerieName.equals("y")) {// only if b not already defined, else we keep b
+	                        xyzSerieName = "" + fragSer[i].frag_series;
+	                        positionIonXYZ = i;
+                    	}
                     }
                     break;
                 case 'z':
                     if (fragSer[i].frag_series.length() == 3) {
                         if (fragSer[i].frag_series.equals("z+1")) {
-                            xyzSerieName = "(z+1)";
-                            positionIonXYZ = i;
+                        	if(!xyzSerieName.equals("z")) {// only if y not already defined, else we keep b
+	                            xyzSerieName = "(z+1)";
+	                            positionIonXYZ = i;
+                        	}
                         }
                     }
                     break;

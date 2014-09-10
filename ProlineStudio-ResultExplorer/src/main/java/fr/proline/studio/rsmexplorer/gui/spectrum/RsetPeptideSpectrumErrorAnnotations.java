@@ -66,7 +66,7 @@ public class RsetPeptideSpectrumErrorAnnotations {
 
         removeErrorAnnotations();
 
-        if ((m_peptideMatch == null) || (m_peptideFragmentationData == null)) {
+        if ((m_peptideMatch == null) || (m_peptideFragmentationData.isEmpty)) {
             return;
         }
 

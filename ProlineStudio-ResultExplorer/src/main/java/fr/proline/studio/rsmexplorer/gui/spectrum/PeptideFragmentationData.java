@@ -16,6 +16,7 @@ public class PeptideFragmentationData {
 
     private TheoreticalFragmentSeries_AW[] m_fragSer;
     private FragmentMatch_AW[] m_fragMa;
+    public boolean isEmpty = true;
 
     public PeptideFragmentationData(ObjectTree objectTree) {
         if(objectTree!= null) {
@@ -39,6 +40,7 @@ public class PeptideFragmentationData {
 		
 		        m_fragSer = jsonProp.frag_table;
 		        m_fragMa = jsonProp.frag_matches;
+		        isEmpty = false;
 	        }
         }
 

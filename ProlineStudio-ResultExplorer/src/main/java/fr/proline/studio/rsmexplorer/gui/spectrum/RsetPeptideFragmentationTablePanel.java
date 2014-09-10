@@ -79,7 +79,10 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 
     
     public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData petpideFragmentationData) {
-        m_fragmentationTable.setData(peptideMatch, petpideFragmentationData);
+        if(petpideFragmentationData.isEmpty) {
+        	return;
+        }
+    	m_fragmentationTable.setData(peptideMatch, petpideFragmentationData);
         
         // update hideFragIntensityButton button
         boolean isEnable =  m_hideFragIntensityButton.isEnabled();
@@ -87,6 +90,7 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
         if (isEnable ^ enable) {
             m_hideFragIntensityButton.setEnabled(enable);
         }
+        
     }
 
     @Override

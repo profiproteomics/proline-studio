@@ -336,8 +336,8 @@ public class RsetPeptideSpectrumErrorAnnotations {
         }
 
         
-        maxY = m_spectrumMaxY;
-        minY = m_spectrumMinY;
+       // maxY = m_spectrumMaxY;
+       // minY = m_spectrumMinY;
         
         double abcPrev = fragTable[1][0] - SpectrumFragmentationUtil.getMassFromAminoAcid(peptideSequence.charAt(0));;
 

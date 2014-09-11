@@ -171,7 +171,9 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
                         if (m_fragSer[i].frag_series.length() > 1) {
                             // then it is either a ++ or a b-H2O and so on...
                         } else { // it's a 'a/b/c' ion
-                            abcSerieName = "" + m_fragSer[i].frag_series.charAt(0);
+                        	if(!abcSerieName.equals("b")) {// only if b not already defined, else we keep b
+                        		abcSerieName = "" + m_fragSer[i].frag_series.charAt(0);
+                            }
                         }
                         break;
                     case 'v':
@@ -182,7 +184,10 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
                         if (m_fragSer[i].frag_series.length() > 1) {
                             // then it is either a ++ or a b-H2O and so on...
                         } else { // it's a 'v/w/x/y/z' ion
-                            xyzSerieName = "" + m_fragSer[i].frag_series.charAt(0);
+                        	if(!xyzSerieName.equals("y")) {// only if b not already defined, else we keep b
+                        		xyzSerieName = "" + m_fragSer[i].frag_series.charAt(0);
+    	                        
+                        	}
                         }
                         break;
                     default:

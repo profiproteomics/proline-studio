@@ -90,7 +90,7 @@ public class ImportSearchResultAsDatasetAction extends AbstractRSMAction {
             final String decoyRegex = dialog.getDecoyRegex();
             final long instrumentId = dialog.getInstrumentId();
             final long peaklistSoftwareId = dialog.getPeaklistSoftwareId();
-            final boolean saveSpectrumMatches = dialog.getSaveSpectrumMatches();
+            final boolean saveSpectrumMatches = false; // ABU old import parameter
             
             IdentificationTree tree = IdentificationTree.getCurrentTree();
             

@@ -859,11 +859,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return peaklistSoftware.getId();
     }
     
-    public boolean getSaveSpectrumMatches() {
-//        return m_saveSpectrumCheckBox.isEnabled() && m_saveSpectrumCheckBox.isSelected();
-    	// return false for mascot result files, true otherwise
-        return (m_parserComboBox.getSelectedItem().toString().compareTo(MASCOT_PARSER) != 0);
-    }
+//    public boolean getSaveSpectrumMatches() {
+////        return m_saveSpectrumCheckBox.isEnabled() && m_saveSpectrumCheckBox.isSelected();
+//    	// return false for mascot result files, true otherwise
+//        return (m_parserComboBox.getSelectedItem().toString().compareTo(MASCOT_PARSER) != 0);
+//    }
     
     public String getParserId() {
         return PARSER_IDS[m_parserComboBox.getSelectedIndex()];

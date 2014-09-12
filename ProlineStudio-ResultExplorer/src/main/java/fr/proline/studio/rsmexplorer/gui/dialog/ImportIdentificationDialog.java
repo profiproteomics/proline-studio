@@ -164,7 +164,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         m_parserParametersPanel = createParametersPanel();
         
         // create panel with option save Spectrum Matches
-        JPanel saveSpectrumPanel = createSaveSpectrumPanel();
+        //JPanel saveSpectrumPanel = createSaveSpectrumPanel();
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -182,8 +182,8 @@ public class ImportIdentificationDialog extends DefaultDialog {
         c.gridy++;
         allParametersPanel.add(m_parserParametersPanel, c);
 
-        c.gridy++;
-        allParametersPanel.add(saveSpectrumPanel, c);
+        /*c.gridy++;
+        allParametersPanel.add(saveSpectrumPanel, c);*/
         
         // init the first parser parameters panel selected
         m_parserComboBox.setSelectedIndex(0);
@@ -556,7 +556,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         return decoyPanel;
     }
     
-    private JPanel createSaveSpectrumPanel() {
+    /*private JPanel createSaveSpectrumPanel() {
         
         JPanel saveSpectrumPanel = new JPanel(new GridBagLayout());
 
@@ -574,7 +574,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
 //        saveSpectrumPanel.add(m_saveSpectrumCheckBox, c);
         
         return saveSpectrumPanel;
-    }
+    }*/
     
     private ArrayList<String> readRegexArray(String regexToAdd) {
         

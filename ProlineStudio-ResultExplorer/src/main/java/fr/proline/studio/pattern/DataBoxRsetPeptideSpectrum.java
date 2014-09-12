@@ -130,12 +130,16 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 ObjectTree objectTree = objectTreeResult[0];
-                m_fragmentationData = (objectTree != null) ? new PeptideFragmentationData(objectTree) : null;
+                m_fragmentationData = (objectTree != null) ? new PeptideFragmentationData(peptideMatch, objectTree) : null;
 
                 ((RsetPeptideSpectrumPanel) m_panel).setData(peptideMatch, m_fragmentationData);
 
                 if (m_fragmentationData != null) {
                     _databox.propagateDataChanged(PeptideFragmentationData.class);
+                }
+                
+                if (finished) {
+                    unregisterTask(taskId);
                 }
 
             }
@@ -143,9 +147,16 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
         // Load data if needed asynchronously
         DatabaseObjectTreeTask task = new DatabaseObjectTreeTask(callback, getProjectId(), peptideMatch, objectTreeResult);
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        Long taskId = task.getId();
+        if (m_previousFragmentationTaskId != null) {
+            // old task is suppressed if it has not been already done
+            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousFragmentationTaskId);
+        }
+        m_previousFragmentationTaskId = taskId;
+        registerTask(task);
 
     }
+    private Long m_previousFragmentationTaskId = null;
     
     
     @Override

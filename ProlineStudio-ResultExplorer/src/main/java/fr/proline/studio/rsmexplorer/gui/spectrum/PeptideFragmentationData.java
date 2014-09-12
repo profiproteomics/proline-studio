@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import fr.proline.core.orm.msi.ObjectTree;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
 /**
  *
@@ -14,36 +15,44 @@ import fr.proline.core.orm.msi.ObjectTree;
  */
 public class PeptideFragmentationData {
 
+    private DPeptideMatch m_peptideMatch;
     private TheoreticalFragmentSeries_AW[] m_fragSer;
     private FragmentMatch_AW[] m_fragMa;
     public boolean isEmpty = true;
 
-    public PeptideFragmentationData(ObjectTree objectTree) {
-        if(objectTree!= null) {
-	    	String clobData = objectTree.getClobData();
-	        String jsonProperties = clobData;
-	        if(!jsonProperties.equals("")) {
-		        JsonParser parser = new JsonParser();
-		        Gson gson = new Gson();
-		
-		        JsonObject array = parser.parse(jsonProperties).getAsJsonObject();
-		        FragmentationJsonProperties jsonProp = gson.fromJson(array, FragmentationJsonProperties.class);
-		        // logging
-		        //LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug(
-		        //		jsonProperties
-		        //		);
-		                
-		        // compute the charge for each fragment match from the label
-		        for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
-		            fragMa.computeChargeFromLabel();
-		        }
-		
-		        m_fragSer = jsonProp.frag_table;
-		        m_fragMa = jsonProp.frag_matches;
-		        isEmpty = false;
-	        }
+    public PeptideFragmentationData(DPeptideMatch peptideMatch, ObjectTree objectTree) {
+        
+        m_peptideMatch = peptideMatch;
+        
+        if (objectTree != null) {
+            String clobData = objectTree.getClobData();
+            String jsonProperties = clobData;
+            if (!jsonProperties.equals("")) {
+                JsonParser parser = new JsonParser();
+                Gson gson = new Gson();
+
+                JsonObject array = parser.parse(jsonProperties).getAsJsonObject();
+                FragmentationJsonProperties jsonProp = gson.fromJson(array, FragmentationJsonProperties.class);
+                // logging
+                //LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug(
+                //		jsonProperties
+                //		);
+
+                // compute the charge for each fragment match from the label
+                for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
+                    fragMa.computeChargeFromLabel();
+                }
+
+                m_fragSer = jsonProp.frag_table;
+                m_fragMa = jsonProp.frag_matches;
+                isEmpty = false;
+            }
         }
 
+    }
+    
+    public DPeptideMatch getPeptideMatch() {
+        return m_peptideMatch;
     }
 
     public TheoreticalFragmentSeries_AW[] getFragmentSeries() {

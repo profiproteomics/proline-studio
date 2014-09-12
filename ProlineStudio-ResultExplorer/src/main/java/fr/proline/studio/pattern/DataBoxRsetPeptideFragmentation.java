@@ -36,8 +36,8 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        final DPeptideMatch peptideMatch = (DPeptideMatch) m_previousDataBox.getData(false, DPeptideMatch.class);
         final PeptideFragmentationData fragmentationData = (PeptideFragmentationData) m_previousDataBox.getData(false, PeptideFragmentationData.class);
+        final DPeptideMatch peptideMatch = (fragmentationData!=null) ? fragmentationData.getPeptideMatch() : null;
 
         if ((m_previousPeptideMatch == peptideMatch) && (fragmentationData == null)) {
             return;

@@ -19,7 +19,6 @@ import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.ui.RectangleAnchor;
 import org.jfree.ui.TextAnchor;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.pattern.AbstractDataBox;
 
 // created by AW
 //
@@ -77,6 +75,10 @@ public class RsetPeptideSpectrumErrorAnnotations {
         DMsQuery msQuery = m_peptideMatch.isMsQuerySet() ? m_peptideMatch.getMsQuery() : null;
         Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
 
+        if (spectrum == null) {
+            return;
+        }
+        
         PeptideFragmentationData.TheoreticalFragmentSeries_AW[] fragSer = m_peptideFragmentationData.getFragmentSeries();
         PeptideFragmentationData.FragmentMatch_AW[] fragMa = m_peptideFragmentationData.getFragmentMatch();
 

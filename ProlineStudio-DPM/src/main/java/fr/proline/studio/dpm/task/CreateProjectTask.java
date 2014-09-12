@@ -12,7 +12,7 @@ import java.util.Map;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
-import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -118,7 +118,7 @@ public class CreateProjectTask extends AbstractServiceTask {
             //Dataset trashDataset = new Dataset(p);
             //trashDataset.setType(Dataset.DatasetType.TRASH);
 
-            //Aggregation aggregation = UDSDataManager.getUDSDataManager().getAggregation(Aggregation.ChildNature.OTHER);
+            //Aggregation aggregation = DatabaseDataManager.getUDSDataManager().getAggregation(Aggregation.ChildNature.OTHER);
             //Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
             //trashDataset.setAggregation(mergedAggregation);
 

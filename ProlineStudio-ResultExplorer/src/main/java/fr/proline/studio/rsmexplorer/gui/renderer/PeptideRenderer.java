@@ -110,7 +110,11 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
             return res;
         }
 
-        m_basicTextForExport = peptide.getSequence();
+        if (peptide == null) {
+            m_basicTextForExport = "";
+        } else {
+            m_basicTextForExport = peptide.getSequence();
+        }
         
         return m_basicTextForExport;
 

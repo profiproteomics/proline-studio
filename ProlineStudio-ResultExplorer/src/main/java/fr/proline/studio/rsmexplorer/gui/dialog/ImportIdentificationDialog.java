@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
-import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.serverfilesystem.RootInfo;
 import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
@@ -928,12 +928,12 @@ public class ImportIdentificationDialog extends DefaultDialog {
             }  
         };
         
-        m_instrumentsComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray());
-        ObjectParameter<InstrumentConfiguration> instrumentParameter = new ObjectParameter<>("instrument", "Instrument", m_instrumentsComboBox, UDSDataManager.getUDSDataManager().getInstrumentsWithNullArray(), null, -1, instrumentToString);
+        m_instrumentsComboBox = new JComboBox(DatabaseDataManager.getDatabaseDataManager().getInstrumentsWithNullArray());
+        ObjectParameter<InstrumentConfiguration> instrumentParameter = new ObjectParameter<>("instrument", "Instrument", m_instrumentsComboBox, DatabaseDataManager.getDatabaseDataManager().getInstrumentsWithNullArray(), null, -1, instrumentToString);
         parameterList.add(instrumentParameter);
         
-        m_peaklistSoftwaresComboBox = new JComboBox(UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray());
-        ObjectParameter<PeaklistSoftware> peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", m_peaklistSoftwaresComboBox, UDSDataManager.getUDSDataManager().getPeaklistSoftwaresWithNullArray(), null, -1, softwareToString);
+        m_peaklistSoftwaresComboBox = new JComboBox(DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray());
+        ObjectParameter<PeaklistSoftware> peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", m_peaklistSoftwaresComboBox, DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray(), null, -1, softwareToString);
         parameterList.add(peaklistParameter);
         
         m_decoyComboBox = new JComboBox(DECOY_VALUES);

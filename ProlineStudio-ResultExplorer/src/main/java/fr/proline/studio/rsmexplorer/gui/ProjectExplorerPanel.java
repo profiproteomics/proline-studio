@@ -3,7 +3,7 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
@@ -188,7 +188,7 @@ public class ProjectExplorerPanel extends JPanel {
                     // data needed to create the project
                     String projectName = dialog.getProjectName();
                     String projectDescription = dialog.getProjectDescription();
-                    UserAccount owner = UDSDataManager.getUDSDataManager().getProjectUser();
+                    UserAccount owner = DatabaseDataManager.getDatabaseDataManager().getProjectUser();
 
                     // look where to put the node (alphabetical order)
                     int insertionIndex = 0;
@@ -407,7 +407,7 @@ public class ProjectExplorerPanel extends JPanel {
 
 
         DatabaseProjectTask task = new DatabaseProjectTask(callback);
-        task.initLoadProject(UDSDataManager.getUDSDataManager().getProjectUserName(), projectList);
+        task.initLoadProject(DatabaseDataManager.getDatabaseDataManager().getProjectUserName(), projectList);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
     }
 

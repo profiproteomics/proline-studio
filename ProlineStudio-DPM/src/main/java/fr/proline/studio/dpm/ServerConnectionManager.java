@@ -2,7 +2,7 @@ package fr.proline.studio.dpm;
 
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseConnectionTask;

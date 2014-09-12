@@ -3,7 +3,9 @@ package fr.proline.studio.gui;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
+import java.util.prefs.Preferences;
 import javax.swing.*;
+import org.openide.util.NbPreferences;
 
 
 
@@ -21,11 +23,19 @@ public class InfoDialog extends DefaultDialog {
     
     private String m_message = null;
     
+    private JCheckBox m_showNextTimecheckBox = null;
+    private String m_showAtStartKey = null;
+    
     public InfoDialog(Window parent, InfoType type, String title, String message) {
+        this(parent, type, title, message, null);
+    }
+    public InfoDialog(Window parent, InfoType type, String title, String message, String showAtStartKey) {
+
         super(parent);
 
         setTitle(title);
         m_message = message;
+        m_showAtStartKey = showAtStartKey;
 
         // hide default and ol button
         setButtonVisible(BUTTON_HELP, false);
@@ -77,6 +87,22 @@ public class InfoDialog extends DefaultDialog {
         c.weightx = 1;
         c.gridx++;
         internalPanel.add(infoPanel, c);
+        
+        if (showAtStartKey != null) {
+            
+            m_showNextTimecheckBox = new JCheckBox("Do not show this dialog again at start");
+            m_showNextTimecheckBox.setBackground(Color.white);
+            Preferences preferences = NbPreferences.root();
+            boolean selected = preferences.getBoolean(showAtStartKey, Boolean.FALSE);
+            m_showNextTimecheckBox.setSelected(selected);
+   
+            c.weighty = 0;
+            c.gridy++;
+            c.gridx=0;
+            c.gridwidth=2;
+            internalPanel.add(m_showNextTimecheckBox, c);
+            
+        }
 
         
         
@@ -126,6 +152,12 @@ public class InfoDialog extends DefaultDialog {
 
     @Override
     protected boolean okCalled() {
+        
+        if (m_showNextTimecheckBox != null) {
+            Preferences preferences = NbPreferences.root();
+            preferences.putBoolean(m_showAtStartKey, !m_showNextTimecheckBox.isSelected());
+        }
+        
         return true;
     }
     @Override
@@ -133,7 +165,10 @@ public class InfoDialog extends DefaultDialog {
         return true;
     }
 
-
+    public static boolean showAtStart(String showAtStartKey) {
+        Preferences preferences = NbPreferences.root();
+        return preferences.getBoolean(showAtStartKey, Boolean.TRUE);
+    }
     
     
 }

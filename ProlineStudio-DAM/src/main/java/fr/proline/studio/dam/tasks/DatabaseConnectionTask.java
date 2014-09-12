@@ -6,7 +6,7 @@ import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.repository.ProlineDatabaseType;
 import fr.proline.repository.DatabaseConnectorFactory;
 import fr.proline.repository.IDatabaseConnector;
-import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.List;
@@ -153,7 +153,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
                     TypedQuery<UserAccount> userQuery = entityManagerUDS.createQuery("SELECT user FROM fr.proline.core.orm.uds.UserAccount user ORDER BY user.login ASC", UserAccount.class);
                     List<UserAccount> userList = userQuery.getResultList();
-                    UDSDataManager.getUDSDataManager().setProjectUsers(userList);
+                    DatabaseDataManager.getDatabaseDataManager().setProjectUsers(userList);
 
                     entityManagerUDS.getTransaction().commit();
 
@@ -201,8 +201,8 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
                 }
                 
                 // keep some information to be able to add MSI connection to Netbeans Service
-                UDSDataManager.getUDSDataManager().setUdsJdbcDriver(udsJdbcDriver);
-                UDSDataManager.getUDSDataManager().setUdsJdbcURL(udsJdbcUrl);
+                DatabaseDataManager.getDatabaseDataManager().setUdsJdbcDriver(udsJdbcDriver);
+                DatabaseDataManager.getDatabaseDataManager().setUdsJdbcURL(udsJdbcUrl);
                 
                 
             } else if (action == UDS_USER_TEST) {
@@ -250,7 +250,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
     private boolean checkProjectUser() {
         // check if the projectUser asked is known
-        UDSDataManager udsMgr = UDSDataManager.getUDSDataManager();
+        DatabaseDataManager udsMgr = DatabaseDataManager.getDatabaseDataManager();
         boolean foundUser = false;
         UserAccount[] projectUsers = udsMgr.getProjectUsersArray();
         int nb = projectUsers.length;
@@ -281,7 +281,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
             TypedQuery<InstrumentConfiguration> instrumentQuery = entityManagerUDS.createQuery("SELECT i FROM fr.proline.core.orm.uds.InstrumentConfiguration i ORDER BY i.name ASC", InstrumentConfiguration.class);
             List<InstrumentConfiguration> instrumentList = instrumentQuery.getResultList();
-            UDSDataManager.getUDSDataManager().setIntruments(instrumentList);
+            DatabaseDataManager.getDatabaseDataManager().setIntruments(instrumentList);
 
             entityManagerUDS.getTransaction().commit();
 
@@ -299,7 +299,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
             TypedQuery<PeaklistSoftware> peaklistSoftwareQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.PeaklistSoftware p ORDER BY p.name ASC", PeaklistSoftware.class);
             List<PeaklistSoftware> peaklistSoftwareList = peaklistSoftwareQuery.getResultList();
-            UDSDataManager.getUDSDataManager().setPeaklistSofwares(peaklistSoftwareList);
+            DatabaseDataManager.getDatabaseDataManager().setPeaklistSofwares(peaklistSoftwareList);
 
             entityManagerUDS.getTransaction().commit();
 
@@ -317,7 +317,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
 
             TypedQuery<Aggregation> aggregationQuery = entityManagerUDS.createQuery("SELECT a FROM fr.proline.core.orm.uds.Aggregation a", Aggregation.class);
             List<Aggregation> aggregationList = aggregationQuery.getResultList();
-            UDSDataManager.getUDSDataManager().setAggregationList(aggregationList);
+            DatabaseDataManager.getDatabaseDataManager().setAggregationList(aggregationList);
 
             entityManagerUDS.getTransaction().commit();
 

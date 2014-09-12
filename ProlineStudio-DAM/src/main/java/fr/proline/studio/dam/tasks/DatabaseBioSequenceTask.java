@@ -7,6 +7,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.module.seq.BioSequenceProvider;
 import fr.proline.module.seq.dto.BioSequenceWrapper;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +63,17 @@ public class DatabaseBioSequenceTask extends AbstractDatabaseTask {
     public static boolean fetchData(List<DProteinMatch> proteinMatchList, Long rsmId) {
 
         int nbProteinMatches = proteinMatchList.size();
+        
+        if (! DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()) {
+            // Seq Database does not exists : no data is available
+            for (int i = 0; i < nbProteinMatches; i++) {
+                DProteinMatch proteinMatch = proteinMatchList.get(i);
+                proteinMatch.setDBioSequence(null);
+            }
+            return true;
+        }
+        
+        
         ArrayList<String> values = new ArrayList<>(nbProteinMatches);
         for (int i = 0; i < nbProteinMatches; i++) {
             String accession = proteinMatchList.get(i).getAccession();

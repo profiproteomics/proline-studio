@@ -11,6 +11,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.ps.PeptidePtm;
 import fr.proline.module.seq.BioSequenceProvider;
 import fr.proline.module.seq.dto.BioSequenceWrapper;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -123,6 +124,12 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
 
         if (peptideInstances == null) {
             m_editorPane.setText("");
+            return;
+        }
+        
+         if (! DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()) {
+            // Seq Database does not exists : no data is available
+             m_editorPane.setText("There is no Protein Sequence Database available. Please contact your IT Administrator to install it.");
             return;
         }
         

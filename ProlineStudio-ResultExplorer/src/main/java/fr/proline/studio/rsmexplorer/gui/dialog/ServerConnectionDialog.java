@@ -1,11 +1,10 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.uds.UserAccount;
-import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.ConnectionDialog;
-import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import java.awt.Window;
 import javax.swing.*;
@@ -18,7 +17,6 @@ import org.openide.windows.WindowManager;
 public class ServerConnectionDialog extends ConnectionDialog {
 
     private boolean m_changingUser = false;
-    private String m_keepLastPasswordForChangingUser = null;
     
     private static ServerConnectionDialog m_singletonDialog = null;
     
@@ -60,46 +58,9 @@ public class ServerConnectionDialog extends ConnectionDialog {
             return false;
         }
         
-        /*if (m_changingUser) {
-            // aleady connected to the server and UDS database, we check the new user
-            String projectUser = m_userTextField.getText();
-            String password = new String(m_passwordField.getPassword());
-            
-            UDSDataManager udsMgr = UDSDataManager.getUDSDataManager();
-            boolean foundUser = false;
-            UserAccount[] projectUsers = udsMgr.getProjectUsersArray();
-            int nb = projectUsers.length;
-            for (int i = 0; i < nb; i++) {
-                UserAccount account = projectUsers[i];
-                if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
-                    udsMgr.setProjectUser(account);
-                    foundUser = true;
-                    break;
-                }
-            }
-            
-            if (!foundUser) {
-                 setStatus(true, "Unknown Project User: "+projectUser);
-                 highlight(m_userTextField);
-                 return false;
-            }
-            
-            if (m_keepLastPasswordForChangingUser.compareTo(password) != 0) {
-                setStatus(true, "Incorrect Password");
-                highlight(m_passwordField);
-                return false;
-            }
 
-            // start to load the data for the new user
-            ProjectExplorerPanel.getProjectExplorerPanel().startLoadingProjects();
+        connect(m_changingUser);
 
-            
-            return true;
- 
-        } else {*/
-            connect(m_changingUser);
-        //}
-        
         // dialog will be closed if the connection is established
         return false;
     }
@@ -149,12 +110,9 @@ public class ServerConnectionDialog extends ConnectionDialog {
                     JOptionPane.showMessageDialog(m_singletonDialog, connectionError, "Database Connection Error", JOptionPane.ERROR_MESSAGE);
                 } else if (serverManager.isConnectionDone()) {
                     
-                    m_keepLastPasswordForChangingUser = password;
-                    
+
                     storeDefaults();
                     setVisible(false);     
-                    
-                    
                     
                     // Open the Help
                     if (HelpDialog.showAtStart()) {
@@ -169,17 +127,28 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         });
                     }
                     
+                    // check if we have SeqDb
+                    if (SeqDBInfoDialog.showAtStart() && !DatabaseDataManager.getDatabaseDataManager().isSeqDatabaseExists()) {
+                        SwingUtilities.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                SeqDBInfoDialog seqDBInfoDialog = new SeqDBInfoDialog(WindowManager.getDefault().getMainWindow());
+                                seqDBInfoDialog.centerToScreen();
+                                seqDBInfoDialog.setVisible(true);
+                            }
+                        });
+                    }
+
                     if (changingUser) {
 
-                        UDSDataManager udsMgr = UDSDataManager.getUDSDataManager();
-                        boolean foundUser = false;
+                        DatabaseDataManager udsMgr = DatabaseDataManager.getDatabaseDataManager();
                         UserAccount[] projectUsers = udsMgr.getProjectUsersArray();
                         int nb = projectUsers.length;
                         for (int i = 0; i < nb; i++) {
                             UserAccount account = projectUsers[i];
                             if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
                                 udsMgr.setProjectUser(account);
-                                foundUser = true;
                                 break;
                             }
                         }

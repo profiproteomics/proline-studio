@@ -16,7 +16,7 @@ import fr.proline.core.orm.uds.*;
 import fr.proline.core.orm.uds.repository.ExternalDbRepository;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.repository.ProlineDatabaseType;
-import fr.proline.studio.dam.UDSDataManager;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.taskinfo.TaskError;
@@ -449,9 +449,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             try {
                 ConnectionManager cm = ConnectionManager.getDefault();
 
-                JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers( UDSDataManager.getUDSDataManager().getUdsJdbcDriver() )[0]; //JPM.WART : same driver for uds and msi
+                JDBCDriver driver = JDBCDriverManager.getDefault().getDrivers( DatabaseDataManager.getDatabaseDataManager().getUdsJdbcDriver() )[0]; //JPM.WART : same driver for uds and msi
 
-                String udsJdbcUrl = UDSDataManager.getUDSDataManager().getUdsJdbcURL();
+                String udsJdbcUrl = DatabaseDataManager.getDatabaseDataManager().getUdsJdbcURL();
                 
                 String msiJdbcUrl = udsJdbcUrl.substring(0, udsJdbcUrl.lastIndexOf('/')+1) + msiDb.getDbName();
                 
@@ -923,7 +923,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             d = new Dataset(mergedProject);
             d.setType(Dataset.DatasetType.AGGREGATE);
             
-            Aggregation aggregation = UDSDataManager.getUDSDataManager().getAggregation(m_datasetType);
+            Aggregation aggregation = DatabaseDataManager.getDatabaseDataManager().getAggregation(m_datasetType);
             Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
             d.setAggregation(mergedAggregation);
  

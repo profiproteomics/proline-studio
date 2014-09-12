@@ -290,9 +290,9 @@ public class IconManager {
             case QUANT:
                 return "fr/proline/studio/images/chart-quant.png";
             case QUANT_XIC:
-                return "fr/proline/studio/images/chart-quantXic.png";
+                return "fr/proline/studio/images/chart-quantXic2.png";
             case QUANT_SC:
-                return "fr/proline/studio/images/chart-quantSC.png";                
+                return "fr/proline/studio/images/chart-quantSC2.png";                
             case BOOK:
                 return "fr/proline/studio/images/book.png";
             case BOOK_OPEN:

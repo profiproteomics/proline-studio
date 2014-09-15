@@ -1,7 +1,10 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 
+import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.ServerConnectionManager;
+import fr.proline.studio.gui.InfoDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
@@ -104,6 +107,22 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
 
         } else {
             // Disconnect...
+            
+            
+            // check if there is tasks being done which ask not to disconnect/close the application
+            if (TaskInfoManager.getTaskInfoManager().askBeforeExitingApp()) {
+                InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not disconnect. Important tasks are being done.\nAre you sure you want to disconnect ?");
+                exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
+                exitDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
+                exitDialog.centerToFrame(WindowManager.getDefault().getMainWindow());
+                exitDialog.setVisible(true);
+
+                if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {
+                    // No clicked
+                    return;
+                }
+
+            }
             
             // close all specific windows
             Set<TopComponent> tcs = TopComponent.getRegistry().getOpened();

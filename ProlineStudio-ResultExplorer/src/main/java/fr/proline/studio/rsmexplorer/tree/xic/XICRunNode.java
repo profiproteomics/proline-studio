@@ -94,6 +94,7 @@ public class XICRunNode extends AbstractNode {
                     // TODO : how to choose the right rawfile or run instead of the first one ??
                     ((RunInfoData) getData()).setRawFile(m_rawFileList.get(0));
                     ((RunInfoData) getData()).setRun(m_rawFileList.get(0).getRuns().get(0));
+                    ((RunInfoData) getData()).setRawFilePath(m_rawFileList.get(0).getDirectory()+File.separator+m_rawFileList.get(0).getRawFileName());
                 } else {
                     warnParent(true);
                     ((RunInfoData) getData()).setMessage("<html><font color='#FF0000'>Multiple Raw Files found, select one</font></html>");
@@ -174,11 +175,14 @@ public class XICRunNode extends AbstractNode {
                     // we have found the raw file in the database, we use this one
                     ((RunInfoData) getData()).setRawFile(m_rawFileList.get(0));
                     ((RunInfoData) getData()).setRun(m_rawFileList.get(0).getRuns().get(0));
+                    ((RunInfoData) getData()).setRawFilePath(m_rawFileList.get(0).getDirectory()+File.separator+m_rawFileList.get(0).getRawFileName());
                 } else {
                     // we use the file choosen by the user
                     RawFile rawFile = new RawFile();
-                    rawFile.setRawFileName(selectedFile.getPath());
+                    rawFile.setDirectory(selectedFile.getPath());
+                    rawFile.setRawFileName(selectedFile.getName());
                     ((RunInfoData) getData()).setRawFile(rawFile);
+                    ((RunInfoData) getData()).setRawFilePath(selectedFile.getPath());
                 }
                 setIsChanging(false);
                 m_treeModel.nodeChanged(_this);

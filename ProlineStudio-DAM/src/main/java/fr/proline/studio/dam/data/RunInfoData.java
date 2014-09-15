@@ -14,11 +14,20 @@ public class RunInfoData extends AbstractData {
     
     private String m_peakListPath = null;
     private RawFile m_rawFile = null;
+    private String m_rawFilePath = null;
     private Run m_run = null;
     private String m_message = null;
     
     public RunInfoData() {
         
+    }
+ 
+    public void setRawFilePath(String rawFilePath) {
+        m_rawFilePath = rawFilePath;
+    }
+    
+    public String getRawFilePath() {
+        return m_rawFilePath;
     }
     
     public void setPeakListPath(String peakListPath) {

@@ -46,7 +46,7 @@ public class RegisterRawFileTask extends AbstractServiceTask {
             request.setMethod("register");
             Map<String, Object> params = new HashMap<>();
             Map<String, String> propertiesMap = new HashMap<>();
-            propertiesMap.put("mzdb_file_path", m_runInfoData.getRawFile().getRawFileName());
+            propertiesMap.put("mzdb_file_path", m_raw_file_path);
             params.put("raw_file_path", m_raw_file_path);
             params.put("properties", propertiesMap);
             params.put("instrument_id", m_instrumentId);

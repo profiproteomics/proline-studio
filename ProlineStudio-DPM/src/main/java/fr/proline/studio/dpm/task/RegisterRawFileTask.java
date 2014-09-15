@@ -25,10 +25,10 @@ public class RegisterRawFileTask extends AbstractServiceTask {
     private long m_ownerId;
     private RunInfoData m_runInfoData;
             
-    public RegisterRawFileTask(AbstractServiceCallback callback, String rawPath,  long instrumentId, long ownerId, RunInfoData runInfo) {
-        super(callback, true /*synchronous*/, new TaskInfo("Register raw file "+rawPath, true, TASK_LIST_INFO));
+    public RegisterRawFileTask(AbstractServiceCallback callback, long instrumentId, long ownerId, RunInfoData runInfo) {
+        super(callback, true /*synchronous*/, new TaskInfo("Register raw file "+runInfo.getRawFilePath(), true, TASK_LIST_INFO));
         
-        m_raw_file_path = (rawPath != null) ? rawPath : runInfo.getRawFile().getRawFileName();
+        m_raw_file_path = runInfo.getRawFilePath();
         m_ownerId = ownerId;
         m_instrumentId = instrumentId;
         m_runInfoData = runInfo;

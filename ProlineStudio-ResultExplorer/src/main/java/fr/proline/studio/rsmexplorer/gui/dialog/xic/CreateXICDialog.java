@@ -204,7 +204,7 @@ public class CreateXICDialog extends DefaultDialog {
                                             };
                                             // TODO : get the right instrumentId !!! 
                                             long instrumentID = 1;
-                                            RegisterRawFileTask task = new RegisterRawFileTask(callback, runData.getRawFile().getRawFileName(), instrumentID, project.getOwner().getId(), runData);
+                                            RegisterRawFileTask task = new RegisterRawFileTask(callback, instrumentID, project.getOwner().getId(), runData);
                                             AccessServiceThread.getAccessServiceThread().addTask(task);
                                             // wait untill the files are loaded
                                             mutexFileRegistered.wait();
@@ -500,7 +500,7 @@ public class CreateXICDialog extends DefaultDialog {
         if (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
             XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) node;
             if (sampleAnalysisNode.getChildCount() != 1 ||  ((RunInfoData)((AbstractNode)sampleAnalysisNode.getChildAt(0)).getData()).getRawFile()==null) {
-                showErrorOnNode((AbstractNode)sampleAnalysisNode.getChildAt(0), "You must specify a Raw(meDb) File for each identification.");
+                showErrorOnNode((AbstractNode)sampleAnalysisNode.getChildAt(0), "You must specify a Raw(mzDb) File for each identification.");
                 return false;
             }
         }

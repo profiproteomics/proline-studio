@@ -35,9 +35,15 @@ public class PeptideFragmentationData {
                 FragmentationJsonProperties jsonProp = gson.fromJson(array, FragmentationJsonProperties.class);
                 // logging
                 //LoggerFactory.getLogger("ProlineStudio.ResultExplorer").debug(
-                //		jsonProperties
+                //		"peptide match id: " + m_peptideMatch.getId() +
+                //		 " - " + jsonProperties
                 //		);
 
+                if(jsonProp.frag_matches == null) {
+        			System.out.println("no fragment match");
+        			jsonProp.frag_matches = new FragmentMatch_AW[0];
+        		}  
+                
                 // compute the charge for each fragment match from the label
                 for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
                     fragMa.computeChargeFromLabel();

@@ -252,6 +252,9 @@ public class RsetPeptideSpectrumErrorAnnotations {
         int nbFound = 0;
         int nbThroughB = 0;
         int nbThroughY = 0;
+        if(fragMa.length == 0 ) {
+			return;
+		}
         for (j = 0; j < fragSer.length; j++) { // loop through theoFragment
             // series here
             for (int k = 0; k < fragSer[j].masses.length; k++) { // loop

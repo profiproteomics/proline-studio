@@ -349,6 +349,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         long projectId = m_project.getId();
 
+        ArrayList<Long> idList = new ArrayList<>();
+        HashMap<Long, DDataset> ddatasetMap = new HashMap<>();
+        ArrayList<Long> rsetIdList = new ArrayList<>();
         
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
@@ -375,8 +378,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             }
 
 
-            ArrayList<Long> idList = new ArrayList<>();
-            HashMap<Long, DDataset> ddatasetMap = new HashMap<>();
+            
             
             
             DDataset trash = null;
@@ -389,6 +391,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     trash = datasetCur;
                 } else {
                     m_list.add(new DataSetData(datasetCur));
+                    Long resultSetId = datasetCur.getResultSetId();
+                    rsetIdList.add(resultSetId);
                 }
                 
                                 
@@ -426,7 +430,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     ddatasetMap.get(id).setQuantitationMethod(quantitationMethod);
                 }
                 
-                
+   
         
             }
             
@@ -481,6 +485,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             entityManagerUDS.close();
         }
 
+        completeMergeInfo(projectId, rsetIdList);
+        
+        
         return true;
     }
     
@@ -489,6 +496,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         long parentDatasetId = m_parentDataset.getId();
 
+        ArrayList<Long> rsetIdList = new ArrayList<>();
         
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();  
         try {
@@ -511,6 +519,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 Long id = datasetCur.getId();
                 idList.add(id);
                 ddatasetMap.put(id, datasetCur);
+                rsetIdList.add(datasetCur.getResultSetId());
             }
             
             // Load Aggregation and QuantitationMethod separately
@@ -553,9 +562,65 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             entityManagerUDS.close();
         }
 
+        completeMergeInfo(m_parentDataset.getProject().getId(), rsetIdList);
+        
         return true;
     }
     
+        private boolean completeMergeInfo(Long projectId, ArrayList<Long> rsetIdList) {
+        if (!m_list.isEmpty()) {
+            // fetch if there is a merged rsm
+            EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
+            try {
+
+                entityManagerMSI.getTransaction().begin();
+
+                HashSet<Long> m_rsetFromMergedRsm = new HashSet<>();
+
+                Query mergeInfoQuery = entityManagerMSI.createQuery("SELECT r.id, r.mergedRsmId FROM ResultSet r WHERE r.id IN (:listId)");
+                mergeInfoQuery.setParameter("listId", rsetIdList);
+                List<Object[]> results = mergeInfoQuery.getResultList();
+                Iterator<Object[]> itMergedInfo = results.iterator();
+                while (itMergedInfo.hasNext()) {
+                    Object[] resCur = itMergedInfo.next();
+                    Long rsetId = (Long) resCur[0];
+                    Long mergedRsmId = (Long) resCur[1];
+                    if (mergedRsmId != null) {
+                        m_rsetFromMergedRsm.add(rsetId);
+                    }
+                }
+
+                Iterator<AbstractData> it = m_list.iterator();
+                while (it.hasNext()) {
+                    AbstractData data = (AbstractData) it.next();
+                   
+                    if ( data.getDataType() != AbstractData.DataTypes.DATA_SET) {
+                        continue;
+                    }
+                    DataSetData datasetData = (DataSetData) data;
+                    DDataset dataset = datasetData.getDataset();
+                    Long rsetId = dataset.getResultSetId();
+                    if (m_rsetFromMergedRsm.contains(rsetId)) {
+                        dataset.setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY);
+                    } else {
+                        dataset.setMergeInformation(DDataset.MergeInformation.MERGE_UNKNOW);
+                    }
+                }
+
+                entityManagerMSI.getTransaction().commit();
+            } catch (Exception e) {
+                m_logger.error(getClass().getSimpleName() + " failed", e);
+                m_taskError = new TaskError(e);
+                entityManagerMSI.getTransaction().rollback();
+                return false;
+            } finally {
+                entityManagerMSI.close();
+            }
+        }
+
+        return true;
+    }
+
     public boolean fetchRsetAndRsm() {
 
         long projectId = -1;

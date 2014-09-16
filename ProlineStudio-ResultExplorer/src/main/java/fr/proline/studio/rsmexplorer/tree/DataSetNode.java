@@ -4,6 +4,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DDataset.MergeInformation;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
@@ -42,10 +43,11 @@ public class DataSetNode extends AbstractNode {
                 if (dataset != null) {
                     if (dataset.getResultSummaryId() == null) {
                         if (isChanging()) {
-                            return getIcon(IconManager.IconType.DATASET_RSM); // will become a RSM
+                            // will become a RSM
+                            return getIcon(IconManager.IconType.DATASET_RSM); 
                         } else {
                             return getIcon(IconManager.IconType.DATASET_RSET);
-                        }
+                         }
                     } else {
                         return getIcon(IconManager.IconType.DATASET_RSM);
                     }
@@ -69,10 +71,15 @@ public class DataSetNode extends AbstractNode {
                 
                 if (dataset != null) {
                     if (dataset.getResultSummaryId() != null) {
-                         return getIcon(IconManager.IconType.DATASET_RSM);  // JPM.TODO DATASET_MERGE
+                        MergeInformation mergeInfo = ((DataSetData) getData()).getDataset().getMergeInformation();
+                        if (mergeInfo.compareTo(MergeInformation.MERGE_IDENTIFICATION_SUMMARY) == 0) {
+                            return getIcon(IconManager.IconType.DATASET_RSM_MERGED);
+                        } else {
+                            return getIcon(IconManager.IconType.DATASET_RSM_RSET_MERGED);
+                        }
                     }
                     if (dataset.getResultSetId() != null) {
-                        return getIcon(IconManager.IconType.DATASET_RSET);  // JPM.TODO DATASET_MERGE
+                        return getIcon(IconManager.IconType.DATASET_RSET_MERGED);
                     }
                 }
                 

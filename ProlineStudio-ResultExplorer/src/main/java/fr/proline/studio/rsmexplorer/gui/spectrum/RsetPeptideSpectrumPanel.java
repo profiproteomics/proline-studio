@@ -14,6 +14,8 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 
 import org.apache.batik.svggen.SVGGraphics2DIOException;
@@ -345,7 +347,24 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         String title = "Query " + msQuery.getInitialId() + " - " + p.getSequence();
         m_chart.setTitle(title);
 
+       // JFreePanel sub Menus
 
+        final JMenuItem showSpectrumTitle = new JMenuItem("Show Spectrum Title");
+        final String spectrumTitle = spectrum.getTitle();
+        class SpectrumTitleShower implements ActionListener{
+            public void actionPerformed(ActionEvent e)
+            {
+                if(e.getSource() == showSpectrumTitle){
+                	JOptionPane.showMessageDialog(null, spectrumTitle, "Spectrum title",1);
+                }
+                
+            }
+        }
+        showSpectrumTitle.setActionCommand("Show");
+        showSpectrumTitle.addActionListener(new SpectrumTitleShower());
+
+        ((ChartPanel) m_spectrumPanel).getPopupMenu().add(showSpectrumTitle);
+        
         // reset X/Y zooming
         // ((ChartPanel) m_spectrumPanel).restoreAutoBounds();
         ((ChartPanel) m_spectrumPanel).setBackground(Color.white);

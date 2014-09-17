@@ -1,5 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui.spectrum;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
@@ -48,8 +52,25 @@ public class PeptideFragmentationData {
                 for (FragmentMatch_AW fragMa : jsonProp.frag_matches) {
                     fragMa.computeChargeFromLabel();
                 }
-
-                m_fragSer = jsonProp.frag_table;
+                
+                // sort theoretical frag table according to serie's label for proper display in frag jtable
+                ArrayList<TheoreticalFragmentSeries_AW> fragSerArrayList = new ArrayList<TheoreticalFragmentSeries_AW>();
+                for(TheoreticalFragmentSeries_AW frag : jsonProp.frag_table) {
+                	fragSerArrayList.add(frag);
+                }
+                //Sorting
+                Collections.sort(fragSerArrayList, new Comparator<TheoreticalFragmentSeries_AW>(){
+                    public int compare(TheoreticalFragmentSeries_AW s1, TheoreticalFragmentSeries_AW s2) {
+                        return s1.frag_series.compareToIgnoreCase(s2.frag_series);
+                    }
+                });
+                
+                //convert fragSeries ArrayList to array []
+                m_fragSer = new TheoreticalFragmentSeries_AW[fragSerArrayList.size()];//jsonProp.frag_table;
+                for(int i=0; i<fragSerArrayList.size();i++) {
+                	m_fragSer[i] = fragSerArrayList.get(i);
+                }
+                
                 m_fragMa = jsonProp.frag_matches;
                 isEmpty = false;
             }

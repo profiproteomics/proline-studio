@@ -252,39 +252,26 @@ public class RsetPeptideSpectrumErrorAnnotations {
         int nbFound = 0;
         int nbThroughB = 0;
         int nbThroughY = 0;
-        if(fragMa.length == 0 ) {
-			return;
-		}
-        for (j = 0; j < fragSer.length; j++) { // loop through theoFragment
-            // series here
+
+        for (j = 0; j < fragSer.length; j++) { // loop through theoFragment series here
+        	fragSer[j].computeChargeFromLabel();
             for (int k = 0; k < fragSer[j].masses.length; k++) { // loop
-                // through
-                // masses
-                // for
-                // each
-                // fragment
-                // series
+            	fragTableTheo[0][nbThroughB] = maxY - (maxY - minY) * 0.15; 
+                fragTableTheo[1][nbThroughB] = fragSer[j].masses[k]; 
+                fragTableTheoCharge[0][nbThroughB] = fragSer[j].charge;
+                fragTableTheo[5][nbThroughY] = maxY - (maxY - minY) * 0.25; // intensity
+                fragTableTheo[6][nbThroughY] = fragSer[j].masses[k];
+                fragTableTheoCharge[5][nbThroughY] = fragSer[j].charge;
+                
                 for (int i = 0; i < fragMa.length; i++) { // find matching
-                    // fragMatches
-                    // with
-                    // theoFragSeries
-                    fragSer[j].computeChargeFromLabel();
+                  
                     fragMa[i].computeChargeFromLabel();
                     if (j == positionIonABC) {
-                    	if(fragMa[i].charge == fragSer[j].charge) {
-                    		if((fragMa[i].label.contains("*") && fragSer[j].frag_series.contains("*"))
-                    			|| (fragMa[i].label.contains("0") && fragSer[j].frag_series.contains("0"))
-                    			|| (!fragMa[i].label.contains("*") && !fragSer[j].frag_series.contains("*")) 
-                            	|| (!fragMa[i].label.contains("0") && !fragSer[j].frag_series.contains("0")))
-		                    		{
-		                        fragTableTheo[0][nbThroughB] = maxY - (maxY - minY) * 0.15; // data[1][i];
-		                        // //
-		                        // intensity
-		                        // for
-		                        // b
-		                        // ions
-		                        fragTableTheo[1][nbThroughB] = fragSer[j].masses[k]; // data[0][i];
-		                        fragTableTheoCharge[0][nbThroughB] = fragSer[j].charge;
+                    	if(    fragMa[i].charge == fragSer[j].charge
+    							&& fragMa[i].countSeq('*') == fragSer[j].countSeq('*')
+    							&& fragMa[i].countSeq('0') == fragSer[j].countSeq('0'))
+	                    {
+		                    	
 		                        if ((fragMa[i].calculated_moz - roundTol <= (fragSer[j].masses[k]))
 		                                && (fragMa[i].calculated_moz + roundTol >= fragSer[j].masses[k])) {
 		                            nbFound++;
@@ -299,19 +286,14 @@ public class RsetPeptideSpectrumErrorAnnotations {
 		                            ;
 		                        } else {
 		                        }
-		                     }
+		                     
                     	}
                     }
                     if (j == positionIonXYZ) {
-                    	if(fragMa[i].charge == fragSer[j].charge) {
-                    		if((fragMa[i].label.contains("*") && fragSer[j].frag_series.contains("*"))
-                    			|| (fragMa[i].label.contains("0") && fragSer[j].frag_series.contains("0"))
-                    			|| (!fragMa[i].label.contains("*") && !fragSer[j].frag_series.contains("*")) 
-                            	|| (!fragMa[i].label.contains("0") && !fragSer[j].frag_series.contains("0")))
-		                    		{
-		                        fragTableTheo[5][nbThroughY] = maxY - (maxY - minY) * 0.25; // intensity
-		                        fragTableTheo[6][nbThroughY] = fragSer[j].masses[k];
-		                        fragTableTheoCharge[5][nbThroughY] = fragSer[j].charge;
+                    	if(    fragMa[i].charge == fragSer[j].charge
+    							&& fragMa[i].countSeq('*') == fragSer[j].countSeq('*')
+    							&& fragMa[i].countSeq('0') == fragSer[j].countSeq('0'))
+    	                 {
 		                        if ((fragMa[i].calculated_moz - roundTol <= fragSer[j].masses[k])
 		                                && (fragMa[i].calculated_moz + roundTol >= fragSer[j].masses[k])) {
 		                            nbFound++;
@@ -328,7 +310,7 @@ public class RsetPeptideSpectrumErrorAnnotations {
 		
 		                    }
                     	}
-                    }
+                    
 
                 }
                 if (j == positionIonABC) {

@@ -6,12 +6,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
 import javax.swing.JTable;
 
-import org.slf4j.LoggerFactory;
 
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -53,7 +49,7 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 
 
     public void setData(DPeptideMatch pepMatch, PeptideFragmentationData petpideFragmentationData) {
-
+ 
         setAllColumnsVisibles(); //JPM.HACK : bug between columns visibility and update of the model of a JXTable
         
         FragmentationTableModel fragmentationTableModel = ((FragmentationTableModel) getModel());

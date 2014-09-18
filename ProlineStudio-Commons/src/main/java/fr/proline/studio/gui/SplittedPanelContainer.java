@@ -10,6 +10,8 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * Used to create a panel containing other panels separated by SplitPanes
@@ -86,7 +88,7 @@ public class SplittedPanelContainer extends JPanel {
         
         components.add(panel);
         
-        JTabbedPane tb = new JTabbedPane();
+        JTabbedPane tb = new ReactiveTabbedPane();
         tb.setBorder(new EmptyBorder(8,8,8,8));
         String name = "";
         int nbTabs = components.size();
@@ -332,7 +334,7 @@ public class SplittedPanelContainer extends JPanel {
             components.add(bottomComponent);
         }
         
-        JTabbedPane tb = new JTabbedPane();
+        JTabbedPane tb = new ReactiveTabbedPane();
         tb.setBorder(new EmptyBorder(8,8,8,8));
         String name = "";
         for (int i=0;i<components.size();i++) {
@@ -1215,4 +1217,41 @@ public class SplittedPanelContainer extends JPanel {
         public ActionListener getAddAction(SplittedPanelContainer splittedPanel);
     }
     
+    
+    public interface ReactiveTabbedComponent {
+        public void setShowed(boolean showed);
+    }
+    
+    public static class ReactiveTabbedPane extends JTabbedPane {
+
+        private int m_lastSelectedIndex = -1;
+        
+        public ReactiveTabbedPane() {
+            addChangeListener(new ChangeListener() {
+
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    
+                    JTabbedPane tabbedPane = (JTabbedPane) e.getSource();
+                    int selectedIndex = tabbedPane.getSelectedIndex();
+                    if (selectedIndex == m_lastSelectedIndex) {
+                        return;
+                    }
+                    m_lastSelectedIndex = selectedIndex;
+                    
+                    int nbTabs = tabbedPane.getTabCount();
+                    for (int i=0;i<nbTabs;i++) {
+                        Component c = tabbedPane.getComponentAt(i);
+                        if (c instanceof ReactiveTabbedComponent) {
+                            ((ReactiveTabbedComponent)c).setShowed(i == selectedIndex);
+                        }
+                    }
+                    
+                    
+                }
+            });
+
+        }
+
+    }
 }

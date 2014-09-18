@@ -88,7 +88,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param list 
      */
     public void initLoadParentDataset(Project project, List<AbstractData> list, boolean identificationDataset) {
-        setTaskInfo(new TaskInfo("Load Data for Project "+project.getName(), false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load "+(identificationDataset ? "Identification" : "Quantitation")+" Data for Project "+project.getName(), false, TASK_LIST_INFO));
         m_project = project;
         m_list = list;
         m_identificationDataset = identificationDataset;
@@ -392,7 +392,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 } else {
                     m_list.add(new DataSetData(datasetCur));
                     Long resultSetId = datasetCur.getResultSetId();
-                    rsetIdList.add(resultSetId);
+                    if (resultSetId != null) {
+                        rsetIdList.add(resultSetId);
+                    }
                 }
                 
                                 
@@ -519,7 +521,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 Long id = datasetCur.getId();
                 idList.add(id);
                 ddatasetMap.put(id, datasetCur);
-                rsetIdList.add(datasetCur.getResultSetId());
+                Long resultSetId = datasetCur.getResultSetId();
+                if (resultSetId!=null) {
+                    rsetIdList.add(resultSetId);
+                }
             }
             
             // Load Aggregation and QuantitationMethod separately
@@ -568,7 +573,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     }
     
         private boolean completeMergeInfo(Long projectId, ArrayList<Long> rsetIdList) {
-        if (!m_list.isEmpty()) {
+        if (!m_list.isEmpty() && !rsetIdList.isEmpty()) {
             // fetch if there is a merged rsm
             EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(projectId).getEntityManagerFactory().createEntityManager();
             try {

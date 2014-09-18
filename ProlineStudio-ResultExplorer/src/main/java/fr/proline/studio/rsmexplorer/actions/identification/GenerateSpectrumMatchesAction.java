@@ -50,7 +50,7 @@ public class GenerateSpectrumMatchesAction extends AbstractRSMAction {
             
             final DDataset dataset = node.getDataset();
             Long projectId = dataset.getProject().getId();
-            Long resultSummaryId = (dataset.getResultSummary() != null) ? dataset.getResultSummary().getId() : null;
+             Long resultSummaryId = dataset.getResultSummaryId();
             // TODO : if resultSummaryId != null open a dialog to choose between generate spectrum matches for the whole resultSet or only RSM
             Long resultSetId = dataset.getResultSetId();
             GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(callback, dataset.getName(), projectId, resultSetId, resultSummaryId, null);

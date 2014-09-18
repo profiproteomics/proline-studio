@@ -57,13 +57,13 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
  *
  * @author JM235353 + AW
  */
-public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements DataBoxPanelInterface, ImageExporterInterface {
+public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements DataBoxPanelInterface, ImageExporterInterface, SplittedPanelContainer.ReactiveTabbedComponent {
 
-    /**
-     *
-     */
-    //private static final long serialVersionUID = 1L;
+
     private AbstractDataBox m_dataBox;
+
+    private boolean m_isDisplayed = true;
+    
     private boolean m_redrawInProgress = false; // to ensure no circular loop in changeEven when triggered by zooming the graph... 
     private double m_spectrumMinX = 0;
     private double m_spectrumMaxX = 0;
@@ -179,8 +179,18 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
 
     public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
 
+        if (!m_isDisplayed) {
+            // postpone update
+            m_peptideMatchPostponed = peptideMatch;
+            m_peptideFragmentationDataPostponed = peptideFragmentationData;
+            return;
+        }
+        m_peptideMatchPostponed = null;
+        m_peptideFragmentationDataPostponed = null;
+        updateDisplay(peptideMatch, peptideFragmentationData);
+    }
 
-
+    public void updateDisplay(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
         constructSpectrumErrorChart(peptideMatch);
         m_spectrumErrorAnnotations = new RsetPeptideSpectrumErrorAnnotations(m_chart, peptideMatch, peptideFragmentationData);
         m_spectrumErrorAnnotations.addErrorAnnotations();
@@ -199,10 +209,10 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
         }
         // set default auto bounds in case there is no annotations (which sets new autobounds)
 
-
-
-
     }
+    private DPeptideMatch m_peptideMatchPostponed = null;
+    private PeptideFragmentationData m_peptideFragmentationDataPostponed = null;
+
 
     public void writeToPNG(String fileName) {
         m_pngFile = new File(fileName);
@@ -407,6 +417,22 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getAddAction(splittedPanel);
+    }
+
+    @Override
+    public void setShowed(boolean showed) {
+        if (showed == m_isDisplayed) {
+            return;
+        }
+        if (!m_isDisplayed) {
+            // update display
+            if (m_peptideMatchPostponed != null) {
+                updateDisplay(m_peptideMatchPostponed, m_peptideFragmentationDataPostponed);
+                m_peptideMatchPostponed = null;
+                m_peptideFragmentationDataPostponed = null;
+            }
+        }
+        m_isDisplayed = showed;
     }
 
     public static class XYStickRenderer extends AbstractXYItemRenderer {

@@ -43,6 +43,7 @@ public class GenerateSpectrumMatchTask extends AbstractServiceTask {
 
 
             Map<String, Object> params = new HashMap<>();
+            params.put("memory_safe", Boolean.FALSE); // JPM.HACK : later remove it when no longer necessary
             params.put("project_id", m_projectId);
             params.put("result_set_id", m_resultSetId);
             if (m_peptideMatchId != null) {

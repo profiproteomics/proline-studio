@@ -1252,6 +1252,21 @@ public class SplittedPanelContainer extends JPanel {
             });
 
         }
+        
+        @Override
+        public void insertTab(String title, Icon icon, Component component, String tip, int index) {
+            super.insertTab(title, icon, component, tip, index);
+            int selectedIndex = getSelectedIndex();
+            int nbTabs = getTabCount();
+            for (int i = 0; i < nbTabs; i++) {
+                Component c = getComponentAt(i);
+                if (c instanceof ReactiveTabbedComponent) {
+                    ((ReactiveTabbedComponent) c).setShowed(i == selectedIndex);
+                }
+            }
+            m_lastSelectedIndex = selectedIndex;
+        }
+
 
     }
 }

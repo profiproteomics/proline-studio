@@ -22,8 +22,9 @@ import javax.swing.JToolBar;
  *
  * @author AW
  */
-public class RsetPeptideFragmentationTablePanel extends HourglassPanel implements DataBoxPanelInterface {
+public class RsetPeptideFragmentationTablePanel extends HourglassPanel implements DataBoxPanelInterface, SplittedPanelContainer.ReactiveTabbedComponent {
 
+    private boolean m_isDisplayed = true;
 
     private AbstractDataBox m_dataBox;
 
@@ -85,7 +86,19 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
     	if(peptideFragmentationData.isEmpty) {
         	return;
         }
-    	m_fragmentationTable.setData(peptideMatch, peptideFragmentationData);
+        if (!m_isDisplayed) {
+            // postpone update
+            m_peptideMatchPostponed = peptideMatch;
+            m_peptideFragmentationDataPostponed = peptideFragmentationData;
+            return;
+        }
+        m_peptideMatchPostponed = null;
+        m_peptideFragmentationDataPostponed = null;
+        updateDisplay(peptideMatch, peptideFragmentationData);
+
+    }
+    private void updateDisplay(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
+        m_fragmentationTable.setData(peptideMatch, peptideFragmentationData);
         
         // update hideFragIntensityButton button
         boolean isEnable =  m_hideFragIntensityButton.isEnabled();
@@ -93,8 +106,9 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
         if (isEnable ^ enable) {
             m_hideFragIntensityButton.setEnabled(enable);
         }
-        
     }
+    private DPeptideMatch m_peptideMatchPostponed = null;
+    private PeptideFragmentationData m_peptideFragmentationDataPostponed = null;
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
@@ -109,6 +123,22 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getAddAction(splittedPanel);
+    }
+
+    @Override
+    public void setShowed(boolean showed) {
+        if (showed == m_isDisplayed) {
+            return;
+        }
+        if (!m_isDisplayed) {
+            // update display
+            if (m_peptideMatchPostponed != null) {
+                updateDisplay(m_peptideMatchPostponed, m_peptideFragmentationDataPostponed);
+                m_peptideMatchPostponed = null;
+                m_peptideFragmentationDataPostponed = null;
+            }
+        }
+        m_isDisplayed = showed;
     }
 
 }

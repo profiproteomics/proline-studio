@@ -211,7 +211,7 @@ public class WindowBoxFactory {
                     tb.addTab(boxes[i].getName(), (JPanel) boxes[i].getPanel());
                     tb.setName(tb.getName() + " / " + boxes[i].getName());
                 } else {
-                    JTabbedPane tb = new JTabbedPane();
+                    SplittedPanelContainer.ReactiveTabbedPane tb = new SplittedPanelContainer.ReactiveTabbedPane();
                     tb.setBorder(new EmptyBorder(8, 8, 8, 8));
                     tb.addTab(boxes[i - 1].getName(), panels[--panelIdx]);
                     tb.addTab(boxes[i].getName(), (JPanel) boxes[i].getPanel());

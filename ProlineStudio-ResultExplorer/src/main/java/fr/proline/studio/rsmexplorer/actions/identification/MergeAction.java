@@ -161,6 +161,10 @@ public class MergeAction extends AbstractRSMAction {
 
                 datasetNode.setIsChanging(false);
 
+                if (datasetNode.hasResultSummary()) {
+                    datasetNode.getDataset().setMergeInformation(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY);
+                }
+                
                 IdentificationTree tree = IdentificationTree.getCurrentTree();
                 DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                 treeModel.nodeChanged(datasetNode);

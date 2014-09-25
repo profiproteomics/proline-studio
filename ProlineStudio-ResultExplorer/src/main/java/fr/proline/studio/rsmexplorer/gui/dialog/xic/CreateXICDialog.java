@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
-import fr.proline.core.orm.uds.RawFile;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.data.DataSetData;
@@ -173,7 +172,39 @@ public class CreateXICDialog extends DefaultDialog {
                             while (runNodes.hasMoreElements()) {
                                 XICRunNode runNode = (XICRunNode) runNodes.nextElement();
                                 RunInfoData runData = (RunInfoData) runNode.getData();
-                                ArrayList<RawFile> returnedRaw = new ArrayList<>();
+                                if (!runData.isRunInfoInDatabase()) {
+                                    // RawFile does not exists, create it
+                                    try {
+                                        synchronized (mutexFileRegistered) {
+                                            AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+                                                @Override
+                                                public boolean mustBeCalledInAWT() {
+                                                    return false;
+                                                }
+
+                                                @Override
+                                                public void run(boolean success) {
+                                                    synchronized (mutexFileRegistered) {
+                                                        mutexFileRegistered.notifyAll();
+                                                    }
+                                                }
+                                            };
+                                            // TODO : get the right instrumentId !!! 
+                                            long instrumentID = 1;
+                                            RegisterRawFileTask task = new RegisterRawFileTask(callback, instrumentID, project.getOwner().getId(), runData);
+                                            AccessServiceThread.getAccessServiceThread().addTask(task);
+                                            // wait untill the files are loaded
+                                            mutexFileRegistered.wait();
+                                        }
+
+                                    } catch (InterruptedException ie) {
+                                        // should not happen
+                                    }
+                                }
+                                
+                                
+                                /*ArrayList<RawFile> returnedRaw = new ArrayList<>();
                                 DatabaseRunsTask loadRunIdsTask = new DatabaseRunsTask(null);
                                 loadRunIdsTask.initSearchRawFile(runData.getRawFile().getRawFileName(), returnedRaw);
                                 loadRunIdsTask.fetchData();
@@ -213,10 +244,10 @@ public class CreateXICDialog extends DefaultDialog {
                                     } catch (InterruptedException ie) {
                                         // should not happen
                                     } 
-                                }
+                                }*/
                                 //  then map IdentificationDataset to RawFile and Run
                                 DatabaseRunsTask registerRunIdsTask = new DatabaseRunsTask(null);
-                                registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData)bioSplAnalysisNode.getData()).getDataset().getId(), runData.getRawFile(), runData.getRun());
+                                registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData)bioSplAnalysisNode.getData()).getDataset().getId(), runData.getRawFileSouce().getSelectedRawFile(), runData.getRun());
                                 registerRunIdsTask.fetchData();
 
                             }
@@ -499,7 +530,7 @@ public class CreateXICDialog extends DefaultDialog {
         AbstractNode.NodeTypes type = node.getType();
         if (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
             XICBiologicalSampleAnalysisNode sampleAnalysisNode = (XICBiologicalSampleAnalysisNode) node;
-            if (sampleAnalysisNode.getChildCount() != 1 ||  ((RunInfoData)((AbstractNode)sampleAnalysisNode.getChildAt(0)).getData()).getRawFile()==null) {
+            if (sampleAnalysisNode.getChildCount() != 1 ||  !((RunInfoData)((AbstractNode)sampleAnalysisNode.getChildAt(0)).getData()).hasRawFile()) {
                 showErrorOnNode((AbstractNode)sampleAnalysisNode.getChildAt(0), "You must specify a Raw(mzDb) File for each identification.");
                 return false;
             }

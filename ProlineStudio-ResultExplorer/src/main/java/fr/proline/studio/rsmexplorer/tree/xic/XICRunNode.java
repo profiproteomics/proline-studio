@@ -1,6 +1,10 @@
 package fr.proline.studio.rsmexplorer.tree.xic;
 
+import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.IdentificationDataset;
 import fr.proline.core.orm.uds.RawFile;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.RunInfoData;
@@ -11,6 +15,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
 import java.io.File;
 import java.util.ArrayList;
+import javax.persistence.EntityManager;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
@@ -24,13 +29,47 @@ public class XICRunNode extends AbstractNode {
 
     private DefaultTreeModel m_treeModel = null;
     
-    public XICRunNode(AbstractData data, Long projectId, Long rsetId, DefaultTreeModel treeModel) {
+    public XICRunNode(AbstractData data) {
         super(NodeTypes.RUN, data);
+    }
+
+    public void init(DDataset dataset, DefaultTreeModel treeModel) {
+        Long rsetId = dataset.getResultSetId();
+        
+        m_treeModel = treeModel;
+        
+        // look if we find a Raw File
+        if (dataset.getType() == Dataset.DatasetType.IDENTIFICATION) {
+            EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+            try {
+                entityManagerUDS.getTransaction().begin();
+
+                IdentificationDataset identificationDataset = entityManagerUDS.find(IdentificationDataset.class, dataset.getId());
+                if (identificationDataset != null) {
+                    RunInfoData runInfoData = ((RunInfoData) getData());
+                    RawFile rawFile = identificationDataset.getRawFile();
+                    if (rawFile != null) {
+                        runInfoData.getRawFileSouce().setLinkedRawFile(rawFile);
+                        runInfoData.setRun(identificationDataset.getRun());
+                        //runInfoData.getRawFileSouce().setRawFileOnDisk(rawFile.getDirectory()+File.separator+rawFile.getRawFileName()); JPM.RUNINFODATA ???
+                        //runInfoData.setRunInfoInDatabase(true);
+                        warnParent(false);
+                        // everything is set
+                        return;
+                    }
+                }
+                entityManagerUDS.getTransaction().commit();
+
+            } catch (Exception e) {
+                m_logger.error(getClass().getSimpleName() + " failed", e);
+                entityManagerUDS.getTransaction().rollback();
+            } finally {
+                entityManagerUDS.close();
+            }
+        }
 
         setIsChanging(true);
 
-        m_treeModel = treeModel;
-        
         final String[] path = new String[1];
 
         final XICRunNode _this = this;
@@ -65,6 +104,7 @@ public class XICRunNode extends AbstractNode {
 
 
         // ask asynchronous loading of data
+        Long projectId = dataset.getProject().getId();
         DatabaseRunsTask task = new DatabaseRunsTask(callback);
         task.initLoadPeakListPathForRset(projectId, rsetId, path);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
@@ -86,30 +126,37 @@ public class XICRunNode extends AbstractNode {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                 setIsChanging(false);
 
+                RunInfoData runInfoData = ((RunInfoData) getData());
+                
                 if (m_rawFileList.isEmpty()) {
                     warnParent(true);
-                    ((RunInfoData) getData()).setMessage("<html><font color='#FF0000'>No Raw File found, select one</font></html>");
+                    runInfoData.setMessage("<html><font color='#FF0000'>No Raw File found, select one</font></html>");
                 } else if (m_rawFileList.size() == 1) {
                     warnParent(false);
+
                     // TODO : how to choose the right rawfile or run instead of the first one ??
-                    ((RunInfoData) getData()).setRawFile(m_rawFileList.get(0));
-                    ((RunInfoData) getData()).setRun(m_rawFileList.get(0).getRuns().get(0));
-                    ((RunInfoData) getData()).setRawFilePath(m_rawFileList.get(0).getDirectory()+File.separator+m_rawFileList.get(0).getRawFileName());
+                    
+                    RawFile rawFile = m_rawFileList.get(0);
+                    runInfoData.getRawFileSouce().setSelectedRawFile(rawFile);
+                    runInfoData.setRun(rawFile.getRuns().get(0));
+                    //runInfoData.setRawFilePath(rawFile.getDirectory()+File.separator+rawFile.getRawFileName());  //JPM.RUNINFODATA
+                    //runInfoData.setRunInfoInDatabase(true);
                 } else {
+                    runInfoData.setPotentialRawFiles(m_rawFileList);
                     warnParent(true);
-                    ((RunInfoData) getData()).setMessage("<html><font color='#FF0000'>Multiple Raw Files found, select one</font></html>");
+                    runInfoData.setMessage("<html><font color='#FF0000'>Multiple Raw Files found, select one</font></html>");
                 }
             }
         };
 
         
-                // ask asynchronous loading of data
+        // ask asynchronous loading of data
         DatabaseRunsTask task = new DatabaseRunsTask(callback);
         task.initSearchRawFile(searchString, m_rawFileList);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
     }
 
-    public void warnParent(boolean error) {
+    public final void warnParent(boolean error) {
         TreeNode parentNode = getParent();
         if (parentNode == null) {
             return;
@@ -170,19 +217,24 @@ public class XICRunNode extends AbstractNode {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
+                RunInfoData runInfoData = ((RunInfoData) getData());
                 if (m_rawFileList.size() == 1) {
 
                     // we have found the raw file in the database, we use this one
-                    ((RunInfoData) getData()).setRawFile(m_rawFileList.get(0));
-                    ((RunInfoData) getData()).setRun(m_rawFileList.get(0).getRuns().get(0));
-                    ((RunInfoData) getData()).setRawFilePath(m_rawFileList.get(0).getDirectory()+File.separator+m_rawFileList.get(0).getRawFileName());
+                    RawFile rawFile = m_rawFileList.get(0);
+                    runInfoData.getRawFileSouce().setSelectedRawFile(rawFile);
+                    runInfoData.setRun(rawFile.getRuns().get(0));
+                    //runInfoData.setRawFilePath(rawFile.getDirectory()+File.separator+m_rawFileList.get(0).getRawFileName()); //JPM.RUNINFODATA
+                    //runInfoData.setRunInfoInDatabase(true);
                 } else {
                     // we use the file choosen by the user
-                    RawFile rawFile = new RawFile();
+                    /*RawFile rawFile = new RawFile();
                     rawFile.setDirectory(selectedFile.getPath());
                     rawFile.setRawFileName(selectedFile.getName());
-                    ((RunInfoData) getData()).setRawFile(rawFile);
-                    ((RunInfoData) getData()).setRawFilePath(selectedFile.getPath());
+                    runInfoData.setRawFile(rawFile);
+                    runInfoData.setRawFilePath(selectedFile.getPath());
+                    runInfoData.setRunInfoInDatabase(false);*/  //JPM.RUNINFODATA
+                    runInfoData.getRawFileSouce().setRawFileOnDisk(selectedFile);
                 }
                 setIsChanging(false);
                 m_treeModel.nodeChanged(_this);
@@ -199,6 +251,12 @@ public class XICRunNode extends AbstractNode {
 
     }
     
-
+    public String getPeakListPath() {
+        RunInfoData data = ((RunInfoData) getData());
+        if (data == null) {
+            return null;
+        }
+       return data.getPeakListPath();
+    }
     
 }

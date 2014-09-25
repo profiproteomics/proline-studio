@@ -39,7 +39,7 @@ public class Installer extends ModuleInstall {
             InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not exit. Important tasks are being done.\nAre you sure you want to exit ?");
             exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
             exitDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
-            exitDialog.centerToFrame(WindowManager.getDefault().getMainWindow());
+            exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
             exitDialog.setVisible(true);
             
             if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {

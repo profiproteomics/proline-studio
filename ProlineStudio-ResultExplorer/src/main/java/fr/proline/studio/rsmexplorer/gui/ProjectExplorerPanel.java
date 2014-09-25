@@ -90,7 +90,7 @@ public class ProjectExplorerPanel extends JPanel {
         
         // hide quantitation for the moment  JPM.LATER
         Preferences preferences = NbPreferences.root();
-        boolean showQuantitation = preferences.getBoolean("Profi", false);
+        boolean showQuantitation = preferences.getBoolean("Profi", true); //JPM.TODO
 
         if (showQuantitation) {
             JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, m_identificationTreeScrollPane, m_quantitationTreeScrollPane);

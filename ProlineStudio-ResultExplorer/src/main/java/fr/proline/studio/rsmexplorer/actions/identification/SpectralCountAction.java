@@ -134,7 +134,7 @@ public class SpectralCountAction extends AbstractRSMAction {
         
         // forbid this action for the moment  JPM.LATER
         Preferences preferences = NbPreferences.root();
-        boolean showSpectralCount = preferences.getBoolean("Profi", false);
+        boolean showSpectralCount = preferences.getBoolean("Profi", true);  //JPM.TODO
         if (!showSpectralCount) {
             setEnabled(false);
             return;

@@ -472,7 +472,7 @@ public class DefaultDialog extends javax.swing.JDialog {
     }
     
     
-    public void centerToFrame(Frame f) {
+    public void centerToWindow(Window w) {
         
         // pack must have been done beforehand
         pack();
@@ -480,10 +480,10 @@ public class DefaultDialog extends javax.swing.JDialog {
         int width = getWidth();
         int height = getHeight();
         
-        int frameX = f.getX();
-        int frameY = f.getY();
-        int frameWidth = f.getWidth();
-        int frameHeight = f.getHeight();
+        int frameX = w.getX();
+        int frameY = w.getY();
+        int frameWidth = w.getWidth();
+        int frameHeight = w.getHeight();
       
         int x = frameX+(frameWidth-width)/2;
         int y = frameY+(frameHeight-height)/2;
@@ -491,6 +491,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         setLocation(x, y);
          
     }
+
 
     public void centerToScreen() {
         
@@ -506,8 +507,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         int y = (screenSize.height-height)/2;
         
         super.setLocation(x, y);
-         
-        
+
     }
     
     public void setBusy(boolean busy) {

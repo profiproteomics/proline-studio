@@ -4,6 +4,7 @@ import com.google.api.client.http.*;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
+import fr.proline.core.orm.uds.RawFile;
 import fr.proline.core.orm.uds.Run;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -21,14 +22,16 @@ import javax.persistence.EntityManager;
 public class RegisterRawFileTask extends AbstractServiceTask {
 
     private String m_raw_file_path;
+    private String m_raw_file_name;
     private long m_instrumentId;
     private long m_ownerId;
     private RunInfoData m_runInfoData;
             
     public RegisterRawFileTask(AbstractServiceCallback callback, long instrumentId, long ownerId, RunInfoData runInfo) {
-        super(callback, true /*synchronous*/, new TaskInfo("Register raw file "+runInfo.getRawFilePath(), true, TASK_LIST_INFO));
+        super(callback, true /*synchronous*/, new TaskInfo("Register raw file "+runInfo.getRawFileSouce().getRawFileOnDisk(), true, TASK_LIST_INFO));
         
-        m_raw_file_path = runInfo.getRawFilePath();
+        m_raw_file_path = runInfo.getRawFileSouce().getRawFileOnDisk().getPath();
+        m_raw_file_name = runInfo.getRawFileSouce().getRawFileOnDisk().getName();
         m_ownerId = ownerId;
         m_instrumentId = instrumentId;
         m_runInfoData = runInfo;
@@ -36,6 +39,33 @@ public class RegisterRawFileTask extends AbstractServiceTask {
     
     @Override
     public boolean askService() {
+        
+        // first we check if the Raw File exists already or not 
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        try {
+            entityManagerUDS.getTransaction().begin();
+        
+            RawFile rawFile = entityManagerUDS.find(RawFile.class, m_raw_file_name);
+
+            if (rawFile != null) {
+                Run r = rawFile.getRuns().get(0);
+                m_runInfoData.setRun(r);
+                return true;
+            }
+
+            
+            
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            m_loggerProline.error(getClass().getSimpleName() + " failed", e);
+            entityManagerUDS.getTransaction().rollback();
+            return false;
+        } finally {
+            entityManagerUDS.close();
+        }
+        
+        
         
         BigDecimal idRun;
         
@@ -98,7 +128,7 @@ public class RegisterRawFileTask extends AbstractServiceTask {
             return false;
         }
         
-        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
         
@@ -110,6 +140,7 @@ public class RegisterRawFileTask extends AbstractServiceTask {
             }
             
             m_runInfoData.setRun(r);
+            //m_runInfoData.setRunInfoInDatabase(true); //JPM.RUNINFODATA
             
             entityManagerUDS.getTransaction().commit();
 

@@ -46,7 +46,7 @@ public class SelectRawFileDialog extends DefaultDialog {
 
         setTitle("Select a Raw File");
 
-        //setHelpURL(null); TODO
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic");
 
         
         setInternalComponent(createInternalPanel());

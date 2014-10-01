@@ -34,8 +34,7 @@ public class SpectralCountDialog extends DefaultDialog {
 
         setResizable(true);
 
-        
-        setHelpURL(null); //JPM.TODO
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:spectralcount");
 
         setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
 

@@ -5,7 +5,7 @@
   <parent>
     <artifactId>ProlineStudio-parent</artifactId>
     <groupId>fr.proline</groupId>
-    <version>0.1.5-b2rc1-SNAPSHOT</version>
+    <version>0.1.5</version>
   </parent>
 
   <groupId>fr.proline</groupId>
@@ -16,8 +16,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <core.version>0.2.0-b2rc1-SNAPSHOT</core.version>
-    <util.version>0.0.7-b2rc1-SNAPSHOT</util.version>
+    <core.version>0.2.0</core.version>
+    <util.version>0.0.7</util.version>
   </properties>
 
   <dependencies>
@@ -75,7 +75,7 @@
         <dependency> 
             <groupId>fr.proline</groupId> 
             <artifactId>PM-SequenceRepository</artifactId> 
-            <version>0.0.2-SNAPSHOT</version> 
+            <version>0.0.2</version> 
         </dependency>
 
     <dependency>

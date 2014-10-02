@@ -6,12 +6,12 @@
   <parent>
     <artifactId>ProFI-Pom</artifactId>
     <groupId>fr.proline</groupId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5</version>
   </parent>
 
   <groupId>fr.proline</groupId>
   <artifactId>ProlineStudio-parent</artifactId>
-  <version>0.1.5-b2rc1-SNAPSHOT</version> <!-- ProlineStudio version -->
+  <version>0.1.5</version> <!-- ProlineStudio version -->
   <packaging>pom</packaging>
 
   <name>ProlineStudio-parent</name>

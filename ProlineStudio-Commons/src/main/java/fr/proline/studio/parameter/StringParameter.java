@@ -120,6 +120,13 @@ public class StringParameter extends AbstractParameter {
     }
 
     @Override
+    public void setValue(String v) {
+        if ((m_graphicalType.equals(JTextField.class)) && (m_parameterComponent != null)) {
+            ((JTextField) m_parameterComponent).setText(v);
+        }
+    }
+    
+    @Override
     public String getStringValue() {
         return getObjectValue().toString();
     }

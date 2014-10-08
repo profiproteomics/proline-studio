@@ -103,6 +103,14 @@ public class DoubleParameter extends AbstractParameter {
         
         return null;
     }
+    
+    @Override
+    public void setValue(String v) {
+        if ((m_graphicalType.equals(JTextField.class)) && (m_parameterComponent!=null)) {
+            ((JTextField)m_parameterComponent).setText(v);
+        }
+    }
+    
 
     @Override
     public String getStringValue() {

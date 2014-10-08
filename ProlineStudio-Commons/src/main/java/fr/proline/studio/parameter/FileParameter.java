@@ -107,14 +107,6 @@ public class FileParameter extends AbstractParameter {
             if(path.isEmpty()) {
             	return new ParameterError(path+" file is missing", m_parameterComponent);
             }
-//            File f = new File(path);
-//            if (! f.exists()) {
-//                return new ParameterError(path+" file does not exist", m_parameterComponent);
-//            } else if (f.isDirectory() ) {
-//                return new ParameterError(path+" is a directory", m_parameterComponent);
-//            } else if (! f.canRead() ) {
-//                return new ParameterError(path+" is not readable", m_parameterComponent);
-//            }
 
         }
         
@@ -123,6 +115,13 @@ public class FileParameter extends AbstractParameter {
         return null;
     }
 
+    @Override
+    public void setValue(String v) {
+        if ((m_graphicalType.equals(JTextField.class)) && (m_parameterComponent!=null)) {
+            ((JTextField)m_parameterComponent).setText(v);
+        }
+    }
+    
     @Override
     public String getStringValue() {
         return getObjectValue().toString();

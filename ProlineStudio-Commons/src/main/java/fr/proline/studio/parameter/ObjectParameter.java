@@ -114,6 +114,17 @@ public class ObjectParameter<E> extends AbstractParameter {
     }
 
     @Override
+    public void setValue(String v) {
+        if (m_parameterComponent == null) {
+            return; // should not happen
+        }
+
+        if (m_graphicalType.equals(JComboBox.class)) {
+            selectItem(((JComboBox) m_parameterComponent), v);
+        }
+    }
+    
+    @Override
     public String getStringValue() {
         if (m_associatedObjects == null) {
             E item = getObjectValue();

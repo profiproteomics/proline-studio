@@ -113,8 +113,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
     
-    public void updateIsUsed() {
-        Preferences preferences = NbPreferences.root();
+    public void updateIsUsed(Preferences preferences) {
         String prefixKey = m_name.replaceAll(" ", "_") + ".";
 
         int nbParameters = size();
@@ -146,8 +145,8 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
     }
     
-    public void saveParameters() {
-        Preferences preferences = NbPreferences.root();
+    public void saveParameters(Preferences preferences) {
+
         String prefixKey = m_name.replaceAll(" ", "_")+".";
         
         int nbParameters = size();
@@ -168,6 +167,30 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             
 
         }
+    }
+    
+    public void loadParameters(Preferences preferences) {
+        String prefixKey = m_name.replaceAll(" ", "_")+".";
+        
+        int nbParameters = size();
+        for (int i = 0; i < nbParameters; i++) {
+            AbstractParameter parameter = get(i);
+
+            String parameterName = parameter.getName();
+            String suffixKey = parameterName.replaceAll(" ", "_");
+        
+            String key = prefixKey+suffixKey;
+            
+            String value = preferences.get(key, null);
+            if (value == null) {
+                continue;
+            }
+            
+            parameter.setValue(value);
+
+        }
+        
+        updateIsUsed(preferences);
     }
     
     public HashMap<String, String> getValues() {

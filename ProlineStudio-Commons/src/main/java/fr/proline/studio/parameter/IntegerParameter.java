@@ -208,6 +208,20 @@ public class IntegerParameter extends AbstractParameter {
     }
 
     @Override
+    public void setValue(String v) {
+        if (m_parameterComponent == null) {
+            return; // should not happen
+        }
+        if (m_graphicalType.equals(JTextField.class)) {
+            ((JTextField) m_parameterComponent).setText(v);
+        } else if (m_graphicalType.equals(JSlider.class)) {
+            ((JSlider) m_parameterComponent).setValue(Integer.valueOf(v));
+        } else if (m_graphicalType.equals(JSpinner.class)) {
+            ((JSpinner) m_parameterComponent).setValue(Integer.valueOf(v));
+        }
+    }
+    
+    @Override
     public String getStringValue() {
         return getObjectValue().toString();
     }

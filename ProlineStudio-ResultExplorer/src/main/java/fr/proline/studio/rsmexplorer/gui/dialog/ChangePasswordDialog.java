@@ -22,7 +22,6 @@ public class ChangePasswordDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("Change Password");
         setButtonVisible(BUTTON_HELP, false);
-        setButtonVisible(BUTTON_DEFAULT, false);
         JPanel internalPanel = createInternalPanel();
         setInternalComponent(internalPanel);
 

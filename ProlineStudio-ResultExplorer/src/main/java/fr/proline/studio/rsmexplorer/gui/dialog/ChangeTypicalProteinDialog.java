@@ -6,6 +6,7 @@ import java.awt.*;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import org.openide.util.NbPreferences;
 
 /**
  *
@@ -31,7 +32,6 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
         
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:changetypicalprot");
 
-        setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
         setStatusVisible(false);
 
         setInternalComponent(createInternalPanel());
@@ -75,7 +75,7 @@ public class ChangeTypicalProteinDialog extends DefaultDialog {
     @Override
     protected boolean okCalled() {
 
-        changePanel.savePreference();
+        changePanel.savePreference(NbPreferences.root());
         return true;
     }
 

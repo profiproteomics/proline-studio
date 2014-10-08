@@ -417,7 +417,6 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
             // hide default and help buttons
-            setButtonVisible(BUTTON_DEFAULT, false);
             setButtonVisible(BUTTON_HELP, false);
 
             setStatusVisible(false);

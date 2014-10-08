@@ -36,7 +36,6 @@ public class FilterDialog extends DefaultDialog {
 
         setInternalComponent(createFilterPanel());
 
-        setButtonVisible(BUTTON_DEFAULT, false);
     }
     
         

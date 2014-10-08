@@ -59,7 +59,6 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
 
         // hide default and ol button
         setButtonVisible(BUTTON_HELP, false);
-        setButtonVisible(BUTTON_DEFAULT, false);
         setButtonVisible(BUTTON_CANCEL, false);
         setButtonName(BUTTON_OK, "Close");
         setStatusVisible(false);

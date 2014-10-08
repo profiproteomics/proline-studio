@@ -121,7 +121,6 @@ public class ExportDialog extends DefaultDialog  {
 
         setInternalComponent(createExportPanel());
 
-        setButtonVisible(BUTTON_DEFAULT, false);
         
         
         setButtonName(BUTTON_OK, ((m_exportType == ExporterFactory.EXPORT_IMAGE)

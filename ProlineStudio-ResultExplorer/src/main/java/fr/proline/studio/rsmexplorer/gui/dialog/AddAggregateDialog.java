@@ -35,6 +35,8 @@ public class AddAggregateDialog extends DefaultDialog {
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:createaggregate");
 
+        setButtonVisible(BUTTON_DEFAULT, true);
+        
         m_aggregatePanel = new AddAggregatePanel();
 
         setInternalComponent(m_aggregatePanel);

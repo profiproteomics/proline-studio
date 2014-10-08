@@ -62,8 +62,6 @@ public class AddProjectDialog extends DefaultDialog {
     private AddProjectDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-        setButtonVisible(BUTTON_DEFAULT, false);
-        
         setResizable(true);
 
         initInternalPanel();

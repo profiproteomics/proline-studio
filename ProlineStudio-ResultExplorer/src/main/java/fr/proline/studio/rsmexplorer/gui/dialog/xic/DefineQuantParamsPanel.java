@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import org.openide.util.NbPreferences;
 
 /**
  * Panel to set the different parameters for the XIC Quantitation
@@ -84,7 +85,7 @@ public class DefineQuantParamsPanel extends JPanel{
        
         m_parameterList = new ParameterList("XicParameters");
         createParameters();
-        m_parameterList.updateIsUsed();
+        m_parameterList.updateIsUsed(NbPreferences.root());
         
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();

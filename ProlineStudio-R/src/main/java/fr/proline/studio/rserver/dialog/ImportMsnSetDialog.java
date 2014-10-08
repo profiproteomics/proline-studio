@@ -45,8 +45,7 @@ public class ImportMsnSetDialog extends DefaultDialog {
         //setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot"); //JPM.TODO
         
         setButtonVisible(DefaultDialog.BUTTON_HELP, false);
-        setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
-        
+
         JPanel fileSelectionPanel = createFileSelectionPanel();
         
         setInternalComponent(fileSelectionPanel);

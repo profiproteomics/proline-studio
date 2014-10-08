@@ -39,7 +39,6 @@ public class InfoDialog extends DefaultDialog {
 
         // hide default and ol button
         setButtonVisible(BUTTON_HELP, false);
-        setButtonVisible(BUTTON_DEFAULT, false);
         setButtonName(BUTTON_OK, "Yes");
         setButtonName(BUTTON_CANCEL, "No");
         setStatusVisible(false);

@@ -24,8 +24,10 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Window;
 import java.util.*;
+import java.util.prefs.Preferences;
 import javax.persistence.EntityManager;
 import javax.swing.tree.TreePath;
+import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 
@@ -59,7 +61,7 @@ public class CreateXICDialog extends DefaultDialog {
 
         setHelpURL(null); //JPM.TODO
 
-      
+        setButtonVisible(BUTTON_DEFAULT, true);
 
         setSize(640, 500);
         setResizable(true);
@@ -444,7 +446,7 @@ public class CreateXICDialog extends DefaultDialog {
             }
 
             // Save Parameters        
-            parameterList.saveParameters();
+            parameterList.saveParameters(NbPreferences.root());
 
             return true;
         }

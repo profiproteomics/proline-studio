@@ -11,18 +11,23 @@ import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.dpm.task.ValidationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.*;
+import fr.proline.studio.settings.FilePreferences;
+import fr.proline.studio.settings.SettingsDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
 import java.awt.event.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import org.openide.util.NbPreferences;
+import org.slf4j.LoggerFactory;
 
 /**
  * Dialog used to validate an identification and ask the creation of a Result
@@ -62,7 +67,7 @@ public class ValidationDialog extends DefaultDialog {
     private JLabel m_fdrLabel = null;
     private JTextField m_fdrTextField = null;
     private JLabel m_fdrPercentageLabel = null;
-//    private JComboBox m_fdrEstimatorComboBox = null;
+
     private JLabel m_proteinFdrLabel = null;
     private JTextField m_proteinFdrTextField = null;
     private JLabel m_proteinFdrPercentageLabel = null;
@@ -71,7 +76,7 @@ public class ValidationDialog extends DefaultDialog {
     private JCheckBox m_proteinFdrCheckbox = null;
 
     private JCheckBox m_typicalProteinMatchCheckBox;
-    private ChangeTypicalProteinPanel changeTypicalPanel = null;
+    private ChangeTypicalProteinPanel m_changeTypicalPanel = null;
     
     private JComboBox m_proteinScoringTypeCbx = null;
     
@@ -100,18 +105,21 @@ public class ValidationDialog extends DefaultDialog {
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:rsvalidation");
         
+        setButtonVisible(BUTTON_LOAD, true);
+        setButtonVisible(BUTTON_SAVE, true);
+        
         m_parameterList = new ParameterList("Validation");
         createParameters();
-        m_parameterList.updateIsUsed();
+        m_parameterList.updateIsUsed(NbPreferences.root());
 
         setInternalComponent(createInternalPanel());
 
         initPsmPrefilterPanel();
         initProteinPrefilterPanel();
         
-        restoreScoringTypeParameter();
+        restoreScoringTypeParameter(NbPreferences.root());
         
-        restoreTypicalProteinParameters();
+        restoreTypicalProteinParameters(NbPreferences.root());
         
 
     }
@@ -350,7 +358,7 @@ public class ValidationDialog extends DefaultDialog {
         m_fdrCheckbox = new JCheckBox();
         m_fdrLabel = new JLabel("Ensure FDR <=");
         m_fdrPercentageLabel = new JLabel("%  on");
-        m_fdrCheckbox.setSelected(fdrUsed);
+        
 
         updateFdrObjects(fdrUsed);
 
@@ -393,7 +401,6 @@ public class ValidationDialog extends DefaultDialog {
             public void mouseClicked(MouseEvent e) {
                 boolean enabled = (m_fdrCheckbox.isSelected());
                 if (!enabled) {
-                    m_fdrCheckbox.setSelected(true);
                     updateFdrObjects(true);
 
                     if (e.getSource().equals(m_fdrTextField)) {
@@ -412,6 +419,9 @@ public class ValidationDialog extends DefaultDialog {
     }
 
     private void updateFdrObjects(boolean enabled) {
+        
+        m_fdrCheckbox.setSelected(enabled);
+        
         m_fdrLabel.setEnabled(enabled);
         m_fdrTextField.setEnabled(enabled);
         m_fdrPercentageLabel.setEnabled(enabled);
@@ -467,15 +477,15 @@ public class ValidationDialog extends DefaultDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 boolean enabled = m_typicalProteinMatchCheckBox.isSelected();
-                changeTypicalPanel.enableRules(enabled);
+                m_changeTypicalPanel.enableRules(enabled);
             }
         });
         
         c.gridx=0;
         c.gridy++;
         c.gridwidth = 2;
-        changeTypicalPanel = new ChangeTypicalProteinPanel();
-        typicalProteinPanel.add(changeTypicalPanel, c);
+        m_changeTypicalPanel = new ChangeTypicalProteinPanel();
+        typicalProteinPanel.add(m_changeTypicalPanel, c);
 
         return typicalProteinPanel;
     }
@@ -531,7 +541,7 @@ public class ValidationDialog extends DefaultDialog {
             public void mouseClicked(MouseEvent e) {
                 boolean enabled = (m_proteinFdrCheckbox.isSelected());
                 if (!enabled) {
-                    m_proteinFdrCheckbox.setSelected(true);
+                    
                     updateproteinFdrObjects(true);
                     if (e.getSource().equals(m_proteinFdrTextField)) {
                         m_proteinFdrTextField.requestFocusInWindow();
@@ -703,25 +713,25 @@ public class ValidationDialog extends DefaultDialog {
     }
     
     
-    private void restoreScoringTypeParameter() {
-        Preferences preferences = NbPreferences.root();
-        
+    private void restoreScoringTypeParameter(Preferences preferences) {
+
         String scoringType = preferences.get("ValidationScoringType", SCORING_TYPE_OPTIONS[0]);
         m_proteinScoringTypeCbx.setSelectedItem(scoringType);
         
     }
     
-    private void restoreTypicalProteinParameters() {
-        Preferences preferences = NbPreferences.root();
+    private void restoreTypicalProteinParameters(Preferences preferences) {
         
         boolean useTypicalProteinRegex = preferences.getBoolean("UseTypicalProteinRegex", true);
         
         m_typicalProteinMatchCheckBox.setSelected(useTypicalProteinRegex);
-        changeTypicalPanel.restoreInitialParameters();
-        changeTypicalPanel.enableRules(useTypicalProteinRegex);
+        m_changeTypicalPanel.restoreInitialParameters();
+        m_changeTypicalPanel.enableRules(useTypicalProteinRegex);
     }
     
     private void updateproteinFdrObjects(boolean enabled) {
+        m_proteinFdrCheckbox.setSelected(enabled);
+        
         m_proteinFdrLabel.setEnabled(enabled);
         m_proteinFdrTextField.setEnabled(enabled);
         m_proteinFdrPercentageLabel.setEnabled(enabled);
@@ -801,7 +811,7 @@ public class ValidationDialog extends DefaultDialog {
     }
     
     public List<ChangeTypicalRule> getChangeTypicalRules() {
-        return changeTypicalPanel.getChangeTypicalRules();
+        return m_changeTypicalPanel.getChangeTypicalRules();
     }
     
     
@@ -812,35 +822,65 @@ public class ValidationDialog extends DefaultDialog {
     
     @Override
     protected boolean okCalled() {
-
-        boolean aFdrSelected = m_fdrCheckbox.isSelected() || m_proteinFdrCheckbox.isSelected();
-
-        if (aFdrSelected && (getHasDecoy() == DecoyStatus.WAITING)) {
-            // we have not finished to read data for decoy check
-            // we are waiting for one second
-            setBusy(true);
-            javax.swing.Timer t = new Timer(1000, new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    okCalled();
-                }
-            });
-            t.setRepeats(false);
-            t.start();
+        
+        // check parameters
+        if (!checkParameters(true)) {
             return false;
         }
-         
-        setBusy(false);
+
+        // save parameters
+        Preferences preferences = NbPreferences.root();
+        saveParameters(preferences);
+
         
-        if (aFdrSelected && (getHasDecoy() == DecoyStatus.NO_DECOY)) {
-            setStatus(true, "A FDR can not be calculated with no Decoy Data");
-            if (m_fdrCheckbox.isSelected()) {
-                highlight(m_fdrCheckbox);
-            } else {
-                highlight(m_proteinFdrCheckbox);
+        return true;
+
+    }
+
+    private void saveParameters(Preferences preferences) {
+        // Save Parameters        
+        m_parameterList.saveParameters(preferences);
+
+        // save scoring type
+        preferences.put("ValidationScoringType", m_proteinScoringTypeCbx.getSelectedItem().toString());
+
+        // save specific Typical Protein parameters
+        m_changeTypicalPanel.savePreference(preferences);
+        preferences.putBoolean("UseTypicalProteinRegex", m_typicalProteinMatchCheckBox.isSelected());
+    }
+
+    private boolean checkParameters(boolean checkFDR) {
+
+        if (checkFDR) {
+            boolean aFdrSelected = m_fdrCheckbox.isSelected() || m_proteinFdrCheckbox.isSelected();
+
+            if (aFdrSelected && (getHasDecoy() == DecoyStatus.WAITING)) {
+                // we have not finished to read data for decoy check
+                // we are waiting for one second
+                setBusy(true);
+                javax.swing.Timer t = new Timer(1000, new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        okCalled();
+                    }
+                });
+                t.setRepeats(false);
+                t.start();
+                return false;
             }
-            return false;
+
+            setBusy(false);
+
+            if (aFdrSelected && (getHasDecoy() == DecoyStatus.NO_DECOY)) {
+                setStatus(true, "A FDR can not be calculated with no Decoy Data");
+                if (m_fdrCheckbox.isSelected()) {
+                    highlight(m_fdrCheckbox);
+                } else {
+                    highlight(m_proteinFdrCheckbox);
+                }
+                return false;
+            }
         }
             
         // check parameters
@@ -850,35 +890,80 @@ public class ValidationDialog extends DefaultDialog {
             highlight(error.getParameterComponent());
             return false;
         }
-
-
-        // Save Parameters        
-        m_parameterList.saveParameters();
-
-        
-        Preferences preferences = NbPreferences.root();
-        
-        // save scoring type
-         preferences.put("ValidationScoringType", m_proteinScoringTypeCbx.getSelectedItem().toString());
-        
-        // save specific Typical Protein parameters
-         changeTypicalPanel.savePreference();
-        preferences.putBoolean("UseTypicalProteinRegex", m_typicalProteinMatchCheckBox.isSelected());
-
         
         return true;
-
     }
+    
+    @Override
+    protected boolean saveCalled() {
+        // check parameters
+        if (!checkParameters(false)) {
+            return false;
+        }
 
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setMultiSelectionEnabled(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Proline Settings File", "settings");
+        fileChooser.addChoosableFileFilter(filter);
+        fileChooser.setFileFilter(filter);
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File f = fileChooser.getSelectedFile();
+            FilePreferences filePreferences = new FilePreferences(f, null, "");
+
+            saveParameters(filePreferences);
+        }
+
+        return false;
+    }
+    
+    @Override
+    protected boolean loadCalled() {
+
+        SettingsDialog settingsDialog = new SettingsDialog(this, "Validation");
+        settingsDialog.setLocationRelativeTo(this);
+        settingsDialog.setVisible(true);
+        
+        if (settingsDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            if (settingsDialog.isDefaultSettingsSelected()) {
+                m_parameterList.initDefaults();
+            } else {
+                try {
+                    File settingsFile = settingsDialog.getSelectedFile();
+                    FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
+
+                    
+                    Preferences preferences = NbPreferences.root();
+                    String[] keys = filePreferences.keys();
+                    for (int i=0;i<keys.length;i++) {
+                        String key = keys[i];
+                        String value = filePreferences.get(key, null);
+                        preferences.put(key, value);
+                    }
+                    
+                    m_parameterList.loadParameters(filePreferences);
+                    restoreScoringTypeParameter(filePreferences);
+                    restoreTypicalProteinParameters(filePreferences);
+                    updateFdrObjects(m_fdrFilterParameter.isUsed());
+                    updateproteinFdrObjects(m_proteinFdrFilterParameter.isUsed());
+                    initPsmPrefilterPanel();
+                    initProteinPrefilterPanel();
+
+                } catch (Exception e) {
+                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
+                    setStatus(true, "Parsing of your Settings File failed");
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    
     @Override
     protected boolean cancelCalled() {
         return true;
     }
 
-    @Override
-    protected boolean defaultCalled() {
-        m_parameterList.initDefaults();
 
-        return false;
-    }
 }

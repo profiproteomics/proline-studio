@@ -100,7 +100,9 @@ public class IconManager {
         DATASET_RSM_MERGED,
         DATASET_RSET_DECOY,
         DATASET_RSM_DECOY,
-        DATASET_RSM_ERROR;
+        DATASET_RSM_ERROR,
+        LOAD_SETTINGS,
+        SAVE_SETTINGS;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -362,6 +364,10 @@ public class IconManager {
                 return "fr/proline/studio/images/dataset_rsm_decoy.png";
             case DATASET_RSM_ERROR:
                 return "fr/proline/studio/images/dataset_rsm_error.png";
+            case LOAD_SETTINGS:
+                return "fr/proline/studio/images/load-settings.png"; 
+            case SAVE_SETTINGS:
+                return "fr/proline/studio/images/save-settings.png"; 
         }
 
 

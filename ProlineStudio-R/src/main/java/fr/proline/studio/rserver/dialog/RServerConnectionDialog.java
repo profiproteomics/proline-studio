@@ -42,7 +42,7 @@ public class RServerConnectionDialog extends ConnectionDialog {
         super(parent, "R-Server Connection", " R-Server Parameter ", "R-Server Host :");
 
         setButtonVisible(DefaultDialog.BUTTON_HELP, false);
-
+        setButtonVisible(BUTTON_DEFAULT, true);
         
         initDefaults();
         

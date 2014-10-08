@@ -37,7 +37,6 @@ public class SpectralCountDialog extends DefaultDialog {
         
         setHelpURL(null); //JPM.TODO
 
-        setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
 
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));

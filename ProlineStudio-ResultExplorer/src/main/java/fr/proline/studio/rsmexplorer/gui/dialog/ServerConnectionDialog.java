@@ -8,6 +8,7 @@ import fr.proline.studio.gui.ConnectionDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import java.awt.Window;
 import javax.swing.*;
+import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 
 /**
@@ -33,6 +34,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:startsession");
 
+        setButtonVisible(BUTTON_DEFAULT, true);
         
         initDefaults();
         

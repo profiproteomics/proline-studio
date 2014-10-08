@@ -36,7 +36,6 @@ public class DataBoxChooserDialog extends DefaultDialog {
         setSize(780,420);
         
         setButtonVisible(BUTTON_HELP, false);
-        setButtonVisible(BUTTON_DEFAULT, false);
         setResizable(true);
         
         TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleStartingDataboxList(outParameters);
@@ -50,7 +49,6 @@ public class DataBoxChooserDialog extends DefaultDialog {
         setSize(800,320);
         
         setButtonVisible(BUTTON_HELP, false);
-        setButtonVisible(BUTTON_DEFAULT, false);
         
         TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(previousDatabox);
 

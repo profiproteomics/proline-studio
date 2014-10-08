@@ -8,6 +8,8 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -17,8 +19,16 @@ import org.openide.windows.WindowManager;
  */
 public class RenameAction extends AbstractRSMAction {
 
-    public RenameAction() {
-        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    // tree type: could be Identification or Quantitation
+    AbstractTree.TreeType m_treeType = null;
+    
+    /**
+     * Builds the RenameAction depending of the treeType
+     * @param treeType 
+     */
+    public RenameAction(AbstractTree.TreeType treeType) {
+        super(NbBundle.getMessage(RenameAction.class, "CTL_RenameAction"), treeType);
+        this.m_treeType = treeType;
     }
 
     @Override
@@ -36,7 +46,14 @@ public class RenameAction extends AbstractRSMAction {
             String name = dataset.getName();
             String newName = showRenameDialog(name, x, y);
 
-            datasetNode.rename(newName);
+            // depends on the treeType
+            AbstractTree tree = null;
+            if (m_treeType == AbstractTree.TreeType.TREE_IDENTIFICATION ){
+                tree = IdentificationTree.getCurrentTree();
+            }else if (m_treeType == AbstractTree.TreeType.TREE_QUANTITATION ){
+                 tree = QuantitationTree.getCurrentTree();
+            }
+            datasetNode.rename(newName, tree);
             
         } else if (nodeType == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
             IdProjectIdentificationNode projectNode = (IdProjectIdentificationNode) n;

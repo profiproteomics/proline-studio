@@ -5,9 +5,11 @@ import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportXICAction;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
+import fr.proline.studio.rsmexplorer.actions.identification.RenameAction;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,7 +70,9 @@ public class QuantitationTree extends AbstractTree {
     
     @Override
     public void rename(AbstractNode rsmNode, String newName) {
-        //JPM.TODO (setEditable must be done on tree)
+        if (rsmNode.getType().equals(AbstractNode.NodeTypes.DATA_SET)) {
+            ((DataSetNode) rsmNode).rename(newName, QuantitationTree.getCurrentTree());
+        }
     }
 
     
@@ -86,6 +90,13 @@ public class QuantitationTree extends AbstractTree {
         AbstractNode n = selectedNodes[0];
         boolean isRootPopup = n.isRoot();
 
+        // check if nodes are changing
+        for (int i = 0; i < nbNodes; i++) {
+            if (selectedNodes[i].isChanging()) {
+                // do not show a popup on a node which is changing
+                return;
+            }
+         }
          JPopupMenu popup;
          ArrayList<AbstractRSMAction> actions;
         
@@ -117,7 +128,7 @@ public class QuantitationTree extends AbstractTree {
          } else {
              if (m_mainPopup == null) {
                  // create the actions
-                 m_mainActions = new ArrayList<>(4);  // <--- get in sync
+                 m_mainActions = new ArrayList<>(6);  // <--- get in sync
 
                  RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
                  m_mainActions.add(retrieveSCDataAction);
@@ -130,6 +141,11 @@ public class QuantitationTree extends AbstractTree {
                  
                  ExportXICAction exportXICActionProtSet = new ExportXICAction(ExportXICAction.ExportType.BASIC_MASTER_QPROT_SETS);
                  m_mainActions.add(exportXICActionProtSet);
+                 
+                 m_mainActions.add(null);  // separator
+                 
+                 RenameAction renameQuantitationAction = new RenameAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                 m_mainActions.add(renameQuantitationAction);
                  
 
                  // add actions to popup

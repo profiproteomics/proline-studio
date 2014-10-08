@@ -19,7 +19,6 @@ import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProtein
 import fr.proline.studio.rsmexplorer.actions.identification.EmptyTrashAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
 import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.AbstractData;
@@ -504,7 +503,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             Project project = projectNode.getProject();
             ((IdProjectIdentificationNode) rsmNode).changeNameAndDescription(newName, project.getDescription());
         } else if (rsmNode.getType() == AbstractNode.NodeTypes.DATA_SET) {
-            ((DataSetNode) rsmNode).rename(newName);
+            ((DataSetNode) rsmNode).rename(newName, IdentificationTree.getCurrentTree());
         }
     }
 
@@ -665,7 +664,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 ChangeDescriptionAction changeDescriptionAction = new ChangeDescriptionAction();
                 m_mainActions.add(changeDescriptionAction);
                 
-                RenameAction renameAction = new RenameAction();
+                RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(renameAction);
 
                 

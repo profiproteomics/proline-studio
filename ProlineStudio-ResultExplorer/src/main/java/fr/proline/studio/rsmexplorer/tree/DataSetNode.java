@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.tree;
 
-import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.core.orm.msi.*;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -189,18 +188,26 @@ public class DataSetNode extends AbstractNode {
         
     }
     
-    public void rename(final String newName) {
+    /**
+     * rename the dataset with the given newName
+     * This operation could be done on the IdentificationTree or a QuantitationTree
+     * @param newName
+     * @param tree 
+     */
+    public void rename(final String newName, final AbstractTree tree) {
 
         DDataset dataset = getDataset();
         String name = dataset.getName();
 
-        if ((newName != null) && (newName.compareTo(name) != 0)) {
+        if ((newName != null) && (newName.compareTo(name) != 0) && !newName.trim().isEmpty()) {
 
             final DataSetNode datasetNode = this;
 
             setIsChanging(true);
             dataset.setName(newName + "...");
-            ((DefaultTreeModel) IdentificationTree.getCurrentTree().getModel()).nodeChanged(this);
+            if (tree != null) {
+                ((DefaultTreeModel) tree.getModel()).nodeChanged(this);
+            }
 
 
             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -214,7 +221,9 @@ public class DataSetNode extends AbstractNode {
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     datasetNode.setIsChanging(false);
                     datasetNode.getDataset().setName(newName);
-                    ((DefaultTreeModel) IdentificationTree.getCurrentTree().getModel()).nodeChanged(datasetNode);
+                    if (tree != null) {
+                        ((DefaultTreeModel) tree.getModel()).nodeChanged(datasetNode);
+                    }
                 }
             };
 

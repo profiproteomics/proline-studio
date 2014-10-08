@@ -19,14 +19,15 @@ public class DefaultDialog extends javax.swing.JDialog {
     public static final int BUTTON_OK = 0;
     public static final int BUTTON_CANCEL = 1;
     public static final int BUTTON_DEFAULT = 2;
-    public static final int BUTTON_HELP = 3;
+    public static final int BUTTON_LOAD = 3;
+    public static final int BUTTON_SAVE = 4;
+    public static final int BUTTON_HELP = 5;
+    private static final int BUTTONS_NUMBER = 6; // ---- get in sync
     
     private JPanel m_internalPanel;
     
-    private JButton m_okButton;
-    private JButton m_cancelButton;
-    private JButton m_defaultButton;
-    private JButton m_helpButton;
+    private JButton[] m_buttons;
+
 
     private JPanel m_statusPanel;
     private JLabel m_statusLabel;
@@ -53,6 +54,8 @@ public class DefaultDialog extends javax.swing.JDialog {
     }
     public DefaultDialog(Window parent, Dialog.ModalityType modalityType) {
         super(parent, modalityType);
+        
+        m_buttons = new JButton[BUTTONS_NUMBER];
         
         // Action when the user press on the dialog cross
         addWindowListener(new WindowAdapter() {
@@ -150,70 +153,20 @@ public class DefaultDialog extends javax.swing.JDialog {
     }
 
     public void setButtonVisible(int buttonId, boolean visible) {
-        switch (buttonId) {
-            case BUTTON_OK:
-                m_okButton.setVisible(visible);
-                break;
-            case BUTTON_CANCEL:
-                m_cancelButton.setVisible(visible);
-                break;
-            case BUTTON_DEFAULT:
-                m_defaultButton.setVisible(visible);
-                break;
-            case BUTTON_HELP:
-                m_helpButton.setVisible(visible); 
-                
-        }
+        m_buttons[buttonId].setVisible(visible);
+
     }
     
     public void setButtonName(int buttonId, String name) {
-        switch (buttonId) {
-            case BUTTON_OK:
-                m_okButton.setText(name);
-                break;
-            case BUTTON_CANCEL:
-                m_cancelButton.setText(name);
-                break;
-            case BUTTON_DEFAULT:
-                m_defaultButton.setText(name);
-                break;
-            case BUTTON_HELP:
-                m_helpButton.setText(name);
-        }
+        m_buttons[buttonId].setText(name);
     }
     
     protected void setButtonIcon(int buttonId, Icon icon) {
-        switch (buttonId) {
-            case BUTTON_OK:
-                m_okButton.setIcon(icon);
-                break;
-            case BUTTON_CANCEL:
-                m_cancelButton.setIcon(icon);
-                break;
-            case BUTTON_DEFAULT:
-                m_defaultButton.setIcon(icon);
-                break;
-            case BUTTON_HELP:
-                m_helpButton.setIcon(icon);
-                break;
-        }
+        m_buttons[buttonId].setIcon(icon);
     }
     
     protected void doClick(int buttonId) {
-        switch (buttonId) {
-            case BUTTON_OK:
-                m_okButton.doClick();
-                break;
-            case BUTTON_CANCEL:
-                m_cancelButton.doClick();
-                break;
-            case BUTTON_DEFAULT:
-                m_defaultButton.doClick();
-                break;
-            case BUTTON_HELP:
-                m_helpButton.doClick();
-                break;
-        }
+        m_buttons[buttonId].doClick();
     }
     
     protected void setStatusVisible(boolean visible) {
@@ -268,7 +221,13 @@ public class DefaultDialog extends javax.swing.JDialog {
         return false;
     }
     
-
+    protected boolean saveCalled() {
+        return false;
+    }
+    
+    protected boolean loadCalled() {
+        return false;
+    }
     
     
     private void initComponents() {
@@ -316,17 +275,25 @@ public class DefaultDialog extends javax.swing.JDialog {
         c.weightx = 0;
         c.weighty = 0;
         
-        m_okButton = new JButton(IconManager.getIcon(IconManager.IconType.OK));
-        m_cancelButton = new JButton(IconManager.getIcon(IconManager.IconType.CANCEL));
-        m_defaultButton = new JButton(IconManager.getIcon(IconManager.IconType.DEFAULT));
-        m_helpButton = new JButton(IconManager.getIcon(IconManager.IconType.QUESTION));
-        Insets margin = m_helpButton.getMargin();
+        m_buttons[BUTTON_OK] = new JButton(IconManager.getIcon(IconManager.IconType.OK));
+        m_buttons[BUTTON_CANCEL] = new JButton(IconManager.getIcon(IconManager.IconType.CANCEL));
+        m_buttons[BUTTON_DEFAULT] = new JButton(IconManager.getIcon(IconManager.IconType.DEFAULT));
+        m_buttons[BUTTON_LOAD] = new JButton(IconManager.getIcon(IconManager.IconType.LOAD_SETTINGS));
+        m_buttons[BUTTON_SAVE] = new JButton(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
+        m_buttons[BUTTON_HELP] = new JButton(IconManager.getIcon(IconManager.IconType.QUESTION));
+        Insets margin = m_buttons[BUTTON_HELP].getMargin();
         margin.left=3;
         margin.right=3;
-        m_helpButton.setMargin(margin);
+        m_buttons[BUTTON_HELP].setMargin(margin);
         
         
-        buttonPanel.add(m_defaultButton, c);
+        buttonPanel.add(m_buttons[BUTTON_SAVE], c);
+        
+        c.gridx++;
+        buttonPanel.add(m_buttons[BUTTON_LOAD], c);
+        
+        c.gridx++;
+        buttonPanel.add(m_buttons[BUTTON_DEFAULT], c);
         
         c.gridx++;
         c.weightx = 1;
@@ -334,32 +301,51 @@ public class DefaultDialog extends javax.swing.JDialog {
         
         c.gridx++;
         c.weightx = 0;
-        buttonPanel.add(m_okButton, c);
+        buttonPanel.add(m_buttons[BUTTON_OK], c);
         
         c.gridx++;
-        buttonPanel.add(m_cancelButton, c);
+        buttonPanel.add(m_buttons[BUTTON_CANCEL], c);
         
         c.gridx++;
-        buttonPanel.add(m_helpButton, c);
+        buttonPanel.add(m_buttons[BUTTON_HELP], c);
         
-        m_okButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
-        m_okButton.addActionListener(new java.awt.event.ActionListener() {
+        m_buttons[BUTTON_SAVE].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.saveButton.text"));
+        setButtonVisible(BUTTON_SAVE, false);
+        m_buttons[BUTTON_SAVE].addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveButtonActionPerformed();
+            }
+        });
+        
+        m_buttons[BUTTON_LOAD].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.loadButton.text"));
+        setButtonVisible(BUTTON_LOAD, false);
+        m_buttons[BUTTON_LOAD].addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadButtonActionPerformed();
+            }
+        });
+        
+        m_buttons[BUTTON_OK].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.okButton.text"));
+        m_buttons[BUTTON_OK].addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 okButtonActionPerformed();
             }
         });
 
-        m_cancelButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.cancelButton.text"));
-        m_cancelButton.addActionListener(new java.awt.event.ActionListener() {
+        m_buttons[BUTTON_CANCEL].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.cancelButton.text"));
+        m_buttons[BUTTON_CANCEL].addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelButtonActionPerformed();
             }
         });
 
-        m_defaultButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.defaultButton.text"));
-        m_defaultButton.addActionListener(new java.awt.event.ActionListener() {
+        m_buttons[BUTTON_DEFAULT].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.defaultButton.text"));
+        setButtonVisible(BUTTON_DEFAULT, false);
+        m_buttons[BUTTON_DEFAULT].addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 defaultButtonActionPerformed();
@@ -367,7 +353,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         });
         
         //m_helpButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.helpButton.text"));
-        m_helpButton.addActionListener(new java.awt.event.ActionListener() {
+        m_buttons[BUTTON_HELP].addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 helpButtonActionPerformed();
@@ -378,6 +364,20 @@ public class DefaultDialog extends javax.swing.JDialog {
         return buttonPanel;
     }
 
+    
+    private void saveButtonActionPerformed() {
+        if (saveCalled()) {
+            m_buttonClicked = BUTTON_SAVE;
+        }
+    }
+
+    private void loadButtonActionPerformed() {
+        if (loadCalled()) {
+            m_buttonClicked = BUTTON_LOAD;
+        }
+    }
+
+     
     private void cancelButtonActionPerformed() {                                             
         if (cancelCalled()) {
             m_buttonClicked = BUTTON_CANCEL;

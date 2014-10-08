@@ -78,6 +78,13 @@ public class BooleanParameter extends AbstractParameter {
     }
 
     @Override
+    public void setValue(String v) {
+        if ((m_graphicalType.equals(JCheckBox.class)) && (m_parameterComponent!=null)) {
+            ((JCheckBox)m_parameterComponent).setSelected(Boolean.parseBoolean(v));
+        }
+    }
+    
+    @Override
     public String getStringValue() {
         return getObjectValue().toString();
     }

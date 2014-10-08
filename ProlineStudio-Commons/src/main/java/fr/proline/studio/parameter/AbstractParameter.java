@@ -42,6 +42,8 @@ public abstract class AbstractParameter {
     
     public abstract String getStringValue();
     public abstract Object getObjectValue();
+    
+    public abstract void setValue(String v);
     /**
      * Specify if a component should be associated to the label for this parameter. 
      * Default is true;

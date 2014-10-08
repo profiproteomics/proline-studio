@@ -50,8 +50,7 @@ public class ChangeTypicalProteinPanel extends javax.swing.JPanel {
         add(regexHelpLabel, c);                  
     }
     
-    protected void savePreference(){
-        Preferences preferences = NbPreferences.root();              
+    protected void savePreference(Preferences preferences){         
         for(int i=0; i<NBR_MAX_RULES; i++){
             preferences.put("TypicalProteinRegex_"+i, m_regexTextFields[i].getText().trim());        
             preferences.putBoolean("TypicalProteinRegexOnAccession_"+i, (m_regexTargetComboboxs[i].getSelectedIndex() == 0));

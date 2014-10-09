@@ -87,30 +87,17 @@ public class ProjectExplorerPanel extends JPanel {
         c.weightx = 0;
         add(buttonsPanel, c);
 
-        
-        // hide quantitation for the moment  JPM.LATER
-        Preferences preferences = NbPreferences.root();
-        boolean showQuantitation = preferences.getBoolean("Profi", false);
 
-        if (showQuantitation) {
-            JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, m_identificationTreeScrollPane, m_quantitationTreeScrollPane);
-            splitPane.setResizeWeight(0.5);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, m_identificationTreeScrollPane, m_quantitationTreeScrollPane);
+        splitPane.setResizeWeight(0.5);
 
-            c.gridy++;
-            c.gridx = 0;
-            c.weightx = 1;
-            c.weighty = 1;
-            c.gridwidth = 2;
-            add(splitPane, c);
-        } else {
-            // only identification
-            c.gridy++;
-            c.gridx = 0;
-            c.weightx = 1;
-            c.weighty = 1;
-            c.gridwidth = 2;
-            add(m_identificationTreeScrollPane, c);
-        }
+        c.gridy++;
+        c.gridx = 0;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.gridwidth = 2;
+        add(splitPane, c);
+
 
     }
     

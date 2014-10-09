@@ -13,6 +13,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.*;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
+import fr.proline.studio.settings.SettingsUtils;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
@@ -25,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +46,8 @@ public class ValidationDialog extends DefaultDialog {
     
     private final static  String[] SCORING_TYPE_OPTIONS = { "Standard", "Mascot Modified Mudpit" };
     private final static  String[] SCORING_TYPE_VALUES = { "mascot:standard score", "mascot:modified mudpit score" };
+    
+    private final static String SETTINGS_KEY = "Validation";
     
     private ParameterList m_parameterList;
     
@@ -901,18 +903,19 @@ public class ValidationDialog extends DefaultDialog {
             return false;
         }
 
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setMultiSelectionEnabled(false);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Proline Settings File", "settings");
-        fileChooser.addChoosableFileFilter(filter);
-        fileChooser.setFileFilter(filter);
+        JFileChooser fileChooser = SettingsUtils.getFileChooser(SETTINGS_KEY);
         int result = fileChooser.showSaveDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File f = fileChooser.getSelectedFile();
             FilePreferences filePreferences = new FilePreferences(f, null, "");
 
             saveParameters(filePreferences);
+            
+            SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
+            SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
         }
+        
+        
 
         return false;
     }
@@ -920,7 +923,7 @@ public class ValidationDialog extends DefaultDialog {
     @Override
     protected boolean loadCalled() {
 
-        SettingsDialog settingsDialog = new SettingsDialog(this, "Validation");
+        SettingsDialog settingsDialog = new SettingsDialog(this, SETTINGS_KEY);
         settingsDialog.setLocationRelativeTo(this);
         settingsDialog.setVisible(true);
         

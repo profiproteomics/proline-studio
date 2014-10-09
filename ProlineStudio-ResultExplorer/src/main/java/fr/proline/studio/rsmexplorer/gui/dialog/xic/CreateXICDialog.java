@@ -20,12 +20,17 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
 import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
+import fr.proline.studio.settings.FilePreferences;
+import fr.proline.studio.settings.SettingsDialog;
+import fr.proline.studio.settings.SettingsUtils;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
 import java.awt.Window;
+import java.io.File;
 import java.util.*;
 import java.util.prefs.Preferences;
 import javax.persistence.EntityManager;
+import javax.swing.JFileChooser;
 import javax.swing.tree.TreePath;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
@@ -41,6 +46,8 @@ public class CreateXICDialog extends DefaultDialog {
     private static final int STEP_PANEL_CREATE_XIC_DESIGN = 0;
     private static final int STEP_PANEL_DEFINE_XIC_PARAMS = 1;
     private int m_step = STEP_PANEL_CREATE_XIC_DESIGN;
+    
+    private static final String SETTINGS_KEY = "XIC";
     
     private static CreateXICDialog m_singletonDialog = null;
     
@@ -61,7 +68,6 @@ public class CreateXICDialog extends DefaultDialog {
 
         setHelpURL(null); //JPM.TODO
 
-        setButtonVisible(BUTTON_DEFAULT, true);
 
         setSize(640, 500);
         setResizable(true);
@@ -73,7 +79,8 @@ public class CreateXICDialog extends DefaultDialog {
         
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
-        setButtonVisible(DefaultDialog.BUTTON_DEFAULT, false);
+        setButtonVisible(BUTTON_LOAD, false);
+        setButtonVisible(BUTTON_SAVE, false);
         finalXICDesignNode = null;
         m_step = STEP_PANEL_CREATE_XIC_DESIGN;
         finalXICDesignNode = new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
@@ -429,23 +436,20 @@ public class CreateXICDialog extends DefaultDialog {
             revalidate();
             repaint();
             
-            setButtonVisible(DefaultDialog.BUTTON_DEFAULT, true);
+            setButtonVisible(BUTTON_LOAD, true);
+            setButtonVisible(BUTTON_SAVE, true);
             m_step = STEP_PANEL_DEFINE_XIC_PARAMS;
             
             return false;
         } else { //STEP_PANEL_DEFINE_QUANT_PARAMS
             
-            ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
-            
-            // check parameters
-            ParameterError error = parameterList.checkParameters();
-            if (error != null) {
-                setStatus(true, error.getErrorMessage());
-                highlight(error.getParameterComponent());
+            if (!checkQuantParameters()) {
                 return false;
             }
 
-            // Save Parameters        
+
+            // Save Parameters  
+            ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
             parameterList.saveParameters(NbPreferences.root());
 
             return true;
@@ -453,13 +457,88 @@ public class CreateXICDialog extends DefaultDialog {
 
     }
     
+    private boolean checkQuantParameters() {
+        ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
+
+        // check parameters
+        ParameterError error = parameterList.checkParameters();
+        if (error != null) {
+            setStatus(true, error.getErrorMessage());
+            highlight(error.getParameterComponent());
+            return false;
+        }
+        return true;
+    }
+    
+    
     @Override
+    protected boolean saveCalled() {
+        // check parameters
+        if (!checkQuantParameters()) {
+            return false;
+        }
+
+        JFileChooser fileChooser = SettingsUtils.getFileChooser(SETTINGS_KEY);
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File f = fileChooser.getSelectedFile();
+            FilePreferences filePreferences = new FilePreferences(f, null, "");
+
+            // Save Parameters  
+            ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
+            parameterList.saveParameters(filePreferences);
+            
+            SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
+            SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
+        }
+
+        return false;
+    }
+    
+        @Override
+    protected boolean loadCalled() {
+
+        SettingsDialog settingsDialog = new SettingsDialog(this, SETTINGS_KEY);
+        settingsDialog.setLocationRelativeTo(this);
+        settingsDialog.setVisible(true);
+
+        if (settingsDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            if (settingsDialog.isDefaultSettingsSelected()) {
+                ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
+                parameterList.initDefaults();
+            } else {
+                try {
+                    File settingsFile = settingsDialog.getSelectedFile();
+                    FilePreferences filePreferences = new FilePreferences(settingsFile, null, "");
+
+
+                    Preferences preferences = NbPreferences.root();
+                    String[] keys = filePreferences.keys();
+                    for (int i = 0; i < keys.length; i++) {
+                        String key = keys[i];
+                        String value = filePreferences.get(key, null);
+                        preferences.put(key, value);
+                    }
+
+                    DefineQuantParamsPanel.getDefineQuantPanel().getParameterList().loadParameters(filePreferences);
+
+                } catch (Exception e) {
+                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
+                    setStatus(true, "Parsing of your Settings File failed");
+                }
+            }
+        }
+
+        return false;
+    }
+    
+    /*@Override
     protected boolean defaultCalled() {
         ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
         parameterList.initDefaults();
 
         return false;
-    }
+    }*/
     
     private boolean checkDesignStructure(AbstractNode parentNode) {
         AbstractNode.NodeTypes type = parentNode.getType();

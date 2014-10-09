@@ -13,6 +13,7 @@ import fr.proline.studio.parameter.*;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.settings.FilePreferences;
 import fr.proline.studio.settings.SettingsDialog;
+import fr.proline.studio.settings.SettingsUtils;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -66,6 +67,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private final static String[] DECOY_VALUES_ASSOCIATED_KEYS = DECOY_VALUES;
     private static final int CONCATENATED_DECOY_INDEX = 3;
     
+    private final static String SETTINGS_KEY = "ImporteIdentification";
     
     private JList<File> m_fileList;
     private JScrollPane m_fileListScrollPane;
@@ -723,17 +725,16 @@ public class ImportIdentificationDialog extends DefaultDialog {
             return false;
         }
 
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setMultiSelectionEnabled(false);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Proline Settings File", "settings");
-        fileChooser.addChoosableFileFilter(filter);
-        fileChooser.setFileFilter(filter);
+        JFileChooser fileChooser = SettingsUtils.getFileChooser(SETTINGS_KEY);
         int result = fileChooser.showSaveDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File f = fileChooser.getSelectedFile();
             FilePreferences filePreferences = new FilePreferences(f, null, "");
 
             saveParameters(filePreferences);
+            
+            SettingsUtils.addSettingsPath(SETTINGS_KEY, f.getAbsolutePath());
+            SettingsUtils.writeDefaultDirectory(SETTINGS_KEY, f.getParent());
         }
 
         return false;
@@ -742,7 +743,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     @Override
     protected boolean loadCalled() {
 
-        SettingsDialog settingsDialog = new SettingsDialog(this, "ImportIdentification");
+        SettingsDialog settingsDialog = new SettingsDialog(this, SETTINGS_KEY);
         settingsDialog.setLocationRelativeTo(this);
         settingsDialog.setVisible(true);
         

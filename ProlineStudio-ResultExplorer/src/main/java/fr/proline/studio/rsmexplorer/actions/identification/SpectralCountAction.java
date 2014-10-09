@@ -132,14 +132,6 @@ public class SpectralCountAction extends AbstractRSMAction {
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
         
-        // forbid this action for the moment  JPM.LATER
-        Preferences preferences = NbPreferences.root();
-        boolean showSpectralCount = preferences.getBoolean("Profi", false);
-        if (!showSpectralCount) {
-            setEnabled(false);
-            return;
-        }
-        
          if (selectedNodes.length != 1) {
             setEnabled(false);
             return;

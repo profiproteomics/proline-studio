@@ -51,7 +51,7 @@ public class CreateXICDialog extends DefaultDialog {
     
     private static CreateXICDialog m_singletonDialog = null;
     
-    private AbstractNode finalXICDesignNode = null;
+    private AbstractNode m_finalXICDesignNode = null;
 
     public static CreateXICDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -74,22 +74,28 @@ public class CreateXICDialog extends DefaultDialog {
         
     }
     
-
-    public final void reinit(){
+    public void displayDesignTree() {
+        displayDesignTree(new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION)));
+    }
+    private void displayDesignTree(AbstractNode finalXICDesignNode) {
+        
+        m_finalXICDesignNode = finalXICDesignNode;
+        m_step = STEP_PANEL_CREATE_XIC_DESIGN;
         
         setButtonName(DefaultDialog.BUTTON_OK, "Next");
         setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.ARROW));
         setButtonVisible(BUTTON_LOAD, false);
         setButtonVisible(BUTTON_SAVE, false);
-        finalXICDesignNode = null;
-        m_step = STEP_PANEL_CREATE_XIC_DESIGN;
-        finalXICDesignNode = new DataSetNode(new DataSetData("XIC", Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION));
+        setButtonVisible(BUTTON_BACK, false);
 
-        replaceInternaleComponent(CreateXICDesignPanel.getPanel(finalXICDesignNode));
+        replaceInternaleComponent(CreateXICDesignPanel.getPanel(m_finalXICDesignNode));
         revalidate();
         repaint();
          
     }
+    
+    
+    
     
     @Override
     public void pack() {
@@ -97,7 +103,7 @@ public class CreateXICDialog extends DefaultDialog {
     }
     
     public AbstractNode getDesignRSMNode(){
-        return finalXICDesignNode;
+        return m_finalXICDesignNode;
     }
     
     /*
@@ -167,7 +173,7 @@ public class CreateXICDialog extends DefaultDialog {
            
                 final Object mutexFileRegistered = new Object();
 
-                Enumeration xicGrps = finalXICDesignNode.children();
+                Enumeration xicGrps = m_finalXICDesignNode.children();
                 while (xicGrps.hasMoreElements() && errorMsg == null) {
                     AbstractNode grpNode = (AbstractNode) xicGrps.nextElement();
                     //Iterate over Samples
@@ -243,7 +249,7 @@ public class CreateXICDialog extends DefaultDialog {
     }
 
     public Map<String, Object>  getDesignParameters() throws IllegalAccessException {
-        if (finalXICDesignNode==null) {
+        if (m_finalXICDesignNode==null) {
             throw new IllegalAccessException("Design parameters have not been set.");
         }
         
@@ -264,7 +270,7 @@ public class CreateXICDialog extends DefaultDialog {
         HashMap<String, ArrayList<String>> _samplesAnalysisBySample = new HashMap<>();
         Map<String, Integer> splNbrByName = new HashMap<>();            
                 
-        Enumeration xicGrps = finalXICDesignNode.children();   
+        Enumeration xicGrps = m_finalXICDesignNode.children();   
         while(xicGrps.hasMoreElements()&& errorMsg==null){
             AbstractNode grpNode = (AbstractNode) xicGrps.nextElement();
             String grpName = grpNode.getData().getName();
@@ -322,7 +328,7 @@ public class CreateXICDialog extends DefaultDialog {
             
         Map<String, Object> groupSetupParams = new HashMap<>();
         groupSetupParams.put("number", 1);
-        groupSetupParams.put("name", finalXICDesignNode.getData().getName());
+        groupSetupParams.put("name", m_finalXICDesignNode.getData().getName());
         groupSetupParams.put("biological_groups", _biologicalGroupList);
         groupSetupParams.put("ratio_definitions", ratioParamsList);
             
@@ -361,7 +367,7 @@ public class CreateXICDialog extends DefaultDialog {
         List masterQuantChannelsList = new ArrayList();
         Map<String, Object> masterQuantChannelParams = new HashMap<>();
         masterQuantChannelParams.put("number", 1);
-        masterQuantChannelParams.put("name", finalXICDesignNode.getData().getName());
+        masterQuantChannelParams.put("name", m_finalXICDesignNode.getData().getName());
         masterQuantChannelParams.put("quant_channels", quantChanneList);
         masterQuantChannelsList.add(masterQuantChannelParams);
        
@@ -420,14 +426,17 @@ public class CreateXICDialog extends DefaultDialog {
 
         if (m_step == STEP_PANEL_CREATE_XIC_DESIGN)  {
             
-            if ((!checkDesignStructure(finalXICDesignNode)) || (!checkRawFiles(finalXICDesignNode))) {
+            if ((!checkDesignStructure(m_finalXICDesignNode)) || (!checkRawFiles(m_finalXICDesignNode))) {
                 return false;
             }
 
             // change to ok button
             setButtonName(DefaultDialog.BUTTON_OK, "OK");
             setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
- 
+            setButtonVisible(BUTTON_BACK, true);
+            setButtonVisible(BUTTON_LOAD, true);
+            setButtonVisible(BUTTON_SAVE, true);
+            
             //Update panel
          
             DefineQuantParamsPanel quantPanel =  DefineQuantParamsPanel.getDefineQuantPanel();
@@ -435,9 +444,7 @@ public class CreateXICDialog extends DefaultDialog {
             replaceInternaleComponent(quantPanel);
             revalidate();
             repaint();
-            
-            setButtonVisible(BUTTON_LOAD, true);
-            setButtonVisible(BUTTON_SAVE, true);
+
             m_step = STEP_PANEL_DEFINE_XIC_PARAMS;
             
             return false;
@@ -495,7 +502,7 @@ public class CreateXICDialog extends DefaultDialog {
         return false;
     }
     
-        @Override
+    @Override
     protected boolean loadCalled() {
 
         SettingsDialog settingsDialog = new SettingsDialog(this, SETTINGS_KEY);
@@ -532,13 +539,11 @@ public class CreateXICDialog extends DefaultDialog {
         return false;
     }
     
-    /*@Override
-    protected boolean defaultCalled() {
-        ParameterList parameterList = DefineQuantParamsPanel.getDefineQuantPanel().getParameterList();
-        parameterList.initDefaults();
-
-        return false;
-    }*/
+     @Override
+    protected boolean backCalled() {
+         displayDesignTree(m_finalXICDesignNode);
+         return true;
+     }
     
     private boolean checkDesignStructure(AbstractNode parentNode) {
         AbstractNode.NodeTypes type = parentNode.getType();

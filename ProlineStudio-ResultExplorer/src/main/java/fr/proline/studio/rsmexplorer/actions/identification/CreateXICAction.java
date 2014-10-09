@@ -48,7 +48,7 @@ public class CreateXICAction extends AbstractRSMAction {
          
          Long pID = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject().getId();
          CreateXICDialog dialog =  CreateXICDialog.getDialog(WindowManager.getDefault().getMainWindow());
-         dialog.reinit();
+         dialog.displayDesignTree();
          dialog.setLocation(x, y);
          dialog.setVisible(true);
          final Long[] _xicQuantiDataSetId= new Long[1];

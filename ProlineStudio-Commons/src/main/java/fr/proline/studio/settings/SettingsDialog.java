@@ -7,15 +7,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.openide.util.NbPreferences;
 
 /**
- *
+ * Dialog to load settings from a file among a list of previously saved settings
  * @author JM235353
  */
 public class SettingsDialog extends DefaultDialog {
@@ -44,7 +42,8 @@ public class SettingsDialog extends DefaultDialog {
         
         setButtonVisible(BUTTON_HELP, false);
         
-        m_potentialSettingsFile = readSettingsPaths(settingsKey);
+        m_chooserDefaultDirectory = SettingsUtils.readDefaultDirectory(settingsKey);
+        m_potentialSettingsFile = SettingsUtils.readSettingsPaths(settingsKey);
         setInternalComponent(createInternalPanel(m_potentialSettingsFile));
     }
     
@@ -174,7 +173,8 @@ public class SettingsDialog extends DefaultDialog {
         if (!pathFound) {
             m_potentialSettingsFile.add(0, f.getAbsolutePath());
         }
-        writeSettingsPath(m_settingsKey, m_potentialSettingsFile);
+        SettingsUtils.writeSettingsPath(m_settingsKey, m_potentialSettingsFile);
+        SettingsUtils.writeDefaultDirectory(m_settingsKey, f.getParent());
         
         return true;
     }
@@ -194,55 +194,9 @@ public class SettingsDialog extends DefaultDialog {
         return m_selectedFile;
     }
     
+
     
     
-    private ArrayList<String> readSettingsPaths(String settingsKey) {
-        
-        Preferences preferences = NbPreferences.root();
-        
-        String settingsDirectoryKey = settingsKey+".filePath_";
-        
-        
-        m_chooserDefaultDirectory = preferences.get(settingsDirectoryKey, null);
-        
-        ArrayList<String> filePathList = new ArrayList();
-        int i = 1;
-        while (i<10) {
-            String filePath = preferences.get(settingsDirectoryKey+i, null);
-            if (filePath == null) {
-                break;
-            }
-            filePathList.add(filePath);
-            i++;
-        } 
 
-        
-        return filePathList;
-    }
-    private void writeSettingsPath(String settingsKey, ArrayList<String> filePathList) {
-
-        Preferences preferences = NbPreferences.root();
-        
-        String settingsDirectoryKey = settingsKey+".filePath_";
-        
-        // remove previous file path
-        int i = 1;
-        while (i<10) {
-            String key = settingsDirectoryKey+i;
-        
-            String regex = preferences.get(key, null);
-            if (regex == null) {
-                break;
-            }
-            preferences.remove(key);
-            i++;
-        }
-        
-        // put new file path
-        for (i=0;i<filePathList.size();i++) {
-            String key = settingsDirectoryKey+(i+1);
-            preferences.put(key, filePathList.get(i));
-        }
-    }
 
 }

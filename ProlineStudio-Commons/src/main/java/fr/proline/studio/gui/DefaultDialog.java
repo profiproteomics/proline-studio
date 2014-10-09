@@ -22,7 +22,8 @@ public class DefaultDialog extends javax.swing.JDialog {
     public static final int BUTTON_LOAD = 3;
     public static final int BUTTON_SAVE = 4;
     public static final int BUTTON_HELP = 5;
-    private static final int BUTTONS_NUMBER = 6; // ---- get in sync
+    public static final int BUTTON_BACK = 6;
+    private static final int BUTTONS_NUMBER = 7; // ---- get in sync
     
     private JPanel m_internalPanel;
     
@@ -216,8 +217,12 @@ public class DefaultDialog extends javax.swing.JDialog {
     protected boolean okCalled() {
         return true;
     }
-    
+        
     protected boolean defaultCalled() {
+        return false;
+    }
+    
+    protected boolean backCalled() {
         return false;
     }
     
@@ -278,6 +283,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         m_buttons[BUTTON_OK] = new JButton(IconManager.getIcon(IconManager.IconType.OK));
         m_buttons[BUTTON_CANCEL] = new JButton(IconManager.getIcon(IconManager.IconType.CANCEL));
         m_buttons[BUTTON_DEFAULT] = new JButton(IconManager.getIcon(IconManager.IconType.DEFAULT));
+        m_buttons[BUTTON_BACK] = new JButton(IconManager.getIcon(IconManager.IconType.BACK));
         m_buttons[BUTTON_LOAD] = new JButton(IconManager.getIcon(IconManager.IconType.LOAD_SETTINGS));
         m_buttons[BUTTON_SAVE] = new JButton(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
         m_buttons[BUTTON_HELP] = new JButton(IconManager.getIcon(IconManager.IconType.QUESTION));
@@ -301,6 +307,9 @@ public class DefaultDialog extends javax.swing.JDialog {
         
         c.gridx++;
         c.weightx = 0;
+        buttonPanel.add(m_buttons[BUTTON_BACK], c);
+        
+        c.gridx++;
         buttonPanel.add(m_buttons[BUTTON_OK], c);
         
         c.gridx++;
@@ -352,6 +361,15 @@ public class DefaultDialog extends javax.swing.JDialog {
             }
         });
         
+        m_buttons[BUTTON_BACK].setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.backButton.text"));
+        setButtonVisible(BUTTON_BACK, false);
+        m_buttons[BUTTON_BACK].addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backButtonActionPerformed();
+            }
+        });
+        
         //m_helpButton.setText(org.openide.util.NbBundle.getMessage(DefaultDialog.class, "DefaultDialog.helpButton.text"));
         m_buttons[BUTTON_HELP].addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -398,6 +416,14 @@ public class DefaultDialog extends javax.swing.JDialog {
             setVisible(false);
         }
     } 
+    
+    private void backButtonActionPerformed() {
+        if (backCalled()) {
+            m_buttonClicked = BUTTON_BACK;
+        }
+    }
+    
+    
     
     private void helpButtonActionPerformed() {
         // Show help

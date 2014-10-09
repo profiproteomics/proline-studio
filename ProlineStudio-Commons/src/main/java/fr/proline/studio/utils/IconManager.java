@@ -85,6 +85,7 @@ public class IconManager {
         IDENTIFICATION,
         ARROW_8X7,
         ARROW,
+        BACK,
         DRAG_AND_DROP,
         WAND_HAT,
         FILE,
@@ -332,6 +333,8 @@ public class IconManager {
                 return "fr/proline/studio/images/arrow8x7.png";
             case ARROW:
                 return "fr/proline/studio/images/arrow.png";
+            case BACK:
+                return "fr/proline/studio/images/arrow-180.png";
             case DRAG_AND_DROP:
                 return "fr/proline/studio/images/dragAndDrop.png";
             case WAND_HAT:

@@ -1,8 +1,13 @@
 package fr.proline.studio.pattern;
 
 
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.utils.IconManager;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -38,9 +43,9 @@ public class WindowBoxFactory {
         boxes[0] = new DataBoxRsetPeptide();
         boxes[1] = new DataBoxRsetPeptideSpectrum();
         boxes[2] = new DataBoxRsetPeptideSpectrumError();
-        boxes[2].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         boxes[3] = new DataBoxRsetPeptideFragmentation();
-        boxes[3].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         boxes[4] = new DataBoxRsetProteinsForPeptideMatch();
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
@@ -112,7 +117,7 @@ public class WindowBoxFactory {
         boxes[1] = new DataBoxRsmProteinSetOfPeptides();
         boxes[2] = new DataBoxRsmProteinsOfProteinSet();
         boxes[3] = new DataBoxRsmPeptidesOfProtein();
-        boxes[3].setLayout(AbstractDataBox.DataBoxLayout.HORIZONTAL);
+        boxes[3].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
 
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
@@ -130,11 +135,11 @@ public class WindowBoxFactory {
         boxes[2] = new DataBoxRsmPeptidesOfProtein();
         boxes[3] = new DataBoxRsmProteinAndPeptideSequence();
         boxes[4] = new DataBoxRsetPeptideSpectrum();
-        boxes[4].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         boxes[5] = new DataBoxRsetPeptideSpectrumError();
-        boxes[5].setLayout(AbstractDataBox.DataBoxLayout.TABBED);
+        boxes[5].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         boxes[6] = new DataBoxRsetPeptideFragmentation();
-        boxes[6].setLayout(AbstractDataBox.DataBoxLayout.TABBED);        
+        boxes[6].setLayout(SplittedPanelContainer.PanelLayout.TABBED);        
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
         
@@ -165,6 +170,20 @@ public class WindowBoxFactory {
 
         return winBox;
     }
+    
+    public static WindowBox getFromBoxesWindowBox(String title, AbstractDataBox[] boxes, boolean isDecoy, boolean isRSM) {
+
+        IconManager.IconType iconType;
+        if (isRSM) {
+            iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
+        } else {
+            iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
+        }
+        
+        WindowBox winBox = new WindowBox(title, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+
+        return winBox;
+    }
 
     private static SplittedPanelContainer generatePanel(AbstractDataBox[] boxes) {
 
@@ -183,19 +202,19 @@ public class WindowBoxFactory {
         // create container panel for TABBED AND HORIZONTAL Boxes
         int nbContainerPanels = 0;
         for (int i = 0; i < nb; i++) {
-            if (boxes[i].getLayout() == AbstractDataBox.DataBoxLayout.VERTICAL) {
+            if (boxes[i].getLayout() == SplittedPanelContainer.PanelLayout.VERTICAL) {
                 nbContainerPanels++;
             }
         }
 
         JComponent[] panels = new JComponent[nbContainerPanels];
         int panelIdx = 0;
-        AbstractDataBox.DataBoxLayout prevLayout = AbstractDataBox.DataBoxLayout.VERTICAL;
+        SplittedPanelContainer.PanelLayout prevLayout = SplittedPanelContainer.PanelLayout.VERTICAL;
         for (int i = 0; i < nb; i++) {
-            AbstractDataBox.DataBoxLayout layout = boxes[i].getLayout();
-            if (layout == AbstractDataBox.DataBoxLayout.VERTICAL) {
+            SplittedPanelContainer.PanelLayout layout = boxes[i].getLayout();
+            if (layout == SplittedPanelContainer.PanelLayout.VERTICAL) {
                 panels[panelIdx++] = (JPanel) boxes[i].getPanel();
-            } else if (layout == AbstractDataBox.DataBoxLayout.HORIZONTAL) {
+            } else if (layout == SplittedPanelContainer.PanelLayout.HORIZONTAL) {
                 JSplitPane sp = new JSplitPane();
                 JComponent leftComponent = panels[--panelIdx];
                 sp.setLeftComponent(leftComponent);
@@ -205,8 +224,8 @@ public class WindowBoxFactory {
 
                 sp.setDividerLocation(350); //JPM.TODO
                 panels[panelIdx++] = sp;
-            } else if (layout == AbstractDataBox.DataBoxLayout.TABBED) {
-                if (prevLayout == AbstractDataBox.DataBoxLayout.TABBED) {
+            } else if (layout == SplittedPanelContainer.PanelLayout.TABBED) {
+                if (prevLayout == SplittedPanelContainer.PanelLayout.TABBED) {
                     JTabbedPane tb = (JTabbedPane) panels[panelIdx - 1];
                     tb.addTab(boxes[i].getName(), (JPanel) boxes[i].getPanel());
                     tb.setName(tb.getName() + " / " + boxes[i].getName());
@@ -235,8 +254,76 @@ public class WindowBoxFactory {
         return splittedPanel;
     }
     
+    public static String writeBoxes(ArrayList<AbstractDataBox> boxList, ArrayList<SplittedPanelContainer.PanelLayout> layoutList) {
+        
+        boolean rset = false;
+        boolean rsm = false;
+        
+        AbstractDataBox entryBox = boxList.get(0);
+        HashSet<GroupParameter> entryParameterSet = entryBox.getInParameters();
+        Iterator<GroupParameter> entryParameterIt = entryParameterSet.iterator();
+        while (entryParameterIt.hasNext()) {
+            GroupParameter groupParameter = entryParameterIt.next();
+            ArrayList<DataParameter> parametersList = groupParameter.getParameterList();
+            for (int i=0;i<parametersList.size();i++) {
+                DataParameter parameter = parametersList.get(i);
+                if (parameter.equalsData(ResultSet.class)) {
+                    rset = true;
+                } else if (parameter.equalsData(ResultSummary.class)) {
+                    rsm = true;
+                }
+            }
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        
+        if (rset) {
+            sb.append("1#");
+        } else if (rsm) {
+            sb.append("2#");
+        } else {
+            sb.append("0#");
+        }
+        
+        
+        for (int i=0;i<boxList.size();i++) {
+            sb.append(boxList.get(i).getType().intValue());
+            sb.append('#');
+            sb.append(layoutList.get(i).intValue());
+            if (i<boxList.size()-1) {
+                sb.append('#');
+            }
+        }
+        return sb.toString();
+    }
+    
+    public static boolean hasResultSetParameter(String dump) {
+        return dump.charAt(0)  == '1';
+    }
+    
+    public static boolean hasResultSummaryParameter(String dump) {
+        return dump.charAt(0)  == '2';
+    }
+    
+    public static AbstractDataBox[] readBoxes(String dump) {
+        String[] values = dump.split("\\#");
+        
+        int nbBoxes = (values.length-1)/2;
+        AbstractDataBox[] boxes = new AbstractDataBox[nbBoxes];
+        int boxId = 0;
 
-
+        for(int i=1;i<values.length;i+=2) {
+            AbstractDataBox.DataboxType databoxType = AbstractDataBox.DataboxType.getDataboxType(Integer.parseInt(values[i]));
+            SplittedPanelContainer.PanelLayout layout = SplittedPanelContainer.PanelLayout.getLayoutType(Integer.parseInt(values[i+1]));
+            
+            AbstractDataBox databox = databoxType.getDatabox();
+            databox.setLayout(layout);
+            
+            boxes[boxId++] = databox;
+        }
+        
+        return boxes;
+    }
 
 
 }

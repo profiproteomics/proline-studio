@@ -110,6 +110,10 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+    @Override
+    public AbstractDataBox getDataBox() {
+        return m_dataBox;
+    }
 
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
@@ -119,6 +123,11 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getAddAction(splittedPanel);
+    }
+    
+    @Override
+    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getSaveAction(splittedPanel);
     }
 
     /**

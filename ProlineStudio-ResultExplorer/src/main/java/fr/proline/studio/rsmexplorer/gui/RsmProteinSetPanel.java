@@ -13,6 +13,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.SaveDataBoxActionListener;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
@@ -126,6 +127,10 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+    @Override
+    public AbstractDataBox getDataBox() {
+        return m_dataBox;
+    }
     
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
@@ -135,6 +140,11 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getAddAction(splittedPanel);
+    }
+    
+    @Override
+    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getSaveAction(splittedPanel);
     }
         
     private String getTopComponentName() {
@@ -232,13 +242,18 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                     if (decoyRsm == null) {
                         return;
                     }
-                    WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox("Decoy " + getTopComponentName(), true);
+
+                    String dump = SaveDataBoxActionListener.saveParentContainer(m_decoyButton);
+                    
+                    AbstractDataBox[] databoxes = WindowBoxFactory.readBoxes(dump);
+                    WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, true);
                     wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
 
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                     win.open();
                     win.requestActive();
+
                 }
             });
 

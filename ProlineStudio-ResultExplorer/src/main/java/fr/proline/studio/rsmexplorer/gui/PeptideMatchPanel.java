@@ -15,10 +15,7 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.pattern.*;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
@@ -79,6 +76,10 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
+    }
+    @Override
+    public AbstractDataBox getDataBox() {
+        return m_dataBox;
     }
 
     public void setData(long taskId, DPeptideMatch[] peptideMatches, long[] peptideMatchesId, boolean finished) {
@@ -269,8 +270,12 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                         if (decoyRsm == null) {
                             return;
                         }
-                        wbox = WindowBoxFactory.getRsmPSMWindowBox("Decoy " + getTopComponentName(), true);
+                        String dump = SaveDataBoxActionListener.saveParentContainer(m_decoyButton);
+
+                        AbstractDataBox[] databoxes = WindowBoxFactory.readBoxes(dump);
+                        wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, true);
                         wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
+
 
                     } else {
                         ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
@@ -278,7 +283,10 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                         if (decoyRset == null) {
                             return;
                         }
-                        wbox = WindowBoxFactory.getPeptidesForRsetOnlyWindowBox("Decoy " + getTopComponentName(), true);
+                        String dump = SaveDataBoxActionListener.saveParentContainer(m_decoyButton);
+
+                        AbstractDataBox[] databoxes = WindowBoxFactory. readBoxes(dump);
+                        wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false);
                         wbox.setEntryData(m_dataBox.getProjectId(), decoyRset);
                     }
 
@@ -409,6 +417,11 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getAddAction(splittedPanel);
+    }
+    
+    @Override
+    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getSaveAction(splittedPanel);
     }
 
     private class Search extends AbstractSearch {

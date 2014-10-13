@@ -23,11 +23,7 @@ import javax.swing.event.ChangeListener;
  */
 public abstract class AbstractDataBox implements ChangeListener, SplittedPanelContainer.UserActions {
    
-    public enum DataBoxLayout {
-      VERTICAL,
-      HORIZONTAL,
-      TABBED
-    };
+
     
     // Panel corresponding to this box
     protected DataBoxPanelInterface m_panel;
@@ -44,13 +40,118 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     protected String m_name;
     protected String m_description = "";
     
-    private DataBoxLayout m_layout = DataBoxLayout.VERTICAL;
+    private SplittedPanelContainer.PanelLayout m_layout = SplittedPanelContainer.PanelLayout.VERTICAL;
     
     protected AbstractDataBox m_nextDataBox = null;
     protected AbstractDataBox m_previousDataBox = null;
     
     private int m_loadingId = 0;
     
+    protected DataboxType m_type;
+    
+    public enum DataboxType {
+        DataBoxRsetAll(0),
+        DataBoxRsetAllProteinMatch(1),
+        DataBoxRsetPeptide(2),
+        DataBoxRsetPeptideFragmentation(3),
+        DataBoxRsetPeptideSpectrum(4),
+        DataBoxRsetPeptideSpectrumError(5),
+        DataBoxRsetProteinsForPeptideMatch(6),
+        DataBoxRsmAllProteinSet(7),
+        DataBoxRsmPeptide(8),
+        DataBoxRsmPeptideInstances(9),
+        DataBoxRsmPeptidesOfProtein(10),
+        DataBoxRsmProteinAndPeptideSequence(11),
+        DataBoxRsmProteinSetOfPeptides(12),
+        DataBoxRsmProteinsOfProteinSet(13),
+        DataBoxRsmWSC(14),
+        DataBoxStatisticsFrequencyResponse(15),
+        DataBoxTaskDescription(16),
+        DataBoxTaskList(17),
+        DataboxRsetPeptidesOfProtein(18);
+        
+        int m_type;
+        private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
+        
+        DataboxType(int type) {
+            m_type = type;
+        }
+        
+        public int intValue() {
+            return m_type;
+        }
+        
+        public AbstractDataBox getDatabox() {
+            switch (this) {
+                case DataBoxRsetAll:
+                    return new DataBoxRsetAll();
+                case DataBoxRsetAllProteinMatch:
+                    return new DataBoxRsetAllProteinMatch();
+                case DataBoxRsetPeptide:
+                    return new DataBoxRsetPeptide();
+                case DataBoxRsetPeptideFragmentation:
+                    return new DataBoxRsetPeptideFragmentation();
+                case DataBoxRsetPeptideSpectrum:
+                    return new DataBoxRsetPeptideSpectrum();
+                case DataBoxRsetPeptideSpectrumError:
+                    return new DataBoxRsetPeptideSpectrumError();
+                case DataBoxRsetProteinsForPeptideMatch:
+                    return new DataBoxRsetProteinsForPeptideMatch();
+                case DataBoxRsmAllProteinSet:
+                    return new DataBoxRsmAllProteinSet();
+                case DataBoxRsmPeptide:
+                    return new DataBoxRsmPeptide();
+                case DataBoxRsmPeptideInstances:
+                    return new DataBoxRsmPeptideInstances();
+                case DataBoxRsmPeptidesOfProtein:
+                    return new DataBoxRsmPeptidesOfProtein();
+                case DataBoxRsmProteinAndPeptideSequence:
+                    return new DataBoxRsmProteinAndPeptideSequence();
+                case DataBoxRsmProteinSetOfPeptides:
+                    return new DataBoxRsmProteinSetOfPeptides();
+                case DataBoxRsmProteinsOfProteinSet:
+                    return new DataBoxRsmProteinsOfProteinSet();
+                case DataBoxRsmWSC:
+                    return new DataBoxRsmWSC(false);
+                case DataBoxStatisticsFrequencyResponse:
+                    return new DataBoxStatisticsFrequencyResponse();
+                case DataBoxTaskDescription:
+                    return new DataBoxTaskDescription();
+                case DataBoxTaskList:
+                    return new DataBoxTaskList();
+                case DataboxRsetPeptidesOfProtein:
+                    return new DataboxRsetPeptidesOfProtein();
+            }
+            return null; // should not happen
+        }
+        
+        private static HashMap<Integer, DataboxType> generateDataboxTypeMap() {
+            HashMap<Integer, DataboxType> map = new HashMap<>();
+            DataboxType[] databoxTypeArray = DataboxType.values();
+            for (int i=0;i<databoxTypeArray.length;i++) {
+                DataboxType type = databoxTypeArray[i];
+                map.put(type.m_type, type);
+            }
+            return map;
+        }
+        
+        public static DataboxType getDataboxType(int type) {
+            if (m_databoxTypeMap == null) {
+                m_databoxTypeMap = generateDataboxTypeMap();
+            }
+            return m_databoxTypeMap.get(type);
+        }
+        
+        
+    }
+    
+    public AbstractDataBox(DataboxType type) {
+        m_type = type;
+    }
+    
+    public DataboxType getType() {
+        return m_type;
+    }
     
     protected void deleteThis() {
         
@@ -131,6 +232,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         }
     }
     
+
     public abstract void createPanel();
     
     public abstract void dataChanged();
@@ -175,11 +277,11 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         return m_panel;
     }
     
-    public void setLayout(DataBoxLayout layout) {
+    public void setLayout(SplittedPanelContainer.PanelLayout layout) {
         m_layout = layout;
     }
     
-    public DataBoxLayout getLayout() {
+    public SplittedPanelContainer.PanelLayout getLayout() {
         return m_layout;
     }
     
@@ -228,6 +330,11 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return new AddDataBoxActionListener(splittedPanel, this);
+    }
+    
+    @Override
+    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+        return new SaveDataBoxActionListener(splittedPanel);
     }
     
     public int getLoadingPercentage() {

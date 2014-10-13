@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -19,6 +20,43 @@ import javax.swing.event.ChangeListener;
  */
 public class SplittedPanelContainer extends JPanel {
 
+    public enum PanelLayout {
+        VERTICAL(0),
+        HORIZONTAL(1),
+        TABBED(2);
+        
+                
+        int m_type;
+        private static HashMap<Integer, PanelLayout> m_layoutMap = null;
+        
+        PanelLayout(int type) {
+            m_type = type;
+        }
+        
+        public int intValue() {
+            return m_type;
+        }
+        
+        private static HashMap<Integer, PanelLayout> generateLayoutMap() {
+            HashMap<Integer, PanelLayout> map = new HashMap<>();
+            PanelLayout[] layoutArray = PanelLayout.values();
+            for (int i=0;i<layoutArray.length;i++) {
+                PanelLayout type = layoutArray[i];
+                map.put(type.m_type, type);
+            }
+            return map;
+        }
+        
+        public static PanelLayout getLayoutType(int type) {
+            if (m_layoutMap == null) {
+                m_layoutMap = generateLayoutMap();
+            }
+            return m_layoutMap.get(type);
+        }
+        
+    };
+    
+    
     private ArrayList<SplittedPanel> m_panelArray = new ArrayList<>(4);
     private ArrayList<JSplitPane> m_splitPaneArray = new ArrayList<>(3);
 
@@ -32,6 +70,47 @@ public class SplittedPanelContainer extends JPanel {
     public SplittedPanelContainer() {   
     }
 
+    public void generateListOfPanels(ArrayList<JPanel> panelList, ArrayList<PanelLayout> layoutList) {
+
+        
+        for (int i=0;i<m_panelArray.size();i++) {
+            SplittedPanel splittedPanel = m_panelArray.get(i);
+            JComponent c = splittedPanel.getEmbededPanel();
+            generateForComponent(c, panelList, layoutList, PanelLayout.VERTICAL);
+        }
+ 
+    }
+    private void generateForComponent(Component c, ArrayList<JPanel> panelList, ArrayList<PanelLayout> layoutList, PanelLayout layout) {
+        if (c instanceof JTabbedPane) {
+            if (layout!=null) {
+                layoutList.add(layout);
+            }
+            generateForTabbedPane((JTabbedPane) c, panelList, layoutList);
+        } else if (c instanceof JSplitPane) {
+            if (layout!=null) {
+                layoutList.add(layout);
+            }
+            generateForSplitPane((JSplitPane) c, panelList, layoutList);
+        } else if (c instanceof JPanel) {
+            if (layout!=null) {
+                layoutList.add(layout);
+            }
+            panelList.add((JPanel) c);
+        }
+    }
+    private void generateForTabbedPane(JTabbedPane tabbedPane, ArrayList<JPanel> panelList, ArrayList<PanelLayout> layoutList) {
+        int nbTabs = tabbedPane.getComponentCount();
+        for (int i=0;i<nbTabs;i++) {
+            Component c = tabbedPane.getComponentAt(i);
+            generateForComponent(c, panelList, layoutList, (i==0 ? null : PanelLayout.TABBED));
+        }
+    }
+    private void generateForSplitPane(JSplitPane splitPane, ArrayList<JPanel> panelList, ArrayList<PanelLayout> layoutList) {
+        generateForComponent(splitPane.getLeftComponent(), panelList, layoutList, null);
+        generateForComponent(splitPane.getRightComponent(), panelList, layoutList, PanelLayout.HORIZONTAL);
+    }
+    
+    
     /**
      * Register a panel which will be put in the container panel
      * @param panel 
@@ -831,6 +910,7 @@ public class SplittedPanelContainer extends JPanel {
         private JButton m_dissociateButton;
         private JButton m_removeButton;
         private JButton m_addButton;
+        private JButton m_saveButton;
         
         
         private JPanel m_rightButtonPanel;
@@ -867,6 +947,7 @@ public class SplittedPanelContainer extends JPanel {
             }
 
             m_addButton.setVisible(lastPanel);
+            m_saveButton.setVisible(lastPanel);
 
 
         }
@@ -1008,7 +1089,19 @@ public class SplittedPanelContainer extends JPanel {
                     }
                 }
             });
+            
+            m_saveButton = new MiniButton(IconManager.getIcon(IconManager.IconType.SAVE_WND));
+            m_saveButton.addActionListener(new java.awt.event.ActionListener() {
 
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    UserActions userAction = lookForUserActions(m_embededPanel);
+                    if (userAction != null) {
+                        userAction.getSaveAction(m_container).actionPerformed(e);
+                    }
+                }
+            });
+            
             GridBagConstraints cButton = new GridBagConstraints();
 
             // Put Graphical Objects in rightButtonPanel
@@ -1034,6 +1127,9 @@ public class SplittedPanelContainer extends JPanel {
 
             cButton.gridy++;
             m_rightButtonPanel.add(m_addButton, cButton);
+            
+            cButton.gridy++;
+            m_rightButtonPanel.add(m_saveButton, cButton);
             
             
 
@@ -1215,6 +1311,8 @@ public class SplittedPanelContainer extends JPanel {
         public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel);
         
         public ActionListener getAddAction(SplittedPanelContainer splittedPanel);
+        
+        public ActionListener getSaveAction(SplittedPanelContainer splittedPanel);
     }
     
     

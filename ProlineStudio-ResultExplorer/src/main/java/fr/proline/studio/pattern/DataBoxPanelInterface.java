@@ -9,6 +9,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 public interface DataBoxPanelInterface extends SplittedPanelContainer.UserActions {
     
     public void setDataBox(AbstractDataBox dataBox);
+    public AbstractDataBox getDataBox();
     
     public void setLoading(int id);
     public void setLoading(int id, boolean calculating);

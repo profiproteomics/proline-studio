@@ -118,7 +118,10 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
-    
+    @Override
+    public AbstractDataBox getDataBox() {
+        return m_dataBox;
+    }
     
     private class ResultSetTable extends DecoratedMarkerTable {
 
@@ -241,6 +244,11 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getAddAction(splittedPanel);
+    }
+    
+    @Override
+    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getSaveAction(splittedPanel);
     }
     
     

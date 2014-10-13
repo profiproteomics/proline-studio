@@ -26,8 +26,7 @@ import javax.swing.table.TableColumn;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.pattern.*;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.AbstractSearch;
@@ -147,9 +146,12 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                     if (decoyRset == null) {
                         return;
                     }
-                    WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox("Decoy " + getTopComponentName(), true);
-                    wbox.setEntryData(m_dataBox.getProjectId(), decoyRset);
 
+                    String dump = SaveDataBoxActionListener.saveParentContainer(m_decoyButton);
+
+                    AbstractDataBox[] databoxes = WindowBoxFactory.readBoxes(dump);
+                    WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false);
+                    wbox.setEntryData(m_dataBox.getProjectId(), decoyRset);
 
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
@@ -280,6 +282,10 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+    @Override
+    public AbstractDataBox getDataBox() {
+        return m_dataBox;
+    }
 
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
@@ -289,6 +295,11 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getAddAction(splittedPanel);
+    }
+    
+    @Override
+    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getSaveAction(splittedPanel);
     }
 
     private JPanel initComponents() {

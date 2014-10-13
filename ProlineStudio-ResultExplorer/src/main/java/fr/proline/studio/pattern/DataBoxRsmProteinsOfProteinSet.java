@@ -21,8 +21,9 @@ public class DataBoxRsmProteinsOfProteinSet extends AbstractDataBox {
     private long m_proteinSetCurId = -1;
 
     public DataBoxRsmProteinsOfProteinSet() {
+        super(DataboxType.DataBoxRsmProteinsOfProteinSet);
 
-         // Name of this databox
+        // Name of this databox
         m_name = "Proteins";
         m_description = "All Proteins of a Protein Set";
         

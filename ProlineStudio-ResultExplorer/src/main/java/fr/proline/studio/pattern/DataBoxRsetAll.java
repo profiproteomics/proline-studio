@@ -21,7 +21,9 @@ public class DataBoxRsetAll extends AbstractDataBox{
     private Project m_project = null;
     
     public DataBoxRsetAll() {
-
+        super(DataboxType.DataBoxRsetAll);
+        
+        
         // Name of this databox
         m_name = "Search Results";
         

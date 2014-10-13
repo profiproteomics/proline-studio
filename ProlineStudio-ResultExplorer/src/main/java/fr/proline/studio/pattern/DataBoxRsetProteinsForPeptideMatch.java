@@ -18,6 +18,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     private long m_peptideMatchCurId = -1;
 
     public DataBoxRsetProteinsForPeptideMatch() {
+        super(DataboxType.DataBoxRsetProteinsForPeptideMatch);
 
          // Name of this databox
         m_name = "Proteins";

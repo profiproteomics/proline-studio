@@ -22,6 +22,7 @@ public class DataBoxRsetPeptide extends AbstractDataBox {
     private boolean m_finishedLoading = false;
     
     public DataBoxRsetPeptide() {
+        super(DataboxType.DataBoxRsetPeptide);
 
         // Name of this databox
         m_name = "PSM";

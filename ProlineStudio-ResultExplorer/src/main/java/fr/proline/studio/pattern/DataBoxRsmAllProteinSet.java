@@ -21,8 +21,9 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
 
     
     public DataBoxRsmAllProteinSet() { 
-
-         // Name of this databox
+        super(DataboxType.DataBoxRsmAllProteinSet);
+        
+        // Name of this databox
         m_name = "Protein Set";
         m_description = "All Protein Sets of an Identification Summary";
 

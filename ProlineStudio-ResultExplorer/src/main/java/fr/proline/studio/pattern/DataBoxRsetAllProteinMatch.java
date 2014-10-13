@@ -19,6 +19,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
     private ResultSet m_rset;
     
     public DataBoxRsetAllProteinMatch() {
+        super(DataboxType.DataBoxRsetAllProteinMatch);
         
         // Name of this databox
         m_name = "Proteins";

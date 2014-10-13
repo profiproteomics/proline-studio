@@ -13,10 +13,7 @@ import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.pattern.*;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideInstanceTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
@@ -129,19 +126,23 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             @Override
             public void actionPerformed(ActionEvent e) {
 
-
                 ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
                 ResultSummary decoyRsm = rsm.getDecotResultSummary();
                 if (decoyRsm == null) {
                     return;
                 }
-                WindowBox wbox = WindowBoxFactory.getRsmPeptidesWindowBox("Decoy " + getTopComponentName(), true);
+
+                String dump = SaveDataBoxActionListener.saveParentContainer(m_decoyButton);
+
+                AbstractDataBox[] databoxes = WindowBoxFactory.readBoxes(dump);
+                WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, true);
                 wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
 
                 // open a window to display the window box
                 DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                 win.open();
                 win.requestActive();
+
             }
         });
 
@@ -224,6 +225,10 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+    @Override
+    public AbstractDataBox getDataBox() {
+        return m_dataBox;
+    }
 
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
@@ -233,6 +238,11 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getAddAction(splittedPanel);
+    }
+    
+    @Override
+    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getSaveAction(splittedPanel);
     }
 
     public void setData(long taskId, PeptideInstance[] peptideInstances, boolean finished) {

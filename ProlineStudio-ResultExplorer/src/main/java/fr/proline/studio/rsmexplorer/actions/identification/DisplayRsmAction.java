@@ -16,6 +16,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
     private DisplayUserWindowAction m_displayUserWindowAction;
+    private DisplaySavedWindowAction m_displaySavedWindowAction;
     
     private JMenu m_menu;
     
@@ -31,18 +32,21 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction();
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction();
         m_displayUserWindowAction = new DisplayUserWindowAction(true);
+        m_displaySavedWindowAction = new DisplaySavedWindowAction();
 
 
         JMenuItem displayRsmPSMItem = new JMenuItem(m_displayRsmPSMAction);
         JMenuItem displayRsmPeptidesItem = new JMenuItem(m_displayRsmPeptidesAction);
         JMenuItem displayRsmProteinSetsItem = new JMenuItem(m_displayRsmProteinSetsAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
+        JMenuItem displaySavedWindowItem = new JMenuItem(m_displaySavedWindowAction);
 
         m_menu.add(displayRsmPSMItem);
         m_menu.add(displayRsmPeptidesItem);
         m_menu.add(displayRsmProteinSetsItem);
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);
+        m_menu.add(displaySavedWindowItem);
 
         return m_menu;
     }
@@ -54,8 +58,9 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPeptidesAction.updateEnabled(selectedNodes);
         m_displayRsmProteinSetsAction.updateEnabled(selectedNodes);
         m_displayUserWindowAction.updateEnabled(selectedNodes);
+        m_displaySavedWindowAction.updateEnabled(selectedNodes);
 
-        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled() || m_displayUserWindowAction.isEnabled();
+        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled() || m_displayUserWindowAction.isEnabled() || m_displaySavedWindowAction.isEnabled();
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
 

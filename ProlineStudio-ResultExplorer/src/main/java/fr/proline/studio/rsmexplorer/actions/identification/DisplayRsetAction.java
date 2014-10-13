@@ -15,6 +15,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
    private DisplayRsetPeptidesAction m_displayRsetPeptidesAction;
    private DisplayUserWindowAction m_displayUserWindowAction;
    private DisplayRsetProteinMatchesAction m_displayRsetProteinMatchesAction;
+   private DisplaySavedWindowAction m_displaySavedWindowAction;
 
    private JMenu m_menu;
     
@@ -29,15 +30,18 @@ public class DisplayRsetAction extends AbstractRSMAction {
         m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction();
         m_displayRsetProteinMatchesAction = new DisplayRsetProteinMatchesAction();
         m_displayUserWindowAction = new DisplayUserWindowAction(false);
+        m_displaySavedWindowAction = new DisplaySavedWindowAction();
        
         JMenuItem displayRsetPeptidesItem = new JMenuItem(m_displayRsetPeptidesAction);
         JMenuItem displayRsetProteinMatchesItem = new JMenuItem(m_displayRsetProteinMatchesAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
+        JMenuItem displaySavedWindowItem = new JMenuItem(m_displaySavedWindowAction);
         
         m_menu.add(displayRsetPeptidesItem);
         m_menu.add(displayRsetProteinMatchesItem);
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);
+        m_menu.add(displaySavedWindowItem);
 
         return m_menu;
     }
@@ -48,8 +52,9 @@ public class DisplayRsetAction extends AbstractRSMAction {
         m_displayRsetPeptidesAction.updateEnabled(selectedNodes);
         m_displayRsetProteinMatchesAction.updateEnabled(selectedNodes);
         m_displayUserWindowAction.updateEnabled(selectedNodes);
+        m_displaySavedWindowAction.updateEnabled(selectedNodes);
         
-        boolean isEnabled = m_displayRsetPeptidesAction.isEnabled() || m_displayRsetProteinMatchesAction.isEnabled() || m_displayUserWindowAction.isEnabled();
+        boolean isEnabled = m_displayRsetPeptidesAction.isEnabled() || m_displayRsetProteinMatchesAction.isEnabled() || m_displayUserWindowAction.isEnabled() || m_displaySavedWindowAction.isEnabled();
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

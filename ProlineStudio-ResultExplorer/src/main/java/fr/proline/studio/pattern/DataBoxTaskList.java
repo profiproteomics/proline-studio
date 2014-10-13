@@ -17,12 +17,11 @@ public class DataBoxTaskList extends AbstractDataBox {
     private Timer m_updateTimer = null;
     
     public DataBoxTaskList() {
-
+        super(DataboxType.DataBoxTaskList);
+        
         // Name of this databox
         m_name = "Tasks Log";
-        
 
-        
         // Register possible out parameters
         // One or Multiple PeptideMatch
         GroupParameter outParameter = new GroupParameter();

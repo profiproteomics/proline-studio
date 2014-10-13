@@ -9,22 +9,21 @@ import fr.proline.studio.stats.ValuesForStatsAbstract;
  */
 public class DataBoxStatisticsFrequencyResponse extends AbstractDataBox  {
 
-    private ValuesForStatsAbstract m_values = null;;
-    
-        public DataBoxStatisticsFrequencyResponse() {
+    private ValuesForStatsAbstract m_values = null;
+
+    public DataBoxStatisticsFrequencyResponse() {
+        super(DataboxType.DataBoxStatisticsFrequencyResponse);
 
         // Name of this databox
         m_name = "Histogram";
         m_description = "Histogram and Standard Deviation of a Value";
-        
+
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ValuesForStatsAbstract.class, false);
         registerInParameter(inParameter);
-        
 
-       
     }
     
     @Override

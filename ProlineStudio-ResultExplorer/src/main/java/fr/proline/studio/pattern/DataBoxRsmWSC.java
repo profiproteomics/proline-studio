@@ -48,6 +48,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
      * @return 
      */
     public DataBoxRsmWSC(boolean readData) {
+        super(DataboxType.DataBoxRsmWSC);
         
         // Name of this databox
         m_name = "Weighted SC result";

@@ -2,8 +2,6 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideSet;
-import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.SequenceMatchPK;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -359,6 +357,10 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
     }
+    @Override
+    public AbstractDataBox getDataBox() {
+        return m_dataBox;
+    }
     
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
@@ -370,6 +372,10 @@ public class RsmProteinAndPeptideSequencePanel extends HourglassPanel implements
         return m_dataBox.getAddAction(splittedPanel);
     }
 
+    @Override
+    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+        return m_dataBox.getSaveAction(splittedPanel);
+    }
 
     
 

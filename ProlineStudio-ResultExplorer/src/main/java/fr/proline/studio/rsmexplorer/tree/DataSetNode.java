@@ -261,28 +261,39 @@ public class DataSetNode extends AbstractNode {
 
 
         // ask asynchronous loading of data
+        // depending of the type
+        Dataset.DatasetType type = dataSet.getType();
+        if (type != null && type.equals(Dataset.DatasetType.QUANTITATION)) { 
+            // Task 1 : Load Quantitation, MasterQuantitationChannels 
+            DatabaseDataSetTask task1 = new DatabaseDataSetTask(dbCallback);
+            task1.setPriority(Priority.HIGH_3); // highest priority
+            task1.initLoadQuantitation(dataSet);
+            
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task1);
+        }else { 
         
-        // Task 1 : Load ResultSet and ResultSummary
-        DatabaseDataSetTask task1 = new DatabaseDataSetTask(null);
-        task1.setPriority(Priority.HIGH_3); // highest priority
-        task1.initLoadRsetAndRsm(dataSet);
+            // Task 1 : Load ResultSet and ResultSummary
+            DatabaseDataSetTask task1 = new DatabaseDataSetTask(null);
+            task1.setPriority(Priority.HIGH_3); // highest priority
+            task1.initLoadRsetAndRsm(dataSet);
         
-        // Task 2 : Load ResultSet Extra Data
-        AbstractDatabaseCallback task2Callback = (dataSet.getResultSummaryId()!=null) ? null : dbCallback;
-        DatabaseRsetProperties task2 = new DatabaseRsetProperties(task2Callback, dataSet.getProject().getId(),dataSet);
-        task2.setPriority(Priority.HIGH_3); // highest priority
-        task1.setConsecutiveTask(task2);
+            // Task 2 : Load ResultSet Extra Data
+            AbstractDatabaseCallback task2Callback = (dataSet.getResultSummaryId()!=null) ? null : dbCallback;
+            DatabaseRsetProperties task2 = new DatabaseRsetProperties(task2Callback, dataSet.getProject().getId(),dataSet);
+            task2.setPriority(Priority.HIGH_3); // highest priority
+            task1.setConsecutiveTask(task2);
         
-        // Task 3 : Count number of Protein Sets for Rsm
-        if (dataSet.getResultSummaryId() != null) {
-            DatabaseProteinSetsTask task3 = new DatabaseProteinSetsTask(dbCallback);
-            task3.initCountProteinSets(dataSet);
-            task3.setPriority(Priority.HIGH_3); // highest priority
+            // Task 3 : Count number of Protein Sets for Rsm
+            if (dataSet.getResultSummaryId() != null) {
+                DatabaseProteinSetsTask task3 = new DatabaseProteinSetsTask(dbCallback);
+                task3.initCountProteinSets(dataSet);
+                task3.setPriority(Priority.HIGH_3); // highest priority
 
-            task2.setConsecutiveTask(task3);
-        }
+                task2.setConsecutiveTask(task3);
+            }
         
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task1);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task1);
+        }
 
     }
     

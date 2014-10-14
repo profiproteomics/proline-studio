@@ -1,7 +1,12 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.msi.*;
+import fr.proline.core.orm.uds.BiologicalSample;
+import fr.proline.core.orm.uds.QuantitationChannel;
+import fr.proline.core.orm.uds.QuantitationLabel;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -10,10 +15,8 @@ import fr.proline.studio.utils.SerializedPropertiesUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import org.hibernate.LazyInitializationException;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.nodes.Node.Property;
@@ -27,8 +30,8 @@ import org.slf4j.LoggerFactory;
  */
 public class PropertiesAction extends AbstractRSMAction {
 
-    public PropertiesAction() {
-        super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public PropertiesAction(AbstractTree.TreeType treeType) {
+        super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"), treeType);
     }
 
     @Override
@@ -95,12 +98,12 @@ public class PropertiesAction extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
-            if ((type!=AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) && (type!=AbstractNode.NodeTypes.DATA_SET)) {
+            if (((type!=AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) || (type!=AbstractNode.NodeTypes.PROJECT_QUANTITATION)) && (type!=AbstractNode.NodeTypes.DATA_SET)) {
                 setEnabled(false);
                 return;
             }
             
-            if (type == AbstractNode.NodeTypes.DATA_SET) {
+            if ((type==AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) && (type == AbstractNode.NodeTypes.DATA_SET)) {
                 DataSetNode datasetNode = (DataSetNode) node;
                 if (!datasetNode.hasResultSet() && !datasetNode.hasResultSummary()) {
                     setEnabled(false);
@@ -136,9 +139,80 @@ public class PropertiesAction extends AbstractRSMAction {
     public static Sheet createSheet(DDataset dataset) {
         ResultSet rset = dataset.getResultSet();
         ResultSummary rsm = dataset.getResultSummary();
+        QuantitationMethod quantMethod = dataset.getQuantitationMethod();
+        if (quantMethod != null) {
+            return createSheet(dataset,quantMethod);
+        }
         return createSheet(dataset, rset, rsm);
     }
 
+    public static Sheet createSheet(DDataset dataset, QuantitationMethod quantMethod) {
+
+        Sheet sheet = Sheet.createDefault();
+
+        try {
+
+            if (dataset != null) {
+                Sheet.Set dsSet = createDataSetSheetSet(dataset);
+                Property prop = new PropertySupport.Reflection<>(dataset, String.class, "getDescription", null);
+                prop.setName("description");
+                dsSet.put(prop);
+                
+                sheet.put(dsSet);
+            }
+
+            
+            if (quantMethod != null) {
+                sheet.put(createQuantitationMethodSheetSet(quantMethod));
+                // quantitation labels
+                try{
+                    Set<QuantitationLabel> labelsSet = quantMethod.getLabels();
+                    Iterator<QuantitationLabel> it = labelsSet.iterator();
+                    while (it.hasNext()) {
+                        sheet.put(createQuantitationLabelSheetSet(it.next()));
+                    }
+                } catch (LazyInitializationException e){
+                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(PropertiesAction.class.getSimpleName() + " properties error ", e);
+                }
+
+            }
+            
+            if (dataset.getMasterQuantitationChannels() != null && !dataset.getMasterQuantitationChannels().isEmpty()) {
+                for (Iterator<DMasterQuantitationChannel> it = dataset.getMasterQuantitationChannels().iterator(); it.hasNext();) {
+                    DMasterQuantitationChannel masterQuantitationChannel = it.next();
+                    Sheet.Set masterSet = createMasterQuantitationChannelSheetSet(masterQuantitationChannel);
+                    if (masterQuantitationChannel.getIdentDataset() != null) {
+                        Property prop = new PropertySupport.Reflection<>(masterQuantitationChannel.getIdentDataset(), String.class, "getName", null);
+                        prop.setName("Dataset name");
+                        masterSet.put(prop);
+                    }
+                    sheet.put(masterSet);
+                    
+                    // quantitation channels
+                     try{
+                        List<QuantitationChannel> channels = masterQuantitationChannel.getQuantitationChannels();
+                        int id= 1;
+                        for (Iterator<QuantitationChannel> itChannel = channels.iterator(); itChannel.hasNext();) {
+                            QuantitationChannel quantitationChannel = itChannel.next();
+                            sheet.put(createQuantitationChannelSheetSet(quantitationChannel, id));
+                            if (quantitationChannel.getBiologicalSample() != null) {
+                                sheet.put(createBiologicalSampleSheetSet(quantitationChannel.getBiologicalSample(), id));
+                            }
+                            id++;
+                        }
+                    } catch (LazyInitializationException e){
+                        LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(PropertiesAction.class.getSimpleName() + " properties error ", e);
+                    }
+                }
+            }
+
+        } catch (NoSuchMethodException e) {
+            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(PropertiesAction.class.getSimpleName() + " properties error ", e);
+        }
+        
+        return sheet;
+    }
+    
     public static Sheet createSheet(DDataset dataset, ResultSet rset, ResultSummary rsm) {
 
         Sheet sheet = Sheet.createDefault();
@@ -239,6 +313,124 @@ public class PropertiesAction extends AbstractRSMAction {
             propGroup.put(prop);
             
             return propGroup;
+    }
+    
+    private static Sheet.Set createQuantitationLabelSheetSet(final QuantitationLabel quantLabel) throws NoSuchMethodException {
+        Sheet.Set propGroup = Sheet.createPropertiesSet();
+        String name = "Quantitation Label";
+        propGroup.setName(name);
+        propGroup.setDisplayName(name);
+
+        Property prop = new PropertySupport.Reflection<>(quantLabel, Long.class, "getId", null);
+        prop.setName("QuantitationLabel id");
+        propGroup.put(prop);
+        
+        prop = new PropertySupport.Reflection<>(quantLabel, String.class, "getName", null);
+        prop.setName("Name");
+        propGroup.put(prop);
+        
+        prop = new PropertySupport.Reflection<>(quantLabel, String.class, "getType", null);
+        prop.setName("Type");
+        propGroup.put(prop);
+        
+        /* prop = new PropertySupport.Reflection<>(quantLabel, String.class, "getSerializedProperties", null);
+        prop.setName("Serialized Properties");
+        propGroup.put(prop); */
+        
+        return propGroup;
+    }
+    
+    private static Sheet.Set createMasterQuantitationChannelSheetSet(final DMasterQuantitationChannel masterQuantChannel) throws NoSuchMethodException {
+        Sheet.Set propGroup = Sheet.createPropertiesSet();
+        String name = "Master Quantitation Channel";
+        propGroup.setName(name);
+        propGroup.setDisplayName(name);
+
+        Property prop = new PropertySupport.Reflection<>(masterQuantChannel, Long.class, "getId", null);
+        prop.setName("MasterQuantitationChannel id");
+        propGroup.put(prop);
+        
+        prop = new PropertySupport.Reflection<>(masterQuantChannel, String.class, "getName", null);
+        prop.setName("Name");
+        propGroup.put(prop);
+        
+        prop = new PropertySupport.Reflection<>(masterQuantChannel, String.class, "getSerializedProperties", null);
+        prop.setName("Serialized Properties");
+        propGroup.put(prop);
+        
+        return propGroup;
+    }
+    
+    private static Sheet.Set createQuantitationChannelSheetSet(final QuantitationChannel quantChannel, int index) throws NoSuchMethodException {
+        Sheet.Set propGroup = Sheet.createPropertiesSet();
+        String name = "Quantitation Channel "+index;
+        propGroup.setName(name);
+        propGroup.setDisplayName(name);
+
+        Property prop = new PropertySupport.Reflection<>(quantChannel, Long.class, "getId", null);
+        prop.setName("QuantitationChannel id");
+        propGroup.put(prop);
+        
+        prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getName", null);
+        prop.setName("Name");
+        propGroup.put(prop);
+        
+        prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getSerializedProperties", null);
+        prop.setName("Serialized Properties");
+        propGroup.put(prop); 
+        
+        prop = new PropertySupport.Reflection<>(quantChannel, Long.class, "getIdentResultSummaryId", null);
+        prop.setName("identResultSummaryId");
+        propGroup.put(prop); 
+        
+        return propGroup;
+    }
+    
+    private static Sheet.Set createBiologicalSampleSheetSet(final BiologicalSample biologicalSample, int index) throws NoSuchMethodException {
+        Sheet.Set propGroup = Sheet.createPropertiesSet();
+        String name = "Biological Sample "+index;
+        propGroup.setName(name);
+        propGroup.setDisplayName(name);
+
+        Property prop = new PropertySupport.Reflection<>(biologicalSample, Long.class, "getId", null);
+        prop.setName("Biological Sample id");
+        propGroup.put(prop);
+        
+        prop = new PropertySupport.Reflection<>(biologicalSample, String.class, "getName", null);
+        prop.setName("Name");
+        propGroup.put(prop);
+        
+        return propGroup;
+    }
+    
+     
+    private static Sheet.Set createQuantitationMethodSheetSet(final QuantitationMethod quantMethod) throws NoSuchMethodException {
+        Sheet.Set propGroup = Sheet.createPropertiesSet();
+        String name = "Quantitation Method";
+        propGroup.setName(name);
+        propGroup.setDisplayName(name);
+
+        Property prop = new PropertySupport.Reflection<>(quantMethod, Long.class, "getId", null);
+        prop.setName("QuantitationMethod id");
+        propGroup.put(prop);
+        
+        prop = new PropertySupport.Reflection<>(quantMethod, String.class, "getName", null);
+        prop.setName("Name");
+        propGroup.put(prop);
+        
+        prop = new PropertySupport.Reflection<>(quantMethod, String.class, "getType", null);
+        prop.setName("Type");
+        propGroup.put(prop);
+        
+        prop = new PropertySupport.Reflection<>(quantMethod, String.class, "getAbundanceUnit", null);
+        prop.setName("Abundance Unit");
+        propGroup.put(prop);
+        
+        /* prop = new PropertySupport.Reflection<>(quantMethod, String.class, "getSerializedProperties", null);
+        prop.setName("Serialized Properties");
+        propGroup.put(prop); */
+        
+        return propGroup;
     }
     
     private static Sheet.Set createResultSetSheetSet(final ResultSet rset, boolean decoy) throws NoSuchMethodException {

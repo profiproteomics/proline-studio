@@ -5,7 +5,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportXICAction;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
-import fr.proline.studio.rsmexplorer.actions.identification.RenameAction;
+import fr.proline.studio.rsmexplorer.actions.identification.*;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
@@ -128,8 +128,13 @@ public class QuantitationTree extends AbstractTree {
          } else {
              if (m_mainPopup == null) {
                  // create the actions
-                 m_mainActions = new ArrayList<>(6);  // <--- get in sync
+                 m_mainActions = new ArrayList<>(8);  // <--- get in sync
 
+                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                 m_mainActions.add(propertiesAction);
+                 
+                 m_mainActions.add(null);  // separator
+                 
                  RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
                  m_mainActions.add(retrieveSCDataAction);
 

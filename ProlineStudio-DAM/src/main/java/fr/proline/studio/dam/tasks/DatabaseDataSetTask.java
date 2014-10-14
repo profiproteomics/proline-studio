@@ -31,6 +31,7 @@ import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 
 /**
  * Used to load dataset in two cases :
@@ -75,6 +76,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int LOAD_DATASET_AND_RSM_INFO = 11;
     private final static int LOAD_DATASET = 12;
     private final static int CLEAR_DATASET = 13;
+    private final static int LOAD_QUANTITATION = 14;
      
     private static final Object WRITE_DATASET_LOCK = new Object();
     
@@ -119,6 +121,17 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_dataset = dataset;
 
         m_action = LOAD_RSET_AND_RSM_OF_DATASET;
+    }
+    
+    /**
+     * Load Quantitation of a dataset
+     * @param dataSet 
+     */
+    public void initLoadQuantitation(DDataset dataset) {
+        setTaskInfo(new TaskInfo("Load Quantitation for Dataset "+dataset.getName(), false, TASK_LIST_INFO));
+        m_dataset = dataset;
+
+        m_action = LOAD_QUANTITATION;
     }
 
     /**
@@ -286,6 +299,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case LOAD_DATASET_AND_RSM_INFO:
             case LOAD_DATASET:
             case CLEAR_DATASET:
+            case LOAD_QUANTITATION:
                 return true; // done one time
          
         }
@@ -340,6 +354,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return fetchDataset();
             case CLEAR_DATASET:
                 return clearDataset();
+            case LOAD_QUANTITATION:
+                return fetchQuantitation();
         }
         
         return false; // should never happen
@@ -510,7 +526,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             //JPM.HACK : there is a join done by Hibernate if we read the Aggregation at once,
             // But some Aggregation are null (for identifications) -> identifications are not loaded
             // So we load aggregations afterwards
-            TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
+            TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
             datasetQuery.setParameter("parentDatasetId", parentDatasetId);
             List<DDataset> dataSetResultList = datasetQuery.getResultList();
             Iterator<DDataset> itDataset = dataSetResultList.iterator();
@@ -626,7 +642,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
 
-    public boolean fetchRsetAndRsm() {
+        public boolean fetchRsetAndRsm() {
 
         long projectId = -1;
         if (m_dataset != null) {
@@ -658,6 +674,78 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             return false;
         } finally {
             entityManagerMSI.close();
+        }
+
+        return true;
+    }
+        
+    public boolean fetchQuantitation() {
+
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();       
+        try {
+
+            entityManagerUDS.getTransaction().begin();
+
+            // force initialization of lazy data (data will be needed for the display of properties)
+            Dataset datasetDB = entityManagerUDS.find(Dataset.class, m_dataset.getId());
+            QuantitationMethod quantMethodDB = datasetDB.getMethod();
+            List<MasterQuantitationChannel> listMasterQuantitationChannels = datasetDB.getMasterQuantitationChannels();
+            Set<QuantitationLabel> labels = quantMethodDB.getLabels();
+            
+            
+            // fill the current object with the db object
+            m_dataset.setQuantitationMethod(quantMethodDB);
+            m_dataset.getQuantitationMethod().setLabels(labels);
+            m_dataset.setDescription(datasetDB.getDescription());
+            
+            List<DMasterQuantitationChannel> masterQuantitationChannels = null;
+            
+            if (listMasterQuantitationChannels != null && !listMasterQuantitationChannels.isEmpty()) {
+                masterQuantitationChannels = new ArrayList<>();
+                for (Iterator<MasterQuantitationChannel> it = listMasterQuantitationChannels.iterator(); it.hasNext();) {
+                    MasterQuantitationChannel masterQuantitationChannel = it.next();
+                    DMasterQuantitationChannel dMaster = new DMasterQuantitationChannel(masterQuantitationChannel.getId(), masterQuantitationChannel.getName(), 
+                            masterQuantitationChannel.getQuantResultSummaryId(), masterQuantitationChannel.getQuantitationChannels(), masterQuantitationChannel.getDataset(),
+                            masterQuantitationChannel.getSerializedProperties());
+                    // load the dataset for which the id is stored in the serialized properties
+                    Map<String, Object> propertiesMap = dMaster.getSerializedPropertiesAsMap();
+                    DDataset identDataset = null;
+                    if (propertiesMap != null) {
+                       Object o = propertiesMap.get("ident_dataset_id");
+                       if (o != null) {
+                            Long identDatasetId = Long.parseLong(o.toString());
+                            Dataset identDatasetDB = entityManagerUDS.find(Dataset.class, identDatasetId);
+                            identDataset = new DDataset(identDatasetDB.getId(), identDatasetDB.getProject(), identDatasetDB.getName(), identDatasetDB.getType(), 
+                                identDatasetDB.getChildrenCount(), identDatasetDB.getResultSetId(), identDatasetDB.getResultSummaryId(), identDatasetDB.getNumber());
+                       }
+                    }
+                    dMaster.setIdentDataset(identDataset);
+                    // load the list of quantitation channel linked to this masterQuantitationChannel
+                    List<QuantitationChannel> listQuantitationChannels = masterQuantitationChannel.getQuantitationChannels();
+                    if (listQuantitationChannels != null && !listQuantitationChannels.isEmpty()) {
+                        int id2 = 0;
+                        for (Iterator<QuantitationChannel> itChannel = listQuantitationChannels.iterator(); itChannel.hasNext();) {
+                            QuantitationChannel quantitationChannel = itChannel.next();
+                            // load biologicalSample
+                            BiologicalSample biologicalSample = quantitationChannel.getBiologicalSample();
+                            dMaster.getQuantitationChannels().get(id2).setBiologicalSample(biologicalSample);
+                            id2++;
+                        }
+                    }
+                    masterQuantitationChannels.add(dMaster);
+                }// end of the for
+            }
+            m_dataset.setMasterQuantitationChannels(masterQuantitationChannels);
+            
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
+            entityManagerUDS.getTransaction().rollback();
+            return false;
+        } finally {
+            entityManagerUDS.close();
         }
 
         return true;
@@ -784,7 +872,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             entityManagerUDS.getTransaction().begin();
 
             // *** load dataset for specified id
-            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
+            TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
             dataSetQuery.setParameter("dsId", m_datasetId);
             DDataset ddataSet = dataSetQuery.getSingleResult();
             m_datasetList.add(ddataSet);

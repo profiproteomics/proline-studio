@@ -623,7 +623,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 m_mainActions.add(displayRsmAction);
 
 
-                PropertiesAction propertiesAction = new PropertiesAction();
+                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(propertiesAction);
 
                 

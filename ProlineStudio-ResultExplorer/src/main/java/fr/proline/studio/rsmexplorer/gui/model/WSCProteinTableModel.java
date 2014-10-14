@@ -143,7 +143,7 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
                 return m_columnNames[col];
             default: {
                 int currentRSMNbr = getRsmNumber(col)+1;
-                int colSuffixIndex = getTypeNumber(col);
+                int colSuffixIndex = getTypeNumber(col)+2;
                 StringBuilder sb = new StringBuilder();
 
 

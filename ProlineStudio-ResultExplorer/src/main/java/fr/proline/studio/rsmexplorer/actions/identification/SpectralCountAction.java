@@ -131,7 +131,7 @@ public class SpectralCountAction extends AbstractRSMAction {
 
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
-        
+
          if (selectedNodes.length != 1) {
             setEnabled(false);
             return;

@@ -29,6 +29,22 @@ public class XICBiologicalSampleAnalysisNode extends AbstractNode {
         
     }
     
+    @Override
+    public String getToolTipText() {
+        int nbChild = getChildCount();
+        if (nbChild == 1) {
+            AbstractNode childNode = (AbstractNode) getChildAt(0);
+            if (childNode.getType() == AbstractNode.NodeTypes.RUN) {
+                String peakList = ((XICRunNode)childNode).getPeakListPath();
+                if (peakList == null) {
+                    return null;
+                }
+                return "PeakList : "+peakList;
+            }
+        }
+        return null;
+    }
+    
     public boolean hasResultSummary() {
         DDataset dataSet = ((DataSetData) getData()).getDataset();
         return (dataSet.getResultSummaryId() != null);

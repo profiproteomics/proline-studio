@@ -124,6 +124,12 @@ public class WindowSavedManager {
         return m_windowSavedList;
     }
     
+    public static  void setSavedWindows(ArrayList<String> windowSavedList) {
+        m_windowSavedList = windowSavedList;
+        m_newWindowAdded = true;
+        writeSavedWindows();
+    }
+    
     public static void addSavedWindow(String savedWindow) {
         
         m_newWindowAdded = true;

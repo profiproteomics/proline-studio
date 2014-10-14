@@ -6,10 +6,12 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import fr.proline.studio.dam.tasks.SubTask;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.*;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.tree.*;
 
 /**
@@ -48,6 +50,8 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         // -- listeners
         addMouseListener(this);         // used for popup triggering
 
+        // add tooltips 
+        ToolTipManager.sharedInstance().registerComponent(this);
     }
     
     
@@ -303,7 +307,17 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     
     public abstract void rename(AbstractNode rsmNode, String newName);
 
-    
+    @Override
+    public String getToolTipText(MouseEvent evt) {
+        int row = getRowForLocation(evt.getX(), evt.getY());
+        if (row  == -1) {
+            return null;
+        }
+        TreePath curPath = getPathForRow(row);
+        AbstractNode node = (AbstractNode) curPath.getLastPathComponent();
+        return node.getToolTipText();
+
+    } 
     
     public class RSMTreeModel extends DefaultTreeModel {
 
@@ -347,4 +361,6 @@ public abstract class AbstractTree extends JTree implements MouseListener {
             }
         }
     }
+    
+    
 }

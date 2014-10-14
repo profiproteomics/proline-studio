@@ -103,6 +103,10 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
         return m_isChanging;
     }
     
+    public String getToolTipText() {
+        return null;
+    }
+    
     @Override
     public abstract Sheet createSheet();
     

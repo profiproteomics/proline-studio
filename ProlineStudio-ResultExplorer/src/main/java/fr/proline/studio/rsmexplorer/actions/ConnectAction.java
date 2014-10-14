@@ -101,7 +101,7 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
                 // open the dialog to connect to another user
                 ServerConnectionDialog serverConnectionDialog = ServerConnectionDialog.getDialog(WindowManager.getDefault().getMainWindow());
                 serverConnectionDialog.setChangeUser();
-                serverConnectionDialog.centerToFrame(WindowManager.getDefault().getMainWindow());
+                serverConnectionDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 serverConnectionDialog.setVisible(true);
             }
 
@@ -114,7 +114,7 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
                 InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "You should not disconnect. Important tasks are being done.\nAre you sure you want to disconnect ?");
                 exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
                 exitDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
-                exitDialog.centerToFrame(WindowManager.getDefault().getMainWindow());
+                exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 exitDialog.setVisible(true);
 
                 if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {
@@ -143,7 +143,7 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
             // open the dialog to connect to another user
             ServerConnectionDialog serverConnectionDialog = ServerConnectionDialog.getDialog(WindowManager.getDefault().getMainWindow());
             serverConnectionDialog.setChangeUser();
-            serverConnectionDialog.centerToFrame(WindowManager.getDefault().getMainWindow());
+            serverConnectionDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
             serverConnectionDialog.setVisible(true);
             
             

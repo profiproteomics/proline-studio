@@ -31,7 +31,9 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
         { "Import a Search Result", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot" },
         { "Validate a Search Result", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:rsvalidation" },
         { "Display Search Result Data", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:viewpsm" },
-        { "Display Identification Summary Data", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:viewprotset" }
+        { "Display Identification Summary Data", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:viewprotset" },
+        { "Create a Spectral Count", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:spectralcount" },
+        { "Create a XIC", "http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic" }
   
     };
     

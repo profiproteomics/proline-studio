@@ -1,5 +1,7 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -8,6 +10,7 @@ import java.util.ArrayList;
 import java.util.prefs.Preferences;
 import javax.swing.JPanel;
 import org.openide.util.NbPreferences;
+import org.openide.windows.WindowManager;
 
 
 /**
@@ -25,24 +28,34 @@ public class SaveDataBoxActionListener  implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        String dump = saveSplittedPanelContainer(m_splittedPanel);
+        String windowName = showSelectNameDialog();
+        if (windowName == null) {
+            return;
+        }
         
+        String windowSaved = saveSplittedPanelContainer(windowName, m_splittedPanel);
         
-        Preferences preferences = NbPreferences.root();
-        preferences.put("TESTWND", dump);
-        
+        WindowSavedManager.addSavedWindow(windowSaved);
+  
     }
     
-    public static String saveParentContainer(Container c) {
+    public static String saveParentContainer(String windowName, Container c) {
         while ((c != null) && !(c instanceof SplittedPanelContainer)) {
             c = c.getParent();
         }
         if (c == null) {
             return null;
         }
-        return saveSplittedPanelContainer((SplittedPanelContainer) c);
+        return saveSplittedPanelContainer(windowName, (SplittedPanelContainer) c);
     }
-    public static String saveSplittedPanelContainer(SplittedPanelContainer splittedPanel) {
+    public static String saveSplittedPanelContainer(String windowName, SplittedPanelContainer splittedPanel) {
+        
+        // window name must have no # characters and spaces at start and end.
+        windowName = windowName.trim();
+        if (windowName.indexOf('#') != -1) {
+            windowName.replaceAll("#", "_");
+        }
+        
         ArrayList<JPanel> panelList = new ArrayList<>();
         ArrayList<SplittedPanelContainer.PanelLayout> layoutList = new ArrayList<>();
         splittedPanel.generateListOfPanels(panelList, layoutList);
@@ -59,8 +72,25 @@ public class SaveDataBoxActionListener  implements ActionListener {
 
         }
         
-        String dump = WindowBoxFactory.writeBoxes(boxList, layoutList);
+        String windowSaved = WindowSavedManager.writeBoxes(windowName, boxList, layoutList);
         
-        return dump;
+        return windowSaved;
+    }
+    
+    private String showSelectNameDialog() {
+        
+        OptionDialog dialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Select Window Name", null, "Window Name", OptionDialog.OptionDialogType.TEXTFIELD);
+        dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+        dialog.setVisible(true);
+        String newName = null;
+        if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+            newName = dialog.getText();
+        }
+        
+        if ((newName != null) && (newName.length() > 0)) {
+            return newName;
+        }
+        
+        return null;
     }
 }

@@ -11,12 +11,13 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import java.util.ArrayList;
 import java.util.prefs.Preferences;
-import org.openide.util.NbBundle;
 import org.openide.util.NbPreferences;
 
 /**
@@ -25,38 +26,43 @@ import org.openide.util.NbPreferences;
  */
 public class DisplaySavedWindowAction extends AbstractRSMAction {
 
-    public DisplaySavedWindowAction() {
-        super(NbBundle.getMessage(DisplaySavedWindowAction.class, "CTL_DisplaySavedWindowAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
-
+    private int m_wndIndex;
+    
+    public DisplaySavedWindowAction(String name, int wndIndex) {
+        super(name, AbstractTree.TreeType.TREE_IDENTIFICATION);
+        m_wndIndex = wndIndex;
     }
 
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
 
+        ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
+        if (savedWindowsList.isEmpty()) {
+            return;
+        }
 
-        Preferences preferences = NbPreferences.root();
-        String wndDefinition = preferences.get("TESTWND", null);
+        String savedWindow = savedWindowsList.get(m_wndIndex);
 
-        boolean needsRsm = WindowBoxFactory.hasResultSummaryParameter(wndDefinition);
-
+        boolean needsRsm = WindowSavedManager.hasResultSummaryParameter(savedWindow);
+        String windowName = WindowSavedManager.getWindowName(savedWindow);
 
         int nbNodes = selectedNodes.length;
         for (int i = 0; i < nbNodes; i++) {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
 
-            actionImpl(wndDefinition, dataSetNode, needsRsm);
+            actionImpl(windowName, savedWindow, dataSetNode, needsRsm);
         }
     }
 
-    private void actionImpl(String wndDefinition, DataSetNode dataSetNode, boolean needsRsm) {
+    private void actionImpl(String windowName, String savedWindow, DataSetNode dataSetNode, boolean needsRsm) {
         
         final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
         long projectId = dataSet.getProject().getId();
         
         
-        AbstractDataBox[] databoxes = WindowBoxFactory.readBoxes(wndDefinition);
+        AbstractDataBox[] databoxes = WindowSavedManager.readBoxes(savedWindow);
         databoxes[0].setProjectId(projectId);
-        WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("", databoxes, true, false);
+        WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox(dataSet.getName()+" "+windowName, databoxes, false, needsRsm);
         
         if (needsRsm) {
             ResultSummary rsm = dataSetNode.getResultSummary();
@@ -106,6 +112,7 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
         } else {
             wbox.setEntryData(projectId, dataSet.getResultSet());
         }
+
          // open a window to display the window box
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
         win.open();
@@ -117,15 +124,10 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
     public void updateEnabled(AbstractNode[] selectedNodes) {
         
        Preferences preferences = NbPreferences.root();
-       String wndDefinition = preferences.get("TESTWND", null);
-        
-       if (wndDefinition == null) {
-           setEnabled(false);
-           return;
-       }
+       String wndDefinition = WindowSavedManager.readSavedWindows().get(m_wndIndex);
        
-       boolean needsRset = WindowBoxFactory.hasResultSetParameter(wndDefinition);
-       boolean needsRsm = WindowBoxFactory.hasResultSummaryParameter(wndDefinition);
+       boolean needsRset = WindowSavedManager.hasResultSetParameter(wndDefinition);
+       boolean needsRsm = WindowSavedManager.hasResultSummaryParameter(wndDefinition);
        
        
        int nbSelectedNodes = selectedNodes.length;

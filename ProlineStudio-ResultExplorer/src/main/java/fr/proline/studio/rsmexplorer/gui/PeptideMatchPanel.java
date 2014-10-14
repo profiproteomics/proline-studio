@@ -270,9 +270,9 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                         if (decoyRsm == null) {
                             return;
                         }
-                        String dump = SaveDataBoxActionListener.saveParentContainer(m_decoyButton);
+                        String savedWindow = SaveDataBoxActionListener.saveParentContainer("tmp", m_decoyButton);
 
-                        AbstractDataBox[] databoxes = WindowBoxFactory.readBoxes(dump);
+                        AbstractDataBox[] databoxes = WindowSavedManager.readBoxes(savedWindow);
                         wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, true);
                         wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
 
@@ -283,9 +283,9 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                         if (decoyRset == null) {
                             return;
                         }
-                        String dump = SaveDataBoxActionListener.saveParentContainer(m_decoyButton);
+                        String savedWindow = SaveDataBoxActionListener.saveParentContainer("tmp", m_decoyButton);
 
-                        AbstractDataBox[] databoxes = WindowBoxFactory. readBoxes(dump);
+                        AbstractDataBox[] databoxes = WindowSavedManager. readBoxes(savedWindow);
                         wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false);
                         wbox.setEntryData(m_dataBox.getProjectId(), decoyRset);
                     }

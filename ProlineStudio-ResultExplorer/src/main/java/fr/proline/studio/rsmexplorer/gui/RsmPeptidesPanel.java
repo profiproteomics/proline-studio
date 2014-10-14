@@ -132,9 +132,9 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
                     return;
                 }
 
-                String dump = SaveDataBoxActionListener.saveParentContainer(m_decoyButton);
+                String savedWindow = SaveDataBoxActionListener.saveParentContainer("tmp", m_decoyButton);
 
-                AbstractDataBox[] databoxes = WindowBoxFactory.readBoxes(dump);
+                AbstractDataBox[] databoxes = WindowSavedManager.readBoxes(savedWindow);
                 WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, true);
                 wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
 

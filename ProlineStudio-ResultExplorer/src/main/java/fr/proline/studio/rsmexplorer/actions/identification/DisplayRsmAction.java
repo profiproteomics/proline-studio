@@ -1,7 +1,9 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import java.util.ArrayList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;
@@ -16,7 +18,8 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
     private DisplayUserWindowAction m_displayUserWindowAction;
-    private DisplaySavedWindowAction m_displaySavedWindowAction;
+    private ManageUserWindowsAction m_manageUserWindowsAction;
+    private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
     
     private JMenu m_menu;
     
@@ -31,22 +34,42 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction = new DisplayRsmPSMAction();
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction();
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction();
+        m_manageUserWindowsAction = new ManageUserWindowsAction(true);
         m_displayUserWindowAction = new DisplayUserWindowAction(true);
-        m_displaySavedWindowAction = new DisplaySavedWindowAction();
+        
+        ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
+        int nb = savedWindowsList.size();
+        m_displaySavedWindowActionList = new ArrayList<>();
+        for (int i = 0; i < nb; i++) {
+            String wndSaved = savedWindowsList.get(i);
+            if (!WindowSavedManager.hasResultSummaryParameter(wndSaved)) {
+                continue;
+            }
+            String name = WindowSavedManager.getWindowName(wndSaved);
+            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i));
+        }
 
 
         JMenuItem displayRsmPSMItem = new JMenuItem(m_displayRsmPSMAction);
         JMenuItem displayRsmPeptidesItem = new JMenuItem(m_displayRsmPeptidesAction);
         JMenuItem displayRsmProteinSetsItem = new JMenuItem(m_displayRsmProteinSetsAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
-        JMenuItem displaySavedWindowItem = new JMenuItem(m_displaySavedWindowAction);
+        JMenuItem manageUserWindowsItem = new JMenuItem(m_manageUserWindowsAction);
+
 
         m_menu.add(displayRsmPSMItem);
         m_menu.add(displayRsmPeptidesItem);
         m_menu.add(displayRsmProteinSetsItem);
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);
-        m_menu.add(displaySavedWindowItem);
+        m_menu.add(manageUserWindowsItem);
+        int nbUserWindows = m_displaySavedWindowActionList.size();
+        if (nbUserWindows>0) {
+            m_menu.addSeparator();
+        }
+         for (int i = 0; i <nbUserWindows ; i++) {
+            m_menu.add(new JMenuItem(m_displaySavedWindowActionList.get(i)));
+        }
 
         return m_menu;
     }
@@ -58,9 +81,15 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPeptidesAction.updateEnabled(selectedNodes);
         m_displayRsmProteinSetsAction.updateEnabled(selectedNodes);
         m_displayUserWindowAction.updateEnabled(selectedNodes);
-        m_displaySavedWindowAction.updateEnabled(selectedNodes);
+        m_manageUserWindowsAction.updateEnabled(selectedNodes);
+        
+        boolean listEnabled = false;
+        for (int i=0;i<m_displaySavedWindowActionList.size();i++) {
+            m_displaySavedWindowActionList.get(i).updateEnabled(selectedNodes);
+            listEnabled |= m_displaySavedWindowActionList.get(i).isEnabled();
+        }
 
-        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled() || m_displayUserWindowAction.isEnabled() || m_displaySavedWindowAction.isEnabled();
+        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled() || m_displayUserWindowAction.isEnabled()|| m_manageUserWindowsAction.isEnabled() || listEnabled;
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
 

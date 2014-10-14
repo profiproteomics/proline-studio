@@ -1,0 +1,171 @@
+package fr.proline.studio.pattern;
+
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.studio.gui.SplittedPanelContainer;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.prefs.Preferences;
+import org.openide.util.NbPreferences;
+
+/**
+ *
+ * @author JM235353
+ */
+public class WindowSavedManager {
+    
+    private static boolean m_newWindowAdded = true;
+    
+    public static String writeBoxes(String windowName, ArrayList<AbstractDataBox> boxList, ArrayList<SplittedPanelContainer.PanelLayout> layoutList) {
+        
+        boolean rset = false;
+        boolean rsm = false;
+        
+        AbstractDataBox entryBox = boxList.get(0);
+        HashSet<GroupParameter> entryParameterSet = entryBox.getInParameters();
+        Iterator<GroupParameter> entryParameterIt = entryParameterSet.iterator();
+        while (entryParameterIt.hasNext()) {
+            GroupParameter groupParameter = entryParameterIt.next();
+            ArrayList<DataParameter> parametersList = groupParameter.getParameterList();
+            for (int i=0;i<parametersList.size();i++) {
+                DataParameter parameter = parametersList.get(i);
+                if (parameter.equalsData(ResultSet.class)) {
+                    rset = true;
+                } else if (parameter.equalsData(ResultSummary.class)) {
+                    rsm = true;
+                }
+            }
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        
+        // save rset/rsm entry parameter
+        if (rset) {
+            sb.append("1#");
+        } else if (rsm) {
+            sb.append("2#");
+        } else {
+            sb.append("0#");
+        }
+        
+        // save window name
+        sb.append(windowName);
+        sb.append('#');
+        
+        
+        for (int i=0;i<boxList.size();i++) {
+            sb.append(boxList.get(i).getType().intValue());
+            sb.append('#');
+            sb.append(layoutList.get(i).intValue());
+            if (i<boxList.size()-1) {
+                sb.append('#');
+            }
+        }
+        return sb.toString();
+    }
+    
+    public static boolean hasResultSetParameter(String dump) {
+        return dump.charAt(0)  == '1';
+    }
+    
+    public static boolean hasResultSummaryParameter(String dump) {
+        return dump.charAt(0)  == '2';
+    }
+    
+    public static AbstractDataBox[] readBoxes(String dump) {
+        String[] values = dump.split("\\#");
+        
+        int nbBoxes = (values.length-2)/2;
+        AbstractDataBox[] boxes = new AbstractDataBox[nbBoxes];
+        int boxId = 0;
+
+        for(int i=2;i<values.length;i+=2) {
+            AbstractDataBox.DataboxType databoxType = AbstractDataBox.DataboxType.getDataboxType(Integer.parseInt(values[i]));
+            SplittedPanelContainer.PanelLayout layout = SplittedPanelContainer.PanelLayout.getLayoutType(Integer.parseInt(values[i+1]));
+            
+            AbstractDataBox databox = databoxType.getDatabox();
+            databox.setLayout(layout);
+            
+            boxes[boxId++] = databox;
+        }
+        
+        return boxes;
+    }
+    
+    public static String getWindowName(String dump) {
+        int endOfName = dump.indexOf('#', 2);
+        return dump.substring(2, endOfName);
+    }
+    
+    
+    private static final String WINDOW_SAVED_KEY = "WindowSaved";
+    private static ArrayList<String> m_windowSavedList = null;
+    public static ArrayList<String> readSavedWindows() {
+
+        if (m_windowSavedList!= null) {
+            return m_windowSavedList;
+        }
+        
+        Preferences preferences = NbPreferences.root();
+
+        m_windowSavedList = new ArrayList();
+        int i = 1;
+        while (true) {
+            String windowSaved = preferences.get(WINDOW_SAVED_KEY + i, null);
+            if (windowSaved == null) {
+                break;
+            }
+            m_windowSavedList.add(windowSaved);
+            i++;
+        }
+
+
+        return m_windowSavedList;
+    }
+    
+    public static void addSavedWindow(String savedWindow) {
+        
+        m_newWindowAdded = true;
+        
+        readSavedWindows();
+        
+        m_windowSavedList.add(savedWindow);
+        
+        writeSavedWindows();
+    }
+    
+    public static void setNoWindowAdded() {
+        m_newWindowAdded = false;
+    }
+    
+    public static boolean isWindowAdded() {
+        return m_newWindowAdded;
+    }
+    
+    public static void writeSavedWindows() {
+
+        Preferences preferences = NbPreferences.root();
+
+
+        // remove previously saved windows
+        int i = 1;
+        while (true) {
+            String key = WINDOW_SAVED_KEY + i;
+
+            String windowSaved = preferences.get(key, null);
+            if (windowSaved == null) {
+                break;
+            }
+            preferences.remove(key);
+            i++;
+        }
+
+        // put new file path
+        for (i = 0; i < m_windowSavedList.size(); i++) {
+            String key = WINDOW_SAVED_KEY + (i + 1);
+            preferences.put(key, m_windowSavedList.get(i));
+        }
+    }
+
+}

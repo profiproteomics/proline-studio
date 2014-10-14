@@ -254,76 +254,7 @@ public class WindowBoxFactory {
         return splittedPanel;
     }
     
-    public static String writeBoxes(ArrayList<AbstractDataBox> boxList, ArrayList<SplittedPanelContainer.PanelLayout> layoutList) {
-        
-        boolean rset = false;
-        boolean rsm = false;
-        
-        AbstractDataBox entryBox = boxList.get(0);
-        HashSet<GroupParameter> entryParameterSet = entryBox.getInParameters();
-        Iterator<GroupParameter> entryParameterIt = entryParameterSet.iterator();
-        while (entryParameterIt.hasNext()) {
-            GroupParameter groupParameter = entryParameterIt.next();
-            ArrayList<DataParameter> parametersList = groupParameter.getParameterList();
-            for (int i=0;i<parametersList.size();i++) {
-                DataParameter parameter = parametersList.get(i);
-                if (parameter.equalsData(ResultSet.class)) {
-                    rset = true;
-                } else if (parameter.equalsData(ResultSummary.class)) {
-                    rsm = true;
-                }
-            }
-        }
-        
-        StringBuilder sb = new StringBuilder();
-        
-        if (rset) {
-            sb.append("1#");
-        } else if (rsm) {
-            sb.append("2#");
-        } else {
-            sb.append("0#");
-        }
-        
-        
-        for (int i=0;i<boxList.size();i++) {
-            sb.append(boxList.get(i).getType().intValue());
-            sb.append('#');
-            sb.append(layoutList.get(i).intValue());
-            if (i<boxList.size()-1) {
-                sb.append('#');
-            }
-        }
-        return sb.toString();
-    }
-    
-    public static boolean hasResultSetParameter(String dump) {
-        return dump.charAt(0)  == '1';
-    }
-    
-    public static boolean hasResultSummaryParameter(String dump) {
-        return dump.charAt(0)  == '2';
-    }
-    
-    public static AbstractDataBox[] readBoxes(String dump) {
-        String[] values = dump.split("\\#");
-        
-        int nbBoxes = (values.length-1)/2;
-        AbstractDataBox[] boxes = new AbstractDataBox[nbBoxes];
-        int boxId = 0;
 
-        for(int i=1;i<values.length;i+=2) {
-            AbstractDataBox.DataboxType databoxType = AbstractDataBox.DataboxType.getDataboxType(Integer.parseInt(values[i]));
-            SplittedPanelContainer.PanelLayout layout = SplittedPanelContainer.PanelLayout.getLayoutType(Integer.parseInt(values[i+1]));
-            
-            AbstractDataBox databox = databoxType.getDatabox();
-            databox.setLayout(layout);
-            
-            boxes[boxId++] = databox;
-        }
-        
-        return boxes;
-    }
-
-
+    
+    
 }

@@ -371,13 +371,13 @@ public class PropertiesAction extends AbstractRSMAction {
         prop.setName("QuantitationChannel id");
         propGroup.put(prop);
         
-        prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getName", null);
+        /* prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getName", null);
         prop.setName("Name");
         propGroup.put(prop);
         
         prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getSerializedProperties", null);
         prop.setName("Serialized Properties");
-        propGroup.put(prop); 
+        propGroup.put(prop); */
         
         prop = new PropertySupport.Reflection<>(quantChannel, Long.class, "getIdentResultSummaryId", null);
         prop.setName("identResultSummaryId");

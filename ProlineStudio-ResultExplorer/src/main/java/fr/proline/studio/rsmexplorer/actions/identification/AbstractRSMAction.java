@@ -52,7 +52,9 @@ public abstract class AbstractRSMAction extends AbstractAction {
         Rectangle r = tree.getPathBounds(treePath);
         Point p = tree.getLocationOnScreen();
 
-        actionPerformed(tree.getSelectedNodes(), p.x + r.x + r.width / 2, p.y + r.y + r.height / 2);
+        int x = (r == null ? (p.x / 2) : (p.x + r.x + r.width / 2));
+        int y = (r == null ? (p.y / 2) : (p.y + r.y + r.height / 2));
+        actionPerformed(tree.getSelectedNodes(), x, y);
 
     }
     

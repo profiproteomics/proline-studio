@@ -21,6 +21,9 @@ public class DeleteAction  extends AbstractRSMAction {
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
         
         int nbSelectedNode = selectedNodes.length;
+        if (nbSelectedNode == 0) {
+            return;
+        }
 
         XICDesignTree tree = XICDesignTree.getDesignTree();
         AbstractTree.RSMTreeModel model = (AbstractTree.RSMTreeModel) tree.getModel();

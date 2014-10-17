@@ -7,7 +7,6 @@ import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dpm.serverfilesystem.RootInfo;
 import fr.proline.studio.dpm.serverfilesystem.ServerFile;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.parameter.FileParameter;
 import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
@@ -277,7 +276,7 @@ public class SelectRawFileDialog extends DefaultDialog {
             }
         }
 
-        JFileChooser fileChooser = (defaultDirectory!= null) ? new JFileChooser(ServerFileSystemView.getServerFileSystemView()) : new JFileChooser(defaultDirectory, ServerFileSystemView.getServerFileSystemView());
+        JFileChooser fileChooser = (defaultDirectory == null) ? new JFileChooser(ServerFileSystemView.getServerFileSystemView()) : new JFileChooser(defaultDirectory, ServerFileSystemView.getServerFileSystemView());
         fileChooser.setMultiSelectionEnabled(false);
         return fileChooser;
 

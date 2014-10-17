@@ -62,6 +62,7 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JButton;
+import org.openide.windows.WindowManager;
 
 import org.slf4j.Logger;
 
@@ -89,9 +90,10 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     private boolean m_previousFragmentationSet = false;
     private javax.swing.JPanel m_spectrumPanel;
     private JButton m_generateMatchButton;
+    
     // menuItem ShowSpectrumTitle is created while creating the panel, to avoid having a multitude of menuItem in the popupMenu
     private JMenuItem m_showSpectrumTitle;
-    private ActionListener m_showSpectrumActionListener = null;
+    private String m_spectrumTitle;
     
     private RsetPeptideSpectrumAnnotations m_spectrumAnnotations = null;
     
@@ -158,8 +160,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         };
         
         
-        cp.setMinimumDrawWidth(0);					//
-        cp.setMinimumDrawHeight(0);					//
+        cp.setMinimumDrawWidth(0);
+        cp.setMinimumDrawHeight(0);
         cp.setMaximumDrawWidth(Integer.MAX_VALUE); // make the legend to have a fixed size and not strecht it 
         cp.setMaximumDrawHeight(Integer.MAX_VALUE); // when the windows becomes bigger.
         m_spectrumPanel = cp;
@@ -167,9 +169,18 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         // JFreePanel sub Menus
         // creation of the menuItem Show Spectrum Title
         m_showSpectrumTitle = new JMenuItem("Show Spectrum Title");
+        m_showSpectrumTitle.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), m_spectrumTitle, "Spectrum Title", 1);
+            }
+        });
+
+        
         // add to the popupMenu
         ((ChartPanel) m_spectrumPanel).getPopupMenu().add(m_showSpectrumTitle);
-        m_showSpectrumTitle.setActionCommand("Show");
+        
         
         //
         JToolBar toolbar = initToolbar();
@@ -356,24 +367,9 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         String title = "Query " + msQuery.getInitialId() + " - " + p.getSequence();
         m_chart.setTitle(title);
 
-        // menu Show spectrum title
-        // create the actionListener with the current title
-        final String spectrumTitle = spectrum.getTitle();
-        class SpectrumTitleShower implements ActionListener{
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                if(e.getSource() == m_showSpectrumTitle){
-                	JOptionPane.showMessageDialog(null, spectrumTitle, "Spectrum title",1);
-                }
-                
-            }
-            
-        }
-        
-        m_showSpectrumTitle.removeActionListener(m_showSpectrumActionListener);
-        m_showSpectrumActionListener = new SpectrumTitleShower();
-        m_showSpectrumTitle.addActionListener(m_showSpectrumActionListener);
+        // set the spectrum title
+        m_spectrumTitle = spectrum.getTitle();
+
         
         // reset X/Y zooming
         // ((ChartPanel) m_spectrumPanel).restoreAutoBounds();

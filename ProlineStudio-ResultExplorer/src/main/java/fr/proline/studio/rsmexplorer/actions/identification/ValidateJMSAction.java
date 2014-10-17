@@ -8,9 +8,12 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
+import fr.proline.studio.dpm.jms.AccessJMSManager;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.ChangeTypicalProteinTask;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.ValidationJMSTask;
+import fr.proline.studio.dpm.task.jms.ValidationJMSTaskJPM;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ValidationDialog;
@@ -151,7 +154,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
         // used as out parameter for the service
         final Integer[] _resultSummaryId = new Integer[1];
 
-        AbstractServiceCallback callback = new AbstractServiceCallback() {
+        /*AbstractServiceCallback callback = new AbstractServiceCallback() {
 
             @Override
             public boolean mustBeCalledInAWT() {
@@ -179,7 +182,37 @@ public class ValidateJMSAction extends AbstractRSMAction {
 
 
         ValidationJMSTask task = new ValidationJMSTask(callback, dataSetNode.getDataset(), "", parserArguments, _resultSummaryId, scoringType);
-        AccessServiceThread.getAccessServiceThread().addTask(task);
+        AccessServiceThread.getAccessJMSManager().addTask(task);*/
+        
+        AbstractJMSCallback callback = new AbstractJMSCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success) {
+                if (success) {
+
+                    updateDataset(dataSetNode, d, _resultSummaryId[0], getTaskInfo(), changeTypicalRules);
+
+
+                } else {
+                    //JPM.TODO : manage error with errorMessage
+                    dataSetNode.setIsChanging(false);
+
+
+                    IdentificationTree tree = IdentificationTree.getCurrentTree();
+                    DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                    treeModel.nodeChanged(dataSetNode);
+                }
+            }
+        };
+
+
+        ValidationJMSTaskJPM task = new ValidationJMSTaskJPM(callback, dataSetNode.getDataset(), "", parserArguments, _resultSummaryId, scoringType);
+        AccessJMSManager.getAccessJMSManager().addTask(task);
 
     }
 

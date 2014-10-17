@@ -47,8 +47,6 @@ public abstract class AbstractRSMAction extends AbstractAction {
     
         TreePath treePath = tree.getSelectionPath();
 
-        tree.getPathBounds(treePath);
-
         Rectangle r = tree.getPathBounds(treePath);
         Point p = tree.getLocationOnScreen();
 

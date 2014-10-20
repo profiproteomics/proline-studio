@@ -230,7 +230,7 @@ public class DataSetNode extends AbstractNode {
 
             // ask asynchronous loading of data
             DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-            task.initRenameDataset(dataset, newName);
+            task.initRenameDataset(dataset, name, newName);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }
@@ -314,5 +314,14 @@ public class DataSetNode extends AbstractNode {
         AbstractNode copy = new DataSetNode(getData());
         copyChildren(copy);
         return copy;
+    }
+    
+    /**
+     * return true in case of DatasetNode is a quantitation node (XIC or spectral count)
+     * @return 
+     */
+    public boolean isQuantitation(){
+       Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
+       return  (datasetType == Dataset.DatasetType.QUANTITATION) ;
     }
 }

@@ -1,18 +1,7 @@
-package fr.proline.studio.rsmexplorer.tree.identification;
+package fr.proline.studio.rsmexplorer.tree.quantitation;
 
-import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.Project;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
-import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.HourGlassNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -29,10 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class used for Drag and Drop of nodes
- * @author JM235353
+ * Class used for Drag and Drop of nodes in the Quantitation Tree
  */
-public class IdTransferHandler extends TransferHandler {
+public class QuantiTransferHandler extends TransferHandler {
     
     private Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
@@ -45,8 +33,8 @@ public class IdTransferHandler extends TransferHandler {
     @Override
     protected Transferable createTransferable(JComponent c) {
 
-        if (c instanceof IdentificationTree) {
-            IdentificationTree tree = (IdentificationTree) c;
+        if (c instanceof QuantitationTree) {
+            QuantitationTree tree = (QuantitationTree) c;
             
             // only Dataset which are not being changed can be transferred
             // furthermore Dataset must be of the same project
@@ -107,28 +95,14 @@ public class IdTransferHandler extends TransferHandler {
  
             }
 
-            // a selected node in a merged parent can not be transferred
-            int nbKeptNodes = keptNodes.size();
-             for (int i=0;i<nbKeptNodes;i++) {
-                 AbstractNode curNode = keptNodes.get(i);
-                 AbstractNode parentNode = (AbstractNode) curNode.getParent();
-                 if (parentNode instanceof DataSetNode) {
-                     DataSetNode parentDatasetNode = (DataSetNode) parentNode;
-                     if ((parentDatasetNode.hasResultSet()) || (parentDatasetNode.hasResultSummary())) {
-                         // parent is a merged dataset : no transfer possible
-                         return null;
-                     }
-                 }
-             }
             
-
-            IdTransferable.TransferData data = new IdTransferable.TransferData();
+            QuantiTransferable.TransferData data = new QuantiTransferable.TransferData();
             data.setNodeList(keptNodes);
-            Integer transferKey =  IdTransferable.register(data);
+            Integer transferKey =  QuantiTransferable.register(data);
 
             
             
-            return new IdTransferable(transferKey, commonProjectId);
+            return new QuantiTransferable(transferKey, commonProjectId);
 
         }
         return null;
@@ -140,14 +114,14 @@ public class IdTransferHandler extends TransferHandler {
     protected void exportDone(JComponent source, Transferable data, int action) {
 
         // clean all transferred data
-        IdTransferable.clearRegisteredData();
+        QuantiTransferable.clearRegisteredData();
     }
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport support) {
 
         support.setShowDropLocation(true);
-        if (support.isDataFlavorSupported(IdTransferable.RSMNodeList_FLAVOR)) {
+        if (support.isDataFlavorSupported(QuantiTransferable.QuantiNodeList_FLAVOR)) {
 
             // drop path
             TreePath dropTreePath = ((JTree.DropLocation) support.getDropLocation()).getPath();
@@ -163,7 +137,6 @@ public class IdTransferHandler extends TransferHandler {
                 return false;
             }
             
-            // We can drop only in project or aggregate node with no Rsm or Rset
             // The node must not being changed
             AbstractNode dropRSMNode = (AbstractNode) dropComponent;
             if (dropRSMNode.isChanging()) {
@@ -174,54 +147,28 @@ public class IdTransferHandler extends TransferHandler {
             AbstractNode.NodeTypes nodeType = dropRSMNode.getType();
             if ( nodeType == AbstractNode.NodeTypes.DATA_SET) {
                 DataSetNode dropDatasetNode = (DataSetNode) dropRSMNode;
-                if (dropDatasetNode.hasResultSet() || dropDatasetNode.hasResultSummary()) {
+                if (dropDatasetNode.isQuantitation()) {
                     return false;
                 }
                 dropProjectId = dropDatasetNode.getDataset().getProject().getId();
-            } else if ( nodeType == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
-                IdProjectIdentificationNode dropProjectNode = (IdProjectIdentificationNode) dropRSMNode;
+            } else if ( nodeType == AbstractNode.NodeTypes.PROJECT_QUANTITATION) {
+                QuantitationProjectNode dropProjectNode = (QuantitationProjectNode) dropRSMNode;
                 dropProjectId = dropProjectNode.getProject().getId();
-                if (((JTree.DropLocation) support.getDropLocation()).getChildIndex() == 0) {
-                    // drop can not been done in Project before the All imported
-                    return false;
-                }
             } else {
                 return false;
             }
 
-
-            
-            
             try {
-                
                 // drop node must be in the same project that nodes being transferred
-                IdTransferable nodeListTransferable = (IdTransferable) support.getTransferable().getTransferData(IdTransferable.RSMNodeList_FLAVOR);
+                QuantiTransferable nodeListTransferable = (QuantiTransferable) support.getTransferable().getTransferData(QuantiTransferable.QuantiNodeList_FLAVOR);
                 if (nodeListTransferable.getProjectId() != dropProjectId) {
                     return false;
-                }
-                
-                // drop node must not be equal or a child of a transferred node
-                IdTransferable.TransferData data = IdTransferable.getData(nodeListTransferable.getTransferKey());
-                
-                if (data.isNodeList()) {
-                    ArrayList<AbstractNode> nodeList = (ArrayList<AbstractNode>) data.getDataList();
-                    int nbNodes = nodeList.size();
-                    for (int i = 0; i < nbNodes; i++) {
-                        AbstractNode nodeTransfered = nodeList.get(i);
-
-                        if (dropRSMNode.isNodeAncestor(nodeTransfered)) {
-                            return false;
-                        }
-                    }
                 }
             } catch (UnsupportedFlavorException | IOException e) {
                 // should never happen
                 m_logger.error(getClass().getSimpleName() + " DnD error ", e);
                 return false;
             }
-
-            
-            
             return true;
 
         }
@@ -235,13 +182,11 @@ public class IdTransferHandler extends TransferHandler {
         if (canImport(support)) {
 
             try {
-                IdTransferable transfer = (IdTransferable) support.getTransferable().getTransferData(IdTransferable.RSMNodeList_FLAVOR);
-                IdTransferable.TransferData data = IdTransferable.getData(transfer.getTransferKey());
+                QuantiTransferable transfer = (QuantiTransferable) support.getTransferable().getTransferData(QuantiTransferable.QuantiNodeList_FLAVOR);
+                QuantiTransferable.TransferData data = QuantiTransferable.getData(transfer.getTransferKey());
                 if (data.isNodeList()) {
                     return importNodes(support, data);
-                } else {
-                    return importResultSets(support, data);
-                }
+                } 
 
             } catch (UnsupportedFlavorException | IOException e) {
                 // should never happen
@@ -255,115 +200,14 @@ public class IdTransferHandler extends TransferHandler {
         return false;
     }
     
-    private boolean importResultSets(TransferSupport support, IdTransferable.TransferData data) {
-
-        
-        JTree.DropLocation location = ((JTree.DropLocation) support.getDropLocation());
-        TreePath dropTreePath = location.getPath();
-        int childIndex = location.getChildIndex();
-        AbstractNode dropRSMNode = (AbstractNode) dropTreePath.getLastPathComponent();
-
-        IdentificationTree tree = IdentificationTree.getCurrentTree();
-        final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-
-        // no insert index specified -> we insert at the end
-        if (childIndex == -1) {
-
-            childIndex = dropRSMNode.getChildCount();
-
-            // special case to drop before the Trash
-            if (childIndex > 0) {
-                AbstractNode lastChild = (AbstractNode) dropRSMNode.getChildAt(childIndex - 1);
-                if ((lastChild instanceof DataSetNode) && ((DataSetNode) lastChild).isTrash()) {
-                    childIndex--; // we drop before the Trash
-                }
-            }
-        }
-        
-        
-        Project project = null;
-        DDataset parentDataset = null;
-        DataSetNode parentDatasetNode = null;
-
-        if (dropRSMNode.getType() == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
-            IdProjectIdentificationNode projectNode = (IdProjectIdentificationNode) dropRSMNode;
-            project = projectNode.getProject();
-        } else if (dropRSMNode.getType() == AbstractNode.NodeTypes.DATA_SET) {
-            parentDatasetNode = (DataSetNode) dropRSMNode;
-            project = parentDatasetNode.getDataset().getProject();
-            parentDataset = parentDatasetNode.getDataset();
-        }
-
-
-        
-        // start imports
-        ArrayList<ResultSet> rsetList = (ArrayList<ResultSet>) data.getDataList();
-        int nbRset = rsetList.size();
-        for (int i = 0; i < nbRset; i++) {
-            ResultSet rset = rsetList.get(i);
-            String datasetName = rset.getMsiSearch().getResultFileName();
-            int indexOfDot = datasetName.lastIndexOf('.');
-            if (indexOfDot != -1) {
-                datasetName = datasetName.substring(0, indexOfDot);
-            }
-
-            DataSetData identificationData = new DataSetData(datasetName, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS);  //JPM.TODO
-
-            final DataSetNode identificationNode = new DataSetNode(identificationData);
-            identificationNode.setIsChanging(true);
-
-            treeModel.insertNodeInto(identificationNode, dropRSMNode, childIndex);
-            childIndex++;
-
-            final ArrayList<DDataset> createdDatasetList = new ArrayList<>();
-
-
-            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                     identificationNode.setIsChanging(false);
-                    
-                    if (success) {
-                        
-
-                        DDataset dataset = createdDatasetList.get(0);
-                        identificationNode.setIsChanging(false);
-                        ((DataSetData) identificationNode.getData()).setDataset(dataset);
-                        treeModel.nodeChanged(identificationNode);
-                    } else {
-                        // should not happen
-                        treeModel.removeNodeFromParent(identificationNode);
-                    }
-                }
-            };
-
-
-            DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-            task.initCreateDatasetForIdentification(project, parentDataset, Aggregation.ChildNature.SAMPLE_ANALYSIS, datasetName, rset.getId(), null, createdDatasetList, new TaskInfo("Create Dataset " + datasetName, true, AbstractDatabaseTask.TASK_LIST_INFO));
-            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-
-        }
-
-        
-        return true;
-    }
-    
-    private boolean importNodes(TransferSupport support, IdTransferable.TransferData data) {
+    private boolean importNodes(TransferSupport support, QuantiTransferable.TransferData data) {
 
         JTree.DropLocation location = ((JTree.DropLocation) support.getDropLocation());
         TreePath dropTreePath = location.getPath();
         int childIndex = location.getChildIndex();
         AbstractNode dropRSMNode = (AbstractNode) dropTreePath.getLastPathComponent();
 
-        IdentificationTree tree = IdentificationTree.getCurrentTree();
+        QuantitationTree tree = QuantitationTree.getCurrentTree();
         DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
         // no insert index specified -> we insert at the end
@@ -384,13 +228,10 @@ public class IdTransferHandler extends TransferHandler {
         // to be able later to modify the database
         LinkedHashSet<AbstractNode> allParentNodeModified = new LinkedHashSet<>();
         
-
-
         ArrayList<AbstractNode> nodeList = (ArrayList<AbstractNode>) data.getDataList();
         int nbNodes = nodeList.size();
         for (int i = 0; i < nbNodes; i++) {
             AbstractNode node = nodeList.get(i);
-
 
             // specific case when the node is moved in its parent
             int indexChild;
@@ -434,8 +275,8 @@ public class IdTransferHandler extends TransferHandler {
                 DataSetNode datasetNode = ((DataSetNode) parentNode);
                 databaseParentObject = datasetNode.getDataset();
                 //nodeToBeChanged.add(datasetNode);
-            } else if (type == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
-                IdProjectIdentificationNode projectNode = ((IdProjectIdentificationNode) parentNode);
+            } else if (type == AbstractNode.NodeTypes.PROJECT_QUANTITATION) {
+                QuantitationProjectNode projectNode = ((QuantitationProjectNode) parentNode);
                 databaseParentObject = projectNode.getProject();
             }
 
@@ -469,13 +310,10 @@ public class IdTransferHandler extends TransferHandler {
         }
 
         // ask the modification to the database at once (intricate to put in a thread in Dnd context)
-        DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify, true);
-
-        
+        DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify, false);
 
         return true;
 
 
     }
-
 }

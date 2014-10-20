@@ -93,10 +93,10 @@ public class DataSetData extends AbstractData {
     }
     
     @Override
-    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority, boolean identificationDataset) {
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
 
-        task.initLoadChildrenDataset(m_dataset, list);
+        task.initLoadChildrenDataset(m_dataset, list,  identificationDataset);
         if (priority != null) {
             task.setPriority(priority);
         }

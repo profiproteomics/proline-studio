@@ -108,7 +108,7 @@ public class RunInfoData extends AbstractData {
     
     
     @Override
-    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority, boolean identificationDataset) {
         // nothing to do
     }
 

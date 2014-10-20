@@ -92,7 +92,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
         initTree(top);
         
-        startLoading(top);
+        startLoading(top, true);
 
     }
 
@@ -102,7 +102,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
         initTree(top);
 
-        startLoading(top);
+        startLoading(top, true);
 
     }
 
@@ -272,7 +272,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             AbstractNode childNode = (AbstractNode) nodeExpanded.getChildAt(0);
             if (childNode.getType() == AbstractNode.NodeTypes.HOUR_GLASS) {
                 
-                startLoading(nodeExpanded);
+                startLoading(nodeExpanded, true);
             }
         }
         
@@ -355,7 +355,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
         
 
-        parentData.load(callback, childrenList);
+        parentData.load(callback, childrenList, true);
     }
     
     public void moveToTrash(AbstractNode[] selectedNodes) {
@@ -490,7 +490,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         }
 
         // ask the modification to the database at once (intricate to put in a thread in Dnd context)
-        DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify);
+        DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify, true);
 
 
         
@@ -564,7 +564,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                  // create the actions
                 m_trashActions = new ArrayList<>(1);  // <--- get in sync
                 
-                EmptyTrashAction emtpyTrashAction = new EmptyTrashAction();
+                EmptyTrashAction emtpyTrashAction = new EmptyTrashAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_trashActions.add(emtpyTrashAction);
                 
                 m_trashPopup = new JPopupMenu();
@@ -668,7 +668,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 m_mainActions.add(renameAction);
 
                 
-                DeleteAction deleteAction = new DeleteAction();
+                DeleteAction deleteAction = new DeleteAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(deleteAction);
 
 

@@ -55,7 +55,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     }
     
     
-    protected void startLoading(final AbstractNode nodeToLoad) {
+    protected void startLoading(final AbstractNode nodeToLoad, boolean identificationDataset) {
 
         
         
@@ -117,7 +117,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
         
 
-        parentData.load(callback, childrenList);
+        parentData.load(callback, childrenList,identificationDataset );
     }
     
     protected void dataLoaded(AbstractData data, List<AbstractData> list) {
@@ -143,7 +143,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     
     
 
-    public void loadAllAtOnce(final AbstractNode nodeToLoad) {
+    public void loadAllAtOnce(final AbstractNode nodeToLoad, final boolean identificationDataset) {
         if (nodeToLoad.getChildCount() == 0) {
             return;
         }
@@ -151,7 +151,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         if (childNode.getType() != AbstractNode.NodeTypes.HOUR_GLASS) {
             int nbChildren = nodeToLoad.getChildCount();
             for (int i = 0; i < nbChildren; i++) {
-                loadAllAtOnce((AbstractNode) nodeToLoad.getChildAt(i));
+                loadAllAtOnce((AbstractNode) nodeToLoad.getChildAt(i), identificationDataset);
             }
             return; 
         }
@@ -183,16 +183,16 @@ public abstract class AbstractTree extends JTree implements MouseListener {
                     m_model.nodeChanged(nodeToLoad);
                 }
 
-                dataLoadedAtOnce(parentData, childrenList);
+                dataLoadedAtOnce(parentData, childrenList, identificationDataset);
             }
         };
 
         
 
-        parentData.load(callback, childrenList, Priority.TOP);
+        parentData.load(callback, childrenList, Priority.TOP, identificationDataset);
         
     }
-    protected void dataLoadedAtOnce(AbstractData data, List<AbstractData> list) {
+    protected void dataLoadedAtOnce(AbstractData data, List<AbstractData> list, boolean identificationDataset) {
 
         AbstractNode parentNode = loadingMap.remove(data);
 
@@ -212,7 +212,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
         int nbChildren = parentNode.getChildCount();
         for (int i=0;i<nbChildren;i++) {
-            loadAllAtOnce((AbstractNode) parentNode.getChildAt(i));
+            loadAllAtOnce((AbstractNode) parentNode.getChildAt(i), identificationDataset);
         }
 
     }

@@ -10,6 +10,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 
@@ -19,8 +20,11 @@ import org.openide.util.NbBundle;
  */
 public class EmptyTrashAction extends AbstractRSMAction {
 
-    public EmptyTrashAction() {
-        super(NbBundle.getMessage(EmptyTrashAction.class, "CTL_EmptyTrashAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    private AbstractTree.TreeType m_treeType;
+    
+    public EmptyTrashAction(AbstractTree.TreeType treeType) {
+        super(NbBundle.getMessage(EmptyTrashAction.class, "CTL_EmptyTrashAction"), treeType);
+        this.m_treeType = treeType;
     }
     
 
@@ -32,7 +36,18 @@ public class EmptyTrashAction extends AbstractRSMAction {
         DataSetNode datasetNode = (DataSetNode) n;
         DDataset trashDataset = datasetNode.getDataset();
         
-        IdentificationTree tree = IdentificationTree.getCurrentTree();
+        AbstractTree tree = null;
+        boolean identificationDataset = false;
+        if (this.m_treeType  == AbstractTree.TreeType.TREE_IDENTIFICATION) {
+            tree = IdentificationTree.getCurrentTree();
+            identificationDataset = true;
+        }else if (this.m_treeType  == AbstractTree.TreeType.TREE_QUANTITATION) {
+            tree = QuantitationTree.getCurrentTree();
+            identificationDataset = false;
+        }
+        if (tree == null){
+            return;
+        }
         final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
         n.setIsChanging(true);
@@ -61,7 +76,7 @@ public class EmptyTrashAction extends AbstractRSMAction {
         };
 
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-        task.initEmptyTrash(trashDataset);
+        task.initEmptyTrash(trashDataset, identificationDataset);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         
 

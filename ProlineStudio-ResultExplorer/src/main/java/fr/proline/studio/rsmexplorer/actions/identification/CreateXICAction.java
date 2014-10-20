@@ -154,7 +154,8 @@ public class CreateXICAction extends AbstractRSMAction {
             quantitationNode.setIsChanging(true);
             
             AbstractNode rootNode = (AbstractNode) treeModel.getRoot();
-            treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount());
+            // before trash
+            treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount()-1);
             
             // expand the parent node to display its children
             tree.expandNodeIfNeeded(rootNode);

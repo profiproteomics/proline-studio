@@ -103,11 +103,12 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param parentDataSet
      * @param list 
      */
-    public void initLoadChildrenDataset(DDataset parentDataset, List<AbstractData> list) {
+    public void initLoadChildrenDataset(DDataset parentDataset, List<AbstractData> list, boolean identificationDataset) {
         setTaskInfo(new TaskInfo("Load Data for Dataset "+parentDataset.getName(), false, TASK_LIST_INFO));
         m_project = parentDataset.getProject();
         m_parentDataset = parentDataset;
         m_list = list;
+        m_identificationDataset = identificationDataset;
         m_action = LOAD_CHILDREN_DATASET;
         setPriority(Priority.HIGH_1);
     }
@@ -161,8 +162,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * rename a dataset
      * @return 
      */
-    public void initRenameDataset(DDataset dataset, String name) {
-        setTaskInfo(new TaskInfo("Rename Dataset "+dataset.getName()+" to "+name, true, TASK_LIST_INFO));
+    public void initRenameDataset(DDataset dataset, String oldName, String name) {
+        setTaskInfo(new TaskInfo("Rename Dataset "+oldName+" to "+name, true, TASK_LIST_INFO));
         m_name = name;
         m_dataset = dataset;
         m_action = RENAME_DATASET;
@@ -222,10 +223,15 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         m_action = MODIFY_MERGED_DATASET;
     }
     
-    public void initEmptyTrash(DDataset trashDataset) {
-        setTaskInfo(new TaskInfo("Empty Trash", true, TASK_LIST_INFO));
+    public void initEmptyTrash(DDataset trashDataset, boolean identificationDataset) {
+        String type = Dataset.DatasetType.IDENTIFICATION.name();
+        if (!identificationDataset) {
+            type = Dataset.DatasetType.QUANTITATION.name();
+        }
+        setTaskInfo(new TaskInfo("Empty Trash "+type, true, TASK_LIST_INFO));
         setPriority(Priority.HIGH_2);
         m_dataset = trashDataset;
+        m_identificationDataset = identificationDataset;
         m_action = EMPTY_TRASH;
     }
 
@@ -387,9 +393,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
                 datasetListSelected = dataSetQuery.getResultList();
             } else {
-                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type=:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND ( d.type=:quantitationType or d.type=:trashType)  AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
                 dataSetQuery.setParameter("projectId", projectId);
                 dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+                dataSetQuery.setParameter("trashType", Dataset.DatasetType.TRASH);
                 datasetListSelected = dataSetQuery.getResultList();
             }
 
@@ -527,6 +534,14 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             // But some Aggregation are null (for identifications) -> identifications are not loaded
             // So we load aggregations afterwards
             TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId ORDER BY d.number ASC", DDataset.class);
+            if (m_parentDataset.getType() == Dataset.DatasetType.TRASH) {
+                if (m_identificationDataset){
+                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type<>:quantitationType ORDER BY d.number ASC", DDataset.class);
+                }else { 
+                    datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType ORDER BY d.number ASC", DDataset.class);
+                }
+                datasetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+            }
             datasetQuery.setParameter("parentDatasetId", parentDatasetId);
             List<DDataset> dataSetResultList = datasetQuery.getResultList();
             Iterator<DDataset> itDataset = dataSetResultList.iterator();
@@ -715,8 +730,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                        if (o != null) {
                             Long identDatasetId = Long.parseLong(o.toString());
                             Dataset identDatasetDB = entityManagerUDS.find(Dataset.class, identDatasetId);
-                            identDataset = new DDataset(identDatasetDB.getId(), identDatasetDB.getProject(), identDatasetDB.getName(), identDatasetDB.getType(), 
-                                identDatasetDB.getChildrenCount(), identDatasetDB.getResultSetId(), identDatasetDB.getResultSummaryId(), identDatasetDB.getNumber());
+                            if (identDatasetDB != null) {
+                                identDataset = new DDataset(identDatasetDB.getId(), identDatasetDB.getProject(), identDatasetDB.getName(), identDatasetDB.getType(), 
+                                    identDatasetDB.getChildrenCount(), identDatasetDB.getResultSetId(), identDatasetDB.getResultSummaryId(), identDatasetDB.getNumber());
+                            }
                        }
                     }
                     dMaster.setIdentDataset(identDataset);
@@ -1230,9 +1247,18 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 entityManagerUDS.getTransaction().begin();
 
                 Dataset mergedTrash = entityManagerUDS.find(Dataset.class, m_dataset.getId()); // dataset is the Trash
-                removeChildren(entityManagerUDS, mergedTrash);
-                mergedTrash.setChildren(new ArrayList());
-                mergedTrash.setChildrenCount(0);
+                removeChildren(entityManagerUDS, mergedTrash, m_identificationDataset);
+                List<Dataset> children = mergedTrash.getChildren();
+                mergedTrash.setChildren(children);
+                mergedTrash.setChildrenCount(children == null ?0:children.size());
+                if (children != null) {
+                    int pos = 0;
+                    for (Iterator<Dataset> it = children.iterator(); it.hasNext();) {
+                        Dataset child = it.next();
+                        child.setNumber(pos);
+                        entityManagerUDS.persist(child);
+                    }
+                }
                 entityManagerUDS.persist(mergedTrash);
 
                 entityManagerUDS.getTransaction().commit();
@@ -1250,17 +1276,24 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         return true;
     }
 
-    private void removeChildren(EntityManager entityManagerUDS, Dataset d) {
+    private void removeChildren(EntityManager entityManagerUDS, Dataset d, boolean identificationTrash) {
         List<Dataset> children = d.getChildren();
         if (children != null) {
-            Iterator<Dataset> it = children.iterator();
-            while (it.hasNext()) {
-                Dataset child = it.next();
-                removeChildren(entityManagerUDS, child);
+            int nbChildren = children.size() ;
+            for (int i = nbChildren-1; i >= 0; i--) {
+                Dataset child = children.get(i);
+                removeChildren(entityManagerUDS, child, identificationTrash);
+                boolean isDatasetIdentification = (child.getMethod() == null);
+                if ((isDatasetIdentification && identificationTrash) || (!isDatasetIdentification && !identificationTrash)) {
+                    children.remove(child);
+                }
             }
-            children.clear();
+            //children.clear();
         }
-        entityManagerUDS.remove(d);
+        boolean isDatasetIdentification = (d.getMethod() == null);
+        if ((isDatasetIdentification && identificationTrash) || (!isDatasetIdentification && !identificationTrash)) {
+            entityManagerUDS.remove(d);
+        }
     }
 
     /**
@@ -1270,7 +1303,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param databaseObjectsToModify HashMap whose keys can be Project or
      * Parent Dataset
      */
-    public static boolean updateDatasetAndProjectsTree(LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify) {
+    public static boolean updateDatasetAndProjectsTree(LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify, boolean identificationTree) {
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
@@ -1304,7 +1337,45 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     parentDataset = (DDataset) parentObject;
                     mergedParentDataset = entityManagerUDS.find(Dataset.class, parentDataset.getId());
                     
-                    if (childrenNotLoaded) {
+                    if (mergedParentDataset.getType() == Dataset.DatasetType.TRASH) {
+                        if (identificationTree) {
+                            // load quanti trash
+                            TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type=:quantitationType ORDER BY d.number ASC", DDataset.class);
+                            datasetQuery.setParameter("parentDatasetId", mergedParentDataset.getId());
+                            datasetQuery.setParameter("quantitationType",Dataset.DatasetType.QUANTITATION);
+                            List<DDataset> quantiInTrash = datasetQuery.getResultList();
+                             
+                            mergedParentDataset.replaceAllChildren(mergedDatasetList);
+                            for (Iterator<DDataset> qt = quantiInTrash.iterator(); qt.hasNext();) {
+                               DDataset aQuantiInTrash = qt.next();
+                               Dataset wholeDataset = entityManagerUDS.find(Dataset.class, aQuantiInTrash.getId());
+                               mergedParentDataset.addChild(wholeDataset);
+                            }
+                              
+                        }else  {
+                            // load identification trash
+                            TypedQuery<DDataset> datasetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.parentDataset.id=:parentDatasetId AND d.type<>:quantitationType ORDER BY d.number ASC", DDataset.class);
+                            
+                            datasetQuery.setParameter("parentDatasetId", mergedParentDataset.getId());
+                            datasetQuery.setParameter("quantitationType",Dataset.DatasetType.QUANTITATION);
+                            List<DDataset> identificationInTrash = datasetQuery.getResultList();
+                             
+                            mergedParentDataset.replaceAllChildren(mergedDatasetList);
+                            for (Iterator<DDataset> qt = identificationInTrash.iterator(); qt.hasNext();) {
+                               DDataset aIdentificationInTrash = qt.next();
+                               Dataset wholeDataset = entityManagerUDS.find(Dataset.class, aIdentificationInTrash.getId());
+                               mergedParentDataset.addChild(wholeDataset);
+                            }
+                        }
+                        // change number position for children
+                        List<Dataset> childs = mergedParentDataset.getChildren();
+                        int pos=0;
+                        for (Iterator<Dataset> it1 = childs.iterator(); it1.hasNext();) {
+                            Dataset dataset = it1.next();
+                            dataset.setNumber(pos);
+                            pos++;
+                        }
+                    }else if (childrenNotLoaded) {
                         for (int i=0;i<mergedDatasetList.size();i++) {
                             mergedParentDataset.addChild(mergedDatasetList.get(i));
                         }
@@ -1328,7 +1399,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     }
                 }
 
-                for (int i = 0; i < mergedDatasetList.size(); i++) {
+               for (int i = 0; i < mergedDatasetList.size(); i++) {
                     Dataset mergedDataset = mergedDatasetList.get(i);
                     entityManagerUDS.persist(mergedDataset);
                 }

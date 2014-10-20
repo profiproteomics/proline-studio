@@ -27,9 +27,9 @@ public class XICSelectionTree extends AbstractTree implements TreeWillExpandList
         initTree(top);
 
         if (loadAllAtOnce) {
-            loadAllAtOnce(top);
+            loadAllAtOnce(top, false);
         } else {
-            startLoading(top);
+            startLoading(top, false);
         }
         
 
@@ -77,7 +77,7 @@ public class XICSelectionTree extends AbstractTree implements TreeWillExpandList
             AbstractNode childNode = (AbstractNode) nodeExpanded.getChildAt(0);
             if (childNode.getType() == AbstractNode.NodeTypes.HOUR_GLASS) {
 
-                startLoading(nodeExpanded);
+                startLoading(nodeExpanded, false);
             }
         }
 

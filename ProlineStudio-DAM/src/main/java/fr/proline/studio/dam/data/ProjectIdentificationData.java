@@ -51,7 +51,7 @@ public class ProjectIdentificationData extends AbstractData {
     }
 
     @Override
-    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority, boolean identificationDataset) {
 
         list.add(new AllImportedData());
         

@@ -4,6 +4,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,13 +16,23 @@ import org.openide.util.NbBundle;
  */
 public class DeleteAction extends AbstractRSMAction {
 
-    public DeleteAction() {
-        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    private AbstractTree.TreeType m_treeType;
+    
+    public DeleteAction(AbstractTree.TreeType treeType) {
+        super(NbBundle.getMessage(DeleteAction.class, "CTL_DeleteAction"), treeType);
+        this.m_treeType = treeType;
     }
 
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) { 
-        IdentificationTree.getCurrentTree().moveToTrash(selectedNodes);
+        // depends on the treeType
+        if (m_treeType == AbstractTree.TreeType.TREE_IDENTIFICATION ){
+            IdentificationTree tree = IdentificationTree.getCurrentTree();
+            tree.moveToTrash(selectedNodes);
+        }else if (m_treeType == AbstractTree.TreeType.TREE_QUANTITATION ){
+             QuantitationTree tree = QuantitationTree.getCurrentTree();
+             tree.moveToTrash(selectedNodes);
+        }
     }
     
     @Override

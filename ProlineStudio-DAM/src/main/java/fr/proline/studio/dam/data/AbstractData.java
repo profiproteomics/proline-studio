@@ -47,10 +47,10 @@ public abstract class AbstractData {
      *
      * @param list
      */
-    public void load(AbstractDatabaseCallback callback, List<AbstractData> list) {
-        load(callback, list, null);
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, boolean identificationDataset) {
+        load(callback, list, null, identificationDataset);
     }
-    public abstract void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority);
+    public abstract void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority, boolean identificationDataset);
 
     /**
      * Subclasses must overriden this method to give the name of the data

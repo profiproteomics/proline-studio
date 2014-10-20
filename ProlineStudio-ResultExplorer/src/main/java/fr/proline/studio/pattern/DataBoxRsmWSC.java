@@ -199,7 +199,8 @@ public class DataBoxRsmWSC extends AbstractDataBox {
             quantitationNode.setIsChanging(true);
             
             AbstractNode rootNode = (AbstractNode) treeModel.getRoot();
-            treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount());
+            // before Trash
+            treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount()-1);
 
             // expand the parent node to display its children
             tree.expandNodeIfNeeded(rootNode);

@@ -51,7 +51,7 @@ public class ProjectQuantitationData extends AbstractData {
     }
 
     @Override
-    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority) {
+    public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority, boolean identificationDataset) {
 
         DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
         task.initLoadParentDataset(m_project, list, false);

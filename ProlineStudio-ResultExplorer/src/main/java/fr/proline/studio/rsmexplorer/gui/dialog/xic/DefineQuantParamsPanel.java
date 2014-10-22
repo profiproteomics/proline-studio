@@ -40,8 +40,8 @@ public class DefineQuantParamsPanel extends JPanel{
     private final static String[] FEATURE_FILTER_OPERATOR_VALUES = {">", "<"};
     private final static String[] FEATURE_FILTER_OPERATOR_KEYS = {"GT", "LT"};
 
-    private final static String[] FEATURE_NORMALIZATION_VALUES = {"Intensity Sum", "Median Intensity", "Median Ratio"};
-    private final static String[] FEATURE_NORMALIZATION_KEYS = {"INTENSITY_SUM", "MEDIAN_INTENSITY", "MEDIAN_RATIO"};        
+    private final static String[] FEATURE_NORMALIZATION_VALUES = {"No", "Intensity Sum", "Median Intensity", "Median Ratio"};
+    private final static String[] FEATURE_NORMALIZATION_KEYS = {"NONE", "INTENSITY_SUM", "MEDIAN_INTENSITY", "MEDIAN_RATIO"};        
     
     private ObjectParameter<String> m_clusteringTimeComputationParameter;
     private ObjectParameter<String> m_clusteringIntensityComputationParameter;
@@ -306,7 +306,10 @@ public class DefineQuantParamsPanel extends JPanel{
         ftMappingParams.put("moz_tol_unit", "PPM");
         ftMappingParams.put("time_tol", m_featureMappingTimeTolTF.getText());        
         params.put("ft_mapping_params", ftMappingParams); 
-        params.put("normalization_method", m_normalizationParameter.getStringValue());
+        // normalization parameter is an option
+        if (m_normalizationParameter.getStringValue() != null && !m_normalizationParameter.getStringValue().equalsIgnoreCase("NONE")) {
+            params.put("normalization_method", m_normalizationParameter.getStringValue());
+        }
         params.put("detect_features", m_detectFeatureChB.isSelected());
         params.put("start_from_validated_peptides", m_validatedPSMsChB.isEnabled() && m_validatedPSMsChB.isSelected());
         return params;

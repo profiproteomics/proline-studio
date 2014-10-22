@@ -1,14 +1,15 @@
 package fr.proline.studio.rsmexplorer.tree;
 
-import fr.proline.core.orm.msi.*;
+import fr.proline.core.orm.msi.ResultSet;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DDataset.MergeInformation;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
-import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
+import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
 import fr.proline.studio.utils.IconManager;
 import java.util.Enumeration;
@@ -323,5 +324,22 @@ public class DataSetNode extends AbstractNode {
     public boolean isQuantitation(){
        Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
        return  (datasetType == Dataset.DatasetType.QUANTITATION) ;
+    }
+    
+    /**
+     * return the parent dataset of the current node, if the parent is a merged dataset
+     * @return 
+     */
+    public DDataset getParentMergedDataset ()  {
+        if (this.getParent() instanceof DataSetNode) {
+            DataSetNode parentNode = (DataSetNode)this.getParent();
+            if (parentNode.getDataset().getMergeInformation() != null) {
+                return parentNode.getDataset();
+            }else {
+                return null;
+            }
+        }else {
+            return null;
+        }
     }
 }

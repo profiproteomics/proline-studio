@@ -2,10 +2,11 @@ package fr.proline.studio.rsmexplorer.tree.xic;
 
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
-import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
@@ -263,9 +264,29 @@ public class XICTransferHandler extends TransferHandler {
             
             tree.expandNodeIfNeeded(dropRSMNode);
             
+            String suffix = Integer.toString(dropRSMNode.getChildCount()+1);
+            // Issue 11312: if the dragged node is a merged node, we use its name as suffix
+            if (datasetList != null && !datasetList.isEmpty()) {
+               // all dataset are in the same merged dataset parent
+                DDataset parentNode = datasetList.get(0).getParentMergedDataset();
+                if (parentNode != null){
+                    int nb = datasetList.size();
+                    boolean sameParent = true;
+                    for (int i=1; i<nb; i++) {
+                        DDataset p = datasetList.get(i).getParentMergedDataset();
+                        if (p != null && p.getId() != parentNode.getId()){
+                            sameParent = false;
+                            break;
+                        }
+                    }
+                    if (sameParent) {
+                        suffix = parentNode.getName() ;
+                    }
+                }
+            }
             if (dropRSMNode instanceof DataSetNode) {
                 // top node, we create a group now
-                String groupName = "Group "+Integer.toString(dropRSMNode.getChildCount()+1);
+                String groupName = "Group "+suffix;
                 XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(groupName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 treeModel.insertNodeInto(biologicalGroupNode, dropRSMNode, childIndex);
                 dropRSMNode = biologicalGroupNode;
@@ -275,7 +296,7 @@ public class XICTransferHandler extends TransferHandler {
             
             if (dropRSMNode instanceof XICBiologicalGroupNode) {
                 // Group Node, we create a sample node
-                String sampleName = "Sample " + Integer.toString(dropRSMNode.getChildCount() + 1);
+                String sampleName = "Sample " + suffix;
                 XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 treeModel.insertNodeInto(biologicalSampleNode, dropRSMNode, childIndex);
                 dropRSMNode = biologicalSampleNode;
@@ -338,7 +359,7 @@ public class XICTransferHandler extends TransferHandler {
 
 
     }
-
+    
     
 }
 

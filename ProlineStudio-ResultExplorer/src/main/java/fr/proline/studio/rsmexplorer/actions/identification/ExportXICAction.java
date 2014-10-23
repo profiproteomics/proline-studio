@@ -117,8 +117,8 @@ public class ExportXICAction extends AbstractRSMAction {
                         if (success) {
 
                             String fileName = dialog.getFileName();
-                            if (!fileName.endsWith(".xls")) {
-                                fileName += ".xls";
+                            if (!fileName.endsWith(".xlsx")) {
+                                fileName += ".xlsx";
                             }
                             DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath[0]);
                             AccessServiceThread.getAccessServiceThread().addTask(task);

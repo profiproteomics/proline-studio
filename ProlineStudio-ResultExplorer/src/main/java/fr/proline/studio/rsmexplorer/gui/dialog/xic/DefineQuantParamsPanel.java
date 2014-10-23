@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
 import fr.proline.studio.parameter.*;
 import fr.proline.studio.utils.IconManager;
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -81,31 +82,24 @@ public class DefineQuantParamsPanel extends JPanel{
     
     private JScrollPane m_scrollPane;
     
+    private JTabbedPane m_tabbedPane;
+    
     private DefineQuantParamsPanel() {
        
         m_parameterList = new ParameterList("XicParameters");
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());
         
-        setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        add(createWizardPanel(), c);
+        setLayout(new BorderLayout());
+        
+        add(createWizardPanel(), BorderLayout.PAGE_START);
 
 
         JPanel mainPanel = createMainPanel();
         m_scrollPane = new JScrollPane();
         m_scrollPane.setViewportView(mainPanel);
         m_scrollPane.createVerticalScrollBar();
-        c.gridy++;
-        c.weighty = 1;
-        add(m_scrollPane, c);
+        add(m_scrollPane, BorderLayout.CENTER);
         
     }
    
@@ -337,50 +331,29 @@ public class DefineQuantParamsPanel extends JPanel{
     
     private JPanel createMainPanel() {
         JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridBagLayout());
+        mainPanel.setLayout(new BorderLayout());
         mainPanel.setBorder(createTitledBorder(" XIC Parameters ", 0));
         
+        JPanel headerPanel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         JLabel extractionMoZTolLabel = new JLabel("Extraction moz tolerance (ppm):");
         c.gridx = 0;
         c.gridy = 0;
-        mainPanel.add(extractionMoZTolLabel, c);
+        c.gridwidth=1;
+        headerPanel.add(extractionMoZTolLabel, c);
 
         c.gridx++;
-        mainPanel.add(m_extractionMoZTolTF, c);
-        
-        c.gridy++;
-        c.gridx = 0;
-        c.gridwidth = 2;
-        mainPanel.add(createClusteringPanel(), c);
-        
-        c.gridy++;
-        c.gridx = 0;
-        c.gridwidth = 2;
-        mainPanel.add(createAlignementPanel(), c);
-
-        c.gridy++;
-        c.gridx = 0;
-        c.gridwidth = 2;
-        mainPanel.add(createFTPanel(), c);
-
-        c.gridy++;
-        c.gridx = 0;
-        c.weightx = 0;
-        c.gridwidth = 1;
-        mainPanel.add(new JLabel("Normalization "), c);
-        c.gridx++;
+        c.gridwidth=1;
         c.weightx = 1;
-        mainPanel.add(m_normalizationCB, c);
+        headerPanel.add(m_extractionMoZTolTF, c);
         
+        // Extracted XIC from
+        c.gridwidth = 2;
         c.gridy++;
         c.gridx = 0;
-        c.weightx = 0;
-        c.gridwidth = 2;
         m_detectFeatureChB.addActionListener(new ActionListener() {
 
             @Override
@@ -388,25 +361,65 @@ public class DefineQuantParamsPanel extends JPanel{
                 m_validatedPSMsChB.setEnabled(!m_detectFeatureChB.isSelected());
             }
         });
-        mainPanel.add(m_detectFeatureChB, c);
+        headerPanel.add(m_detectFeatureChB, c);
+        
         
         c.gridy++;
         c.gridx = 0;
-        c.weightx = 0;
         c.gridwidth = 2;
-        mainPanel.add(m_validatedPSMsChB, c);
+        headerPanel.add(m_validatedPSMsChB, c);
         
-                
+        mainPanel.add(headerPanel, BorderLayout.PAGE_START);
+        
+        // tabbed pane
+        m_tabbedPane = new JTabbedPane();
+        m_tabbedPane.addTab("Clustering", null, createClusteringPanel(), "Feature Clustering");
+        m_tabbedPane.addTab("Alignment", null, createAlignmentPanel(), "Map Alignment");
+        m_tabbedPane.addTab("Normalization", null, createNormalizationPanel(), "Map Normalization");
+        m_tabbedPane.addTab("Master Map", null, createFTPanel(), "Master Map");
+        
+        mainPanel.add(m_tabbedPane, BorderLayout.CENTER);
+        
+        
         return mainPanel;
     }
     
-    private JPanel createClusteringPanel(){
-        
-        JPanel clusteringPanel = new JPanel(new GridBagLayout());
-        clusteringPanel.setBorder(createTitledBorder(" Clustering ", 1));
+    
+    private JPanel createNormalizationPanel() {
+        JPanel panelN = new JPanel(new BorderLayout());
+        JPanel normalizationPanel = new JPanel(new GridBagLayout());
+        normalizationPanel.setBorder(createTitledBorder(" Map Normalization ", 1));
         
         GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
+        c.anchor = GridBagConstraints.NORTHWEST ;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        c.weighty= 0;
+        c.gridx = 0;
+        c.gridy = 0;   
+        c.gridwidth = 1;
+        c.gridheight = 1;
+        normalizationPanel.add(new JLabel("Map intensities Normalization "), c);
+        c.gridx++;
+        c.weighty= 0;
+        c.weightx = 1;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+        normalizationPanel.add(m_normalizationCB, c);
+        
+        panelN.add(normalizationPanel, BorderLayout.NORTH);
+        return panelN ;
+    }
+    
+    
+    private JPanel createClusteringPanel(){
+        JPanel panelC = new JPanel(new BorderLayout());
+        JPanel clusteringPanel = new JPanel(new GridBagLayout());
+        clusteringPanel.setBorder(createTitledBorder(" Feature Clustering ", 1));
+        
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST ;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
@@ -442,16 +455,18 @@ public class DefineQuantParamsPanel extends JPanel{
         clusteringPanel.add(m_clusteringIntensityComputationCB, c);
         c.weightx = 0;
 
-        return clusteringPanel;                
+        panelC.add(clusteringPanel, BorderLayout.NORTH);
+        return panelC ;               
     }
     
-    private JPanel createAlignementPanel(){
+    private JPanel createAlignmentPanel(){
+        JPanel panelA = new JPanel(new BorderLayout());
         
         JPanel alignmentPanel = new JPanel(new GridBagLayout());
-        alignmentPanel.setBorder(createTitledBorder(" Alignment ", 1));
+        alignmentPanel.setBorder(createTitledBorder(" Map Alignment ", 1));
         
         GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
+        c.anchor = GridBagConstraints.NORTHWEST ;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
@@ -532,10 +547,10 @@ public class DefineQuantParamsPanel extends JPanel{
         
         // Add Alignement  FT mapping specific params
         JPanel ftParamsPanel = new JPanel(new GridBagLayout());
-        ftParamsPanel.setBorder(createTitledBorder(" Feature Mapping Params ", 2));
+        ftParamsPanel.setBorder(createTitledBorder(" Feature Mapping ", 2));
 
         c1 = new GridBagConstraints();
-        c1.anchor = GridBagConstraints.NORTHWEST;
+        c1.anchor = GridBagConstraints.FIRST_LINE_START;
         c1.fill = GridBagConstraints.BOTH;
         c1.insets = new java.awt.Insets(5, 5, 5, 5);
 
@@ -561,43 +576,63 @@ public class DefineQuantParamsPanel extends JPanel{
         c.gridwidth = 2;
         alignmentPanel.add(ftParamsPanel, c);                
 
-        return alignmentPanel;                
+        panelA.add(alignmentPanel, BorderLayout.NORTH);
+        return panelA ;                 
     }           
     
     private JPanel createFTPanel(){
+        JPanel panelF = new JPanel(new BorderLayout());
+        
+        JPanel masterMapPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints cm = new GridBagConstraints();
+        cm.anchor = GridBagConstraints.FIRST_LINE_START ;
+        cm.fill = GridBagConstraints.BOTH;
+        cm.insets = new java.awt.Insets(5, 5, 5, 5);
         
         JPanel ftPanel = new JPanel(new GridBagLayout());
         ftPanel.setBorder(createTitledBorder(" Feature Filter ", 1));
         
         GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
+        c.anchor = GridBagConstraints.NORTHWEST ;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         c.gridx = 0;
-        c.gridy = 0;                
+        c.gridy = 0;
+        c.gridwidth = 1;
         ftPanel.add(new JLabel("name:"), c);        
-        c.gridx++;       
+        c.gridx++;   
+        c.weightx = 1;
         ftPanel.add(m_featureFilterNameCB, c);
                
         c.gridy++;
         c.gridx = 0;
+        c.weightx = 0;
         ftPanel.add(new JLabel("operator:"), c);
-        c.gridx++;       
+        c.gridx++;    
+        c.weightx = 1;
         ftPanel.add(m_featureFilterOperatorCB, c);
 
         c.gridy++;
         c.gridx = 0;
+        c.weightx = 0;
         ftPanel.add(new JLabel("value:"), c);
-        c.gridx++;       
+        c.gridx++;   
+        c.weightx = 1;
         ftPanel.add(m_featureFilterValueTF, c);
+        
+        cm.gridy = 0;
+        cm.gridx = 0;
+        cm.weightx = 1.0;
+        cm.gridwidth = 2;
+        masterMapPanel.add(ftPanel, cm);    
 
          // Add FT mapping specific params
         JPanel ftParamsPanel = new JPanel(new GridBagLayout());
-        ftParamsPanel.setBorder(createTitledBorder(" Mapping Params ", 2));
+        ftParamsPanel.setBorder(createTitledBorder(" Feature Mapping ", 1));
 
         GridBagConstraints c1 = new GridBagConstraints();
-        c1.anchor = GridBagConstraints.NORTHWEST;
+        c1.anchor = GridBagConstraints.NORTHWEST ;
         c1.fill = GridBagConstraints.BOTH;
         c1.insets = new java.awt.Insets(5, 5, 5, 5);
 
@@ -621,10 +656,15 @@ public class DefineQuantParamsPanel extends JPanel{
         c.gridx = 0;
         c.weightx = 1.0;
         c.gridwidth=2;
-        ftPanel.add(ftParamsPanel, c); 
+        
+        cm.gridy++;
+        cm.gridx = 0;
+        cm.weightx = 1.0;
+        cm.gridwidth = 2;
+        masterMapPanel.add(ftParamsPanel, cm);
 
-
-        return ftPanel;                
+        panelF.add(masterMapPanel, BorderLayout.NORTH);
+        return panelF;                
     }
     
     private TitledBorder createTitledBorder(String title, int level) {

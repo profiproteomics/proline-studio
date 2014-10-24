@@ -10,6 +10,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.imageio.ImageIO;
@@ -45,7 +48,7 @@ public class ExportDialog extends DefaultDialog  {
     private ImageExporterInterface m_imageExporter = null;
     
     private JFileChooser m_fchooser;
-
+    private List<FileNameExtensionFilter> m_filterList = new ArrayList<>();
     
     private DefaultDialog.ProgressTask m_task = null;
     
@@ -176,8 +179,15 @@ public class ExportDialog extends DefaultDialog  {
                 
                 if (exporterInfo != null) {
                     FileNameExtensionFilter filter = new FileNameExtensionFilter(exporterInfo.getName(), exporterInfo.getFileExtension());
-                    m_fchooser.addChoosableFileFilter(filter);
-                    m_fchooser.setFileFilter(filter);
+                    FileNameExtensionFilter existFilter = getFilterWithSameExtensions(filter);
+                    
+                    if (existFilter == null) {
+                        m_fchooser.addChoosableFileFilter(filter);
+                        m_filterList.add(filter);
+                        m_fchooser.setFileFilter(filter);
+                    }else {
+                        m_fchooser.setFileFilter(existFilter);
+                    }
                 }
 
                 String textFile = m_fileTextField.getText().trim();
@@ -364,5 +374,32 @@ public class ExportDialog extends DefaultDialog  {
 
 
         return true;
+    }
+    
+    /* compare filter based on the extensions, returns null if the filter is not already in the list, otherwise returns the object filter in the list*/
+    private FileNameExtensionFilter getFilterWithSameExtensions(FileNameExtensionFilter filter) {
+        FileNameExtensionFilter existFilter = null;
+        
+        String[] newExtension = filter.getExtensions();
+        int nbNew = newExtension.length;
+        for (FileNameExtensionFilter f : m_filterList) {
+            String[] extensions = f.getExtensions();
+            boolean sameExt = true;
+            int nbE = extensions.length;
+            if (nbE == nbNew) {
+                for (int k = 0; k < nbE; k++) {
+                    if (!extensions[k].equals(newExtension[k])) {
+                        sameExt = false;
+                        break;
+                    }
+                }
+            }
+            if (sameExt) {
+                existFilter = f;
+                break;
+            }
+        }
+        return existFilter;
+
     }
 }

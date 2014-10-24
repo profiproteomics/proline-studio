@@ -104,7 +104,9 @@ public class IconManager {
         DATASET_RSM_ERROR,
         LOAD_SETTINGS,
         SAVE_SETTINGS,
-        SAVE_WND;
+        SAVE_WND, 
+        ARROW_DOWN, 
+        ARROW_RIGHT;
     }
     private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -373,7 +375,11 @@ public class IconManager {
             case SAVE_SETTINGS:
                 return "fr/proline/studio/images/save-settings.png"; 
             case SAVE_WND:
-                return "fr/proline/studio/images/save11x11.png";  
+                return "fr/proline/studio/images/save11x11.png";
+           case ARROW_DOWN:
+               return "fr/proline/studio/images/arrow-down.png";
+           case ARROW_RIGHT:
+               return "fr/proline/studio/images/arrow-right.png";
         }
 
 

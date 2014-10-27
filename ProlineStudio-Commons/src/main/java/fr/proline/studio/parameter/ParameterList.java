@@ -128,6 +128,10 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                 if ((parameterValue != null) && (!parameterValue.isEmpty())) {
                     parameter.setUsed(true);
                 }
+            } else {
+                if ((parameterValue == null) || (parameterValue.isEmpty())) {
+                    parameter.setUsed(false); 
+                }
             }
             
             //Used to initialize values            

@@ -5,10 +5,16 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.ConnectionDialog;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
+import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import java.awt.Window;
+import java.util.Iterator;
+import java.util.Set;
 import javax.swing.*;
 import org.openide.util.NbPreferences;
+import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
 /**
@@ -20,6 +26,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
     private boolean m_changingUser = false;
     
     private static ServerConnectionDialog m_singletonDialog = null;
+
     
     public static ServerConnectionDialog getDialog(Window parent) {
         if (m_singletonDialog == null) {
@@ -60,6 +67,20 @@ public class ServerConnectionDialog extends ConnectionDialog {
             return false;
         }
         
+        if (m_changingUser) {
+            // close all specific windows
+            Set<TopComponent> tcs = TopComponent.getRegistry().getOpened();
+            Iterator<TopComponent> itTop = tcs.iterator();
+            while (itTop.hasNext()) {
+                TopComponent topComponent = itTop.next();
+                if (((topComponent instanceof DataBoxViewerTopComponent) || (topComponent instanceof PropertiesTopComponent)) && !(topComponent instanceof TaskLogTopComponent)) {
+                    topComponent.close();
+                }
+            }
+
+            // must remove all projects
+            ProjectExplorerPanel.getProjectExplorerPanel().clearAll();
+        }
 
         connect(m_changingUser);
 

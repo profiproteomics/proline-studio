@@ -124,21 +124,8 @@ public class ConnectAction  extends AbstractAction implements ContextAwareAction
 
             }
             
-            // close all specific windows
-            Set<TopComponent> tcs = TopComponent.getRegistry().getOpened();
-            Iterator<TopComponent> itTop = tcs.iterator();
-            while (itTop.hasNext()) {
-                TopComponent topComponent = itTop.next();
-                if (((topComponent instanceof DataBoxViewerTopComponent) || (topComponent instanceof PropertiesTopComponent)) && !(topComponent instanceof TaskLogTopComponent)) {
-                    topComponent.close();
-                }
-            }
 
-            // must remove all projects
-            ProjectExplorerPanel.getProjectExplorerPanel().clearAll();
-            
-            // change menu to connect
-            //connectionChanged(false);
+
 
             // open the dialog to connect to another user
             ServerConnectionDialog serverConnectionDialog = ServerConnectionDialog.getDialog(WindowManager.getDefault().getMainWindow());

@@ -172,7 +172,31 @@ public class ValidationDialog extends DefaultDialog {
     }
     
     private JPanel createInternalPanel() {
+   
         JPanel internalPanel = new JPanel(new GridBagLayout());
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        JTabbedPane tabbedPane = new JTabbedPane(); 
+        tabbedPane.addTab("Validation Parameters", null, createPSMTabPanel(), null);
+        tabbedPane.addTab("Typical Protein Parameters", null, createTypicalProteinTabPanel(), null);
+        
+        
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0;
+        internalPanel.add(tabbedPane, c);
+
+        
+        return internalPanel;
+    }
+    
+    private JPanel createPSMTabPanel() {
+
+        JPanel psmTabPanel = new JPanel(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -182,16 +206,34 @@ public class ValidationDialog extends DefaultDialog {
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
-        internalPanel.add(createPSMPanel(), c);
+        psmTabPanel.add(createPSMPanel(), c);
 
         c.gridy++;
-        internalPanel.add(createProteinSetFilterPanel(), c);
+        psmTabPanel.add(createProteinSetFilterPanel(), c);
+
+        
+        return psmTabPanel;
+    }
+    
+    private JPanel createTypicalProteinTabPanel() {
+        
+        JPanel tabPanel = new JPanel(new GridBagLayout());
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0;
+        tabPanel.add(createTypicalProteinPanel(), c);
 
         c.gridy++;
-        internalPanel.add(createTypicalProteinPanel(), c);
+        c.weighty = 1.0;
+        tabPanel.add(Box.createVerticalGlue(), c);
         
-        
-        return internalPanel;
+        return tabPanel;
     }
 
     private JPanel createPSMPanel() {
@@ -469,7 +511,6 @@ public class ValidationDialog extends DefaultDialog {
 
         c.gridx = 0;
         c.gridy = 0;
-//        c.gridwidth = 2;
         m_typicalProteinMatchCheckBox = new JCheckBox("Using rules (in priority order):");
         m_typicalProteinMatchCheckBox.setHorizontalAlignment(SwingConstants.RIGHT);
         typicalProteinPanel.add(m_typicalProteinMatchCheckBox, c);
@@ -483,12 +524,15 @@ public class ValidationDialog extends DefaultDialog {
             }
         });
         
-        c.gridx=0;
+        c.gridx = 0;
         c.gridy++;
-        c.gridwidth = 2;
         m_changeTypicalPanel = new ChangeTypicalProteinPanel();
         typicalProteinPanel.add(m_changeTypicalPanel, c);
 
+        c.gridy++;
+        c.weighty = 1;
+        typicalProteinPanel.add(Box.createVerticalGlue(), c);
+        
         return typicalProteinPanel;
     }
     

@@ -20,11 +20,18 @@ import javax.swing.border.EmptyBorder;
  */
 public class WindowBoxFactory {
     
-    public static WindowBox getUserDefinedWindowBox(String name, AbstractDataBox databox, boolean isDecoy) {
+    public static WindowBox getUserDefinedWindowBox(String name, AbstractDataBox databox, boolean isDecoy, boolean isRSM) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = databox;
 
-        IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
+        IconManager.IconType iconType;
+        if (isRSM) {
+            iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
+        } else {
+            iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
+        }
+
+        
         WindowBox winBox = new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
 
         return winBox;
@@ -40,7 +47,7 @@ public class WindowBoxFactory {
     	// 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[5];
-        boxes[0] = new DataBoxRsetPeptide();
+        boxes[0] = new DataBoxRsetPSM();
         boxes[1] = new DataBoxRsetPeptideSpectrum();
         boxes[2] = new DataBoxRsetPeptideSpectrumError();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
@@ -103,7 +110,7 @@ public class WindowBoxFactory {
         // create boxes
     	// AW: All PSM of an Identification Summary or corresponding to a Peptide Instance
         AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataBoxRsmPeptide();
+        boxes[0] = new DataBoxRsmPSM();
 
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
         return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );

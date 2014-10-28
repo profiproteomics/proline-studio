@@ -3,6 +3,7 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -128,6 +129,8 @@ public class WindowSavedManager {
         m_windowSavedList = windowSavedList;
         m_newWindowAdded = true;
         writeSavedWindows();
+        
+        IdentificationTree.reinitMainPopup();
     }
     
     public static void addSavedWindow(String savedWindow) {
@@ -139,6 +142,8 @@ public class WindowSavedManager {
         m_windowSavedList.add(savedWindow);
         
         writeSavedWindows();
+        
+        IdentificationTree.reinitMainPopup();
     }
     
     public static void setNoWindowAdded() {

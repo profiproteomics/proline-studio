@@ -13,15 +13,15 @@ import fr.proline.studio.stats.ValuesForStatsAbstract;
  * Databox : All PSM of an Identification Summary or corresponding to a Peptide Instance
  * @author JM235353
  */
-public class DataBoxRsmPeptide extends AbstractDataBox {
+public class DataBoxRsmPSM extends AbstractDataBox {
 
     
     private ResultSummary m_rsm = null;
     
     private boolean m_finishedLoading = false;
     
-    public DataBoxRsmPeptide() {
-        super(DataboxType.DataBoxRsmPeptide);
+    public DataBoxRsmPSM() {
+        super(DataboxType.DataBoxRsmPSM);
 
         // Name of this databox
         m_name = "PSM";

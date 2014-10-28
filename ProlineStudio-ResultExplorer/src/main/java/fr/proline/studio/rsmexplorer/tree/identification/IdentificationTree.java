@@ -27,6 +27,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DatasetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.*;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -50,17 +51,17 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
     
     private boolean m_isMainTree;
 
-    private static HashMap<ProjectIdentificationData, IdentificationTree> treeMap = new HashMap<>();
+    private static HashMap<ProjectIdentificationData, IdentificationTree> m_treeMap = new HashMap<>();
     private static IdentificationTree m_currentTree = null;
     
     private boolean m_loadingDone = false;
     
     public static IdentificationTree getTree(ProjectIdentificationData projectData) {
         
-        IdentificationTree tree = treeMap.get(projectData);
+        IdentificationTree tree = m_treeMap.get(projectData);
         if (tree == null) {
             tree = new IdentificationTree(projectData);
-            treeMap.put(projectData, tree);
+            m_treeMap.put(projectData, tree);
         }
         
         m_currentTree = tree;
@@ -116,7 +117,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
     
     
     public static void clearAll() {
-        treeMap.clear();
+        m_treeMap.clear();
     }
     
     public void removeRootChildren() {
@@ -638,6 +639,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 ValidateAction validateAction = new ValidateAction();
                 m_mainActions.add(validateAction);
                 
+                //ValidateJMSAction validateJMSAction = new ValidateJMSAction();
+                //m_mainActions.add(validateJMSAction);
+                
                 ChangeTypicalProteinAction changeTypicalProteinAction = new ChangeTypicalProteinAction();
                 m_mainActions.add(changeTypicalProteinAction);
                 
@@ -708,6 +712,14 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         }
         
         popup.show( (JComponent)e.getSource(), e.getX(), e.getY() );
+    }
+    public static void reinitMainPopup() {
+        
+        Iterator<ProjectIdentificationData> it = m_treeMap.keySet().iterator();
+        while (it.hasNext()) {
+            IdentificationTree tree = m_treeMap.get(it.next());
+            tree.m_mainPopup = null;
+        }
     }
     private JPopupMenu m_mainPopup;
     private ArrayList<AbstractRSMAction> m_mainActions;

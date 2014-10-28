@@ -14,15 +14,15 @@ import fr.proline.studio.stats.ValuesForStatsAbstract;
  * Databox for all PSM of a ResultSet (Search Result)
  * @author JM235353
  */
-public class DataBoxRsetPeptide extends AbstractDataBox {
+public class DataBoxRsetPSM extends AbstractDataBox {
 
     
     private ResultSet m_rset = null;
     
     private boolean m_finishedLoading = false;
     
-    public DataBoxRsetPeptide() {
-        super(DataboxType.DataBoxRsetPeptide);
+    public DataBoxRsetPSM() {
+        super(DataboxType.DataBoxRsetPSM);
 
         // Name of this databox
         m_name = "PSM";

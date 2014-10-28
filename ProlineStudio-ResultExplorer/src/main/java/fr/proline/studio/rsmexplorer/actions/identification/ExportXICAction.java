@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class ExportXICAction extends AbstractRSMAction {
  
   public enum ExportType {
-        MASTER_QPEP_IONS("master_quant_peptide_ions", "Quant Peptides ions"),MASTER_QPEPS("master_quant_peptides", "Quant Peptides"), BASIC_MASTER_QPROT_SETS("basic_master_quant_protein_sets", "Quant Proteins Sets"), MASTER_QPROT_SETS("master_quant_protein_sets", "Quant Proteins Sets");
+        MASTER_QPEP_IONS("master_quant_peptide_ions", "Quant Peptides ions"),MASTER_QPEPS("master_quant_peptides", "Quant Peptides"), BASIC_MASTER_QPROT_SETS("basic_master_quant_protein_sets", "Quant Proteins Sets"), MASTER_QPROT_SETS("master_quant_protein_sets", "Quant Proteins Sets Profile");
         
         private String m_value;
         private String m_label;

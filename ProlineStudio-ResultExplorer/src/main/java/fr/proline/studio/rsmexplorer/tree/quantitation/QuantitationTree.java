@@ -1,21 +1,25 @@
 package fr.proline.studio.rsmexplorer.tree.quantitation;
 
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.rsmexplorer.actions.identification.RetrieveSCDataAction;
 import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportXICAction;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.actions.identification.*;
+//import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.tree.*;
-import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentificationNode;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.ExpandVetoException;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 /**
@@ -168,7 +172,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         } else {
             if (m_mainPopup == null) {
                 // create the actions
-                m_mainActions = new ArrayList<>(9);  // <--- get in sync
+                //m_mainActions = new ArrayList<>(10);  // <--- get in sync
+                m_mainActions = new ArrayList<>(8);  // <--- get in sync
 
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(propertiesAction);
@@ -177,6 +182,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                 RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
                 m_mainActions.add(retrieveSCDataAction);
+                
+                // should be uncomment as soon as the compute is ready
+ //               ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
+ //               m_mainActions.add(computeQuantProfileAction);
 
                 ExportXICAction exportXICActionIons = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPEP_IONS);
                 m_mainActions.add(exportXICActionIons);
@@ -186,6 +195,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                 ExportXICAction exportXICActionProtSet = new ExportXICAction(ExportXICAction.ExportType.BASIC_MASTER_QPROT_SETS);
                 m_mainActions.add(exportXICActionProtSet);
+                
+                // should be uncomment as soon as the export is ready
+ //               ExportXICAction exportXICActionProtSetProfile = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPROT_SETS);
+ //               m_mainActions.add(exportXICActionProtSetProfile);
 
                 m_mainActions.add(null);  // separator
 
@@ -481,5 +494,116 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify, false);
 
 
+    }
+    
+    // return the trash node
+    private DataSetNode getTrashNode() {
+        // search Project Node
+        QuantitationProjectNode projectNode = null;
+        TreeNode root = (TreeNode)m_model.getRoot();
+        if (root instanceof QuantitationProjectNode) {
+            projectNode = (QuantitationProjectNode) root;
+        }
+
+        if (projectNode == null) {
+            return null; // should not happen
+        }
+
+        // search trash (should be at the end)
+        DataSetNode trash = null;
+        int nbChildren = projectNode.getChildCount();
+        for (int i = nbChildren - 1; i >= 0; i--) {
+            AbstractNode childNode = (AbstractNode) projectNode.getChildAt(i);
+            if (childNode instanceof DataSetNode) {
+                DataSetNode datasetNode = (DataSetNode) childNode;
+                if (datasetNode.isTrash()) {
+                    trash = datasetNode;
+                    break;
+                }
+            }
+        }
+        if (trash == null) {
+            return null; // should not happen
+        }
+        return trash ;
+    }
+
+    // load the trash node: called while loading project to display correctly the number of childs
+    public void loadTrash() {
+        DataSetNode trashNode = getTrashNode() ;
+        if (trashNode != null) {
+            // Callback used only for the synchronization with the AccessDatabaseThread
+             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return false;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                
+                }
+            };
+            QuantitationTree.getCurrentTree().loadInBackground(trashNode, callback);
+        }
+    }
+    
+    
+    /**
+     * Load a node if needed. The node will not be expanded, but the data will be used
+     * @param nodeToLoad 
+     */
+    public void loadInBackground(final AbstractNode nodeToLoad, final AbstractDatabaseCallback parentCallback ) {
+
+        // check if the loading is necessary :
+        // it is necessary only if we have an hour glass child
+        // which correspond to data not already loaded
+        if (nodeToLoad.getChildCount() == 0) {
+            parentCallback.run(true, 0, null, true);
+            return;
+        }
+        AbstractNode childNode = (AbstractNode) nodeToLoad.getChildAt(0);
+        if (childNode.getType() != AbstractNode.NodeTypes.HOUR_GLASS) {
+            parentCallback.run(true, 0, null, true);
+            return;
+        }
+
+        // register hour glass which is expanded
+        loadingMap.put(nodeToLoad.getData(), nodeToLoad);
+
+        final ArrayList<AbstractData> childrenList = new ArrayList<>();
+        final AbstractData parentData = nodeToLoad.getData();
+
+
+        // Callback used only for the synchronization with the AccessDatabaseThread
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return false;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        
+                        dataLoaded(parentData, childrenList);
+                        
+                        // use of childrenList / parentData
+                       parentCallback.run(true, 0, null, true);
+                    }
+                });
+
+            }
+        };
+
+        
+
+        parentData.load(callback, childrenList, false);
     }
 }

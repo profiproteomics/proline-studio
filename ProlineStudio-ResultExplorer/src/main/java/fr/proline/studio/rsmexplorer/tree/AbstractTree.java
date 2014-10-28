@@ -6,6 +6,7 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask.Priority;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.*;
@@ -55,7 +56,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     }
     
     
-    protected void startLoading(final AbstractNode nodeToLoad, boolean identificationDataset) {
+    protected void startLoading(final AbstractNode nodeToLoad, final boolean identificationDataset) {
 
         
         
@@ -108,6 +109,12 @@ public abstract class AbstractTree extends JTree implements MouseListener {
                             // A selection has been postponed, we do it now
                             setSelection(selectionFromrsmArray);
                             selectionFromrsmArray = null;
+                        }
+                        
+                        if (identificationDataset) {
+                            IdentificationTree.getCurrentTree().loadTrash() ;
+                        }else {
+                            QuantitationTree.getCurrentTree().loadTrash() ;
                         }
                     }
                 });

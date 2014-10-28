@@ -824,7 +824,54 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
     
 
 
-    
+    private DataSetNode getTrashNode() {
+        // search Project Node
+        IdProjectIdentificationNode projectNode = null;
+        TreeNode root = (TreeNode)m_model.getRoot();
+        if (root instanceof IdProjectIdentificationNode) {
+            projectNode = (IdProjectIdentificationNode) root;
+        }
 
-    
+        if (projectNode == null) {
+            return null; // should not happen
+        }
+
+        // search trash (should be at the end)
+        DataSetNode trash = null;
+        int nbChildren = projectNode.getChildCount();
+        for (int i = nbChildren - 1; i >= 0; i--) {
+            AbstractNode childNode = (AbstractNode) projectNode.getChildAt(i);
+            if (childNode instanceof DataSetNode) {
+                DataSetNode datasetNode = (DataSetNode) childNode;
+                if (datasetNode.isTrash()) {
+                    trash = datasetNode;
+                    break;
+                }
+            }
+        }
+        if (trash == null) {
+            return null; // should not happen
+        }
+        return trash ;
+    }
+
+    public void loadTrash() {
+        DataSetNode trashNode = getTrashNode() ;
+        if (trashNode != null) {
+            // Callback used only for the synchronization with the AccessDatabaseThread
+             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return false;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                
+                }
+            };
+            IdentificationTree.getCurrentTree().loadInBackground(trashNode, callback);
+        }
+    }
 }

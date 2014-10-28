@@ -52,13 +52,13 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     public enum DataboxType {
         DataBoxRsetAll(0),
         DataBoxRsetAllProteinMatch(1),
-        DataBoxRsetPeptide(2),
+        DataBoxRsetPSM(2),
         DataBoxRsetPeptideFragmentation(3),
         DataBoxRsetPeptideSpectrum(4),
         DataBoxRsetPeptideSpectrumError(5),
         DataBoxRsetProteinsForPeptideMatch(6),
         DataBoxRsmAllProteinSet(7),
-        DataBoxRsmPeptide(8),
+        DataBoxRsmPSM(8),
         DataBoxRsmPeptideInstances(9),
         DataBoxRsmPeptidesOfProtein(10),
         DataBoxRsmProteinAndPeptideSequence(11),
@@ -68,7 +68,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         DataBoxStatisticsFrequencyResponse(15),
         DataBoxTaskDescription(16),
         DataBoxTaskList(17),
-        DataboxRsetPeptidesOfProtein(18);
+        DataboxRsetPeptidesOfProtein(18),
+        DataboxRsmPSMOfProteinSet(19);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -87,8 +88,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
                     return new DataBoxRsetAll();
                 case DataBoxRsetAllProteinMatch:
                     return new DataBoxRsetAllProteinMatch();
-                case DataBoxRsetPeptide:
-                    return new DataBoxRsetPeptide();
+                case DataBoxRsetPSM:
+                    return new DataBoxRsetPSM();
                 case DataBoxRsetPeptideFragmentation:
                     return new DataBoxRsetPeptideFragmentation();
                 case DataBoxRsetPeptideSpectrum:
@@ -99,8 +100,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
                     return new DataBoxRsetProteinsForPeptideMatch();
                 case DataBoxRsmAllProteinSet:
                     return new DataBoxRsmAllProteinSet();
-                case DataBoxRsmPeptide:
-                    return new DataBoxRsmPeptide();
+                case DataBoxRsmPSM:
+                    return new DataBoxRsmPSM();
                 case DataBoxRsmPeptideInstances:
                     return new DataBoxRsmPeptideInstances();
                 case DataBoxRsmPeptidesOfProtein:
@@ -121,6 +122,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
                     return new DataBoxTaskList();
                 case DataboxRsetPeptidesOfProtein:
                     return new DataboxRsetPeptidesOfProtein();
+                case DataboxRsmPSMOfProteinSet:
+                    return new DataboxRsmPSMOfProteinSet();
             }
             return null; // should not happen
         }

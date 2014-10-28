@@ -60,7 +60,7 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
             try {
                 AbstractDataBox databox = (AbstractDataBox) genericDatabox.getClass().newInstance();
 
-                final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataSet.getName()+" "+dialog.getWndTitle(), databox, false);
+                final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataSet.getName()+" "+dialog.getWndTitle(), databox, false, m_forRsm);
 
                 if (m_forRsm) {
                     

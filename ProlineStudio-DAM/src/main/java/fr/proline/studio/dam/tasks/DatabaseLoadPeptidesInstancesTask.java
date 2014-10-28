@@ -28,7 +28,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
 
     private int m_action;
     
-    private final static int LOAD_PEPTIDE_INSTANCE_FOR_PEPTIDE_MATCH   = 0;
+    private final static int LOAD_PEPTIDE_INSTANCE_FOR_PROTEIN_MATCH   = 0;
     private final static int LOAD_PEPTIDE_INSTANCES_FOR_RSM   = 1;
     
     private long m_projectId = -1;
@@ -44,7 +44,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         m_proteinMatch = proteinMatch;
         m_proteinMatchArray = null;
         m_rsmList = rsmList;
-        m_action = LOAD_PEPTIDE_INSTANCE_FOR_PEPTIDE_MATCH;
+        m_action = LOAD_PEPTIDE_INSTANCE_FOR_PROTEIN_MATCH;
         
     }
     
@@ -54,7 +54,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
         m_proteinMatch = null;
         m_proteinMatchArray = proteinMatchArray;
         m_rsmList = rsmList;
-        m_action = LOAD_PEPTIDE_INSTANCE_FOR_PEPTIDE_MATCH;
+        m_action = LOAD_PEPTIDE_INSTANCE_FOR_PROTEIN_MATCH;
     }
 
     public DatabaseLoadPeptidesInstancesTask(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm) {
@@ -69,7 +69,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     @Override
     public boolean needToFetch() {
         switch(m_action) {
-            case LOAD_PEPTIDE_INSTANCE_FOR_PEPTIDE_MATCH: {
+            case LOAD_PEPTIDE_INSTANCE_FOR_PROTEIN_MATCH: {
                 int size = m_rsmList.size();
                 for (int i = 0; i < size; i++) {
                     ResultSummary rsm = m_rsmList.get(i);
@@ -105,7 +105,7 @@ public class DatabaseLoadPeptidesInstancesTask extends AbstractDatabaseTask {
     @Override
     public boolean fetchData() {
         switch (m_action) {
-            case LOAD_PEPTIDE_INSTANCE_FOR_PEPTIDE_MATCH: {
+            case LOAD_PEPTIDE_INSTANCE_FOR_PROTEIN_MATCH: {
                 return fetchDataForPeptideMatch();
             }
             case LOAD_PEPTIDE_INSTANCES_FOR_RSM: {

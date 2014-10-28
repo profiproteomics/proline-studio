@@ -12,15 +12,15 @@ public class DataboxManager {
     private static DataboxManager m_databoxManager = null;
     
     
-    private AbstractDataBox[] m_dataBoxStartingArray = { new DataBoxRsetAll(), new DataBoxRsetPeptide(), new DataBoxRsetAllProteinMatch(),
-                                                 new DataBoxRsmPeptide(), new DataBoxRsmPeptideInstances(),
+    private final AbstractDataBox[] m_dataBoxStartingArray = { new DataBoxRsetAll(), new DataBoxRsetPSM(), new DataBoxRsetAllProteinMatch(),
+                                                 new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(),
                                                  new DataBoxRsmAllProteinSet() };
     
-    private AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(),
+    private final AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(),
                                                  new DataBoxRsetProteinsForPeptideMatch(),
                                                  new DataboxRsetPeptidesOfProtein(),
                                                  new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(),
-                                                 new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet(), new DataBoxTaskDescription(), new DataBoxStatisticsFrequencyResponse(), new DataBoxRsetPeptideFragmentation(), new DataBoxRsetPeptideSpectrumError() };
+                                                 new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet(), new DataBoxTaskDescription(), new DataBoxStatisticsFrequencyResponse(), new DataBoxRsetPeptideFragmentation(), new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet() };
     
     private DataboxManager() {
     }

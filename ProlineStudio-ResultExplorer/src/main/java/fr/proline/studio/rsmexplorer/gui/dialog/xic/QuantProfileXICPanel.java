@@ -71,7 +71,7 @@ public class QuantProfileXICPanel extends JPanel {
         BooleanParameter applyNormalizationParameter = new BooleanParameter("applyNormalization", "Apply Normalization", m_applyNormalizationChB, true);
         m_parameterList.add(applyNormalizationParameter);
         
-        m_applyMissValInferenceChB = new JCheckBox("Apply Miss Val Inference");
+        m_applyMissValInferenceChB = new JCheckBox("Apply Missing Value Inference");
         BooleanParameter applyMissValInferenceParameter = new BooleanParameter("applyMissValInference", "Apply Miss Val Inference", m_applyMissValInferenceChB, true);
         m_parameterList.add(applyMissValInferenceParameter);
         
@@ -79,11 +79,11 @@ public class QuantProfileXICPanel extends JPanel {
         BooleanParameter applyVarianceCorrectionParameter = new BooleanParameter("applyVarianceCorrection", "Apply Variance Correction", m_applyVarianceCorrectionChB, true);
         m_parameterList.add(applyVarianceCorrectionParameter);
         
-        m_applyTTestChB = new JCheckBox("Apply T Test");
+        m_applyTTestChB = new JCheckBox("Apply T-Test");
         BooleanParameter applyTTestParameter = new BooleanParameter("applyTTest", "Apply TTest", m_applyTTestChB, true);
         m_parameterList.add(applyTTestParameter);
         
-        m_applyZTestChB = new JCheckBox("Apply Z Test");
+        m_applyZTestChB = new JCheckBox("Apply Z-Test");
         BooleanParameter applyZTestParameter = new BooleanParameter("applyZTest", "Apply ZTest", m_applyZTestChB, true);
         m_parameterList.add(applyZTestParameter);
         
@@ -98,20 +98,52 @@ public class QuantProfileXICPanel extends JPanel {
     
     private void initPanel() {
         this.setLayout(new GridBagLayout());
-        this.setBorder(BorderFactory.createTitledBorder("<html> <b> Parameters </b></html>"));
+        this.setBorder(BorderFactory.createTitledBorder("<html> <b> Configuration </b></html>"));
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(5, 5, 5, 5);
 
+        // useOnlySpecificPeptides
+        c.gridx = 0;
+        c.gridy=0;
+        c.weightx = 1;
+        c.gridwidth = 2;
+        this.add(m_useOnlySpecificPeptidesChB, c);
+        
+        // discardMissedCleavedPeptides
+        c.gridy++;
+        c.gridx = 0;
+        c.weightx = 1;
+        c.gridwidth = 2;
+        this.add(m_discardMissedCleavedPeptidesChB, c);
+        
+        // discardOxidizedPeptides
+        //c.gridy++;
+        //c.gridx = 0;
+        c.gridx++;
+        c.weightx = 1;
+        c.gridwidth = 2;
+        this.add(m_discardOxidizedPeptidesChB, c);
+        
+        // applyNormalization
+        c.gridx = 0;
+        c.gridy++;
+        c.weightx = 1;
+        c.gridwidth = 2;
+        this.add(m_applyNormalizationChB, c);
+        
+        
         // peptideStatTestsAlpha
         c.gridx = 0;
-        c.gridy = 0;
+        c.gridy++;
         c.weightx = 0;
+        c.gridwidth = 1;
         this.add(new JLabel("Peptide Stat Tests Alpha:"), c);
         
         c.gridx++;  
         c.weightx = 1;
+        c.gridwidth = 1;
         this.add(m_peptideStatTestsAlpha, c);
         
         
@@ -125,28 +157,10 @@ public class QuantProfileXICPanel extends JPanel {
         c.weightx = 1;
         this.add(m_proteinStatTestsAlpha, c);
         
-        
-        // discardMissedCleavedPeptides
-        c.gridy++;
-        c.gridx = 0;
-        c.weightx = 1;
-        this.add(m_discardMissedCleavedPeptidesChB, c);
-        
-        // discardOxidizedPeptides
-        //c.gridy++;
-        //c.gridx = 0;
-        c.gridx++;
-        this.add(m_discardOxidizedPeptidesChB, c);
-        
-        // applyNormalization
-        c.gridwidth = 2;
-        c.gridy++;
-        c.gridx = 0;
-        this.add(m_applyNormalizationChB, c);
-        
         // applyMissValInference
         c.gridy++;
         c.gridx = 0;
+        c.gridwidth = 2;
         this.add(m_applyMissValInferenceChB, c);
         
         // applyVarianceCorrection
@@ -172,10 +186,7 @@ public class QuantProfileXICPanel extends JPanel {
         c.gridx = 0;
         this.add(m_applyProfileClusteringChB, c);
         
-        // useOnlySpecificPeptides
-        c.gridy++;
-        c.gridx = 0;
-        this.add(m_useOnlySpecificPeptidesChB, c);
+        
     }
     
     public ParameterList getParameterList() {

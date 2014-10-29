@@ -30,7 +30,7 @@ public class QuantProfileXICDialog extends DefaultDialog {
     private QuantProfileXICDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-        setTitle("XIC Compute Profile Quantitation");
+        setTitle("XIC Compute Quantitative Profiles");
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic");
 

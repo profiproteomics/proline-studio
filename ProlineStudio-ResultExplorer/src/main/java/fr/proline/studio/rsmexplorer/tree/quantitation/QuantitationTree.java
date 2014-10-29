@@ -11,7 +11,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.actions.identification.*;
-//import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
+import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.tree.*;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -172,9 +172,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         } else {
             if (m_mainPopup == null) {
                 // create the actions
-                //m_mainActions = new ArrayList<>(10);  // <--- get in sync
-                m_mainActions = new ArrayList<>(8);  // <--- get in sync
-
+                m_mainActions = new ArrayList<>(11);  // <--- get in sync
+                
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(propertiesAction);
 
@@ -183,9 +182,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
                 m_mainActions.add(retrieveSCDataAction);
                 
-                // should be uncomment as soon as the compute is ready
- //               ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
- //               m_mainActions.add(computeQuantProfileAction);
+                ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
+                m_mainActions.add(computeQuantProfileAction);
+                
+                m_mainActions.add(null);  // separator
 
                 ExportXICAction exportXICActionIons = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPEP_IONS);
                 m_mainActions.add(exportXICActionIons);
@@ -196,9 +196,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 ExportXICAction exportXICActionProtSet = new ExportXICAction(ExportXICAction.ExportType.BASIC_MASTER_QPROT_SETS);
                 m_mainActions.add(exportXICActionProtSet);
                 
-                // should be uncomment as soon as the export is ready
- //               ExportXICAction exportXICActionProtSetProfile = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPROT_SETS);
- //               m_mainActions.add(exportXICActionProtSetProfile);
+                ExportXICAction exportXICActionProtSetProfile = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPROT_SETS);
+                m_mainActions.add(exportXICActionProtSetProfile);
 
                 m_mainActions.add(null);  // separator
 

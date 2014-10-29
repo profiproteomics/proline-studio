@@ -10,6 +10,7 @@ import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.DownloadFileTask;
 import fr.proline.studio.dpm.task.ExportXICTask;
 import fr.proline.studio.export.ExportDialog;
+import fr.proline.studio.export.ExporterFactory;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -63,7 +64,7 @@ public class ExportXICAction extends AbstractRSMAction {
         final DataSetNode xicDatasetNode = (DataSetNode) selectedNodes[0];
         
 
-        final ExportDialog dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(),false);
+        final ExportDialog dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(),false, ExporterFactory.EXPORT_XLS);
         
         DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
 

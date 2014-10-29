@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -103,6 +102,16 @@ public class ExportDialog extends DefaultDialog  {
 
         return m_singletonServerDialog;
     }
+    
+    public static ExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption, int exportType) {
+        if (m_singletonServerDialog == null) {
+            m_singletonServerDialog = new ExportDialog(parent, exportType, showExportAllPSMsOption);
+        } else if(!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)){
+            m_singletonServerDialog = new ExportDialog(parent, exportType, showExportAllPSMsOption);
+        }
+
+        return m_singletonServerDialog;
+    }
 
     public void setTask(DefaultDialog.ProgressTask task) {
         m_task = task;
@@ -134,7 +143,7 @@ public class ExportDialog extends DefaultDialog  {
         
         String defaultExportPath;
         Preferences preferences = NbPreferences.root();
-        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER)) {
+        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) || (m_exportType == ExporterFactory.EXPORT_XLS)) {
            defaultExportPath = preferences.get("DefaultExcelExportPath", "");
         } else { // IMAGE
            defaultExportPath = preferences.get("DefaultImageExportPath", "");
@@ -220,7 +229,7 @@ public class ExportDialog extends DefaultDialog  {
         c.gridwidth = 1;
         exportPanel.add(addFileButton, c);
 
-        if(m_exportType == ExporterFactory.EXPORT_FROM_SERVER && m_showExportAllPSMsChB){
+        if((m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XLS) && m_showExportAllPSMsChB  ){
             //Allow specific parameter in this case
             c.gridy++;
             c.gridx = 0;
@@ -302,7 +311,7 @@ public class ExportDialog extends DefaultDialog  {
 
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
-        } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) {
+        } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XLS) {
 
             startTask(m_singletonServerDialog.m_task);
             

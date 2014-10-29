@@ -51,7 +51,7 @@ public class ExportXICAction extends AbstractRSMAction {
     private ExportType m_exportType = null;
     
     public ExportXICAction(ExportType type) {
-        super(NbBundle.getMessage(ExportXICAction.class, "CTL_PrefixExportXICAction")+type.getAsLabel(), AbstractTree.TreeType.TREE_QUANTITATION);
+        super(NbBundle.getMessage(ExportXICAction.class, "CTL_PrefixExportXICAction")+type.getAsLabel()+"...", AbstractTree.TreeType.TREE_QUANTITATION);
         m_exportType = type; 
     }
     

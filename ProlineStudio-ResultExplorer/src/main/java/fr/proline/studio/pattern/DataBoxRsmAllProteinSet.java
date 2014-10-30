@@ -1,7 +1,6 @@
 package fr.proline.studio.pattern;
 
 
-import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -9,7 +8,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
-import java.util.Arrays;
 
 /**
  * Databox for the list of Protein Sets of a Rsm

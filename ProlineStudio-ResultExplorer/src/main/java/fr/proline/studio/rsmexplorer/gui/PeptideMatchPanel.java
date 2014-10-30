@@ -51,6 +51,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
     private boolean m_forRSM;
     private boolean m_startingPanel;
+    private boolean m_proteinMatchUnknown;
     
     private PeptideMatchTable m_peptideMatchTable;
     private JScrollPane m_scrollPane;
@@ -66,9 +67,10 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     private ExportButton m_exportButton;
     private JButton m_histogramButton;
 
-    public PeptideMatchPanel(boolean forRSM, boolean startingPanel) {
+    public PeptideMatchPanel(boolean forRSM, boolean startingPanel, boolean proteinMatchUnknown) {
         m_forRSM = forRSM;
         m_startingPanel = startingPanel;
+        m_proteinMatchUnknown = proteinMatchUnknown;
         initComponents();
 
     }
@@ -384,7 +386,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         // create objects
         m_scrollPane = new JScrollPane();
         m_peptideMatchTable = new PeptideMatchTable();
-        PeptideMatchTableModel peptideMatchTableModel = new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !m_startingPanel);
+        PeptideMatchTableModel peptideMatchTableModel = new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !(m_startingPanel || m_proteinMatchUnknown));
         m_peptideMatchTable.setModel(peptideMatchTableModel);
         m_peptideMatchTable.displayColumnAsPercentage(peptideMatchTableModel.convertColToColUsed(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE));
 

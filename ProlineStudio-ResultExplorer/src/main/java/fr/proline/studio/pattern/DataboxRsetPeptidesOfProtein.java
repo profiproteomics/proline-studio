@@ -44,7 +44,7 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        PeptideMatchPanel p = new PeptideMatchPanel(false, false);
+        PeptideMatchPanel p = new PeptideMatchPanel(false, false, false);
         p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;

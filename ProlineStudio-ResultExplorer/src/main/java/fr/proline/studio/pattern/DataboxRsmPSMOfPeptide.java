@@ -1,8 +1,8 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -10,25 +10,24 @@ import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
 import fr.proline.studio.stats.ValuesForStatsAbstract;
 
 /**
- * Load the PSM of a Protein Set
+ * Load the PSM of a Peptide
  * @author JM235353
  */
-public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
+public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
 
     private boolean m_finishedLoading = false;
     
-    public DataboxRsmPSMOfProteinSet() {
-        super(DataboxType.DataboxRsmPSMOfProteinSet);
+    public DataboxRsmPSMOfPeptide() {
+        super(DataboxType.DataboxRsmPSMOfPeptide);
 
         // Name of this databox
         m_name = "PSM";
-        m_description = "All PSM of a Protein Set";
+        m_description = "All PSM of a Peptide";
         
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(ResultSummary.class, false);
-        inParameter.addParameter(DProteinSet.class, false);
+        inParameter.addParameter(PeptideInstance.class, false);  //JPM.TODO ????
         registerInParameter(inParameter);
         
         // Register possible out parameters
@@ -43,7 +42,7 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        PeptideMatchPanel p = new PeptideMatchPanel(true, false, false);
+        PeptideMatchPanel p = new PeptideMatchPanel(true, false, true);
         p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
@@ -51,9 +50,8 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
     
     @Override
     public void dataChanged() {
-        
-        ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
-        final DProteinSet proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+
+        final PeptideInstance peptideInstance = (PeptideInstance) m_previousDataBox.getData(false, PeptideInstance.class);
 
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -68,9 +66,9 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
                 
                if (subTask == null) {
 
-                    DPeptideMatch[] peptideMatchArray = proteinSet.getTypicalProteinMatch().getPeptideMatches();
+                    DPeptideMatch[] peptideMatchArray = peptideInstance.getTransientData().getPeptideMatches();
                     
-                    long[] peptideMatchIdArray = proteinSet.getTypicalProteinMatch().getPeptideMatchesId();
+                    long[] peptideMatchIdArray = peptideInstance.getTransientData().getPeptideMatchesId();
                     ((PeptideMatchPanel)m_panel).setData(taskId, peptideMatchArray, peptideMatchIdArray, finished);
                } else {
                     ((PeptideMatchPanel)m_panel).dataUpdated(subTask, finished);
@@ -86,7 +84,7 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
         
 
         // ask asynchronous loading of data
-        registerTask(new DatabaseLoadPeptideMatchTask(callback, getProjectId(), _rsm, proteinSet));
+        registerTask(new DatabaseLoadPeptideMatchTask(callback, getProjectId(), peptideInstance));
 
        
         

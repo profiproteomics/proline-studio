@@ -288,7 +288,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
                     continue;
                 }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
                 m_filteredIds.add(Integer.valueOf(i));
             }

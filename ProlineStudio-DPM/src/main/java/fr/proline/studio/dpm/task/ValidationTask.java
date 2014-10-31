@@ -47,7 +47,7 @@ public class ValidationTask extends AbstractServiceTask {
     public static String SPECIFIC_PEP_FILTER_NAME = "Specific Peptides";               
     
     public ValidationTask(AbstractServiceCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, String scoringType) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Validation of Search Result "+dataset.getName(), true, TASK_LIST_INFO));
+        super(callback, false /*asynchronous*/, new TaskInfo("Validation of Search Result "+dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
         m_description = description;
         m_argumentsMap = argumentsMap;

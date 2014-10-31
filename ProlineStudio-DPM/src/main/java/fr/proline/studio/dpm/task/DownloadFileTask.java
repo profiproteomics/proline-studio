@@ -21,7 +21,7 @@ public class DownloadFileTask extends AbstractServiceTask {
     private String m_serverFilePath;
     
     public DownloadFileTask(AbstractServiceCallback callback, String userFilePath, String serverFilePath) {
-        super(callback, false /** asynchronous */, new TaskInfo("Download File " + userFilePath, true, TASK_LIST_INFO));
+        super(callback, false /** asynchronous */, new TaskInfo("Download File " + userFilePath, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_userFilePath = userFilePath;
         m_serverFilePath = serverFilePath;
     }

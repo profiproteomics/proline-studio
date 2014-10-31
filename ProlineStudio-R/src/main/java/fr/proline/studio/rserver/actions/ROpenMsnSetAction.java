@@ -97,7 +97,7 @@ public class ROpenMsnSetAction extends AbstractRAction {
         private MsnSetData m_msnSetData;
 
         public OpenMsnSetTask(AbstractServiceCallback callback, String filePath, MsnSetData msnSetData) {
-            super(callback, true /** synchronous */, new TaskInfo("Open MsnSet " + filePath, false, TASK_LIST_INFO));
+            super(callback, true /** synchronous */, new TaskInfo("Open MsnSet " + filePath, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
 
             m_filePath = filePath;
             m_msnSetData = msnSetData;

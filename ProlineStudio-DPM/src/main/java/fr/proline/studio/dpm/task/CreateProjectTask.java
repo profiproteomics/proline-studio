@@ -31,7 +31,7 @@ public class CreateProjectTask extends AbstractServiceTask {
     private ProjectQuantitationData m_projectQuantificationData;
     
     public CreateProjectTask(AbstractServiceCallback callback, String name, String description, long ownerId, ProjectIdentificationData projectIdentificationData, ProjectQuantitationData projectQuantificationData) {
-        super(callback, true /*synchronous*/, new TaskInfo("Add Project named "+name, true, TASK_LIST_INFO));
+        super(callback, true /*synchronous*/, new TaskInfo("Add Project named "+name, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         
         m_name = name;
         m_description = description;

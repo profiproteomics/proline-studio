@@ -47,7 +47,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
      * @return 
      */
     public void initLoadRunIdForRsm(long projectId, Long rsmId, ArrayList<Long> runIds){
-        setTaskInfo(new TaskInfo(" Load RunId for Identification Summary with id "+rsmId,false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo(" Load RunId for Identification Summary with id "+rsmId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
         m_rsmId = rsmId;
         m_runIds = runIds;
@@ -60,19 +60,18 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
      * @return
      */
     public void initSearchRawFile(String searchString, ArrayList<RawFile> rawfileFounds) {
-        setTaskInfo(new TaskInfo(" Search Raw File " + searchString, false, TASK_LIST_INFO, true /* hide this task to user */));
+        setTaskInfo(new TaskInfo(" Search Raw File " + searchString, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW, true /* hide this task to user */));
         m_searchString = searchString;
         m_rawfileFounds = rawfileFounds;
         m_action = SEARCH_RAWFILE;
     }
     
-        /**
+    /**
      * Load PeakList Path for Rset
      *
-     * @return
      */
     public void initLoadPeakListPathForRset(long projectId, Long rsetId, String[] resultPath) {
-        setTaskInfo(new TaskInfo(" Load PeakList Path for Search Result with id " + rsetId, false, TASK_LIST_INFO, true /* hide this task to user */));
+        setTaskInfo(new TaskInfo(" Load PeakList Path for Search Result with id " + rsetId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW, true /* hide this task to user */));
         m_projectId = projectId;
         m_rsetId = rsetId;
         m_resultPath = resultPath;
@@ -85,7 +84,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
      * @return
      */
     public void initRegisterIdentificationDatasetRun(long datasetId, RawFile rawfile, Run run) {
-        setTaskInfo(new TaskInfo(" Register Run for Dataset with id "+datasetId, false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo(" Register Run for Dataset with id "+datasetId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_datasetId = datasetId;
         m_rawfile = rawfile;
         m_run = run;

@@ -23,7 +23,7 @@ public class ExportRSMTask extends AbstractServiceTask {
     private boolean m_exportAllPSMs;
     
     public ExportRSMTask(AbstractServiceCallback callback, DDataset dataset, boolean exportAllPSMs, String[] filePathInfo) {
-        super(callback, false /** asynchronous */, new TaskInfo("Export Identification Summary " + dataset.getName(), true, TASK_LIST_INFO));
+        super(callback, false /** asynchronous */, new TaskInfo("Export Identification Summary " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
         m_exportAllPSMs =  exportAllPSMs;
         m_filePathResult = filePathInfo;

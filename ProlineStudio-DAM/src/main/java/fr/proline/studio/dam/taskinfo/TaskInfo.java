@@ -6,6 +6,10 @@ package fr.proline.studio.dam.taskinfo;
  */
 public class TaskInfo implements Comparable<TaskInfo> {
     
+    public final static int INFO_IMPORTANCE_HIGH = 0;
+    public final static int INFO_IMPORTANCE_MEDIUM = 1;
+    public final static int INFO_IMPORTANCE_LOW = 2;
+    
     public final static int STATE_WAITING = 0;
     public final static int STATE_RUNNING = 1;
     public final static int STATE_FINISHED = 2;
@@ -13,6 +17,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
 
     private String m_taskDescription = null;
     private String m_idList = null;
+    private int m_infoImportance;
     private String m_requestContent = null;
     private String m_requestURL = null;
     private boolean m_hidden = false;
@@ -38,14 +43,17 @@ public class TaskInfo implements Comparable<TaskInfo> {
     
     private static int INC_ID = 0;
     
-    public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList) {
-        this(taskDescription, askBeforeExitingApp, idList, false);
+    public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList, int infoImportance) {
+        this(taskDescription, askBeforeExitingApp, idList, infoImportance,  false);
     }
     
-    public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList, boolean hidden) {
-              m_taskDescription = taskDescription;
+    public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList, int infoImportance, boolean hidden) {
+        
+        m_taskDescription = taskDescription;
         m_askBeforeExitingApp = askBeforeExitingApp;
         m_idList = idList;
+        m_infoImportance = infoImportance;
+        m_hidden = hidden;
        
         m_state = STATE_WAITING;
         
@@ -54,7 +62,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
         m_success = true;
         m_taskError = null;
         
-        m_hidden = hidden;
+       
         
         m_askTimestamp = System.currentTimeMillis();  
     }
@@ -255,6 +263,8 @@ public class TaskInfo implements Comparable<TaskInfo> {
         to.m_taskDescription = from.m_taskDescription;
         to.m_askBeforeExitingApp = from.m_askBeforeExitingApp;
         to.m_idList = from.m_idList;
+        to.m_infoImportance = from.m_infoImportance;
+        to.m_hidden = from.m_hidden;
         to.m_state = from.m_state;
         to.m_id = from.m_id;
         to.m_success = from.m_success;
@@ -266,7 +276,6 @@ public class TaskInfo implements Comparable<TaskInfo> {
         to.m_percentage = from.m_percentage;
         to.m_requestContent = from.m_requestContent;
         to.m_requestURL = from.m_requestURL;      
-        to.m_hidden = from.m_hidden;
     }
     
     @Override

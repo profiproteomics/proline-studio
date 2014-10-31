@@ -167,7 +167,7 @@ public class RServerConnectionDialog extends ConnectionDialog {
         public RServerConnectionTask(AbstractServiceCallback callback, String serverURL, int port, String user, String password) {
             super(callback, true /*
                      * synchronous
-                     */, new TaskInfo("Connection to R-Server " + serverURL + ":" + port, false, TASK_LIST_INFO));
+                     */, new TaskInfo("Connection to R-Server " + serverURL + ":" + port, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
 
             m_serverURL = serverURL;
             m_port = port;

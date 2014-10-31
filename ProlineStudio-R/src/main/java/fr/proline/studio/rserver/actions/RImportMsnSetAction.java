@@ -100,7 +100,7 @@ public class RImportMsnSetAction extends AbstractRAction {
         private MsnSetData m_msnSetData;
 
         public ImportMsnSetTask(AbstractServiceCallback callback, String designFilePath, String dataFilePath, MsnSetData msnSetData) {
-            super(callback, true /** synchronous */, new TaskInfo("Import MsnSet " + designFilePath, false, TASK_LIST_INFO));
+            super(callback, true /** synchronous */, new TaskInfo("Import MsnSet " + designFilePath, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
 
             m_designFilePath = designFilePath;
             m_dataFilePath = dataFilePath;

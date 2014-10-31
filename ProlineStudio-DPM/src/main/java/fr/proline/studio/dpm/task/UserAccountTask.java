@@ -25,7 +25,7 @@ public class UserAccountTask extends AbstractServiceTask {
     
     
     public UserAccountTask(AbstractServiceCallback callback, String serverURL, String userName, String password, String[] databasePassword) {
-        super(callback, true /** synchronous */, new TaskInfo("Check User " + userName, false, TASK_LIST_INFO));
+        super(callback, true /** synchronous */, new TaskInfo("Check User " + userName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
 
         m_userName = userName;
         m_password = password;

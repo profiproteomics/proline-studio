@@ -27,21 +27,21 @@ public class DatabaseBioSequenceTask extends AbstractDatabaseTask {
     }
     
     public void initLoadBioSequences(List<DProteinMatch> proteinMatchList) {
-        setTaskInfo(new TaskInfo("Load Biosequence for " + proteinMatchList.get(0).getAccession() + "...", false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Biosequence for " + proteinMatchList.get(0).getAccession() + "...", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_proteinMatchList = proteinMatchList;
         m_rsmId = null;
         setPriority(Priority.NORMAL_1);
     }
     
     public void initLoadBioSequences(List<DProteinMatch> proteinMatchList, Long rsmId) {
-        setTaskInfo(new TaskInfo("Load Biosequence for " + proteinMatchList.get(0).getAccession() + "...", false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Biosequence for " + proteinMatchList.get(0).getAccession() + "...", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_proteinMatchList = proteinMatchList;
         m_rsmId = rsmId;
         setPriority(Priority.NORMAL_1);
     }
     
     public void initLoadBioSequences(DProteinMatch proteintMatch) {
-        setTaskInfo(new TaskInfo("Load Biosequence for " + proteintMatch.getAccession() + "...", false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Biosequence for " + proteintMatch.getAccession() + "...", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_proteinMatchList = new ArrayList<>(1);
         m_proteinMatchList.add(proteintMatch);
         m_rsmId = null;
@@ -49,7 +49,7 @@ public class DatabaseBioSequenceTask extends AbstractDatabaseTask {
     }
 
     public void initLoadBioSequences(DProteinMatch proteintMatch, Long rsmId) {
-        setTaskInfo(new TaskInfo("Load Biosequence for " + proteintMatch.getAccession() + "...", false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Biosequence for " + proteintMatch.getAccession() + "...", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_proteinMatchList = new ArrayList<>(1);
         m_proteinMatchList.add(proteintMatch);
         m_rsmId = rsmId;

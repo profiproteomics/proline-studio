@@ -27,7 +27,7 @@ public class ComputeQuantProfileTask extends AbstractServiceTask {
     private Map<String,Object> m_quantProfileParams;
     
     public ComputeQuantProfileTask(AbstractServiceCallback callback, Long projectId,  Long masterQuantChannelId,  Map<String,Object> quantProfileParams, String xicName) {
-        super(callback, false /** asynchronous */, new   TaskInfo("Compute Quantitation Profile for "+xicName, true, TASK_LIST_INFO ));
+        super(callback, false /** asynchronous */, new   TaskInfo("Compute Quantitation Profile for "+xicName, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH ));
         m_pId= projectId;
         m_masterQuantChannelId = masterQuantChannelId ;
         m_quantProfileParams = quantProfileParams ;

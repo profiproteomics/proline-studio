@@ -64,7 +64,7 @@ public class ValidationJMSTask extends AbstractServiceTask implements MessageLis
     private static final String TAB = "    ";
     
     public ValidationJMSTask(AbstractServiceCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, String scoringType){
-        super(callback, false /*asynchronous*/, new TaskInfo("JMS Validation of Search Result "+dataset.getName(), true, TASK_JMSLIST_INFO));  
+        super(callback, false /*asynchronous*/, new TaskInfo("JMS Validation of Search Result "+dataset.getName(), true, TASK_JMSLIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));  
         m_dataset = dataset;
         m_description = description;
         m_argumentsMap = argumentsMap;       

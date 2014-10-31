@@ -33,14 +33,14 @@ public class MergeTask extends AbstractServiceTask {
     }
     
     public void initMergeRset(List<Long> resultSetIdList, String parentName, Long[] resultSetId) {
-        setTaskInfo(new TaskInfo("Merge Search Results on "+parentName, true, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Merge Search Results on "+parentName, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_rsetOrRsmIdList = resultSetIdList;
         m_resultSetId = resultSetId;
         m_action = MERGE_RSET;
     }
     
     public void initMergeRsm(List<Long> resultSummaryIdList, String parentName, Long[] resultSetId, Long[] resultSummaryId) {
-        setTaskInfo(new TaskInfo("Merge Identification Summaries on "+parentName, true, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Merge Identification Summaries on "+parentName, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_rsetOrRsmIdList = resultSummaryIdList;
         m_resultSetId = resultSetId;
         m_resultSummaryId = resultSummaryId;

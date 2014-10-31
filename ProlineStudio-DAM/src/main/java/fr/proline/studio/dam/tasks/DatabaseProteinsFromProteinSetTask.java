@@ -25,7 +25,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
     private DProteinSet m_proteinSet = null;
 
     public DatabaseProteinsFromProteinSetTask(AbstractDatabaseCallback callback, long projectId, DProteinSet proteinSet) {
-        super(callback, Priority.NORMAL_3, new TaskInfo("Load Proteins of a Protein Set "+getProteinSetName(proteinSet), false, TASK_LIST_INFO));
+        super(callback, Priority.NORMAL_3, new TaskInfo("Load Proteins of a Protein Set "+getProteinSetName(proteinSet), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
         m_proteinSet = proteinSet;        
     }

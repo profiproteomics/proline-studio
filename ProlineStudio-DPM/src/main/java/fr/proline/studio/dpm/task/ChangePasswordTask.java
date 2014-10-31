@@ -23,7 +23,7 @@ public class ChangePasswordTask extends AbstractServiceTask {
     
     
     public ChangePasswordTask(AbstractServiceCallback callback, String userName, String oldPassword, String newPassword) {
-        super(callback, true /** synchronous */, new TaskInfo("Change password for " + userName, false, TASK_LIST_INFO));
+        super(callback, true /** synchronous */, new TaskInfo("Change password for " + userName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
 
         m_userName = userName;
         m_password = newPassword;

@@ -10,10 +10,10 @@ import java.util.TreeSet;
  */
 public class TaskInfoManager {
     
-    private static final int MAX_SIZE = 1000;
+    private static final int MAX_SIZE = 5000;
     
-    private TreeSet<TaskInfo> m_tasks;
-    private ArrayList<TaskInfo> m_taskToBeUpdated;
+    private final TreeSet<TaskInfo> m_tasks;
+    private final ArrayList<TaskInfo> m_taskToBeUpdated;
     
     private static TaskInfoManager m_singleton = null;
     

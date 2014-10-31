@@ -88,9 +88,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * Load all Parent Dataset of a project
      * @param project
      * @param list 
+     * @param identificationDataset
      */
     public void initLoadParentDataset(Project project, List<AbstractData> list, boolean identificationDataset) {
-        setTaskInfo(new TaskInfo("Load "+(identificationDataset ? "Identification" : "Quantitation")+" Data for Project "+project.getName(), false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load "+(identificationDataset ? "Identification" : "Quantitation")+" Data for Project "+project.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_project = project;
         m_list = list;
         m_identificationDataset = identificationDataset;
@@ -100,11 +101,12 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     /**
      * Load all children dataset of a dataset
-     * @param parentDataSet
+     * @param parentDataset
      * @param list 
+     * @param identificationDataset
      */
     public void initLoadChildrenDataset(DDataset parentDataset, List<AbstractData> list, boolean identificationDataset) {
-        setTaskInfo(new TaskInfo("Load Data for Dataset "+parentDataset.getName(), false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Data for Dataset "+parentDataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_project = parentDataset.getProject();
         m_parentDataset = parentDataset;
         m_list = list;
@@ -115,10 +117,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     /**
      * Load Rset and Rsm of a dataset
-     * @param dataSet 
+     * @param dataset 
      */
     public void initLoadRsetAndRsm(DDataset dataset) {
-        setTaskInfo(new TaskInfo("Load Search Result and Identification Summary for Dataset "+dataset.getName(), false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Search Result and Identification Summary for Dataset "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_dataset = dataset;
 
         m_action = LOAD_RSET_AND_RSM_OF_DATASET;
@@ -126,10 +128,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     /**
      * Load Quantitation of a dataset
-     * @param dataSet 
+     * @param dataset 
      */
     public void initLoadQuantitation(DDataset dataset) {
-        setTaskInfo(new TaskInfo("Load Quantitation for Dataset "+dataset.getName(), false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Quantitation for Dataset "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_dataset = dataset;
 
         m_action = LOAD_QUANTITATION;
@@ -137,10 +139,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
     /**
      * Load Rset and Rsm of a dataset list
-     * @param dataSetList 
+     * @param datasetList 
      */
     public void initLoadRsetAndRsm(ArrayList<DDataset> datasetList) {
-        setTaskInfo(new TaskInfo("Load Search Result and Identification Summary for multiple Dataset", false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load Search Result and Identification Summary for multiple Dataset", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         
         m_datasetList = datasetList;
 
@@ -149,21 +151,22 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
     /**
      * Load a dataset from its rsm
-     * @param callback
      * @param rsm 
      */
     public void initLoadDatasetForRsm(ResultSummary rsm) {
-        setTaskInfo(new TaskInfo("Load data for Identification Summary "+rsm.getId(), false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load data for Identification Summary "+rsm.getId(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_rsm = rsm;
         m_action = LOAD_DATASET_FOR_RSM;
     }
     
     /**
      * rename a dataset
-     * @return 
+     * @param dataset
+     * @param oldName
+     * @param name
      */
     public void initRenameDataset(DDataset dataset, String oldName, String name) {
-        setTaskInfo(new TaskInfo("Rename Dataset "+oldName+" to "+name, true, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Rename Dataset "+oldName+" to "+name, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_name = name;
         m_dataset = dataset;
         m_action = RENAME_DATASET;
@@ -174,7 +177,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         initCreateDatasetAggregate(project, parentDataset, datasetType, aggregateName, false, 0, 0, datasetList);
     }
     public void initCreateDatasetAggregate(Project project, DDataset parentDataset, Aggregation.ChildNature datasetType, String aggregateName, boolean hasSuffix, int suffixStart, int suffixStop, ArrayList<DDataset> datasetList) {
-        setTaskInfo(new TaskInfo("Create Dataset "+aggregateName, true, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Create Dataset "+aggregateName, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_project = project;
         m_parentDataset = parentDataset;
         m_datasetType = datasetType;
@@ -208,7 +211,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     }
     
     public void initModifyDatasetToRemoveValidation(DDataset dataset) {
-        setTaskInfo(new TaskInfo("Remove Identification Summary from Dataset "+dataset.getName(), true, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Remove Identification Summary from Dataset "+dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         setPriority(Priority.HIGH_2);
         m_dataset = dataset;
         m_action = REMOVE_VALIDATION_OF_DATASET;
@@ -228,7 +231,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         if (!identificationDataset) {
             type = Dataset.DatasetType.QUANTITATION.name();
         }
-        setTaskInfo(new TaskInfo("Empty Trash "+type, true, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Empty Trash "+type, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         setPriority(Priority.HIGH_2);
         m_dataset = trashDataset;
         m_identificationDataset = identificationDataset;
@@ -241,7 +244,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      * @param project project Dataset belongs to
      */
     public void initLoadDatasetAndRSMInfo(Long datasetId, ArrayList<Long> rsmIds, ArrayList<DDataset> returnedDatasetList, ArrayList<String> returnedDatasetNames, Project project) {
-        setTaskInfo(new TaskInfo("Load DataSet "+datasetId+" and get RSMs names", false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load DataSet "+datasetId+" and get RSMs names", false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_project = project;
         m_datasetId = datasetId;
         m_dsChildRSMIds = rsmIds;
@@ -252,19 +255,19 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     }
     
     public void initLoadDataset(Long datasetId, ArrayList<DDataset> returnedDatasetList) {
-        setTaskInfo(new TaskInfo("Load DataSet "+datasetId, false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Load DataSet "+datasetId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_datasetId = datasetId;
         m_datasetList = returnedDatasetList;
         m_action = LOAD_DATASET;
         setPriority(Priority.HIGH_1);
     }
     
-        /**
+    /**
      * Load Rset and Rsm of a dataset
-     * @param dataSet 
+     * @param dataset 
      */
     public void initClearDataset(DDataset dataset) {
-        setTaskInfo(new TaskInfo("Clear Dataset "+dataset.getName(), false, TASK_LIST_INFO));
+        setTaskInfo(new TaskInfo("Clear Dataset "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_dataset = dataset;
 
         m_action = CLEAR_DATASET;
@@ -1370,8 +1373,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                         // change number position for children
                         List<Dataset> childs = mergedParentDataset.getChildren();
                         int pos=0;
-                        for (Iterator<Dataset> it1 = childs.iterator(); it1.hasNext();) {
-                            Dataset dataset = it1.next();
+                        for (Dataset dataset : childs) {
                             dataset.setNumber(pos);
                             pos++;
                         }

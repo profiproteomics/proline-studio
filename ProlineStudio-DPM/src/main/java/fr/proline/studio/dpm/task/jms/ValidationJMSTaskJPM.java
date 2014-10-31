@@ -49,7 +49,7 @@ public class ValidationJMSTaskJPM extends AbstractJMSTask  {
 
     
     public ValidationJMSTaskJPM(AbstractJMSCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, String scoringType) {
-        super(callback, new TaskInfo("JMS Validation of Search Result " + dataset.getName(), true, TASK_LIST_INFO));
+        super(callback, new TaskInfo("JMS Validation of Search Result " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
         m_description = description;
         m_argumentsMap = argumentsMap;

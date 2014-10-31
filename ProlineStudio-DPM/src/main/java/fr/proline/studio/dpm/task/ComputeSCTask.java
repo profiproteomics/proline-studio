@@ -27,7 +27,7 @@ public class ComputeSCTask extends AbstractServiceTask {
     String[] m_spCountJSONResult;
     
     public ComputeSCTask(AbstractServiceCallback callback, Dataset refDataset, List<Long> resultSummaryIds,  String[] spectralCountResultList) {
-        super(callback, false /*asynchronous*/, new TaskInfo("Compute Spectral Count based on "+refDataset.getName(), true, TASK_LIST_INFO));
+        super(callback, false /*asynchronous*/, new TaskInfo("Compute Spectral Count based on "+refDataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_refDataset = refDataset;
         m_resultSummaryIds = resultSummaryIds;
         m_spCountJSONResult = spectralCountResultList;

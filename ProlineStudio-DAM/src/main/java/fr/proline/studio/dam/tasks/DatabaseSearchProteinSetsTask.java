@@ -24,7 +24,7 @@ public class DatabaseSearchProteinSetsTask extends AbstractDatabaseTask {
     private ArrayList<Long>     m_searchResult = null;
     
     public DatabaseSearchProteinSetsTask(AbstractDatabaseCallback callback, long projectId, Long rsmId, String searchAccession, ArrayList<Long> searchResult) {
-        super(callback, Priority.HIGH_1, new TaskInfo("Search Protein Set "+searchAccession, false, TASK_LIST_INFO));
+        super(callback, Priority.HIGH_1, new TaskInfo("Search Protein Set "+searchAccession, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_rsmId = rsmId;       
         m_searchAccession = searchAccession;

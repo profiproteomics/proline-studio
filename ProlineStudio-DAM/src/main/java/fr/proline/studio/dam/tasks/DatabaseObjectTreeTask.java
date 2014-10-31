@@ -20,7 +20,7 @@ public class DatabaseObjectTreeTask extends AbstractDatabaseTask {
     private ObjectTree[] m_objectTreeResult;
     
     public DatabaseObjectTreeTask(AbstractDatabaseCallback callback, long projectId, DPeptideMatch peptideMatch, ObjectTree[] objectTreeResult) {
-        super(callback, new TaskInfo("Load Fragmentation Data for Peptide Match " + getPeptideName(peptideMatch), false, TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load Fragmentation Data for Peptide Match " + getPeptideName(peptideMatch), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
         m_peptideMatch = peptideMatch;
         m_objectTreeResult = objectTreeResult;

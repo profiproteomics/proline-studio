@@ -22,9 +22,7 @@ public class RetrieveSpectralCountTask extends AbstractServiceTask {
     private String[] m_spCountJSONResult = null;
 
     public RetrieveSpectralCountTask(AbstractServiceCallback callback, DDataset refDataset, Long[] refRSMId, Long[] refDSId, String[] spectralCountResultList) {
-        super(callback, false /*
-                 * asynchronous
-                 */, new TaskInfo("Retrieve Spectral Count on " + refDataset.getName(), true, TASK_LIST_INFO));
+        super(callback, false /** asynchronous*/, new TaskInfo("Retrieve Spectral Count on " + refDataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_refQuantDataset = refDataset;
         m_refRSMId = refRSMId;
         m_refDSId = refDSId;

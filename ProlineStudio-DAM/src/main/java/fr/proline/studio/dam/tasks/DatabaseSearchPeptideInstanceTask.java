@@ -22,7 +22,7 @@ public class DatabaseSearchPeptideInstanceTask extends AbstractDatabaseTask {
     private ArrayList<Long>     m_searchResult = null;
     
     public DatabaseSearchPeptideInstanceTask(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm, String searchString, ArrayList<Long> searchResult) {
-        super(callback, Priority.HIGH_1, new TaskInfo("Search Peptide Instance "+searchString, false, TASK_LIST_INFO));
+        super(callback, Priority.HIGH_1, new TaskInfo("Search Peptide Instance "+searchString, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_rsm = rsm;       
         m_searchString = searchString;

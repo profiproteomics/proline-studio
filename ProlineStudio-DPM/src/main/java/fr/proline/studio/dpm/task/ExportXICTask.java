@@ -22,7 +22,7 @@ public class ExportXICTask extends AbstractServiceTask {
     private String m_exportType;
     
     public ExportXICTask(AbstractServiceCallback callback, DDataset dataset, String exportTypeParam, String[] filePathInfo) {
-        super(callback, false /** asynchronous */, new TaskInfo("Export XIC " + dataset.getName(), true, TASK_LIST_INFO));
+        super(callback, false /** asynchronous */, new TaskInfo("Export XIC " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
         m_exportType = exportTypeParam;
         m_filePathResult = filePathInfo;

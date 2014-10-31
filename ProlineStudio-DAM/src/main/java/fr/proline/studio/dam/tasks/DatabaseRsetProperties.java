@@ -21,13 +21,13 @@ public class DatabaseRsetProperties extends AbstractDatabaseTask {
     private ResultSet m_rset = null;
     
     public DatabaseRsetProperties(AbstractDatabaseCallback callback, long projectId, DDataset dataset) {
-        super(callback, new TaskInfo("Load Properties for Search Result "+dataset.getName(), false, TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load Properties for Search Result "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
         m_dataset = dataset;
     }
     
     public DatabaseRsetProperties(AbstractDatabaseCallback callback, long projectId, ResultSet rset, String name) {
-        super(callback, new TaskInfo("Load Properties for Search Result "+name, false, TASK_LIST_INFO));
+        super(callback, new TaskInfo("Load Properties for Search Result "+name, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_projectId = projectId;
         m_rset = rset;
     }

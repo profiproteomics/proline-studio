@@ -22,7 +22,7 @@ public class FileSystemRootsTask extends AbstractServiceTask {
     ArrayList<RootInfo> m_roots;
     
     public FileSystemRootsTask(AbstractServiceCallback callback, ArrayList<RootInfo> roots) {
-        super(callback, true /*synchronous*/, new TaskInfo("Get Server File System Root Paths", true, TASK_LIST_INFO));
+        super(callback, true /*synchronous*/, new TaskInfo("Get Server File System Root Paths", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         
         m_roots = roots;
     }

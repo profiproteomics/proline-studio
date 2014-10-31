@@ -23,7 +23,7 @@ public class FileSystemBrowseTask extends AbstractServiceTask {
     private ArrayList<ServerFile> m_files;
     
     public FileSystemBrowseTask(AbstractServiceCallback callback, String dirPath, ArrayList<ServerFile> files) {
-        super(callback, true /*synchronous*/, new TaskInfo("Browse Server File System "+dirPath, true, TASK_LIST_INFO));
+        super(callback, true /*synchronous*/, new TaskInfo("Browse Server File System "+dirPath, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         
         m_dirPath = dirPath;
         m_files = files;

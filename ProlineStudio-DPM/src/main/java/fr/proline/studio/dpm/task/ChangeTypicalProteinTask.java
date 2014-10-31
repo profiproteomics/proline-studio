@@ -24,7 +24,7 @@ public class ChangeTypicalProteinTask extends AbstractServiceTask {
     private List<ChangeTypicalRule> m_rules;
     
     public ChangeTypicalProteinTask(AbstractServiceCallback callback, DDataset dataset, List<ChangeTypicalRule> rules) {
-        super(callback, false /** asynchronous */, new TaskInfo("Change Typical Protein on Identification Summary " + dataset.getName(), true, TASK_LIST_INFO));
+        super(callback, false /** asynchronous */, new TaskInfo("Change Typical Protein on Identification Summary " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
         m_rules=rules;
     }

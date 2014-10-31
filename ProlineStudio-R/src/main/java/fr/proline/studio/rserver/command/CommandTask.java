@@ -21,7 +21,7 @@ public class CommandTask extends AbstractServiceTask {
         private AbstractCommand m_command;
 
         public CommandTask(AbstractServiceCallback callback, RVar outVar, RVar inVar, AbstractCommand command) {
-            super(callback, true /** synchronous */, new TaskInfo(command.getNodeName(), false, TASK_LIST_INFO));
+            super(callback, true /** synchronous */, new TaskInfo(command.getNodeName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
 
             m_inVar = inVar;
             m_outVar = outVar;

@@ -26,7 +26,7 @@ public class SpectralCountTask extends AbstractServiceTask {
     public SpectralCountTask(AbstractServiceCallback callback, DDataset refDataset, List<DDataset> rsmDataset, String dsName, String dsDescr, Long[] quantiDatasetId, String[] spectralCountResultList) {
         super(callback, false /*
                  * asynchronous
-                 */, new TaskInfo("Spectral Count on " + refDataset.getName(), true, TASK_LIST_INFO));
+                 */, new TaskInfo("Spectral Count on " + refDataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_refDataset = refDataset;
         m_rsmDataset = rsmDataset;
         m_quantiDatasetId = quantiDatasetId;

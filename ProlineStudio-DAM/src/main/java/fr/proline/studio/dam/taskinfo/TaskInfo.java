@@ -1,14 +1,27 @@
 package fr.proline.studio.dam.taskinfo;
 
+
 /**
  * Class contains informations about a Task (description, timestamps and status)
  * @author JM235353
  */
 public class TaskInfo implements Comparable<TaskInfo> {
     
-    public final static int INFO_IMPORTANCE_HIGH = 0;
-    public final static int INFO_IMPORTANCE_MEDIUM = 1;
-    public final static int INFO_IMPORTANCE_LOW = 2;
+
+    
+    public final static Integer INFO_IMPORTANCE_LOW = 0;
+    public final static Integer INFO_IMPORTANCE_MEDIUM = 1;
+    public final static Integer INFO_IMPORTANCE_HIGH = 2;
+
+    public final static String[] IMPORTANCE_VALUES = { "Low", "Medium", "High" };
+
+    public final static Integer PUBLIC_STATE_WAITING = 0;
+    public final static Integer PUBLIC_STATE_RUNNING = 1;
+    public final static Integer PUBLIC_STATE_ABORTED = 2;
+    public final static Integer PUBLIC_STATE_FINISHED = 3;
+    public final static Integer PUBLIC_STATE_FAILED = 4;
+    public final static String[] PUBLIC_STATE_VALUES = { "Waiting", "Running", "Aborted", "Finished", "Failed" };
+     
     
     public final static int STATE_WAITING = 0;
     public final static int STATE_RUNNING = 1;
@@ -17,7 +30,7 @@ public class TaskInfo implements Comparable<TaskInfo> {
 
     private String m_taskDescription = null;
     private String m_idList = null;
-    private int m_infoImportance;
+    private Integer m_infoImportance;
     private String m_requestContent = null;
     private String m_requestURL = null;
     private boolean m_hidden = false;
@@ -43,11 +56,11 @@ public class TaskInfo implements Comparable<TaskInfo> {
     
     private static int INC_ID = 0;
     
-    public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList, int infoImportance) {
+    public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList, Integer infoImportance) {
         this(taskDescription, askBeforeExitingApp, idList, infoImportance,  false);
     }
     
-    public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList, int infoImportance, boolean hidden) {
+    public TaskInfo(String taskDescription, boolean askBeforeExitingApp, String idList, Integer infoImportance, boolean hidden) {
         
         m_taskDescription = taskDescription;
         m_askBeforeExitingApp = askBeforeExitingApp;
@@ -183,7 +196,35 @@ public class TaskInfo implements Comparable<TaskInfo> {
     public String getIdList() {
         return m_idList;
     }
+    
+    public String getImportanceAsString() {
+        return IMPORTANCE_VALUES[m_infoImportance];
+    }
+     public int getImportance() {
+        return m_infoImportance;
+    }
+    
+     public int getPublicState() {
+         if (isWaiting()) {
+             return PUBLIC_STATE_WAITING;
+         } else if (isRunning()) {
+             return PUBLIC_STATE_RUNNING;
+         } else if (isFinished()) {
+             if (isSuccess()) {
+                 return PUBLIC_STATE_FINISHED;
+             } else {
+                 return PUBLIC_STATE_FAILED;
+             }
+         } else if (isAborted()) {
+             return PUBLIC_STATE_ABORTED;
+         }
+         return PUBLIC_STATE_WAITING; // should not happen
+     }
+     public String getPublicStateAsString() {
+         return PUBLIC_STATE_VALUES[getPublicState()];
+     }
 
+     
     public boolean askBeforeExitingApplication() {
         return m_askBeforeExitingApp;
     }

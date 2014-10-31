@@ -2,14 +2,20 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
+import fr.proline.studio.filter.Filter;
+import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.FilterTableModel;
+import fr.proline.studio.filter.IntegerFilter;
+import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.filter.ValueFilter;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.utils.DecoratedMarkerTable;
-import fr.proline.studio.utils.DecoratedTableModel;
 import fr.proline.studio.utils.IconManager;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -31,19 +37,50 @@ import org.jdesktop.swingx.renderer.DefaultTableRenderer;
  */
 public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface {
 
+    private final static ImageIcon[] PUBLIC_STATE_ICONS = { IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI16), IconManager.getIcon(IconManager.IconType.ARROW_RIGHT_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_BLUE_SMALL16), IconManager.getIcon(IconManager.IconType.TICK_SMALL), IconManager.getIcon(IconManager.IconType.CROSS_SMALL16)};
+   
+    
     private AbstractDataBox m_dataBox;
     private LogTable m_logTable;
+    private FilterButton m_filterButton;
 
     private boolean m_firstDisplay = true;
     
     public TasksPanel() {
-        initComponents();
+        
+        setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        c.weightx = 1;
+        c.weighty = 1;
+        add(createToolbarPanel(), c);
+
 
     }
 
-    private void initComponents() {
+    private JPanel createToolbarPanel() {
+        JPanel toolbarPanel = new JPanel();
 
-        setLayout(new GridBagLayout());
+        toolbarPanel.setLayout(new BorderLayout());
+
+        JPanel internalPanel = createInternalPanel();
+        toolbarPanel.add(internalPanel, BorderLayout.CENTER);
+
+        JToolBar toolbar = initToolbar();
+        toolbarPanel.add(toolbar, BorderLayout.WEST);
+
+        return toolbarPanel;
+
+    }
+
+    private JPanel createInternalPanel() {
+
+        JPanel internalPanel = new JPanel();
+        
+        internalPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
@@ -57,6 +94,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         TableColumnModel columnModel = m_logTable.getColumnModel();
 
         columnModel.getColumn(LogTableModel.COLTYPE_STEP).setCellRenderer(new TaskInfoStepRenderer());
+        columnModel.getColumn(LogTableModel.COLTYPE_TASKINFO_IMPORTANCE).setCellRenderer(new TaskInfoImportanceRenderer());
 
         DefaultErrorRenderer defaultErrorRenderer = new DefaultErrorRenderer(new DefaultTableRenderer(), m_logTable);
         columnModel.getColumn(LogTableModel.COLTYPE_TASKINFO_ID).setCellRenderer(defaultErrorRenderer);
@@ -80,10 +118,21 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
-        add(scrollPane, c);
+        internalPanel.add(scrollPane, c);
 
+        return internalPanel;
 
-
+    }
+    
+    private JToolBar initToolbar() {
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+        
+        m_filterButton = new FilterButton(((LogTableModel) m_logTable.getModel()));
+        
+        toolbar.add(m_filterButton);
+        
+        return toolbar;
     }
 
     public void updateData() {
@@ -213,15 +262,20 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         }
     }
 
-    private static class LogTableModel extends DecoratedTableModel {
+    private static class LogTableModel extends FilterTableModel {
 
         public static final int COLTYPE_STEP = 0;
         public static final int COLTYPE_TASKINFO_ID = 1;
         public static final int COLTYPE_TASKINFO_CATEGORY = 2;
-        public static final int COLTYPE_DESCRIPTION = 3;
-        public static final int COLTYPE_PERCENTAGE = 4;
-        private static final String[] columnNames = {"", "id", "Category", "Task Description", "Progress"};
+        public static final int COLTYPE_TASKINFO_IMPORTANCE = 3;
+        public static final int COLTYPE_DESCRIPTION = 4;
+        public static final int COLTYPE_PERCENTAGE = 5;
+        private static final String[] columnNames = {"", "id", "Category", "Importance", "Task Description", "Progress"};
         private ArrayList<TaskInfo> m_taskInfoList = null;
+
+        private ArrayList<Integer> m_filteredIds = null;
+        private boolean m_isFiltering = false;
+        private boolean m_filteringAsked = false;
 
         public boolean updateData() {
             if (m_taskInfoList == null) {
@@ -230,7 +284,16 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             boolean updateDone = TaskInfoManager.getTaskInfoManager().copyData(m_taskInfoList, false);
 
             if (updateDone) {
-                fireTableDataChanged();
+                if (m_filteredIds != null) {
+                    filter();
+                } else {
+                    if (m_filteringAsked) {
+                        m_filteringAsked = false;
+                        filter();
+                    } else {
+                        fireTableDataChanged();
+                    }
+                }
             }
             return updateDone;
         }
@@ -239,6 +302,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             if ((m_taskInfoList == null) || (index >= m_taskInfoList.size()) || (index < 0)) {
                 return null;
             }
+            
+            if (m_filteredIds != null) {
+                index = m_filteredIds.get(index).intValue();
+            }
+            
             return m_taskInfoList.get(index);
 
         }
@@ -248,9 +316,20 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 return -1;
             }
 
-            for (int i = 0; i < m_taskInfoList.size(); i++) {
-                if (m_taskInfoList.get(i).getId() == taskInfoId) {
-                    return i;
+            if (m_filteredIds != null) {
+                
+                for (int i = 0; i < m_filteredIds.size(); i++) {
+                    int index = m_filteredIds.get(i).intValue();
+                    if (m_taskInfoList.get(index).getId() == taskInfoId) {
+                        return i;
+                    }
+                }
+            } else {
+
+                for (int i = 0; i < m_taskInfoList.size(); i++) {
+                    if (m_taskInfoList.get(i).getId() == taskInfoId) {
+                        return i;
+                    }
                 }
             }
             return -1;
@@ -260,6 +339,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         public Class getColumnClass(int col) {
             switch (col) {
                 case COLTYPE_STEP:
+                case COLTYPE_TASKINFO_IMPORTANCE:
                     return TaskInfo.class;
                 case COLTYPE_TASKINFO_ID:
                     return Integer.class;
@@ -277,6 +357,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             if (m_taskInfoList == null) {
                 return 0;
             }
+            
+            if ((!m_isFiltering) && (m_filteredIds != null)) {
+                return m_filteredIds.size();
+            }
+            
             return m_taskInfoList.size();
         }
 
@@ -292,7 +377,13 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            TaskInfo taskInfo = m_taskInfoList.get(rowIndex);
+            
+            int rowFiltered = rowIndex;
+            if ((!m_isFiltering) && (m_filteredIds != null)) {
+                rowFiltered = m_filteredIds.get(rowIndex).intValue();
+            }
+            
+            TaskInfo taskInfo = m_taskInfoList.get(rowFiltered);
             switch (columnIndex) {
                 case COLTYPE_STEP: {
                     return taskInfo;
@@ -302,6 +393,9 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 }
                 case COLTYPE_TASKINFO_CATEGORY: {
                     return taskInfo.getIdList();
+                }
+                case COLTYPE_TASKINFO_IMPORTANCE: {
+                    return taskInfo;
                 }
                 case COLTYPE_DESCRIPTION: {
                     return taskInfo.getTaskDescription();
@@ -327,6 +421,96 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         public String getToolTipForHeader(int col) {
             return null; // no tooltip
         }
+
+        @Override
+        public void initFilters() {
+            if (m_filters == null) {
+                int nbCol = getColumnCount();
+                m_filters = new Filter[nbCol];
+                m_filters[COLTYPE_STEP] = new ValueFilter("State", TaskInfo.PUBLIC_STATE_VALUES, PUBLIC_STATE_ICONS, ValueFilter.ValueFilterType.EQUAL);
+                m_filters[COLTYPE_TASKINFO_ID] = new IntegerFilter(getColumnName(COLTYPE_TASKINFO_ID));
+                m_filters[COLTYPE_TASKINFO_CATEGORY] = null;
+                m_filters[COLTYPE_TASKINFO_IMPORTANCE] = new ValueFilter(getColumnName(COLTYPE_TASKINFO_IMPORTANCE), TaskInfo.IMPORTANCE_VALUES, null, ValueFilter.ValueFilterType.GREATER_EQUAL);
+                m_filters[COLTYPE_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_DESCRIPTION));
+                m_filters[COLTYPE_PERCENTAGE] = null;
+            }
+
+        }
+        
+        
+        
+
+        @Override
+        public void filter() {
+
+            if (m_taskInfoList == null) {
+                // filtering not possible for the moment
+                m_filteringAsked = true;
+                return;
+            }
+
+            m_isFiltering = true;
+            try {
+
+                int nbData = m_taskInfoList.size();
+                if (m_filteredIds == null) {
+                    m_filteredIds = new ArrayList<>(nbData);
+                } else {
+                    m_filteredIds.clear();
+                }
+
+                for (int i = 0; i < nbData; i++) {
+                    try {
+                        if (!filter(i)) {
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        //e.printStackTrace();
+                    }
+                    m_filteredIds.add(Integer.valueOf(i));
+                }
+
+            } finally {
+                m_isFiltering = false;
+            }
+            fireTableDataChanged();
+        }
+
+        @Override
+        public boolean filter(int row, int col) {
+            Filter filter = getColumnFilter(col);
+            if ((filter == null) || (!filter.isUsed())) {
+                return true;
+            }
+
+            Object data = getValueAt(row, col);
+            if (data == null) {
+                return true; // should not happen
+            }
+
+            switch (col) {
+                case COLTYPE_TASKINFO_ID:
+                    return ((IntegerFilter) filter).filter((Integer) data);
+                case COLTYPE_TASKINFO_IMPORTANCE:
+                    return ((ValueFilter) filter).filter(((TaskInfo)data).getImportance());
+                case COLTYPE_STEP:
+                    return ((ValueFilter) filter).filter(((TaskInfo)data).getPublicState());
+                case COLTYPE_DESCRIPTION:
+                    return ((StringFilter) filter).filter((String) data);
+            }
+
+            return true; // should never happen
+        }
+
+        @Override
+        public boolean isLoaded() {
+            return true;
+        }
+
+        @Override
+        public int getLoadingPercentage() {
+            return 100;
+        }
     }
 
     public class TaskInfoStepRenderer extends DefaultTableCellRenderer {
@@ -341,19 +525,25 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
             TaskInfo task = (TaskInfo) value;
 
-            if (task.isWaiting()) {
-                setIcon(IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI16));
-            } else if (task.isRunning()) {
-                setIcon(IconManager.getIcon(IconManager.IconType.ARROW_RIGHT_SMALL));
-            } else if (task.isFinished()) {
-                if (task.isSuccess()) {
-                    setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
-                } else {
-                    setIcon(IconManager.getIcon(IconManager.IconType.CROSS_SMALL16));
-                }
-            } else if (task.isAborted()) {
-                setIcon(IconManager.getIcon(IconManager.IconType.CROSS_BLUE_SMALL16));
-            }
+            setIcon(PUBLIC_STATE_ICONS[task.getPublicState()]);
+
+            return this;
+        }
+    }
+    
+    public class TaskInfoImportanceRenderer extends DefaultTableCellRenderer {
+
+        public TaskInfoImportanceRenderer() {
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+            super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
+
+            TaskInfo task = (TaskInfo) value;
+
+            setText(task.getImportanceAsString());
 
             return this;
         }
@@ -361,9 +551,9 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
     public class DefaultErrorRenderer implements TableCellRenderer, Serializable {
 
-        private TableCellRenderer m_renderer;
-        private JXTable m_table;
-        
+        private final TableCellRenderer m_renderer;
+        private final JXTable m_table;
+
         public DefaultErrorRenderer(TableCellRenderer renderer, JXTable table) {
             m_renderer = renderer;
             m_table = table;
@@ -378,7 +568,6 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
                 l.setHorizontalAlignment(JLabel.LEFT);
 
-                
                 row = m_table.convertRowIndexToModel(row);
                 TaskInfo taskInfo = ((LogTableModel) table.getModel()).getTaskInfo(row);
                 if (taskInfo.hasTaskError()) {
@@ -398,4 +587,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
     }
     
     
+
+
+
 }

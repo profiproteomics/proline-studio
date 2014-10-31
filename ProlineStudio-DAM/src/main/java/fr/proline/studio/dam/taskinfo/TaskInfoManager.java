@@ -12,8 +12,8 @@ public class TaskInfoManager {
     
     private static final int MAX_SIZE = 5000;
     
-    private final TreeSet<TaskInfo> m_tasks;
-    private final ArrayList<TaskInfo> m_taskToBeUpdated;
+    private TreeSet<TaskInfo> m_tasks;
+    private ArrayList<TaskInfo> m_taskToBeUpdated;
     
     private static TaskInfoManager m_singleton = null;
     
@@ -37,6 +37,30 @@ public class TaskInfoManager {
         if (m_tasks.size()>MAX_SIZE) {
             m_tasks.remove(m_tasks.last());
         }
+        m_curUpdate++;
+    }
+    
+    public void clear() {
+        TreeSet<TaskInfo> tasks = new  TreeSet<>();
+        for (TaskInfo task : m_tasks) {
+            if (task.isFinished() && task.isSuccess()) {
+                continue;
+            }
+            tasks.add(task);
+        }
+        m_tasks.clear();
+        m_tasks = tasks;
+        
+        ArrayList<TaskInfo> taskToBeUpdated = new ArrayList<>();
+        for (TaskInfo task : m_taskToBeUpdated) {
+            if (task.isFinished() && task.isSuccess()) {
+                continue;
+            }
+            taskToBeUpdated.add(task);
+        }
+        m_taskToBeUpdated.clear();
+        m_taskToBeUpdated = taskToBeUpdated;
+        
         m_curUpdate++;
     }
     
@@ -119,6 +143,9 @@ public class TaskInfoManager {
                 destinationList.add(new TaskInfo(infoCur));
             }
             index++;
+        }
+        for (int i=destinationList.size()-1;i>=index;i--) {
+            destinationList.remove(i); // can happen when table has been cleared
         }
         
         return true;

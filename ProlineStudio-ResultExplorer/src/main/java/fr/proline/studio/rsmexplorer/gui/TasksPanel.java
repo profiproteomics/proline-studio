@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -42,7 +43,6 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
     
     private AbstractDataBox m_dataBox;
     private LogTable m_logTable;
-    private FilterButton m_filterButton;
 
     private boolean m_firstDisplay = true;
     
@@ -128,9 +128,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
         
-        m_filterButton = new FilterButton(((LogTableModel) m_logTable.getModel()));
+        FilterButton filterButton = new FilterButton(((LogTableModel) m_logTable.getModel()));
+        EraserButton taskEraserButton = new EraserButton();
         
-        toolbar.add(m_filterButton);
+        toolbar.add(filterButton);
+        toolbar.add(taskEraserButton);
         
         return toolbar;
     }
@@ -586,7 +588,24 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         }
     }
     
-    
+    public class EraserButton extends JButton implements ActionListener {
+
+        public EraserButton() {
+
+            setIcon(IconManager.getIcon(IconManager.IconType.ERASER_SMALL11));
+            setToolTipText("Erase All Finished Tasks");
+
+            addActionListener(this);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TaskInfoManager.getTaskInfoManager().clear();
+            m_firstDisplay = true;
+            updateData();
+        }
+    }
+
 
 
 

@@ -94,7 +94,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         TableColumnModel columnModel = m_logTable.getColumnModel();
 
         columnModel.getColumn(LogTableModel.COLTYPE_STEP).setCellRenderer(new TaskInfoStepRenderer());
-        columnModel.getColumn(LogTableModel.COLTYPE_TASKINFO_IMPORTANCE).setCellRenderer(new TaskInfoImportanceRenderer());
+        columnModel.getColumn(LogTableModel.COLTYPE_TASKINFO_CRITICALITY).setCellRenderer(new TaskInfoImportanceRenderer());
 
         DefaultErrorRenderer defaultErrorRenderer = new DefaultErrorRenderer(new DefaultTableRenderer(), m_logTable);
         columnModel.getColumn(LogTableModel.COLTYPE_TASKINFO_ID).setCellRenderer(defaultErrorRenderer);
@@ -269,10 +269,10 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         public static final int COLTYPE_STEP = 0;
         public static final int COLTYPE_TASKINFO_ID = 1;
         public static final int COLTYPE_TASKINFO_CATEGORY = 2;
-        public static final int COLTYPE_TASKINFO_IMPORTANCE = 3;
+        public static final int COLTYPE_TASKINFO_CRITICALITY = 3;
         public static final int COLTYPE_DESCRIPTION = 4;
         public static final int COLTYPE_PERCENTAGE = 5;
-        private static final String[] columnNames = {"", "id", "Category", "Importance", "Task Description", "Progress"};
+        private static final String[] columnNames = {"", "id", "Category", "Criticality", "Task Description", "Progress"};
         private ArrayList<TaskInfo> m_taskInfoList = null;
 
         private ArrayList<Integer> m_filteredIds = null;
@@ -341,7 +341,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         public Class getColumnClass(int col) {
             switch (col) {
                 case COLTYPE_STEP:
-                case COLTYPE_TASKINFO_IMPORTANCE:
+                case COLTYPE_TASKINFO_CRITICALITY:
                     return TaskInfo.class;
                 case COLTYPE_TASKINFO_ID:
                     return Integer.class;
@@ -396,7 +396,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 case COLTYPE_TASKINFO_CATEGORY: {
                     return taskInfo.getIdList();
                 }
-                case COLTYPE_TASKINFO_IMPORTANCE: {
+                case COLTYPE_TASKINFO_CRITICALITY: {
                     return taskInfo;
                 }
                 case COLTYPE_DESCRIPTION: {
@@ -432,7 +432,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 m_filters[COLTYPE_STEP] = new ValueFilter("State", TaskInfo.PUBLIC_STATE_VALUES, PUBLIC_STATE_ICONS, ValueFilter.ValueFilterType.EQUAL);
                 m_filters[COLTYPE_TASKINFO_ID] = new IntegerFilter(getColumnName(COLTYPE_TASKINFO_ID));
                 m_filters[COLTYPE_TASKINFO_CATEGORY] = null;
-                m_filters[COLTYPE_TASKINFO_IMPORTANCE] = new ValueFilter(getColumnName(COLTYPE_TASKINFO_IMPORTANCE), TaskInfo.IMPORTANCE_VALUES, null, ValueFilter.ValueFilterType.GREATER_EQUAL);
+                m_filters[COLTYPE_TASKINFO_CRITICALITY] = new ValueFilter(getColumnName(COLTYPE_TASKINFO_CRITICALITY), TaskInfo.IMPORTANCE_VALUES, null, ValueFilter.ValueFilterType.GREATER_EQUAL);
                 m_filters[COLTYPE_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_DESCRIPTION));
                 m_filters[COLTYPE_PERCENTAGE] = null;
             }
@@ -493,7 +493,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             switch (col) {
                 case COLTYPE_TASKINFO_ID:
                     return ((IntegerFilter) filter).filter((Integer) data);
-                case COLTYPE_TASKINFO_IMPORTANCE:
+                case COLTYPE_TASKINFO_CRITICALITY:
                     return ((ValueFilter) filter).filter(((TaskInfo)data).getImportance());
                 case COLTYPE_STEP:
                     return ((ValueFilter) filter).filter(((TaskInfo)data).getPublicState());

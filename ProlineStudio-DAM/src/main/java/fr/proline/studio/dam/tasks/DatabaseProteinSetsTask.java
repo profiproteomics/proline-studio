@@ -164,8 +164,6 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
                 m_proteinSetMap.put(proteinSetCur.getId(), proteinSetCur);
             }
 
-
-
             // Retrieve Protein Match Ids
             m_proteinMatchIds = new ArrayList<>(proteinSetArray.length);
 
@@ -175,68 +173,40 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
                 //proteinSetArray[i].getResultSummary(); // force fetch of lazy data //JPM.TODO ?
             }
 
+            if (nbProteinSets > 0) {
 
-            /**
-             * Typical Protein Match for each Protein Set
-             *
-             */
-            // slice the task and get the first one
-            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_TYPICAL_PROTEIN, m_proteinMatchIds.size(), SLICE_SIZE);
+                /**
+                 * Typical Protein Match for each Protein Set
+                 *
+                 */
+                // slice the task and get the first one
+                SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_TYPICAL_PROTEIN, m_proteinMatchIds.size(), SLICE_SIZE);
 
-            // execute the first slice now
-            typicalProteinMatch(entityManagerMSI, subTask);
+                // execute the first slice now
+                typicalProteinMatch(entityManagerMSI, subTask);
 
+                /**
+                 * Calculate Spectral Count
+                 *
+                 */
+                // slice the task and get the first one
+                subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
+
+                // execute the first slice now
+                spectralCount(entityManagerMSI, subTask);
+
+                /**
+                 * Calculate Specific Spectral Count
+                 *
+                 */
+                // slice the task and get the first one
+                subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECIFIC_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
+
+                // execute the first slice now
+                specificSpectralCount(entityManagerMSI, subTask);
+
+            }
             
-
-            
-            
-            
-            /*timeStop = System.currentTimeMillis(); delta = ((double) (timeStop-timeStart))/1000;
-            System.out.println("Load Typical Protein : "+delta); 
-            
-            timeStart = System.currentTimeMillis();*/
-
-
-
-            /**
-             * Calculate Spectral Count
-             *
-             */
-            // slice the task and get the first one
-            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
-
-            // execute the first slice now
-            spectralCount(entityManagerMSI, subTask);
-
-
-
-
-            /*timeStop = System.currentTimeMillis(); delta = ((double) (timeStop-timeStart))/1000; 
-            System.out.println("Calculate Spectral Count : "+delta); 
-            
-            timeStart = System.currentTimeMillis();*/
-      
-
-
-            /**
-             * Calculate Specific Spectral Count
-             *
-             */
-            // slice the task and get the first one
-            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECIFIC_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
-
-            // execute the first slice now
-            specificSpectralCount(entityManagerMSI, subTask);
-
-
-
-            /*timeStop = System.currentTimeMillis(); delta = ((double) (timeStop-timeStart))/1000; 
-            System.out.println("Calculate Specific Spectral Count : "+delta);
-            
-            timeStart = System.currentTimeMillis();*/
-
-
-
             /*
              * Calculate SameSet and Subset counts
              */
@@ -248,18 +218,13 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
                 m_proteinSetIds.add(i, proteinSetArray[i].getId());
             }
 
-            // slice the task and get the first one
-            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, m_proteinSetIds.size(), SLICE_SIZE);
+            if (nbProteinSets > 0) {
+                // slice the task and get the first one
+                SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, m_proteinSetIds.size(), SLICE_SIZE);
 
-            // execute the first slice now
-            sameSetAndSubSetCount(entityManagerMSI, m_proteinSetIds, subTask);
-
-
-           /* timeStop = System.currentTimeMillis(); delta = ((double) (timeStop-timeStart))/1000; 
-            
-            System.out.println("Calculate SameSet and SubSet : "+delta);*/
-
-
+                // execute the first slice now
+                sameSetAndSubSetCount(entityManagerMSI, m_proteinSetIds, subTask);
+            }
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -341,48 +306,46 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
             m_proteinMatchIds = new ArrayList<>(proteinSetArray.length);
 
             int nbProteinSets = proteinSetArray.length;
+
+
+            
             for (int i = 0; i < nbProteinSets; i++) {
                 m_proteinMatchIds.add(i, proteinSetArray[i].getProteinMatchId());
             }
 
-            /**
-             * Typical Protein Match for each Protein Set
-             *
-             */
-            // slice the task and get the first one
-            SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_TYPICAL_PROTEIN, m_proteinMatchIds.size(), SLICE_SIZE); // do not really slice : work on all ids
+            if (nbProteinSets > 0) {
 
-            // execute the first slice now
-            typicalProteinMatch(entityManagerMSI, subTask);
+                /**
+                 * Typical Protein Match for each Protein Set
+                 *
+                 */
+                // slice the task and get the first one
+                SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_TYPICAL_PROTEIN, m_proteinMatchIds.size(), SLICE_SIZE); // do not really slice : work on all ids
 
-            
+                // execute the first slice now
+                typicalProteinMatch(entityManagerMSI, subTask);
 
-            
+                /**
+                 * Calculate Spectral Count
+                 *
+                 */
+                // slice the task and get the first one
+                subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
 
+                // execute the first slice now
+                spectralCount(entityManagerMSI, subTask);
 
+                /**
+                 * Calculate Specific Spectral Count
+                 *
+                 */
+                // slice the task and get the first one
+                subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECIFIC_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
 
-            /**
-             * Calculate Spectral Count
-             *
-             */
-            // slice the task and get the first one
-            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
+                // execute the request now
+                specificSpectralCount(entityManagerMSI, subTask);
 
-            // execute the first slice now
-            spectralCount(entityManagerMSI, subTask);
-
-
-            /**
-             * Calculate Specific Spectral Count
-             *
-             */
-            // slice the task and get the first one
-            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SPECIFIC_SPECTRAL_COUNT, m_proteinMatchIds.size(), SLICE_SIZE);
-
-            // execute the request now
-            specificSpectralCount(entityManagerMSI, subTask);
-
-
+            }
 
             /*
              * Calculate SameSet and Subset counts
@@ -395,12 +358,13 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
                 m_proteinSetIds.add(i, proteinSetArray[i].getId());
             }
 
-            // slice the task and get the first one
-            subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, m_proteinSetIds.size(), SLICE_SIZE);
+            if (nbProteinSets > 0) {
+                // slice the task and get the first one
+                SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_SAMESET_SUBSET_COUNT, m_proteinSetIds.size(), SLICE_SIZE);
 
-            // execute the request now
-            sameSetAndSubSetCount(entityManagerMSI, m_proteinSetIds, subTask);
-
+                // execute the request now
+                sameSetAndSubSetCount(entityManagerMSI, m_proteinSetIds, subTask);
+            }
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
@@ -487,6 +451,8 @@ public class DatabaseProteinSetsTask extends AbstractDatabaseSlicerTask {
         
         List sliceOfProteinMatchIds = subTask.getSubList(m_proteinMatchIds);
 
+            
+            
         TypedQuery<DProteinMatch> typicalProteinQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession, pm.score, pm.peptideCount, pm.resultSet.id, pm.description, pepset) FROM PeptideSetProteinMatchMap pset_to_pm JOIN pset_to_pm.proteinMatch as pm JOIN pset_to_pm.peptideSet as pepset WHERE pm.id IN (:listId) AND pset_to_pm.resultSummary.id=:rsmId", DProteinMatch.class);
         typicalProteinQuery.setParameter("listId", sliceOfProteinMatchIds);
         typicalProteinQuery.setParameter("rsmId", m_rsm.getId());

@@ -5,8 +5,6 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
@@ -42,7 +40,10 @@ public class DefineQuantParamsPanel extends JPanel{
     private final static String[] FEATURE_FILTER_OPERATOR_KEYS = {"GT", "LT"};
 
     private final static String[] FEATURE_NORMALIZATION_VALUES = {"No", "Intensity Sum", "Median Intensity", "Median Ratio"};
-    private final static String[] FEATURE_NORMALIZATION_KEYS = {"NONE", "INTENSITY_SUM", "MEDIAN_INTENSITY", "MEDIAN_RATIO"};        
+    private final static String[] FEATURE_NORMALIZATION_KEYS = {"NONE", "INTENSITY_SUM", "MEDIAN_INTENSITY", "MEDIAN_RATIO"};  
+    
+    private final static String[] FEATURE_EXTRACTED_XIC_VALUES = {"Only Validated PSM", "All MSMS Events", "All detectable features"};
+    private final static String[] FEATURE_EXTRACTED_XIC_KEYS = {"ONLY_VALIDATED_PSM", "ALL_MSMS", "ALL_DETECTABLE_FEATURES"};  
     
     private ObjectParameter<String> m_clusteringTimeComputationParameter;
     private ObjectParameter<String> m_clusteringIntensityComputationParameter;
@@ -51,6 +52,7 @@ public class DefineQuantParamsPanel extends JPanel{
     private ObjectParameter<String> m_featureFilterNameParameter;
     private ObjectParameter<String> m_featureFilterOperatorParameter;
     private ObjectParameter<String> m_normalizationParameter;
+    private ObjectParameter<String> m_extractedXICFromParameter;
 
     private JTextField m_extractionMoZTolTF;
     
@@ -77,8 +79,10 @@ public class DefineQuantParamsPanel extends JPanel{
     private JTextField m_featureMappingTimeTolTF;
     
     private JComboBox m_normalizationCB;
-    private JCheckBox m_detectFeatureChB;
-    private JCheckBox m_validatedPSMsChB;
+    //private JCheckBox m_detectFeatureChB;
+    //private JCheckBox m_validatedPSMsChB;
+    
+    private JComboBox m_extractedXICFromCB;
     
     private JScrollPane m_scrollPane;
     
@@ -200,13 +204,17 @@ public class DefineQuantParamsPanel extends JPanel{
         m_normalizationParameter = new ObjectParameter<>("normalization", "Normalization", m_normalizationCB, FEATURE_NORMALIZATION_VALUES, FEATURE_NORMALIZATION_KEYS,  2, null);
         m_parameterList.add(m_normalizationParameter);
 
-        m_detectFeatureChB = new JCheckBox("Detect all features");
-        BooleanParameter detectFeatureParameter = new BooleanParameter("detectAllFeatures", "Detect all features", m_detectFeatureChB, false);
-        m_parameterList.add(detectFeatureParameter);
+//        m_detectFeatureChB = new JCheckBox("Detect all features");
+//        BooleanParameter detectFeatureParameter = new BooleanParameter("detectAllFeatures", "Detect all features", m_detectFeatureChB, false);
+//        m_parameterList.add(detectFeatureParameter);
+//        
+//        m_validatedPSMsChB = new JCheckBox("Only validated PSM");
+//        BooleanParameter validatedPSMsParameter = new BooleanParameter("onlyValidatedPSM", "Only validated PSM", m_validatedPSMsChB, true);
+//        m_parameterList.add(validatedPSMsParameter);
         
-        m_validatedPSMsChB = new JCheckBox("Only validated PSM");
-        BooleanParameter validatedPSMsParameter = new BooleanParameter("onlyValidatedPSM", "Only validated PSM", m_validatedPSMsChB, true);
-        m_parameterList.add(validatedPSMsParameter);
+        m_extractedXICFromCB = new JComboBox(FEATURE_EXTRACTED_XIC_VALUES);
+        m_extractedXICFromParameter = new ObjectParameter<>("extractedXICFrom", "ExtractedXICFrom", m_extractedXICFromCB, FEATURE_EXTRACTED_XIC_VALUES, FEATURE_EXTRACTED_XIC_KEYS,  0, null);
+        m_parameterList.add(m_extractedXICFromParameter);
  
     }
     
@@ -304,8 +312,12 @@ public class DefineQuantParamsPanel extends JPanel{
         if (m_normalizationParameter.getStringValue() != null && !m_normalizationParameter.getStringValue().equalsIgnoreCase("NONE")) {
             params.put("normalization_method", m_normalizationParameter.getStringValue());
         }
-        params.put("detect_features", m_detectFeatureChB.isSelected());
-        params.put("start_from_validated_peptides", m_validatedPSMsChB.isEnabled() && m_validatedPSMsChB.isSelected());
+        //params.put("detect_features", m_detectFeatureChB.isSelected());
+        //params.put("start_from_validated_peptides", m_validatedPSMsChB.isEnabled() && m_validatedPSMsChB.isSelected());
+        boolean detectFeatures = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ONLY_VALIDATED_PSM")) ;
+        boolean start_from_validated_peptides = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ALL_DETECTABLE_FEATURES")) ;
+        params.put("detect_features", detectFeatures);
+        params.put("start_from_validated_peptides", start_from_validated_peptides);
         return params;
     }
         
@@ -350,24 +362,38 @@ public class DefineQuantParamsPanel extends JPanel{
         c.weightx = 1;
         headerPanel.add(m_extractionMoZTolTF, c);
         
-        // Extracted XIC from
-        c.gridwidth = 2;
-        c.gridy++;
+        // Extract XIC from combo box
+        JLabel extractionXICFromLabel = new JLabel("Extract XIC from:");
         c.gridx = 0;
-        m_detectFeatureChB.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                m_validatedPSMsChB.setEnabled(!m_detectFeatureChB.isSelected());
-            }
-        });
-        headerPanel.add(m_detectFeatureChB, c);
-        
-        
         c.gridy++;
-        c.gridx = 0;
-        c.gridwidth = 2;
-        headerPanel.add(m_validatedPSMsChB, c);
+        c.gridwidth=1;
+        c.weightx = 0;
+        headerPanel.add(extractionXICFromLabel, c);
+        c.gridx++;
+        c.weighty= 0;
+        c.weightx = 1;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+        headerPanel.add(m_extractedXICFromCB, c);
+        
+        // to be commented
+//        c.gridwidth = 2;
+//        c.gridy++;
+//        c.gridx = 0;
+//        m_detectFeatureChB.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                m_validatedPSMsChB.setEnabled(!m_detectFeatureChB.isSelected());
+//            }
+//        });
+//        headerPanel.add(m_detectFeatureChB, c);
+//        
+//        
+//        c.gridy++;
+//        c.gridx = 0;
+//        c.gridwidth = 2;
+//        headerPanel.add(m_validatedPSMsChB, c);
         
         mainPanel.add(headerPanel, BorderLayout.PAGE_START);
         

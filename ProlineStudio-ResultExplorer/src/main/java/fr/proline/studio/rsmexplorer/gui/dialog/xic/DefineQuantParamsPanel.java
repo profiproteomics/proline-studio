@@ -5,6 +5,8 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
@@ -83,6 +85,7 @@ public class DefineQuantParamsPanel extends JPanel{
     //private JCheckBox m_validatedPSMsChB;
     
     private JComboBox m_extractedXICFromCB;
+    private JCheckBox m_detectPeakelChB;
     
     private JScrollPane m_scrollPane;
     
@@ -215,6 +218,10 @@ public class DefineQuantParamsPanel extends JPanel{
         m_extractedXICFromCB = new JComboBox(FEATURE_EXTRACTED_XIC_VALUES);
         m_extractedXICFromParameter = new ObjectParameter<>("extractedXICFrom", "ExtractedXICFrom", m_extractedXICFromCB, FEATURE_EXTRACTED_XIC_VALUES, FEATURE_EXTRACTED_XIC_KEYS,  0, null);
         m_parameterList.add(m_extractedXICFromParameter);
+        
+        m_detectPeakelChB = new JCheckBox("Deisotoping Identification Based");
+        BooleanParameter detectPeakelParameter = new BooleanParameter("detectPeakel", "Deisotoping Identification Based", m_detectPeakelChB, true);
+        m_parameterList.add(detectPeakelParameter);
  
     }
     
@@ -318,6 +325,7 @@ public class DefineQuantParamsPanel extends JPanel{
         boolean start_from_validated_peptides = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ALL_DETECTABLE_FEATURES")) ;
         params.put("detect_features", detectFeatures);
         params.put("start_from_validated_peptides", start_from_validated_peptides);
+        params.put("detect_peakels", m_detectPeakelChB.isEnabled() && m_detectPeakelChB.isSelected());
         return params;
     }
         
@@ -375,6 +383,20 @@ public class DefineQuantParamsPanel extends JPanel{
         c.gridwidth = 1;
         c.gridheight = 1;
         headerPanel.add(m_extractedXICFromCB, c);
+        m_extractedXICFromCB.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                boolean start_from_validated_peptides = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ALL_DETECTABLE_FEATURES")) ;
+                m_detectPeakelChB.setEnabled(start_from_validated_peptides);
+            }
+        });
+            
+        c.gridy++;
+        c.gridx = 0;
+        c.gridwidth = 2;
+        headerPanel.add(m_detectPeakelChB, c);
+         m_detectPeakelChB.setEnabled(false);
         
         // to be commented
 //        c.gridwidth = 2;

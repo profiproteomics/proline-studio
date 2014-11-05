@@ -8,6 +8,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -55,6 +56,7 @@ public class DefineQuantParamsPanel extends JPanel{
     private ObjectParameter<String> m_featureFilterOperatorParameter;
     private ObjectParameter<String> m_normalizationParameter;
     private ObjectParameter<String> m_extractedXICFromParameter;
+    private BooleanParameter m_detectPeakelsParameter;
 
     private JTextField m_extractionMoZTolTF;
     
@@ -96,6 +98,10 @@ public class DefineQuantParamsPanel extends JPanel{
         m_parameterList = new ParameterList("XicParameters");
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());
+        for (Iterator<AbstractParameter> iterator = m_parameterList.iterator(); iterator.hasNext();) {
+            AbstractParameter param = iterator.next();
+            param.setUsed(true);
+        }
         
         setLayout(new BorderLayout());
         
@@ -220,8 +226,8 @@ public class DefineQuantParamsPanel extends JPanel{
         m_parameterList.add(m_extractedXICFromParameter);
         
         m_detectPeakelChB = new JCheckBox("Deisotoping Identification Based");
-        BooleanParameter detectPeakelParameter = new BooleanParameter("detectPeakel", "Deisotoping Identification Based", m_detectPeakelChB, true);
-        m_parameterList.add(detectPeakelParameter);
+        m_detectPeakelsParameter = new BooleanParameter("detectPeakel", "Deisotoping Identification Based", m_detectPeakelChB, true);
+        m_parameterList.add(m_detectPeakelsParameter);
  
     }
     

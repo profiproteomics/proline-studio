@@ -63,7 +63,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
     private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Omssa Identification Result"};
     private final static String[] PARSER_IDS = { "mascot.dat", "omssa.omx" };
     
-    private final static String[] DECOY_VALUES = {null, "No Decoy", "Software Engine Decoy", "Concataned Decoy"};
+    private final static String[] DECOY_VALUES = {null, "No Decoy", "Software Engine Decoy", "Concatenated Decoy"};
     private final static String[] DECOY_VALUES_ASSOCIATED_KEYS = DECOY_VALUES;
     private static final int CONCATENATED_DECOY_INDEX = 3;
     

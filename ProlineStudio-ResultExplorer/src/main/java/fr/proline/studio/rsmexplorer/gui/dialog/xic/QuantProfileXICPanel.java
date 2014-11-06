@@ -115,15 +115,14 @@ public class QuantProfileXICPanel extends JPanel {
         c.gridy++;
         c.gridx = 0;
         c.weightx = 1;
-        c.gridwidth = 2;
+        c.gridwidth = 1;
         this.add(m_discardMissedCleavedPeptidesChB, c);
         
         // discardOxidizedPeptides
         //c.gridy++;
-        //c.gridx = 0;
         c.gridx++;
         c.weightx = 1;
-        c.gridwidth = 2;
+        c.gridwidth = 1;
         this.add(m_discardOxidizedPeptidesChB, c);
         
         // applyNormalization

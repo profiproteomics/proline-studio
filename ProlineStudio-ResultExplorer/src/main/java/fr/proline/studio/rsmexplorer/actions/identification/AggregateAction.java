@@ -11,10 +11,12 @@ import fr.proline.core.orm.uds.dto.DDataset;
 
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.AddAggregateDialog;
 import java.util.ArrayList;
 import javax.swing.tree.DefaultTreeModel;
@@ -168,6 +170,13 @@ public class AggregateAction extends AbstractRSMAction {
     
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
+        
+        // to execute this action, the user must be the owner of the project
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            setEnabled(false);
+            return;
+        }
         
         int nbSelectedNodes = selectedNodes.length;
         

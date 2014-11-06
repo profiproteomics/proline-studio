@@ -75,7 +75,7 @@ public class IdProjectIdentificationNode extends AbstractNode {
 
             // ask asynchronous loading of data
             DatabaseProjectTask task = new DatabaseProjectTask(callback);
-            task.initChangeNameAndDescriptionProject(project.getId(), newName, newDescription);
+            task.initChangeSettingsOfProject(project, newName, newDescription, null);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
     }

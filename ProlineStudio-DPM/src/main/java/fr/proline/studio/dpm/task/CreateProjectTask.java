@@ -24,11 +24,11 @@ import javax.persistence.EntityManager;
  */
 public class CreateProjectTask extends AbstractServiceTask {
 
-    private String m_name;
-    private String m_description;
-    private long m_ownerId;
-    private ProjectIdentificationData m_projectIdentificationData;
-    private ProjectQuantitationData m_projectQuantificationData;
+    private final String m_name;
+    private final String m_description;
+    private final long m_ownerId;
+    private final ProjectIdentificationData m_projectIdentificationData;
+    private final ProjectQuantitationData m_projectQuantificationData;
     
     public CreateProjectTask(AbstractServiceCallback callback, String name, String description, long ownerId, ProjectIdentificationData projectIdentificationData, ProjectQuantitationData projectQuantificationData) {
         super(callback, true /*synchronous*/, new TaskInfo("Add Project named "+name, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
@@ -111,25 +111,6 @@ public class CreateProjectTask extends AbstractServiceTask {
                 m_taskError = new TaskError("Internal Error : Project not Found");
                 return false;
             }
-
-            // create the trash
-            // ----- No longer needed, done in create project -------
-            
-            //Dataset trashDataset = new Dataset(p);
-            //trashDataset.setType(Dataset.DatasetType.TRASH);
-
-            //Aggregation aggregation = DatabaseDataManager.getUDSDataManager().getAggregation(Aggregation.ChildNature.OTHER);
-            //Aggregation mergedAggregation = entityManagerUDS.merge(aggregation);
-            //trashDataset.setAggregation(mergedAggregation);
-
-            //trashDataset.setName("Trash");
-            //trashDataset.setChildrenCount(0); // trash is empty
-
-            //trashDataset.setNumber(0); //JPM.TODO ?
-
-            //p.getTransientData().setChildrenNumber(1);
-
-            //entityManagerUDS.persist(trashDataset);
             
             m_projectIdentificationData.setProject(p);
             m_projectQuantificationData.setProject(p);

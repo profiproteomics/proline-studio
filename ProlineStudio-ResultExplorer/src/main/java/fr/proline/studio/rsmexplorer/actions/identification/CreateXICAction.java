@@ -3,8 +3,10 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 import fr.proline.studio.rsmexplorer.actions.ConnectAction;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -168,7 +170,15 @@ public class CreateXICAction extends AbstractRSMAction {
     
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
-         setEnabled(true);
+        
+        // to execute this action, the user must be the owner of the project
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            setEnabled(false);
+            return;
+        }
+        
+        setEnabled(true);
     }
     
 }

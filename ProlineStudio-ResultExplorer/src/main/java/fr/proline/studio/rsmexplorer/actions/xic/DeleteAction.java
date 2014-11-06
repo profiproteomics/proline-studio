@@ -1,6 +1,9 @@
 package fr.proline.studio.rsmexplorer.actions.xic;
 
+import fr.proline.core.orm.uds.Project;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
@@ -73,6 +76,13 @@ public class DeleteAction  extends AbstractRSMAction {
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
+        // to execute this action, the user must be the owner of the project
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            setEnabled(false);
+            return;
+        }
+        
         int nbSelectedNode = selectedNodes.length;
         for (int i = 0; i < nbSelectedNode; i++) {
             AbstractNode node = selectedNodes[i];

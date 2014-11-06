@@ -1,10 +1,13 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -70,6 +73,14 @@ public class ClearDatasetAction extends AbstractRSMAction {
     
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
+        
+        // to execute this action, the user must be the owner of the project
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            setEnabled(false);
+            return;
+        }
+        
         int nbSelectedNodes = selectedNodes.length;
         for (int i = 0; i < nbSelectedNodes; i++) {
             AbstractNode node = selectedNodes[i];

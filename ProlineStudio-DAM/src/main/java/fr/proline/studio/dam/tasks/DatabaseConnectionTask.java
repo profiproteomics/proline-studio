@@ -257,7 +257,7 @@ public class DatabaseConnectionTask extends AbstractDatabaseTask {
         for (int i = 0; i < nb; i++) {
             UserAccount account = projectUsers[i];
             if (m_projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
-                udsMgr.setProjectUser(account);
+                udsMgr.setLoggedUser(account);
                 foundUser = true;
                 break;
             }

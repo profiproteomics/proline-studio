@@ -3,6 +3,7 @@ package fr.proline.studio.dam;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
+import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.module.seq.DatabaseAccess;
@@ -22,7 +23,7 @@ public class DatabaseDataManager  {
     private InstrumentConfiguration[] m_instruments;
     private PeaklistSoftware[] m_peaklistSoftwares;
     private UserAccount[] m_projectUsers;
-    private UserAccount m_projectUser;
+    private UserAccount m_loggedUser;
     private String m_jdbcURL;
     private String m_jdbcDriver;
     
@@ -96,18 +97,26 @@ public class DatabaseDataManager  {
         return m_projectUsers;
     }
     
-    public void setProjectUser(UserAccount projectUser) {
-        m_projectUser = projectUser;
+    public void setLoggedUser(UserAccount loggedUser) {
+        m_loggedUser = loggedUser;
     }
     
-    public UserAccount getProjectUser() {
-        return m_projectUser;
+    public UserAccount getLoggedUser() {
+        return m_loggedUser;
     }
     
-    public String getProjectUserName() {
-        return m_projectUser.getLogin();
+    
+    public String getLoggedUserName() {
+        return m_loggedUser.getLogin();
     }
 
+    public boolean ownProject(Project p) {
+        if (p== null) {
+            return false;
+        }
+        return (p.getOwner().getId() == m_loggedUser.getId());
+    }
+    
     public void setUdsJdbcDriver(String jdbcDriver) {
         m_jdbcDriver = jdbcDriver;
     }

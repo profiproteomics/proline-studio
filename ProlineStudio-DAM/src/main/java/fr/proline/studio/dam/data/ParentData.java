@@ -23,7 +23,7 @@ public class ParentData extends AbstractData {
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority, boolean identificationDataset) {
         DatabaseProjectTask task = new DatabaseProjectTask(callback);
-        task.initLoadProject(DatabaseDataManager.getDatabaseDataManager().getProjectUserName(), list);
+        task.initLoadProject(DatabaseDataManager.getDatabaseDataManager().getLoggedUserName(), list);
         if (priority != null) {
             task.setPriority(priority);
         }

@@ -1,7 +1,9 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -9,6 +11,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.spectralcount.SpectralCountDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -132,7 +135,14 @@ public class SpectralCountAction extends AbstractRSMAction {
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
-         if (selectedNodes.length != 1) {
+        // to execute this action, the user must be the owner of the project
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            setEnabled(false);
+            return;
+        }
+        
+        if (selectedNodes.length != 1) {
             setEnabled(false);
             return;
         }

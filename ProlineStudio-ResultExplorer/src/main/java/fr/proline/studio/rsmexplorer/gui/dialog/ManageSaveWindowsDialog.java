@@ -58,7 +58,7 @@ public class ManageSaveWindowsDialog extends DefaultDialog {
         m_windowList.setCellRenderer(new WindowListRenderer());
         JScrollPane windowListScrollPane = new JScrollPane(m_windowList) {
 
-            private Dimension preferredSize = new Dimension(360, 200);
+            private final Dimension preferredSize = new Dimension(360, 200);
 
             @Override
             public Dimension getPreferredSize() {

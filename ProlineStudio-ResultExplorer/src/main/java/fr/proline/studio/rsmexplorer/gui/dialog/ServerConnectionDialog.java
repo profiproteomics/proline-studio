@@ -171,7 +171,7 @@ public class ServerConnectionDialog extends ConnectionDialog {
                         for (int i = 0; i < nb; i++) {
                             UserAccount account = projectUsers[i];
                             if (projectUser.compareToIgnoreCase(account.getLogin()) == 0) {
-                                udsMgr.setProjectUser(account);
+                                udsMgr.setLoggedUser(account);
                                 break;
                             }
                         }

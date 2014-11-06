@@ -2,7 +2,9 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -11,6 +13,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.MergeTask;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
@@ -184,6 +187,13 @@ public class MergeAction extends AbstractRSMAction {
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
+        // to execute this action, the user must be the owner of the project
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            setEnabled(false);
+            return;
+        }
+        
         if (selectedNodes.length != 1) {
             setEnabled(false);
             return;

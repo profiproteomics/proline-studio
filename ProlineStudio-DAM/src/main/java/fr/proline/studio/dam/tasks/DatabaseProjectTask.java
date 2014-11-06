@@ -3,13 +3,15 @@ package fr.proline.studio.dam.tasks;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**
@@ -20,15 +22,16 @@ import javax.persistence.TypedQuery;
 public class DatabaseProjectTask extends AbstractDatabaseTask {
 
     private String m_user = null;
-    private long m_projectId = -1;
+    private Project m_p = null;
     private List<AbstractData> m_list = null;
     private String m_name = null;
     private String m_description = null;
+    private ArrayList<UserAccount> m_userAccountList = null;
 
     private int m_action;
     
     private final static int LOAD_PROJECT   = 0;
-    private final static int CHANGE_NAME_DESCRIPTION_PROJECT = 1;
+    private final static int CHANGE_SETTINGS_PROJECT = 1;
     
     public DatabaseProjectTask(AbstractDatabaseCallback callback) {
         super(callback, null);
@@ -37,7 +40,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
     
     /**
      * To load a project
-     * @param projectId
+     * @param user
      * @param list 
      */
     public void initLoadProject(String user, List<AbstractData> list) {
@@ -50,16 +53,19 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
     
     /**
      * To rename a project
-     * @param projectId
-     * @param list 
+     * @param p
+     * @param name 
+     * @param description
+     * @param userAccountList
      */
-    public void initChangeNameAndDescriptionProject(long projectId, String name, String description) {
-        setTaskInfo(new TaskInfo("Change Name/Description of a Project", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
-        m_projectId = projectId;
+    public void initChangeSettingsOfProject(Project p, String name, String description, ArrayList<UserAccount> userAccountList) {
+        setTaskInfo(new TaskInfo("Change Settings of a Project", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        m_p = p;
         m_name = name;
         m_description = description;
+        m_userAccountList = userAccountList;
         
-        m_action = CHANGE_NAME_DESCRIPTION_PROJECT;
+        m_action = CHANGE_SETTINGS_PROJECT;
     }
 
     
@@ -74,8 +80,8 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
         switch (m_action) {
             case LOAD_PROJECT:
                 return loadProject();
-            case CHANGE_NAME_DESCRIPTION_PROJECT:
-                return changeNameDescriptionProject();
+            case CHANGE_SETTINGS_PROJECT:
+                return changeProjectSettings();
         }
         return false; // should not happen
     }
@@ -87,7 +93,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
 
-            TypedQuery<Project> projectQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.Project p, fr.proline.core.orm.uds.UserAccount user WHERE p.owner.id=user.id AND user.login=:user ORDER BY p.name ASC", Project.class);
+            TypedQuery<Project> projectQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.Project p, fr.proline.core.orm.uds.UserAccount user WHERE user in elements(p.members) AND user.login=:user ORDER BY p.name ASC", Project.class);
             projectQuery.setParameter("user", m_user);
             List<Project> projectList = projectQuery.getResultList();
 
@@ -97,29 +103,16 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             while (it.hasNext()) {
                 Project projectCur = it.next();
 
+                // avoid lazy initialization problem
+                Set<UserAccount> members = projectCur.getMembers();
+                for (UserAccount userAccount : members) {}
+                
                 ProjectIdentificationData projectDataCur = new ProjectIdentificationData(projectCur);
                 projectDataCur.setHasChildren(true); // always has a Trash
                 //projectMap.put(projectIdCur, projectDataCur);
                 m_list.add(projectDataCur);
             }
-            
-            
-            /*if (projectMap.size() >0) {
-                Query countQuery = entityManagerUDS.createQuery("SELECT p, count(d) FROM fr.proline.core.orm.uds.Project p, fr.proline.core.orm.uds.Dataset d WHERE d.project=p AND d.parentDataset=null AND p.id IN (:projectIds) GROUP BY p.id");
-                countQuery.setParameter("projectIds", projectMap.keySet());
-                List l = countQuery.getResultList();
 
-                Iterator<Object[]> itCountQuery = l.iterator();
-                while (itCountQuery.hasNext()) {
-                    Object[] resCur = itCountQuery.next();
-                    Project p = (Project) resCur[0];
-                    Long countDataset = (Long) resCur[1];
-                    if (countDataset == 0) {
-                        countDataset += 1; // for Trash
-                    }
-                    projectMap.get(p.getId()).setHasChildren(countDataset > 0);
-                }
-            }*/
  
             entityManagerUDS.getTransaction().commit();
 
@@ -132,27 +125,34 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             entityManagerUDS.close();
         }
 
-        // initialize the MSI DB in batch //JPM.TODO ??? remove
-        //DatabaseConnectionTask msiConnection = new DatabaseConnectionTask(null, projectId);
-        //AccessDatabaseThread.getAccessDatabaseThread().addTask(msiConnection);
 
 
         return result;
     }
 
-    private boolean changeNameDescriptionProject() {
+    private boolean changeProjectSettings() {
 
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
         try {
             entityManagerUDS.getTransaction().begin();
 
-            String hqlUpdate = "UPDATE Project p set p.name= :name, p.description= :description where p.id = :projectId";
-            Query modifyProjectQuery = entityManagerUDS.createQuery(hqlUpdate);
-            modifyProjectQuery.setParameter("projectId", m_projectId);
-            modifyProjectQuery.setParameter("name", m_name);
-            modifyProjectQuery.setParameter("description", m_description);
-            modifyProjectQuery.executeUpdate();
+            Project p = entityManagerUDS.merge(m_p);
+            p.setName(m_name);
+            p.setDescription(m_description);
+            
+            if (m_userAccountList != null) {
+                p.getMembers().clear();
+                m_p.getMembers().clear();
 
+                int nb = m_userAccountList.size();
+                for (int i = 0; i < nb; i++) {
+                    UserAccount userAccount = m_userAccountList.get(i);
+                    UserAccount userAccountInDB = entityManagerUDS.merge(userAccount);
+                    p.addMember(userAccountInDB);
+                    m_p.addMember(userAccount);
+                }
+            }
+            
             entityManagerUDS.getTransaction().commit();
 
         } catch (Exception e) {

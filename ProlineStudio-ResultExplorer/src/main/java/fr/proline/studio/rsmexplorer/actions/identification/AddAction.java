@@ -1,6 +1,9 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 
+import fr.proline.core.orm.uds.Project;
+import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import javax.swing.JMenu;
@@ -40,6 +43,7 @@ public class AddAction extends AbstractRSMAction {
     
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
+
         
         m_identificationAction.updateEnabled(selectedNodes);
         m_aggregateAction.updateEnabled(selectedNodes);

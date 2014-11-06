@@ -13,7 +13,10 @@ import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.uds.Project;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.List;
 
@@ -98,6 +101,13 @@ public class ChangeTypicalProteinAction extends AbstractRSMAction {
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
+        // to execute this action, the user must be the owner of the project
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            setEnabled(false);
+            return;
+        }
+        
         // note : we can ask for the validation of multiple ResultSet in one time
 
         int nbSelectedNodes = selectedNodes.length;

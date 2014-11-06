@@ -6,11 +6,13 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.identification.IdProjectIdentificationNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.CertifyIdentificationTask;
 import fr.proline.studio.dpm.task.ImportIdentificationTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ImportIdentificationDialog;
 import java.io.File;
 import java.io.IOException;
@@ -157,6 +159,13 @@ public class ImportSearchResultAsRsetAction extends AbstractRSMAction {
     
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
+        
+        // to execute this action, the user must be the owner of the project
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            setEnabled(false);
+            return;
+        }
         
         int nbSelectedNodes = selectedNodes.length;
 

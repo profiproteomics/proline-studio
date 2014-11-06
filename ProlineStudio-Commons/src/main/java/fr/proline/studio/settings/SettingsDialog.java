@@ -69,7 +69,7 @@ public class SettingsDialog extends DefaultDialog {
         
         JScrollPane filesListScrollPane = new JScrollPane(m_filesList) {
 
-            private Dimension preferredSize = new Dimension(280, 140);
+            private final Dimension preferredSize = new Dimension(280, 140);
 
             @Override
             public Dimension getPreferredSize() {

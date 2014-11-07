@@ -113,6 +113,14 @@ public class ValueFilter extends Filter {
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             JLabel l = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             
+            if (index<0) {
+                // for the selected value, index is not set
+                for (int i=0;i<m_values.length;i++) {
+                    if (m_values[i] == value) {
+                        index = i;
+                    }
+                }
+            }
             if ((m_displayIcons != null) && (index>=0)) {
                 l.setIcon(m_displayIcons[index]);
             } else {

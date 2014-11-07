@@ -59,7 +59,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private ExportButton m_exportButton;
     
     /**
-     * Creates new form ProteinGroupsTablePanel
+     * Creates new form RsmProteinSetPanel
      */
     public RsmProteinSetPanel(boolean firstPanel) {
         
@@ -94,7 +94,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     public void dataUpdated(SubTask subTask, boolean finished) {
-        ((ProteinSetTable) m_proteinSetTable).dataUpdated(subTask, finished);
+        m_proteinSetTable.dataUpdated(subTask, finished);
     }
 
     public DProteinSet getSelectedProteinSet() {
@@ -207,7 +207,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         proteinSetPanel.setBounds(0, 0, 500, 400);
         proteinSetPanel.setLayout(new BorderLayout());
         
-         JPanel internalPanel = createInternalPanel();
+        JPanel internalPanel = createInternalPanel();
 
         JToolBar toolbar = initToolbar();
         proteinSetPanel.add(toolbar, BorderLayout.WEST);
@@ -313,12 +313,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     
     private class ProteinSetTable extends LazyTable  {
-        /** 
-         * Called whenever the value of the selection changes.
-         * @param e the event that characterizes the change.
-         */
 
-        DProteinSet proteinSetSelected = null;
+        private final DProteinSet m_proteinSetSelected = null;
         
         
         public ProteinSetTable() {
@@ -406,7 +402,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
                 if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((ProteinSetTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
-                    ((ProteinSetTable) m_proteinSetTable).scrollRowToVisible(rowSelectedInView);
+                    scrollRowToVisible(rowSelectedInView);
                 }
                     
             }

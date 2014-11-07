@@ -6,6 +6,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.RetrieveSCDataAction
 import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportXICAction;
+import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICProteinSetAction;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -179,6 +180,9 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                 m_mainActions.add(null);  // separator
 
+                DisplayXICProteinSetAction displayXICProteinSetAction = new DisplayXICProteinSetAction();
+                m_mainActions.add(displayXICProteinSetAction);
+                
                 RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
                 m_mainActions.add(retrieveSCDataAction);
                 

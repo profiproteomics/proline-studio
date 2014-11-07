@@ -1,13 +1,9 @@
 package fr.proline.studio.pattern;
 
 
-import fr.proline.core.orm.msi.ResultSet;
-import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import fr.proline.studio.utils.IconManager;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -166,6 +162,16 @@ public class WindowBoxFactory {
 
         return winBox;
 
+    }
+    
+    public static WindowBox getXicQuantProteinSetWindowBox(String name) {
+
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataboxXicProteinSet();
+
+        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
+        return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
     public static WindowBox getTaskListWindowBox() {

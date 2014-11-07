@@ -1,0 +1,105 @@
+package fr.proline.studio.rsmexplorer.actions.xic;
+
+import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.QuantitationMethod;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import org.openide.util.NbBundle;
+
+/**
+ *
+ * @author JM235353
+ */
+public class DisplayXICProteinSetAction extends AbstractRSMAction {
+
+    public DisplayXICProteinSetAction() {
+        super(NbBundle.getMessage(DisplayXICProteinSetAction.class, "CTL_DisplayXicProteinSetAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+    }
+
+    @Override
+    public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
+
+        int nbNodes = selectedNodes.length;
+        for (int i = 0; i < nbNodes; i++) {
+            DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
+
+            actionImpl(dataSetNode);
+        }
+
+    }
+
+    private void actionImpl(DataSetNode dataSetNode) {
+        
+        final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
+
+
+        WindowBox wbox = WindowBoxFactory.getXicQuantProteinSetWindowBox(dataset.getName()+" Protein Sets");
+            wbox.setEntryData(dataset.getProject().getId(), dataset);
+
+
+            // open a window to display the window box
+            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+            win.open();
+            win.requestActive();
+        
+
+
+        }
+
+
+
+    
+    @Override
+    public void updateEnabled(AbstractNode[] selectedNodes) {
+
+        // only one node selected
+        if (selectedNodes.length != 1) {
+            setEnabled(false);
+            return;
+        }
+
+        AbstractNode node = (AbstractNode) selectedNodes[0];
+
+        // the node must not be in changing state
+        if (node.isChanging()) {
+            setEnabled(false);
+            return;
+        }
+
+        // must be a dataset 
+        if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
+            setEnabled(false);
+            return;
+        }
+
+        DataSetNode datasetNode = (DataSetNode) node;
+
+        // must be a quantitation XIC
+        Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
+        if (datasetType != Dataset.DatasetType.QUANTITATION) {
+            setEnabled(false);
+            return;
+        }
+
+        DDataset d = ((DataSetData) datasetNode.getData()).getDataset();
+        QuantitationMethod quantitationMethod = d.getQuantitationMethod();
+        if (quantitationMethod == null) {
+            setEnabled(false);
+            return;
+        }
+
+        if (quantitationMethod.getAbundanceUnit().compareTo("feature_intensity") != 0) { // XIC //JPM.TODO : put as a constant
+            setEnabled(false);
+            return;
+        }
+
+        setEnabled(true);
+    }
+}

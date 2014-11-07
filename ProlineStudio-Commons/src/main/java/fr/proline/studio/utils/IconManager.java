@@ -34,6 +34,7 @@ public class IconManager {
         HOUR_GLASS_MINI16,
         GEL,
         PROJECT,
+        PROJECT_READ_ONLY,
         USER,
         USERS,
         MAXIMIZE,
@@ -236,6 +237,8 @@ public class IconManager {
                 return "fr/proline/studio/images/gel.png";
             case PROJECT:
                 return "fr/proline/studio/images/project.png";
+            case PROJECT_READ_ONLY:
+                return "fr/proline/studio/images/projectReadOnly.png";
             case USER:
                 return "fr/proline/studio/images/user.png";
             case USERS:

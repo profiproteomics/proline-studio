@@ -458,7 +458,11 @@ public class ProjectExplorerPanel extends JPanel {
                     if (projectItem.isChanging()) {
                         l.setIcon(IconManager.getIconWithHourGlass(IconManager.IconType.PROJECT));
                     } else {
-                        l.setIcon(IconManager.getIcon(IconManager.IconType.PROJECT));
+                        if (DatabaseDataManager.getDatabaseDataManager().ownProject(projectItem.getProjectIdentificationData().getProject())) {
+                            l.setIcon(IconManager.getIcon(IconManager.IconType.PROJECT));
+                        } else {
+                            l.setIcon(IconManager.getIcon(IconManager.IconType.PROJECT_READ_ONLY));
+                        }
                     }
                 }
             }

@@ -47,6 +47,8 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.core.orm.uds.Project;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.GenerateSpectrumMatchTask;
@@ -57,6 +59,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataBoxRsetPeptideSpectrum;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.utils.IconManager;
 
 import java.awt.event.ActionEvent;
@@ -227,7 +230,17 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         m_previousPeptideMatch = peptideMatch;
         m_previousFragmentationSet = (peptideFragmentationData!=null);
         
-        m_generateMatchButton.setEnabled(peptideFragmentationData == null);
+        
+        // enable generateMatchButton, when fragmentation data is not known
+        // and when the user own the project
+        if (peptideFragmentationData == null) {
+            // to execute this action, the user must be the owner of the project
+            Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+            if (DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+                m_generateMatchButton.setEnabled(true);
+            }
+        }
+        
         
         m_chart.setNotify(false);
         constructSpectrumChart(peptideMatch);

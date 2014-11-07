@@ -55,8 +55,10 @@ public class PeptideFragmentationData {
                 
                 // sort theoretical frag table according to serie's label for proper display in frag jtable
                 ArrayList<TheoreticalFragmentSeries_AW> fragSerArrayList = new ArrayList<TheoreticalFragmentSeries_AW>();
-                for(TheoreticalFragmentSeries_AW frag : jsonProp.frag_table) {
-                	fragSerArrayList.add(frag);
+                if (jsonProp.frag_table != null) {
+                    for (TheoreticalFragmentSeries_AW frag : jsonProp.frag_table) {
+                        fragSerArrayList.add(frag);
+                    }
                 }
                 //Sorting
                 Collections.sort(fragSerArrayList, new Comparator<TheoreticalFragmentSeries_AW>(){

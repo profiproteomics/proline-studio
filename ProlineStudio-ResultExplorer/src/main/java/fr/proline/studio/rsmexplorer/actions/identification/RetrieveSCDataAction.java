@@ -72,23 +72,10 @@ public class RetrieveSCDataAction extends AbstractRSMAction {
 
         DataSetNode datasetNode = (DataSetNode) node;
         
-        Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
-        if (datasetType != Dataset.DatasetType.QUANTITATION) {
+        if (! datasetNode.isQuantSC()) {
             setEnabled(false);
             return;
         }
-        
-        DDataset d =  ((DataSetData) datasetNode.getData()).getDataset();
-        QuantitationMethod quantitationMethod = d.getQuantitationMethod();
-        if (quantitationMethod == null) {
-            setEnabled(false);
-            return;
-        }
-        
-        if (quantitationMethod.getAbundanceUnit().compareTo("spectral_counts") != 0) { // Spectral count
-            setEnabled(false);
-            return;
-        } 
         
         setEnabled(true);        
     }

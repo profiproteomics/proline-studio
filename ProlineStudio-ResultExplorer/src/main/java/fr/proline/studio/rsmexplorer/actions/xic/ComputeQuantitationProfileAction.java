@@ -165,20 +165,7 @@ public class ComputeQuantitationProfileAction extends AbstractRSMAction {
         DataSetNode datasetNode = (DataSetNode) node;
 
         // must be a quantitation XIC
-        Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
-        if (datasetType != Dataset.DatasetType.QUANTITATION) {
-            setEnabled(false);
-            return;
-        }
-
-        DDataset d = ((DataSetData) datasetNode.getData()).getDataset();
-        QuantitationMethod quantitationMethod = d.getQuantitationMethod();
-        if (quantitationMethod == null) {
-            setEnabled(false);
-            return;
-        }
-
-        if (quantitationMethod.getAbundanceUnit().compareTo("feature_intensity") != 0) { // XIC
+        if (! datasetNode.isQuantXIC()) {
             setEnabled(false);
             return;
         }

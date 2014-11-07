@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.tree;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DDataset.MergeInformation;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -324,6 +325,46 @@ public class DataSetNode extends AbstractNode {
     public boolean isQuantitation(){
        Dataset.DatasetType datasetType = ((DataSetData) getData()).getDatasetType();
        return  (datasetType == Dataset.DatasetType.QUANTITATION) ;
+    }
+    
+    /**
+     * return true if it's a quantitation Spectral Count
+     * @return 
+     */
+    public boolean isQuantSC() {
+        if (isQuantitation()) {
+            DDataset d =  ((DataSetData) getData()).getDataset();
+            QuantitationMethod quantitationMethod = d.getQuantitationMethod();
+            if (quantitationMethod == null) {
+                return false;
+            }else if (quantitationMethod.getAbundanceUnit().compareTo("spectral_counts") == 0) { // Spectral count
+                return true;
+            } else {
+                return false;
+            }
+        }else {
+            return false;
+        }
+    }
+    
+    /**
+     * return true if it's a quantitation XIC
+     * @return 
+     */
+    public boolean isQuantXIC() {
+        if (isQuantitation()) {
+            DDataset d =  ((DataSetData) getData()).getDataset();
+            QuantitationMethod quantitationMethod = d.getQuantitationMethod();
+            if (quantitationMethod == null) {
+                return false;
+            }else if (quantitationMethod.getAbundanceUnit().compareTo("feature_intensity") == 0) { // XIC
+                return true;
+            } else {
+                return false;
+            }
+        }else {
+            return false;
+        }
     }
     
     /**

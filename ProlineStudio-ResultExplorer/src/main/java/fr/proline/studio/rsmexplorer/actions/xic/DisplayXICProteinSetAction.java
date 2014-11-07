@@ -82,20 +82,8 @@ public class DisplayXICProteinSetAction extends AbstractRSMAction {
         DataSetNode datasetNode = (DataSetNode) node;
 
         // must be a quantitation XIC
-        Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
-        if (datasetType != Dataset.DatasetType.QUANTITATION) {
-            setEnabled(false);
-            return;
-        }
-
-        DDataset d = ((DataSetData) datasetNode.getData()).getDataset();
-        QuantitationMethod quantitationMethod = d.getQuantitationMethod();
-        if (quantitationMethod == null) {
-            setEnabled(false);
-            return;
-        }
-
-        if (quantitationMethod.getAbundanceUnit().compareTo("feature_intensity") != 0) { // XIC //JPM.TODO : put as a constant
+        // must be a quantitation XIC
+        if (! datasetNode.isQuantXIC()) {
             setEnabled(false);
             return;
         }

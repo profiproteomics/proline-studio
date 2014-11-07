@@ -35,6 +35,7 @@ public class IconManager {
         GEL,
         PROJECT,
         USER,
+        USERS,
         MAXIMIZE,
         MINIMIZE,
         ASSOCIATE,
@@ -237,6 +238,8 @@ public class IconManager {
                 return "fr/proline/studio/images/project.png";
             case USER:
                 return "fr/proline/studio/images/user.png";
+            case USERS:
+                return "fr/proline/studio/images/users.png";
             case MAXIMIZE:
                 return "fr/proline/studio/images/maximize.png";
             case MINIMIZE:

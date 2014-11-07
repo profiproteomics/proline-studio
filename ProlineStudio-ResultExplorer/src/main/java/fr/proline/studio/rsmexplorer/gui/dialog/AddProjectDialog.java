@@ -36,6 +36,9 @@ public class AddProjectDialog extends DefaultDialog {
     
     private JPanel m_userAccountPanel;
     
+    private boolean m_canModifyValues;
+
+    
     public static AddProjectDialog getAddProjectDialog(Window parent) {
         if (m_singletonDialog == null) {
             m_singletonDialog = new AddProjectDialog(parent);
@@ -61,6 +64,8 @@ public class AddProjectDialog extends DefaultDialog {
         // remove all owners if needed
         DefaultListModel userAccountListModel = ((DefaultListModel) m_userAccountList.getModel());
         userAccountListModel.clear();
+        
+        m_canModifyValues = true;
         
         // initialize fields
         if (p == null) {
@@ -101,11 +106,13 @@ public class AddProjectDialog extends DefaultDialog {
             m_addUserAccountButton.setEnabled(isCreatorOfTheProject);
             m_removeFileButton.setEnabled(isCreatorOfTheProject);
 
-    
+            m_canModifyValues = DatabaseDataManager.getDatabaseDataManager().ownProject(p);
             
         }
+        
+        updateEnabled(m_canModifyValues);
     }
-    
+
     private AddProjectDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
@@ -113,6 +120,7 @@ public class AddProjectDialog extends DefaultDialog {
 
         initInternalPanel();
     }
+
     
     private void initInternalPanel() {
 
@@ -121,8 +129,6 @@ public class AddProjectDialog extends DefaultDialog {
 
 
         JPanel projectParametersPanel = createProjectParametersPanel();
-
-
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -224,7 +230,7 @@ public class AddProjectDialog extends DefaultDialog {
             }
         };
 
-        m_addUserAccountButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
+        m_addUserAccountButton = new JButton(IconManager.getIcon(IconManager.IconType.USERS));
         m_addUserAccountButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
         m_removeFileButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
         m_removeFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
@@ -326,10 +332,23 @@ public class AddProjectDialog extends DefaultDialog {
 
     }
 
+        
+    private void updateEnabled(boolean canModifyValues) {
+        if (!canModifyValues) {
+            m_nameTextField.setEnabled(false);
+            m_descriptionTextArea.setEnabled(false);
+            m_userAccountList.setEnabled(false);
+            m_addUserAccountButton.setEnabled(false);
+            m_removeFileButton.setEnabled(false);
+        }
+    }
     
     @Override
     protected boolean okCalled() {
 
+        if (!m_canModifyValues) {
+            return true;
+        }
 
         // check parameters
         if (!checkParameters()) {
@@ -374,6 +393,10 @@ public class AddProjectDialog extends DefaultDialog {
         return true;
     }
  
+    public boolean canModifyValues() {
+        return m_canModifyValues;
+    }
+    
     public String getProjectName() {
         return m_nameTextField.getText();
     }

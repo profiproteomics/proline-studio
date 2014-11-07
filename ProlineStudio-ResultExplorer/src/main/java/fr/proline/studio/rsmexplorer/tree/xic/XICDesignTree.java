@@ -1,6 +1,8 @@
 package fr.proline.studio.rsmexplorer.tree.xic;
 
+import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.RawFile;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dpm.serverfilesystem.RootInfo;
@@ -10,6 +12,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.xic.RenameAction;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.SelectRawFileDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -77,8 +80,15 @@ public class XICDesignTree extends AbstractTree {
         }
     }
     
-        @Override
+    @Override
     public boolean isPathEditable(TreePath path) {
+
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            return false;
+        }
+
+
         if (isEditable()) {
             AbstractNode node = (AbstractNode) path.getLastPathComponent();
             AbstractNode.NodeTypes nodeType = node.getType();

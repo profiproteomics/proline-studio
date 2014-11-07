@@ -170,7 +170,7 @@ public class ProjectExplorerPanel extends JPanel {
                 dialog.setLocation(x, y);
                 dialog.setVisible(true);
 
-                if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                if ((dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) && (dialog.canModifyValues())) {
 
                     // data needed to create the project
                     String projectName = dialog.getProjectName();
@@ -257,7 +257,7 @@ public class ProjectExplorerPanel extends JPanel {
                 dialog.setLocation(x, y);
                 dialog.setVisible(true);
 
-                if (dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                if ((dialog.getButtonClicked() == DefaultDialog.BUTTON_OK) && (dialog.canModifyValues())) {
 
                     // data needed to create the project
                     final String projectName = dialog.getProjectName();

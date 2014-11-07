@@ -21,6 +21,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -28,6 +29,7 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.*;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -134,6 +136,12 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
     
     @Override
     public boolean isPathEditable(TreePath path) {
+        
+        Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
+        if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
+            return false;
+        }
+        
         if (isEditable()) {
             
             if (path.getPathCount() == 1) {

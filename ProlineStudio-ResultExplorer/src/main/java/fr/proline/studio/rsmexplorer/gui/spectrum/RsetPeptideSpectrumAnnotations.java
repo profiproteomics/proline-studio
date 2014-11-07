@@ -212,8 +212,8 @@ public class RsetPeptideSpectrumAnnotations {
         target2.setLabelTextAnchor(TextAnchor.BOTTOM_RIGHT);
         plot.addRangeMarker(target2);
 
-        int sizeABCserie = fragSer[positionIonABC].masses.length;
-        int sizeXYZserie = fragSer[positionIonXYZ].masses.length;
+        int sizeABCserie = (fragSer.length==0) ? 0 : fragSer[positionIonABC].masses.length;
+        int sizeXYZserie = (fragSer.length==0) ? 0 : fragSer[positionIonXYZ].masses.length;
 
 
         if (xyzSerieName.contains("z+1")) {

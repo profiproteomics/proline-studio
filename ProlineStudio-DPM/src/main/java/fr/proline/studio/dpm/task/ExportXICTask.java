@@ -8,6 +8,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,12 +21,14 @@ public class ExportXICTask extends AbstractServiceTask {
     private DDataset m_dataset;
     private String[] m_filePathResult;
     private String m_exportType;
+    private String m_templateName;
     
-    public ExportXICTask(AbstractServiceCallback callback, DDataset dataset, String exportTypeParam, String[] filePathInfo) {
+    public ExportXICTask(AbstractServiceCallback callback, DDataset dataset, String exportTypeParam, String[] filePathInfo, String templateName) {
         super(callback, false /** asynchronous */, new TaskInfo("Export XIC " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
         m_exportType = exportTypeParam;
         m_filePathResult = filePathInfo;
+        m_templateName = templateName;
     }
     
     
@@ -38,16 +41,20 @@ public class ExportXICTask extends AbstractServiceTask {
             request.setId(m_id);
             request.setMethod("run_job");
 
+            setWsVersion("0.2");
             Map<String, Object> params = new HashMap<>();
             params.put("output_mode", "STREAM"); // use of a stream, (do not export to file)
             params.put("project_id", m_dataset.getProject().getId());
             params.put("data_set_id", m_dataset.getId());
             params.put("export_type", m_exportType);
             
-
+            Map<String, Object> extraParams = new HashMap<>();
+            extraParams.put("template_name", m_templateName); 
+            params.put("extra_params", extraParams);
+            
             request.setParameters(params);
 
-            HttpResponse response = postRequest("dps.msq/export_quant_dataset/" + request.getMethod() + getIdString(), request);
+            HttpResponse response = postRequest("dps.msq/export_quant_dataset/" + request.getMethod() + getIdString()+getWSVersionString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -165,13 +172,13 @@ public class ExportXICTask extends AbstractServiceTask {
                     }
 
                     // retrieve file path
-                    String exportedFilePath = (String) resultMap.get("result");
-                    if (exportedFilePath == null || exportedFilePath.isEmpty()) {
+                    ArrayList exportedFilePathList = (ArrayList) resultMap.get("result");
+                    if (exportedFilePathList == null ) {
                         m_loggerProline.error(getClass().getSimpleName() + " failed : No file path returned.");
                         return ServiceState.STATE_FAILED;
                     }
 
-                    m_filePathResult[0] = (String) exportedFilePath;
+                    m_filePathResult[0] = (String) exportedFilePathList.get(0);
 
 
                     return ServiceState.STATE_DONE;

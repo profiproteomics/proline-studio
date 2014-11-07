@@ -36,6 +36,7 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
     
     protected int m_id;
     protected boolean m_synchronous;
+    protected String m_wsVersion;
     protected TaskError m_taskError = null;
     
     protected static int m_idIncrement = 0;
@@ -158,5 +159,12 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
     protected String getIdString() {
         return "?request_id="+m_id;
     }
+
+    public void setWsVersion(String wsVersion) {
+        this.m_wsVersion = wsVersion;
+    }
     
+    protected String getWSVersionString() {
+        return "&ws_version="+m_wsVersion;
+    }
 }

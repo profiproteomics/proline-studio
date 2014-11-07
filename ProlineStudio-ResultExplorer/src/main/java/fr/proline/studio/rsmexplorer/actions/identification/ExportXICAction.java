@@ -64,7 +64,7 @@ public class ExportXICAction extends AbstractRSMAction {
         final DataSetNode xicDatasetNode = (DataSetNode) selectedNodes[0];
         
 
-        final ExportDialog dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(),false, ExporterFactory.EXPORT_XLS);
+        final ExportDialog dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(),false, ExporterFactory.EXPORT_XIC);
         
         DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
 
@@ -118,7 +118,7 @@ public class ExportXICAction extends AbstractRSMAction {
                         if (success) {
 
                             String fileName = dialog.getFileName();
-                            if (!fileName.endsWith(".xls")) {
+                            if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx")) {
                                 fileName += ".xls";
                             }
                             DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath[0]);
@@ -132,8 +132,19 @@ public class ExportXICAction extends AbstractRSMAction {
                     }
                 };
 
-
-                ExportXICTask task = new ExportXICTask(exportCallback, xicDatasetNode.getDataset(), m_exportType.getAsParameter(), _filePath);
+                String templateName = "";
+                String fileName = dialog.getFileName();
+                boolean isXLSX = fileName.endsWith(".xlsx");
+                if (m_exportType.equals(ExportType.BASIC_MASTER_QPROT_SETS)) {
+                    templateName = isXLSX ? "BASIC_MASTER_QUANT_PROTEIN_SETS_XLSX" : "BASIC_MASTER_QUANT_PROTEIN_SETS_TSV";
+                } else if (m_exportType.equals(ExportType.MASTER_QPROT_SETS)) {
+                    templateName = isXLSX ? "MASTER_QUANT_PROTEIN_SETS_XLSX" : "MASTER_QUANT_PROTEIN_SETS_TSV";
+                }else if (m_exportType.equals(ExportType.MASTER_QPEPS)) {
+                    templateName = isXLSX ? "MASTER_QUANT_PEPTIDES_XLSX" : "MASTER_QUANT_PEPTIDES_TSV";
+                }else if (m_exportType.equals(ExportType.MASTER_QPEP_IONS)) {
+                    templateName = isXLSX ? "MASTER_QUANT_PEPTIDE_IONS_XLSX" : "MASTER_QUANT_PEPTIDE_IONS_TSV";
+                }
+                ExportXICTask task = new ExportXICTask(exportCallback, xicDatasetNode.getDataset(), m_exportType.getAsParameter(), _filePath, templateName);
                 AccessServiceThread.getAccessServiceThread().addTask(task);
 
                 

@@ -12,13 +12,13 @@ public class ExporterFactory {
     public static final int EXPORT_IMAGE = 2;
     public static final int EXPORT_FROM_SERVER = 3;
     public static final int EXPORT_IMAGE2 = 4;
-    public static final int EXPORT_XLS = 5;
+    public static final int EXPORT_XIC = 5;
 
     private static ArrayList<ExporterInfo> m_listTable = null;
     private static ArrayList<ExporterInfo> m_listImage = null;
     private static ArrayList<ExporterInfo> m_listServer= null;
     private static ArrayList<ExporterInfo> m_listImage2 = null;
-    private static ArrayList<ExporterInfo> m_listXls = null;
+    private static ArrayList<ExporterInfo> m_listXic = null;
     
     public enum ExporterType {
         EXCEL_XML,
@@ -69,17 +69,17 @@ public class ExporterFactory {
           // m_listImage.add(new ExporterInfo(ExporterType.PNG, "WMF (.WMF)", "wmf"));
 
            return m_listImage2;
-        }else if (exportType == EXPORT_XLS) {
-            if (m_listXls != null) {
-                return m_listXls;
+        }else if (exportType == EXPORT_XIC) {
+            if (m_listXic != null) {
+                return m_listXic;
             }
-            m_listXls = new ArrayList<>(1);
+            m_listXic = new ArrayList<>(1);
+
+            m_listXic.add(new ExporterInfo(ExporterType.EXCEL_XML, "Excel (.xlsx)", "xlsx"));
+            m_listXic.add(new ExporterInfo(ExporterType.EXCEL_2003, "Excel 2003 (.xls)", "xls"));
 
 
-            m_listXls.add(new ExporterInfo(ExporterType.EXCEL_2003, "Excel 2003 (.xls)", "xls"));
-
-
-            return m_listXls;
+            return m_listXic;
         } else { // EXPORT_FROM_SERVER
             
             if (m_listServer != null) {

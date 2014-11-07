@@ -143,7 +143,7 @@ public class ExportDialog extends DefaultDialog  {
         
         String defaultExportPath;
         Preferences preferences = NbPreferences.root();
-        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) || (m_exportType == ExporterFactory.EXPORT_XLS)) {
+        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) || (m_exportType == ExporterFactory.EXPORT_XIC)) {
            defaultExportPath = preferences.get("DefaultExcelExportPath", "");
         } else { // IMAGE
            defaultExportPath = preferences.get("DefaultImageExportPath", "");
@@ -229,7 +229,7 @@ public class ExportDialog extends DefaultDialog  {
         c.gridwidth = 1;
         exportPanel.add(addFileButton, c);
 
-        if((m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XLS) && m_showExportAllPSMsChB  ){
+        if((m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) && m_showExportAllPSMsChB  ){
             //Allow specific parameter in this case
             c.gridy++;
             c.gridx = 0;
@@ -311,7 +311,7 @@ public class ExportDialog extends DefaultDialog  {
 
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
-        } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XLS) {
+        } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) {
 
             startTask(m_singletonServerDialog.m_task);
             

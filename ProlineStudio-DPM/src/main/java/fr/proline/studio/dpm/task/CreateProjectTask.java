@@ -11,11 +11,13 @@ import java.util.HashMap;
 import java.util.Map;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.util.Set;
 import javax.persistence.EntityManager;
 
 /**
@@ -111,6 +113,11 @@ public class CreateProjectTask extends AbstractServiceTask {
                 m_taskError = new TaskError("Internal Error : Project not Found");
                 return false;
             }
+            
+            // avoid lazy initialization problem
+            Set<UserAccount> members = p.getMembers();
+            for (UserAccount userAccount : members) {}
+            
             
             m_projectIdentificationData.setProject(p);
             m_projectQuantificationData.setProject(p);

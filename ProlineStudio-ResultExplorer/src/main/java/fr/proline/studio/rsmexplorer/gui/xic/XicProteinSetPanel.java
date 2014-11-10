@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
@@ -36,8 +37,9 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
     private MarkerContainerPanel m_markerContainerPanel;
     
+    private QuantitationChannel[] m_quantChannels;
     
-   private FilterButton m_filterButton;
+    private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     
     /*private SearchFloatingPanel m_searchPanel;
@@ -47,7 +49,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
     public XicProteinSetPanel() {
  
-        initComponents();
+        //initComponents();
 
     }
     
@@ -147,10 +149,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         m_proteinSetScrollPane = new JScrollPane();
         
         m_quantProteinSetTable = new QuantProteinSetTable();
-        m_quantProteinSetTable.setModel(new QuantProteinSetTableModel((LazyTable)m_quantProteinSetTable));
+        m_quantProteinSetTable.setModel(new QuantProteinSetTableModel((LazyTable)m_quantProteinSetTable, m_quantChannels));
         // hide the id column
         m_quantProteinSetTable.getColumnExt(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID).setVisible(false);
-        
+        m_quantProteinSetTable.setSortable(false);
 
         m_markerContainerPanel = new MarkerContainerPanel(m_proteinSetScrollPane, m_quantProteinSetTable);
         
@@ -171,9 +173,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, DProteinSet[] proteinSets, boolean finished) {
-
-        ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()).setData(taskId, proteinSets);
+    public void setData(Long taskId, QuantitationChannel[] quantChannels,  DMasterQuantProteinSet[] proteinSets, boolean finished) {
+        m_quantChannels = quantChannels;
+        initComponents();
+        ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()).setData(taskId,  proteinSets);
 
         // select the first row
         if ((proteinSets != null) && (proteinSets.length > 0)) {
@@ -186,7 +189,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         }
     }
     
-        public void dataUpdated(SubTask subTask, boolean finished) {
+    public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantProteinSetTable.dataUpdated(subTask, finished);
     }
     
@@ -219,7 +222,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     
     private class QuantProteinSetTable extends LazyTable  {
 
-        private DProteinSet m_proteinSetSelected = null;
+        private DMasterQuantProteinSet m_proteinSetSelected = null;
         
         
         public QuantProteinSetTable() {
@@ -245,7 +248,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
                 return;
             }
  
-            m_dataBox.propagateDataChanged(DProteinSet.class);
+            m_dataBox.propagateDataChanged(DMasterQuantProteinSet.class);
 
         }
         

@@ -1,12 +1,17 @@
 package fr.proline.studio.pattern.xic;
 
+import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.rsmexplorer.gui.xic.XicProteinSetPanel;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -15,6 +20,7 @@ import fr.proline.studio.rsmexplorer.gui.xic.XicProteinSetPanel;
 public class DataboxXicProteinSet extends AbstractDataBox {
 
     private DDataset m_dataset;
+    private List<DMasterQuantProteinSet> m_masterQuantProteinSetList ;
     
     public DataboxXicProteinSet() { 
         super(DataboxType.DataboxXicProteinSet);
@@ -66,10 +72,18 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (subTask == null) {
-
-
-                    //DProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
-                    ((XicProteinSetPanel) m_panel).setData(taskId, null /*proteinSetArray*/, finished);
+                    // list quant Channels
+                    List<QuantitationChannel> listQuantChannel = new ArrayList();
+                    if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
+                        DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
+                        listQuantChannel = masterChannel.getQuantitationChannels();
+                    }
+                    QuantitationChannel[] quantitationChannelArray = new QuantitationChannel[listQuantChannel.size()];
+                    listQuantChannel.toArray(quantitationChannelArray);
+                    // proteins set 
+                    DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
+                    m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
+                    ((XicProteinSetPanel) m_panel).setData(taskId, quantitationChannelArray, masterQuantProteinSetArray, finished);
                 } else {
                     ((XicProteinSetPanel) m_panel).dataUpdated(subTask, finished);
                 }
@@ -84,9 +98,9 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
 
         // ask asynchronous loading of data
-
+        m_masterQuantProteinSetList = new ArrayList();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        task.initLoadProteinSets(getProjectId(), m_dataset);
+        task.initLoadProteinSets(getProjectId(), m_dataset, m_masterQuantProteinSetList);
         //Long taskId = task.getId();
         /*if (m_previousTaskId != null) {
             // old task is suppressed if it has not been already done

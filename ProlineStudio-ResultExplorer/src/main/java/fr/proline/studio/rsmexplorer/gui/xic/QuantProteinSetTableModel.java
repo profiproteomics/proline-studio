@@ -1,7 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.core.orm.msi.dto.DQuantProteinSet;
+import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.utils.LazyData;
@@ -9,6 +11,7 @@ import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 
 /**
  *
@@ -20,8 +23,9 @@ public class QuantProteinSetTableModel extends LazyTableModel {
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
     private static final String[] m_columnNames = {"Id", "Protein Set"};
     
-    private DProteinSet[] m_proteinSets = null;
-    private int m_quantChannelNumber;
+    private DMasterQuantProteinSet[] m_proteinSets = null;
+    private QuantitationChannel[] m_quantChannels = null;
+    private final  int m_quantChannelNumber;
     
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
@@ -30,8 +34,10 @@ public class QuantProteinSetTableModel extends LazyTableModel {
 
     
     
-    public QuantProteinSetTableModel(LazyTable table) {
+    public QuantProteinSetTableModel(LazyTable table, QuantitationChannel[] quantChannels) {
         super(table);
+        this.m_quantChannels = quantChannels ;
+        this.m_quantChannelNumber = quantChannels.length;
     }
     
  
@@ -46,7 +52,7 @@ public class QuantProteinSetTableModel extends LazyTableModel {
         if (col<=COLTYPE_PROTEIN_SET_NAME) {
             return m_columnNames[col];
         } else {
-            return "qc"+(col-COLTYPE_PROTEIN_SET_NAME);
+            return "qc "+m_quantChannels[col-m_columnNames.length].getNumber();
         }
     }
     
@@ -104,7 +110,7 @@ public class QuantProteinSetTableModel extends LazyTableModel {
         }
         
         // Retrieve Protein Set
-        DProteinSet proteinSet = m_proteinSets[rowFiltered];
+        DMasterQuantProteinSet proteinSet = m_proteinSets[rowFiltered];
         //long rsmId = proteinSet.getResultSummaryId();
 
         switch (col) {
@@ -116,20 +122,40 @@ public class QuantProteinSetTableModel extends LazyTableModel {
                 LazyData lazyData = getLazyData(row,col);
                 
                 // Retrieve typical Protein Match
-                DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
-
-                if (proteinMatch == null) {
+                DProteinMatch proteinMatch = null;
+                if (proteinSet.getProteinSet()!= null) {
+                    proteinMatch =proteinSet.getProteinSet().getTypicalProteinMatch();
+                    if (proteinMatch == null) {
+                        lazyData.setData("");
+                    }else {
+                        lazyData.setData(proteinMatch.getAccession());
+                    }
+                }else{
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
-                } else {
-                    lazyData.setData(proteinMatch.getAccession());
                 }
                 return lazyData;
             }
-            default:
-                // Quant Channel columns JPM.TODO
+            default: {
+                // Quant Channel columns 
+                LazyData lazyData = getLazyData(row,col);
+                
+                // retrieve quantProteinSet for the quantChannelId
+                Map<Long, DQuantProteinSet> quantProteinSetByQchIds = proteinSet.getQuantProteinSetByQchIds() ;
+                if (quantProteinSetByQchIds == null) {
+                    lazyData.setData("");
+                }else{
+                    DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(m_quantChannels[col-m_columnNames.length].getId()) ;
+                    if (quantProteinSet == null) {
+                        lazyData.setData("");
+                    } else {
+                        lazyData.setData(quantProteinSet.getAbundance());
+                    }
+                }
+                return lazyData;
+            }
         }
-        return null; // should never happen
+        //return null; // should never happen
     }
     private static StringBuilder m_sb = new StringBuilder(20);
 
@@ -138,10 +164,8 @@ public class QuantProteinSetTableModel extends LazyTableModel {
 
      
     
-    public void setData(Long taskId, DProteinSet[] proteinSets) {
+    public void setData(Long taskId,  DMasterQuantProteinSet[] proteinSets ) {
         m_proteinSets = proteinSets;
-        
-        m_quantChannelNumber = 0; // JPM.TODO
         
         m_taskId = taskId;
 
@@ -168,7 +192,7 @@ public class QuantProteinSetTableModel extends LazyTableModel {
         }
     }
 
-    public DProteinSet getProteinSet(int i) {
+    public DMasterQuantProteinSet getProteinSet(int i) {
         
         if (m_filteredIds != null) {
             i = m_filteredIds.get(i).intValue();
@@ -177,14 +201,7 @@ public class QuantProteinSetTableModel extends LazyTableModel {
         return m_proteinSets[i];
     }
     
-    public Long getResultSummaryId() {
-        if ((m_proteinSets == null) || (m_proteinSets.length == 0)) {
-            return null;
-        }
-        
-        return m_proteinSets[0].getResultSummaryId();
-    }
-
+    
     public int findRow(long proteinSetId) {
         
         if (m_filteredIds != null) {
@@ -223,7 +240,7 @@ public class QuantProteinSetTableModel extends LazyTableModel {
         for (int iView=0;iView<nb;iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
             // Retrieve Protein Set
-            DProteinSet ps = getProteinSet(iModel);
+            DMasterQuantProteinSet ps = getProteinSet(iModel);
             if (  proteinSetIdMap.contains(ps.getId())  ) {
                 proteinSetIds.set(iCur++,ps.getId());
             }

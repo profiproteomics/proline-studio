@@ -2,6 +2,9 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.dam.AccessDatabaseThread;
+import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseSearchProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
@@ -12,6 +15,11 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.search.AbstractSearch;
+import fr.proline.studio.search.SearchFloatingPanel;
+import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.utils.LazyTable;
 import java.awt.BorderLayout;
@@ -32,6 +40,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
@@ -57,9 +66,9 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
     
-    /*private SearchFloatingPanel m_searchPanel;
+    private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
-    private Search m_search = null;*/ //JPM.TODO
+    private XICProteinSetSearch m_search = null;
     
 
     public XicProteinSetPanel() {
@@ -73,10 +82,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
         setLayout(new BorderLayout());
 
-        /*m_search = new Search();
-        m_searchPanel = new SearchFloatingPanel(m_search);*/  //JPM.TODO
+        m_search = new XICProteinSetSearch();
+        m_searchPanel = new SearchFloatingPanel(m_search);
         final JPanel proteinSetPanel = createProteinSetPanel();
-        //m_searchPanel.setToggleButton(m_searchToggleButton); //JPM.TODO
+        m_searchPanel.setToggleButton(m_searchToggleButton); 
 
         final JLayeredPane layeredPane = new JLayeredPane();
 
@@ -107,7 +116,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(proteinSetPanel, JLayeredPane.DEFAULT_LAYER);
-        //layeredPane.add(m_searchPanel, JLayeredPane.PALETTE_LAYER); //JPM.TODO
+        layeredPane.add(m_searchPanel, JLayeredPane.PALETTE_LAYER); 
 
 
     }
@@ -132,13 +141,9 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-
-
-            // Search Button
-            //m_searchToggleButton = new SearchToggleButton(m_searchPanel);
-
-            //toolbar.add(m_searchToggleButton);
-    
+        // Search Button
+        m_searchToggleButton = new SearchToggleButton(m_searchPanel);
+        toolbar.add(m_searchToggleButton);
         
         m_filterButton = new FilterButton(((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()));
 
@@ -261,9 +266,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         public QuantProteinSetTable() {
             super(m_proteinSetScrollPane.getVerticalScrollBar() );
             
-            //setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); //JPM.TODO
-            
-            //setDefaultRenderer(ProteinSetTableModel.ProteinCount.class, new ProteinCountRenderer());
+            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             
 
         }
@@ -361,7 +364,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         
         @Override
         public void sortingChanged(int col) {
-            //m_search.reinitSearch(); //JPM.TODO
+            m_search.reinitSearch(); 
         }
     
         public void selectionWillBeRestored(boolean b) {
@@ -537,6 +540,121 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             return true;
         }
 
+    }
+    
+    
+    
+    private class XICProteinSetSearch extends AbstractSearch {
+
+        String previousSearch = "";
+        int searchIndex = 0;
+        ArrayList<Long> proteinSetIds = new ArrayList<>();
+
+        @Override
+        public void reinitSearch() {
+            if (proteinSetIds.isEmpty()) {
+                return;
+            }
+            searchIndex = -1;
+            ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()).sortAccordingToModel(proteinSetIds);
+        }
+
+        @Override
+        public void doSearch(String text) {
+            final String searchText = text.trim().toUpperCase();
+
+            if (searchText.compareTo(previousSearch) == 0) {
+                
+                int checkLoopIndex = -1;
+                while (true) {
+                    // search already done, display next result
+                    searchIndex++;
+                    if (searchIndex >= proteinSetIds.size()) {
+                        searchIndex = 0;
+                    }
+
+                    if (checkLoopIndex == searchIndex) {
+                        break;
+                    }
+                    
+                    if (!proteinSetIds.isEmpty()) {
+                        boolean found = ((QuantProteinSetTable) m_quantProteinSetTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
+                        if (found) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                    if (checkLoopIndex == -1) {
+                        checkLoopIndex =  searchIndex;
+                    }
+                }
+                
+            } else {
+                previousSearch = searchText;
+                searchIndex = -1;
+
+                // prepare callback for the search
+                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                        // contruct the Map of proteinSetId
+                        
+                        
+                        if (!proteinSetIds.isEmpty()) {
+                            
+                            ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()).sortAccordingToModel(proteinSetIds);
+
+                             int checkLoopIndex = -1;
+                             while (true) {
+                                // search already done, display next result
+                                searchIndex++;
+                                if (searchIndex >= proteinSetIds.size()) {
+                                    searchIndex = 0;
+                                }
+
+                                if (checkLoopIndex == searchIndex) {
+                                    break;
+                                }
+
+                                if (!proteinSetIds.isEmpty()) {
+                                    boolean found = ((QuantProteinSetTable) m_quantProteinSetTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
+                                    if (found) {
+                                        break;
+                                    }
+                                } else {
+                                    break;
+                                }
+                                if (checkLoopIndex == -1) {
+                                    checkLoopIndex = searchIndex;
+                                }
+                            }
+                            
+                        }
+
+
+                        //System.out.println("Ids size "+proteinSetIds.size());
+                        m_searchPanel.enableSearch(true);
+                    }
+                };
+
+                Long rsmId = ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()).getResultSummaryId();
+
+
+                // Load data if needed asynchronously
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchProteinSetsTask(callback, m_dataBox.getProjectId() ,rsmId, searchText, proteinSetIds));
+
+                m_searchPanel.enableSearch(false);
+            }
+        
+        }
     }
     
 }

@@ -237,7 +237,7 @@ public class QuantProteinSetTableModel extends LazyTableModel {
         if (m_filteredIds != null) {
             int nb = m_filteredIds.size();
             for (int i = 0; i < nb; i++) {
-                if (proteinSetId == m_proteinSets[m_filteredIds.get(i)].getId()) {
+                if (proteinSetId == m_proteinSets[m_filteredIds.get(i)].getProteinSetId()) {
                     return i;
                 }
             }
@@ -246,7 +246,7 @@ public class QuantProteinSetTableModel extends LazyTableModel {
         
         int nb = m_proteinSets.length;
         for (int i=0;i<nb;i++) {
-            if (proteinSetId == m_proteinSets[i].getId()) {
+            if (proteinSetId == m_proteinSets[i].getProteinSetId()) {
                 return i;
             }
         }
@@ -417,5 +417,14 @@ public class QuantProteinSetTableModel extends LazyTableModel {
     
     public int getTypeNumber(int col) {
         return (col-m_columnNames.length) % m_columnNamesQC.length;
+    }
+    
+    
+    public Long getResultSummaryId() {
+        if ((m_proteinSets == null) || (m_proteinSets.length == 0)) {
+            return null;
+        }
+        
+        return m_proteinSets[0].getQuantResultSummaryId();
     }
 }

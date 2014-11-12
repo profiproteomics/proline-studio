@@ -33,6 +33,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -186,8 +187,14 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         
         m_quantProteinSetTable = new QuantProteinSetTable();
         m_quantProteinSetTable.setModel(new QuantProteinSetTableModel((LazyTable)m_quantProteinSetTable, m_quantChannels));
+        // hide the rawAbundance  and selectionLevel columns
+        List<Integer> listIdsToHide = ((QuantProteinSetTableModel)m_quantProteinSetTable.getModel()).getDefaultColumnsToHide();
+        for (Integer id : listIdsToHide) {
+            m_quantProteinSetTable.getColumnExt(id.intValue()).setVisible(false);
+        }
         // hide the id column
         m_quantProteinSetTable.getColumnExt(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID).setVisible(false);
+        
         m_quantProteinSetTable.setSortable(false);
 
         m_markerContainerPanel = new MarkerContainerPanel(m_proteinSetScrollPane, m_quantProteinSetTable);

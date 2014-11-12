@@ -1,5 +1,6 @@
 package fr.proline.studio.dam.tasks.xic;
 
+import fr.proline.core.orm.msi.MsiSearch;
 import fr.proline.core.orm.msi.ObjectTree;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
@@ -11,6 +12,7 @@ import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -23,6 +25,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**
@@ -118,12 +121,28 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 masterQuantitationChannels = new ArrayList<>();
                 for (MasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {
                     Long resultSummaryId = masterQuantitationChannel.getQuantResultSummaryId() ;
-                    DMasterQuantitationChannel dMaster = new DMasterQuantitationChannel(masterQuantitationChannel.getId(), masterQuantitationChannel.getName(),
-                            resultSummaryId, masterQuantitationChannel.getQuantitationChannels(), 
-                            masterQuantitationChannel.getDataset(), masterQuantitationChannel.getSerializedProperties());
                     // load the list of quantitation channel linked to this masterQuantitationChannel
                     List<QuantitationChannel> listQuantitationChannels = masterQuantitationChannel.getQuantitationChannels();
-                    dMaster.setQuantitationChannels(listQuantitationChannels);
+                    List<DQuantitationChannel> listDQuantChannels = new ArrayList();
+                    for (QuantitationChannel qc : listQuantitationChannels) {
+                        DQuantitationChannel dqc = new DQuantitationChannel(qc);
+                        // search resultFileName
+                        String resultFileName = "";
+                        String queryMsi = "SELECT msi.resultFileName FROM MsiSearch msi, ResultSet rs, ResultSummary rsm "
+                                + " WHERE rsm.id=:rsmId AND rsm.resultSet.id = rs.id AND rs.msiSearch.id = msi.id ";
+                        Query qMsi = entityManagerMSI.createQuery(queryMsi);
+                        qMsi.setParameter("rsmId", qc.getIdentResultSummaryId());
+                        try{
+                            resultFileName = (String)qMsi.getSingleResult();
+                        }catch(NoResultException | NonUniqueResultException e){
+                            
+                        }
+                        dqc.setResultFileName(resultFileName);
+                        listDQuantChannels.add(dqc);
+                    }
+                    DMasterQuantitationChannel dMaster = new DMasterQuantitationChannel(masterQuantitationChannel.getId(), masterQuantitationChannel.getName(),
+                            resultSummaryId, listDQuantChannels, 
+                            masterQuantitationChannel.getDataset(), masterQuantitationChannel.getSerializedProperties());
                     //resultSummary
                     if (resultSummaryId != null) {
                         // retrieve the proteinSet list with isValidated = true
@@ -188,10 +207,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     
                     // add into the list
                     masterQuantitationChannels.add(dMaster);
+                    //System.out.println("dMaster nb listQC "+dMaster.getQuantitationChannels().size());
                 } // end of the for
             }
             m_dataset.setMasterQuantitationChannels(masterQuantitationChannels);
-            
+             
             entityManagerMSI.getTransaction().commit();
             entityManagerUDS.getTransaction().commit();
         } catch (Exception e) {

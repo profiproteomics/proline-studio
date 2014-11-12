@@ -32,6 +32,9 @@ import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 
 /**
  * Used to load dataset in two cases :
@@ -128,11 +131,13 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     
     /**
      * Load Quantitation of a dataset
+     * @param project 
      * @param dataset 
      */
-    public void initLoadQuantitation(DDataset dataset) {
+    public void initLoadQuantitation(Project project, DDataset dataset) {
         setTaskInfo(new TaskInfo("Load Quantitation for Dataset "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_dataset = dataset;
+        m_project = project ;
 
         m_action = LOAD_QUANTITATION;
     }
@@ -700,9 +705,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     public boolean fetchQuantitation() {
 
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();       
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_project.getId()).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerUDS.getTransaction().begin();
+            entityManagerMSI.getTransaction().begin();
 
             // force initialization of lazy data (data will be needed for the display of properties)
             Dataset datasetDB = entityManagerUDS.find(Dataset.class, m_dataset.getId());
@@ -722,8 +729,26 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 masterQuantitationChannels = new ArrayList<>();
                 for (Iterator<MasterQuantitationChannel> it = listMasterQuantitationChannels.iterator(); it.hasNext();) {
                     MasterQuantitationChannel masterQuantitationChannel = it.next();
+                    List<QuantitationChannel> listQuantitationChannels = masterQuantitationChannel.getQuantitationChannels();
+                    List<DQuantitationChannel> listDQuantChannels = new ArrayList();
+                    for (QuantitationChannel qc : listQuantitationChannels) {
+                        DQuantitationChannel dqc = new DQuantitationChannel(qc);
+                        // search resultFileName
+                        String resultFileName = "";
+                        String queryMsi = "SELECT msi.resultFileName FROM MsiSearch msi, ResultSet rs, ResultSummary rsm "
+                                + " WHERE rsm.id=:rsmId AND rsm.resultSet.id = rs.id AND rs.msiSearch.id = msi.id ";
+                        Query qMsi = entityManagerMSI.createQuery(queryMsi);
+                        qMsi.setParameter("rsmId", qc.getIdentResultSummaryId());
+                        try{
+                            resultFileName = (String)qMsi.getSingleResult();
+                        }catch(NoResultException | NonUniqueResultException e){
+                            
+                        }
+                        dqc.setResultFileName(resultFileName);
+                        listDQuantChannels.add(dqc);
+                    }
                     DMasterQuantitationChannel dMaster = new DMasterQuantitationChannel(masterQuantitationChannel.getId(), masterQuantitationChannel.getName(), 
-                            masterQuantitationChannel.getQuantResultSummaryId(), masterQuantitationChannel.getQuantitationChannels(), masterQuantitationChannel.getDataset(),
+                            masterQuantitationChannel.getQuantResultSummaryId(), listDQuantChannels, masterQuantitationChannel.getDataset(),
                             masterQuantitationChannel.getSerializedProperties());
                     // load the dataset for which the id is stored in the serialized properties
                     Map<String, Object> propertiesMap = dMaster.getSerializedPropertiesAsMap();
@@ -741,7 +766,6 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     }
                     dMaster.setIdentDataset(identDataset);
                     // load the list of quantitation channel linked to this masterQuantitationChannel
-                    List<QuantitationChannel> listQuantitationChannels = masterQuantitationChannel.getQuantitationChannels();
                     if (listQuantitationChannels != null && !listQuantitationChannels.isEmpty()) {
                         int id2 = 0;
                         for (Iterator<QuantitationChannel> itChannel = listQuantitationChannels.iterator(); itChannel.hasNext();) {
@@ -758,14 +782,17 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             m_dataset.setMasterQuantitationChannels(masterQuantitationChannels);
             
             entityManagerUDS.getTransaction().commit();
+            entityManagerMSI.getTransaction().commit();
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
             entityManagerUDS.getTransaction().rollback();
+            entityManagerMSI.getTransaction().rollback();
             return false;
         } finally {
             entityManagerUDS.close();
+            entityManagerMSI.close();
         }
 
         return true;

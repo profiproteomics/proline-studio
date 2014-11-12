@@ -125,7 +125,7 @@ public class ComputeQuantitationProfileAction extends AbstractRSMAction {
                 }
             };
             DatabaseDataSetTask loadTask = new DatabaseDataSetTask(masterQuantChannelCallback);
-            loadTask.initLoadQuantitation(dataSet);
+            loadTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), dataSet);
             AccessDatabaseThread.getAccessDatabaseThread().addTask(loadTask);
 
         } //End OK entered         

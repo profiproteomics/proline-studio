@@ -4,8 +4,10 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.QuantitationChannel;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.utils.LazyData;
 import fr.proline.studio.utils.LazyTable;
 import fr.proline.studio.utils.LazyTableModel;
@@ -23,8 +25,10 @@ public class QuantProteinSetTableModel extends LazyTableModel {
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
     private static final String[] m_columnNames = {"Id", "Protein Set"};
     
+    private static final String[] m_columnNamesQC = {"Selection level", "Abundance", "Raw abundance", "Peptides Match count"};
+    
     private DMasterQuantProteinSet[] m_proteinSets = null;
-    private QuantitationChannel[] m_quantChannels = null;
+    private DQuantitationChannel[] m_quantChannels = null;
     private final  int m_quantChannelNumber;
     
     private ArrayList<Integer> m_filteredIds = null;
@@ -34,7 +38,7 @@ public class QuantProteinSetTableModel extends LazyTableModel {
 
     
     
-    public QuantProteinSetTableModel(LazyTable table, QuantitationChannel[] quantChannels) {
+    public QuantProteinSetTableModel(LazyTable table, DQuantitationChannel[] quantChannels) {
         super(table);
         this.m_quantChannels = quantChannels ;
         this.m_quantChannelNumber = quantChannels.length;
@@ -44,7 +48,7 @@ public class QuantProteinSetTableModel extends LazyTableModel {
     
     @Override
     public int getColumnCount() {
-        return m_columnNames.length+m_quantChannelNumber;
+        return m_columnNames.length+m_quantChannelNumber*m_columnNamesQC.length;
     }
 
     @Override
@@ -52,7 +56,18 @@ public class QuantProteinSetTableModel extends LazyTableModel {
         if (col<=COLTYPE_PROTEIN_SET_NAME) {
             return m_columnNames[col];
         } else {
-            return "qc "+m_quantChannels[col-m_columnNames.length].getNumber();
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
+            int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
+            
+            StringBuilder sb = new StringBuilder();
+            String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
+            sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+            sb.append(m_columnNamesQC[id]);
+            sb.append("<br/>");
+            sb.append(m_quantChannels[nbQc].getResultFileName());
+            
+            sb.append("</html>");
+            return sb.toString();
         }
     }
     
@@ -145,11 +160,22 @@ public class QuantProteinSetTableModel extends LazyTableModel {
                 if (quantProteinSetByQchIds == null) {
                     lazyData.setData("");
                 }else{
-                    DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(m_quantChannels[col-m_columnNames.length].getId()) ;
+                    int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
+                    int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
+                    DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(m_quantChannels[nbQc].getId()) ;
                     if (quantProteinSet == null) {
                         lazyData.setData("");
                     } else {
-                        lazyData.setData(quantProteinSet.getAbundance());
+                        switch (id ) {
+                            case 0 : lazyData.setData(quantProteinSet.getSelectionLevel());
+                                     break;
+                            case 1 : lazyData.setData(quantProteinSet.getAbundance());
+                                     break;
+                            case 2 : lazyData.setData(quantProteinSet.getRawAbundance());
+                                     break;
+                            case 3 : lazyData.setData(quantProteinSet.getPeptideMatchesCount());
+                                     break;
+                        }
                     }
                 }
                 return lazyData;

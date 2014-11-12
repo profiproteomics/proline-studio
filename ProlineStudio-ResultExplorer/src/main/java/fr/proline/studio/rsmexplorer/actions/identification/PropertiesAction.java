@@ -7,6 +7,7 @@ import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -190,9 +191,9 @@ public class PropertiesAction extends AbstractRSMAction {
                     
                     // quantitation channels
                      try{
-                        List<QuantitationChannel> channels = masterQuantitationChannel.getQuantitationChannels();
+                        List<DQuantitationChannel> channels = masterQuantitationChannel.getQuantitationChannels();
                         int id= 1;
-                        for (Iterator<QuantitationChannel> itChannel = channels.iterator(); itChannel.hasNext();) {
+                        for (Iterator<DQuantitationChannel> itChannel = channels.iterator(); itChannel.hasNext();) {
                             QuantitationChannel quantitationChannel = itChannel.next();
                             sheet.put(createQuantitationChannelSheetSet(quantitationChannel, id));
                             if (quantitationChannel.getBiologicalSample() != null) {
@@ -371,11 +372,11 @@ public class PropertiesAction extends AbstractRSMAction {
         prop.setName("QuantitationChannel id");
         propGroup.put(prop);
         
-        /* prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getName", null);
-        prop.setName("Name");
+        prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getResultFileName", null);
+        prop.setName("Result File Name");
         propGroup.put(prop);
         
-        prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getSerializedProperties", null);
+        /*prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getSerializedProperties", null);
         prop.setName("Serialized Properties");
         propGroup.put(prop); */
         

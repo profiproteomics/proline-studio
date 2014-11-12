@@ -4,6 +4,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
@@ -73,12 +74,12 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
                 if (subTask == null) {
                     // list quant Channels
-                    List<QuantitationChannel> listQuantChannel = new ArrayList();
+                    List<DQuantitationChannel> listQuantChannel = new ArrayList();
                     if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
                         DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
                         listQuantChannel = masterChannel.getQuantitationChannels();
                     }
-                    QuantitationChannel[] quantitationChannelArray = new QuantitationChannel[listQuantChannel.size()];
+                    DQuantitationChannel[] quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
                     // proteins set 
                     DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];

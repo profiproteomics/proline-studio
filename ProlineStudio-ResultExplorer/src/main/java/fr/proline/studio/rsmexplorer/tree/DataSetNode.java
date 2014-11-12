@@ -269,7 +269,7 @@ public class DataSetNode extends AbstractNode {
             // Task 1 : Load Quantitation, MasterQuantitationChannels 
             DatabaseDataSetTask task1 = new DatabaseDataSetTask(dbCallback);
             task1.setPriority(Priority.HIGH_3); // highest priority
-            task1.initLoadQuantitation(dataSet);
+            task1.initLoadQuantitation(dataSet.getProject(), dataSet);
             
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task1);
         }else { 

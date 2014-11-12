@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.uds.QuantitationChannel;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
@@ -37,7 +38,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
     private MarkerContainerPanel m_markerContainerPanel;
     
-    private QuantitationChannel[] m_quantChannels;
+    private DQuantitationChannel[] m_quantChannels;
     
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
@@ -173,7 +174,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, QuantitationChannel[] quantChannels,  DMasterQuantProteinSet[] proteinSets, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  DMasterQuantProteinSet[] proteinSets, boolean finished) {
         m_quantChannels = quantChannels;
         initComponents();
         ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()).setData(taskId,  proteinSets);

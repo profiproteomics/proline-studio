@@ -24,6 +24,11 @@ public class QuantProteinSetTableModel extends LazyTableModel {
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
     private static final String[] m_columnNames = {"Id", "Protein Set"};
     
+    public static final int COLTYPE_SELECTION_LEVEL = 0;
+    public static final int COLTYPE_ABUNDANCE = 1;
+    public static final int COLTYPE_RAW_ABUNDANCE = 2;
+    public static final int COLTYPE_PSM = 3;
+    
     private static final String[] m_columnNamesQC = {"Selection level", "Abundance", "Raw abundance", "Peptides Match count"};
     
     private DMasterQuantProteinSet[] m_proteinSets = null;
@@ -166,13 +171,13 @@ public class QuantProteinSetTableModel extends LazyTableModel {
                         lazyData.setData("");
                     } else {
                         switch (id ) {
-                            case 0 : lazyData.setData(quantProteinSet.getSelectionLevel());
+                            case COLTYPE_SELECTION_LEVEL : lazyData.setData(quantProteinSet.getSelectionLevel());
                                      break;
-                            case 1 : lazyData.setData(quantProteinSet.getAbundance());
+                            case COLTYPE_ABUNDANCE : lazyData.setData(quantProteinSet.getAbundance());
                                      break;
-                            case 2 : lazyData.setData(quantProteinSet.getRawAbundance());
+                            case COLTYPE_RAW_ABUNDANCE : lazyData.setData(quantProteinSet.getRawAbundance());
                                      break;
-                            case 3 : lazyData.setData(quantProteinSet.getPeptideMatchesCount());
+                            case COLTYPE_PSM : lazyData.setData(quantProteinSet.getPeptideMatchesCount());
                                      break;
                         }
                     }
@@ -374,6 +379,43 @@ public class QuantProteinSetTableModel extends LazyTableModel {
     public boolean isLoaded() {
         return m_table.isLoaded();
     }
+    
+    public int getByQCCount() {
+        return m_columnNamesQC.length;
+    }
 
+    public int getQCCount() {
+        return m_quantChannels.length;
+    }
+    
+    public int getColumStart(int index) {
+        return m_columnNames.length+index*m_columnNamesQC.length;
+    }
+    public int getColumStop(int index) {
+        return m_columnNames.length+(1+index)*m_columnNamesQC.length-1;
+    }
+    
+    public String getQCName(int i) {
 
+        StringBuilder sb = new StringBuilder();
+
+        String rsmHtmlColor = CyclicColorPalette.getHTMLColor(i);
+        sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+        sb.append(m_quantChannels[i].getResultFileName());
+        sb.append("</html>");
+
+        return sb.toString();
+    }
+    
+    public String getByQCMColumnName(int index) {
+        return m_columnNamesQC[index];
+    }
+    
+    public int getQCNumber(int col) {
+        return (col-m_columnNames.length) / m_columnNamesQC.length;
+    }
+    
+    public int getTypeNumber(int col) {
+        return (col-m_columnNames.length) % m_columnNamesQC.length;
+    }
 }

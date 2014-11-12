@@ -1,6 +1,5 @@
 package fr.proline.studio.dam.tasks.xic;
 
-import fr.proline.core.orm.msi.MsiSearch;
 import fr.proline.core.orm.msi.ObjectTree;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;

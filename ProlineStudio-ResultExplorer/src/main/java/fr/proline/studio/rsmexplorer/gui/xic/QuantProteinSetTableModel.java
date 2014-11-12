@@ -29,7 +29,7 @@ public class QuantProteinSetTableModel extends LazyTableModel {
     public static final int COLTYPE_RAW_ABUNDANCE = 2;
     public static final int COLTYPE_PSM = 3;
     
-    private static final String[] m_columnNamesQC = {"Selection level", "Abundance", "Raw abundance", "Peptides Match count"};
+    private static final String[] m_columnNamesQC = {"Selection level", "Abundance", "Raw abundance", "Peptides Matches count"};
     
     private DMasterQuantProteinSet[] m_proteinSets = null;
     private DQuantitationChannel[] m_quantChannels = null;

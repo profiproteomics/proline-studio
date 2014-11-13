@@ -77,7 +77,15 @@
             <artifactId>PM-SequenceRepository</artifactId> 
             <version>0.0.2-SNAPSHOT</version> 
         </dependency>
+        
+<dependency>
+      <groupId>fr.proline</groupId>
+      <artifactId>PM-MSDiag</artifactId>
+      <version>0.0.3-SNAPSHOT</version>
+  </dependency>  
+        
 
+   
     <dependency>
       <groupId>fr.proline</groupId>
       <artifactId>Proline-OM</artifactId>

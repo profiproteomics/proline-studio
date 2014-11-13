@@ -133,6 +133,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         qMsi.setParameter("rsmId", qc.getIdentResultSummaryId());
                         try{
                             resultFileName = (String)qMsi.getSingleResult();
+                            if (resultFileName != null && resultFileName.contains(".")) {
+                                resultFileName = resultFileName.substring(0, resultFileName.indexOf('.'));
+                            }
                         }catch(NoResultException | NonUniqueResultException e){
                             
                         }

@@ -58,6 +58,20 @@ public class WindowBoxFactory {
         
     }
     
+    public static WindowBox getMSDiagWindowBox(String name, String resultMessage) {
+        // MSDiag
+    	// 
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxRsetMSDiag(resultMessage);
+                
+        IconManager.IconType iconType = IconManager.IconType.WAVE; // TODO: change icon
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+
+        return winBox;
+        
+    }
+    
     public static WindowBox getHistogramWindowBox(String name) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxStatisticsFrequencyResponse();

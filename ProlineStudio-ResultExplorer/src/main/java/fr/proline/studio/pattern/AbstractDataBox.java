@@ -72,7 +72,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         DataboxRsetPeptidesOfProtein(18),
         DataboxRsmPSMOfProteinSet(19),
         DataboxRsmPSMOfPeptide(20),
-        DataboxXicProteinSet(21);
+        DataboxXicProteinSet(21),
+        DataboxRsetMSDiag(22);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -131,6 +132,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
                     return new DataboxRsmPSMOfPeptide();
                 case DataboxXicProteinSet:
                     return new DataboxXicProteinSet();
+                case DataboxRsetMSDiag:
+                	return new DataBoxRsetMSDiag("");
             }
             return null; // should not happen
         }

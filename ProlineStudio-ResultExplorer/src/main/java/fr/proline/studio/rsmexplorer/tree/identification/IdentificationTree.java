@@ -18,6 +18,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.DisplayAllRsetAction
 import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProteinAction;
 import fr.proline.studio.rsmexplorer.actions.identification.EmptyTrashAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.GenerateMSDiagReportAction;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -670,8 +671,10 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 ExportRSMAction exportRSMAction = new ExportRSMAction();
                 m_mainActions.add(exportRSMAction);                        
                 
+                GenerateMSDiagReportAction msDiagReportAction = new GenerateMSDiagReportAction();
+                m_mainActions.add(msDiagReportAction);                        
+                
                 m_mainActions.add(null);  // separator
-
                 
                 ChangeDescriptionAction changeDescriptionAction = new ChangeDescriptionAction();
                 m_mainActions.add(changeDescriptionAction);

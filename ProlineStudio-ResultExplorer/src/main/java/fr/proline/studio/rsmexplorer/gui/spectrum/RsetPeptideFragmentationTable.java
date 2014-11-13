@@ -28,7 +28,7 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
      * Created by AW
      */
 
-    private FragTableCustomRenderer m_matrixRenderer;
+    private FragTableCustomRenderer m_fragTableRenderer;
 
     private boolean m_fragmentsIntensityVisible = false;
     
@@ -36,10 +36,10 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         
         RsetPeptideFragmentationTable.FragmentationTableModel fragmentationTableModel = new RsetPeptideFragmentationTable.FragmentationTableModel();
 
-        m_matrixRenderer = new RsetPeptideFragmentationTable.FragTableCustomRenderer();
-        m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
+        m_fragTableRenderer = new RsetPeptideFragmentationTable.FragTableCustomRenderer();
+        m_fragTableRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
         setModel(fragmentationTableModel);
-        setDefaultRenderer(Double.class, m_matrixRenderer);
+        setDefaultRenderer(Double.class, m_fragTableRenderer);
         setSortable(false);
         
         updateFragmentsIntensityVisibility(false);
@@ -56,11 +56,11 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
         
         if (petpideFragmentationData == null) {
             fragmentationTableModel.reinitData();
-            m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
+            m_fragTableRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
 
         } else {
             fragmentationTableModel.setData(petpideFragmentationData, pepMatch.getPeptide().getSequence());
-            m_matrixRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
+            m_fragTableRenderer.setSelectMatrix(fragmentationTableModel.getMatrix());
             updateFragmentsIntensityVisibility();
         }
 

@@ -30,7 +30,8 @@ public class QuantProteinSetTableModel extends LazyTableModel {
     public static final int COLTYPE_RAW_ABUNDANCE = 2;
     public static final int COLTYPE_PSM = 3;
     
-    private static final String[] m_columnNamesQC = {"Selection level", "Abundance", "Raw abundance", "Peptides Matches count"};
+    private static final String[] m_columnNamesQC = {"Sel. level", "Abundance", "Raw abundance", "Pep. match count"};
+    private static final String[] m_toolTipQC = {"Selection level", "Abundance", "Raw abundance", "Peptides match count"};
     
     private DMasterQuantProteinSet[] m_proteinSets = null;
     private DQuantitationChannel[] m_quantChannels = null;
@@ -78,7 +79,22 @@ public class QuantProteinSetTableModel extends LazyTableModel {
     
         @Override
     public String getToolTipForHeader(int col) {
-        return getColumnName(col);
+        if (col<=COLTYPE_PROTEIN_SET_NAME) {
+            return m_columnNames[col];
+        } else {
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
+            int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
+            
+            StringBuilder sb = new StringBuilder();
+            String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
+            sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+            sb.append(m_toolTipQC[id]);
+            sb.append("<br/>");
+            sb.append(m_quantChannels[nbQc].getResultFileName());
+            
+            sb.append("</html>");
+            return sb.toString();
+        }
     }
 
     @Override

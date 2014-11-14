@@ -29,7 +29,6 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.MSDiagTable_GenericTable.*;
-import fr.proline.studio.rsmexplorer.gui.MSDiagTable_1stColumnIsString.*;
 import fr.proline.studio.utils.IconManager;
 
 

@@ -28,7 +28,6 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 	        MSdiagTable_GenericTableModel msDiagTableModel1 = new MSdiagTable_GenericTableModel();
 
 	        m_matrixRenderer = new MSDiagTableCustomRenderer();
-	       // m_matrixRenderer.setSelectMatrix(MSdiagTable1Model.getMatrix());
 	        setModel(msDiagTableModel1);
 	        setDefaultRenderer(Object.class, m_matrixRenderer);
 	        setSortable(false);
@@ -63,8 +62,6 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
-			private  TheoreticalFragmentSeries_AW[] m_fragSer;
-	        private String m_peptideSequence;
 	        private int m_nbRows;
 	        private String[][] m_matrix;
 	        private Object[][] m_matrixValues;
@@ -81,8 +78,7 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 	        }
 	        
 	        private void initData() {
-	            m_fragSer = null;
-	            m_peptideSequence = null;
+	           
 	            m_nbRows = 0;
 	            m_matrix = null;
 	            m_matrixValues = null;
@@ -98,12 +94,8 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 				{
 	            	  m_columnNames =  msdo.column_names;
 			          m_matrixValues = msdo.matrix;
-		
-			          //  }
-		
 			          m_nbRows = msdo.matrix.length;
 				          
-			
 				          
 				     fireTableStructureChanged();
 				}

@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import fr.proline.studio.rsmexplorer.gui.MSDiagOutput_AW;
-import fr.proline.core.orm.msi.ResultSet;
+ 
 import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -44,8 +44,6 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
     private AbstractDataBox m_dataBox;
    
    
-    private ResultSet m_previousrSet = null;
-    private javax.swing.JPanel m_MSDiagPanel;
     public javax.swing.JTextArea m_textArea = new JTextArea("data text area initialized line 73");
     
     private MSDiagTable_GenericTable m_msdiagTable_massesPerCharge = null;

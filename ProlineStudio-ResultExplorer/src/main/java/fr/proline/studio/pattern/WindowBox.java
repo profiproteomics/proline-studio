@@ -2,6 +2,8 @@ package fr.proline.studio.pattern;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
 import java.awt.Image;
+import java.util.HashMap;
+import java.util.HashSet;
 import javax.swing.JPanel;
 
 
@@ -43,6 +45,10 @@ public class WindowBox {
     public void setEntryData(long projectId, Object data) {
         m_entryBox.setProjectId(projectId);
         m_entryBox.setEntryData(data);
+    }
+    
+    public void selectDataWhenLoaded(HashSet data) {
+        m_entryBox.selectDataWhenLoaded(data);
     }
     
     public void resetDefaultSize() {

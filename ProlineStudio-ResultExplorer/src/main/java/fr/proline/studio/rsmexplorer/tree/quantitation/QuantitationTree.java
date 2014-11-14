@@ -609,4 +609,58 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
         parentData.load(callback, childrenList, false);
     }
+    
+    public int getQuantitationChildCount(){
+        AbstractNode root = (AbstractNode) m_model.getRoot();
+        int nbC = root.getChildCount();
+        int nb = 0;
+        for (int i=0; i< nbC; i++) {
+            TreeNode tnode = root.getChildAt(i);
+            if (tnode instanceof DataSetNode) {
+                DataSetNode dsnode = (DataSetNode)tnode;
+                if (dsnode.isQuantitation()) {
+                    nb++;
+                }
+            }
+        }
+        return nb;
+    }
+    
+    public AbstractNode getQuantitationNode(int index) {
+        AbstractNode root = (AbstractNode) m_model.getRoot();
+        int nbC = root.getChildCount();
+        for (int i=0; i< nbC; i++) {
+            TreeNode tnode = root.getChildAt(i);
+            if (tnode instanceof DataSetNode && index == i) {
+                return (AbstractNode)tnode;
+            }
+        }
+        return null;
+    }
+    
+    public void clearQuantiSelection() {
+        clearSelection();
+    }
+    
+    
+    /**
+     * select or hightlight the nodes with a datasetId in the given list
+     * @param listIds 
+     */
+    public void selectQuantiNodeWithId (List<Long> listIds) {
+        AbstractNode root = (AbstractNode) m_model.getRoot();
+        int nbC = root.getChildCount();
+        for (int i=0; i< nbC; i++) {
+            TreeNode tnode = root.getChildAt(i);
+            if (tnode instanceof DataSetNode) {
+                DataSetNode dsnode = (DataSetNode)tnode;
+                DDataset dataset = dsnode.getDataset();
+                if (listIds.contains(dataset.getId())) {
+                    addSelectionRow(i+1);
+                    //dsnode.setHighlighted(true);
+                }
+            }
+        }
+        getCurrentTree().updateUI();
+    }
 }

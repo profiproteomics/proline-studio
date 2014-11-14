@@ -1,6 +1,7 @@
 package fr.proline.studio.dam.tasks.xic;
 
 import fr.proline.core.orm.msi.ObjectTree;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
@@ -211,6 +212,15 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     masterQuantitationChannels.add(dMaster);
                     //System.out.println("dMaster nb listQC "+dMaster.getQuantitationChannels().size());
                 } // end of the for
+                
+                
+                // Set the ResultSummary of the Dataset as the ResultSummary of the first MasterQuantitationChannel
+                MasterQuantitationChannel masterQuantitationChannel = listMasterQuantitationChannels.get(0);
+                Long resultSummaryId = masterQuantitationChannel.getQuantResultSummaryId() ;
+                ResultSummary rsm = entityManagerMSI.find(ResultSummary.class, resultSummaryId);
+                m_dataset.setResultSummaryId(resultSummaryId);
+                m_dataset.setResultSummary(rsm);
+                
             }
             m_dataset.setMasterQuantitationChannels(masterQuantitationChannels);
              

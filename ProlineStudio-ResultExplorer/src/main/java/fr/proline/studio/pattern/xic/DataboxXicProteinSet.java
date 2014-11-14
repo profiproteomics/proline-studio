@@ -1,5 +1,6 @@
 package fr.proline.studio.pattern.xic;
 
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
@@ -38,10 +39,10 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
         // Register possible out parameters
         // One or Multiple ProteinSet
-        /*GroupParameter outParameter = new GroupParameter(); //JPM.TODO
-        outParameter.addParameter(DProteinSet.class, true);
+        GroupParameter outParameter = new GroupParameter();
+        //outParameter.addParameter(DProteinSet.class, true);
         outParameter.addParameter(ResultSummary.class, false);
-        registerOutParameter(outParameter);*/
+        registerOutParameter(outParameter);
 
     }
     
@@ -117,5 +118,20 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     public void setEntryData(Object data) {
         m_dataset = (DDataset) data;
         dataChanged();
+    }
+   
+    @Override
+    public Object getData(boolean getArray, Class parameterType) {
+        if (parameterType != null) {
+            if (parameterType.equals(ResultSummary.class)) {
+                return m_dataset.getResultSummary();
+            }
+        }
+        return super.getData(getArray, parameterType);
+    }
+   
+    @Override
+    public String getFullName() {
+        return m_dataset.getName()+" "+getName();
     }
 }

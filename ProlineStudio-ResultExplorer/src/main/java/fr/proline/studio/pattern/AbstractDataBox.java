@@ -302,6 +302,10 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         return m_name;
     }
     
+    public String getFullName() {
+        return getName();
+    }
+    
     public String getDescription() {
         return m_description;
     }
@@ -334,6 +338,9 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         m_panel.setLoaded(loadingId);
     }
     
+    protected void selectDataWhenLoaded(HashSet data) {
+        
+    }
     
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {

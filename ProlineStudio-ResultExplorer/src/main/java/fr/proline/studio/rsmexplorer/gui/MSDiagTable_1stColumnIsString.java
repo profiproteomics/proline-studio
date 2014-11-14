@@ -13,8 +13,8 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 
 import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.FragmentMatch_AW;
 import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries_AW;
-import fr.proline.studio.utils.DecoratedTable;
-import fr.proline.studio.utils.DecoratedTableModel;
+import fr.proline.studio.table.DecoratedTable;
+import fr.proline.studio.table.DecoratedTableModel;
 import java.util.List;
 
 import javax.swing.table.TableColumn;

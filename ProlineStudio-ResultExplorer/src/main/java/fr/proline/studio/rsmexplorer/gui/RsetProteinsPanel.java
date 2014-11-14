@@ -13,7 +13,7 @@ import fr.proline.studio.rsmexplorer.gui.model.ProteinsOfPeptideMatchTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.utils.LazyTable;
+import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;

@@ -15,7 +15,7 @@ import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.SamesetRenderer;
-import fr.proline.studio.utils.DecoratedTable;
+import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.BorderLayout;
 import java.awt.Color;

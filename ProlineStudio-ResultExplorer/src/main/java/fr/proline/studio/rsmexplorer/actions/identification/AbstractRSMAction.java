@@ -13,7 +13,7 @@ import javax.swing.JMenuItem;
 import javax.swing.tree.TreePath;
 
 /**
- * Base Class for actions
+ * Base Class for actions on a Tree
  * @author JM235353
  */
 public abstract class AbstractRSMAction extends AbstractAction {

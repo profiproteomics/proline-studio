@@ -50,10 +50,10 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
     public javax.swing.JTextArea m_textArea = new JTextArea("data text area initialized line 73");
     
     private MSDiagTable_GenericTable m_msdiagTable_massesPerCharge = null;
-    private MSDiagTable_1stColumnIsString m_msdiagTable_matchesPerScanAndScore = null;
+    private MSDiagTable_GenericTable m_msdiagTable_matchesPerScanAndScore = null;
     private MSDiagTable_GenericTable m_msdiagTable_matchesPerChargeAndScore = null;
     private MSDiagTable_GenericTable m_msdiagTable_assignementRepartition = null;
-    private MSDiagTable_1stColumnIsString m_msdiagTable_matchesPerResultSetAndScore = null;
+    private MSDiagTable_GenericTable m_msdiagTable_matchesPerResultSetAndScore = null;
     private MSDiagTable_GenericTable m_msdiagTable_matchesPerMinuteAndScore = null;
     private MSDiagTable_GenericTable m_msdiagTable_massesPerScore = null;
     
@@ -151,8 +151,8 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
         
         //m_msdiagTable_matchesPerScanAndScore
         JScrollPane scrollPane2 = new JScrollPane();
-        m_msdiagTable_matchesPerScanAndScore = new MSDiagTable_1stColumnIsString();
-        m_msdiagTable_matchesPerScanAndScore.setModel(new MSDiagTable_1stColumnIsStringModel());
+        m_msdiagTable_matchesPerScanAndScore = new MSDiagTable_GenericTable();
+        m_msdiagTable_matchesPerScanAndScore.setModel(new MSdiagTable_GenericTableModel());
         scrollPane2.setViewportView(m_msdiagTable_matchesPerScanAndScore);
         jtabbedPane.addTab("Matches Per Scan And Score",icon, scrollPane2); 
 
@@ -166,8 +166,8 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
         
         // m_msdiagTable_matchesPerResultSetAndScore
         JScrollPane scrollPane4 = new JScrollPane();
-        m_msdiagTable_matchesPerResultSetAndScore = new MSDiagTable_1stColumnIsString();
-        m_msdiagTable_matchesPerResultSetAndScore.setModel(new MSDiagTable_1stColumnIsStringModel());
+        m_msdiagTable_matchesPerResultSetAndScore = new MSDiagTable_GenericTable();
+        m_msdiagTable_matchesPerResultSetAndScore.setModel(new MSdiagTable_GenericTableModel());
         scrollPane4.setViewportView(m_msdiagTable_matchesPerResultSetAndScore);
         jtabbedPane.addTab("Matches Per ResultSet And Score",icon, scrollPane4); 
 
@@ -241,7 +241,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 			    //--------------
 				    String msOutputString2 = msOutputHashMap.get("MatchesPerScanAndScore");
         			MSDiagOutput_AW msOutput2 = gson.fromJson(msOutputString2, MSDiagOutput_AW.class);  
-			        ((MSDiagTable_1stColumnIsStringModel) m_msdiagTable_matchesPerScanAndScore.getModel()).setData(msOutput2);
+			        ((MSdiagTable_GenericTableModel) m_msdiagTable_matchesPerScanAndScore.getModel()).setData(msOutput2);
 				//--------------
 			        String msOutputString3 = msOutputHashMap.get("AssignementRepartition");
         			MSDiagOutput_AW msOutput3 = gson.fromJson(msOutputString3, MSDiagOutput_AW.class);  
@@ -249,7 +249,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 				//--------------
 			        String msOutputString4 = msOutputHashMap.get("MatchesPerResultSetAndScore");
         			MSDiagOutput_AW msOutput4 = gson.fromJson(msOutputString4, MSDiagOutput_AW.class);  
-			        ((MSDiagTable_1stColumnIsStringModel) m_msdiagTable_matchesPerResultSetAndScore.getModel()).setData(msOutput4);
+			        ((MSdiagTable_GenericTableModel) m_msdiagTable_matchesPerResultSetAndScore.getModel()).setData(msOutput4);
 			        
 			     // MSDiagTable_MatchesPerScanAndScore
 			        String msOutputString5 = msOutputHashMap.get("MatchesPerChargeAndScore");

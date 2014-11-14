@@ -3,7 +3,9 @@ package fr.proline.studio.rsmexplorer.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font; 
+
 import javax.swing.JTable;
+
 import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries_AW;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
@@ -136,13 +138,14 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 
 	        @Override
 	        public Class getColumnClass(int columnIndex) {
-
-            
-            	return Double.class;
-            
-
+	            if (columnIndex == 0) {
+	                return String.class; // assume first column is always a String type. (even if data is a number)
+	            }
+	            else {
+	                return Double.class;
+	            }
+	        
 	        }
-
 	        @Override
 	        public Object getValueAt(int rowIndex, int columnIndex) {
 				

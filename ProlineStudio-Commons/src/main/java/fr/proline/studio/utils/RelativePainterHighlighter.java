@@ -22,6 +22,7 @@
  */
 package fr.proline.studio.utils;
 
+import fr.proline.studio.table.LazyData;
 import java.awt.Component;
 import java.awt.Graphics2D;
 

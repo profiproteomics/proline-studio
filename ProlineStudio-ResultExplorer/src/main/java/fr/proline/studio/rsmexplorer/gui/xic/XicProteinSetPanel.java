@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -35,14 +36,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -50,10 +46,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
@@ -249,6 +243,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         m_quantProteinSetTable.dataUpdated(subTask, finished);
     }
     
+    public DProteinSet getSelectedProteinSet() {
+        return m_quantProteinSetTable.getSelectedProteinSet();
+    }
+    
     
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
@@ -278,8 +276,6 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     
     private class QuantProteinSetTable extends LazyTable implements ExportTableSelectionInterface  {
 
-        private DMasterQuantProteinSet m_proteinSetSelected = null;
-        
         
         public QuantProteinSetTable() {
             super(m_proteinSetScrollPane.getVerticalScrollBar() );
@@ -298,15 +294,39 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
          */
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            
+
             super.valueChanged(e);
-            
+
             if (selectionWillBeRestored) {
                 return;
             }
- 
-            m_dataBox.propagateDataChanged(DMasterQuantProteinSet.class);
 
+            m_dataBox.propagateDataChanged(DProteinSet.class);
+
+        }
+
+        public DProteinSet getSelectedProteinSet() {
+
+            // Retrieve Selected Row
+            int selectedRow = getSelectedRow();
+
+            // nothing selected
+            if (selectedRow == -1) {
+                return null;
+
+            }
+
+            QuantProteinSetTableModel tableModel = (QuantProteinSetTableModel) getModel();
+            if (tableModel.getRowCount() == 0) {
+                return null; // this is a wart, for an unknown reason, it happens that the first row
+                // is selected although it does not exist.
+            }
+
+            // convert according to the sorting
+            selectedRow = convertRowIndexToModel(selectedRow);
+
+            // Retrieve ProteinMatch selected
+            return tableModel.getProteinSet(selectedRow);
         }
         
         public boolean selectProteinSet(Long proteinSetId, String searchText) {

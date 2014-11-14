@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.filter.Filter;
@@ -206,11 +207,19 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         }
         //return null; // should never happen
     }
-    private static StringBuilder m_sb = new StringBuilder(20);
 
 
     
-
+    public DProteinSet getProteinSet(int row) {
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+        
+        // Retrieve Protein Set
+        DMasterQuantProteinSet quantProteinSet = m_proteinSets[rowFiltered];
+        return quantProteinSet.getProteinSet();
+    }
      
     
     public void setData(Long taskId,  DMasterQuantProteinSet[] proteinSets ) {
@@ -241,7 +250,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         }
     }
 
-    public DMasterQuantProteinSet getProteinSet(int i) {
+    public DMasterQuantProteinSet getQuantProteinSet(int i) {
         
         if (m_filteredIds != null) {
             i = m_filteredIds.get(i).intValue();
@@ -289,7 +298,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         for (int iView=0;iView<nb;iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
             // Retrieve Protein Set
-            DMasterQuantProteinSet ps = getProteinSet(iModel);
+            DMasterQuantProteinSet ps = getQuantProteinSet(iModel);
             if (  proteinSetIdMap.contains(ps.getId())  ) {
                 proteinSetIds.set(iCur++,ps.getId());
             }

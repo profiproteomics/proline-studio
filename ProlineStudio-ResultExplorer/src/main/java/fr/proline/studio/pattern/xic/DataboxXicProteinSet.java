@@ -2,6 +2,7 @@ package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
@@ -40,7 +41,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         // Register possible out parameters
         // One or Multiple ProteinSet
         GroupParameter outParameter = new GroupParameter();
-        //outParameter.addParameter(DProteinSet.class, true);
+        outParameter.addParameter(DProteinSet.class, true);
         outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
 
@@ -126,6 +127,10 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             if (parameterType.equals(ResultSummary.class)) {
                 return m_dataset.getResultSummary();
             }
+            if (parameterType.equals(DProteinSet.class)) {
+                return ((XicProteinSetPanel) m_panel).getSelectedProteinSet();
+            }
+            
         }
         return super.getData(getArray, parameterType);
     }

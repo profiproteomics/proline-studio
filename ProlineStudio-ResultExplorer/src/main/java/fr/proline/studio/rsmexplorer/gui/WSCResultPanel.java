@@ -21,7 +21,7 @@ import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.LazyTable;
+import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionListener;

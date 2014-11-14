@@ -6,8 +6,8 @@ import fr.proline.studio.filter.*;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer.CompareValue;
 import fr.proline.studio.utils.CyclicColorPalette;
-import fr.proline.studio.utils.LazyTable;
-import fr.proline.studio.utils.LazyTableModel;
+import fr.proline.studio.table.LazyTable;
+import fr.proline.studio.table.LazyTableModel;
 import java.awt.Color;
 import java.util.*;
 

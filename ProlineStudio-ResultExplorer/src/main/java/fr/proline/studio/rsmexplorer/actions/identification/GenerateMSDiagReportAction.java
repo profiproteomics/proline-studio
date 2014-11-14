@@ -61,15 +61,9 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
                 }
             };
 
-            // from generatespectrummatch:
-            final DDataset dataset = dataSetNode.getDataset();
-            Long projectId = dataset.getProject().getId();
-            Long resultSetId = dataset.getResultSetId();
             ArrayList resultMessages = new ArrayList(0);
             resultMessages.add("message initialized in GenerateMSDiag Action");
-            //GenerateMSDiagReportTask task = new GenerateMSDiagReportTask(callback, projectId, resultSetId, resultMessages);
-           // AccessServiceThread.getAccessServiceThread().addTask(task);
-   
+           
             actionImpl(dataSetNode,resultMessages);
             
             // ---------------------------
@@ -96,8 +90,6 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
             WindowBox wbox = WindowBoxFactory.getMSDiagWindowBox(dataSet.getName()+" PSM" , resultMessages.get(0).toString()); 
             wbox.setEntryData(dataSet.getProject().getId(), rset); 
             
-            // TODO: here put the code to display data received from the underlying module. (pm msdiag)
-
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();

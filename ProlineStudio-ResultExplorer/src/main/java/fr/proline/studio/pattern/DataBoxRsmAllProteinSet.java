@@ -8,6 +8,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
+import java.util.HashSet;
 
 /**
  * Databox for the list of Protein Sets of a Rsm
@@ -69,12 +70,16 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                 if (subTask == null) {
-
-
                     DProteinSet[] proteinSetArray = _rsm.getTransientData().getProteinSetArray();
                     ((RsmProteinSetPanel) m_panel).setData(taskId, proteinSetArray, finished);
+                    
+                    if (m_dataToBeSelected != null) {
+                        ((RsmProteinSetPanel) m_panel).selectData(m_dataToBeSelected);
+                        m_dataToBeSelected = null;
+                    }
                 } else {
                     ((RsmProteinSetPanel) m_panel).dataUpdated(subTask, finished);
+                    
                 }
 
                 setLoaded(loadingId);
@@ -122,4 +127,10 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
         m_rsm = (ResultSummary) data;
         dataChanged();
     }
+    
+    @Override
+    protected void selectDataWhenLoaded(HashSet data) {
+        m_dataToBeSelected = data;
+    }
+    private HashSet m_dataToBeSelected = null;
 }

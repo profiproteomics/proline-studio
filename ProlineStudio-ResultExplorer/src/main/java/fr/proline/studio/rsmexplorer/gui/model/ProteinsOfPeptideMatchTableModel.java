@@ -4,14 +4,14 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
-import fr.proline.studio.utils.LazyTable;
-import fr.proline.studio.utils.LazyTableModel;
+import fr.proline.studio.table.LazyTable;
+import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
-import fr.proline.studio.utils.LazyData;
+import fr.proline.studio.table.LazyData;
 import fr.proline.studio.utils.RelativePainterHighlighter;
 import java.util.ArrayList;
 import java.util.HashSet;

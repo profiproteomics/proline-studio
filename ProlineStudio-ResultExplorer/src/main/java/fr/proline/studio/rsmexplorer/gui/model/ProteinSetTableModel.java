@@ -1,5 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
+import fr.proline.studio.table.LazyData;
+import fr.proline.studio.table.LazyTableModel;
+import fr.proline.studio.table.LazyTable;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;

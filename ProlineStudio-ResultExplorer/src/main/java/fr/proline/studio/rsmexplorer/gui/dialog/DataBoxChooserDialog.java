@@ -5,7 +5,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.pattern.DataboxManager;
 import fr.proline.studio.pattern.ParameterDistance;
-import fr.proline.studio.utils.DecoratedMarkerTable;
+import fr.proline.studio.table.DecoratedMarkerTable;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;

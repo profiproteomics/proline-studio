@@ -1,4 +1,4 @@
-package fr.proline.studio.utils;
+package fr.proline.studio.table;
 
 import fr.proline.studio.markerbar.MarkerComponentInterface;
 import fr.proline.studio.markerbar.ViewChangeListener;
@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.JTableHeader;
@@ -48,8 +49,35 @@ public class DecoratedMarkerTable extends DecoratedTable implements MarkerCompon
     }
 
     @Override
-    public void scrollToVisible(int row) {
-        scrollRectToVisible(new Rectangle(getCellRect(row, 0, true)));
+    public void scrollToVisible(final int row) {
+        
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                scrollRectToVisible(new Rectangle(getCellRect(row, 0, true)));
+                
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        JViewport viewport = (JViewport) getParent();
+                        Rectangle rect = getCellRect(row, 0, true);
+                        Point pt = viewport.getViewPosition();
+                        rect.setLocation(rect.x - pt.x, rect.y - pt.y);
+                        if (!new Rectangle(viewport.getExtentSize()).contains(rect)) {
+                            scrollToVisible(row);
+                        }
+                    }
+                });
+                
+            }
+        });
+        
+
+
+
+        
     }
 
     @Override

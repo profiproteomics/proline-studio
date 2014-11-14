@@ -1,6 +1,7 @@
-package fr.proline.studio.utils;
+package fr.proline.studio.table;
 
 import com.thierry.filtering.TableSelection;
+import fr.proline.studio.utils.RelativePainterHighlighter;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.MouseEvent;

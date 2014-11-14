@@ -1,7 +1,7 @@
 package fr.proline.studio.filter;
 
 
-import fr.proline.studio.utils.DecoratedTableModel;
+import fr.proline.studio.table.DecoratedTableModel;
 
 
 /**

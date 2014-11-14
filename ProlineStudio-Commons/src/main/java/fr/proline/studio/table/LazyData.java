@@ -1,4 +1,4 @@
-package fr.proline.studio.utils;
+package fr.proline.studio.table;
 
 /**
  * LazyData can wrap any sort of data which will be loaded later.

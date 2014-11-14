@@ -1,4 +1,4 @@
-package fr.proline.studio.utils;
+package fr.proline.studio.table;
 
 import javax.swing.table.AbstractTableModel;
 

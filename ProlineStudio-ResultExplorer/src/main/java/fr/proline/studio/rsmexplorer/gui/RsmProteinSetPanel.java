@@ -10,6 +10,7 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.markerbar.BookmarkMarker;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.*;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
@@ -20,17 +21,20 @@ import fr.proline.studio.rsmexplorer.gui.renderer.ProteinCountRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.table.ImportTableSelectionInterface;
+import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.LazyTable;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
+import java.util.HashSet;
 import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.event.ListSelectionEvent;
-import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.openide.windows.TopComponent;
 
 /**
@@ -310,12 +314,14 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         
         return internalPanel;
     }                 
+    
+    public void selectData(HashSet data) {
+        m_proteinSetTable.importSelection(data);
+    }
 
     
-    private class ProteinSetTable extends LazyTable  {
+    private class ProteinSetTable extends LazyTable implements ImportTableSelectionInterface  {
 
-        private final DProteinSet m_proteinSetSelected = null;
-        
         
         public ProteinSetTable() {
             super(m_proteinSetScrollPane.getVerticalScrollBar() );
@@ -323,7 +329,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             
             setDefaultRenderer(ProteinSetTableModel.ProteinCount.class, new ProteinCountRenderer());
-            
+
+
 
         }
         
@@ -354,7 +361,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             // JPM.hack we need to keep the search text
             // to be able to give it if needed to the panel
             // which display proteins of a protein set
-            searchTextBeingDone = searchText;
+            m_searchTextBeingDone = searchText;
             
             // must convert row index if there is a sorting
             row = convertRowIndexToView(row);
@@ -365,11 +372,11 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             // scroll to the row
             scrollRowToVisible(row);
 
-            searchTextBeingDone = null;
+            m_searchTextBeingDone = null;
             
             return true;
         }
-        String searchTextBeingDone = null;
+        private String m_searchTextBeingDone = null;
 
         public void dataUpdated(SubTask subTask, boolean finished) {
             
@@ -437,6 +444,39 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         public boolean isLoaded() {
             return m_dataBox.isLoaded();
         }
+
+        @Override
+        public void importSelection(HashSet selectedData) {
+            
+            ListSelectionModel selectionTableModel = getSelectionModel();
+            selectionTableModel.clearSelection();
+            
+            int firstRow = -1;
+            ProteinSetTableModel model = ((ProteinSetTableModel) m_proteinSetTable.getModel());
+            int rowCount = model.getRowCount();
+            for (int i=0;i<rowCount;i++) {
+                Object v = model.getValueAt(i, ProteinSetTableModel.COLTYPE_PROTEIN_SET_ID);
+                if (selectedData.remove(v)) {
+                    if (firstRow == -1) {
+                        firstRow = i;
+                    }
+                    selectionTableModel.addSelectionInterval(i, i);
+                        BookmarkMarker marker = new BookmarkMarker(i);
+                        m_markerContainerPanel.addMarker(marker);
+                    if (selectedData.isEmpty()) {
+                        break;
+                    }
+                }
+            }
+            
+            // scroll to the first row
+            if (firstRow != -1) {
+                final int row = firstRow;
+                scrollToVisible(row);
+            }
+            
+        }
+
         
         
     }

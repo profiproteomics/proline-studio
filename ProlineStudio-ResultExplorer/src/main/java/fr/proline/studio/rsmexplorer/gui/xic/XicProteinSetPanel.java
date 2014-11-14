@@ -15,13 +15,16 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.actions.table.DisplayIdentificationProteinSetsAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.utils.LazyTable;
+import fr.proline.studio.table.LazyTable;
+import fr.proline.studio.table.TablePopupMouseAdapter;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -32,17 +35,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTable;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
@@ -265,7 +276,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
     
     
-    private class QuantProteinSetTable extends LazyTable  {
+    private class QuantProteinSetTable extends LazyTable implements ExportTableSelectionInterface  {
 
         private DMasterQuantProteinSet m_proteinSetSelected = null;
         
@@ -275,7 +286,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             
-
+            setComponentPopupMenu(createPopup());
+            
+            addMouseListener(new TablePopupMouseAdapter(this));
+            
         }
         
         /** 
@@ -389,8 +403,27 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             return m_dataBox.isLoaded();
         }
         
+        private JPopupMenu createPopup() {
+            JPopupMenu popupMenu = new JPopupMenu();
+            
+            DisplayIdentificationProteinSetsAction action = new DisplayIdentificationProteinSetsAction(m_dataBox, this);
+
+            popupMenu.add(action);
+            
+            return popupMenu;
+        }
+
+        @Override
+        public HashSet exportSelection(int[] rows) {
+            QuantProteinSetTableModel tableModel = (QuantProteinSetTableModel) getModel();
+            return tableModel.exportSelection(rows);
+        }
+
+        
+
         
     }
+
     
     private class XICProteinSetColumnsVisibilityDialog extends DefaultDialog {
 

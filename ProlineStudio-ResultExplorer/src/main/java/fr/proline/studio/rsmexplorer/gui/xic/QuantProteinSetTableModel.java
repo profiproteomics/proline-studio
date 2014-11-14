@@ -13,7 +13,6 @@ import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
     private DMasterQuantProteinSet[] m_proteinSets = null;
     private DQuantitationChannel[] m_quantChannels = null;
-    private final  int m_quantChannelNumber;
+    private int m_quantChannelNumber;
     
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
@@ -47,17 +46,19 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
     
     
-    public QuantProteinSetTableModel(LazyTable table, DQuantitationChannel[] quantChannels) {
+    public QuantProteinSetTableModel(LazyTable table) {
         super(table);
-        this.m_quantChannels = quantChannels ;
-        this.m_quantChannelNumber = quantChannels.length;
     }
     
  
     
     @Override
     public int getColumnCount() {
-        return m_columnNames.length+m_quantChannelNumber*m_columnNamesQC.length;
+        if (m_quantChannels == null) {
+            return m_columnNames.length ;
+        }else {
+            return m_columnNames.length+m_quantChannelNumber*m_columnNamesQC.length;
+        }
     }
 
     @Override
@@ -222,11 +223,13 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
      
     
-    public void setData(Long taskId,  DMasterQuantProteinSet[] proteinSets ) {
-        m_proteinSets = proteinSets;
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels, DMasterQuantProteinSet[] proteinSets ) {
+        this.m_quantChannels = quantChannels ;
+        this.m_quantChannelNumber = quantChannels.length;
+        this.m_proteinSets = proteinSets;
+        fireTableStructureChanged();
         
         m_taskId = taskId;
-
         
         if (m_filteringAsked) {
             m_filteringAsked = false;
@@ -457,15 +460,17 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
     
     /**
-     * by default the rawAbundance and selectionLevel are hidden
+     * by default the abundance and selectionLevel are hidden
      * return the list of columns ids of these columns
      * @return 
      */
     public List<Integer> getDefaultColumnsToHide() {
         List<Integer> listIds = new ArrayList();
-        for (int i=m_quantChannels.length-1; i>=0; i--) {
-            listIds.add(m_columnNames.length+COLTYPE_RAW_ABUNDANCE+(i*m_columnNamesQC.length));
-            listIds.add(m_columnNames.length+COLTYPE_SELECTION_LEVEL+(i*m_columnNamesQC.length));
+        if (m_quantChannels != null) {
+            for (int i=m_quantChannels.length-1; i>=0; i--) {
+                listIds.add(m_columnNames.length+COLTYPE_ABUNDANCE+(i*m_columnNamesQC.length));
+                listIds.add(m_columnNames.length+COLTYPE_SELECTION_LEVEL+(i*m_columnNamesQC.length));
+            }
         }
         return listIds; 
     }

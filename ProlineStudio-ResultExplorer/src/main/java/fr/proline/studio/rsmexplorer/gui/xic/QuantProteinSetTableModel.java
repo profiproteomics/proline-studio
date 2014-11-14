@@ -6,11 +6,13 @@ import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
-import fr.proline.studio.utils.LazyData;
-import fr.proline.studio.utils.LazyTable;
-import fr.proline.studio.utils.LazyTableModel;
+import fr.proline.studio.table.LazyData;
+import fr.proline.studio.table.LazyTable;
+import fr.proline.studio.table.LazyTableModel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +21,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class QuantProteinSetTableModel extends LazyTableModel {
+public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface {
 
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
@@ -457,5 +459,26 @@ public class QuantProteinSetTableModel extends LazyTableModel {
             listIds.add(m_columnNames.length+COLTYPE_SELECTION_LEVEL+(i*m_columnNamesQC.length));
         }
         return listIds; 
+    }
+
+    @Override
+    public HashSet exportSelection(int[] rows) {
+
+        int nbRows = rows.length;
+        HashSet selectedObjects = new HashSet();
+        for (int i = 0; i < nbRows; i++) {
+
+            int row = rows[i];
+            int rowFiltered = row;
+            if ((!m_isFiltering) && (m_filteredIds != null)) {
+                rowFiltered = m_filteredIds.get(row).intValue();
+            }
+
+            // Retrieve Protein Set
+            DMasterQuantProteinSet proteinSet = m_proteinSets[rowFiltered];
+
+            selectedObjects.add(proteinSet.getProteinSet().getId());
+        }
+        return selectedObjects;
     }
 }

@@ -515,7 +515,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         quantPeptideData = ot.getClobData();
                     }
 
-                    Map<Long, DQuantPeptide> quantProteinSetByQchIds = masterQuantPeptide.parseQuantPeptideFromProperties(quantPeptideData);
+                    Map<Long, DQuantPeptide> quantProteinSetByQchIds = null;
+                    if (quantPeptideData != null && !quantPeptideData.isEmpty()) {
+                        quantProteinSetByQchIds = masterQuantPeptide.parseQuantPeptideFromProperties(quantPeptideData);
+                    }
                     masterQuantPeptide.setQuantPeptideByQchIds(quantProteinSetByQchIds);
 
                     // list of MasterQuantPeptideIons
@@ -617,7 +620,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             }
 
             Map<Long, DQuantProteinSet> quantProteinSetByQchIds = null;
-            if (quantProtSetdata != null) {
+            if (quantProtSetdata != null && !quantProtSetdata.isEmpty()) {
                 quantProteinSetByQchIds= masterQuantProteinSet.parseQuantProteinSetFromProperties(quantProtSetdata);
             }
             masterQuantProteinSet.setQuantProteinSetByQchIds(quantProteinSetByQchIds);

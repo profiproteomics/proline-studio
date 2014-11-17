@@ -1,8 +1,9 @@
 package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
@@ -11,7 +12,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
-import fr.proline.studio.rsmexplorer.gui.xic.XicProteinSetPanel;
+import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidePanel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,37 +20,37 @@ import java.util.List;
  *
  * @author JM235353
  */
-public class DataboxXicProteinSet extends AbstractDataBox {
+public class DataboxXicPeptideSet extends AbstractDataBox {
 
     private DDataset m_dataset;
-    private List<DMasterQuantProteinSet> m_masterQuantProteinSetList ;
+    private DProteinSet m_proteinSet;
+    private List<DMasterQuantPeptide> m_masterQuantPeptideList ;
     
-    public DataboxXicProteinSet() { 
-        super(DataboxType.DataboxXicProteinSet);
+    public DataboxXicPeptideSet() { 
+        super(DataboxType.DataboxXicPeptideSet);
         
         // Name of this databox
-        m_name = "XIC Protein Sets";
-        m_description = "All Protein Sets of a XIC";
+        m_name = "XIC Peptides";
+        m_description = "All Peptides of a XIC";
 
         // Register Possible in parameters
-        // One ResultSummary
+        // One Dataset and list of Peptide
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DDataset.class, false); 
+        inParameter.addParameter(DProteinSet.class, false); 
         registerInParameter(inParameter);
 
 
         // Register possible out parameters
-        // One or Multiple ProteinSet
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DProteinSet.class, true);
-        outParameter.addParameter(DDataset.class, true);
+        //outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
 
     }
     
      @Override
     public void createPanel() {
-        XicProteinSetPanel p = new XicProteinSetPanel();
+        XicPeptidePanel p = new XicPeptidePanel();
         p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
@@ -57,6 +58,12 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
+        boolean allProteinSet = m_previousDataBox == null;
+        
+        if (!allProteinSet) {
+            m_proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+            m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
+        }
         final int loadingId = setLoading();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -78,12 +85,12 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                     }
                     DQuantitationChannel[] quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
-                    // proteins set 
-                    DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
-                    m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
-                    ((XicProteinSetPanel) m_panel).setData(taskId, quantitationChannelArray, masterQuantProteinSetArray, finished);
+                    // peptide set 
+                    DMasterQuantPeptide[] masterQuantPeptideArray = new DMasterQuantPeptide[m_masterQuantPeptideList.size()];
+                    m_masterQuantPeptideList.toArray(masterQuantPeptideArray);
+                    ((XicPeptidePanel) m_panel).setData(taskId, quantitationChannelArray, masterQuantPeptideArray, finished);
                 } else {
-                    ((XicProteinSetPanel) m_panel).dataUpdated(subTask, finished);
+                    ((XicPeptidePanel) m_panel).dataUpdated(subTask, finished);
                 }
 
                 setLoaded(loadingId);
@@ -94,21 +101,17 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             }
         };
 
-
         // ask asynchronous loading of data
-        m_masterQuantProteinSetList = new ArrayList();
+        m_masterQuantPeptideList = new ArrayList();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        task.initLoadProteinSets(getProjectId(), m_dataset, m_masterQuantProteinSetList);
-        //Long taskId = task.getId();
-        /*if (m_previousTaskId != null) {
-            // old task is suppressed if it has not been already done
-            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
-        }*/
-        //m_previousTaskId = taskId;
+        if (allProteinSet) {
+            task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantPeptideList);
+        }else {
+            task.initLoadPeptides(getProjectId(), m_dataset, m_proteinSet, m_masterQuantPeptideList);
+        }
         registerTask(task);
 
     }
-    //private Long m_previousTaskId = null;
     
     
     @Override
@@ -123,13 +126,6 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             if (parameterType.equals(ResultSummary.class)) {
                 return m_dataset.getResultSummary();
             }
-            if (parameterType.equals(DDataset.class)) {
-                return m_dataset;
-            }
-            if (parameterType.equals(DProteinSet.class)) {
-                return ((XicProteinSetPanel) m_panel).getSelectedProteinSet();
-            }
-            
         }
         return super.getData(getArray, parameterType);
     }

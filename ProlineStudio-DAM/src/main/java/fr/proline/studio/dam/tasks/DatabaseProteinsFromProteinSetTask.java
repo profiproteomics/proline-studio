@@ -9,7 +9,6 @@ import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.*;
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 
@@ -30,7 +29,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
         m_proteinSet = proteinSet;        
     }
     
-    private static String getProteinSetName(DProteinSet proteinSet) {
+    public static String getProteinSetName(DProteinSet proteinSet) {
 
         String name;
         

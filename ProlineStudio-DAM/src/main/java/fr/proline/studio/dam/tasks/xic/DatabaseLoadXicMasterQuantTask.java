@@ -346,12 +346,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     if (resultSummaryId != null) {
                         // load peptideInstance
                         String queryPep = "SELECT pi.id "
-                                + "FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem ps_pi, "
-                                + "fr.proline.core.orm.msi.PeptideSet pepset, fr.proline.core.orm.msi.ProteinSet proset "
-                                + "WHERE pi.resultSummary.id=:rsmId AND pi.id = ps_pi.peptideInstance.id AND "
-                                + "ps_pi.peptideSet.id = pepset.id AND pepset.proteinSet.id= proset.id AND proset.isValidated=true AND "
-                                + "proset.resultSummary.id=:rsmId " 
-                                + "ORDER BY pepset.score DESC";
+                                + "FROM fr.proline.core.orm.msi.PeptideInstance pi "
+                                + "WHERE pi.resultSummary.id=:rsmId " 
+                                + "ORDER BY pi.id ASC";
                         Query peptidesQuery = entityManagerMSI.createQuery(queryPep);
                         peptidesQuery.setParameter("rsmId", resultSummaryId);
                         List<Long> listIds = (List<Long>)peptidesQuery.getResultList();
@@ -432,10 +429,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         // for each PeptideInstance, load MasterQuantPeptide and list of QuantPeptide
         List<DMasterQuantPeptide> listDMasterQuantPeptide = new ArrayList();
         for (DPeptideInstance peptideInstance : peptideInstanceList) {
-            String queryDMasterQuantPeptide = "SELECT DISTINCT new fr.proline.core.orm.msi.dto.DMasterQuantPeptide "
-                    + "(q.id, q.selectionLevel, q.objectTreeId,  q.serializedProperties,  r.id) "
-                    + "FROM MasterQuantComponent q, ResultSummary r, PeptideInstance pi " 
-                    +" WHERE pi.id=:peptideInstanceId AND pi.resultSummary.id = r.id AND r.id = q.resultSummary.id AND r.id=:rsmId AND pi.masterQuantComponentId = q.id "
+            String queryDMasterQuantPeptide = "SELECT  new fr.proline.core.orm.msi.dto.DMasterQuantPeptide "
+                    + "(q.id, q.selectionLevel, q.objectTreeId,  q.serializedProperties,  pi.resultSummary.id) "
+                    + "FROM MasterQuantComponent q, PeptideInstance pi " 
+                    +" WHERE pi.id=:peptideInstanceId AND  pi.resultSummary.id=:rsmId AND pi.resultSummary.id = q.resultSummary.id AND  q.id = pi.masterQuantComponentId "
                     + " ORDER BY q.id ASC ";
             TypedQuery<DMasterQuantPeptide> masterQuantPeptideQuery =  entityManagerMSI.createQuery(queryDMasterQuantPeptide, DMasterQuantPeptide.class);
             masterQuantPeptideQuery.setParameter("peptideInstanceId", peptideInstance.getId());
@@ -463,11 +460,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 listDMasterQuantPeptide.add(masterQuantPeptide);
                                     
             }catch (NoResultException | NonUniqueResultException e ){
-                m_logger.error(getClass().getSimpleName()+" failed", e);
+                //m_logger.error(getClass().getSimpleName()+" failed", e);
             }
-            m_masterQuantPeptideList.addAll(listDMasterQuantPeptide);
         }
-        
+        m_masterQuantPeptideList.addAll(listDMasterQuantPeptide);
         return true;
     }
 }

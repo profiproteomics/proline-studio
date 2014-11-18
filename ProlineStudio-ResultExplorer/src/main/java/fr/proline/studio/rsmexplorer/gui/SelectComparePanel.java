@@ -179,7 +179,7 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
             applyAlgorithm();
             
             m_dataRepresentation2 = new DataRepresentation(compareDataInterface2, false);
-            m_dataRepresentation2.setPosition(m_dataRepresentation1.getX()+m_dataRepresentation1.getWidth()+40, 100);
+            m_dataRepresentation2.setPosition(m_dataRepresentation1.getX()+m_dataRepresentation1.getWidth()+40, 20);
             m_keyLinkRepresentation = new KeyLinkRepresentation(m_dataRepresentation1, m_dataRepresentation2, m_result);
             m_resultLinkRepresentation = new ResultLinkRepresentation(m_dataRepresentation1, m_dataRepresentation2);
         }
@@ -406,7 +406,7 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
              int x1 = m_dataRepresentation1.getX()+ m_dataRepresentation1.getWidth()/2;
              int x2 = m_dataRepresentation2.getX()+ m_dataRepresentation2.getWidth()/2;
              int y1 = m_dataRepresentation1.getY()+ m_dataRepresentation1.getHeight();
-             int y2 = m_dataRepresentation1.getY()+ m_dataRepresentation1.getHeight();
+             int y2 = m_dataRepresentation2.getY()+ m_dataRepresentation2.getHeight();
              
              int yHorizontalLine = Math.max(y1, y2)+HEIGHT_START_SEGMENT;
              

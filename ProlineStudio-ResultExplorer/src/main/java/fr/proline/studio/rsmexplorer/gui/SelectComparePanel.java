@@ -19,7 +19,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -100,7 +99,6 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
         JPanel p = new JPanel(null) {
             @Override
             public void paint(Graphics g) {
-                //super.paint(g);
                 
                 if (m_dataRepresentation1 != null) {
                     m_dataRepresentation1.draw(g);
@@ -139,50 +137,7 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
         });
         
         p.add(m_algorithmCombobox);
-        
-        /*
-        p.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        
-        m_algorithmCombobox = new JComboBox(ALGOS);
-        m_algorithmCombobox.setSelectedIndex(0);
-        m_algorithmCombobox.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                applyAlgorithm();
-            }
-            
-        });
-        
-        c.gridx = 0;
-        c.gridy = 0;
-        //p.add(dataLabel1, c);
-        
-        c.gridx++;
-        //p.add(m_label1, c);
-        
-        c.gridx = 0;
-        c.gridy++;
-        //p.add(dataLabel2, c);
-        
-        c.gridx++;
-        //p.add(m_label2, c);
-        
-        c.gridx = 1;
-        c.gridy++;
-        p.add(m_algorithmCombobox, c);
-        
-        c.gridy++;
-        c.gridx++;
-        c.weightx = 1;
-        c.weighty = 1;
-        p.add(Box.createGlue(), c);*/
-        
         return p;
 
     }
@@ -215,10 +170,8 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
     
     public void setData(CompareDataInterface compareDataInterface1, CompareDataInterface compareDataInterface2) {
         if (compareDataInterface2 == null) {
-            //m_label1.setText(compareDataInterface1.getName());
             m_dataRepresentation1 = new DataRepresentation(compareDataInterface1, true);
-            m_dataRepresentation1.setPosition(100, 100);
-            return;
+            m_dataRepresentation1.setPosition(20, 20);
         } else {
             m_compareDataInterface1 = compareDataInterface1;
             m_compareDataInterface2 = compareDataInterface2;
@@ -274,8 +227,8 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
     
     public static class DataRepresentation {
         
-        private CompareDataInterface m_dataInterface;
-        private boolean m_keysAtRight;
+        private final CompareDataInterface m_dataInterface;
+        private final boolean m_keysAtRight;
         
         private int m_x;
         private int m_y;
@@ -405,7 +358,7 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
         private final Point m_p1 = new Point();
         private final Point m_p2 = new Point();
         
-        private AbstractJoinDataModel m_joinModel;
+        private final AbstractJoinDataModel m_joinModel;
         
          public KeyLinkRepresentation(DataRepresentation dataRepresentation1, DataRepresentation dataRepresentation2, AbstractJoinDataModel joinModel) {
             m_dataRepresentation1 = dataRepresentation1;

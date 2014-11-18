@@ -88,7 +88,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
 
     }
     
-        @Override
+    @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType!= null ) {
             if (parameterType.equals(ResultSet.class)) {

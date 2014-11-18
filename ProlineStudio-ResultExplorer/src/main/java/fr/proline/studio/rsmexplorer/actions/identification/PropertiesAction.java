@@ -160,6 +160,25 @@ public class PropertiesAction extends AbstractRSMAction {
                 dsSet.put(prop);
                 
                 sheet.put(dsSet);
+                
+                // post quant processing config
+                if (dataset.getQuantProcessingConfig() != null) {
+                    try {
+                        createObjectTreeQuantiConfig(sheet, false,dataset.getQuantProcessingConfig(), dataset.getQuantProcessingConfigAsMap());
+                    } catch (Exception ex) {
+                        LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(PropertiesAction.class.getSimpleName() + " properties error ", ex);
+                    }
+                }
+                
+                // post quant processing config
+                if (dataset.getPostQuantProcessingConfig() != null) {
+                    try {
+                        createObjectTreeQuantiConfig(sheet, true,dataset.getPostQuantProcessingConfig(), dataset.getPostQuantProcessingConfigAsMap());
+                    } catch (Exception ex) {
+                        LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(PropertiesAction.class.getSimpleName() + " properties error ", ex);
+                    }
+                }
+                
             }
 
             
@@ -861,6 +880,35 @@ public class PropertiesAction extends AbstractRSMAction {
         propGroup.put(prop);
         
         
+        
+        return propGroup;
+    }
+    
+    private static Sheet.Set createObjectTreeQuantiConfig(final Sheet sheet, final boolean isPost, final fr.proline.core.orm.uds.ObjectTree objectTree, Map<String, Object> objectTreeAsMap) throws NoSuchMethodException  {
+        Sheet.Set propGroup = Sheet.createPropertiesSet();
+        String name = "Quant Processing Config";
+        if (isPost) {
+            name = "Post Quant Processing Config";
+        }
+        propGroup.setName(name);
+        propGroup.setDisplayName(name);
+
+        
+        // not yet displayed
+        Property prop = new PropertySupport.Reflection<>(objectTree, Long.class, "getId", null);
+        prop.setName("ObjectTree id");
+        propGroup.put(prop);
+        
+        try {
+            SerializedPropertiesUtil.getProperties(sheet, name, objectTreeAsMap);
+        } catch (Exception e) {
+            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(PropertiesAction.class.getSimpleName() + " properties error ", e);
+        }
+        /*
+        prop = new PropertySupport.Reflection<>(objectTree, String.class, "getClobData", null);
+        prop.setName("Config");
+        propGroup.put(prop);
+        */
         
         return propGroup;
     }

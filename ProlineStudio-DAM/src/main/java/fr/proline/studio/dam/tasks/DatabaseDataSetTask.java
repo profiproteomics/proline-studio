@@ -716,6 +716,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             QuantitationMethod quantMethodDB = datasetDB.getMethod();
             List<MasterQuantitationChannel> listMasterQuantitationChannels = datasetDB.getMasterQuantitationChannels();
             Set<QuantitationLabel> labels = quantMethodDB.getLabels();
+            Map<String, Long> objectTreeIdByName = datasetDB.getObjectTreeIdByName();
             
             
             // fill the current object with the db object
@@ -780,6 +781,39 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 }// end of the for
             }
             m_dataset.setMasterQuantitationChannels(masterQuantitationChannels);
+            
+            // load ObjectTree corresponding to the QUANT_PROCESSING_CONFIG
+            if (objectTreeIdByName != null && objectTreeIdByName.get("quantitation.label_free_config") != null){
+                Long objectId = objectTreeIdByName.get("quantitation.label_free_config");
+                String queryObject = "SELECT clobData FROM fr.proline.core.orm.uds.ObjectTree WHERE id=:objectId ";
+                Query qObject = entityManagerUDS.createQuery(queryObject);
+                qObject.setParameter("objectId", objectId);
+                try{
+                    String clobData = (String)qObject.getSingleResult();
+                    ObjectTree objectTree = new ObjectTree();
+                    objectTree.setId(objectId);
+                    objectTree.setClobData(clobData);
+                    m_dataset.setQuantProcessingConfig(objectTree);
+                }catch(NoResultException | NonUniqueResultException e){
+                            
+                }
+            }
+            // load ObjectTree corresponding to the POST_QUANT_PROCESSING_CONFIG
+            if (objectTreeIdByName != null && objectTreeIdByName.get("quantitation.post_quant_processing_config") != null){
+                Long objectId = objectTreeIdByName.get("quantitation.post_quant_processing_config");
+                String queryObject = "SELECT clobData FROM fr.proline.core.orm.uds.ObjectTree WHERE id=:objectId ";
+                Query qObject = entityManagerUDS.createQuery(queryObject);
+                qObject.setParameter("objectId", objectId);
+                try{
+                    String clobData = (String)qObject.getSingleResult();
+                    ObjectTree objectTree = new ObjectTree();
+                    objectTree.setId(objectId);
+                    objectTree.setClobData(clobData);
+                    m_dataset.setPostQuantProcessingConfig(objectTree);
+                }catch(NoResultException | NonUniqueResultException e){
+                            
+                }
+            }
             
             entityManagerUDS.getTransaction().commit();
             entityManagerMSI.getTransaction().commit();

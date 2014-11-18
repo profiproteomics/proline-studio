@@ -149,6 +149,7 @@ public class WindowBoxFactory {
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[7];
         boxes[0] = new DataBoxRsmAllProteinSet();
+        boxes[0].setFullName(name);
         boxes[1] = new DataBoxRsmProteinsOfProteinSet();
         boxes[2] = new DataBoxRsmPeptidesOfProtein();
         boxes[3] = new DataBoxRsmProteinAndPeptideSequence();

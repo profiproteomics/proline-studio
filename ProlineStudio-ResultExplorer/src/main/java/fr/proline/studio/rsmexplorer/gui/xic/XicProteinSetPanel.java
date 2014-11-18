@@ -3,6 +3,8 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.AddCompareDataButton;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchProteinSetsTask;
@@ -16,6 +18,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayIdentificationProteinSetsAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
@@ -50,6 +53,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
 
@@ -71,6 +75,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
+    private AddCompareDataButton m_addCompareDataButton;
     
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
@@ -169,6 +174,16 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
         });
         toolbar.add(m_columnVisibilityButton);
+        
+        m_addCompareDataButton = new AddCompareDataButton(((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()), (CompareDataInterface)  m_quantProteinSetTable.getModel()) {
+            
+            @Override
+            public void actionPerformed(CompareDataInterface compareDataInterface) {
+                compareDataInterface.setName(m_dataBox.getFullName());
+                DataMixerWindowBoxManager.addCompareTableModel(compareDataInterface);
+            }
+        };
+        toolbar.add(m_addCompareDataButton);
         
         return toolbar;
     }

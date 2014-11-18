@@ -4,6 +4,8 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.studio.comparedata.AddCompareDataButton;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
@@ -32,8 +34,6 @@ import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 import javax.swing.*;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
 import javax.swing.event.ListSelectionEvent;
 import org.openide.windows.TopComponent;
 
@@ -61,6 +61,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
+    private AddCompareDataButton m_addCompareDataButton;
     
     /**
      * Creates new form RsmProteinSetPanel
@@ -270,6 +271,16 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
+
+        m_addCompareDataButton = new AddCompareDataButton(((ProteinSetTableModel) m_proteinSetTable.getModel()), (CompareDataInterface) m_proteinSetTable.getModel()) {
+
+            @Override
+            public void actionPerformed(CompareDataInterface compareDataInterface) {
+                compareDataInterface.setName(m_dataBox.getFullName());
+                DataMixerWindowBoxManager.addCompareTableModel(compareDataInterface);
+            }
+        };
+        toolbar.add(m_addCompareDataButton);
         
         return toolbar;
     }

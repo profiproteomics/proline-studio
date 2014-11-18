@@ -5,6 +5,7 @@ import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.utils.*;
@@ -15,7 +16,7 @@ import java.util.HashSet;
  * Table Model for Protein Sets
  * @author JM235353
  */
-public class ProteinSetTableModel extends LazyTableModel {
+public class ProteinSetTableModel extends LazyTableModel implements CompareDataInterface {
 
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
@@ -34,7 +35,7 @@ public class ProteinSetTableModel extends LazyTableModel {
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
     
-
+    private String m_modelName;
     
     
     public ProteinSetTableModel(LazyTable table) {
@@ -466,6 +467,61 @@ public class ProteinSetTableModel extends LazyTableModel {
     @Override
     public boolean isLoaded() {
         return m_table.isLoaded();
+    }
+
+    @Override
+    public String getDataColumnIdentifier(int columnIndex) {
+        return getColumnName(columnIndex);
+    }
+
+    @Override
+    public Class getDataColumnClass(int columnIndex) {
+
+        switch (columnIndex) {
+            case COLTYPE_PROTEIN_SET_ID: {
+                return Long.class;
+            }
+            case COLTYPE_PROTEIN_SET_NAME:
+            case COLTYPE_PROTEIN_SET_DESCRIPTION: {
+                return String.class;
+            }
+            case COLTYPE_PROTEIN_SCORE: {
+                return Float.class;
+            }
+            case COLTYPE_PROTEINS_COUNT:
+            case COLTYPE_PEPTIDES_COUNT:
+            case COLTYPE_UNIQUE_SEQUENCES_COUNT:
+            case COLTYPE_SPECTRAL_COUNT:
+            case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
+                return Integer.class;
+            }
+        }
+        return null; // should not happen
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        Object data = getValueAt(rowIndex, columnIndex);
+        if (data instanceof LazyData) {
+            data = ((LazyData) data).getData();
+        }
+        return data;
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        int[] keys = { COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_ID };
+        return keys;
+    }
+
+    @Override
+    public void setName(String name) {
+        m_modelName = name;
+    }
+
+    @Override
+    public String getName() {
+        return m_modelName;
     }
 
     public class ProteinCount implements Comparable {

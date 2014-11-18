@@ -31,11 +31,11 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     protected DataBoxPanelInterface m_panel;
     
     // In and out Parameters Registered
-    private HashSet<GroupParameter> m_inParameters = new HashSet<>();
-    private ArrayList<GroupParameter> m_outParameters = new ArrayList<>();
+    private final HashSet<GroupParameter> m_inParameters = new HashSet<>();
+    private final ArrayList<GroupParameter> m_outParameters = new ArrayList<>();
     
     
-    private HashMap<Long, TaskInfo> m_taskMap = new HashMap<>();
+    private final HashMap<Long, TaskInfo> m_taskMap = new HashMap<>();
     
     private long m_projectId = -1;
     
@@ -75,7 +75,9 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         DataboxRsmPSMOfPeptide(20),
         DataboxXicProteinSet(21),
         DataboxRsetMSDiag(22),
-        DataboxXicPeptideSet(23);
+        DataboxSelectCompareData(23),
+        DataboxCompareResult(24),
+        DataboxXicPeptideSet(25);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -138,6 +140,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
                     return new DataboxXicPeptideSet();
                 case DataboxRsetMSDiag:
                 	return new DataBoxRsetMSDiag("");
+                case DataboxSelectCompareData:
+                    return new DataboxSelectCompareData();
             }
             return null; // should not happen
         }

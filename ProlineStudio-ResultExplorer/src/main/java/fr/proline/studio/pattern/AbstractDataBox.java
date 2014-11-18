@@ -40,6 +40,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     private long m_projectId = -1;
     
     protected String m_name;
+    protected String m_fullName = null;
     protected String m_description = "";
     
     private SplittedPanelContainer.PanelLayout m_layout = SplittedPanelContainer.PanelLayout.VERTICAL;
@@ -311,7 +312,14 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
     }
     
     public String getFullName() {
+        if (m_fullName != null) {
+            return m_fullName;
+        }
         return getName();
+    }
+    
+    public void setFullName(String fullName) {
+        m_fullName = fullName;
     }
     
     public String getDescription() {

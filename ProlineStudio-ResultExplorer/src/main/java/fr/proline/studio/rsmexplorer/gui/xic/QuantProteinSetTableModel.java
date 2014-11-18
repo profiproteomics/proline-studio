@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.table.ExportTableSelectionInterface;
@@ -21,7 +22,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface {
+public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface, CompareDataInterface {
 
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
@@ -43,7 +44,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
     
-
+    private String m_modelName;
     
     
     public QuantProteinSetTableModel(LazyTable table) {
@@ -494,5 +495,78 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             selectedObjects.add(proteinSet.getProteinSet().getId());
         }
         return selectedObjects;
+    }
+
+    @Override
+    public String getDataColumnIdentifier(int col) {
+        if (col <= COLTYPE_PROTEIN_SET_NAME) {
+            return m_columnNames[col];
+        } else {
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+            int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(m_columnNamesQC[id]);
+            sb.append(' ');
+            sb.append(m_quantChannels[nbQc].getResultFileName());
+            
+            return sb.toString();
+        }
+    }
+
+    @Override
+    public Class getDataColumnClass(int col) {
+
+        switch (col) {
+            case COLTYPE_PROTEIN_SET_ID: {
+                return Long.class;
+            }
+            case COLTYPE_PROTEIN_SET_NAME: {
+                return String.class;
+            }
+            default: {
+                int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                switch (id) {
+                    case COLTYPE_SELECTION_LEVEL:
+                        return Integer.class;
+                    case COLTYPE_ABUNDANCE:
+                        return Float.class;
+                    case COLTYPE_RAW_ABUNDANCE:
+                        return Float.class;
+                    case COLTYPE_PSM:
+                        return Integer.class;
+                        
+                }
+
+            }
+        }
+        return null; // should never happen
+
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        Object data = getValueAt(rowIndex, columnIndex);
+        if (data instanceof LazyData) {
+            data = ((LazyData) data).getData();
+        }
+        return data;
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        int[] keys = { COLTYPE_PROTEIN_SET_NAME };
+        return keys;
+    }
+
+    @Override
+    public void setName(String name) {
+        m_modelName = name;
+    }
+
+    @Override
+    public String getName() {
+        return m_modelName;
     }
 }

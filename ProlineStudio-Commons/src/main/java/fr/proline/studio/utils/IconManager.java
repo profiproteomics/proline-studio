@@ -109,11 +109,13 @@ public class IconManager {
         SAVE_SETTINGS,
         SAVE_WND, 
         ARROW_DOWN, 
-        ARROW_RIGHT;
+        ARROW_RIGHT,
+        ADD_DATA_MIXER,
+        DATA_MIXER;
     }
-    private static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
-    private static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
-    private static HashMap<IconType, String> m_iconURLMap = new HashMap<>(); 
+    private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
+    private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
+    private final static HashMap<IconType, String> m_iconURLMap = new HashMap<>(); 
     
     
     public static Image getImage(IconType iconType) {
@@ -389,6 +391,10 @@ public class IconManager {
                return "fr/proline/studio/images/arrow-down.png";
            case ARROW_RIGHT:
                return "fr/proline/studio/images/arrow-right.png";
+           case ADD_DATA_MIXER:
+               return "fr/proline/studio/images/addDataMixer.png";
+           case DATA_MIXER:
+               return "fr/proline/studio/images/data-mixer.png";
         }
 
 

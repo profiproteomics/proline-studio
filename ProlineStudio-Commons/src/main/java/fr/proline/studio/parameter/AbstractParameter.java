@@ -14,6 +14,7 @@ public abstract class AbstractParameter {
     protected Class m_graphicalType;
     protected JComponent m_parameterComponent = null;
     protected boolean m_used = true;
+    protected boolean m_compulsory = true;
     protected Object m_associatedData = null;
 
     protected AbstractParameter(String key, String name, Class type, Class graphicalType) {
@@ -23,6 +24,10 @@ public abstract class AbstractParameter {
         m_graphicalType = graphicalType;
     }
 
+    public void setCompulsory(boolean v) {
+        m_compulsory = v;
+    }
+    
     public String getName() {
         return m_name;
     }

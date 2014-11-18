@@ -74,7 +74,7 @@ public class DoubleParameter extends AbstractParameter {
     @Override
     public ParameterError checkParameter() {
         
-        if (!m_used) {
+        if (!m_used && !m_compulsory) {
             return null;
         }
         

@@ -38,9 +38,9 @@ public class DataboxSelectCompareData extends AbstractDataBox {
     @Override
     public void dataChanged() {
 
-        ((SelectComparePanel) m_panel).setData(m_compareDataInterface1, m_compareDataInterface2); //JPM.TODO
+        ((SelectComparePanel) m_panel).setData(m_compareDataInterface1, m_compareDataInterface2);
         
-        propagateDataChanged(CompareDataInterface.class);
+
     }
 
     @Override
@@ -58,6 +58,7 @@ public class DataboxSelectCompareData extends AbstractDataBox {
     public void setEntryData(Object data) {
         if (m_compareDataInterface1 == null) {
             m_compareDataInterface1 = (CompareDataInterface) data;
+            ((SelectComparePanel) m_panel).setData(m_compareDataInterface1, null);
         } else if (m_compareDataInterface2 == null) {
             m_compareDataInterface2 = (CompareDataInterface) data;
             dataChanged();

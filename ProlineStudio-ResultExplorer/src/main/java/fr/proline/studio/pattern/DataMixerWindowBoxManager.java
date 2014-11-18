@@ -11,21 +11,33 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 public class DataMixerWindowBoxManager {
     
     private static WindowBox m_windowBox = null;
-
+    private static DataBoxViewerTopComponent m_win = null;
     
     
     public static void addCompareTableModel(CompareDataInterface model) {
+        
+
         if (m_windowBox == null) {
             m_windowBox = WindowBoxFactory.getDataMixerWindowBox();
             m_windowBox.setEntryData(-1, model);
             
             // open a window to display the window box
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(m_windowBox);
-            win.open();
-            win.requestActive();
+            m_win = new DataBoxViewerTopComponent(m_windowBox);
+            m_win.open();
+            m_win.requestActive();
         } else {
             m_windowBox.setEntryData(-1, model);
+            if (m_win.isOpened()) {
+                m_win.requestActive();
+            } else {
+                m_win = new DataBoxViewerTopComponent(m_windowBox);
+                m_win.open();
+                m_win.requestActive();
+            }
             m_windowBox = null;
+            m_win = null;
+            
+            
         }
     }
     

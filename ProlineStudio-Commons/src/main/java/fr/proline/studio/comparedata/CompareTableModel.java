@@ -17,7 +17,7 @@ public class CompareTableModel extends FilterTableModel {
 
     private CompareDataInterface m_dataInterface = null;
     
-    protected Filter[] m_filters = null;
+
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     

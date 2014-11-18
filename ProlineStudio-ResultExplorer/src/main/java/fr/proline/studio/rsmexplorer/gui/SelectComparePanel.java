@@ -9,10 +9,12 @@ import javax.swing.JPanel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.JoinDataModel;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -40,8 +42,9 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
     private final static int ALGO_JOIN = 1;
     
     public SelectComparePanel() {
-                setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
         setBounds(0, 0, 500, 400);
+        setBackground(Color.white);
 
 
         JPanel internalPanel = initComponents();
@@ -56,6 +59,7 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
 
 
         JPanel internalPanel = new JPanel();
+        internalPanel.setBackground(Color.white);
 
         internalPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -70,6 +74,7 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
         JPanel graphPanel = createGraphPanel();
 
         m_dataScrollPane.setViewportView(graphPanel);
+        m_dataScrollPane.setBackground(Color.white);
 
 
         c.gridx = 0;
@@ -86,12 +91,16 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
     
     private JPanel createGraphPanel() {
         JPanel p = new JPanel();
+        p.setBackground(Color.white);
         
         p.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        JLabel dataLabel1 = new JLabel("Data 1 : ");
+        JLabel dataLabel2 = new JLabel("Data 2 : ");
         
         m_label1 = new JLabel();
         m_label2 = new JLabel();
@@ -109,13 +118,27 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
         
         c.gridx = 0;
         c.gridy = 0;
+        p.add(dataLabel1, c);
+        
+        c.gridx++;
         p.add(m_label1, c);
         
+        c.gridx = 0;
         c.gridy++;
+        p.add(dataLabel2, c);
+        
+        c.gridx++;
         p.add(m_label2, c);
         
+        c.gridx = 1;
         c.gridy++;
         p.add(m_algorithmCombobox, c);
+        
+        c.gridy++;
+        c.gridx++;
+        c.weightx = 1;
+        c.weighty = 1;
+        p.add(Box.createGlue(), c);
         
         return p;
 
@@ -137,15 +160,22 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
             diffModel.setData(m_compareDataInterface1, m_compareDataInterface2);
 
             m_result = diffModel;
-        } else {
+        } else {  // ALGO_JOIN
             JoinDataModel joinDataModel = new JoinDataModel();
             joinDataModel.setData(m_compareDataInterface1, m_compareDataInterface2);
             
             m_result = joinDataModel;
         }
+        
+        m_dataBox.propagateDataChanged(CompareDataInterface.class);
     }
     
     public void setData(CompareDataInterface compareDataInterface1, CompareDataInterface compareDataInterface2) {
+        if (compareDataInterface2 == null) {
+            m_label1.setText(compareDataInterface1.getName());
+            return;
+        }
+
         m_compareDataInterface1 = compareDataInterface1;
         m_compareDataInterface2 = compareDataInterface2;
 

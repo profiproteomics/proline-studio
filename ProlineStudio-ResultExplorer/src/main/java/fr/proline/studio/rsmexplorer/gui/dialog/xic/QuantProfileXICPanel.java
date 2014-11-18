@@ -195,17 +195,17 @@ public class QuantProfileXICPanel extends JPanel {
     public Map<String,Object> getQuantParams(){
         Map<String,Object> params = new HashMap<>();
         
-        params.put("peptideStatTestsAlpha", m_peptideStatTestsAlpha.getText());
-        params.put("proteinStatTestsAlpha", m_proteinStatTestsAlpha.getText());
-        params.put("discardMissedCleavedPeptides", m_discardMissedCleavedPeptidesChB.isSelected());
-        params.put("discardOxidizedPeptides", m_discardOxidizedPeptidesChB.isSelected());
-        params.put("applyNormalization", m_applyNormalizationChB.isSelected());
-        params.put("applyMissValInference", m_applyMissValInferenceChB.isSelected());
-        params.put("applyVarianceCorrection", m_applyVarianceCorrectionChB.isSelected());
-        params.put("applyTTest", m_applyTTestChB.isSelected());
-        params.put("applyZTest", m_applyZTestChB.isSelected());
-        params.put("applyProfileClustering", m_applyProfileClusteringChB.isSelected());
-        params.put("useOnlySpecificPeptides", m_useOnlySpecificPeptidesChB.isSelected());
+        params.put("peptide_stat_tests_alpha", m_peptideStatTestsAlpha.getText());
+        params.put("protein_stat_tests_alpha", m_proteinStatTestsAlpha.getText());
+        params.put("discard_missed_cleaved_peptides", m_discardMissedCleavedPeptidesChB.isSelected());
+        params.put("discard_oxidized_peptides", m_discardOxidizedPeptidesChB.isSelected());
+        params.put("apply_normalization", m_applyNormalizationChB.isSelected());
+        params.put("apply_miss_val_inference", m_applyMissValInferenceChB.isSelected());
+        params.put("apply_variance_correction", m_applyVarianceCorrectionChB.isSelected());
+        params.put("apply_ttest", m_applyTTestChB.isSelected());
+        params.put("apply_ztest", m_applyZTestChB.isSelected());
+        params.put("apply_profile_clustering", m_applyProfileClusteringChB.isSelected());
+        params.put("use_only_specific_peptides", m_useOnlySpecificPeptidesChB.isSelected());
         
        return params;
     }

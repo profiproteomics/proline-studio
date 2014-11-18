@@ -811,6 +811,7 @@ public class ValidationDialog extends DefaultDialog {
                 continue;
             }
             p.setUsed(false);
+            p.setCompulsory(false);
             m_parameterList.add(p);
         }
 
@@ -825,6 +826,7 @@ public class ValidationDialog extends DefaultDialog {
                 continue;
             }
             p.setUsed(false);
+            p.setCompulsory(false);
             m_parameterList.add(p);
         }
         
@@ -832,11 +834,13 @@ public class ValidationDialog extends DefaultDialog {
         m_fdrTextField = new JTextField(5);
         m_fdrFilterParameter = new DoubleParameter("expected_fdr", "FDR", m_fdrTextField, new Double(5), new Double(0), new Double(10));
         m_fdrFilterParameter.setUsed(false);
+        m_fdrFilterParameter.setCompulsory(false);
         m_parameterList.add(m_fdrFilterParameter);
 
         m_fdrOnValueComboBox = new JComboBox(FDR_ON_VALUES);
         m_fdrOnValueParameter = new ObjectParameter<>("expected_fdr_parameter", "FDR Variable", m_fdrOnValueComboBox, FDR_ON_VALUES,FDR_ON_VALUES_ASSOCIATED_KEYS,  0, null);
         m_fdrOnValueParameter.setUsed(false);
+        m_fdrOnValueParameter.setCompulsory(false);
         m_parameterList.add(m_fdrOnValueParameter);
 
 //        m_fdrEstimatorComboBox = new JComboBox(FDR_ESTIMATOR_VALUES);
@@ -846,6 +850,7 @@ public class ValidationDialog extends DefaultDialog {
         m_proteinFdrTextField = new JTextField(5);
         m_proteinFdrFilterParameter = new DoubleParameter("protein_expected_fdr", "Protein FDR", m_proteinFdrTextField, new Double(5), new Double(0), new Double(10));
         m_proteinFdrFilterParameter.setUsed(false);
+        m_proteinFdrFilterParameter.setCompulsory(false);
         m_parameterList.add(m_proteinFdrFilterParameter);
 
 

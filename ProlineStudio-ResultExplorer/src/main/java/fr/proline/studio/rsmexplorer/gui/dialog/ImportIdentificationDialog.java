@@ -1015,6 +1015,7 @@ public class ImportIdentificationDialog extends DefaultDialog {
         m_decoyRegexTextField = new JTextField(20);
         m_decoyRegexParameter = new StringParameter("decoy_accession", "Decoy Accession", m_decoyRegexTextField, "", new Integer(2), null);
         m_decoyRegexParameter.setUsed(false);
+        m_decoyRegexParameter.setCompulsory(false);
         parameterList.add(m_decoyRegexParameter);
 
 //        BooleanParameter saveSpectrumParameter = new BooleanParameter("save_spectrum_matches", "Save Spectrum Matches", JCheckBox.class, Boolean.FALSE);

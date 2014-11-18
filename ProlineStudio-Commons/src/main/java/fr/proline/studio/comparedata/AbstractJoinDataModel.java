@@ -110,6 +110,14 @@ public abstract class AbstractJoinDataModel implements CompareDataInterface  {
         }
     }
     
+    public int getSelectedKey1() {
+        return m_selectedKey1;
+    }
+    
+    public int getSelectedKey2() {
+        return m_selectedKey2;
+    }
+    
     public boolean joinPossible() {
         return (m_selectedKey1 != -1);
     }

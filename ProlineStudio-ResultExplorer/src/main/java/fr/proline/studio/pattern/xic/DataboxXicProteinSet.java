@@ -43,6 +43,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DProteinSet.class, true);
         outParameter.addParameter(DDataset.class, true);
+        outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
 
     }

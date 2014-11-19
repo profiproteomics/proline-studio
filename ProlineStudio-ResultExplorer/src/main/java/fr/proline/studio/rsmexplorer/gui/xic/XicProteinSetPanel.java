@@ -53,7 +53,6 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
 
@@ -263,6 +262,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
+        m_quantProteinSetTable.initComponentPopupMenu();
     }
     @Override
     public AbstractDataBox getDataBox() {
@@ -294,10 +294,12 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             
-            setComponentPopupMenu(createPopup());
-            
             addMouseListener(new TablePopupMouseAdapter(this));
             
+        }
+        
+        public void initComponentPopupMenu() {
+            setComponentPopupMenu(createPopup());
         }
         
         /** 

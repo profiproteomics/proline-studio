@@ -262,7 +262,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         return m_dataBox.getSaveAction(splittedPanel);
     }
 
-    
+    public DMasterQuantPeptide getSelectedMasterQuantPeptide() {
+        return m_quantPeptideTable.getSelectedMasterQuantPeptide();
+    }
     
     private class QuantPeptideTable extends LazyTable implements ExportTableSelectionInterface  {
 
@@ -353,7 +355,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((QuantProteinSetTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((QuantPeptideTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
                     scrollRowToVisible(rowSelectedInView);
                 }
                     
@@ -393,11 +395,33 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
         @Override
         public HashSet exportSelection(int[] rows) {
-            QuantProteinSetTableModel tableModel = (QuantProteinSetTableModel) getModel();
+            QuantPeptideTableModel tableModel = (QuantPeptideTableModel) getModel();
             return tableModel.exportSelection(rows);
         }
 
-        
+        public DMasterQuantPeptide getSelectedMasterQuantPeptide() {
+
+            // Retrieve Selected Row
+            int selectedRow = getSelectedRow();
+
+            // nothing selected
+            if (selectedRow == -1) {
+                return null;
+
+            }
+
+            QuantPeptideTableModel tableModel = (QuantPeptideTableModel) getModel();
+            if (tableModel.getRowCount() == 0) {
+                return null; // this is a wart, for an unknown reason, it happens that the first row
+                // is selected although it does not exist.
+            }
+
+            // convert according to the sorting
+            selectedRow = convertRowIndexToModel(selectedRow);
+
+            // Retrieve Peptide selected
+            return tableModel.getPeptide(selectedRow);
+        }
 
         
     }
@@ -537,7 +561,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             QuantPeptideTableModel model = ((QuantPeptideTableModel) m_quantPeptideTable.getModel());
             
             List<TableColumn> columns = m_quantPeptideTable.getColumns(true);
-            for (int i=QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME+1;i<columns.size();i++) {
+            for (int i=QuantPeptideTableModel.COLTYPE_PEPTIDE_NAME+1;i<columns.size();i++) {
                 int rsmCur = model.getQCNumber(i);
                 int type = model.getTypeNumber(i);
                 boolean visible = m_rsmList.isVisible(rsmCur) && m_xicList.isVisible(type);

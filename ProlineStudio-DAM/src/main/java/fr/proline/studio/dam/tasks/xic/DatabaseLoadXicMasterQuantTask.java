@@ -527,8 +527,13 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
                 listDMasterQuantPeptide.add(masterQuantPeptide);
 
-            } catch (NoResultException | NonUniqueResultException e) {
-                //m_logger.error(getClass().getSimpleName()+" failed", e);
+            } catch (NoResultException  e1) {
+                // no master quantPeptide: build a fake masterQuantPeptide to display the peptideInstance
+                masterQuantPeptide = new DMasterQuantPeptide(-1, 0, -1, null, peptideInstance.getResultSummary().getId());
+                masterQuantPeptide.setPeptideInstance(peptideInstance);
+                listDMasterQuantPeptide.add(masterQuantPeptide);
+            }catch (NonUniqueResultException e2) {
+                m_logger.error(getClass().getSimpleName()+" failed", e2);
             }
         }
         m_masterQuantPeptideList.addAll(listDMasterQuantPeptide);

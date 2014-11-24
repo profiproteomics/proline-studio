@@ -2,7 +2,7 @@ package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
-import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
@@ -12,7 +12,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
-import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidePanel;
+import fr.proline.studio.rsmexplorer.gui.xic.XicPeptideIonPanel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,37 +20,37 @@ import java.util.List;
  *
  * @author JM235353
  */
-public class DataboxXicPeptideSet extends AbstractDataBox {
+public class DataboxXicPeptideIon extends AbstractDataBox {
 
     private DDataset m_dataset;
-    private DProteinSet m_proteinSet;
-    private List<DMasterQuantPeptide> m_masterQuantPeptideList ;
+    private DMasterQuantPeptide m_masterQuantPeptide;
+    private List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList ;
     
-    public DataboxXicPeptideSet() { 
-        super(DataboxType.DataboxXicPeptideSet);
+    public DataboxXicPeptideIon() { 
+        super(DataboxType.DataboxXicPeptideIon);
         
         // Name of this databox
-        m_name = "XIC Peptides";
-        m_description = "All Peptides of a XIC";
+        m_name = "XIC Peptides Ions";
+        m_description = "All Peptides Ions of a XIC";
 
         // Register Possible in parameters
         // One Dataset and list of Peptide
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DDataset.class, false); 
-        inParameter.addParameter(DProteinSet.class, false); 
+        inParameter.addParameter(DMasterQuantPeptide.class, false); 
         registerInParameter(inParameter);
 
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DMasterQuantPeptide.class, false);
+        outParameter.addParameter(DMasterQuantPeptideIon.class, false);
         registerOutParameter(outParameter);
 
     }
     
      @Override
     public void createPanel() {
-        XicPeptidePanel p = new XicPeptidePanel();
+        XicPeptideIonPanel p = new XicPeptideIonPanel();
         p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
@@ -58,10 +58,10 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        boolean allProteinSet = m_previousDataBox == null;
+        boolean allPeptides = m_previousDataBox == null;
         
-        if (!allProteinSet) {
-            m_proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+        if (!allPeptides) {
+            m_masterQuantPeptide = (DMasterQuantPeptide) m_previousDataBox.getData(false, DMasterQuantPeptide.class);
             m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
         }
         final int loadingId = setLoading();
@@ -85,12 +85,12 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                     }
                     DQuantitationChannel[] quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
-                    // peptide set 
-                    DMasterQuantPeptide[] masterQuantPeptideArray = new DMasterQuantPeptide[m_masterQuantPeptideList.size()];
-                    m_masterQuantPeptideList.toArray(masterQuantPeptideArray);
-                    ((XicPeptidePanel) m_panel).setData(taskId, quantitationChannelArray, masterQuantPeptideArray, finished);
+                    // peptide ions 
+                    DMasterQuantPeptideIon[] masterQuantPeptideIonArray = new DMasterQuantPeptideIon[m_masterQuantPeptideIonList.size()];
+                    m_masterQuantPeptideIonList.toArray(masterQuantPeptideIonArray);
+                    ((XicPeptideIonPanel) m_panel).setData(taskId, quantitationChannelArray, masterQuantPeptideIonArray, finished);
                 } else {
-                    ((XicPeptidePanel) m_panel).dataUpdated(subTask, finished);
+                    ((XicPeptideIonPanel) m_panel).dataUpdated(subTask, finished);
                 }
 
                 setLoaded(loadingId);
@@ -102,12 +102,12 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         };
 
         // ask asynchronous loading of data
-        m_masterQuantPeptideList = new ArrayList();
+        m_masterQuantPeptideIonList = new ArrayList();
         DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
-        if (allProteinSet) {
-            task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantPeptideList);
+        if (allPeptides) {
+            task.initLoadPeptideIons(getProjectId(), m_dataset, m_masterQuantPeptideIonList);
         }else {
-            task.initLoadPeptides(getProjectId(), m_dataset, m_proteinSet, m_masterQuantPeptideList);
+            task.initLoadPeptideIons(getProjectId(), m_dataset, m_masterQuantPeptide, m_masterQuantPeptideIonList);
         }
         registerTask(task);
 
@@ -125,10 +125,8 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         if (parameterType != null) {
             if (parameterType.equals(ResultSummary.class)) {
                 return m_dataset.getResultSummary();
-            }else if (parameterType.equals(DMasterQuantPeptide.class)) {
-                return ((XicPeptidePanel) m_panel).getSelectedMasterQuantPeptide();
-            }else if (parameterType.equals(DDataset.class)) {
-                return m_dataset;
+            }else if (parameterType.equals(DMasterQuantPeptideIon.class)) {
+                return ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();
             }
         }
         return super.getData(getArray, parameterType);

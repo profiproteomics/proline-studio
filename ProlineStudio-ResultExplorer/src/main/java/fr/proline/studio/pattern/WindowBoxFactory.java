@@ -2,6 +2,7 @@ package fr.proline.studio.pattern;
 
 
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import fr.proline.studio.utils.IconManager;
@@ -186,6 +187,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataboxXicProteinSet();
         boxes[1] = new DataboxXicPeptideSet();
+        //boxes[2] = new DataboxXicPeptideIon();
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
@@ -194,8 +196,19 @@ public class WindowBoxFactory {
     public static WindowBox getXicQuantPeptideSetWindowBox(String name) {
 
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataboxXicPeptideSet();
+        //boxes[1] = new DataboxXicPeptideIon();
+
+        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
+        return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+    }
+    
+    public static WindowBox getXicQuantPeptideIonWindowBox(String name) {
+
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataboxXicPeptideIon();
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));

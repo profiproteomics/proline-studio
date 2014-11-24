@@ -4,6 +4,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import java.awt.event.ActionListener;
@@ -78,7 +79,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         DataboxRsetMSDiag(22),
         DataboxSelectCompareData(23),
         DataboxCompareResult(24),
-        DataboxXicPeptideSet(25);
+        DataboxXicPeptideSet(25),
+        DataboxXicPeptideIon(26);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -143,6 +145,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
                 	return new DataBoxRsetMSDiag("");
                 case DataboxSelectCompareData:
                     return new DataboxSelectCompareData();
+                case DataboxXicPeptideIon:
+                    return new DataboxXicPeptideIon();
             }
             return null; // should not happen
         }

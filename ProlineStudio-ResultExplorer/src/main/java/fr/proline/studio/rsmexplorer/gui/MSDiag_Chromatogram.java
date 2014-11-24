@@ -112,9 +112,9 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        renderer.setShadowVisible(false);
 
 	        renderer.setSeriesPaint(0, new Color(255,60,60));
-	        renderer.setSeriesPaint(1, new Color(60,255,60));
+	        renderer.setSeriesPaint(1, new Color(255,60,255));
 	        renderer.setSeriesPaint(2, new Color(60,60,255));
-	        renderer.setSeriesPaint(3, new Color(255,60,255));
+	        renderer.setSeriesPaint(3, new Color(60,255,60));
 	        renderer.setSeriesPaint(4, new Color(60,255,255));
 	        renderer.setSeriesPaint(5, new Color(150,20,50));
 	        renderer.setSeriesPaint(6, new Color(20,150,50));
@@ -256,8 +256,11 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        m_chart.setTitle(title);
 	        
 	        // set axes labels
-	        m_chart.getCategoryPlot().getDomainAxis().setLabel(msdo.x_axis_description);
+	       
+	        //m_chart.getCategoryPlot().getRangeAxis().setLabel("");
+	        
 	        m_chart.getCategoryPlot().getDomainAxis().setLabel(msdo.y_axis_description);
+	        
 	        // set the spectrum title
 	        //m_spectrumTitle = spectrum.getTitle();
 

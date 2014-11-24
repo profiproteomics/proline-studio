@@ -107,7 +107,7 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	    	m_dataSet = new DefaultBoxAndWhiskerCategoryDataset();
 	    	
 	    	
-	    	final NumberAxis rangeAxis = new NumberAxis("Value");
+	    	final NumberAxis rangeAxis = new NumberAxis("Masses"); // TODO: find a way to change this value in setData...
 	    	 rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits()); // create integer ticks unit. (whatever data is)
 	         final BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer(); //BarRenderer();
 	       
@@ -264,6 +264,14 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 
 	        m_chart.getPlot().setBackgroundPaint(Color.white);
 
+	        // 	set axes labels
+	       
+	        //	m_chart.getCategoryPlot().getRangeAxis().setLabel(msdo.x_axis_description); // does not work
+	        
+	       
+	        m_chart.getCategoryPlot().getDomainAxis().setLabel(msdo.y_axis_description);
+	        
+	        
 	        //String serieTable[] = new String[msdo.matrix[0].length];
 	        int nbSeries = msdo.matrix[0].length;
 	        int nbCategories = msdo.matrix.length - 1; // -1 because of 1st column is series names
@@ -272,7 +280,6 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	        Comparable<String> serieString; 
 			Comparable<String> catString;  
 	        for (int serie = 1; serie < nbSeries; serie++) { // lines of data table
-	        	//for (int cat = 0; cat < nbCategories; cat++) { // columns of data table also
 	        		// Charge","Lowest Mass","Highest Mass","Average Mass","Median Mass
 	                // series n°; minregularvalue,maxregvalue,mean,median
 	                //BoxAndWhiskerItem item = new BoxAndWhiskerItem(mean,median,q1,q3,minregularValue,maxRegularValue,minOutlier,maxOutlier,listOutliers);
@@ -287,21 +294,14 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	        		double q3= 0; //(double) (msdo.matrix[serie][2]);
 	        		double minRegularValue= (double) (msdo.matrix[serie][1]);
 	        		double maxRegularValue= (double) (msdo.matrix[serie][2]);
-	        		double minOutlier = 0; // not used
-	        		double maxOutlier = 0; // not used
+	        		double minOutlier = minRegularValue; // not used
+	        		double maxOutlier = maxRegularValue; // not used
 	        		listOutliers = new ArrayList(0); // not used
 	               
 					m_dataSet.add(new BoxAndWhiskerItem(mean,median,q1,q3,minRegularValue,maxRegularValue,minOutlier,maxOutlier,listOutliers),serieString,catString);
-	               
 	        
 	        }
-	       
-	        
-	        
-	        
 
-	        
 	    }
-
 	
 }

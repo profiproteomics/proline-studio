@@ -55,6 +55,7 @@ public abstract class AbstractServiceTask extends AbstractLongTask {
         m_synchronous = synchronous;
         
         m_id = m_idIncrement++;
+        m_wsVersion = "0.1";
     }
     
     /**

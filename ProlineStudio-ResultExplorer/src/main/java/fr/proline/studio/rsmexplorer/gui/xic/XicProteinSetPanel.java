@@ -226,17 +226,18 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  DMasterQuantProteinSet[] proteinSets, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<DMasterQuantProteinSet> proteinSets, boolean finished) {
         m_quantChannels = quantChannels;
         ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()).setData(taskId, quantChannels, proteinSets);
 
-        // select the first row
-        if ((proteinSets != null) && (proteinSets.length > 0)) {
+       // select the first row
+        if ((proteinSets != null) && (proteinSets.size() > 0)) {
             m_quantProteinSetTable.getSelectionModel().setSelectionInterval(0, 0);
-            m_markerContainerPanel.setMaxLineNumber(proteinSets.length);
+            m_markerContainerPanel.setMaxLineNumber(proteinSets.size());
         }
-
+        
         if (finished) {
+
             // allow to change column visibility
             m_columnVisibilityButton.setEnabled(true);
             m_quantProteinSetTable.setSortable(true);
@@ -252,6 +253,19 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantProteinSetTable.dataUpdated(subTask, finished);
+        if (finished) {
+            // allow to change column visibility
+            m_columnVisibilityButton.setEnabled(true);
+            m_quantProteinSetTable.setSortable(true);
+            // hide the rawAbundance  and selectionLevel columns
+            List<Integer> listIdsToHide = ((QuantProteinSetTableModel)m_quantProteinSetTable.getModel()).getDefaultColumnsToHide();
+            for (Integer id : listIdsToHide) {
+                m_quantProteinSetTable.getColumnExt(id.intValue()).setVisible(false);
+            }
+            // hide Id column
+            m_quantProteinSetTable.getColumnExt(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID).setVisible(false);
+            
+        }
     }
     
     public DProteinSet getSelectedProteinSet() {

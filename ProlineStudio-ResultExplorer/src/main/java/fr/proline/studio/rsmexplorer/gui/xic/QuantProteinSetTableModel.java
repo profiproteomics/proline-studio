@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.table.ExportTableSelectionInterface;
@@ -36,7 +37,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     private static final String[] m_columnNamesQC = {"Sel. level", "Abundance", "Raw abundance", "Pep. match count"};
     private static final String[] m_toolTipQC = {"Selection level", "Abundance", "Raw abundance", "Peptides match count"};
     
-    private DMasterQuantProteinSet[] m_proteinSets = null;
+    private List<DMasterQuantProteinSet> m_proteinSets = null;
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
     
@@ -112,22 +113,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
     @Override
     public int getSubTaskId(int col) {
-        /*switch (col) {
-            /*case COLTYPE_PROTEIN_SET_NAME:
-            case COLTYPE_PROTEIN_SET_DESCRIPTION:
-                return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
-            case COLTYPE_PROTEIN_SCORE:
-            case COLTYPE_PROTEINS_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_SAMESET_SUBSET_COUNT;
-            case COLTYPE_UNIQUE_SEQUENCES_COUNT:
-            case COLTYPE_PEPTIDES_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
-            case COLTYPE_SPECTRAL_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_SPECTRAL_COUNT;
-            case COLTYPE_SPECIFIC_SPECTRAL_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_SPECIFIC_SPECTRAL_COUNT;
-        }*/ //JPM.TODO
-        return -1;
+        return DatabaseLoadXicMasterQuantTask.SUB_TASK_PROTEIN_SET;
     }
 
     
@@ -139,7 +125,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         if ((!m_isFiltering) && (m_filteredIds != null)) {
             return m_filteredIds.size();
         }
-        return m_proteinSets.length;
+        return m_proteinSets.size();
     }
 
     @Override
@@ -151,7 +137,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         }
         
         // Retrieve Protein Set
-        DMasterQuantProteinSet proteinSet = m_proteinSets[rowFiltered];
+        DMasterQuantProteinSet proteinSet = m_proteinSets.get(rowFiltered);
         //long rsmId = proteinSet.getResultSummaryId();
 
         switch (col) {
@@ -180,27 +166,31 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             default: {
                 // Quant Channel columns 
                 LazyData lazyData = getLazyData(row,col);
-                
-                // retrieve quantProteinSet for the quantChannelId
-                Map<Long, DQuantProteinSet> quantProteinSetByQchIds = proteinSet.getQuantProteinSetByQchIds() ;
-                if (quantProteinSetByQchIds == null) {
-                    lazyData.setData("");
+                if (proteinSet.getProteinSet()== null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
                 }else{
-                    int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
-                    int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
-                    DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(m_quantChannels[nbQc].getId()) ;
-                    if (quantProteinSet == null) {
+                    // retrieve quantProteinSet for the quantChannelId
+                    Map<Long, DQuantProteinSet> quantProteinSetByQchIds = proteinSet.getQuantProteinSetByQchIds() ;
+                    if (quantProteinSetByQchIds == null) {
                         lazyData.setData("");
-                    } else {
-                        switch (id ) {
-                            case COLTYPE_SELECTION_LEVEL : lazyData.setData(quantProteinSet.getSelectionLevel());
+                    }else{
+                        int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
+                        int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
+                        DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(m_quantChannels[nbQc].getId()) ;
+                        if (quantProteinSet == null) {
+                            lazyData.setData("");
+                        } else {
+                            switch (id ) {
+                                case COLTYPE_SELECTION_LEVEL : lazyData.setData(quantProteinSet.getSelectionLevel());
                                      break;
-                            case COLTYPE_ABUNDANCE : lazyData.setData(quantProteinSet.getAbundance());
+                                case COLTYPE_ABUNDANCE : lazyData.setData(quantProteinSet.getAbundance());
                                      break;
-                            case COLTYPE_RAW_ABUNDANCE : lazyData.setData(quantProteinSet.getRawAbundance());
+                                case COLTYPE_RAW_ABUNDANCE : lazyData.setData(quantProteinSet.getRawAbundance());
                                      break;
-                            case COLTYPE_PSM : lazyData.setData(quantProteinSet.getPeptideMatchesCount());
+                                case COLTYPE_PSM : lazyData.setData(quantProteinSet.getPeptideMatchesCount());
                                      break;
+                            }
                         }
                     }
                 }
@@ -219,12 +209,12 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         }
         
         // Retrieve Protein Set
-        DMasterQuantProteinSet quantProteinSet = m_proteinSets[rowFiltered];
+        DMasterQuantProteinSet quantProteinSet = m_proteinSets.get(rowFiltered);
         return quantProteinSet.getProteinSet();
     }
      
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels, DMasterQuantProteinSet[] proteinSets ) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets ) {
         this.m_quantChannels = quantChannels ;
         this.m_quantChannelNumber = quantChannels.length;
         this.m_proteinSets = proteinSets;
@@ -260,7 +250,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             i = m_filteredIds.get(i).intValue();
         }
         
-        return m_proteinSets[i];
+        return m_proteinSets.get(i);
     }
     
     
@@ -269,16 +259,16 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         if (m_filteredIds != null) {
             int nb = m_filteredIds.size();
             for (int i = 0; i < nb; i++) {
-                if (proteinSetId == m_proteinSets[m_filteredIds.get(i)].getProteinSetId()) {
+                if (proteinSetId == m_proteinSets.get(m_filteredIds.get(i)).getProteinSetId()) {
                     return i;
                 }
             }
             return -1;
         }
         
-        int nb = m_proteinSets.length;
+        int nb = m_proteinSets.size();
         for (int i=0;i<nb;i++) {
-            if (proteinSetId == m_proteinSets[i].getProteinSetId()) {
+            if (proteinSetId == m_proteinSets.get(i).getProteinSetId()) {
                 return i;
             }
         }
@@ -328,7 +318,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         m_isFiltering = true;
         try {
 
-            int nbData = m_proteinSets.length;
+            int nbData = m_proteinSets.size();
             if (m_filteredIds == null) {
                 m_filteredIds = new ArrayList<>(nbData);
             } else {
@@ -453,11 +443,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
     
     public Long getResultSummaryId() {
-        if ((m_proteinSets == null) || (m_proteinSets.length == 0)) {
+        if ((m_proteinSets == null) || (m_proteinSets.size() == 0)) {
             return null;
         }
         
-        return m_proteinSets[0].getQuantResultSummaryId();
+        return m_proteinSets.get(0).getQuantResultSummaryId();
     }
     
     /**
@@ -490,7 +480,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             }
 
             // Retrieve Protein Set
-            DMasterQuantProteinSet proteinSet = m_proteinSets[rowFiltered];
+            DMasterQuantProteinSet proteinSet = m_proteinSets.get(rowFiltered);
 
             selectedObjects.add(proteinSet.getProteinSet().getId());
         }

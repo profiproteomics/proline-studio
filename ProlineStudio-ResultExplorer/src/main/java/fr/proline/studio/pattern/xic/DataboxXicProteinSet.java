@@ -80,9 +80,9 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                     DQuantitationChannel[] quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
                     // proteins set 
-                    DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
-                    m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
-                    ((XicProteinSetPanel) m_panel).setData(taskId, quantitationChannelArray, masterQuantProteinSetArray, finished);
+                    //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
+                    //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
+                    ((XicProteinSetPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantProteinSetList, finished);
                 } else {
                     ((XicProteinSetPanel) m_panel).dataUpdated(subTask, finished);
                 }

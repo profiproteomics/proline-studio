@@ -208,15 +208,15 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  DMasterQuantPeptide[] peptides, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<DMasterQuantPeptide> peptides, boolean finished) {
         m_quantChannels = quantChannels;
         
         ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).setData(taskId, quantChannels, peptides);
 
         // select the first row
-        if ((peptides != null) && (peptides.length > 0)) {
+        if ((peptides != null) && (peptides.size() > 0)) {
             m_quantPeptideTable.getSelectionModel().setSelectionInterval(0, 0);
-            m_markerContainerPanel.setMaxLineNumber(peptides.length);
+            m_markerContainerPanel.setMaxLineNumber(peptides.size());
         }
 
         if (finished) {
@@ -235,6 +235,18 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantPeptideTable.dataUpdated(subTask, finished);
+        if (finished) {
+            // hide the rawAbundance  and selectionLevel columns
+            List<Integer> listIdsToHide = ((QuantPeptideTableModel)m_quantPeptideTable.getModel()).getDefaultColumnsToHide();
+            for (Integer id : listIdsToHide) {
+                m_quantPeptideTable.getColumnExt(id.intValue()).setVisible(false);
+            }
+            // hide the id column
+            m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
+            // allow to change column visibility
+            m_columnVisibilityButton.setEnabled(true);
+            m_quantPeptideTable.setSortable(true);
+        }
     }
     
     

@@ -196,7 +196,7 @@ public class WindowBoxFactory {
     public static WindowBox getXicQuantPeptideSetWindowBox(String name) {
 
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxXicPeptideSet();
         //boxes[1] = new DataboxXicPeptideIon();
 

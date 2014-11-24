@@ -4,6 +4,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.table.ExportTableSelectionInterface;
@@ -34,7 +35,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     private static final String[] m_columnNamesQC = {"Sel. level", "Abundance", "Raw abundance", "Pep. match count"};
     private static final String[] m_toolTipQC = {"Selection level", "Abundance", "Raw abundance", "Peptides match count"};
     
-    private DMasterQuantPeptide[] m_quantPeptides = null;
+    private List<DMasterQuantPeptide> m_quantPeptides = null;
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
     
@@ -114,22 +115,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     
     @Override
     public int getSubTaskId(int col) {
-        /*switch (col) {
-            /*case COLTYPE_PROTEIN_SET_NAME:
-            case COLTYPE_PROTEIN_SET_DESCRIPTION:
-                return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
-            case COLTYPE_PROTEIN_SCORE:
-            case COLTYPE_PROTEINS_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_SAMESET_SUBSET_COUNT;
-            case COLTYPE_UNIQUE_SEQUENCES_COUNT:
-            case COLTYPE_PEPTIDES_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_TYPICAL_PROTEIN;
-            case COLTYPE_SPECTRAL_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_SPECTRAL_COUNT;
-            case COLTYPE_SPECIFIC_SPECTRAL_COUNT:
-                return DatabaseProteinSetsTask.SUB_TASK_SPECIFIC_SPECTRAL_COUNT;
-        }*/ //JPM.TODO
-        return -1;
+        return DatabaseLoadXicMasterQuantTask.SUB_TASK_PEPTIDE_INSTANCE;
     }
 
     
@@ -141,7 +127,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         if ((!m_isFiltering) && (m_filteredIds != null)) {
             return m_filteredIds.size();
         }
-        return m_quantPeptides.length;
+        return m_quantPeptides.size();
     }
 
     @Override
@@ -152,7 +138,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             rowFiltered = m_filteredIds.get(row).intValue();
         }
         // Retrieve Quant Peptide
-        DMasterQuantPeptide peptide = m_quantPeptides[rowFiltered];
+        DMasterQuantPeptide peptide = m_quantPeptides.get(rowFiltered);
         DPeptideInstance peptideInstance = peptide.getPeptideInstance() ;
 
         switch (col) {
@@ -198,7 +184,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         //return null; // should never happen
     }
 
-    public void setData(Long taskId,  DQuantitationChannel[] quantChannels, DMasterQuantPeptide[] peptides ) {
+    public void setData(Long taskId,  DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides ) {
         this.m_quantPeptides = peptides;
         this.m_quantChannels = quantChannels ;
         this.m_quantChannelNumber = quantChannels.length;
@@ -235,7 +221,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             i = m_filteredIds.get(i).intValue();
         }
         
-        return m_quantPeptides[i];
+        return m_quantPeptides.get(i);
     }
     
     
@@ -244,16 +230,16 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         if (m_filteredIds != null) {
             int nb = m_filteredIds.size();
             for (int i = 0; i < nb; i++) {
-                if (peptideId == m_quantPeptides[m_filteredIds.get(i)].getId()) {
+                if (peptideId == m_quantPeptides.get(m_filteredIds.get(i)).getId()) {
                     return i;
                 }
             }
             return -1;
         }
         
-        int nb = m_quantPeptides.length;
+        int nb = m_quantPeptides.size();
         for (int i=0;i<nb;i++) {
-            if (peptideId == m_quantPeptides[i].getId()) {
+            if (peptideId == m_quantPeptides.get(i).getId()) {
                 return i;
             }
         }
@@ -303,7 +289,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         m_isFiltering = true;
         try {
 
-            int nbData = m_quantPeptides.length;
+            int nbData = m_quantPeptides.size();
             if (m_filteredIds == null) {
                 m_filteredIds = new ArrayList<>(nbData);
             } else {
@@ -428,11 +414,11 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     
     
     public Long getResultSummaryId() {
-        if ((m_quantPeptides == null) || (m_quantPeptides.length == 0)) {
+        if ((m_quantPeptides == null) || (m_quantPeptides.size() == 0)) {
             return null;
         }
         
-        return m_quantPeptides[0].getQuantResultSummaryId();
+        return m_quantPeptides.get(0).getQuantResultSummaryId();
     }
     
     
@@ -466,7 +452,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             }
 
             // Retrieve Peptide
-            DMasterQuantPeptide peptide = m_quantPeptides[rowFiltered];
+            DMasterQuantPeptide peptide = m_quantPeptides.get(rowFiltered);
 
             selectedObjects.add(peptide.getId());
         }

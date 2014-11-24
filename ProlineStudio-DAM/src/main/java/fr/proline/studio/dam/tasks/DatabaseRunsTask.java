@@ -86,6 +86,9 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     public void initRegisterIdentificationDatasetRun(long datasetId, RawFile rawfile, Run run) {
         setTaskInfo(new TaskInfo(" Register Run for Dataset with id "+datasetId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_datasetId = datasetId;
+        if (rawfile == null) {
+            rawfile = run.getRawFile();
+        }
         m_rawfile = rawfile;
         m_run = run;
         

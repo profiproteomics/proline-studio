@@ -192,7 +192,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 								
 								default: 
 									// use table as default ---
-									break;
+									
 								case "table":
 									MSDiagTable_GenericTable m_msdiagTable = new MSDiagTable_GenericTable();
 									m_msdiagTable.setModel(new MSdiagTable_GenericTableModel());
@@ -201,7 +201,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 									
 							        scrollPane.setViewportView(m_msdiagTable);
 								    m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
-									//break;
+									break;
 								}
 			        		}
 							

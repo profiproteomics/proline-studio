@@ -105,28 +105,23 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	    public MSDiag_BoxAndWhisker() {
 	        
 	    	m_dataSet = new DefaultBoxAndWhiskerCategoryDataset();
-	    	//m_chart = ChartFactory.createXYLineChart("", "m/z", "intensity", m_dataSet, PlotOrientation.VERTICAL, true, true, false);
-
+	    	
 	    	
 	    	final NumberAxis rangeAxis = new NumberAxis("Value");
 	    	 rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits()); // create integer ticks unit. (whatever data is)
 	         final BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer(); //BarRenderer();
-	       //  renderer2.setDrawBarOutline(false);
+	       
 	         renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars
 	         renderer.setSeriesFillPaint(0, new Color(128,60,60));
 	         renderer.setSeriesOutlinePaint(0, new Color(128,60,60));
-	         //renderer2.setSeriesOutlineStroke(0, new Stroke(new BasicStroke(0.5)));
-	         
+	        
 	         renderer.setFillBox(false);
-	         //renderer2.setArtifactPaint(Color.yellow);
 	         renderer.setSeriesOutlinePaint(0, Color.blue);
 	         renderer.setSeriesOutlineStroke(0, new BasicStroke(2f), true);
 	         renderer.setBaseOutlinePaint(Color.blue, true);
-	         //renderer2.setBaseShape(shape); (Color.red);
 	         renderer.setItemMargin(0.20);
 	         renderer.setMaximumBarWidth(1.0);
 	         renderer.setBaseLegendShape(new Rectangle2D.Double(-4.0, -4.0, 8.0, 8.0));
-	         //renderer2.set
 	         
 	        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 	        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars
@@ -140,16 +135,15 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	        subplot.setDomainGridlinesVisible(true);
 
 	        final CategoryAxis domainAxis = new CategoryAxis("Category");
-	         //CategoryAxis domainAxis = plot.getDomainAxis();
+	        
 	        domainAxis.setCategoryLabelPositions(
 	            CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 4.0)
 	        );
 	        final CombinedDomainCategoryPlot plot = new CombinedDomainCategoryPlot(domainAxis);
-	        //plot.add(subplot1, 2);
+	       ;
 	        plot.add(subplot, 1);
 	        
-	        
-	       
+
 	        
 	    	m_chart = new JFreeChart(
 	                "Combined Chart title",
@@ -157,24 +151,11 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	                plot,
 	                true
 	            );
-	    	
-	        
-	  //      m_chart.setNotify(false); // stops events handler
-	        //m_chart.removeLegend();
+
 	        m_chart.setBackgroundPaint(Color.white);
 	        TextTitle textTitle = m_chart.getTitle();
 	        textTitle.setFont(textTitle.getFont().deriveFont(Font.PLAIN, 10.0f));
-//	        
-	       //XYPlot plot = (XYPlot) m_chart.getPlot();
-	       // plot.getRangeAxis().setUpperMargin(0.2);
-	//
-	 //       plot.setBackgroundPaint(Color.white);
-//	        
-//	        XYStickRenderer renderer = new XYStickRenderer();
-//	        renderer.setBaseStroke(new BasicStroke(1.0f));
-	        
-	 //       plot.setRenderer(renderer);
-	        
+
 	        initComponents();
 	        
 	        
@@ -207,25 +188,6 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	       
 	        m_chromatogragmPanel = cp;
 	        
-	        // set temp initial data:
-	       // m_dataSet.setValue("loading...", new Double(10));
-	    	//m_dataSet.setValue("this should not stay for ever...", new Double(20));
-
-	        // JFreePanel sub Menus
-	        // creation of the menuItem Show Spectrum Title
-	       // m_showSpectrumTitle = new JMenuItem("Show Spectrum Title");
-//	        m_showSpectrumTitle.addActionListener(new ActionListener() {
-	//
-//	            @Override
-//	            public void actionPerformed(ActionEvent e) {
-//	                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), m_spectrumTitle, "Spectrum Title", 1);
-//	            }
-//	        });
-
-	        // add to the popupMenu
-	        //((ChartPanel) m_pieChartPanel).getPopupMenu().add(m_showSpectrumTitle);
-	        
-	        
 	        //
 	        JToolBar toolbar = initToolbar();
 	        
@@ -252,16 +214,8 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	    
 	    public void setData(MSDiagOutput_AW msdo) {
 	             
-	        
-	   //     m_chart.setNotify(false);
 	        constructChromatogram(msdo);
-	        //m_spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch, peptideFragmentationData);
-	        
-	        // set default auto bounds in case there is no annotations (which sets new autobounds)
-//	        m_chart.getXYPlot().getRangeAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getRangeAxis().getLowerBound(),m_chart.getXYPlot().getRangeAxis().getUpperBound()));
-//	        m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getDomainAxis().getLowerBound(),m_chart.getXYPlot().getDomainAxis().getUpperBound()));
-	       // m_spectrumAnnotations.addAnnotations();
-	       // m_chart.setNotify(true);
+
 	    }
 	    
 	    public void writeToPNG(String fileName) {
@@ -281,7 +235,6 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	        DOMImplementation mySVGDOM = org.apache.batik.dom.GenericDOMImplementation.getDOMImplementation();
 	        Document document = mySVGDOM.createDocument(null, "svg", null);
 	        org.apache.batik.svggen.SVGGraphics2D my_svg_generator = new org.apache.batik.svggen.SVGGraphics2D(document);
-	        //m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 800,600), null);
 	        // draw a rectangle of the size that determines the scale of the axis graduations.
 	        m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, m_chromatogragmPanel.getWidth(), m_chromatogragmPanel.getHeight()), null);
 	        
@@ -298,10 +251,9 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	    private void constructChromatogram(MSDiagOutput_AW msdo) {
 
 	        // clear all data
-	        m_dataSet.clear(); //removeSeries(SERIES_NAME);
+	        m_dataSet.clear(); 
 	    	
 	    	
-	 
 	        if (msdo == null) {
 	            return;
 	        }
@@ -310,33 +262,15 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	        String title = msdo.description;
 	        m_chart.setTitle(title);
 
-	        // set the spectrum title
-	        //m_spectrumTitle = spectrum.getTitle();
-
-	        
-	        // reset X/Y zooming
-	        // ((ChartPanel) m_spectrumPanel).restoreAutoBounds();
 	        m_chart.getPlot().setBackgroundPaint(Color.white);
 
 	        //String serieTable[] = new String[msdo.matrix[0].length];
 	        int nbSeries = msdo.matrix[0].length;
 	        int nbCategories = msdo.matrix.length - 1; // -1 because of 1st column is series names
-//	        for (int i = 0; i < nbSeries; i++) {
-//	          serieTable[i] = msdo.matrix[0][i].toString();
-//	        }
-	        
-	       // type 1: mettre: column_titles (category) columns
-	        // serie: mettre 1ere colonne de données. (scan group etc).
-	        // column keys...
-	        
 
-	       // result.addValue(1.0, series1, type1);
-	       // result.addValue(4.0, series1, type2);
-	        
 	        ArrayList<Double> listOutliers = new ArrayList();
 	        Comparable<String> serieString; 
 			Comparable<String> catString;  
-	      //  JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "nb series:" + nbSeries + "\nnbCat:"+ nbCategories, "DEBUG", 1);
 	        for (int serie = 1; serie < nbSeries; serie++) { // lines of data table
 	        	//for (int cat = 0; cat < nbCategories; cat++) { // columns of data table also
 	        		// Charge","Lowest Mass","Highest Mass","Average Mass","Median Mass

@@ -110,36 +110,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        renderer.setDrawBarOutline(false);
 	        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars
 	        renderer.setShadowVisible(false);
-	     // set up gradient paints for series...
-//	        GradientPaint gp0 = new GradientPaint(
-//	            0.0f, 0.0f, Color.red, 
-//	            0.0f, 0.0f, new Color(0, 0, 64)
-//	        );
-//	        GradientPaint gp2 = new GradientPaint(
-//	            0.0f, 0.0f, Color.blue, 
-//	            0.0f, 0.0f, new Color(0, 64, 0)
-//	        );
-//	        GradientPaint gp1 = new GradientPaint(
-//		            0.0f, 0.0f, Color.green, 
-//		            0.0f, 0.0f, new Color(64, 0, 0)
-//		        );
-//	        GradientPaint gp4 = new GradientPaint(
-//		            0.0f, 0.0f, Color.yellow, 
-//		            0.0f, 0.0f, new Color(64, 0, 0)
-//		        );
-//	        GradientPaint gp3 = new GradientPaint(
-//		            0.0f, 0.0f, Color.orange, 
-//		            0.0f, 0.0f, new Color(64, 0, 0)
-//		        );
-//	        GradientPaint gp5 = new GradientPaint(
-//		            0.0f, 0.0f, Color.pink, 
-//		            0.0f, 0.0f, new Color(64, 0, 0)
-//		        );
-//	        GradientPaint gp6 = new GradientPaint(
-//		            0.0f, 0.0f, Color.gray, 
-//		            0.0f, 0.0f, new Color(64, 0, 0)
-//		        );
-//	        
+
 	        renderer.setSeriesPaint(0, new Color(255,60,60));
 	        renderer.setSeriesPaint(1, new Color(60,255,60));
 	        renderer.setSeriesPaint(2, new Color(60,60,255));
@@ -153,16 +124,14 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        subplot.setDomainGridlinesVisible(true);
 
 	        final CategoryAxis domainAxis = new CategoryAxis("Category");
-	         //CategoryAxis domainAxis = plot.getDomainAxis();
+	        
 	        domainAxis.setCategoryLabelPositions(
 	            CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 4.0)
 	        );
 	        final CombinedDomainCategoryPlot plot = new CombinedDomainCategoryPlot(domainAxis);
-	        //plot.add(subplot1, 2);
+	        
 	        plot.add(subplot, 1);
 	        
-	        
-	       
 	        
 	    	m_chart = new JFreeChart(
 	                "Combined Chart title",
@@ -170,45 +139,19 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	                plot,
 	                true
 	            );
-	    	
-	        
-	  //      m_chart.setNotify(false); // stops events handler
-	        //m_chart.removeLegend();
+	    	   
 	        m_chart.setBackgroundPaint(Color.white);
 	        TextTitle textTitle = m_chart.getTitle();
 	        textTitle.setFont(textTitle.getFont().deriveFont(Font.PLAIN, 10.0f));
-//	        
-	       //XYPlot plot = (XYPlot) m_chart.getPlot();
-	       // plot.getRangeAxis().setUpperMargin(0.2);
-	//
-	 //       plot.setBackgroundPaint(Color.white);
-//	        
-//	        XYStickRenderer renderer = new XYStickRenderer();
-//	        renderer.setBaseStroke(new BasicStroke(1.0f));
-	        
-	 //       plot.setRenderer(renderer);
 	        
 	        initComponents();
-	        
 	        
 	    }
 	    
 	    private void initComponents() {
 	        setLayout(new BorderLayout());
 	        ChartPanel cp = new ChartPanel(m_chart, true) {
-//	            @Override
-//	            public void restoreAutoBounds(){
-//	            	
-//	            	XYPlot plot=(XYPlot)getChart().getPlot();
-//	                double domainStart = plot.getDomainAxis().getDefaultAutoRange().getLowerBound();
-//	            	double domainEnd =  plot.getDomainAxis().getDefaultAutoRange().getUpperBound();
-//	            	double rangeStart = plot.getRangeAxis().getDefaultAutoRange().getLowerBound();
-//	            	double rangeEnd =  plot.getRangeAxis().getDefaultAutoRange().getUpperBound();
-//	                plot.getDomainAxis().setAutoRange(false);
-//	                plot.getDomainAxis().setRange(domainStart,domainEnd);
-//	                plot.getRangeAxis().setRange(rangeStart,rangeEnd);
-//	                
-//	            }
+
 	        };
 	        
 	        
@@ -220,11 +163,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	       
 	        m_chromatogragmPanel = cp;
 	        
-	        // set temp initial data:
-	       // m_dataSet.setValue("loading...", new Double(10));
-	    	//m_dataSet.setValue("this should not stay for ever...", new Double(20));
-
-	        // JFreePanel sub Menus
+	         // JFreePanel sub Menus
 	        // creation of the menuItem Show Spectrum Title
 	       // m_showSpectrumTitle = new JMenuItem("Show Spectrum Title");
 //	        m_showSpectrumTitle.addActionListener(new ActionListener() {
@@ -266,15 +205,8 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    public void setData(MSDiagOutput_AW msdo) {
 	             
 	        
-	   //     m_chart.setNotify(false);
 	        constructChromatogram(msdo);
-	        //m_spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch, peptideFragmentationData);
-	        
-	        // set default auto bounds in case there is no annotations (which sets new autobounds)
-//	        m_chart.getXYPlot().getRangeAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getRangeAxis().getLowerBound(),m_chart.getXYPlot().getRangeAxis().getUpperBound()));
-//	        m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getDomainAxis().getLowerBound(),m_chart.getXYPlot().getDomainAxis().getUpperBound()));
-	       // m_spectrumAnnotations.addAnnotations();
-	       // m_chart.setNotify(true);
+		
 	    }
 	    
 	    public void writeToPNG(String fileName) {
@@ -330,37 +262,16 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        //m_spectrumTitle = spectrum.getTitle();
 
 	        
-	        // reset X/Y zooming
-	        // ((ChartPanel) m_spectrumPanel).restoreAutoBounds();
 	        m_chart.getPlot().setBackgroundPaint(Color.white);
 
-	        //String serieTable[] = new String[msdo.matrix[0].length];
 	        int nbSeries = msdo.matrix[0].length;
 	        int nbCategories = msdo.matrix.length - 1; // -1 because of 1st column is series names
-//	        for (int i = 0; i < nbSeries; i++) {
-//	          serieTable[i] = msdo.matrix[0][i].toString();
-//	        }
-	        
-	       // type 1: mettre: column_titles (category) columns
-	        // serie: mettre 1ere colonne de données. (scan group etc).
-	        // column keys...
-	        
-
-	       // result.addValue(1.0, series1, type1);
-	       // result.addValue(4.0, series1, type2);
-	        
-	      //  JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "nb series:" + nbSeries + "\nnbCat:"+ nbCategories, "DEBUG", 1);
 	        for (int serie = 1; serie < nbSeries; serie++) {
 	        	for (int cat = 0; cat < nbCategories; cat++) { // columns of data table also
 	        		m_dataSet.addValue((double) msdo.matrix[cat][serie], msdo.column_names[serie],  msdo.matrix[cat][0].toString());
 	        	}
 	        
 	        }
-	       
-	        
-	        
-	        
-
 	        
 	    }
 

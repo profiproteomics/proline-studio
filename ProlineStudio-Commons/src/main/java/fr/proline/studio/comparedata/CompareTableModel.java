@@ -56,7 +56,7 @@ public class CompareTableModel extends FilterTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (m_dataInterface == null) {
-            return null;
+            return null; 
         }
         
         int rowFiltered = rowIndex;
@@ -64,7 +64,7 @@ public class CompareTableModel extends FilterTableModel {
             rowFiltered = m_filteredIds.get(rowIndex).intValue();
         }
         
-        return m_dataInterface.getDataValueAt(rowIndex, columnIndex);
+        return m_dataInterface.getDataValueAt(rowFiltered, columnIndex);
     }
     
     @Override
@@ -121,9 +121,14 @@ public class CompareTableModel extends FilterTableModel {
 
         Object data = getValueAt(row, col);
         
-         Class columnClass = getColumnClass(col);
+        if (data == null) {
+            return false; // remove null data for the moment. //JPM.TODO ?
+        }
         
-         if (columnClass.equals(String.class)) {
+        
+        Class columnClass = getColumnClass(col);
+        
+        if (columnClass.equals(String.class)) {
             return ((StringFilter) filter).filter((String) data);
         } else if (columnClass.equals(Integer.class)) {
             return ((IntegerFilter) filter).filter((Integer) data);

@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.IconManager;
@@ -12,24 +13,28 @@ import java.util.ArrayList;
  * Table Model for Proteins
  * @author JM235353
  */
-public class ProteinTableModel extends FilterTableModel {
+public class ProteinTableModel extends FilterTableModel implements CompareDataInterface {
+
+
 
     public enum Column {
-        PROTEIN_ID("Id", Long.class),
-        PROTEIN_NAME("Protein", String.class),
-        PROTEIN_DESCRIPTION("Description", String.class),
-        SAMESET_SUBSET("Sameset / Subset", Sameset.class),
-        PROTEIN_SCORE("Score", Float.class),
-        PROTEIN_PEPTIDES_COUNT("Peptides", Integer.class),
-        PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT("Unique Seq.", Integer.class),
-        PROTEIN_MASS("Mass", Float.class);
+        PROTEIN_ID("Id", Long.class, 0),
+        PROTEIN_NAME("Protein", String.class, 1),
+        PROTEIN_DESCRIPTION("Description", String.class, 2),
+        SAMESET_SUBSET("Sameset / Subset", Sameset.class, 3),
+        PROTEIN_SCORE("Score", Float.class, 4),
+        PROTEIN_PEPTIDES_COUNT("Peptides", Integer.class, 5),
+        PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT("Unique Seq.", Integer.class, 6),
+        PROTEIN_MASS("Mass", Float.class, 7);
         
-        String name; 
-        Class clazz;
+        String m_name; 
+        Class m_class;
+        int m_colId;
         
-        Column(String n, Class cl) {
-            name = n; 
-            clazz = cl;
+        Column(String n, Class cl, int colId) {
+            m_name = n; 
+            m_class = cl;
+            m_colId = colId;
         }
     }
      
@@ -42,6 +47,8 @@ public class ProteinTableModel extends FilterTableModel {
     private boolean m_filteringAsked = false;
     private ProgressInterface m_progressInterface = null;
 
+    private String m_modelName;
+    
     public ProteinTableModel(ProgressInterface progressInterface) {
         m_progressInterface = progressInterface;
     }
@@ -67,7 +74,7 @@ public class ProteinTableModel extends FilterTableModel {
 
     @Override
     public String getColumnName(int col) {
-        return Column.values()[col].name;
+        return Column.values()[col].m_name;
     }
 
     @Override
@@ -87,7 +94,7 @@ public class ProteinTableModel extends FilterTableModel {
 
     @Override
     public Class getColumnClass(int col) {
-        return Column.values()[col].clazz;
+        return Column.values()[col].m_class;
     }
 
     @Override
@@ -269,6 +276,44 @@ public class ProteinTableModel extends FilterTableModel {
         return m_progressInterface.isLoaded();
     }
     
+        @Override
+    public String getDataColumnIdentifier(int columnIndex) {
+        return getColumnName(columnIndex);
+    }
+
+    @Override
+    public Class getDataColumnClass(int columnIndex) {
+        
+        if (Column.values()[columnIndex].equals(Column.SAMESET_SUBSET)) {
+            return String.class;
+        }
+
+        return getColumnClass(columnIndex);
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        if (Column.values()[columnIndex].equals(Column.SAMESET_SUBSET)) {
+           return ((Sameset) getValueAt(rowIndex, columnIndex)).toString();
+        }
+        return getValueAt(rowIndex, columnIndex);
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        int[] keys = { Column.PROTEIN_NAME.m_colId, Column.PROTEIN_ID.m_colId };
+        return keys;
+    }
+
+    @Override
+    public void setName(String name) {
+        m_modelName = name;
+    }
+
+    @Override
+    public String getName() {
+        return m_modelName;
+    }
     
     public static class Sameset {
         
@@ -294,6 +339,17 @@ public class ProteinTableModel extends FilterTableModel {
         
         public boolean isSameset() {
             return (m_type == SAMESET);
+        }
+        
+        @Override
+        public String toString() {
+            if (isTypical()) {
+                return "typical";
+            } else if (isSameset()) {
+                return "sameset";
+            } else {
+                return "subset";
+            }
         }
     }
 }

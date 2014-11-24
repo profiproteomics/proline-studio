@@ -4,12 +4,15 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.studio.comparedata.AddCompareDataButton;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
@@ -43,6 +46,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
+    private AddCompareDataButton m_addCompareDataButton;
     
     /**
      * Creates new form RsmProteinsOfProteinSetPanel
@@ -132,9 +136,20 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
         m_filterButton = new FilterButton(((ProteinTableModel) m_proteinTable.getModel()));
         m_exportButton = new ExportButton(((ProteinTableModel) m_proteinTable.getModel()), "Proteins", m_proteinTable);
+        m_addCompareDataButton = new AddCompareDataButton(((ProteinTableModel) m_proteinTable.getModel()), (CompareDataInterface) m_proteinTable.getModel()) {
 
+            @Override
+            public void actionPerformed(CompareDataInterface compareDataInterface) {
+                compareDataInterface.setName(m_dataBox.getFullName());
+                DataMixerWindowBoxManager.addCompareTableModel(compareDataInterface);
+            }
+        };
+        
+        
+        
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
+        toolbar.add(m_addCompareDataButton);
 
         return toolbar;
     }

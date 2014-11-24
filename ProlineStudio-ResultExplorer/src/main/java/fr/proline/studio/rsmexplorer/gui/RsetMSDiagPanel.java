@@ -1,3 +1,4 @@
+
 package fr.proline.studio.rsmexplorer.gui;
 
 import java.awt.BorderLayout;
@@ -8,12 +9,13 @@ import java.awt.event.ActionListener;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
 import org.slf4j.Logger;
@@ -22,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import fr.proline.studio.rsmexplorer.gui.MSDiagOutput_AW;
- 
 import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -42,20 +43,8 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private static final long serialVersionUID = 1L;
     private AbstractDataBox m_dataBox;
-   
-   
-    public javax.swing.JTextArea m_textArea = new JTextArea("data text area initialized line 73");
-    
-    private MSDiagTable_GenericTable m_msdiagTable_massesPerCharge = null;
-    private MSDiagTable_GenericTable m_msdiagTable_matchesPerScanAndScore = null;
-    private MSDiagTable_GenericTable m_msdiagTable_matchesPerChargeAndScore = null;
-    private MSDiagTable_GenericTable m_msdiagTable_assignementRepartition = null;
-    private MSDiagTable_GenericTable m_msdiagTable_matchesPerResultSetAndScore = null;
-    private MSDiagTable_GenericTable m_msdiagTable_matchesPerMinuteAndScore = null;
-    private MSDiagTable_GenericTable m_msdiagTable_massesPerScore = null;
-    
-    
-    
+    private JTabbedPane m_tabbedPane = null;
+       
     @Override // declared in ProlineStudioCommons ImageExporterInterface
     public void generateSvgImage(String file) {
        // writeToSVG(file);
@@ -80,24 +69,15 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
         setLayout(new BorderLayout());
         
         
-        JTabbedPane internalPanel = createInternalPanel();
-        
-        add(internalPanel, BorderLayout.CENTER);
+        m_tabbedPane = createInternalPanel();
              
-        JPanel m_MSDiagPanel = new JPanel();
-        m_MSDiagPanel.setLayout(new GridLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
-        ///
-        //m_MSDiagPanel.setBounds(0, 0, this.getWidth(), this.getHeight());
-
-        m_MSDiagPanel.add(internalPanel, new GridLayout(0,1));
-
         JToolBar toolbar = initToolbar();
-        add(internalPanel, BorderLayout.CENTER);
+        add(m_tabbedPane, BorderLayout.CENTER);
         add(toolbar, BorderLayout.WEST);
         
 
@@ -130,7 +110,6 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
         
     	JTabbedPane jtabbedPane = new JTabbedPane();
         
-    	ImageIcon icon = IconManager.getIcon(IconManager.IconType.CHART);
     	
     	JPanel internalPanel = new JPanel();
         
@@ -139,58 +118,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
            
         internalPanel.setBackground(Color.white);
         
-        // m_msdiagTable_massesPerCharge
-        JScrollPane scrollPane = new JScrollPane();
-        m_msdiagTable_massesPerCharge = new MSDiagTable_GenericTable();
-        m_msdiagTable_massesPerCharge.setModel(new MSdiagTable_GenericTableModel());
-        scrollPane.setViewportView(m_msdiagTable_massesPerCharge);
-        jtabbedPane.addTab("Masses Per Charge",icon, scrollPane); 
-        
-        //m_msdiagTable_matchesPerScanAndScore
-        JScrollPane scrollPane2 = new JScrollPane();
-        m_msdiagTable_matchesPerScanAndScore = new MSDiagTable_GenericTable();
-        m_msdiagTable_matchesPerScanAndScore.setModel(new MSdiagTable_GenericTableModel());
-        scrollPane2.setViewportView(m_msdiagTable_matchesPerScanAndScore);
-        jtabbedPane.addTab("Matches Per Scan And Score",icon, scrollPane2); 
-
-        
-        // m_msdiagTable_assignementRepartition
-        JScrollPane scrollPane3 = new JScrollPane();
-        m_msdiagTable_assignementRepartition = new MSDiagTable_GenericTable(); 
-        m_msdiagTable_assignementRepartition.setModel(new MSdiagTable_GenericTableModel());
-        scrollPane3.setViewportView(m_msdiagTable_assignementRepartition);
-        jtabbedPane.addTab("Assignement Repartition",icon, scrollPane3); 
-        
-        // m_msdiagTable_matchesPerResultSetAndScore
-        JScrollPane scrollPane4 = new JScrollPane();
-        m_msdiagTable_matchesPerResultSetAndScore = new MSDiagTable_GenericTable();
-        m_msdiagTable_matchesPerResultSetAndScore.setModel(new MSdiagTable_GenericTableModel());
-        scrollPane4.setViewportView(m_msdiagTable_matchesPerResultSetAndScore);
-        jtabbedPane.addTab("Matches Per ResultSet And Score",icon, scrollPane4); 
-
-      
-        // m_msdiagTable_matchesPerChargeAndScore
-        JScrollPane scrollPane5 = new JScrollPane();
-        m_msdiagTable_matchesPerChargeAndScore = new MSDiagTable_GenericTable();
-        m_msdiagTable_matchesPerChargeAndScore.setModel(new MSdiagTable_GenericTableModel());
-        scrollPane5.setViewportView(m_msdiagTable_matchesPerChargeAndScore);
-        jtabbedPane.addTab("Matches Per Charge And Score",icon, scrollPane5); 
-
-      //m_msdiagTable_matchesPerMinuteAndScore
-        JScrollPane scrollPane6 = new JScrollPane();
-        m_msdiagTable_matchesPerMinuteAndScore = new MSDiagTable_GenericTable();
-        m_msdiagTable_matchesPerMinuteAndScore.setModel(new MSdiagTable_GenericTableModel());
-        scrollPane6.setViewportView(m_msdiagTable_matchesPerMinuteAndScore);
-        jtabbedPane.addTab("Matches Per Minute And Score",icon, scrollPane6); 
-
-        
-      //m_msdiagTable_massesPerScore
-        JScrollPane scrollPane7 = new JScrollPane();
-        m_msdiagTable_massesPerScore = new MSDiagTable_GenericTable();
-        m_msdiagTable_massesPerScore.setModel(new MSdiagTable_GenericTableModel());
-        scrollPane7.setViewportView(m_msdiagTable_massesPerScore);
-        jtabbedPane.addTab("Masses per score",icon, scrollPane7); 
-
+  
         
         return jtabbedPane; //internalPanel;
     }
@@ -201,7 +129,6 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
     	
         launchMSDiag(jsonMessageHashMapJson);
  
-       
     }
     
       
@@ -209,61 +136,73 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
         
     	
     	// data is encoded in JSON string, subformed of other json strings!!!
-        
+    	ImageIcon icon = IconManager.getIcon(IconManager.IconType.WAVE);
+    	
+    	
         final String SERIES_NAME = "MSDiag data";
         if(messageHashMapJson != null) {
         
 	        if (messageHashMapJson.length() == 0) {
-	        	
-	        	
+	        	// nothing to process
 	        } 
 	        else 
 	        {
 	        	 
-	        	if(messageHashMapJson.startsWith("{")) {
-	         	
-	         	
-	        	Gson gson = new Gson();
+		        if(messageHashMapJson.startsWith("{")) { // JSON data is there
+		         	
+		        	Gson gson = new Gson();
+		        	
+		        	HashMap<String,String> msOutputHashMap = new HashMap<String,String>();
+		        	msOutputHashMap = gson.fromJson(messageHashMapJson, msOutputHashMap.getClass());
+		        	
+		        	if(msOutputHashMap != null) {
+			        	// go through all msOutputs
+			        	Iterator<String> msOutputHashMapIterator = msOutputHashMap.keySet().iterator();
+			        	while (msOutputHashMapIterator.hasNext()) {
+			        		String msOutputItem = msOutputHashMapIterator.next();
+			        		JScrollPane scrollPane = new JScrollPane();
+			        		String msOutputString =  msOutputHashMap.get(msOutputItem);
+			        		MSDiagOutput_AW msOutput = gson.fromJson(msOutputString, MSDiagOutput_AW.class);
+			        		if(msOutput != null) {
+			        			
+			        			switch (msOutput.output_type.value) { // could be changed to use enum in MSDiagOutput_AW
+								
+								case "chromatogram":
+									MSDiag_Chromatogram m_msdiagChromatogram = new MSDiag_Chromatogram();
+									m_msdiagChromatogram.setData(msOutput);
+									scrollPane = new JScrollPane();
+							        scrollPane.setViewportView(m_msdiagChromatogram);
+							        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
+									break;
+								case "pie":
+									MSDiag_PieChart m_msdiagPieChart = new MSDiag_PieChart();
+									m_msdiagPieChart.setData(msOutput);
+									scrollPane = new JScrollPane();
+							        scrollPane.setViewportView(m_msdiagPieChart);
+							        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
+									break;
+		
+								
+								default: 
+									// use table as default ---
+									break;
+								case "table":
+									MSDiagTable_GenericTable m_msdiagTable = new MSDiagTable_GenericTable();
+									m_msdiagTable.setModel(new MSdiagTable_GenericTableModel());
+									((MSdiagTable_GenericTableModel) m_msdiagTable.getModel()).setData(msOutput);
+									//---add it to the tabbed pane	
+									
+							        scrollPane.setViewportView(m_msdiagTable);
+								    m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
+									//break;
+								}
+			        		}
+							
+							
+						}
 	        	
-	        	HashMap<String,String> msOutputHashMap = new HashMap<String,String>();
-	        	msOutputHashMap = gson.fromJson(messageHashMapJson, msOutputHashMap.getClass());
-	        	
-	        	
-	        	if(msOutputHashMap != null) {
-	        		//--------------
- 	        		        			        			
-        			String msOutputString1 = msOutputHashMap.get("MassesPerCharge");
-        			MSDiagOutput_AW msOutput1 = gson.fromJson(msOutputString1, MSDiagOutput_AW.class);  
-			        ((MSdiagTable_GenericTableModel) m_msdiagTable_massesPerCharge.getModel()).setData(msOutput1);
-			    //--------------
-				    String msOutputString2 = msOutputHashMap.get("MatchesPerScanAndScore");
-        			MSDiagOutput_AW msOutput2 = gson.fromJson(msOutputString2, MSDiagOutput_AW.class);  
-			        ((MSdiagTable_GenericTableModel) m_msdiagTable_matchesPerScanAndScore.getModel()).setData(msOutput2);
-				//--------------
-			        String msOutputString3 = msOutputHashMap.get("AssignementRepartition");
-        			MSDiagOutput_AW msOutput3 = gson.fromJson(msOutputString3, MSDiagOutput_AW.class);  
-			        ((MSdiagTable_GenericTableModel) m_msdiagTable_assignementRepartition.getModel()).setData(msOutput3);
-				//--------------
-			        String msOutputString4 = msOutputHashMap.get("MatchesPerResultSetAndScore");
-        			MSDiagOutput_AW msOutput4 = gson.fromJson(msOutputString4, MSDiagOutput_AW.class);  
-			        ((MSdiagTable_GenericTableModel) m_msdiagTable_matchesPerResultSetAndScore.getModel()).setData(msOutput4);
-			        
-			     // MSDiagTable_MatchesPerScanAndScore
-			        String msOutputString5 = msOutputHashMap.get("MatchesPerChargeAndScore");
-        			MSDiagOutput_AW msOutput5 = gson.fromJson(msOutputString5, MSDiagOutput_AW.class);  
-			        ((MSdiagTable_GenericTableModel) m_msdiagTable_matchesPerChargeAndScore.getModel()).setData(msOutput5);
-			        
-			     // m_msdiagTable_matchesPerMinuteAndScore
-			        String msOutputString6 = msOutputHashMap.get("MatchesPerMinuteAndScore");
-        			MSDiagOutput_AW msOutput6 = gson.fromJson(msOutputString6, MSDiagOutput_AW.class);  
-			        ((MSdiagTable_GenericTableModel) m_msdiagTable_matchesPerMinuteAndScore.getModel()).setData(msOutput6);
-			        
-			     // m_msdiagTable_massesPerScore
-			        String msOutputString7 = msOutputHashMap.get("MassesPerScore");
-        			MSDiagOutput_AW msOutput7 = gson.fromJson(msOutputString7, MSDiagOutput_AW.class);  
-			        ((MSdiagTable_GenericTableModel) m_msdiagTable_massesPerScore.getModel()).setData(msOutput7);
-			        
-				    this.repaint();
+	
+				    	this.repaint();
 	        		
 		        	}
 	        	}
@@ -315,5 +254,6 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 
 	    
 }
+
 
 

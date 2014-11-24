@@ -1,8 +1,8 @@
 package fr.proline.studio.pattern.xic;
 
+import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
-import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
@@ -24,7 +24,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
     private DDataset m_dataset;
     private DMasterQuantPeptide m_masterQuantPeptide;
-    private List<DMasterQuantPeptideIon> m_masterQuantPeptideIonList ;
+    private List<MasterQuantPeptideIon> m_masterQuantPeptideIonList ;
     
     public DataboxXicPeptideIon() { 
         super(DataboxType.DataboxXicPeptideIon);
@@ -43,7 +43,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DMasterQuantPeptideIon.class, false);
+        outParameter.addParameter(MasterQuantPeptideIon.class, false);
         registerOutParameter(outParameter);
 
     }
@@ -86,7 +86,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                     DQuantitationChannel[] quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
                     // peptide ions 
-                    DMasterQuantPeptideIon[] masterQuantPeptideIonArray = new DMasterQuantPeptideIon[m_masterQuantPeptideIonList.size()];
+                    MasterQuantPeptideIon[] masterQuantPeptideIonArray = new MasterQuantPeptideIon[m_masterQuantPeptideIonList.size()];
                     m_masterQuantPeptideIonList.toArray(masterQuantPeptideIonArray);
                     ((XicPeptideIonPanel) m_panel).setData(taskId, quantitationChannelArray, masterQuantPeptideIonArray, finished);
                 } else {
@@ -125,7 +125,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         if (parameterType != null) {
             if (parameterType.equals(ResultSummary.class)) {
                 return m_dataset.getResultSummary();
-            }else if (parameterType.equals(DMasterQuantPeptideIon.class)) {
+            }else if (parameterType.equals(MasterQuantPeptideIon.class)) {
                 return ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();
             }
         }

@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
+import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
@@ -34,7 +34,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
     private static final String[] m_columnNamesQC = {"Sel. level", "Abundance", "Raw abundance", "Pep. match count"};
     private static final String[] m_toolTipQC = {"Selection level", "Abundance", "Raw abundance", "Peptides match count"};
     
-    private DMasterQuantPeptideIon[] m_quantPeptideIons = null;
+    private MasterQuantPeptideIon[] m_quantPeptideIons = null;
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
     
@@ -153,8 +153,8 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         }
         
         // Retrieve Quant Peptide Ion
-        DMasterQuantPeptideIon peptideIon = m_quantPeptideIons[rowFiltered];
-        DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
+        MasterQuantPeptideIon peptideIon = m_quantPeptideIons[rowFiltered];
+        //DPeptideInstance peptideInstance = peptideIon.getPeptideInstance();
 
         switch (col) {
             case COLTYPE_PEPTIDE_ION_ID: {
@@ -162,7 +162,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             }
             case COLTYPE_PEPTIDE_ION_NAME: {
                 LazyData lazyData = getLazyData(row,col);
-                lazyData.setData(peptideInstance.getBestPeptideMatch().getPeptide().getSequence());
+                //lazyData.setData(peptideInstance.getBestPeptideMatch().getPeptide().getSequence());
                 return lazyData;
 
             }
@@ -199,7 +199,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         //return null; // should never happen
     }
 
-    public void setData(Long taskId,  DQuantitationChannel[] quantChannels, DMasterQuantPeptideIon[] peptideIons ) {
+    public void setData(Long taskId,  DQuantitationChannel[] quantChannels, MasterQuantPeptideIon[] peptideIons ) {
         this.m_quantPeptideIons = peptideIons;
         this.m_quantChannels = quantChannels ;
         this.m_quantChannelNumber = quantChannels.length;
@@ -230,7 +230,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         }
     }
 
-    public DMasterQuantPeptideIon getPeptideIon(int i) {
+    public MasterQuantPeptideIon getPeptideIon(int i) {
         
         if (m_filteredIds != null) {
             i = m_filteredIds.get(i).intValue();
@@ -278,7 +278,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         for (int iView=0;iView<nb;iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
             // Retrieve Peptide Ion
-            DMasterQuantPeptideIon p = getPeptideIon(iModel);
+            MasterQuantPeptideIon p = getPeptideIon(iModel);
             if (  peptideIdMap.contains(p.getId())  ) {
                 peptideIds.set(iCur++,p.getId());
             }
@@ -467,7 +467,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             }
 
             // Retrieve PeptideIon
-            DMasterQuantPeptideIon peptideIon = m_quantPeptideIons[rowFiltered];
+            MasterQuantPeptideIon peptideIon = m_quantPeptideIons[rowFiltered];
 
             selectedObjects.add(peptideIon.getId());
         }

@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.MasterQuantPeptideIon;
-import fr.proline.core.orm.msi.dto.DMasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -209,7 +208,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  DMasterQuantPeptideIon[] peptideIons, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  MasterQuantPeptideIon[] peptideIons, boolean finished) {
         m_quantChannels = quantChannels;
         
         ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).setData(taskId, quantChannels, peptideIons);

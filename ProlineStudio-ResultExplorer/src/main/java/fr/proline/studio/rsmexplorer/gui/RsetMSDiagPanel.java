@@ -167,11 +167,18 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 			        			
 			        			switch (msOutput.output_type.value) { // could be changed to use enum in MSDiagOutput_AW
 								
-								case "chromatogram":
+			        			case "chromatogram":
 									MSDiag_Chromatogram m_msdiagChromatogram = new MSDiag_Chromatogram();
 									m_msdiagChromatogram.setData(msOutput);
 									scrollPane = new JScrollPane();
 							        scrollPane.setViewportView(m_msdiagChromatogram);
+							        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
+									break;
+			        			case "whisker":
+									MSDiag_BoxAndWhisker m_msdiagBoxAndWhisker = new MSDiag_BoxAndWhisker();
+									m_msdiagBoxAndWhisker.setData(msOutput);
+									scrollPane = new JScrollPane();
+							        scrollPane.setViewportView(m_msdiagBoxAndWhisker);
 							        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
 									break;
 								case "pie":

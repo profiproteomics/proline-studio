@@ -5,26 +5,27 @@ package fr.proline.studio.rsmexplorer.gui;
 public class MSDiagOutput_AW {
 	
 
-	public Object [][] /*Array<Array<Double>>*/ matrix;
-	public MSDiagOutputTypes output_typeZZ;  // the type of information that is represented by the table (chart, table, histogram, etc)
+	public Object [][]  matrix;
+	public MSDiagOutputTypes output_type;  // the type of information that is represented by the table (chart, table, histogram, etc)
 	public String cell_type; // the (native) type of cell values (integer, string, float)
 	public String description; // the string description of the output (ie Number of matches)
-	public String[] /*Seq<String>*/ column_names; // the column headers
+	public String[] column_names; // the column headers
 	public String x_axis_description; // the string description of the X axis (ie. Retention times)
 	public String y_axis_description; 
 	
-	public enum MSDiagOutputTypes {
-		Table ("table"),
+	public class MSDiagOutputTypes {
+		// the following section has been disabled (as enum instead of class), need to find a way to deserialize enums...
+	/*	Table ("table"),
 		Histogram ("histogram"),
 		Pie ("pie"),
 		Chromatogram ("chromatogram");
-				
-		private String Value = "";
-		MSDiagOutputTypes(String value) {
-			this.Value = value;
+			*/	
+		public String value = "";
+		MSDiagOutputTypes(String aValue) {
+			this.value = aValue;
 		}
 		public String toString() {
-			return Value;
+			return value;
 		}
 	}
 	
@@ -39,7 +40,7 @@ public class MSDiagOutput_AW {
 		String y_axis_description) {
 		
 			this.matrix = matrix;
-			this.output_typeZZ = output_typeZZ;
+			this.output_type = output_type;
 			this.cell_type = cellType;
 			this.description = description;
 			this.column_names = column_names;

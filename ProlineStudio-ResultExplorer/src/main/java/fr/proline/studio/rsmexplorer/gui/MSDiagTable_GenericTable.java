@@ -21,6 +21,7 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 	
 
 	    private MSDiagTableCustomRenderer m_matrixRenderer;
+	    private String m_outputType = "";
 
 	    
 	    public MSDiagTable_GenericTable() {
@@ -47,6 +48,7 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 	           
 
 	        } else {
+	        	//m_outputType = msdo.output_typeZZ.name();
 	            msDiagTableModel1.setData(msdo);
 	            
 	        }

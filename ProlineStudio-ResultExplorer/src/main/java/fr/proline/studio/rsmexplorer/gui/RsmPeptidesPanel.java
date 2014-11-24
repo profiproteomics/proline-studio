@@ -4,6 +4,8 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.comparedata.AddCompareDataButton;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
@@ -51,6 +53,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
+    private AddCompareDataButton m_addCompareDataButton;
     
     public RsmPeptidesPanel() {
         initComponents();
@@ -153,11 +156,20 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         
         m_exportButton = new ExportButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()), "Peptide Instances", m_peptideInstanceTable);
         
+        m_addCompareDataButton = new AddCompareDataButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()), (CompareDataInterface) m_peptideInstanceTable.getModel()) {
+
+            @Override
+            public void actionPerformed(CompareDataInterface compareDataInterface) {
+                compareDataInterface.setName(m_dataBox.getFullName());
+                DataMixerWindowBoxManager.addCompareTableModel(compareDataInterface);
+            }
+        };
         
         toolbar.add(m_decoyButton);
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
+        toolbar.add(m_addCompareDataButton);
         
         return toolbar;
     }

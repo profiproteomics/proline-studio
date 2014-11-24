@@ -10,6 +10,7 @@ import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -23,7 +24,7 @@ import java.util.HashSet;
  * Table Model for PeptideInstance of a Rsm
  * @author JM235353
  */
-public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : should be removed, model seems not to use lazy model in fact
+public class PeptideInstanceTableModel extends LazyTableModel implements CompareDataInterface {
 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_NAME = 1;
@@ -49,7 +50,7 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
 
-    
+    private String m_modelName;
     
     public PeptideInstanceTableModel(LazyTable table) {
         super(table);
@@ -511,6 +512,55 @@ public class PeptideInstanceTableModel extends LazyTableModel {  //JPM.TODO : sh
     @Override
     public int getLoadingPercentage() {
         return m_table.getLoadingPercentage();
+    }
+
+    @Override
+    public String getDataColumnIdentifier(int columnIndex) {
+        return getColumnName(columnIndex);
+    }
+
+    @Override
+    public Class getDataColumnClass(int columnIndex) {
+
+        switch (columnIndex) {
+            case COLTYPE_PEPTIDE_CALCULATED_MASS:
+                return Float.class;
+            case COLTYPE_PEPTIDE_NAME:
+            case COLTYPE_PEPTIDE_PTM:
+                return String.class;
+
+        }
+        
+        return getColumnClass(columnIndex);
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        Object data = getValueAt(rowIndex, columnIndex);
+        if (data instanceof LazyData) {
+            data = ((LazyData) data).getData();
+            if (data instanceof DPeptideMatch) {
+                data = ((DPeptideMatch) data).getPeptide().getSequence();
+            }
+        }
+        
+        return data;
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        int[] keys = {COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_ID };
+        return keys;
+    }
+
+    @Override
+    public void setName(String name) {
+        m_modelName = name;
+    }
+
+    @Override
+    public String getName() {
+        return m_modelName;
     }
 
     

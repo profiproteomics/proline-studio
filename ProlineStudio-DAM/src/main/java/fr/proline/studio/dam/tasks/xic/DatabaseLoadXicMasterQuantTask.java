@@ -578,7 +578,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 + "fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p  "
                 + "WHERE pi.id IN (:listId) AND  "
                 + "pi.bestPeptideMatchId=pm.id AND "
-                + "pm.peptideId=p.id AND pi.peptideId = p.id  "
+                + "pm.peptideId=p.id AND pi.peptide.id = p.id  "
                 + "ORDER BY pm.score DESC";
 
         Query query = entityManagerMSI.createQuery(querySelect);

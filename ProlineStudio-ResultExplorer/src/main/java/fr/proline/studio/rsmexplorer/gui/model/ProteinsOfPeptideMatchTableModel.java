@@ -4,6 +4,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
@@ -20,7 +21,7 @@ import java.util.HashSet;
  * Table Model for Peptide Matches
  * @author JM235353
  */
-public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
+public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements CompareDataInterface {
 
     public static final int COLTYPE_PROTEIN_ID             = 0;
     public static final int COLTYPE_PROTEIN_NAME           = 1;
@@ -35,6 +36,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
 
+    private String m_modelName;
     
     public ProteinsOfPeptideMatchTableModel(LazyTable table) {
         super(table);
@@ -362,6 +364,44 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel {
     @Override
     public int getLoadingPercentage() {
         return m_table.getLoadingPercentage();
+    }
+
+    @Override
+    public String getDataColumnIdentifier(int columnIndex) {
+        return getColumnName(columnIndex);
+    }
+
+    @Override
+    public Class getDataColumnClass(int columnIndex) {
+        if (columnIndex == COLTYPE_PROTEIN_MASS) {
+                return Float.class;
+        }
+        return getColumnClass(columnIndex);
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        Object data = getValueAt(rowIndex, columnIndex);
+        if (data instanceof LazyData) {
+            data = ((LazyData) data).getData();
+        }
+        return data;
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        int[] keys = { COLTYPE_PROTEIN_NAME, COLTYPE_PROTEIN_ID };
+        return keys;
+    }
+
+    @Override
+    public void setName(String name) {
+        m_modelName = name;
+    }
+
+    @Override
+    public String getName() {
+        return m_modelName;
     }
 
 

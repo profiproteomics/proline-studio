@@ -7,12 +7,15 @@ import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.comparedata.AddCompareDataButton;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
@@ -20,13 +23,11 @@ import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.table.DecoratedTable;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 
@@ -45,6 +46,8 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     private ExportButton m_exportButton;
     
     private DProteinMatch m_currentProteinMatch = null;
+    
+    private AddCompareDataButton m_addCompareDataButton;
     
     /**
      * Creates new form RsmPeptidesOfProteinPanel
@@ -109,9 +112,20 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
 
         m_filterButton = new FilterButton(((PeptideTableModel) m_peptidesTable.getModel()));
         m_exportButton = new ExportButton(((PeptideTableModel) m_peptidesTable.getModel()), "Peptides", m_peptidesTable);
+        m_addCompareDataButton = new AddCompareDataButton(((PeptideTableModel) m_peptidesTable.getModel()), (CompareDataInterface) m_peptidesTable.getModel()) {
 
+            @Override
+            public void actionPerformed(CompareDataInterface compareDataInterface) {
+                compareDataInterface.setName(m_dataBox.getFullName());
+                DataMixerWindowBoxManager.addCompareTableModel(compareDataInterface);
+            }
+        };
+        
+        
+        
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
+        toolbar.add(m_addCompareDataButton);
 
         return toolbar;
     }

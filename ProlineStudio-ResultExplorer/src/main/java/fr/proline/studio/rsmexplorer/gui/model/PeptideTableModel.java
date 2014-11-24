@@ -9,6 +9,7 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.*;
 import java.util.ArrayList;
 
@@ -17,7 +18,7 @@ import java.util.ArrayList;
  * Table Model for PeptideInstance (peptides of a ProteinMatch in a Rsm)
  * @author JM235353
  */
-public class PeptideTableModel extends FilterTableModel {
+public class PeptideTableModel extends FilterTableModel implements CompareDataInterface {
 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_PREVIOUS_AA = 1;
@@ -46,6 +47,7 @@ public class PeptideTableModel extends FilterTableModel {
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
 
+    private String m_modelName;
     
     public DPeptideInstance getPeptide(int row) {
         return m_peptideInstances[row];
@@ -446,6 +448,43 @@ public class PeptideTableModel extends FilterTableModel {
     @Override
     public boolean isLoaded() {
         return true;
+    }
+
+    @Override
+    public String getDataColumnIdentifier(int columnIndex) {
+        return getColumnName(columnIndex);
+    }
+
+    @Override
+    public Class getDataColumnClass(int columnIndex) {
+        if (columnIndex == COLTYPE_PEPTIDE_NAME) {
+            return String.class;
+        }
+        return getColumnClass(columnIndex);
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        if (columnIndex == COLTYPE_PEPTIDE_NAME) {
+            return ((DPeptideMatch) getValueAt(rowIndex, columnIndex)).getPeptide().getSequence();
+        }
+        return getValueAt(rowIndex, columnIndex);
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        int[] keys = { COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_ID };
+        return keys;
+    }
+
+    @Override
+    public void setName(String name) {
+        m_modelName = name;
+    }
+
+    @Override
+    public String getName() {
+        return m_modelName;
     }
 
     

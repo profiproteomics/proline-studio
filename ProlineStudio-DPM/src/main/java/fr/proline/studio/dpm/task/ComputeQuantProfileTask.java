@@ -31,7 +31,7 @@ public class ComputeQuantProfileTask extends AbstractServiceTask {
         m_pId= projectId;
         m_masterQuantChannelId = masterQuantChannelId ;
         m_quantProfileParams = quantProfileParams ;
-        
+        setWsVersion("0.2");
     }
     
     
@@ -59,8 +59,8 @@ public class ComputeQuantProfileTask extends AbstractServiceTask {
             
             
             request.setParameters(params);
-            HttpResponse response = postRequest("dps.msq/compute_quant_profiles/" + request.getMethod() + getIdString(), request);
-
+            HttpResponse response = postRequest("dps.msq/compute_quant_profiles/" + request.getMethod() + getIdString()+getWSVersionString(), request);
+ 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
             ArrayMap errorMap = (ArrayMap) jsonResult.get("error");

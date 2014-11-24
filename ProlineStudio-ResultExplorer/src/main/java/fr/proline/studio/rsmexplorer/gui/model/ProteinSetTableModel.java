@@ -526,8 +526,8 @@ public class ProteinSetTableModel extends LazyTableModel implements CompareDataI
 
     public class ProteinCount implements Comparable {
 
-        private int m_sameSetCount;
-        private int m_subSetCount;
+        private final int m_sameSetCount;
+        private final int m_subSetCount;
         
         public ProteinCount(int sameSetCount, int subSetCount) {
             m_sameSetCount = sameSetCount;

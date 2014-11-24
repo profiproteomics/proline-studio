@@ -415,8 +415,8 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
              m_centerY = yHorizontalLine+HEIGHT_RESULT_SEGMENT/2;
              
              
-             g.drawLine(x1, y1, x1, y1+HEIGHT_START_SEGMENT);
-             g.drawLine(x2, y2, x2, y2+HEIGHT_START_SEGMENT);
+             g.drawLine(x1, y1, x1, yHorizontalLine);
+             g.drawLine(x2, y2, x2, yHorizontalLine);
              g.drawLine(x1, yHorizontalLine, x2, yHorizontalLine);
              g.drawLine(m_centerX, yHorizontalLine, m_centerX, yHorizontalLine+HEIGHT_RESULT_SEGMENT);
          }

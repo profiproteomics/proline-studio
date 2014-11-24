@@ -6,6 +6,8 @@ import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.comparedata.AddCompareDataButton;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
@@ -66,6 +68,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_histogramButton;
+    private AddCompareDataButton m_addCompareDataButton;
 
     public PeptideMatchPanel(boolean forRSM, boolean startingPanel, boolean proteinMatchUnknown) {
         m_forRSM = forRSM;
@@ -308,6 +311,16 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         
         m_exportButton = new ExportButton((PeptideMatchTableModel) m_peptideMatchTable.getModel(), "Peptide Match", m_peptideMatchTable);
         
+              
+        m_addCompareDataButton = new AddCompareDataButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel()), (CompareDataInterface) m_peptideMatchTable.getModel()) {
+
+            @Override
+            public void actionPerformed(CompareDataInterface compareDataInterface) {
+                compareDataInterface.setName(m_dataBox.getFullName());
+                DataMixerWindowBoxManager.addCompareTableModel(compareDataInterface);
+            }
+        };
+        
         if (m_startingPanel) {
             m_histogramButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
             m_histogramButton.setToolTipText("Histogram and Standard Deviation");
@@ -347,10 +360,13 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
+        toolbar.add(m_addCompareDataButton);
         
         if (m_startingPanel) {
             toolbar.add(m_histogramButton);
         }
+        
+
         
         return toolbar;
     }

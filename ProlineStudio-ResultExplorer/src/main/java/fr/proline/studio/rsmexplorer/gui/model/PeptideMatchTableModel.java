@@ -9,6 +9,7 @@ import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -22,7 +23,7 @@ import java.util.HashSet;
  * Table Model for PeptideMatch of a RSet
  * @author JM235353
  */
-public class PeptideMatchTableModel extends LazyTableModel {
+public class PeptideMatchTableModel extends LazyTableModel implements CompareDataInterface  {
 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_PREVIOUS_AA = 1;
@@ -59,6 +60,7 @@ public class PeptideMatchTableModel extends LazyTableModel {
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
 
+    private String m_modelName;
     
     public PeptideMatchTableModel(LazyTable table, boolean forRSM, boolean hasPrevNextAA) {
         super(table);
@@ -744,6 +746,69 @@ public class PeptideMatchTableModel extends LazyTableModel {
     @Override
     public int getLoadingPercentage() {
         return m_table.getLoadingPercentage();
+    }
+
+    @Override
+    public String getDataColumnIdentifier(int columnIndex) {
+        return getColumnName(columnIndex);
+    }
+
+    @Override
+    public Class getDataColumnClass(int columnIndex) {
+        switch (columnIndex) {
+            case COLTYPE_PEPTIDE_PREVIOUS_AA:
+            case COLTYPE_PEPTIDE_NAME:
+            case COLTYPE_PEPTIDE_NEXT_AA:
+            case COLTYPE_PEPTIDE_PTM:
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
+                return String.class;
+            case COLTYPE_PEPTIDE_SCORE:
+            case COLTYPE_PEPTIDE_CALCULATED_MASS:
+            case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
+            case COLTYPE_PEPTIDE_PPM:
+            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
+                return Float.class;
+            case COLTYPE_PEPTIDE_START:
+            case COLTYPE_PEPTIDE_STOP:
+            case COLTYPE_PEPTIDE_MSQUERY:
+            case COLTYPE_PEPTIDE_RANK:
+            case COLTYPE_PEPTIDE_CHARGE:
+            case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
+                return Integer.class;
+        }
+        return getColumnClass(columnIndex);
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        Object data = getValueAt(rowIndex, columnIndex);
+        if (data instanceof LazyData) {
+            data = ((LazyData) data).getData();
+            
+            if (data instanceof DPeptideMatch) {
+                data = ((DPeptideMatch)data).getPeptide().getSequence();
+            } else if (data instanceof DMsQuery) {
+                data = Integer.valueOf(((DMsQuery)data).getInitialId());
+            }
+
+        }
+        return data;
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        int[] keys = { convertColToColUsed(COLTYPE_PEPTIDE_NAME), convertColToColUsed(COLTYPE_PEPTIDE_ID) };
+        return keys;
+    }
+
+    @Override
+    public void setName(String name) {
+        m_modelName = name;
+    }
+
+    @Override
+    public String getName() {
+        return m_modelName;
     }
 
 }

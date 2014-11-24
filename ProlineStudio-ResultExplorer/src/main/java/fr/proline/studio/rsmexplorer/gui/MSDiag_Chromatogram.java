@@ -76,6 +76,8 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    private JMenuItem m_showSpectrumTitle;
 	    private String m_spectrumTitle;
 
+		private String m_domain_axis_label = "";
+
 		
 	    
 	    @Override // declared in ProlineStudioCommons ImageExporterInterface
@@ -103,7 +105,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    	//m_chart = ChartFactory.createXYLineChart("", "m/z", "intensity", m_dataSet, PlotOrientation.VERTICAL, true, true, false);
 
 	    	
-	    	final NumberAxis rangeAxis2 = new NumberAxis("Value");
+	    	final NumberAxis rangeAxis2 = new NumberAxis("");
 	        rangeAxis2.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 	        final BarRenderer renderer = new StackedBarRenderer3D();
 	        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
@@ -123,7 +125,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        final CategoryPlot subplot = new CategoryPlot(m_dataSet, null, rangeAxis2, renderer);
 	        subplot.setDomainGridlinesVisible(true);
 
-	        final CategoryAxis domainAxis = new CategoryAxis("Category");
+	        final CategoryAxis domainAxis = new CategoryAxis(m_domain_axis_label );
 	        
 	        domainAxis.setCategoryLabelPositions(
 	            CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 4.0)
@@ -257,9 +259,10 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        
 	        // set axes labels
 	       
-	        //m_chart.getCategoryPlot().getRangeAxis().setLabel("");
 	        
-	        m_chart.getCategoryPlot().getDomainAxis().setLabel(msdo.y_axis_description);
+	        //((CategoryPlot) m_chart.getPlot()).getRangeAxis().setLabel(msdo.y_axis_description);// does not work !!!
+	        m_domain_axis_label = msdo.y_axis_description;
+	        m_chart.getCategoryPlot().getDomainAxis().setLabel(msdo.x_axis_description);
 	        
 	        // set the spectrum title
 	        //m_spectrumTitle = spectrum.getTitle();

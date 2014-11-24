@@ -81,6 +81,8 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	    private JMenuItem m_showSpectrumTitle;
 	    private String m_spectrumTitle;
 
+		private String m_range_axis_label = "";
+
 		
 	    
 	    @Override // declared in ProlineStudioCommons ImageExporterInterface
@@ -107,7 +109,7 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	    	m_dataSet = new DefaultBoxAndWhiskerCategoryDataset();
 	    	
 	    	
-	    	final NumberAxis rangeAxis = new NumberAxis("Masses"); // TODO: find a way to change this value in setData...
+	    	final NumberAxis rangeAxis = new NumberAxis(m_range_axis_label ); // TODO: find a way to change this value in setData...
 	    	 rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits()); // create integer ticks unit. (whatever data is)
 	         final BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer(); //BarRenderer();
 	       
@@ -266,10 +268,12 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 
 	        // 	set axes labels
 	       
-	        //	m_chart.getCategoryPlot().getRangeAxis().setLabel(msdo.x_axis_description); // does not work
+	        //	m_chart.getCategoryPlot().getRangeAxis().setLabel(msdo.y_axis_description); // does not work
+	        m_range_axis_label = msdo.y_axis_description;
+	        //((CategoryPlot) m_chart.getPlot()).getRangeAxis().setLabel(msdo.y_axis_description);// does not work !!!
 	        
 	       
-	        m_chart.getCategoryPlot().getDomainAxis().setLabel(msdo.y_axis_description);
+	        m_chart.getCategoryPlot().getDomainAxis().setLabel(msdo.x_axis_description);
 	        
 	        
 	        //String serieTable[] = new String[msdo.matrix[0].length];
@@ -301,7 +305,8 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 					m_dataSet.add(new BoxAndWhiskerItem(mean,median,q1,q3,minRegularValue,maxRegularValue,minOutlier,maxOutlier,listOutliers),serieString,catString);
 	        
 	        }
-
+	      
 	    }
+	    
 	
 }

@@ -588,7 +588,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         while (itPeptidesQuery.hasNext()) {
             Object[] resCur = itPeptidesQuery.next();
             PeptideInstance pi = (PeptideInstance) resCur[0];
-            DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptideId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
+            DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
             dpi.setResultSummary(pi.getResultSummary());
             Long pmId = (Long) resCur[1];
             Integer pmRank = (Integer) resCur[2];
@@ -935,7 +935,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         for (Object[] resCur : resultListIons) {
             int i = 0;
             PeptideInstance pi = (PeptideInstance) resCur[i++];
-            DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptideId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
+            DPeptideInstance dpi = new DPeptideInstance(pi.getId(), pi.getPeptide().getId(), pi.getValidatedProteinSetCount(), pi.getElutionTime());
             dpi.setResultSummary(pi.getResultSummary());
             
             MasterQuantPeptideIon mQuantPeptideIon = (MasterQuantPeptideIon) resCur[i++];

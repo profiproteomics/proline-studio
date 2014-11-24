@@ -105,8 +105,8 @@ public abstract class AbstractJoinDataModel implements CompareDataInterface  {
             m_keyToRow2.put(key, i);
             if (!keysFound.contains(key)) {
                 keysFound.add(key);
+                m_allKeys.add(key);
             }
-            m_allKeys.add(key);
         }
     }
     

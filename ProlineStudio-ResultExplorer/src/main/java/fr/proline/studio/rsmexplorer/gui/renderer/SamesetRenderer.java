@@ -35,14 +35,12 @@ public class SamesetRenderer extends DefaultTableCellRenderer implements ExportT
         
         ProteinTableModel.Sameset sameset = (ProteinTableModel.Sameset) value;
         
+        m_basicTextForExport = sameset.toString();
         if (sameset.isTypical()) {
-            m_basicTextForExport = "typical";
             label.setIcon(IconManager.getIcon(IconManager.IconType.TYPICAL));
         } else if (sameset.isSameset()) {
-            m_basicTextForExport = "sameset";
             label.setIcon(IconManager.getIcon(IconManager.IconType.SAME_SET));
         } else {
-            m_basicTextForExport = "subset";
             label.setIcon(IconManager.getIcon(IconManager.IconType.SUB_SET));
         }
         

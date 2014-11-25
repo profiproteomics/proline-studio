@@ -26,81 +26,76 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_NAME = 1;
     private static final String[] m_columnNames = {"Id", "Peptide"};
-    
+
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_ABUNDANCE = 1;
     public static final int COLTYPE_RAW_ABUNDANCE = 2;
     public static final int COLTYPE_PSM = 3;
-    
+
     private static final String[] m_columnNamesQC = {"Sel. level", "Abundance", "Raw abundance", "Pep. match count"};
     private static final String[] m_toolTipQC = {"Selection level", "Abundance", "Raw abundance", "Peptides match count"};
-    
+
     private List<DMasterQuantPeptide> m_quantPeptides = null;
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
-    
+
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
-    
 
-    
-    
     public QuantPeptideTableModel(LazyTable table) {
         super(table);
     }
-    
- 
-    
+
     @Override
     public int getColumnCount() {
         if (m_quantChannels == null) {
-            return m_columnNames.length ;
-        }else {
-            return m_columnNames.length+m_quantChannelNumber*m_columnNamesQC.length;
+            return m_columnNames.length;
+        } else {
+            return m_columnNames.length + m_quantChannelNumber * m_columnNamesQC.length;
         }
     }
 
     @Override
     public String getColumnName(int col) {
-        if (col<=COLTYPE_PEPTIDE_NAME) {
+        if (col <= COLTYPE_PEPTIDE_NAME) {
             return m_columnNames[col];
         } else if (m_quantChannels != null) {
-            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
-            int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
-            
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+            int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
             sb.append(m_columnNamesQC[id]);
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
-            
+
             sb.append("</html>");
             return sb.toString();
-        }else{
+        } else {
             return ""; // should not happen
         }
     }
-    
-        @Override
+
+    @Override
     public String getToolTipForHeader(int col) {
-        if (col<=COLTYPE_PEPTIDE_NAME) {
+        if (col <= COLTYPE_PEPTIDE_NAME) {
             return m_columnNames[col];
         } else if (m_quantChannels != null) {
-            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
-            int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
-            
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+            int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
             sb.append(m_toolTipQC[id]);
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
-            
+
             sb.append("</html>");
             return sb.toString();
-        }else{
+        } else {
             return ""; // should not happen
         }
     }
@@ -109,16 +104,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     public Class getColumnClass(int col) {
         if (col == COLTYPE_PEPTIDE_ID) {
             return Long.class;
-        } 
+        }
         return LazyData.class;
     }
-    
+
     @Override
     public int getSubTaskId(int col) {
         return DatabaseLoadXicMasterQuantTask.SUB_TASK_PEPTIDE_INSTANCE;
     }
 
-    
     @Override
     public int getRowCount() {
         if (m_quantPeptides == null) {
@@ -132,49 +126,63 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
     @Override
     public Object getValueAt(int row, int col) {
-        
+
         int rowFiltered = row;
         if ((!m_isFiltering) && (m_filteredIds != null)) {
             rowFiltered = m_filteredIds.get(row).intValue();
         }
         // Retrieve Quant Peptide
         DMasterQuantPeptide peptide = m_quantPeptides.get(rowFiltered);
-        DPeptideInstance peptideInstance = peptide.getPeptideInstance() ;
+        DPeptideInstance peptideInstance = peptide.getPeptideInstance();
 
         switch (col) {
             case COLTYPE_PEPTIDE_ID: {
-                return peptide.getId() == -1?"":peptide.getId();
+                return peptide.getId() == -1 ? "" : peptide.getId();
             }
             case COLTYPE_PEPTIDE_NAME: {
-                LazyData lazyData = getLazyData(row,col);
-                lazyData.setData(peptideInstance.getBestPeptideMatch().getPeptide().getSequence());
+                LazyData lazyData = getLazyData(row, col);
+                if (peptideInstance == null || peptideInstance.getBestPeptideMatch() == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+                    lazyData.setData(peptideInstance.getBestPeptideMatch().getPeptide().getSequence());
+                }
                 return lazyData;
 
             }
             default: {
                 // Quant Channel columns 
-                LazyData lazyData = getLazyData(row,col);
-                
-                // retrieve quantPeptide for the quantChannelId
-                Map<Long, DQuantPeptide> quantPeptideByQchIds = peptide.getQuantPeptideByQchIds() ;
-                if (quantPeptideByQchIds == null) {
-                    lazyData.setData("");
-                }else{
-                    int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
-                    int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
-                    DQuantPeptide quantPeptide = quantPeptideByQchIds.get(m_quantChannels[nbQc].getId()) ;
-                    if (quantPeptide == null) {
+                LazyData lazyData = getLazyData(row, col);
+                if (peptideInstance == null) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+
+                    // retrieve quantPeptide for the quantChannelId
+                    Map<Long, DQuantPeptide> quantPeptideByQchIds = peptide.getQuantPeptideByQchIds();
+                    if (quantPeptideByQchIds == null) {
                         lazyData.setData("");
                     } else {
-                        switch (id ) {
-                            case COLTYPE_SELECTION_LEVEL : lazyData.setData(quantPeptide.getSelectionLevel());
-                                     break;
-                            case COLTYPE_ABUNDANCE : lazyData.setData(quantPeptide.getAbundance().isNaN()?"":quantPeptide.getAbundance());
-                                     break;
-                            case COLTYPE_RAW_ABUNDANCE : lazyData.setData(quantPeptide.getRawAbundance().isNaN()?"":quantPeptide.getRawAbundance());
-                                     break;
-                            case COLTYPE_PSM : lazyData.setData(quantPeptide.getPeptideMatchesCount());
-                                     break;
+                        int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                        int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                        DQuantPeptide quantPeptide = quantPeptideByQchIds.get(m_quantChannels[nbQc].getId());
+                        if (quantPeptide == null) {
+                            lazyData.setData("");
+                        } else {
+                            switch (id) {
+                                case COLTYPE_SELECTION_LEVEL:
+                                    lazyData.setData(quantPeptide.getSelectionLevel());
+                                    break;
+                                case COLTYPE_ABUNDANCE:
+                                    lazyData.setData(quantPeptide.getAbundance().isNaN() ? "" : quantPeptide.getAbundance());
+                                    break;
+                                case COLTYPE_RAW_ABUNDANCE:
+                                    lazyData.setData(quantPeptide.getRawAbundance().isNaN() ? "" : quantPeptide.getRawAbundance());
+                                    break;
+                                case COLTYPE_PSM:
+                                    lazyData.setData(quantPeptide.getPeptideMatchesCount());
+                                    break;
+                            }
                         }
                     }
                 }
@@ -184,30 +192,26 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         //return null; // should never happen
     }
 
-    public void setData(Long taskId,  DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides ) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantPeptide> peptides) {
         this.m_quantPeptides = peptides;
-        this.m_quantChannels = quantChannels ;
+        this.m_quantChannels = quantChannels;
         this.m_quantChannelNumber = quantChannels.length;
         fireTableStructureChanged();
-        
+
         m_taskId = taskId;
 
-        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();
         } else {
             fireTableDataChanged();
         }
-        
-        
+
     }
 
-    
     public void dataUpdated() {
-    
+
         // no need to do an updateMinMax : scores are known at once
-        
         if (m_filteredIds != null) {
             filter();
         } else {
@@ -216,17 +220,16 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     }
 
     public DMasterQuantPeptide getPeptide(int i) {
-        
+
         if (m_filteredIds != null) {
             i = m_filteredIds.get(i).intValue();
         }
-        
+
         return m_quantPeptides.get(i);
     }
-    
-    
+
     public int findRow(long peptideId) {
-        
+
         if (m_filteredIds != null) {
             int nb = m_filteredIds.size();
             for (int i = 0; i < nb; i++) {
@@ -236,56 +239,53 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             }
             return -1;
         }
-        
+
         int nb = m_quantPeptides.size();
-        for (int i=0;i<nb;i++) {
+        for (int i = 0; i < nb; i++) {
             if (peptideId == m_quantPeptides.get(i).getId()) {
                 return i;
             }
         }
         return -1;
-        
+
     }
-    
-    
+
     public void sortAccordingToModel(ArrayList<Long> peptideIds) {
-        
-        if (m_quantPeptides == null){
+
+        if (m_quantPeptides == null) {
             // data not loaded 
             return;
         }
-        
+
         HashSet<Long> peptideIdMap = new HashSet<>(peptideIds.size());
         peptideIdMap.addAll(peptideIds);
-        
+
         int nb = getRowCount();
         int iCur = 0;
-        for (int iView=0;iView<nb;iView++) {
+        for (int iView = 0; iView < nb; iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
             // Retrieve Peptide
             DMasterQuantPeptide p = getPeptide(iModel);
-            if (  peptideIdMap.contains(p.getId())  ) {
-                peptideIds.set(iCur++,p.getId());
+            if (peptideIdMap.contains(p.getId())) {
+                peptideIds.set(iCur++, p.getId());
             }
         }
-        
+
         // need to refilter
         if (m_filteredIds != null) { // NEEDED ????
             filter();
         }
     }
 
-
-
     @Override
     public void filter() {
-        
+
         if (m_quantPeptides == null) {
             // filtering not possible for the moment
             m_filteringAsked = true;
             return;
         }
-        
+
         m_isFiltering = true;
         try {
 
@@ -309,42 +309,40 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         fireTableDataChanged();
     }
 
-    
     @Override
     public boolean filter(int row, int col) {
         Filter filter = getColumnFilter(col);
         if ((filter == null) || (!filter.isUsed())) {
             return true;
         }
-        
+
         Object data = ((LazyData) getValueAt(row, col)).getData();
         if (data == null) {
             return true; // should not happen
         }
-        
+
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
-                return ((StringFilter) filter).filter((String)data);
+                return ((StringFilter) filter).filter((String) data);
             }
             /*case COLTYPE_PROTEIN_SET_DESCRIPTION: {
-                return ((StringFilter) filter).filter((String)data);
-            }
-            case COLTYPE_PROTEIN_SCORE: {
-                return ((DoubleFilter) filter).filter((Float)data);
-            }
-            case COLTYPE_PROTEINS_COUNT:
-            case COLTYPE_PEPTIDES_COUNT:
-            case COLTYPE_SPECTRAL_COUNT:
-            case COLTYPE_UNIQUE_SEQUENCES_COUNT:
-            case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
-                return ((IntegerFilter) filter).filter((Integer)data);
-            }*/ //JPM.TODO
-    
+             return ((StringFilter) filter).filter((String)data);
+             }
+             case COLTYPE_PROTEIN_SCORE: {
+             return ((DoubleFilter) filter).filter((Float)data);
+             }
+             case COLTYPE_PROTEINS_COUNT:
+             case COLTYPE_PEPTIDES_COUNT:
+             case COLTYPE_SPECTRAL_COUNT:
+             case COLTYPE_UNIQUE_SEQUENCES_COUNT:
+             case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
+             return ((IntegerFilter) filter).filter((Integer)data);
+             }*/ //JPM.TODO
+
         }
-        
+
         return true; // should never happen
     }
-
 
     @Override
     public void initFilters() {
@@ -354,12 +352,12 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             m_filters[COLTYPE_PEPTIDE_ID] = null;
             m_filters[COLTYPE_PEPTIDE_NAME] = new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME));
             /*m_filters[COLTYPE_PROTEIN_SET_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_DESCRIPTION));
-            m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
-            m_filters[COLTYPE_PROTEINS_COUNT] = null;
-            m_filters[COLTYPE_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT));
-            m_filters[COLTYPE_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECTRAL_COUNT));
-            m_filters[COLTYPE_SPECIFIC_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECIFIC_SPECTRAL_COUNT));
-            m_filters[COLTYPE_UNIQUE_SEQUENCES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_UNIQUE_SEQUENCES_COUNT));   */         
+             m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
+             m_filters[COLTYPE_PROTEINS_COUNT] = null;
+             m_filters[COLTYPE_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT));
+             m_filters[COLTYPE_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECTRAL_COUNT));
+             m_filters[COLTYPE_SPECIFIC_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECIFIC_SPECTRAL_COUNT));
+             m_filters[COLTYPE_UNIQUE_SEQUENCES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_UNIQUE_SEQUENCES_COUNT));   */
         }
     }
 
@@ -372,7 +370,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     public boolean isLoaded() {
         return m_table.isLoaded();
     }
-    
+
     public int getByQCCount() {
         return m_columnNamesQC.length;
     }
@@ -380,14 +378,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     public int getQCCount() {
         return m_quantChannels.length;
     }
-    
+
     public int getColumStart(int index) {
-        return m_columnNames.length+index*m_columnNamesQC.length;
+        return m_columnNames.length + index * m_columnNamesQC.length;
     }
+
     public int getColumStop(int index) {
-        return m_columnNames.length+(1+index)*m_columnNamesQC.length-1;
+        return m_columnNames.length + (1 + index) * m_columnNamesQC.length - 1;
     }
-    
+
     public String getQCName(int i) {
 
         StringBuilder sb = new StringBuilder();
@@ -399,43 +398,42 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
         return sb.toString();
     }
-    
+
     public String getByQCMColumnName(int index) {
         return m_columnNamesQC[index];
     }
-    
+
     public int getQCNumber(int col) {
-        return (col-m_columnNames.length) / m_columnNamesQC.length;
+        return (col - m_columnNames.length) / m_columnNamesQC.length;
     }
-    
+
     public int getTypeNumber(int col) {
-        return (col-m_columnNames.length) % m_columnNamesQC.length;
+        return (col - m_columnNames.length) % m_columnNamesQC.length;
     }
-    
-    
+
     public Long getResultSummaryId() {
         if ((m_quantPeptides == null) || (m_quantPeptides.size() == 0)) {
             return null;
         }
-        
+
         return m_quantPeptides.get(0).getQuantResultSummaryId();
     }
-    
-    
+
     /**
-     * by default the rawAbundance and selectionLevel are hidden
-     * return the list of columns ids of these columns
-     * @return 
+     * by default the rawAbundance and selectionLevel are hidden return the list
+     * of columns ids of these columns
+     *
+     * @return
      */
     public List<Integer> getDefaultColumnsToHide() {
         List<Integer> listIds = new ArrayList();
         if (m_quantChannels != null) {
-            for (int i=m_quantChannels.length-1; i>=0; i--) {
-                listIds.add(m_columnNames.length+COLTYPE_ABUNDANCE+(i*m_columnNamesQC.length));
-                listIds.add(m_columnNames.length+COLTYPE_SELECTION_LEVEL+(i*m_columnNamesQC.length));
+            for (int i = m_quantChannels.length - 1; i >= 0; i--) {
+                listIds.add(m_columnNames.length + COLTYPE_ABUNDANCE + (i * m_columnNamesQC.length));
+                listIds.add(m_columnNames.length + COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
             }
         }
-        return listIds; 
+        return listIds;
     }
 
     @Override

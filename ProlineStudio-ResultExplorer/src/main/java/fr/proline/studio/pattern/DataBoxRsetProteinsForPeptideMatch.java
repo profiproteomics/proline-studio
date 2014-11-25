@@ -3,6 +3,8 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
@@ -36,6 +38,9 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
         outParameter.addParameter(DProteinMatch.class, true);
         registerOutParameter(outParameter);
 
+        outParameter = new GroupParameter();
+        outParameter.addParameter(CompareDataInterface.class, true);
+        registerOutParameter(outParameter);
        
     }
 
@@ -107,8 +112,13 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     
     @Override
     public Object getData(boolean getArray, Class parameterType) {
-        if (parameterType!= null && (parameterType.equals(DProteinMatch.class))) {
-            return ((RsetProteinsPanel)m_panel).getSelectedProteinMatch();
+        if (parameterType!= null) {
+            if (parameterType.equals(DProteinMatch.class)) {
+                return ((RsetProteinsPanel) m_panel).getSelectedProteinMatch();
+            }
+            if (parameterType.equals(CompareDataInterface.class)) {
+                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+            }
         }
         return super.getData(getArray, parameterType);
     }

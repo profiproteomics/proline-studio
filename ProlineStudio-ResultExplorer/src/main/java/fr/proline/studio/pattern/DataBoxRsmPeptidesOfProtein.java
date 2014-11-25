@@ -5,6 +5,8 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
@@ -44,6 +46,9 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
         outParameter.addParameter(DPeptideMatch.class, true);
         registerOutParameter(outParameter);
         
+        outParameter = new GroupParameter();
+        outParameter.addParameter(CompareDataInterface.class, true);
+        registerOutParameter(outParameter);
        
     }
     
@@ -112,12 +117,18 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
     
     @Override
     public Object getData(boolean getArray, Class parameterType) {
-        if (parameterType!= null && (parameterType.equals(DPeptideInstance.class))) {
-            return ((RsmPeptidesOfProteinPanel)m_panel).getSelectedPeptide();
-        } else if (parameterType!= null && (parameterType.equals(DPeptideMatch.class))) {
-            DPeptideInstance pi = ((RsmPeptidesOfProteinPanel)m_panel).getSelectedPeptide();
-            if (pi != null) {
-                return pi.getBestPeptideMatch();
+        if (parameterType!= null) {
+            if (parameterType.equals(DPeptideInstance.class)) {
+                return ((RsmPeptidesOfProteinPanel) m_panel).getSelectedPeptide();
+            }
+            if (parameterType.equals(DPeptideMatch.class)) {
+                DPeptideInstance pi = ((RsmPeptidesOfProteinPanel) m_panel).getSelectedPeptide();
+                if (pi != null) {
+                    return pi.getBestPeptideMatch();
+                }
+            }
+            if (parameterType.equals(CompareDataInterface.class)) {
+                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }
         }
         return super.getData(getArray, parameterType);

@@ -6,6 +6,8 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
@@ -46,6 +48,10 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
 
+        outParameter = new GroupParameter();
+        outParameter.addParameter(CompareDataInterface.class, true);
+        registerOutParameter(outParameter);
+        
     }
     
      @Override
@@ -129,6 +135,9 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             }
             if (parameterType.equals(DProteinSet.class)) {
                 return ((XicProteinSetPanel) m_panel).getSelectedProteinSet();
+            }
+            if (parameterType.equals(CompareDataInterface.class)) {
+                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }
             
         }

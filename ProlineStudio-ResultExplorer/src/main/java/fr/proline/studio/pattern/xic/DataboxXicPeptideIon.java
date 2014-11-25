@@ -7,6 +7,8 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
@@ -44,6 +46,10 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(MasterQuantPeptideIon.class, false);
+        registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(CompareDataInterface.class, true);
         registerOutParameter(outParameter);
 
     }
@@ -125,8 +131,12 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         if (parameterType != null) {
             if (parameterType.equals(ResultSummary.class)) {
                 return m_dataset.getResultSummary();
-            }else if (parameterType.equals(MasterQuantPeptideIon.class)) {
+            }
+            if (parameterType.equals(MasterQuantPeptideIon.class)) {
                 return ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();
+            }
+            if (parameterType.equals(CompareDataInterface.class)) {
+                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }
         }
         return super.getData(getArray, parameterType);

@@ -5,6 +5,8 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
+import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
@@ -45,6 +47,10 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         outParameter.addParameter(PeptideInstance.class, true);
         registerOutParameter(outParameter);
        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(CompareDataInterface.class, true);
+        registerOutParameter(outParameter);
+        
     }
     
 
@@ -122,6 +128,9 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                 if (m_rsm != null) {
                     return m_rsm;
                 }
+            }
+            if (parameterType.equals(CompareDataInterface.class)) {
+                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }
         }
         return super.getData(getArray, parameterType);

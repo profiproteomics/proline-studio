@@ -3,6 +3,8 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.rsmexplorer.gui.RsetProteinsPanel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -36,6 +38,10 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DProteinMatch.class, true);
         outParameter.addParameter(ResultSet.class, false);
+        registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(CompareDataInterface.class, true);
         registerOutParameter(outParameter);
     }
     
@@ -107,6 +113,9 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
                 if (m_rset != null) {
                     return m_rset;
                 }
+            }
+            if (parameterType.equals(CompareDataInterface.class)) {
+                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }
         }
         return super.getData(getArray, parameterType);

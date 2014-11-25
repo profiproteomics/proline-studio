@@ -114,7 +114,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     }
     
     public void initLoadPeptides(long projectId, DDataset dataset, DProteinSet proteinSet ,  List<DMasterQuantPeptide> masterQuantPeptideList ) {
-        init(SUB_TASK_COUNT_PEPTIDE, new TaskInfo("Load Peptides of proteinSet " + DatabaseProteinsFromProteinSetTask.getProteinSetName(proteinSet), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        String proteinSetName = "";
+        if (proteinSet != null) {
+            proteinSetName = DatabaseProteinsFromProteinSetTask.getProteinSetName(proteinSet);
+        }
+        init(SUB_TASK_COUNT_PEPTIDE, new TaskInfo("Load Peptides of proteinSet " + proteinSetName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_dataset = dataset;
         m_masterQuantPeptideList = masterQuantPeptideList;
@@ -534,7 +538,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                                 + "ORDER BY pi.id ASC";
                         Query peptidesQuery = entityManagerMSI.createQuery(queryPep);
                         peptidesQuery.setParameter("rsmId", resultSummaryId);
-                        peptidesQuery.setParameter("proteinSetId", m_dProteinSet.getId());
+                        peptidesQuery.setParameter("proteinSetId", ( m_dProteinSet == null?-1:m_dProteinSet.getId()));
                         List<Long> listIds = (List<Long>) peptidesQuery.getResultList();
                         m_peptideInstanceIds = listIds ;
                         

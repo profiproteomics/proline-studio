@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;

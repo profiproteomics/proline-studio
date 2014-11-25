@@ -16,7 +16,6 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.PieSectionLabelGenerator;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PiePlot;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DefaultPieDataset;
 import org.slf4j.LoggerFactory;
 
@@ -85,10 +84,7 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
     
     private void initComponents() {
         setLayout(new BorderLayout());
-        ChartPanel cp = new ChartPanel(m_chart, true) {
- 
-        };
-        
+        ChartPanel cp = new ChartPanel(m_chart, true);
         
         cp.setMinimumDrawWidth(0);
         cp.setMinimumDrawHeight(0);
@@ -98,7 +94,6 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
        
         m_pieChartPanel = cp;
         
-            //
         JToolBar toolbar = initToolbar();
         
         add(toolbar, BorderLayout.WEST);
@@ -180,8 +175,8 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
 	    	if(msdo.matrix[0].length == 2) { // then both data are present
 		        m_dataSet.setValue(msdo.column_names[0], (Double) Math.abs((double) msdo.matrix[0][0]));
 			    m_dataSet.setValue(msdo.column_names[1], (Double) Math.abs((double) msdo.matrix[0][1]));
-			    ((PiePlot) m_chart.getPlot()).setSectionPaint(msdo.column_names[0], Color.red);
-		        ((PiePlot) m_chart.getPlot()).setSectionPaint(msdo.column_names[1], Color.blue);
+			    ((PiePlot) m_chart.getPlot()).setSectionPaint(msdo.column_names[0], new Color(255,60,60));
+		        ((PiePlot) m_chart.getPlot()).setSectionPaint(msdo.column_names[1], new Color(60,60,255));
 		    }
 	    }
 	    

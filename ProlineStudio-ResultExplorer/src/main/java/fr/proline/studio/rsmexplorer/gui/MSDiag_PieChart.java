@@ -1,22 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui;
-
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
 import java.text.DecimalFormat;
 
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 
 import org.apache.batik.svggen.SVGGraphics2DIOException;
@@ -24,55 +13,21 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.event.PlotChangeEvent;
-import org.jfree.chart.event.PlotChangeListener;
 import org.jfree.chart.labels.PieSectionLabelGenerator;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
-import org.jfree.chart.plot.CrosshairState;
 import org.jfree.chart.plot.PiePlot;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
-import org.jfree.chart.renderer.xy.XYItemRendererState;
-import org.jfree.chart.title.TextTitle;
-import org.jfree.data.Range;
 import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.data.general.PieDataset;
-import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.data.xy.XYDataset;
 import org.slf4j.LoggerFactory;
 
-//import org.freehep.graphicsio.emf.EMFGraphics2D;
 
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
-import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.Spectrum;
-import fr.proline.core.orm.msi.dto.DMsQuery;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.core.orm.uds.Project;
-import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.dpm.AccessServiceThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.GenerateSpectrumMatchTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
-import fr.proline.studio.gui.SplittedPanelContainer;
-import fr.proline.studio.pattern.AbstractDataBox;
-import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.pattern.DataBoxRsetPeptideSpectrum;
-import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.utils.IconManager;
 
-import java.awt.event.ActionEvent;
-
-import javax.swing.JButton;
-
-import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 
 /**
@@ -116,7 +71,6 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
     public MSDiag_PieChart() {
         
         m_dataSet = new DefaultPieDataset();
-        //m_chart = ChartFactory.createXYLineChart("", "m/z", "intensity", m_dataSet, PlotOrientation.VERTICAL, true, true, false);
         m_chart = ChartFactory.createPieChart(
 	            "Chart Title",  // chart title
 	            m_dataSet ,             // data
@@ -124,30 +78,15 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
 	            true,
 	            false
 	        );
-        
-   
-        
+         
         initComponents();
-        
         
     }
     
     private void initComponents() {
         setLayout(new BorderLayout());
         ChartPanel cp = new ChartPanel(m_chart, true) {
-            @Override
-            public void restoreAutoBounds(){
-            	
-            	XYPlot plot=(XYPlot)getChart().getPlot();
-                double domainStart = plot.getDomainAxis().getDefaultAutoRange().getLowerBound();
-            	double domainEnd =  plot.getDomainAxis().getDefaultAutoRange().getUpperBound();
-            	double rangeStart = plot.getRangeAxis().getDefaultAutoRange().getLowerBound();
-            	double rangeEnd =  plot.getRangeAxis().getDefaultAutoRange().getUpperBound();
-                plot.getDomainAxis().setAutoRange(false);
-                plot.getDomainAxis().setRange(domainStart,domainEnd);
-                plot.getRangeAxis().setRange(rangeStart,rangeEnd);
-                
-            }
+ 
         };
         
         
@@ -159,9 +98,7 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
        
         m_pieChartPanel = cp;
         
-      
-        
-        //
+            //
         JToolBar toolbar = initToolbar();
         
         add(toolbar, BorderLayout.WEST);
@@ -174,9 +111,7 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
         
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
-        //m_picWrapper = new ExportPictureWrapper();
-        //m_picWrapper.setFile(m_svgFile);
-
+   
         ExportButton exportImageButton = new ExportButton("pieChart", (ImageExporterInterface) this);
         toolbar.add(exportImageButton);
        
@@ -226,7 +161,6 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
         // clear all data
         m_dataSet.clear();
     	
- 
         if (msdo == null) {
             return;
         }
@@ -241,8 +175,7 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
                 "{0}: {1} ({2})", new DecimalFormat("0"), new DecimalFormat("0%"));
         ((PiePlot) m_chart.getPlot()).setLabelGenerator(gen);
             
-        /// ---- start of plot listenener (for zoom changes for instance)
-   
+        
         if(msdo.matrix.length == 1) { // then there is some data
 	    	if(msdo.matrix[0].length == 2) { // then both data are present
 		        m_dataSet.setValue(msdo.column_names[0], (Double) Math.abs((double) msdo.matrix[0][0]));

@@ -63,19 +63,10 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	    
 	    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 	    private static final long serialVersionUID = 1L;
-	    private AbstractDataBox m_dataBox;
-	    private static boolean redrawInProgress = false; // to ensure no circular loop in changeEven when triggered by zooming the graph... 
-	    private double m_spectrumMinX = 0;
-	    private double m_spectrumMaxX = 0;
-	    private double m_spectrumMinY = 0;
-	    private double m_spectrumMaxY = 0;
 	    private DefaultBoxAndWhiskerCategoryDataset m_dataSet;
 	    private JFreeChart m_chart;
 	    private File m_pngFile;
-	    private DPeptideMatch m_previousPeptideMatch = null;
-	    private boolean m_previousFragmentationSet = false;
 	    private javax.swing.JPanel m_chromatogragmPanel;
-	    private JButton m_generateMatchButton;
 	    
 	    
 	    private CategoryPlot m_subplot; // the plot that holds the range values data

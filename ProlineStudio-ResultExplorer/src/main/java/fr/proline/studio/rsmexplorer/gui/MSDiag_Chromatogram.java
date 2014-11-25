@@ -72,11 +72,9 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    private javax.swing.JPanel m_chromatogragmPanel;
 	    private JButton m_generateMatchButton;
 	    
-	    // menuItem ShowSpectrumTitle is created while creating the panel, to avoid having a multitude of menuItem in the popupMenu
-	    private JMenuItem m_showSpectrumTitle;
-	    private String m_spectrumTitle;
-
-		private String m_domain_axis_label = "";
+	    
+	   
+		private CategoryPlot m_subplot; // the plot that holds the range values data
 
 		
 	    
@@ -105,8 +103,8 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    	//m_chart = ChartFactory.createXYLineChart("", "m/z", "intensity", m_dataSet, PlotOrientation.VERTICAL, true, true, false);
 
 	    	
-	    	final NumberAxis rangeAxis2 = new NumberAxis("");
-	        rangeAxis2.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+	    	final NumberAxis rangeAxis = new NumberAxis("");
+	        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 	        final BarRenderer renderer = new StackedBarRenderer3D();
 	        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
 	        renderer.setDrawBarOutline(false);
@@ -122,17 +120,17 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        renderer.setSeriesPaint(6, new Color(20,150,50));
 
 	        
-	        final CategoryPlot subplot = new CategoryPlot(m_dataSet, null, rangeAxis2, renderer);
-	        subplot.setDomainGridlinesVisible(true);
+	        m_subplot = new CategoryPlot(m_dataSet, null, rangeAxis, renderer);
+	        m_subplot.setDomainGridlinesVisible(true);
 
-	        final CategoryAxis domainAxis = new CategoryAxis(m_domain_axis_label );
+	        final CategoryAxis domainAxis = new CategoryAxis("");
 	        
 	        domainAxis.setCategoryLabelPositions(
 	            CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 4.0)
 	        );
 	        final CombinedDomainCategoryPlot plot = new CombinedDomainCategoryPlot(domainAxis);
 	        
-	        plot.add(subplot, 1);
+	        plot.add(m_subplot, 1);
 	        
 	        
 	    	m_chart = new JFreeChart(
@@ -259,14 +257,10 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        
 	        // set axes labels
 	       
-	        
-	        //((CategoryPlot) m_chart.getPlot()).getRangeAxis().setLabel(msdo.y_axis_description);// does not work !!!
-	        m_domain_axis_label = msdo.y_axis_description;
+	        m_subplot.getRangeAxis().setLabel(msdo.y_axis_description);
 	        m_chart.getCategoryPlot().getDomainAxis().setLabel(msdo.x_axis_description);
 	        
-	        // set the spectrum title
-	        //m_spectrumTitle = spectrum.getTitle();
-
+	        
 	        
 	        m_chart.getPlot().setBackgroundPaint(Color.white);
 

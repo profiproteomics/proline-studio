@@ -77,14 +77,10 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	    private javax.swing.JPanel m_chromatogragmPanel;
 	    private JButton m_generateMatchButton;
 	    
-	    // menuItem ShowSpectrumTitle is created while creating the panel, to avoid having a multitude of menuItem in the popupMenu
-	    private JMenuItem m_showSpectrumTitle;
-	    private String m_spectrumTitle;
-
-		private String m_range_axis_label = "";
-
-		
 	    
+	    private CategoryPlot m_subplot; // the plot that holds the range values data
+
+			    
 	    @Override // declared in ProlineStudioCommons ImageExporterInterface
 	    public void generateSvgImage(String file) {
 	        writeToSVG(file);
@@ -109,7 +105,7 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	    	m_dataSet = new DefaultBoxAndWhiskerCategoryDataset();
 	    	
 	    	
-	    	final NumberAxis rangeAxis = new NumberAxis(m_range_axis_label ); // TODO: find a way to change this value in setData...
+	    	 NumberAxis rangeAxis = new NumberAxis(""); // TODO: find a way to change this value in setData...
 	    	 rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits()); // create integer ticks unit. (whatever data is)
 	         final BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer(); //BarRenderer();
 	       
@@ -133,17 +129,17 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	        renderer.setSeriesPaint(0, Color.green);
 	        
 	       
-	        final CategoryPlot subplot = new CategoryPlot(m_dataSet, null, rangeAxis, renderer);
-	        subplot.setDomainGridlinesVisible(true);
+	        m_subplot = new CategoryPlot(m_dataSet, null, rangeAxis, renderer);
+	        m_subplot.setDomainGridlinesVisible(true);
 
-	        final CategoryAxis domainAxis = new CategoryAxis("Category");
+	        final CategoryAxis domainAxis = new CategoryAxis("");
 	        
 	        domainAxis.setCategoryLabelPositions(
 	            CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 4.0)
 	        );
 	        final CombinedDomainCategoryPlot plot = new CombinedDomainCategoryPlot(domainAxis);
 	       ;
-	        plot.add(subplot, 1);
+	        plot.add(m_subplot, 1);
 	        
 
 	        
@@ -269,7 +265,7 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	        // 	set axes labels
 	       
 	        //	m_chart.getCategoryPlot().getRangeAxis().setLabel(msdo.y_axis_description); // does not work
-	        m_range_axis_label = msdo.y_axis_description;
+	        m_subplot.getRangeAxis().setLabel(msdo.y_axis_description);
 	        //((CategoryPlot) m_chart.getPlot()).getRangeAxis().setLabel(msdo.y_axis_description);// does not work !!!
 	        
 	       
@@ -278,8 +274,7 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	        
 	        //String serieTable[] = new String[msdo.matrix[0].length];
 	        int nbSeries = msdo.matrix[0].length;
-	        int nbCategories = msdo.matrix.length - 1; // -1 because of 1st column is series names
-
+	        
 	        ArrayList<Double> listOutliers = new ArrayList();
 	        Comparable<String> serieString; 
 			Comparable<String> catString;  

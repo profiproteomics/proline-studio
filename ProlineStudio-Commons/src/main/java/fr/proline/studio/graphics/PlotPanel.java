@@ -1,18 +1,23 @@
 package fr.proline.studio.graphics;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
 
 /**
  * Panel to display data with an X and Y Axis
  * @author JM235353
  */
-public class PlotPanel extends JPanel {
+public class PlotPanel extends JPanel implements MouseListener, MouseMotionListener {
     
     private XAxis m_xAxis = null;
     private YAxis m_yAxis = null;
     
     private PlotAbstract m_plot = null;
+    
+    private ZoomGesture m_zoomRectangle = new ZoomGesture();
     
     public final static int GAP_FIGURES_Y = 50;
     public final static int GAP_FIGURES_X = 30;
@@ -21,7 +26,8 @@ public class PlotPanel extends JPanel {
     
     
     public PlotPanel() {
-
+        addMouseListener(this);
+        addMouseMotionListener(this);
     }
     
     @Override
@@ -51,6 +57,8 @@ public class PlotPanel extends JPanel {
         if (m_plot != null) {
             m_plot.paint(g2d);
         }
+        
+        m_zoomRectangle.paint(g2d);
         
     }
     
@@ -85,5 +93,44 @@ public class PlotPanel extends JPanel {
     public YAxis getYAxis() {
         return m_yAxis;
     }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {}
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        m_zoomRectangle.startZooming(e.getX(), e.getY());
+        repaint();
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        m_zoomRectangle.stopZooming(e.getX(), e.getY());
+        
+        int action = m_zoomRectangle.getAction();
+        if (action == ZoomGesture.ACTION_ZOOM) {
+            m_xAxis.setRange(m_xAxis.pixelToValue(m_zoomRectangle.getStartX()), m_xAxis.pixelToValue(m_zoomRectangle.getEndX()));
+            m_yAxis.setRange(m_yAxis.pixelToValue(m_zoomRectangle.getEndY()), m_yAxis.pixelToValue(m_zoomRectangle.getStartY()));
+        } else if (action == ZoomGesture.ACTION_UNZOOM) {
+            updateAxis(m_plot);
+        }
+        repaint();
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {}
+
+    @Override
+    public void mouseExited(MouseEvent e) {}
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        m_zoomRectangle.moveZooming(e.getX(), e.getY());
+
+        repaint();
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {}
     
 }

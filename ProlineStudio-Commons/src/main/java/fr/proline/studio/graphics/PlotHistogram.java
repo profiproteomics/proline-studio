@@ -150,6 +150,13 @@ public class PlotHistogram extends PlotAbstract {
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis(); 
         
+        // set clipping area
+        int clipX = xAxis.valueToPixel(xAxis.getMinTick());
+        int clipWidth = xAxis.valueToPixel(xAxis.getMaxTick())-clipX;
+        int clipY = yAxis.valueToPixel(yAxis.getMaxTick());
+        int clipHeight = yAxis.valueToPixel(yAxis.getMinTick())-clipY;
+        g.setClip(clipX, clipY, clipWidth, clipHeight);
+        
         int y2 = yAxis.valueToPixel(0);
         int size = m_dataX.length;
         for (int i=0;i<size-1;i++) {

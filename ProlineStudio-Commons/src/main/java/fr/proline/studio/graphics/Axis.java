@@ -47,7 +47,11 @@ public abstract class Axis {
     public abstract void paint(Graphics2D g);
 
     public int valueToPixel(double v) {
-        return (int) Math.round((v - m_minTick) * m_width);
+        return (m_y+m_height)-(int) Math.round(((v - m_minTick)/(m_maxTick-m_minTick)) * m_height);
+    }
+
+    public double pixelToValue(int pixel) {
+        return m_minTick+(((double)((m_y+m_height)-pixel))/((double)m_height))*(m_maxTick-m_minTick);
     }
     
     public double getMinValue() {

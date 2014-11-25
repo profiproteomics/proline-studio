@@ -86,5 +86,10 @@ public class XAxis extends Axis {
         return m_x + (int) Math.round(((v-m_minTick)/(m_maxTick-m_minTick))*m_width);
     }
    
+    @Override
+    public double pixelToValue(int pixel) {
+        return m_minTick + ((((double) pixel)-m_x) / ((double) m_width))*(m_maxTick-m_minTick);
+    }
+   
     
 }

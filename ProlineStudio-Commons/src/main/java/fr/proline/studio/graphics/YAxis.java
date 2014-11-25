@@ -76,7 +76,12 @@ public class YAxis extends Axis {
     
     @Override
     public int valueToPixel(double v) {
-        return m_y+m_height-(int) Math.round(((v-m_minTick)/(m_maxTick-m_minTick))*m_height);
+        return (m_y+m_height)-(int) Math.round(((v - m_minTick)/(m_maxTick-m_minTick)) * m_height);
+    }
+
+    @Override
+    public double pixelToValue(int pixel) {
+        return m_minTick+(((double)((m_y+m_height)-pixel))/((double)m_height))*(m_maxTick-m_minTick);
     }
    
     

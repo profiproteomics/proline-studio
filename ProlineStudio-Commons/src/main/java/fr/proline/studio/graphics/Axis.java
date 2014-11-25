@@ -10,6 +10,8 @@ import java.text.DecimalFormat;
  */
 public abstract class Axis {
 
+    protected String m_title;
+    
     protected int m_x;
     protected int m_y;
     protected int m_width;
@@ -44,15 +46,15 @@ public abstract class Axis {
         m_maxTick = max;
     }
 
+    public void setTitle(String title) {
+        m_title = title;
+    }
+    
     public abstract void paint(Graphics2D g);
 
-    public int valueToPixel(double v) {
-        return (m_y+m_height)-(int) Math.round(((v - m_minTick)/(m_maxTick-m_minTick)) * m_height);
-    }
+    public abstract int valueToPixel(double v);
 
-    public double pixelToValue(int pixel) {
-        return m_minTick+(((double)((m_y+m_height)-pixel))/((double)m_height))*(m_maxTick-m_minTick);
-    }
+    public abstract double pixelToValue(int pixel);
     
     public double getMinValue() {
         return m_minValue;

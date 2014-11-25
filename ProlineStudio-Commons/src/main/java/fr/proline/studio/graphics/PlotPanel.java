@@ -17,12 +17,13 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     
     private PlotAbstract m_plot = null;
     
-    private ZoomGesture m_zoomRectangle = new ZoomGesture();
+    private final ZoomGesture m_zoomGesture = new ZoomGesture();
+    
     
     public final static int GAP_FIGURES_Y = 50;
     public final static int GAP_FIGURES_X = 30;
     public final static int GAP_END_AXIS = 10;
-
+    public final static int GAP_AXIS_TITLE = 0; //JPM.TODO
     
     
     public PlotPanel() {
@@ -45,12 +46,12 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         g.drawRect(0, 0, bounds.width-1, bounds.height-1);
         
         if (m_xAxis != null) {
-            m_xAxis.setSize(GAP_FIGURES_Y, ((int)bounds.getHeight())-GAP_FIGURES_X /*-GAP_TOP_AXIS*/, bounds.width-GAP_FIGURES_Y-GAP_END_AXIS, GAP_FIGURES_X /*+GAP_TOP_AXIS*/);
+            m_xAxis.setSize(GAP_FIGURES_Y, ((int)bounds.getHeight())-GAP_FIGURES_X /*-GAP_TOP_AXIS*/, bounds.width-GAP_FIGURES_Y-GAP_END_AXIS, GAP_FIGURES_X + GAP_AXIS_TITLE);
             m_xAxis.paint(g2d);
         }
         
         if (m_yAxis != null) {
-            m_yAxis.setSize(0, GAP_END_AXIS, GAP_FIGURES_Y /*+GAP_TOP_AXIS*/, ((int)bounds.getHeight())-GAP_FIGURES_X-GAP_END_AXIS);
+            m_yAxis.setSize(0, GAP_END_AXIS, GAP_FIGURES_Y+GAP_AXIS_TITLE /*+GAP_TOP_AXIS*/, ((int)bounds.getHeight())-GAP_FIGURES_X-GAP_END_AXIS);
             m_yAxis.paint(g2d);
         }
         
@@ -58,7 +59,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             m_plot.paint(g2d);
         }
         
-        m_zoomRectangle.paint(g2d);
+        m_zoomGesture.paint(g2d);
         
     }
     
@@ -99,18 +100,18 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mousePressed(MouseEvent e) {
-        m_zoomRectangle.startZooming(e.getX(), e.getY());
+        m_zoomGesture.startZooming(e.getX(), e.getY());
         repaint();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        m_zoomRectangle.stopZooming(e.getX(), e.getY());
+        m_zoomGesture.stopZooming(e.getX(), e.getY());
         
-        int action = m_zoomRectangle.getAction();
+        int action = m_zoomGesture.getAction();
         if (action == ZoomGesture.ACTION_ZOOM) {
-            m_xAxis.setRange(m_xAxis.pixelToValue(m_zoomRectangle.getStartX()), m_xAxis.pixelToValue(m_zoomRectangle.getEndX()));
-            m_yAxis.setRange(m_yAxis.pixelToValue(m_zoomRectangle.getEndY()), m_yAxis.pixelToValue(m_zoomRectangle.getStartY()));
+            m_xAxis.setRange(m_xAxis.pixelToValue(m_zoomGesture.getStartX()), m_xAxis.pixelToValue(m_zoomGesture.getEndX()));
+            m_yAxis.setRange(m_yAxis.pixelToValue(m_zoomGesture.getEndY()), m_yAxis.pixelToValue(m_zoomGesture.getStartY()));
         } else if (action == ZoomGesture.ACTION_UNZOOM) {
             updateAxis(m_plot);
         }
@@ -125,7 +126,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        m_zoomRectangle.moveZooming(e.getX(), e.getY());
+        m_zoomGesture.moveZooming(e.getX(), e.getY());
 
         repaint();
     }

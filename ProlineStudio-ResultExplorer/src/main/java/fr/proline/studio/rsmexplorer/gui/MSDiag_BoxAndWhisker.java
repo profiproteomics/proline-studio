@@ -162,19 +162,7 @@ public class MSDiag_BoxAndWhisker  extends HourglassPanel implements  ImageExpor
 	    private void initComponents() {
 	        setLayout(new BorderLayout());
 	        ChartPanel cp = new ChartPanel(m_chart, true) {
-	            @Override
-	            public void restoreAutoBounds(){
-	            	
-	            	XYPlot plot=(XYPlot)getChart().getPlot();
-	                double domainStart = plot.getDomainAxis().getDefaultAutoRange().getLowerBound();
-	            	double domainEnd =  plot.getDomainAxis().getDefaultAutoRange().getUpperBound();
-	            	double rangeStart = plot.getRangeAxis().getDefaultAutoRange().getLowerBound();
-	            	double rangeEnd =  plot.getRangeAxis().getDefaultAutoRange().getUpperBound();
-	                plot.getDomainAxis().setAutoRange(false);
-	                plot.getDomainAxis().setRange(domainStart,domainEnd);
-	                plot.getRangeAxis().setRange(rangeStart,rangeEnd);
-	                
-	            }
+	           
 	        };
 	        
 	        

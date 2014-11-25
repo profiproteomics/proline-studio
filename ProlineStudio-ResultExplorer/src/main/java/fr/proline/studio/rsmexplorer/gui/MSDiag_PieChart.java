@@ -86,26 +86,14 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
     
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private static final long serialVersionUID = 1L;
-    private AbstractDataBox m_dataBox;
-    private static boolean redrawInProgress = false; // to ensure no circular loop in changeEven when triggered by zooming the graph... 
-    private double m_spectrumMinX = 0;
-    private double m_spectrumMaxX = 0;
-    private double m_spectrumMinY = 0;
-    private double m_spectrumMaxY = 0;
+
     private DefaultPieDataset m_dataSet;
     private JFreeChart m_chart;
     private File m_pngFile;
-    private DPeptideMatch m_previousPeptideMatch = null;
-    private boolean m_previousFragmentationSet = false;
+ 
     private javax.swing.JPanel m_pieChartPanel;
-    private JButton m_generateMatchButton;
-    
-    // menuItem ShowSpectrumTitle is created while creating the panel, to avoid having a multitude of menuItem in the popupMenu
-    private JMenuItem m_showSpectrumTitle;
-    private String m_spectrumTitle;
-
-	
-    
+ 
+     
     @Override // declared in ProlineStudioCommons ImageExporterInterface
     public void generateSvgImage(String file) {
         writeToSVG(file);
@@ -137,22 +125,7 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
 	            false
 	        );
         
-        
-  //      m_chart.setNotify(false); // stops events handler
-        //m_chart.removeLegend();
-//        m_chart.setBackgroundPaint(Color.white);
-//        TextTitle textTitle = m_chart.getTitle();
-//        textTitle.setFont(textTitle.getFont().deriveFont(Font.PLAIN, 10.0f));
-//        
-//        XYPlot plot = (XYPlot) m_chart.getPlot();
-//        plot.getRangeAxis().setUpperMargin(0.2);
-//
- //       plot.setBackgroundPaint(Color.white);
-//        
-//        XYStickRenderer renderer = new XYStickRenderer();
-//        renderer.setBaseStroke(new BasicStroke(1.0f));
-        
- //       plot.setRenderer(renderer);
+   
         
         initComponents();
         
@@ -186,24 +159,7 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
        
         m_pieChartPanel = cp;
         
-        // set temp initial data:
-       // m_dataSet.setValue("loading...", new Double(10));
-    	//m_dataSet.setValue("this should not stay for ever...", new Double(20));
-
-        // JFreePanel sub Menus
-        // creation of the menuItem Show Spectrum Title
-       // m_showSpectrumTitle = new JMenuItem("Show Spectrum Title");
-//        m_showSpectrumTitle.addActionListener(new ActionListener() {
-//
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), m_spectrumTitle, "Spectrum Title", 1);
-//            }
-//        });
-
-        // add to the popupMenu
-        //((ChartPanel) m_pieChartPanel).getPopupMenu().add(m_showSpectrumTitle);
-        
+      
         
         //
         JToolBar toolbar = initToolbar();
@@ -230,18 +186,9 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
     }
     
     public void setData(MSDiagOutput_AW msdo) {
-             
         
-   //     m_chart.setNotify(false);
         constructPieChart(msdo);
-        //m_spectrumAnnotations = new RsetPeptideSpectrumAnnotations(m_dataBox, m_dataSet, m_chart, peptideMatch, peptideFragmentationData);
-        
-        // set default auto bounds in case there is no annotations (which sets new autobounds)
-//        m_chart.getXYPlot().getRangeAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getRangeAxis().getLowerBound(),m_chart.getXYPlot().getRangeAxis().getUpperBound()));
-//        m_chart.getXYPlot().getDomainAxis().setDefaultAutoRange(new Range(m_chart.getXYPlot().getDomainAxis().getLowerBound(),m_chart.getXYPlot().getDomainAxis().getUpperBound()));
-       // m_spectrumAnnotations.addAnnotations();
-       // m_chart.setNotify(true);
-    }
+     }
     
     public void writeToPNG(String fileName) {
         m_pngFile = new File(fileName);
@@ -277,8 +224,7 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
     private void constructPieChart(MSDiagOutput_AW msdo) {
 
         // clear all data
-        //m_dataSet.removeSeries(SERIES_NAME);
-    	m_dataSet.clear();
+        m_dataSet.clear();
     	
  
         if (msdo == null) {
@@ -286,41 +232,17 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
         }
         
         
-       // m_dataSet.addSeries(SERIES_NAME, data);
-
-
         // Set title
         String title = msdo.description;
         m_chart.setTitle(title);
 
-        // set the spectrum title
-        //m_spectrumTitle = spectrum.getTitle();
-
-        
-        // reset X/Y zooming
-        // ((ChartPanel) m_spectrumPanel).restoreAutoBounds();
         m_chart.getPlot().setBackgroundPaint(Color.white);
         PieSectionLabelGenerator gen = new StandardPieSectionLabelGenerator(
                 "{0}: {1} ({2})", new DecimalFormat("0"), new DecimalFormat("0%"));
         ((PiePlot) m_chart.getPlot()).setLabelGenerator(gen);
             
         /// ---- start of plot listenener (for zoom changes for instance)
-       // final XYPlot plot = m_chart.getXYPlot();
-        //p.setRenderer(renderer);
-
-// may be used but commented for now:
-//    	plot.getDomainAxis().setAutoRange(true);
-//		plot.getRangeAxis().setAutoRange(true);	
-//		m_spectrumMinX = 0; //plot.getDomainAxis().getLowerBound();
-//		m_spectrumMaxX = precursorMass;
-//		 //plot.getDomainAxis().getUpperBound();
-//		m_spectrumMinY = 0;//plot.getRangeAxis().getLowerBound();
-//		m_spectrumMaxY =  plot.getRangeAxis().getUpperBound();
-//		plot.getDomainAxis().setRange(new Range(0,m_spectrumMaxX), false, true); 
-//		plot.getRangeAxis().setRange(new Range(0,m_spectrumMaxY), false, true);
-//		plot.getDomainAxis().setDefaultAutoRange(new Range(0,m_spectrumMaxX)); // set new default zoom for x axis
-//		plot.getRangeAxis().setDefaultAutoRange(new Range(0,m_spectrumMaxY)); //           "              y axis		
-        
+   
         if(msdo.matrix.length == 1) { // then there is some data
 	    	if(msdo.matrix[0].length == 2) { // then both data are present
 		        m_dataSet.setValue(msdo.column_names[0], (Double) Math.abs((double) msdo.matrix[0][0]));

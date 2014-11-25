@@ -175,7 +175,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         } else {
             if (m_mainPopup == null) {
                 // create the actions
-                m_mainActions = new ArrayList<>(13);  // <--- get in sync
+                m_mainActions = new ArrayList<>(14);  // <--- get in sync
                 
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(propertiesAction);
@@ -185,10 +185,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 DisplayXICProteinSetAction displayXICProteinSetAction = new DisplayXICProteinSetAction();
                 m_mainActions.add(displayXICProteinSetAction);
                 
-                /*
+                
                 DisplayXICPeptideSetAction displayXICPeptideSetAction = new DisplayXICPeptideSetAction();
                 m_mainActions.add(displayXICPeptideSetAction);
-                
+                /*
                 DisplayXICPeptideIonAction displayXICPeptideIonAction = new DisplayXICPeptideIonAction();
                 m_mainActions.add(displayXICPeptideIonAction);
                 */

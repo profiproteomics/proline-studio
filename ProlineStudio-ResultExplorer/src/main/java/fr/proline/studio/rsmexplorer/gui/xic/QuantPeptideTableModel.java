@@ -143,7 +143,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
         switch (col) {
             case COLTYPE_PEPTIDE_ID: {
-                return peptide.getId();
+                return peptide.getId() == -1?"":peptide.getId();
             }
             case COLTYPE_PEPTIDE_NAME: {
                 LazyData lazyData = getLazyData(row,col);
@@ -169,9 +169,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                         switch (id ) {
                             case COLTYPE_SELECTION_LEVEL : lazyData.setData(quantPeptide.getSelectionLevel());
                                      break;
-                            case COLTYPE_ABUNDANCE : lazyData.setData(quantPeptide.getAbundance());
+                            case COLTYPE_ABUNDANCE : lazyData.setData(quantPeptide.getAbundance().isNaN()?"":quantPeptide.getAbundance());
                                      break;
-                            case COLTYPE_RAW_ABUNDANCE : lazyData.setData(quantPeptide.getRawAbundance());
+                            case COLTYPE_RAW_ABUNDANCE : lazyData.setData(quantPeptide.getRawAbundance().isNaN()?"":quantPeptide.getRawAbundance());
                                      break;
                             case COLTYPE_PSM : lazyData.setData(quantPeptide.getPeptideMatchesCount());
                                      break;

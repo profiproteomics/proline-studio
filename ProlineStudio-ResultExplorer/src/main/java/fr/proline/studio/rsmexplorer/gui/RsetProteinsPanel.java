@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -45,7 +46,7 @@ import org.openide.windows.TopComponent;
  *
  * @author JM235353
  */
-public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInterface {
+public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
 
     private AbstractDataBox m_dataBox;
     private long m_peptideMatchCurId = -1;
@@ -299,6 +300,11 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
+    }
+    
+    @Override
+    public CompareDataInterface getCompareDataInterface() {
+        return (CompareDataInterface) m_proteinTable.getModel();
     }
 
     @Override

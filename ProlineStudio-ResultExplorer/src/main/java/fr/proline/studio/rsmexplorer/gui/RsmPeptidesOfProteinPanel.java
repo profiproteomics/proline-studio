@@ -9,6 +9,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
@@ -35,7 +36,7 @@ import javax.swing.event.ListSelectionEvent;
  * Panel for Peptides of a Protein 
  * @author JM235353
  */
-public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBoxPanelInterface {
+public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
 
     private AbstractDataBox m_dataBox;
     
@@ -175,6 +176,12 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     public AbstractDataBox getDataBox() {
         return m_dataBox;
     }
+    
+    @Override
+    public CompareDataInterface getCompareDataInterface() {
+        return (CompareDataInterface) m_peptidesTable.getModel();
+    }
+    
     
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {

@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchProteinSetsTask;
@@ -60,7 +61,7 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelInterface {
+public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -281,6 +282,11 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
+    }
+    
+    @Override
+    public CompareDataInterface getCompareDataInterface() {
+        return (CompareDataInterface) m_quantProteinSetTable.getModel();
     }
 
     @Override

@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.HourglassPanel;
@@ -35,7 +36,7 @@ import javax.swing.table.TableColumn;
  *
  * @author JM235353
  */
-public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface {
+public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
 
     private AbstractDataBox m_dataBox;
     private DProteinSet m_proteinSetCur = null;
@@ -241,6 +242,11 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
+    }
+    
+    @Override
+    public CompareDataInterface getCompareDataInterface() {
+        return (CompareDataInterface) m_proteinTable.getModel();
     }
     
     @Override

@@ -8,6 +8,7 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
@@ -47,7 +48,7 @@ import org.openide.windows.WindowManager;
  * Panel for Peptide Matches
  * @author JM235353
  */
-public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInterface {
+public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -85,6 +86,11 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
+    }
+    
+    @Override
+    public CompareDataInterface getCompareDataInterface() {
+        return (CompareDataInterface) m_peptideMatchTable.getModel();
     }
 
     public void setData(long taskId, DPeptideMatch[] peptideMatches, long[] peptideMatchesId, boolean finished) {

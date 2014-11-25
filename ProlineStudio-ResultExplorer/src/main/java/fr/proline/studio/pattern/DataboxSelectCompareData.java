@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.comparedata.DiffDataModel;
 import fr.proline.studio.rsmexplorer.gui.SelectComparePanel;
 
@@ -47,7 +48,7 @@ public class DataboxSelectCompareData extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((SelectComparePanel) m_panel).getResultDataInterface();
+                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }
 
         }

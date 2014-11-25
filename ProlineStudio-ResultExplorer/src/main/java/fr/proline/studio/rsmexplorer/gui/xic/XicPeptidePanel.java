@@ -2,6 +2,8 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
@@ -52,7 +54,7 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInterface {
+public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -257,6 +259,11 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
+    }
+    
+    @Override
+    public CompareDataInterface getCompareDataInterface() {
+        return (CompareDataInterface) m_quantPeptideTable.getModel();
     }
 
     @Override

@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
@@ -41,7 +42,7 @@ import org.openide.windows.TopComponent;
  *
  * @author JM235353
  */
-public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInterface {
+public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
 
     private AbstractDataBox m_dataBox;
     private PeptideInstanceTable m_peptideInstanceTable;
@@ -240,6 +241,11 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     @Override
     public AbstractDataBox getDataBox() {
         return m_dataBox;
+    }
+    
+    @Override
+    public CompareDataInterface getCompareDataInterface() {
+        return (CompareDataInterface) m_peptideInstanceTable.getModel();
     }
 
     @Override

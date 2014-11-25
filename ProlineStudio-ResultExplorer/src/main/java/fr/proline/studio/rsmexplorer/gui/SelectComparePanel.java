@@ -8,6 +8,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.comparedata.JoinDataModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -27,7 +28,7 @@ import javax.swing.JToolBar;
  *
  * @author JM235353
  */
-public class SelectComparePanel extends JPanel implements DataBoxPanelInterface {
+public class SelectComparePanel extends JPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -187,7 +188,8 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface 
         
     }
            
-    public CompareDataInterface getResultDataInterface() {
+    @Override
+    public CompareDataInterface getCompareDataInterface() {
         return m_result;
     }
 

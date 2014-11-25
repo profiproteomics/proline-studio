@@ -115,6 +115,7 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface 
         return m_dataBox;
     }
     
+    
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getRemoveAction(splittedPanel);

@@ -4,7 +4,9 @@ import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseSearchMasterQuantPeptideIonTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
@@ -143,7 +145,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
 
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
-        //toolbar.add(m_searchToggleButton);
+        toolbar.add(m_searchToggleButton);
         
         m_filterButton = new FilterButton(((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()));
 
@@ -610,15 +612,15 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
 
         String previousSearch = "";
         int searchIndex = 0;
-        ArrayList<Long> peptideIonIds = new ArrayList<>();
+        ArrayList<Long> peptideIonsIds = new ArrayList<>();
 
         @Override
         public void reinitSearch() {
-            if (peptideIonIds.isEmpty()) {
+            if (peptideIonsIds.isEmpty()) {
                 return;
             }
             searchIndex = -1;
-            ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).sortAccordingToModel(peptideIonIds);
+            ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).sortAccordingToModel(peptideIonsIds);
         }
 
         @Override
@@ -631,7 +633,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                 while (true) {
                     // search already done, display next result
                     searchIndex++;
-                    if (searchIndex >= peptideIonIds.size()) {
+                    if (searchIndex >= peptideIonsIds.size()) {
                         searchIndex = 0;
                     }
 
@@ -639,8 +641,8 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                         break;
                     }
                     
-                    if (!peptideIonIds.isEmpty()) {
-                        boolean found = ((QuantPeptideIonTable) m_quantPeptideIonTable).selectPeptideIon(peptideIonIds.get(searchIndex), searchText);
+                    if (!peptideIonsIds.isEmpty()) {
+                        boolean found = ((QuantPeptideIonTable) m_quantPeptideIonTable).selectPeptideIon(peptideIonsIds.get(searchIndex), searchText);
                         if (found) {
                             break;
                         }
@@ -670,16 +672,16 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                         // contruct the Map of proteinSetId
 
 
-                        if (!peptideIonIds.isEmpty()) {
+                        if (!peptideIonsIds.isEmpty()) {
 
-                            ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).sortAccordingToModel(peptideIonIds);
+                            ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).sortAccordingToModel(peptideIonsIds);
 
                             
                              int checkLoopIndex = -1;
                              while (true) {
                                 // search already done, display next result
                                 searchIndex++;
-                                if (searchIndex >= peptideIonIds.size()) {
+                                if (searchIndex >= peptideIonsIds.size()) {
                                     searchIndex = 0;
                                 }
 
@@ -687,8 +689,8 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                                     break;
                                 }
 
-                                if (!peptideIonIds.isEmpty()) {
-                                    boolean found = ((QuantPeptideIonTable) m_quantPeptideIonTable).selectPeptideIon(peptideIonIds.get(searchIndex), searchText);
+                                if (!peptideIonsIds.isEmpty()) {
+                                    boolean found = ((QuantPeptideIonTable) m_quantPeptideIonTable).selectPeptideIon(peptideIonsIds.get(searchIndex), searchText);
                                     if (found) {
                                         break;
                                     }
@@ -711,7 +713,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                 Long rsmId = ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).getResultSummaryId();
 
                 // Load data if needed asynchronously
-                //AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, m_dataBox.getProjectId(), rsmId, searchText, peptideInstanceIds));
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchMasterQuantPeptideIonTask(callback, m_dataBox.getProjectId(), rsmId, searchText, peptideIonsIds));
 
                 m_searchPanel.enableSearch(false);
 

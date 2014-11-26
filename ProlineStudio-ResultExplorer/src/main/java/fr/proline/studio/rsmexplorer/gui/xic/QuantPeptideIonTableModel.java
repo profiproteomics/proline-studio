@@ -272,12 +272,12 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         return m_quantPeptideIons.get(i);
     }
 
-    public int findRow(long peptideIonId) {
+    public int findRow(long peptideId) {
 
         if (m_filteredIds != null) {
             int nb = m_filteredIds.size();
             for (int i = 0; i < nb; i++) {
-                if (peptideIonId == m_quantPeptideIons.get(m_filteredIds.get(i)).getId()) {
+                if (peptideId == m_quantPeptideIons.get(m_filteredIds.get(i)).getId()) {
                     return i;
                 }
             }
@@ -286,7 +286,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
 
         int nb = m_quantPeptideIons.size();
         for (int i = 0; i < nb; i++) {
-            if (peptideIonId == m_quantPeptideIons.get(i).getId()) {
+            if (peptideId == m_quantPeptideIons.get(i).getId()) {
                 return i;
             }
         }

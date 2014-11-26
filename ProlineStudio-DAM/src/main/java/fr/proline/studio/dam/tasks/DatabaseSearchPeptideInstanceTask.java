@@ -1,6 +1,5 @@
 package fr.proline.studio.dam.tasks;
 
-import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;

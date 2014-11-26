@@ -90,13 +90,14 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars
 	        renderer.setShadowVisible(false);
 
-	        renderer.setSeriesPaint(0, new Color(255,60,60));
-	        renderer.setSeriesPaint(1, new Color(255,60,255));
-	        renderer.setSeriesPaint(2, new Color(60,60,255));
-	        renderer.setSeriesPaint(3, new Color(60,255,60));
-	        renderer.setSeriesPaint(4, new Color(60,255,255));
-	        renderer.setSeriesPaint(5, new Color(150,20,50));
-	        renderer.setSeriesPaint(6, new Color(20,150,50));
+	        renderer.setSeriesPaint(0, new Color(254,60,60));
+	        renderer.setSeriesPaint(1, new Color(176,190,255));
+	        renderer.setSeriesPaint(2, new Color(132,153,255));
+	        renderer.setSeriesPaint(3, new Color(91,120,255));
+	        renderer.setSeriesPaint(4, new Color(64,98,255));
+	        renderer.setSeriesPaint(5, new Color(32,71,255));
+	        renderer.setSeriesPaint(6, new Color(1,191,220));
+	        renderer.setSeriesPaint(7, new Color(126,84,214));
 
 	        
 	        m_subplot = new CategoryPlot(m_dataSet, null, rangeAxis, renderer);
@@ -105,7 +106,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        final CategoryAxis domainAxis = new CategoryAxis("");
 	        
 	        domainAxis.setCategoryLabelPositions(
-	            CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 4.0)
+	            CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 2.0)
 	        );
 	        final CombinedDomainCategoryPlot plot = new CombinedDomainCategoryPlot(domainAxis);
 	        

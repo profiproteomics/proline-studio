@@ -5,6 +5,8 @@ import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.filter.Filter;
+import fr.proline.studio.filter.DoubleFilter;
+import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -28,6 +30,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
     public static final int COLTYPE_PEPTIDE_ION_MOZ = 3;
     public static final int COLTYPE_PEPTIDE_ION_ELUTION_TIME = 4;
     private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Charge", "MoZ", "<html>Elution<br/>time (s)</html>"};
+    private static final String[] m_columnNamesForFilter = {"Id", "Peptide Sequence", "Charge", "MoZ", "Elution time"};
     private static final String[] m_toolTipColumns = {"MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Charge", "Mass to Charge Ratio", "Elution time"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
@@ -78,6 +81,18 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
 
             sb.append("</html>");
             return sb.toString();
+        } else {
+            return ""; // should not happen
+        }
+    }
+    
+    public String getColumnNameForFilter(int col) {
+        if (col <= COLTYPE_PEPTIDE_ION_ELUTION_TIME) {
+            return m_columnNamesForFilter[col];
+        } else if (m_quantChannels != null) {
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+            int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+            return m_columnNamesQC[id];
         } else {
             return ""; // should not happen
         }
@@ -369,19 +384,15 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             case COLTYPE_PEPTIDE_ION_NAME: {
                 return ((StringFilter) filter).filter((String) data);
             }
-            /*case COLTYPE_PROTEIN_SET_DESCRIPTION: {
-             return ((StringFilter) filter).filter((String)data);
-             }
-             case COLTYPE_PROTEIN_SCORE: {
-             return ((DoubleFilter) filter).filter((Float)data);
-             }
-             case COLTYPE_PROTEINS_COUNT:
-             case COLTYPE_PEPTIDES_COUNT:
-             case COLTYPE_SPECTRAL_COUNT:
-             case COLTYPE_UNIQUE_SEQUENCES_COUNT:
-             case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
-             return ((IntegerFilter) filter).filter((Integer)data);
-             }*/ //JPM.TODO
+            case COLTYPE_PEPTIDE_ION_CHARGE: {
+                return ((IntegerFilter) filter).filter((Integer) data);
+            }
+            case COLTYPE_PEPTIDE_ION_MOZ: {
+                return ((DoubleFilter) filter).filter((Double) data);
+            }
+            case COLTYPE_PEPTIDE_ION_ELUTION_TIME: {
+                return ((DoubleFilter) filter).filter((Float) data);
+            }
 
         }
 
@@ -394,14 +405,10 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
             m_filters[COLTYPE_PEPTIDE_ION_ID] = null;
-            m_filters[COLTYPE_PEPTIDE_ION_NAME] = new StringFilter(getColumnName(COLTYPE_PEPTIDE_ION_NAME));
-            /*m_filters[COLTYPE_PROTEIN_SET_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_DESCRIPTION));
-             m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
-             m_filters[COLTYPE_PROTEINS_COUNT] = null;
-             m_filters[COLTYPE_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT));
-             m_filters[COLTYPE_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECTRAL_COUNT));
-             m_filters[COLTYPE_SPECIFIC_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECIFIC_SPECTRAL_COUNT));
-             m_filters[COLTYPE_UNIQUE_SEQUENCES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_UNIQUE_SEQUENCES_COUNT));   */
+            m_filters[COLTYPE_PEPTIDE_ION_NAME] = new StringFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME));
+            m_filters[COLTYPE_PEPTIDE_ION_CHARGE] = new IntegerFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_CHARGE));
+            m_filters[COLTYPE_PEPTIDE_ION_MOZ] = new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_MOZ));
+            m_filters[COLTYPE_PEPTIDE_ION_ELUTION_TIME] = new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_ELUTION_TIME));
         }
     }
 

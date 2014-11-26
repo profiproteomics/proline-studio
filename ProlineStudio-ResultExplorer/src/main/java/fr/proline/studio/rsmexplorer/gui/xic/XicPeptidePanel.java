@@ -4,7 +4,9 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
@@ -143,7 +145,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
-        //toolbar.add(m_searchToggleButton);
+        toolbar.add(m_searchToggleButton);
         
         m_filterButton = new FilterButton(((QuantPeptideTableModel) m_quantPeptideTable.getModel()));
 
@@ -711,7 +713,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                 Long rsmId = ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).getResultSummaryId();
 
                 // Load data if needed asynchronously
-                //AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, m_dataBox.getProjectId(), rsmId, searchText, peptideInstanceIds));
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, m_dataBox.getProjectId(), rsmId, searchText, peptideInstanceIds));
 
                 m_searchPanel.enableSearch(false);
 

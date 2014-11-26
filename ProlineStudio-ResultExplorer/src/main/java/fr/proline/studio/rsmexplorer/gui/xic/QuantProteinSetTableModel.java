@@ -298,8 +298,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             int iModel = m_table.convertRowIndexToModel(iView);
             // Retrieve Protein Set
             DMasterQuantProteinSet ps = getQuantProteinSet(iModel);
-            if (  proteinSetIdMap.contains(ps.getId())  ) {
-                proteinSetIds.set(iCur++,ps.getId());
+            if (  proteinSetIdMap.contains(ps.getProteinSetId())  ) {
+                proteinSetIds.set(iCur++,ps.getProteinSetId());
             }
         }
         

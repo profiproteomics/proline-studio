@@ -239,7 +239,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         if (m_filteredIds != null) {
             int nb = m_filteredIds.size();
             for (int i = 0; i < nb; i++) {
-                if (peptideId == m_quantPeptides.get(m_filteredIds.get(i)).getId()) {
+                if (peptideId == m_quantPeptides.get(m_filteredIds.get(i)).getPeptideInstanceId()) {
                     return i;
                 }
             }
@@ -248,7 +248,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
         int nb = m_quantPeptides.size();
         for (int i = 0; i < nb; i++) {
-            if (peptideId == m_quantPeptides.get(i).getId()) {
+            if (peptideId == m_quantPeptides.get(i).getPeptideInstanceId()) {
                 return i;
             }
         }
@@ -272,8 +272,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             int iModel = m_table.convertRowIndexToModel(iView);
             // Retrieve Peptide
             DMasterQuantPeptide p = getPeptide(iModel);
-            if (peptideIdMap.contains(p.getId())) {
-                peptideIds.set(iCur++, p.getId());
+            if (peptideIdMap.contains(p.getPeptideInstanceId())) {
+                peptideIds.set(iCur++, p.getPeptideInstanceId());
             }
         }
 

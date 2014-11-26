@@ -17,14 +17,14 @@ import javax.persistence.TypedQuery;
 public class DatabaseSearchPeptideInstanceTask extends AbstractDatabaseTask {
    
     private long m_projectId = -1;
-    private ResultSummary m_rsm = null;
+    private Long m_rsmId = null;
     private String        m_searchString = null;
     private ArrayList<Long>     m_searchResult = null;
     
-    public DatabaseSearchPeptideInstanceTask(AbstractDatabaseCallback callback, long projectId, ResultSummary rsm, String searchString, ArrayList<Long> searchResult) {
+    public DatabaseSearchPeptideInstanceTask(AbstractDatabaseCallback callback, long projectId, Long rsmId, String searchString, ArrayList<Long> searchResult) {
         super(callback, Priority.HIGH_1, new TaskInfo("Search Peptide Instance "+searchString, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
-        m_rsm = rsm;       
+        m_rsmId = rsmId;       
         m_searchString = searchString;
         m_searchResult = searchResult;
     }
@@ -39,7 +39,7 @@ public class DatabaseSearchPeptideInstanceTask extends AbstractDatabaseTask {
             TypedQuery<Long> searchQuery = entityManagerMSI.createQuery("SELECT pi.id FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideMatch pm, fr.proline.core.orm.msi.Peptide p WHERE pi.resultSummary.id=:rsmId AND pi.bestPeptideMatchId=pm.id AND pm.peptideId=p.id AND p.sequence LIKE :search ORDER BY pm.score DESC", Long.class);
             String searchStringSql = m_searchString.replaceAll("\\*", "%").replaceAll("\\?","_");
             searchQuery.setParameter("search", searchStringSql);
-            searchQuery.setParameter("rsmId", m_rsm.getId());
+            searchQuery.setParameter("rsmId", m_rsmId);
             List<Long> peptideInstanceIdList = searchQuery.getResultList();
 
             m_searchResult.clear();

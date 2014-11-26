@@ -670,6 +670,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 masterQuantPeptide = masterQuantPeptideQuery.getSingleResult();
                 if (masterQuantPeptide != null) {
                     masterQuantPeptide.setPeptideInstance(peptideInstance);
+                    masterQuantPeptide.setPeptideInstanceId(peptideInstance.getId());
                     // list of quantPeptide
                     String quantPeptideData = ""; //ObjectTree.clobData
                     ObjectTree ot = entityManagerMSI.find(ObjectTree.class, masterQuantPeptide.getObjectTreeId()); // get the objectTree from id.
@@ -692,6 +693,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 // no master quantPeptide: build a fake masterQuantPeptide to display the peptideInstance
                 masterQuantPeptide = new DMasterQuantPeptide(-1, 0, -1, null, peptideInstance.getResultSummary().getId());
                 masterQuantPeptide.setPeptideInstance(peptideInstance);
+                masterQuantPeptide.setPeptideInstanceId(peptideInstance.getId());
                 // update the list 
                 m_masterQuantPeptideList.set(index, masterQuantPeptide);
             }catch (NonUniqueResultException e2) {

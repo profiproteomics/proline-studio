@@ -570,7 +570,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
                 ResultSummary rsm = ((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()).getResultSummary();
 
                 // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, m_dataBox.getProjectId(), rsm, searchText, peptideInstanceIds));
+                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, m_dataBox.getProjectId(), rsm.getId(), searchText, peptideInstanceIds));
 
                 m_searchPanel.enableSearch(false);
 

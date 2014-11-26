@@ -395,6 +395,10 @@ public class PropertiesAction extends AbstractRSMAction {
         prop.setName("Result File Name");
         propGroup.put(prop);
         
+        prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getRawFilePath", null);
+        prop.setName("Raw File Path");
+        propGroup.put(prop);
+        
         /*prop = new PropertySupport.Reflection<>(quantChannel, String.class, "getSerializedProperties", null);
         prop.setName("Serialized Properties");
         propGroup.put(prop); */

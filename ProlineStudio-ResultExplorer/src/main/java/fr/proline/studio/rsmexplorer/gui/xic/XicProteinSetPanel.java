@@ -22,6 +22,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayIdentificationProteinSetsAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
@@ -313,6 +314,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             super(m_proteinSetScrollPane.getVerticalScrollBar() );
             
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
+            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             
             addMouseListener(new TablePopupMouseAdapter(this));
             

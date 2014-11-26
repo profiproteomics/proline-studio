@@ -25,7 +25,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_NAME = 1;
-    private static final String[] m_columnNames = {"Id", "Peptide"};
+    private static final String[] m_columnNames = {"Id", "Peptide Sequence"};
+    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Identified Peptide Sequence"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_ABUNDANCE = 1;
@@ -70,6 +71,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             sb.append(m_columnNamesQC[id]);
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append("<br/>");
+            sb.append(m_quantChannels[nbQc].getRawFileName());
 
             sb.append("</html>");
             return sb.toString();
@@ -81,7 +84,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     @Override
     public String getToolTipForHeader(int col) {
         if (col <= COLTYPE_PEPTIDE_NAME) {
-            return m_columnNames[col];
+            return m_toolTipColumns[col];
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
@@ -92,6 +95,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             sb.append(m_toolTipQC[id]);
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append("<br/>");
+            sb.append(m_quantChannels[nbQc].getRawFilePath());
+            
 
             sb.append("</html>");
             return sb.toString();
@@ -394,6 +400,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         String rsmHtmlColor = CyclicColorPalette.getHTMLColor(i);
         sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
         sb.append(m_quantChannels[i].getResultFileName());
+        sb.append("<br/>");
+        sb.append(m_quantChannels[i].getRawFileName());
         sb.append("</html>");
 
         return sb.toString();

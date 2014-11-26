@@ -16,6 +16,7 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
@@ -210,15 +211,15 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  MasterQuantPeptideIon[] peptideIons, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<MasterQuantPeptideIon> peptideIons, boolean finished) {
         m_quantChannels = quantChannels;
         
         ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).setData(taskId, quantChannels, peptideIons);
 
         // select the first row
-        if ((peptideIons != null) && (peptideIons.length > 0)) {
+        if ((peptideIons != null) && (peptideIons.size() > 0)) {
             m_quantPeptideIonTable.getSelectionModel().setSelectionInterval(0, 0);
-            m_markerContainerPanel.setMaxLineNumber(peptideIons.length);
+            m_markerContainerPanel.setMaxLineNumber(peptideIons.size());
         }
 
         if (finished) {
@@ -237,6 +238,18 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantPeptideIonTable.dataUpdated(subTask, finished);
+        if (finished) {
+            // hide the rawAbundance  and selectionLevel columns
+            List<Integer> listIdsToHide = ((QuantPeptideIonTableModel)m_quantPeptideIonTable.getModel()).getDefaultColumnsToHide();
+            for (Integer id : listIdsToHide) {
+                m_quantPeptideIonTable.getColumnExt(id.intValue()).setVisible(false);
+            }
+            // hide the id column
+            m_quantPeptideIonTable.getColumnExt(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID).setVisible(false);
+            // allow to change column visibility
+            m_columnVisibilityButton.setEnabled(true);
+            m_quantPeptideIonTable.setSortable(true);
+        }
     }
     
     
@@ -282,7 +295,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
             super(m_peptideIonScrollPane.getVerticalScrollBar() );
             
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
-           
+            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             
             addMouseListener(new TablePopupMouseAdapter(this));
             
@@ -568,7 +581,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
             QuantPeptideIonTableModel model = ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel());
             
             List<TableColumn> columns = m_quantPeptideIonTable.getColumns(true);
-            for (int i=QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_NAME+1;i<columns.size();i++) {
+            for (int i=QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ELUTION_TIME+1;i<columns.size();i++) {
                 int rsmCur = model.getQCNumber(i);
                 int type = model.getTypeNumber(i);
                 boolean visible = m_rsmList.isVisible(rsmCur) && m_xicList.isVisible(type);

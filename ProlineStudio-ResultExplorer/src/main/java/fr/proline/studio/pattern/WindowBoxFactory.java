@@ -184,10 +184,10 @@ public class WindowBoxFactory {
     public static WindowBox getXicQuantProteinSetWindowBox(String name) {
 
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        AbstractDataBox[] boxes = new AbstractDataBox[3];
         boxes[0] = new DataboxXicProteinSet();
         boxes[1] = new DataboxXicPeptideSet();
-        //boxes[2] = new DataboxXicPeptideIon();
+        boxes[2] = new DataboxXicPeptideIon();
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
@@ -196,9 +196,9 @@ public class WindowBoxFactory {
     public static WindowBox getXicQuantPeptideSetWindowBox(String name) {
 
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataboxXicPeptideSet();
-        //boxes[1] = new DataboxXicPeptideIon();
+        boxes[1] = new DataboxXicPeptideIon();
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));

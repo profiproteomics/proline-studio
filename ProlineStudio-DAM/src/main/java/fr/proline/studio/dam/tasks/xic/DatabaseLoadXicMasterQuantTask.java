@@ -128,7 +128,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     
     public void initLoadPeptideIons(long projectId, DDataset dataset,  DMasterQuantPeptide masterQuantPeptide ,  List<MasterQuantPeptideIon> masterQuantPeptideIonList ) {
         String peptideName = "";
-        if (masterQuantPeptide != null) {
+        if (masterQuantPeptide != null && masterQuantPeptide.getPeptideInstance() != null && masterQuantPeptide.getPeptideInstance().getBestPeptideMatch() != null && masterQuantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide() != null  ) {
             peptideName =masterQuantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide().getSequence();
         }
         init(SUB_TASK_COUNT_PEPTIDE_ION, new TaskInfo("Load Peptides Ions of peptide " + peptideName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
@@ -278,14 +278,19 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     List<DQuantitationChannel> listDQuantChannels = new ArrayList();
                     for (QuantitationChannel qc : listQuantitationChannels) {
                         DQuantitationChannel dqc = new DQuantitationChannel(qc);
-                        // search resultFileName
+                        // search resultFileName and raw path
                         String resultFileName = "";
-                        String queryMsi = "SELECT msi.resultFileName FROM MsiSearch msi, ResultSet rs, ResultSummary rsm "
-                                + " WHERE rsm.id=:rsmId AND rsm.resultSet.id = rs.id AND rs.msiSearch.id = msi.id ";
+                        String rawPath = "";
+                        String queryMsi = "SELECT msi.resultFileName, pl.path "
+                                + "FROM MsiSearch msi, Peaklist pl, ResultSet rs, ResultSummary rsm "
+                                + " WHERE rsm.id=:rsmId AND rsm.resultSet.id = rs.id AND rs.msiSearch.id = msi.id "
+                                + "AND msi.peaklist.id = pl.id ";
                         Query qMsi = entityManagerMSI.createQuery(queryMsi);
                         qMsi.setParameter("rsmId", qc.getIdentResultSummaryId());
                         try {
-                            resultFileName = (String) qMsi.getSingleResult();
+                            Object[] res = (Object[])qMsi.getSingleResult();
+                            resultFileName = (String)res[0];
+                            rawPath = (String)res[1];
                             if (resultFileName != null && resultFileName.contains(".")) {
                                 resultFileName = resultFileName.substring(0, resultFileName.indexOf('.'));
                             }
@@ -293,6 +298,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
                         }
                         dqc.setResultFileName(resultFileName);
+                        dqc.setRawFilePath(rawPath);
                         listDQuantChannels.add(dqc);
                     }
                     DMasterQuantitationChannel dMaster = new DMasterQuantitationChannel(masterQuantitationChannel.getId(), masterQuantitationChannel.getName(),
@@ -929,8 +935,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             mqpi.setId(m_masterQuantPeptideIonId);
                             m_masterQuantPeptideIonList.add(mqpi) ;
                         }
-                        
-                        fetchPeptideIonData(entityManagerMSI, m_masterQuantPeptideIonIds);
+                        if (!m_masterQuantPeptideIonIds.isEmpty()) {
+                            fetchPeptideIonData(entityManagerMSI, m_masterQuantPeptideIonIds);
+                        }
                         
                     }// end resultSummaryId null
 
@@ -974,7 +981,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         
         Query queryMasterIons = entityManagerMSI.createQuery(queryMasterPeptideIons);
         queryMasterIons.setParameter("listId", listMasterPeptideIonsIds);
-        List<Object[]> resultListIons = queryMasterIons.getResultList(); 
+        List<Object[]> resultListIons = new ArrayList();
+        if (listMasterPeptideIonsIds != null && !listMasterPeptideIonsIds.isEmpty()) {
+            resultListIons = queryMasterIons.getResultList();
+        } 
         for (Object[] resCur : resultListIons) {
             int i = 0;
             PeptideInstance pi = (PeptideInstance) resCur[i++];
@@ -1008,6 +1018,41 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             m_masterQuantPeptideIonList.set(index, mQuantPeptideIon);
         } // end for
         
+        String queryPeptideIonWithoutPeptide = "SELECT mqpi "
+                + "FROM  fr.proline.core.orm.msi.MasterQuantPeptideIon mqpi " 
+                + "WHERE mqpi.id IN (:listId) AND mqpi.peptideInstance is NULL  "
+                + "ORDER BY mqpi.id ASC";
+        TypedQuery<MasterQuantPeptideIon> queryMasterIons2 = entityManagerMSI.createQuery(queryPeptideIonWithoutPeptide, MasterQuantPeptideIon.class);
+        queryMasterIons2.setParameter("listId", listMasterPeptideIonsIds);
+        List<MasterQuantPeptideIon> resultListIons2 = new ArrayList();
+        if (listMasterPeptideIonsIds != null && !listMasterPeptideIonsIds.isEmpty()) {
+            resultListIons2 = queryMasterIons2.getResultList();
+        } 
+        for (MasterQuantPeptideIon mQuantPeptideIon : resultListIons2) {
+            
+            // load QuantPeptideIon
+            String quantPeptideIonData = ""; //ObjectTree.clobData
+            ObjectTree oti = entityManagerMSI.find(ObjectTree.class, mQuantPeptideIon.getMasterQuantComponent().getObjectTreeId()); // get the objectTree from id.
+            if (oti != null) {
+                quantPeptideIonData = oti.getClobData();
+            }
+
+            Map<Long, DQuantPeptideIon> quantPeptideIonByQchIds = null;
+            if (quantPeptideIonData != null && !quantPeptideIonData.isEmpty()) {
+                quantPeptideIonByQchIds = mQuantPeptideIon.parseQuantPeptideIonFromProperties(quantPeptideIonData);
+            }
+            mQuantPeptideIon.setQuantPeptideIonByQchIds(quantPeptideIonByQchIds);
+
+            // update the list
+            int index = -1;
+            for(int k=0; k<nbM; k++) {
+                if (m_masterQuantPeptideIonList.get(k).getId() == mQuantPeptideIon.getId()) {
+                    index = k;
+                    break;
+                }
+            }
+            m_masterQuantPeptideIonList.set(index, mQuantPeptideIon);
+        } // end for
         return true;
     }
 

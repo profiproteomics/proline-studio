@@ -734,18 +734,25 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     List<DQuantitationChannel> listDQuantChannels = new ArrayList();
                     for (QuantitationChannel qc : listQuantitationChannels) {
                         DQuantitationChannel dqc = new DQuantitationChannel(qc);
-                        // search resultFileName
+                        // search resultFileName  and raw path
                         String resultFileName = "";
-                        String queryMsi = "SELECT msi.resultFileName FROM MsiSearch msi, ResultSet rs, ResultSummary rsm "
-                                + " WHERE rsm.id=:rsmId AND rsm.resultSet.id = rs.id AND rs.msiSearch.id = msi.id ";
+                        String rawPath = "";
+                         String queryMsi = "SELECT msi.resultFileName, pl.path "
+                                + "FROM MsiSearch msi, Peaklist pl, ResultSet rs, ResultSummary rsm "
+                                + " WHERE rsm.id=:rsmId AND rsm.resultSet.id = rs.id AND rs.msiSearch.id = msi.id "
+                                + "AND msi.peaklist.id = pl.id ";
                         Query qMsi = entityManagerMSI.createQuery(queryMsi);
                         qMsi.setParameter("rsmId", qc.getIdentResultSummaryId());
                         try{
-                            resultFileName = (String)qMsi.getSingleResult();
+                            Object[] res = (Object[])qMsi.getSingleResult();
+                            resultFileName = (String)res[0];
+                            rawPath = (String)res[1];
                         }catch(NoResultException | NonUniqueResultException e){
                             
                         }
                         dqc.setResultFileName(resultFileName);
+                        dqc.setRawFilePath(rawPath);
+                        
                         listDQuantChannels.add(dqc);
                     }
                     DMasterQuantitationChannel dMaster = new DMasterQuantitationChannel(masterQuantitationChannel.getId(), masterQuantitationChannel.getName(), 

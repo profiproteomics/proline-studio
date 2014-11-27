@@ -69,7 +69,9 @@ public class StringFilter extends Filter {
     }
 
     private static String escapeRegex(String s) {
-
+        if (s == null) {
+            return "";
+        }
         int len = s.length();
         if (len == 0) {
             return "";

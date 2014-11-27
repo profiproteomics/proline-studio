@@ -43,7 +43,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements Compare
     //public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
     public static final int COLTYPE_PEPTIDE_PTM = 10;
     private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Calc. Mass", "Exp. MoZ", "Ppm" /*"Delta MoZ"*/, "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
-    private static final String[] m_columnTooltips = {"PeptideMatch Id","Peptide", "Score", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" /*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Protein Set Count", "Retention Time", "Post Translational Modifications"};
+    private static final String[] m_columnTooltips = {"Peptide Id","Peptide", "Score", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" /*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Protein Set Count", "Retention Time", "Post Translational Modifications"};
     private PeptideInstance[] m_peptideInstances = null;
 
     private ArrayList<Integer> m_filteredIds = null;
@@ -155,7 +155,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements Compare
 
         switch (col) {
             case COLTYPE_PEPTIDE_ID:
-                return peptideMatch.getId();
+                return peptideInstance.getPeptide().getId();
             case COLTYPE_PEPTIDE_NAME: {
                 
                 LazyData lazyData = getLazyData(row,col);
@@ -549,7 +549,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements Compare
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = {COLTYPE_PEPTIDE_NAME, COLTYPE_PEPTIDE_ID };
+        int[] keys = {COLTYPE_PEPTIDE_ID, COLTYPE_PEPTIDE_NAME };
         return keys;
     }
 

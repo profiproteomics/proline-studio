@@ -13,16 +13,13 @@ import org.apache.batik.svggen.SVGGraphics2DIOException;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.labels.StandardCategoryToolTipGenerator;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.CombinedDomainCategoryPlot;
-import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.chart.renderer.category.StackedBarRenderer3D;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StackedXYBarRenderer;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.title.TextTitle;
-import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.DefaultTableXYDataset;
+import org.jfree.data.xy.XYSeries;
 import org.slf4j.LoggerFactory;
 
 
@@ -34,10 +31,18 @@ import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
 
 
+
+
+
+
 import org.slf4j.Logger;
 
 	/**
 	 * Panel used to display MSDiag Chromatogram
+	 * it requires data with 1st column: retention time or other numeric value (for x axis)
+	 * data from 2nd column are the y values.
+	 * series names are column titles.
+	 * they are stacked as a XYStackedChart.
 	 *
 	 * @author AW
 	 */
@@ -48,17 +53,12 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    
 	    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 	    private static final long serialVersionUID = 1L;
-	    private DefaultCategoryDataset m_dataSet;
+	    private DefaultTableXYDataset m_dataSet;
 	    private JFreeChart m_chart;
 	    private File m_pngFile;
 	    private javax.swing.JPanel m_chromatogragmPanel;
 	    
-	    
-	   
-		private CategoryPlot m_subplot; // the plot that holds the range values data
-
-		
-	    
+	   	    
 	    @Override // declared in ProlineStudioCommons ImageExporterInterface
 	    public void generateSvgImage(String file) {
 	        writeToSVG(file);
@@ -80,16 +80,16 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	     */
 	    public MSDiag_Chromatogram() {
 	        
-	    	m_dataSet = new DefaultCategoryDataset();
+	    	m_dataSet = new DefaultTableXYDataset();
 	    	
-	    	final NumberAxis rangeAxis = new NumberAxis("");
-	        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
-	        final BarRenderer renderer = new StackedBarRenderer3D();
-	        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator());
-	        renderer.setDrawBarOutline(false);
-	        renderer.setBaseToolTipGenerator(new StandardCategoryToolTipGenerator()); // info bulles on bars
-	        renderer.setShadowVisible(false);
 
+	    	 NumberAxis numberaxis = new NumberAxis("X");   
+	         numberaxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());   
+	         NumberAxis numberaxis1 = new NumberAxis("Y");   
+	         StackedXYBarRenderer renderer = new StackedXYBarRenderer (0);    // put space between bars in parameter.0,...
+	         renderer.setDrawBarOutline(false);  
+	        renderer.setBarPainter(new StandardXYBarPainter());
+	         
 	        renderer.setSeriesPaint(0, new Color(254,60,60));
 	        renderer.setSeriesPaint(1, new Color(176,190,255));
 	        renderer.setSeriesPaint(2, new Color(132,153,255));
@@ -99,27 +99,18 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        renderer.setSeriesPaint(6, new Color(1,191,220));
 	        renderer.setSeriesPaint(7, new Color(126,84,214));
 
-	        
-	        m_subplot = new CategoryPlot(m_dataSet, null, rangeAxis, renderer);
-	        m_subplot.setDomainGridlinesVisible(true);
-
-	        final CategoryAxis domainAxis = new CategoryAxis("");
-	        
-	        domainAxis.setCategoryLabelPositions(
-	            CategoryLabelPositions.createUpRotationLabelPositions(Math.PI / 2.0)
-	        );
-	        final CombinedDomainCategoryPlot plot = new CombinedDomainCategoryPlot(domainAxis);
-	        
-	        plot.add(m_subplot, 1);
-	        
-	        
-	    	m_chart = new JFreeChart(
+	     
+	        XYPlot plot = new XYPlot(m_dataSet, numberaxis, numberaxis1, renderer);   
+	        m_chart = new JFreeChart(
 	                "Combined Chart title",
 	                new Font("SansSerif", Font.BOLD, 12),
 	                plot,
 	                true
-	            );
+	        );
 	    	   
+	    	
+	    	
+	    	
 	        m_chart.setBackgroundPaint(Color.white);
 	        TextTitle textTitle = m_chart.getTitle();
 	        textTitle.setFont(textTitle.getFont().deriveFont(Font.PLAIN, 10.0f));
@@ -130,9 +121,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    
 	    private void initComponents() {
 	        setLayout(new BorderLayout());
-	        ChartPanel cp = new ChartPanel(m_chart, true) {
-
-	        };
+	        ChartPanel cp = new ChartPanel(m_chart, true);
 	        
 	        
 	        cp.setMinimumDrawWidth(0);
@@ -156,7 +145,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
 	        toolbar.setFloatable(false);
 
-	        ExportButton exportImageButton = new ExportButton("pieChart", (ImageExporterInterface) this);
+	        ExportButton exportImageButton = new ExportButton("chart", (ImageExporterInterface) this);
 	        toolbar.add(exportImageButton);
 	       
 	        
@@ -204,7 +193,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    private void constructChromatogram(MSDiagOutput_AW msdo) {
 
 	        // clear all data
-	        m_dataSet.clear();
+	        m_dataSet.removeAllSeries();
 	    	
 	    	
 	 
@@ -217,8 +206,9 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        m_chart.setTitle(title);
 	        
 	        // set axes labels
-	        m_subplot.getRangeAxis().setLabel(msdo.y_axis_description);
-	        m_chart.getCategoryPlot().getDomainAxis().setLabel(msdo.x_axis_description);
+	        //m_subplot.getRangeAxis().setLabel(msdo.y_axis_description);
+	        m_chart.getXYPlot().getDomainAxis().setLabel(msdo.x_axis_description);
+	        m_chart.getXYPlot().getRangeAxis().setLabel(msdo.y_axis_description);
 	        
 	        
 	        
@@ -226,11 +216,20 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 
 	        int nbSeries = msdo.matrix[0].length;
 	        int nbCategories = msdo.matrix.length - 1; // -1 because of 1st column is series names
-	        for (int serie = 1; serie < nbSeries; serie++) {
-	        	for (int cat = 0; cat < nbCategories; cat++) { // columns of data table also
-	        		m_dataSet.addValue((double) msdo.matrix[cat][serie], msdo.column_names[serie],  msdo.matrix[cat][0].toString());
-	        	}
+	        double x;
+	        double y;
+
 	        
+	        for (int serie = 1; serie < nbSeries; serie++) {
+	        	XYSeries xyseries = new XYSeries(msdo.column_names[serie], true, false);
+	        	for (int cat = 0; cat < nbCategories; cat++) { // columns of data table also
+	        		y = (Double) msdo.matrix[cat][serie];
+	        		if(y>0) { // do not add a zero value otherwise it adds an element on the graph with 0 "thickness"
+	        			 x =   (Double) msdo.matrix[cat][0];
+	        			 xyseries.add(x,y);
+	        	 	}
+	        	}
+	        	m_dataSet.addSeries(xyseries);
 	        }
 	        
 	    }

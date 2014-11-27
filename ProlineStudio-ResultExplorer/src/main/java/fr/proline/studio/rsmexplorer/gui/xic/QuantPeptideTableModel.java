@@ -147,11 +147,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             }
             case COLTYPE_PEPTIDE_NAME: {
                 LazyData lazyData = getLazyData(row, col);
-                if (peptideInstance == null || peptideInstance.getBestPeptideMatch() == null) {
+                if (peptideInstance == null ) {
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, row, col);
                 } else {
-                    lazyData.setData(peptideInstance.getBestPeptideMatch().getPeptide().getSequence());
+                    if (peptideInstance.getBestPeptideMatch() != null) {
+                        lazyData.setData(peptideInstance.getBestPeptideMatch().getPeptide().getSequence());
+                    }else {
+                        lazyData.setData("");
+                    }
                 }
                 return lazyData;
 

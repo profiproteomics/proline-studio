@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
+import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.table.ExportTableSelectionInterface;
@@ -21,7 +22,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class QuantPeptideTableModel extends LazyTableModel implements ExportTableSelectionInterface {
+public class QuantPeptideTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface {
 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_NAME = 1;
@@ -79,6 +80,28 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         } else {
             return ""; // should not happen
         }
+    }
+    
+    @Override
+    public String getExportColumnName(int col) {
+        if (col <= COLTYPE_PEPTIDE_NAME) {
+            return m_columnNames[col];
+        } else if (m_quantChannels != null) {
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+            int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append(m_columnNamesQC[id]);
+            sb.append(" ");
+            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(" ");
+            sb.append(m_quantChannels[nbQc].getRawFileName());
+            
+            return sb.toString();
+        }else {
+            return ""; // should not happen
+        }
+        
     }
 
     @Override

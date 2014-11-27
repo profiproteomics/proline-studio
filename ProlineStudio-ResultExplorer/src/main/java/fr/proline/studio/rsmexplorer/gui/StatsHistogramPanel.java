@@ -8,6 +8,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.stats.ValuesForStatsAbstract;
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
 import java.awt.Color;
 
@@ -25,17 +26,13 @@ import javax.swing.*;
  */
 public class StatsHistogramPanel extends HourglassPanel implements DataBoxPanelInterface {
 
-    
     private AbstractDataBox m_dataBox;
-
     private PlotPanel m_plotPanel;
     private JPanel m_statPanel;
     
     
     private JComboBox<String> m_valueComboBox;
-    
     private PlotHistogram m_histogram;
-    
     private ValuesForStatsAbstract m_values = null;
     
     public StatsHistogramPanel() {
@@ -54,7 +51,6 @@ public class StatsHistogramPanel extends HourglassPanel implements DataBoxPanelI
         JPanel internalPanel = new JPanel();
         
         internalPanel.setLayout(new GridBagLayout());
-        internalPanel.setBackground(Color.white);
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -101,7 +97,6 @@ public class StatsHistogramPanel extends HourglassPanel implements DataBoxPanelI
     private JPanel createSelectPanel() {
         JPanel selectPanel = new JPanel();
          selectPanel.setLayout(new GridBagLayout());
-         selectPanel.setBackground(Color.white);
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;

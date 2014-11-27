@@ -21,6 +21,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayIdentificationProteinSetsAction;
+import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
@@ -315,7 +316,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
-            
+            setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
             addMouseListener(new TablePopupMouseAdapter(this));
             
         }
@@ -615,7 +616,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             QuantProteinSetTableModel model = ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel());
             
             List<TableColumn> columns = m_quantProteinSetTable.getColumns(true);
-            for (int i=QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME+1;i<columns.size();i++) {
+            for (int i=QuantProteinSetTableModel.LAST_STATIC_COLUMN+1;i<columns.size();i++) {
                 int rsmCur = model.getQCNumber(i);
                 int type = model.getTypeNumber(i);
                 boolean visible = m_rsmList.isVisible(rsmCur) && m_xicList.isVisible(type);

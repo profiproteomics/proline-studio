@@ -9,11 +9,13 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,8 +29,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
-    private static final String[] m_columnNames = {"Id", "Protein Set"};
-    private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id", "Identified Protein label"};
+    public static final int COLTYPE_OVERVIEW = 2;
+    public static final int LAST_STATIC_COLUMN = COLTYPE_OVERVIEW;
+    
+    private static final String[] m_columnNames = {"Id", "Protein Set", "Overview"};
+    private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id", "Overview", "Identified Protein label"};
     
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_ABUNDANCE = 1;
@@ -41,6 +46,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     private List<DMasterQuantProteinSet> m_proteinSets = null;
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
+    
+    private int m_overviewType = COLTYPE_ABUNDANCE;
     
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
@@ -66,7 +73,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
     @Override
     public String getColumnName(int col) {
-        if (col<=COLTYPE_PROTEIN_SET_NAME) {
+        if (col<=LAST_STATIC_COLUMN) {
             return m_columnNames[col];
         } else {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
@@ -88,7 +95,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
         @Override
     public String getToolTipForHeader(int col) {
-        if (col<=COLTYPE_PROTEIN_SET_NAME) {
+        if (col<=LAST_STATIC_COLUMN) {
             return m_toolTipColumns[col];
         } else {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
@@ -112,6 +119,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public Class getColumnClass(int col) {
         if (col == COLTYPE_PROTEIN_SET_ID) {
             return Long.class;
+        } else if (col == COLTYPE_OVERVIEW) {
+            return CompareValueRenderer.CompareValue.class; 
         }
         return LazyData.class;
     }
@@ -134,7 +143,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
 
     @Override
-    public Object getValueAt(int row, int col) {
+    public Object getValueAt(final int row, int col) {
         
         int rowFiltered = row;
         if ((!m_isFiltering) && (m_filteredIds != null)) {
@@ -168,6 +177,86 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 }
                 return lazyData;
             }
+                
+            case COLTYPE_OVERVIEW:
+                return new CompareValueRenderer.CompareValue() {
+
+                    @Override
+                    public int getNumberColumns() {
+                        return m_quantChannels.length ;
+                    }
+
+                    @Override
+                    public Color getColor(int col) {
+                        return CyclicColorPalette.getColor(col);
+                    }
+
+                    @Override
+                    public double getValue(int col) {
+                        if (m_overviewType == -1) {
+                            return 0; // should not happen
+                        }
+                       int realCol = LAST_STATIC_COLUMN+1 + m_overviewType+col*m_columnNamesQC.length;
+                       LazyData lazyData = (LazyData)getValueAt(row, realCol);
+                       if (Number.class.isAssignableFrom(lazyData.getData().getClass())) {
+                            return ((Number)lazyData.getData()).floatValue();
+                       }
+                       return 0;
+                    }
+                    
+                    public double getValueNoNaN(int col) {
+                        double val = getValue(col);
+                        if (val != val) { // NaN value
+                            return 0;
+                        }
+                        return val;
+                    }
+
+                    @Override
+                    public double getMaximumValue() {
+                        int nbCols = getNumberColumns();
+                        double maxValue = 0;
+                        for (int i=0;i<nbCols;i++) {
+                            double v = getValue(i);
+                            if (v>maxValue) {
+                                maxValue = v;
+                            }
+                        }
+                        return maxValue;
+                        
+                    }
+
+                    @Override
+                    public double calculateComparableValue() {
+                        int nbColumns = getNumberColumns();
+                        double mean = 0;
+                        for (int i=0;i<nbColumns;i++) {
+                            mean += getValueNoNaN(i);
+                        }
+                        mean /= nbColumns;
+                        
+                        double maxDiff = 0;
+                        for (int i=0;i<nbColumns;i++) {
+                            double diff = getValueNoNaN(i)-mean;
+                            if (diff<0) {
+                                diff = -diff;
+                            }
+                            if (diff>maxDiff) {
+                                maxDiff = diff;
+                            }
+                        }
+                        return maxDiff / mean;
+                    }
+                    
+                    @Override
+                    public int compareTo(CompareValueRenderer.CompareValue o) {
+                        return Double.compare(calculateComparableValue(), o.calculateComparableValue());
+                    }
+                };
+
+                
+                
+                
             default: {
                 // Quant Channel columns 
                 LazyData lazyData = getLazyData(row,col);
@@ -387,6 +476,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             m_filters = new Filter[nbCol];
             m_filters[COLTYPE_PROTEIN_SET_ID] = null;
             m_filters[COLTYPE_PROTEIN_SET_NAME] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_NAME));
+            m_filters[COLTYPE_OVERVIEW] = null;            
             /*m_filters[COLTYPE_PROTEIN_SET_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_DESCRIPTION));
             m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
             m_filters[COLTYPE_PROTEINS_COUNT] = null;

@@ -161,7 +161,7 @@ public class SpectralCountResultData {
                 if(fillLists){
                     m_rsmIds.add(rsmId);                 
                 }
-                Map<String, SpectralCountsStruct> rsmSCRst = parseRsmSC(rsmSCResult.substring(rsmSCResult.indexOf(protSCsListPropName)));
+                Map<String, SpectralCountsStruct> rsmSCRst = parseRsmSC(rsmId, rsmSCResult.substring(rsmSCResult.indexOf(protSCsListPropName)));
                 scsByProtByRSMId.put(rsmId, rsmSCRst);
             }
         }
@@ -176,7 +176,7 @@ public class SpectralCountResultData {
          *
          * @return Map of spectralCounts for each Protein Matches
          */
-        private Map<String, SpectralCountsStruct> parseRsmSC(String rsmsSCResult) {
+        private Map<String, SpectralCountsStruct> parseRsmSC(Long rsmId, String rsmsSCResult) {
             m_loggerProline.debug(" parseRsmSC :   " + rsmsSCResult);
 
             //"proteins_spectral_counts":[{"protein_accession"=MyProt,"bsc"=123.6,"ssc"=45.6,"wsc"=55.5}, {"protein_accession"=OtherProt,"bsc"=17.2,"ssc"=2.6,"wsc"=1.5} ]
@@ -186,6 +186,10 @@ public class SpectralCountResultData {
             String protEntries = rsmsSCResult.substring(rsmsSCResult.indexOf("[") + 1);
             protEntries = protEntries.substring(0, protEntries.indexOf("]"));
 
+            if (protEntries.isEmpty()) { // case proteins_spectral_counts":[]
+                m_loggerProline.debug(" no accession values for RSM :   " + rsmId+" ("+rsmsSCResult+")");
+                return scByProtAcc;
+            }
             String[] protAccEntries = protEntries.split("}"); //Each ProtAcc entry
             int protIndex = 0;
             for (String protAcc : protAccEntries) {

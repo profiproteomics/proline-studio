@@ -3,6 +3,7 @@ package fr.proline.studio.graphics.marker;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.*;
 
 /**
@@ -47,7 +48,7 @@ public class TextMarker extends AbstractMarker {
 
         g.setFont(MARKER_FONT);
 
-        g.setColor(Color.black);
+        g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
         g.drawString(m_valueLabel, pixelX, pixelY);
 
         

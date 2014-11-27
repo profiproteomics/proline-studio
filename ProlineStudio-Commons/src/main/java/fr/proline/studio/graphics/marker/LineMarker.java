@@ -40,7 +40,7 @@ public class LineMarker extends AbstractMarker {
             int x1 = xAxis.valueToPixel(xAxis.getMinTick());
             int x2 = xAxis.valueToPixel(xAxis.getMaxTick());
 
-            g.setColor(Color.gray);
+            g.setColor(Color.white);
             g.drawLine(x1, y, x2, y);
 
 
@@ -49,7 +49,7 @@ public class LineMarker extends AbstractMarker {
             int y1 = yAxis.valueToPixel(yAxis.getMinTick());
             int y2 = yAxis.valueToPixel(yAxis.getMaxTick());
             
-            g.setColor(Color.gray);
+            g.setColor(Color.white);
             g.drawLine(x, y1, x, y2);
         }
         
@@ -57,6 +57,6 @@ public class LineMarker extends AbstractMarker {
         g.setStroke(prevStroke);
         
     }
-    private final static float dash1[] = {10.0f};
+    private final static float dash1[] = {4.0f};
     private final static BasicStroke dashed = new BasicStroke(1.0f,  BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash1, 0.0f);
 }

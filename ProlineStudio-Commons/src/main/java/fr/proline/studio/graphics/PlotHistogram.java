@@ -5,6 +5,7 @@ import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.TextMarker;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
 import fr.proline.studio.stats.ValuesForStatsAbstract;
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -25,7 +26,6 @@ public class PlotHistogram extends PlotAbstract {
     public PlotHistogram(PlotPanel plotPanel, ValuesForStatsAbstract values) {
         
         super(plotPanel);
-       
         update(values);
         
     }
@@ -145,8 +145,6 @@ public class PlotHistogram extends PlotAbstract {
     @Override
     public void paint(Graphics2D g) {
         
-        
-        
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis(); 
         
@@ -164,20 +162,16 @@ public class PlotHistogram extends PlotAbstract {
             int x2 = xAxis.valueToPixel( m_dataX[i+1]);
             int y1 = yAxis.valueToPixel( m_dataY[i]);
             
-            
-            
-            g.setColor(COLOR_MARS_RED);
+            g.setColor(CyclicColorPalette.getColor(1));
             g.fillRect(x1, y1 , x2-x1, y2-y1);
             
-            g.setColor(Color.black);
+            g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
             g.drawRect(x1, y1 , x2-x1, y2-y1);
             
         }
         
         paintMarkers(g);
     }
-    private final static Color COLOR_MARS_RED = new Color(227,38,54);
-
 
 
     @Override

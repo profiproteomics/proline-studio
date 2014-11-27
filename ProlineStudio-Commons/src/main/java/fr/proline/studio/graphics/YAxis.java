@@ -1,5 +1,6 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -35,6 +36,7 @@ public class YAxis extends Axis {
             m_digits = digits;
         }
         
+        g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
         FontMetrics metrics = g.getFontMetrics(g.getFont());
         int halfAscent = metrics.getAscent()/2;
         

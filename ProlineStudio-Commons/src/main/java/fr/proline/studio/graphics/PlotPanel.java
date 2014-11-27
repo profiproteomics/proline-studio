@@ -1,16 +1,20 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 
 /**
  * Panel to display data with an X and Y Axis
  * @author JM235353
  */
 public class PlotPanel extends JPanel implements MouseListener, MouseMotionListener {
+    
+    private static final Color PANEL_BACKGROUND_COLOR = UIManager.getColor ("Panel.background");
     
     private XAxis m_xAxis = null;
     private YAxis m_yAxis = null;
@@ -38,24 +42,32 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
          g2d.setRenderingHint( RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         
         Rectangle bounds = getBounds();
-
-        g.setColor(Color.white);
+        Rectangle plotArea = getBounds();
+        
+        g.setColor(PANEL_BACKGROUND_COLOR);
         g.fillRect(0, 0, bounds.width, bounds.height);
         
         g.setColor(Color.darkGray);
-        g.drawRect(0, 0, bounds.width-1, bounds.height-1);
+//        g.drawRect(0, 0, bounds.width-1, bounds.height-1);
         
         if (m_xAxis != null) {
             m_xAxis.setSize(GAP_FIGURES_Y, ((int)bounds.getHeight())-GAP_FIGURES_X /*-GAP_TOP_AXIS*/, bounds.width-GAP_FIGURES_Y-GAP_END_AXIS, GAP_FIGURES_X + GAP_AXIS_TITLE);
+            plotArea.x = m_xAxis.m_x+1;
+            plotArea.width = m_xAxis.m_width-1;
             m_xAxis.paint(g2d);
         }
         
         if (m_yAxis != null) {
             m_yAxis.setSize(0, GAP_END_AXIS, GAP_FIGURES_Y+GAP_AXIS_TITLE /*+GAP_TOP_AXIS*/, ((int)bounds.getHeight())-GAP_FIGURES_X-GAP_END_AXIS);
+            plotArea.y = m_yAxis.m_y+1;
+            plotArea.height = m_yAxis.m_height-1;
             m_yAxis.paint(g2d);
         }
         
         if (m_plot != null) {
+            g.setColor(CyclicColorPalette.GRAY_BACKGROUND);
+            g.fillRect(plotArea.x, plotArea.y, plotArea.width, plotArea.height);
+            g.setColor(Color.darkGray);
             m_plot.paint(g2d);
         }
         

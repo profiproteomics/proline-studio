@@ -1,5 +1,6 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -45,6 +46,7 @@ public class XAxis extends Axis {
             return;
         }
         
+        g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
         
         FontMetrics metrics = g.getFontMetrics(g.getFont());
         int height = metrics.getHeight();

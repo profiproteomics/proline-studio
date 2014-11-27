@@ -174,7 +174,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 							        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
 									break;
 			        			case "whisker":
-									MSDiag_BoxAndWhisker m_msdiagBoxAndWhisker = new MSDiag_BoxAndWhisker();
+									MSDiag_BoxChart m_msdiagBoxAndWhisker = new MSDiag_BoxChart();
 									m_msdiagBoxAndWhisker.setData(msOutput);
 									scrollPane = new JScrollPane();
 							        scrollPane.setViewportView(m_msdiagBoxAndWhisker);

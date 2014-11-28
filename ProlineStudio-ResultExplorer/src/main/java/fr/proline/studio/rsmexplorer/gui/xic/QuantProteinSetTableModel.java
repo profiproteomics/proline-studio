@@ -7,6 +7,7 @@ import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
+import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
@@ -25,7 +26,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface, CompareDataInterface {
+public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface, CompareDataInterface, ExportColumnTextInterface {
 
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
@@ -33,7 +34,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public static final int LAST_STATIC_COLUMN = COLTYPE_OVERVIEW;
     
     private static final String[] m_columnNames = {"Id", "Protein Set", "Overview"};
-    private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id", "Overview", "Identified Protein label"};
+    private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id",  "Identified Protein label", "Overview on Abundance"};
     
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_ABUNDANCE = 1;
@@ -93,7 +94,29 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         }
     }
     
-        @Override
+    @Override
+    public String getExportColumnName(int col) {
+        if (col <= COLTYPE_OVERVIEW) {
+            return m_columnNames[col];
+        } else if (m_quantChannels != null) {
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+            int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append(m_columnNamesQC[id]);
+            sb.append(" ");
+            sb.append(m_quantChannels[nbQc].getResultFileName());
+            sb.append(" ");
+            sb.append(m_quantChannels[nbQc].getRawFileName());
+            
+            return sb.toString();
+        }else {
+            return ""; // should not happen
+        }
+        
+    }
+    
+    @Override
     public String getToolTipForHeader(int col) {
         if (col<=LAST_STATIC_COLUMN) {
             return m_toolTipColumns[col];

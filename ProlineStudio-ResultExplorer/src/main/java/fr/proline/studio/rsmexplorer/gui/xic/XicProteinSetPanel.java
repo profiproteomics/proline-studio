@@ -11,6 +11,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
@@ -308,7 +309,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
     
     
-    private class QuantProteinSetTable extends LazyTable implements ExportTableSelectionInterface  {
+    private class QuantProteinSetTable extends LazyTable implements ExportTableSelectionInterface , ExportColumnTextInterface {
 
         
         public QuantProteinSetTable() {
@@ -342,6 +343,13 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
         }
 
+        @Override
+        public HashSet exportSelection(int[] rows) {
+            QuantProteinSetTableModel tableModel = (QuantProteinSetTableModel) getModel();
+            return tableModel.exportSelection(rows);
+        }
+        
+        
         public DProteinSet getSelectedProteinSet() {
 
             // Retrieve Selected Row
@@ -470,10 +478,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             return popupMenu;
         }
 
+
         @Override
-        public HashSet exportSelection(int[] rows) {
-            QuantProteinSetTableModel tableModel = (QuantProteinSetTableModel) getModel();
-            return tableModel.exportSelection(rows);
+        public String getExportColumnName(int col) {
+            return ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
         }
 
         

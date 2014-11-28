@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
@@ -29,6 +30,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     public final static int GAP_END_AXIS = 10;
     public final static int GAP_AXIS_TITLE = 0; //JPM.TODO
     
+    private BufferedImage m_doubleBuffer = null;
+    private boolean m_useDoubleBuffering = false;
+    private boolean m_updateDoubleBuffer = false;
     
     public PlotPanel() {
         addMouseListener(this);
@@ -65,17 +69,39 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         }
         
         if (m_plot != null) {
-            g.setColor(CyclicColorPalette.GRAY_BACKGROUND);
-            g.fillRect(plotArea.x, plotArea.y, plotArea.width, plotArea.height);
-            g.setColor(Color.darkGray);
-            m_plot.paint(g2d);
+            
+            if (m_useDoubleBuffering) {
+                if ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth()!=plotArea.width) || (m_doubleBuffer.getHeight()!=plotArea.height) || (m_updateDoubleBuffer)) {
+                    m_doubleBuffer = new BufferedImage(plotArea.width, plotArea.height, BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D graphicBufferG2d = (Graphics2D) m_doubleBuffer.getGraphics();
+                    graphicBufferG2d.setColor(Color.white);
+                    graphicBufferG2d.fillRect(0, 0, plotArea.width, plotArea.height);
+                    graphicBufferG2d.translate(-plotArea.x, -plotArea.y);
+                    m_plot.paint(graphicBufferG2d);
+                    m_updateDoubleBuffer = false;
+                }
+                g2d.drawImage(m_doubleBuffer, plotArea.x, plotArea.y, null);
+                
+            } else {
+
+                long startPlotTime = System.currentTimeMillis();
+                g.setColor(Color.white);
+                g.fillRect(plotArea.x, plotArea.y, plotArea.width, plotArea.height);
+                m_plot.paint(g2d);
+                long stopPlotTime = System.currentTimeMillis();
+                if (stopPlotTime - startPlotTime > 50) {
+                    // display is too slow , we use an image 
+                    m_useDoubleBuffering = true;
+                }
+            }
         }
         
         m_zoomGesture.paint(g2d);
         
     }
+  
     
-    public void addPlot(PlotAbstract plot) {
+    public void setPlot(PlotAbstract plot) {
         m_plot = plot;
 
         updateAxis(plot);
@@ -97,6 +123,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             }
             m_yAxis.setRange(plot.getYMin(), plot.getYMax());
         }
+        
+        m_updateDoubleBuffer = true;
+        m_useDoubleBuffering = plot.needsDoubleBuffering();
     }
     
     public XAxis getXAxis() {
@@ -124,8 +153,10 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         if (action == ZoomGesture.ACTION_ZOOM) {
             m_xAxis.setRange(m_xAxis.pixelToValue(m_zoomGesture.getStartX()), m_xAxis.pixelToValue(m_zoomGesture.getEndX()));
             m_yAxis.setRange(m_yAxis.pixelToValue(m_zoomGesture.getEndY()), m_yAxis.pixelToValue(m_zoomGesture.getStartY()));
+            m_updateDoubleBuffer = true;
         } else if (action == ZoomGesture.ACTION_UNZOOM) {
             updateAxis(m_plot);
+            m_updateDoubleBuffer = true;
         }
         repaint();
     }

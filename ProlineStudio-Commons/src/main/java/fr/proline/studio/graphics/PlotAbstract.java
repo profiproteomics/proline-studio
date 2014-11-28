@@ -1,5 +1,6 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -22,12 +23,15 @@ public abstract class PlotAbstract {
 
     public abstract boolean needsXAxis();
     public abstract boolean needsYAxis();
+
     
     public abstract void paint(Graphics2D g);
 
     public PlotAbstract(PlotPanel plotPanel) {
         m_plotPanel = plotPanel;
     }
+    
+    public abstract void update(CompareDataInterface compareDataInterface, int colX, int colY);
     
     public void addMarker(AbstractMarker m) {
         if (m_markersList == null) {
@@ -50,5 +54,9 @@ public abstract class PlotAbstract {
         for (int i=0;i<m_markersList.size();i++) {
             m_markersList.get(i).paint(g);
         }
+    }
+    
+    public boolean needsDoubleBuffering() {
+        return false;
     }
 }

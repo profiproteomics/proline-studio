@@ -69,7 +69,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         DataBoxRsmProteinSetOfPeptides(12),
         DataBoxRsmProteinsOfProteinSet(13),
         DataBoxRsmWSC(14),
-        DataBoxStatisticsFrequencyResponse(15),
+        //DataBoxStatisticsFrequencyResponse(15),
         DataBoxTaskDescription(16),
         DataBoxTaskList(17),
         DataboxRsetPeptidesOfProtein(18),
@@ -80,7 +80,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         DataboxSelectCompareData(23),
         DataboxCompareResult(24),
         DataboxXicPeptideSet(25),
-        DataboxXicPeptideIon(26);
+        DataboxXicPeptideIon(26),
+        DataboxGraphics(27);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -125,8 +126,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
                     return new DataBoxRsmProteinsOfProteinSet();
                 case DataBoxRsmWSC:
                     return new DataBoxRsmWSC(false);
-                case DataBoxStatisticsFrequencyResponse:
-                    return new DataBoxStatisticsFrequencyResponse();
+                /*case DataBoxStatisticsFrequencyResponse:
+                    return new DataBoxStatisticsFrequencyResponse();*/
                 case DataBoxTaskDescription:
                     return new DataBoxTaskDescription();
                 case DataBoxTaskList:
@@ -147,6 +148,8 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
                     return new DataboxSelectCompareData();
                 case DataboxXicPeptideIon:
                     return new DataboxXicPeptideIon();
+                case DataboxGraphics:
+                    return new DataboxGraphics();
             }
             return null; // should not happen
         }

@@ -41,6 +41,11 @@ public class CyclicColorPalette {
         brightness = Math.min(brightness, 1.0f);
         return new Color(Color.HSBtoRGB(hsb[0], hsb[1], brightness));
     }
+    
+    public static Color getColor(int colorIndex, int alpha) {
+        Color c = getColor(colorIndex);
+        return new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
+    }
 
     public static String getHTMLColor(int colorIndex) {
         Color c = getColor(colorIndex);

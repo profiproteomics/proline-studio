@@ -68,7 +68,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
-    private JButton m_histogramButton;
+    private JButton m_graphicsButton;
     private AddCompareDataButton m_addCompareDataButton;
 
     public PeptideMatchPanel(boolean forRSM, boolean startingPanel, boolean proteinMatchUnknown) {
@@ -328,16 +328,16 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         };
         
         if (m_startingPanel) {
-            m_histogramButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
-            m_histogramButton.setToolTipText("Histogram and Standard Deviation");
-            m_histogramButton.addActionListener(new ActionListener() {
+            m_graphicsButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
+            m_graphicsButton.setToolTipText("Graphics : Histogram / Scatter Plot");
+            m_graphicsButton.addActionListener(new ActionListener() {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (!((PeptideMatchTableModel) m_peptideMatchTable.getModel()).isLoaded()) {
 
                         ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((PeptideMatchTableModel) m_peptideMatchTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
-                        dialog.setLocation(getLocationOnScreen().x + m_histogramButton.getWidth() + 5, m_histogramButton.getLocationOnScreen().y + getHeight() + 5);
+                        dialog.setLocation(getLocationOnScreen().x + m_graphicsButton.getWidth() + 5, m_graphicsButton.getLocationOnScreen().y + getHeight() + 5);
                         dialog.setVisible(true);
 
                         if (!dialog.isWaitingFinished()) {
@@ -345,9 +345,9 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                         }
                     }
                     // prepare window box
-                    WindowBox wbox = WindowBoxFactory.getHistogramWindowBox("Histogram");
+                    WindowBox wbox = WindowBoxFactory.getHistogramWindowBox("Graphic");
 
-                    wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, ValuesForStatsAbstract.class));
+                    wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, CompareDataInterface.class));
 
 
 
@@ -369,7 +369,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         toolbar.add(m_addCompareDataButton);
         
         if (m_startingPanel) {
-            toolbar.add(m_histogramButton);
+            toolbar.add(m_graphicsButton);
         }
         
 

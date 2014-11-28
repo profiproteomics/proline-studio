@@ -7,8 +7,8 @@ import fr.proline.studio.stats.ValuesForStatsAbstract;
  *
  * @author JM235353
  */
-public class DataBoxStatisticsFrequencyResponse extends AbstractDataBox  {
-
+public class DataBoxStatisticsFrequencyResponse /*extends AbstractDataBox*/  {
+    /*
     private ValuesForStatsAbstract m_values = null;
 
     public DataBoxStatisticsFrequencyResponse() {
@@ -45,5 +45,5 @@ public class DataBoxStatisticsFrequencyResponse extends AbstractDataBox  {
         m_values = (ValuesForStatsAbstract) data;
         dataChanged();
     }
-    
+ */   
 }

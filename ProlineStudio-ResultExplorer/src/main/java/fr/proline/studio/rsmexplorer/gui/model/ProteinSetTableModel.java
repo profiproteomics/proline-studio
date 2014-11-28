@@ -504,6 +504,9 @@ public class ProteinSetTableModel extends LazyTableModel implements CompareDataI
         Object data = getValueAt(rowIndex, columnIndex);
         if (data instanceof LazyData) {
             data = ((LazyData) data).getData();
+            if (data instanceof ProteinCount) {
+                return ((ProteinCount) data).getNbProteins();
+            }
         }
         return data;
     }
@@ -532,6 +535,10 @@ public class ProteinSetTableModel extends LazyTableModel implements CompareDataI
         public ProteinCount(int sameSetCount, int subSetCount) {
             m_sameSetCount = sameSetCount;
             m_subSetCount = subSetCount;
+        }
+        
+        public int getNbProteins() {
+            return m_sameSetCount+m_subSetCount;
         }
         
         public String toHtml() {

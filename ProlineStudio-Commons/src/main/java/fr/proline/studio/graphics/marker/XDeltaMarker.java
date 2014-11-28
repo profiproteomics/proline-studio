@@ -42,7 +42,7 @@ public class XDeltaMarker extends AbstractMarker {
         int y = yAxis.valueToPixel(m_y);
             
 
-        g.setColor(Color.white);
+        g.setColor(Color.black);
         g.drawLine(x1, y, x2, y);
 
         final int ARROW_SIZE = 3;

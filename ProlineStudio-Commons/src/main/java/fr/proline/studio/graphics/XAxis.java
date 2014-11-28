@@ -33,7 +33,7 @@ public class XAxis extends Axis {
         
         int digits = ticks.getDigits();
         
-        if (digits != m_digits) {
+        if ((digits != m_digits) || (m_df == null)) {
             m_df = selectDecimalFormat(digits);
             m_digits = digits;
         }

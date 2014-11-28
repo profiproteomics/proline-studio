@@ -24,8 +24,8 @@ import javax.swing.*;
  *
  * @author JM235353
  */
-public class StatsHistogramPanel extends HourglassPanel implements DataBoxPanelInterface {
-
+public class StatsHistogramPanel /*extends HourglassPanel implements DataBoxPanelInterface*/ {
+/*
     private AbstractDataBox m_dataBox;
     private PlotPanel m_plotPanel;
     private JPanel m_statPanel;
@@ -183,5 +183,5 @@ public class StatsHistogramPanel extends HourglassPanel implements DataBoxPanelI
         return m_dataBox.getSaveAction(splittedPanel);
     }
 
-    
+    */
 }

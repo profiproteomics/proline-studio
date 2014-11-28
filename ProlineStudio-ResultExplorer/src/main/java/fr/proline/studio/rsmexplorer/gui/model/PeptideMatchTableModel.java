@@ -755,6 +755,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
 
     @Override
     public Class getDataColumnClass(int columnIndex) {
+        columnIndex =  m_colUsed[columnIndex];
         switch (columnIndex) {
             case COLTYPE_PEPTIDE_PREVIOUS_AA:
             case COLTYPE_PEPTIDE_NAME:

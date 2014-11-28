@@ -1,13 +1,14 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.StatsModel;
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.TextMarker;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
-import fr.proline.studio.stats.ValuesForStatsAbstract;
 import fr.proline.studio.utils.CyclicColorPalette;
-import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.HashSet;
 
 /**
  * Histogram Plot
@@ -23,19 +24,27 @@ public class PlotHistogram extends PlotAbstract {
     private double[] m_dataY;
 
     
-    public PlotHistogram(PlotPanel plotPanel, ValuesForStatsAbstract values) {
-        
+    public PlotHistogram(PlotPanel plotPanel, CompareDataInterface compareDataInterface, int colX) {
         super(plotPanel);
-        update(values);
-        
+        update(compareDataInterface, colX, -1); 
+    }
+
+
+
+    public static HashSet<Class> getAcceptedYValues() {
+        HashSet<Class> acceptedValues = new HashSet();
+        return acceptedValues;
     }
     
-    public final void update(ValuesForStatsAbstract values) {
+    @Override
+    public final void update(CompareDataInterface compareDataInterface, int colX, int colY) { // colY not used for histogram
          
+        StatsModel values = new StatsModel(compareDataInterface, colX);
+        
         clearMarkers();
         
         // number of bins
-        int size = values.size();
+        int size = values.getRowCount();
         if (size == 0) {
 
             return;
@@ -59,7 +68,7 @@ public class PlotHistogram extends PlotAbstract {
         double std = values.standardDeviation();
         int bins = (int) Math.round((max-min)/(3.5*std*Math.pow(size, -1/3.0)));
         
-        double[] data = new double[values.size()];
+        double[] data = new double[values.getRowCount()];
         for (int i=0;i<data.length;i++) {
             data[i] = values.getValue(i);
         }
@@ -116,7 +125,7 @@ public class PlotHistogram extends PlotAbstract {
         addMarker(new LabelMarker(m_plotPanel, mean, yMeanLabel, "Mean : "+mean, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_BOTTOM));
         
         // add Title
-        addMarker(new TextMarker(m_plotPanel, 0.05, 0.95, values.getValueType()+" Histogram"));
+        addMarker(new TextMarker(m_plotPanel, 0.05, 0.95, values.getDataColumnIdentifier(0) +" Histogram"));
         
         m_plotPanel.repaint();
     }
@@ -162,7 +171,7 @@ public class PlotHistogram extends PlotAbstract {
             int x2 = xAxis.valueToPixel( m_dataX[i+1]);
             int y1 = yAxis.valueToPixel( m_dataY[i]);
             
-            g.setColor(CyclicColorPalette.getColor(1));
+            g.setColor(CyclicColorPalette.getColor(21));
             g.fillRect(x1, y1 , x2-x1, y2-y1);
             
             g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);

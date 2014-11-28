@@ -657,6 +657,15 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             case COLTYPE_PROTEIN_SET_NAME: {
                 return String.class;
             }
+            case COLTYPE_OVERVIEW: {
+                return CompareValueRenderer.CompareValue.class; 
+            }
+            case COLTYPE_NB_PEPTIDE: {
+                return Integer.class; 
+            }
+            case COLTYPE_NB_QUANT_PEPTIDE: {
+                return Integer.class; 
+            }
             default: {
                 int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
                 int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);

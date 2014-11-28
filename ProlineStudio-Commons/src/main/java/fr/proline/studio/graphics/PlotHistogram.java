@@ -67,6 +67,9 @@ public class PlotHistogram extends PlotAbstract {
         // bins
         double std = values.standardDeviation();
         int bins = (int) Math.round((max-min)/(3.5*std*Math.pow(size, -1/3.0)));
+        if (bins<10) {
+            bins = 10;
+        }
         
         double[] data = new double[values.getRowCount()];
         for (int i=0;i<data.length;i++) {
@@ -81,6 +84,7 @@ public class PlotHistogram extends PlotAbstract {
             if (index >= bins) {
                 index = bins - 1;
             }
+
             histogram[index]++;
         }
         

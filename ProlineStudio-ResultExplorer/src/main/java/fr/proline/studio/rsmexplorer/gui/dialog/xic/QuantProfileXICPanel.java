@@ -4,6 +4,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog.xic;
 
+import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.DoubleParameter;
 import fr.proline.studio.parameter.ObjectParameter;
@@ -25,7 +26,6 @@ import org.openide.util.NbPreferences;
  * @author MB243701
  */
 public class QuantProfileXICPanel extends JPanel {
-    
     private ParameterList m_parameterList;
     
     private JScrollPane m_scrollPane;    
@@ -56,6 +56,23 @@ public class QuantProfileXICPanel extends JPanel {
     private JCheckBox m_applyProtTTestChB;
     private JCheckBox m_applyProtZTestChB;
     
+    private DoubleParameter m_peptideStatTestsAlphaParameter;
+    private DoubleParameter m_proteinStatTestsAlphaParameter;
+    private BooleanParameter m_discardMissedCleavedPeptidesParameter;
+    private BooleanParameter m_discardOxidizedPeptidesParameter;
+    private BooleanParameter m_applyPepNormalizationParameter;
+    private BooleanParameter m_applyProtNormalizationParameter;
+    private BooleanParameter m_applyPepMissValInferenceParameter;
+    private BooleanParameter m_applyProtMissValInferenceParameter;
+    private BooleanParameter m_applyPepVarianceCorrectionParameter;
+    private BooleanParameter m_applyProtVarianceCorrectionParameter;
+    private BooleanParameter m_applyPepTTestParameter;
+    private BooleanParameter m_applyProtTTestParameter;
+    private BooleanParameter m_applyPepZTestParameter;
+    private BooleanParameter m_applyProtZTestParameter;
+    private BooleanParameter m_applyProfileClusteringParameter;
+    private BooleanParameter m_useOnlySpecificPeptidesParameter;
+    private ObjectParameter<String> m_abundanceSummarizerMethodParameter;
     
     
     public QuantProfileXICPanel() {
@@ -64,83 +81,89 @@ public class QuantProfileXICPanel extends JPanel {
     }
     
     private void init() {
-        m_parameterList = new ParameterList("XicProfileParameters");
+        m_parameterList = new ParameterList(QuantProfileXICDialog.SETTINGS_KEY);
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());
+        for (AbstractParameter param : m_parameterList) {
+            param.setUsed(true);
+        }
         initPanel();
-        restoreParameters(NbPreferences.root());
     }
     
     
     public final void createParameters() {
         m_peptideStatTestsAlpha = new JTextField();
-        DoubleParameter m_peptideStatTestsAlphaParameter = new DoubleParameter("peptideStatTestsAlpha", "Peptide Stat Tests Alpha", m_peptideStatTestsAlpha, new Double(0.01), null, null);
+        m_peptideStatTestsAlphaParameter = new DoubleParameter("peptideStatTestsAlpha", "Peptide Stat Tests Alpha", m_peptideStatTestsAlpha, new Double(0.01), null, null);
         m_parameterList.add(m_peptideStatTestsAlphaParameter);
        
         m_proteinStatTestsAlpha = new JTextField();
-        DoubleParameter m_proteinStatTestsAlphaParameter = new DoubleParameter("proteinStatTestsAlpha", "Protein Stat Tests Alpha", m_proteinStatTestsAlpha, new Double(0.01), null, null);
+        m_proteinStatTestsAlphaParameter = new DoubleParameter("proteinStatTestsAlpha", "Protein Stat Tests Alpha", m_proteinStatTestsAlpha, new Double(0.01), null, null);
         m_parameterList.add(m_proteinStatTestsAlphaParameter);
         
         m_discardMissedCleavedPeptidesChB = new JCheckBox("Discard Missed Cleaved Peptides");
-        BooleanParameter discardMissedCleavedPeptidesParameter = new BooleanParameter("discardMissedCleavedPeptides", "Discard Missed Cleaved Peptides", m_discardMissedCleavedPeptidesChB, true);
-        m_parameterList.add(discardMissedCleavedPeptidesParameter);
+        m_discardMissedCleavedPeptidesParameter = new BooleanParameter("discardMissedCleavedPeptides", "Discard Missed Cleaved Peptides", m_discardMissedCleavedPeptidesChB, true);
+        m_parameterList.add(m_discardMissedCleavedPeptidesParameter);
         
         m_discardOxidizedPeptidesChB = new JCheckBox("Discard Oxidized Peptides");
-        BooleanParameter discardOxidizedPeptidesParameter = new BooleanParameter("discardOxidizedPeptides", "Discard Oxidized Peptides", m_discardOxidizedPeptidesChB, true);
-        m_parameterList.add(discardOxidizedPeptidesParameter);
+        m_discardOxidizedPeptidesParameter = new BooleanParameter("discardOxidizedPeptides", "Discard Oxidized Peptides", m_discardOxidizedPeptidesChB, true);
+        m_parameterList.add(m_discardOxidizedPeptidesParameter);
         
         m_applyPepNormalizationChB = new JCheckBox("Apply Normalization");
-        BooleanParameter applyPepNormalizationParameter = new BooleanParameter("applyPepNormalization", "Apply Normalization on peptides", m_applyPepNormalizationChB, true);
-        m_parameterList.add(applyPepNormalizationParameter);
+        m_applyPepNormalizationParameter = new BooleanParameter("applyPepNormalization", "Apply Normalization on peptides", m_applyPepNormalizationChB, true);
+        m_parameterList.add(m_applyPepNormalizationParameter);
 
         m_applyProtNormalizationChB = new JCheckBox("Apply Normalization");
-        BooleanParameter applyProtNormalizationParameter = new BooleanParameter("applyProtNormalization", "Apply Normalization on proteins", m_applyProtNormalizationChB, true);
-        m_parameterList.add(applyProtNormalizationParameter);
+        m_applyProtNormalizationParameter = new BooleanParameter("applyProtNormalization", "Apply Normalization on proteins", m_applyProtNormalizationChB, true);
+        m_parameterList.add(m_applyProtNormalizationParameter);
 
         m_applyPepMissValInferenceChB = new JCheckBox("Apply Missing Value Inference");
-        BooleanParameter applyPepMissValInferenceParameter = new BooleanParameter("applyPepMissValInference", "Apply Miss Val Inference on peptides", m_applyPepMissValInferenceChB, true);
-        m_parameterList.add(applyPepMissValInferenceParameter);
+        m_applyPepMissValInferenceParameter = new BooleanParameter("applyPepMissValInference", "Apply Miss Val Inference on peptides", m_applyPepMissValInferenceChB, true);
+        m_parameterList.add(m_applyPepMissValInferenceParameter);
 
         m_applyProtMissValInferenceChB = new JCheckBox("Apply Missing Value Inference");
-        BooleanParameter applyProtMissValInferenceParameter = new BooleanParameter("applyProtMissValInference", "Apply Miss Val Inference on proteins", m_applyProtMissValInferenceChB, true);
-        m_parameterList.add(applyProtMissValInferenceParameter);
+        m_applyProtMissValInferenceParameter = new BooleanParameter("applyProtMissValInference", "Apply Miss Val Inference on proteins", m_applyProtMissValInferenceChB, true);
+        m_parameterList.add(m_applyProtMissValInferenceParameter);
         
         m_applyPepVarianceCorrectionChB = new JCheckBox("Apply Variance Correction");
-        BooleanParameter applyPepVarianceCorrectionParameter = new BooleanParameter("applyPepVarianceCorrection", "Apply Variance Correction on peptides", m_applyPepVarianceCorrectionChB, true);
-        m_parameterList.add(applyPepVarianceCorrectionParameter);
+        m_applyPepVarianceCorrectionParameter = new BooleanParameter("applyPepVarianceCorrection", "Apply Variance Correction on peptides", m_applyPepVarianceCorrectionChB, true);
+        m_parameterList.add(m_applyPepVarianceCorrectionParameter);
         
         m_applyProtVarianceCorrectionChB = new JCheckBox("Apply Variance Correction");
-        BooleanParameter applyProtVarianceCorrectionParameter = new BooleanParameter("applyProtVarianceCorrection", "Apply Variance Correction on proteins", m_applyProtVarianceCorrectionChB, true);
-        m_parameterList.add(applyProtVarianceCorrectionParameter);
+        m_applyProtVarianceCorrectionParameter = new BooleanParameter("applyProtVarianceCorrection", "Apply Variance Correction on proteins", m_applyProtVarianceCorrectionChB, true);
+        m_parameterList.add(m_applyProtVarianceCorrectionParameter);
         
         m_applyPepTTestChB = new JCheckBox("Apply T-Test (peptide)");
-        BooleanParameter applyPepTTestParameter = new BooleanParameter("applyPepTTest", "Apply TTest on peptides", m_applyPepTTestChB, true);
-        m_parameterList.add(applyPepTTestParameter);
+        m_applyPepTTestParameter = new BooleanParameter("applyPepTTest", "Apply TTest on peptides", m_applyPepTTestChB, true);
+        m_parameterList.add(m_applyPepTTestParameter);
         
         m_applyProtTTestChB = new JCheckBox("Apply T-Test (protein)");
-        BooleanParameter applyProtTTestParameter = new BooleanParameter("applyProtTTest", "Apply TTest on proteins", m_applyProtTTestChB, true);
-        m_parameterList.add(applyProtTTestParameter);
+        m_applyProtTTestParameter = new BooleanParameter("applyProtTTest", "Apply TTest on proteins", m_applyProtTTestChB, true);
+        m_parameterList.add(m_applyProtTTestParameter);
 
         m_applyPepZTestChB = new JCheckBox("Apply Z-Test (peptide)");
-        BooleanParameter applyPepZTestParameter = new BooleanParameter("applyPepZTest", "Apply ZTest on peptides", m_applyPepZTestChB, true);
-        m_parameterList.add(applyPepZTestParameter);
+        m_applyPepZTestParameter = new BooleanParameter("applyPepZTest", "Apply ZTest on peptides", m_applyPepZTestChB, true);
+        m_parameterList.add(m_applyPepZTestParameter);
         
         m_applyProtZTestChB = new JCheckBox("Apply Z-Test (protein)");
-        BooleanParameter applyProtZTestParameter = new BooleanParameter("applyProtZTest", "Apply ZTest on proteins", m_applyProtZTestChB, true);
-        m_parameterList.add(applyProtZTestParameter);
+        m_applyProtZTestParameter = new BooleanParameter("applyProtZTest", "Apply ZTest on proteins", m_applyProtZTestChB, true);
+        m_parameterList.add(m_applyProtZTestParameter);
 
         m_applyProfileClusteringChB = new JCheckBox("Apply Profile Clustering");
-        BooleanParameter applyProfileClusteringParameter = new BooleanParameter("applyProfileClustering", "Apply Profile Clustering", m_applyProfileClusteringChB, true);
-        m_parameterList.add(applyProfileClusteringParameter);
+        m_applyProfileClusteringParameter = new BooleanParameter("applyProfileClustering", "Apply Profile Clustering", m_applyProfileClusteringChB, true);
+        m_parameterList.add(m_applyProfileClusteringParameter);
         
         m_useOnlySpecificPeptidesChB = new JCheckBox("Use Only Specific Peptides");
-        BooleanParameter useOnlySpecificPeptidesParameter = new BooleanParameter("useOnlySpecificPeptides", "Use Only Specific Peptides", m_useOnlySpecificPeptidesChB, true);
-        m_parameterList.add(useOnlySpecificPeptidesParameter);
-        
+        m_useOnlySpecificPeptidesParameter = new BooleanParameter("useOnlySpecificPeptides", "Use Only Specific Peptides", m_useOnlySpecificPeptidesChB, true);
+        m_parameterList.add(m_useOnlySpecificPeptidesParameter);
         
         m_abundanceSummarizerMethodCB = new JComboBox(ABUNDANCE_SUMMARIZER_METHOD_VALUES);
-        ObjectParameter<String> m_abundanceSummarizerMethodParameter = new ObjectParameter<>("abundanceSummarizerMethod", "Abundance Summarizer Method", m_abundanceSummarizerMethodCB, ABUNDANCE_SUMMARIZER_METHOD_VALUES, ABUNDANCE_SUMMARIZER_METHOD_KEYS,  0, null);
+        m_abundanceSummarizerMethodParameter = new ObjectParameter<>("abundanceSummarizerMethod", "Abundance Summarizer Method", m_abundanceSummarizerMethodCB, ABUNDANCE_SUMMARIZER_METHOD_VALUES, ABUNDANCE_SUMMARIZER_METHOD_KEYS,  0, null);
         m_parameterList.add(m_abundanceSummarizerMethodParameter);
+        
+    }
+    
+    public ParameterList getParameterList() {
+        return m_parameterList;
     }
     
     private void initPanel() {
@@ -333,10 +356,6 @@ public class QuantProfileXICPanel extends JPanel {
         
     }
       
-    public ParameterList getParameterList() {
-        return m_parameterList;
-    }
-    
     public Map<String,Object> getQuantParams(){
         Map<String,Object> params = new HashMap<>();
         
@@ -368,7 +387,7 @@ public class QuantProfileXICPanel extends JPanel {
     }
         
     
-    private void restoreParameters(Preferences preferences) {
+    public void restoreParameters(Preferences preferences) {
 
         Float peptideStatTestsAlpha = preferences.getFloat("peptideStatTestsAlpha", 0.01f );
         m_peptideStatTestsAlpha.setText(""+peptideStatTestsAlpha);

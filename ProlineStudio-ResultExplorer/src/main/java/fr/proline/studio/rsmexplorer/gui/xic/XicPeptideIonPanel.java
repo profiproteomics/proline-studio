@@ -9,6 +9,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchMasterQuantPeptideIonTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
@@ -288,7 +289,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         return m_quantPeptideIonTable.getSelectedMasterQuantPeptideIon();
     }
     
-    private class QuantPeptideIonTable extends LazyTable implements ExportTableSelectionInterface  {
+    private class QuantPeptideIonTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface   {
 
         private MasterQuantPeptideIon m_peptideIonSelected = null;
         
@@ -443,6 +444,11 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
 
             // Retrieve PeptideIon selected
             return tableModel.getPeptideIon(selectedRow);
+        }
+
+        @Override
+        public String getExportColumnName(int col) {
+            return ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
         }
 
         

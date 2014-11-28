@@ -31,10 +31,13 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
     public static final int COLTYPE_OVERVIEW = 2;
-    public static final int LAST_STATIC_COLUMN = COLTYPE_OVERVIEW;
+    public static final int COLTYPE_NB_PEPTIDE = 3;
+    public static final int COLTYPE_NB_QUANT_PEPTIDE = 4;
+    public static final int LAST_STATIC_COLUMN = COLTYPE_NB_QUANT_PEPTIDE;
     
-    private static final String[] m_columnNames = {"Id", "Protein Set", "Overview"};
-    private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id",  "Identified Protein label", "Overview on Abundance"};
+    private static final String[] m_columnNames = {"Id", "Protein Set", "Overview", "#Peptide", "<html>#Quant.<br/>Peptide</html>"};
+    private static final String[] m_columnNamesForFilter = {"Id", "Protein Set", "Overview", "#Peptide", "#Quant. Peptide"};
+    private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id",  "Identified Protein label", "Overview on Abundance", "Number of Identified Peptides", "Number of Quantified Peptides"};
     
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_ABUNDANCE = 1;
@@ -96,8 +99,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
     @Override
     public String getExportColumnName(int col) {
-        if (col <= COLTYPE_OVERVIEW) {
-            return m_columnNames[col];
+        if (col <= LAST_STATIC_COLUMN) {
+            return m_columnNamesForFilter[col];
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
@@ -277,8 +280,28 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                     }
                 };
 
+            case COLTYPE_NB_PEPTIDE: {
+                LazyData lazyData = getLazyData(row,col);
                 
+                if (proteinSet.getProteinSet()!= null) {
+                    lazyData.setData(proteinSet.getNbPeptides());
+                }else{
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                }
+                return lazyData;
+            }   
+            case COLTYPE_NB_QUANT_PEPTIDE: {
+                LazyData lazyData = getLazyData(row,col);
                 
+                if (proteinSet.getProteinSet()!= null) {
+                    lazyData.setData(proteinSet.getNbQuantifiedPeptides());
+                }else{
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                }
+                return lazyData;
+            }       
                 
             default: {
                 // Quant Channel columns 
@@ -610,7 +633,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     @Override
     public String getDataColumnIdentifier(int col) {
         if (col <= COLTYPE_PROTEIN_SET_NAME) {
-            return m_columnNames[col];
+            return m_columnNamesForFilter[col];
         } else {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);

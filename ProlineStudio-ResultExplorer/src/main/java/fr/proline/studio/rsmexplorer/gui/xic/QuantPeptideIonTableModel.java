@@ -8,7 +8,7 @@ import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
@@ -278,6 +278,9 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         this.m_quantPeptideIons = peptideIons;
         this.m_quantChannels = quantChannels;
         this.m_quantChannelNumber = quantChannels.length;
+        m_filteredIds = null;
+        m_isFiltering = false;
+        
         fireTableStructureChanged();
 
         m_taskId = taskId;
@@ -405,7 +408,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
 
         switch (col) {
             case COLTYPE_PEPTIDE_ION_NAME: {
-                return ((StringFilter) filter).filter((String) data);
+                return ((StringDiffFilter) filter).filter((String) data);
             }
             case COLTYPE_PEPTIDE_ION_CHARGE: {
                 return ((IntegerFilter) filter).filter((Integer) data);
@@ -428,7 +431,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
             m_filters[COLTYPE_PEPTIDE_ION_ID] = null;
-            m_filters[COLTYPE_PEPTIDE_ION_NAME] = new StringFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME));
+            m_filters[COLTYPE_PEPTIDE_ION_NAME] = new StringDiffFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME));
             m_filters[COLTYPE_PEPTIDE_ION_CHARGE] = new IntegerFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_CHARGE));
             m_filters[COLTYPE_PEPTIDE_ION_MOZ] = new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_MOZ));
             m_filters[COLTYPE_PEPTIDE_ION_ELUTION_TIME] = new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_ELUTION_TIME));

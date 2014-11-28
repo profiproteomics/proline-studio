@@ -7,7 +7,7 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
@@ -229,6 +229,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         this.m_quantPeptides = peptides;
         this.m_quantChannels = quantChannels;
         this.m_quantChannelNumber = quantChannels.length;
+        m_filteredIds = null;
+        m_isFiltering = false;
         fireTableStructureChanged();
 
         m_taskId = taskId;
@@ -356,7 +358,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
         switch (col) {
             case COLTYPE_PEPTIDE_NAME: {
-                return ((StringFilter) filter).filter((String) data);
+                return ((StringDiffFilter) filter).filter((String) data);
             }
             /*case COLTYPE_PROTEIN_SET_DESCRIPTION: {
              return ((StringFilter) filter).filter((String)data);
@@ -383,7 +385,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
             m_filters[COLTYPE_PEPTIDE_ID] = null;
-            m_filters[COLTYPE_PEPTIDE_NAME] = new StringFilter(getColumnName(COLTYPE_PEPTIDE_NAME));
+            m_filters[COLTYPE_PEPTIDE_NAME] = new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NAME));
             /*m_filters[COLTYPE_PROTEIN_SET_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_DESCRIPTION));
              m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
              m_filters[COLTYPE_PROTEINS_COUNT] = null;

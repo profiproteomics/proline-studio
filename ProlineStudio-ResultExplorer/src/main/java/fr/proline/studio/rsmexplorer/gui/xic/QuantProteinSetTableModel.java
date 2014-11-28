@@ -9,6 +9,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.Filter;
+import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.table.ExportTableSelectionInterface;
@@ -36,7 +37,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public static final int LAST_STATIC_COLUMN = COLTYPE_NB_QUANT_PEPTIDE;
     
     private static final String[] m_columnNames = {"Id", "Protein Set", "Overview", "#Peptide", "<html>#Quant.<br/>Peptide</html>"};
-    private static final String[] m_columnNamesForFilter = {"Id", "Protein Set", "Overview", "#Peptide", "#Quant. Peptide"};
+    private static final String[] m_columnNamesForFilter = {"Id", "Protein Set", "Overview", "#Peptide", "#Quant.Peptide"};
     private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id",  "Identified Protein label", "Overview on Abundance", "Number of Identified Peptides", "Number of Quantified Peptides"};
     
     public static final int COLTYPE_SELECTION_LEVEL = 0;
@@ -94,6 +95,18 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             
             sb.append("</html>");
             return sb.toString();
+        }
+    }
+    
+    public String getColumnNameForFilter(int col) {
+        if (col<=LAST_STATIC_COLUMN) {
+            return m_columnNamesForFilter[col];
+        } else if (m_quantChannels != null) {
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+            int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+            return m_columnNamesQC[id];
+        } else {
+            return ""; // should not happen
         }
     }
     
@@ -495,20 +508,12 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             case COLTYPE_PROTEIN_SET_NAME: {
                 return ((StringFilter) filter).filter((String)data);
             }
-            /*case COLTYPE_PROTEIN_SET_DESCRIPTION: {
-                return ((StringFilter) filter).filter((String)data);
-            }
-            case COLTYPE_PROTEIN_SCORE: {
-                return ((DoubleFilter) filter).filter((Float)data);
-            }
-            case COLTYPE_PROTEINS_COUNT:
-            case COLTYPE_PEPTIDES_COUNT:
-            case COLTYPE_SPECTRAL_COUNT:
-            case COLTYPE_UNIQUE_SEQUENCES_COUNT:
-            case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
+            case COLTYPE_NB_PEPTIDE: {
                 return ((IntegerFilter) filter).filter((Integer)data);
-            }*/ //JPM.TODO
-    
+            }
+            case COLTYPE_NB_QUANT_PEPTIDE: {
+                return ((IntegerFilter) filter).filter((Integer)data);
+            }
         }
         
         return true; // should never happen
@@ -521,15 +526,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             int nbCol = getColumnCount();
             m_filters = new Filter[nbCol];
             m_filters[COLTYPE_PROTEIN_SET_ID] = null;
-            m_filters[COLTYPE_PROTEIN_SET_NAME] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_NAME));
+            m_filters[COLTYPE_PROTEIN_SET_NAME] = new StringFilter(getColumnNameForFilter(COLTYPE_PROTEIN_SET_NAME));
             m_filters[COLTYPE_OVERVIEW] = null;            
-            /*m_filters[COLTYPE_PROTEIN_SET_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_DESCRIPTION));
-            m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
-            m_filters[COLTYPE_PROTEINS_COUNT] = null;
-            m_filters[COLTYPE_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT));
-            m_filters[COLTYPE_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECTRAL_COUNT));
-            m_filters[COLTYPE_SPECIFIC_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECIFIC_SPECTRAL_COUNT));
-            m_filters[COLTYPE_UNIQUE_SEQUENCES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_UNIQUE_SEQUENCES_COUNT));   */         
+            m_filters[COLTYPE_NB_PEPTIDE] = new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_PEPTIDE)); 
+            m_filters[COLTYPE_NB_QUANT_PEPTIDE] = new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_QUANT_PEPTIDE));        
         }
     }
 

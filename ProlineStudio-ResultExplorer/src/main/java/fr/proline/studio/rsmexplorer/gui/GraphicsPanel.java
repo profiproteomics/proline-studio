@@ -197,7 +197,8 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
             }
 
             m_valueXComboBox.setSelectedIndex(0);
-            m_valueYComboBox.setSelectedIndex(0);
+            int yIndex = (nbValuesType>=2) ? 1 : 0;
+            m_valueYComboBox.setSelectedIndex(yIndex);
             
 
         } finally {

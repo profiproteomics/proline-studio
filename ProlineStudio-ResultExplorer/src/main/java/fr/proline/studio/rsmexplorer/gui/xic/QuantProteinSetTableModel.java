@@ -632,7 +632,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
     @Override
     public String getDataColumnIdentifier(int col) {
-        if (col <= COLTYPE_PROTEIN_SET_NAME) {
+        if (col <= LAST_STATIC_COLUMN) {
             return m_columnNamesForFilter[col];
         } else {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;

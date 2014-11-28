@@ -15,6 +15,8 @@ import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.graphics.BestGraphicsInterface;
+import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.utils.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,7 +25,7 @@ import java.util.HashSet;
  * Table Model for PeptideMatch of a RSet
  * @author JM235353
  */
-public class PeptideMatchTableModel extends LazyTableModel implements CompareDataInterface  {
+public class PeptideMatchTableModel extends LazyTableModel implements CompareDataInterface, BestGraphicsInterface  {
 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_PREVIOUS_AA = 1;
@@ -767,7 +769,6 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
             case COLTYPE_PEPTIDE_PPM:
-            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
                 return Float.class;
             case COLTYPE_PEPTIDE_START:
             case COLTYPE_PEPTIDE_STOP:
@@ -776,6 +777,8 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
                 return Integer.class;
+            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
+                return Object.class; // Float or String... JPM.TODO
         }
         return getColumnClass(columnIndex);
     }
@@ -811,5 +814,32 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
     public String getName() {
         return m_modelName;
     }
+
+    @Override
+    public PlotType getBestPlotType() {
+        return PlotType.HISTOGRAM_PLOT;
+    }
+
+    @Override
+    public int getBestXAxisColIndex(PlotType plotType) {
+        switch (plotType) {
+            case HISTOGRAM_PLOT:
+                return convertColToColUsed(COLTYPE_PEPTIDE_PPM);
+            case SCATTER_PLOT:
+                return convertColToColUsed(COLTYPE_PEPTIDE_CALCULATED_MASS);
+        }
+        return -1;
+    }
+
+    @Override
+    public int getBestYAxisColIndex(PlotType plotType) {
+        switch (plotType) {
+            case SCATTER_PLOT:
+                return convertColToColUsed(COLTYPE_PEPTIDE_SCORE);
+        }
+        return -1;
+    }
+
+
 
 }

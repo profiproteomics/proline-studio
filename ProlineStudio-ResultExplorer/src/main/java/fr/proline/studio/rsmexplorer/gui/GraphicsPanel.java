@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.PlotAbstract;
 import fr.proline.studio.graphics.PlotHistogram;
 import fr.proline.studio.graphics.PlotScatter;
@@ -186,20 +187,49 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
             HashSet<Class> acceptedValues = plotType.getAcceptedXValues();
 
             int nbValuesType = m_values.getColumnCount();
+            
+            // find the best column for the current plot
+            int bestColX = -1;
+            int bestColY = -1;
+            if (m_values instanceof BestGraphicsInterface) {
+                BestGraphicsInterface bestGraphics = (BestGraphicsInterface) m_values;
+                int col = bestGraphics.getBestXAxisColIndex(plotType);
+                if (col != -1) {
+                    bestColX = col;
+                }
+                col = bestGraphics.getBestYAxisColIndex(plotType);
+                if (col != -1) {
+                    bestColY = col;
+                }
+            }
+
+            // fill the comboboxes and find the index to be selected
+            int bestColIndexXCbx = 0;
+            int bestColIndexYCbx = (nbValuesType >= 2) ? 1 : 0;
+            int nbValuesInCbx = 0;
             for (int i = 0; i < nbValuesType; i++) {
                 Class c = m_values.getDataColumnClass(i);
                 if (acceptedValues.contains(c)) {
                     ReferenceToColumn ref = new ReferenceToColumn(m_values.getDataColumnIdentifier(i), i);
                     ((DefaultComboBoxModel) m_valueXComboBox.getModel()).addElement(ref);
                     ((DefaultComboBoxModel) m_valueYComboBox.getModel()).addElement(ref);
-                    setData(m_values);
+                    if (bestColX == i) {
+                        bestColIndexXCbx = nbValuesInCbx;
+                    }
+                    if (bestColY == i) {
+                        bestColIndexYCbx = nbValuesInCbx;
+                    }
+                    nbValuesInCbx++;
+                    
                 }
             }
-
-            m_valueXComboBox.setSelectedIndex(0);
-            int yIndex = (nbValuesType>=2) ? 1 : 0;
-            m_valueYComboBox.setSelectedIndex(yIndex);
             
+            m_valueXComboBox.setSelectedIndex(bestColIndexXCbx);
+            m_valueYComboBox.setSelectedIndex(bestColIndexYCbx);
+            
+            
+            setData(m_values);
+
 
         } finally {
             m_isUpdatingCbx = false;

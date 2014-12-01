@@ -397,7 +397,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                     return taskInfo.getIdList();
                 }
                 case COLTYPE_TASKINFO_CRITICALITY: {
-                    return taskInfo;
+                    return taskInfo.getImportanceAsString();
                 }
                 case COLTYPE_DESCRIPTION: {
                     return taskInfo.getTaskDescription();
@@ -543,9 +543,9 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
             super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
 
-            TaskInfo task = (TaskInfo) value;
+           // TaskInfo task = (TaskInfo) value;
 
-            setText(task.getImportanceAsString());
+            //setText(task.getImportanceAsString());
 
             return this;
         }

@@ -237,8 +237,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                         }
                        int realCol = LAST_STATIC_COLUMN+1 + m_overviewType+col*m_columnNamesQC.length;
                        LazyData lazyData = (LazyData)getValueAt(row, realCol);
-                       if (Number.class.isAssignableFrom(lazyData.getData().getClass())) {
-                            return ((Number)lazyData.getData()).floatValue();
+                       if (lazyData != null && lazyData.getData() != null){
+                            if (Number.class.isAssignableFrom(lazyData.getData().getClass())) {
+                                return ((Number)lazyData.getData()).floatValue();
+                            }
                        }
                        return 0;
                     }
@@ -292,7 +294,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                         return Double.compare(calculateComparableValue(), o.calculateComparableValue());
                     }
                 };
-
+                
             case COLTYPE_NB_PEPTIDE: {
                 LazyData lazyData = getLazyData(row,col);
                 

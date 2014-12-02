@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.studio.dpm.data.SpectralCountResultData;
 import fr.proline.studio.export.ExportColumnTextInterface;
+import fr.proline.studio.export.ExportRowTextInterface;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer.CompareValue;
@@ -16,7 +17,7 @@ import java.util.*;
  *
  * @author JM235353
  */
-public class WSCProteinTableModel extends LazyTableModel implements ExportColumnTextInterface {
+public class WSCProteinTableModel extends LazyTableModel implements ExportColumnTextInterface, ExportRowTextInterface {
 
     public static final int COLTYPE_PROTEIN_NAME = 0;
     public static final int COLTYPE_OVERVIEW = 1;
@@ -491,5 +492,65 @@ public class WSCProteinTableModel extends LazyTableModel implements ExportColumn
     @Override
     public int getSubTaskId(int col) {
         return -1;
+    }
+
+    @Override
+    public String getExportRowCell(int row, int col) {
+        
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+
+        // Retrieve Protein Match
+        String proteinMatchName = m_protMatchNames.get(rowFiltered);
+
+        switch (col) {
+            case COLTYPE_PROTEIN_NAME:
+                return proteinMatchName;
+            case COLTYPE_OVERVIEW:
+                return "";
+
+            default: {
+                int currentRSMNbr = getRsmNumber(col)+1;
+                Long rsmID = m_wscResult.getComputedSCRSMIds().get(currentRSMNbr - 1);
+                Map<String, SpectralCountResultData.SpectralCountsStruct> rsmResult = m_wscResult.getRsmSCResult(rsmID);
+                SpectralCountResultData.SpectralCountsStruct searchedProtSC = rsmResult.get(proteinMatchName);
+                int colSuffixIndex = getTypeNumber(col)+2;
+                switch (colSuffixIndex) {
+                    case COLTYPE_STATUS:
+                        if (searchedProtSC != null) {
+                            return searchedProtSC.getProtMatchStatus();
+                        } else {
+                            return "";
+                        }
+                    case COLTYPE_PEPTIDE_NUMBER:
+                        if (searchedProtSC != null) {
+                            return Integer.toString(searchedProtSC.getPeptideNumber());
+                        } else {
+                            return "0";
+                        }
+                    case COLTYPE_BSC:
+                        if (searchedProtSC != null) {
+                            return Float.toString(searchedProtSC.getBsc());
+                        } else {
+                            return "0";
+                        }
+                    case COLTYPE_SSC:
+                        if (searchedProtSC != null) {
+                            return Float.toString(searchedProtSC.getSsc());
+                        } else {
+                            return "0";
+                        }
+                    case COLTYPE_WSC:
+                        if (searchedProtSC != null) {
+                            return Float.toString(searchedProtSC.getWsc());
+                        } else {
+                            return "0";
+                        }
+                }
+            }
+        }
+        return null; // should never happen
     }
 }

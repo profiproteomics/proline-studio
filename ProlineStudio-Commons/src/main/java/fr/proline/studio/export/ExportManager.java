@@ -76,12 +76,21 @@ public class ExportManager {
             int lastPercentage = 0;
             int percentage;
             for (int row = 0; row < nbRow; row++) {
-                m_exporter.startRow();
-                for (int col = 0; col < nbCol; col++) {
-                    TableCellRenderer renderer = m_table.getCellRenderer(row, col);
-                    Component c = m_table.prepareRenderer(renderer, row, col);
-                    String text = componentToText(c);
-                    m_exporter.addCell(text);
+                boolean rowTextInterface =(m_table instanceof ExportRowTextInterface);
+                if (rowTextInterface){
+                    m_exporter.startRow();
+                    for (int col = 0; col < nbCol; col++) {
+                        String text = ((ExportRowTextInterface)m_table).getExportRowCell(row, col);
+                        m_exporter.addCell(text);
+                    }
+                }else{
+                    m_exporter.startRow();
+                    for (int col = 0; col < nbCol; col++) {
+                        TableCellRenderer renderer = m_table.getCellRenderer(row, col);
+                        Component c = m_table.prepareRenderer(renderer, row, col);
+                        String text = componentToText(c);
+                        m_exporter.addCell(text);
+                    }
                 }
                 percentage = (int) Math.round((((double)(row + 1)) / nbRow) * 100);
                 if (percentage>lastPercentage) {

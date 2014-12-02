@@ -143,7 +143,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
                 case DataboxXicPeptideSet:
                     return new DataboxXicPeptideSet();
                 case DataboxRsetMSDiag:
-                	return new DataBoxRsetMSDiag("");
+                	return new DataBoxRsetMSDiag(null);
                 case DataboxSelectCompareData:
                     return new DataboxSelectCompareData();
                 case DataboxXicPeptideIon:

@@ -45,11 +45,13 @@ public class DatabaseObjectTreeTask extends AbstractDatabaseTask {
                 m_logger.warn("PeptideMatch {} has more than one object_tree ", pmORM.getId());
             }
 
-            Long objectTreeId = aw_Map.get("peptide_match.spectrum_match");
-            if (objectTreeId != null) {
-                ot = entityManagerMSI.find(ObjectTree.class, objectTreeId); // get the objectTree from id.
-            } else {
-                result = false;
+            if (aw_Map.size() > 0){
+                Long objectTreeId = aw_Map.get("peptide_match.spectrum_match");
+                if (objectTreeId != null) {
+                    ot = entityManagerMSI.find(ObjectTree.class, objectTreeId); // get the objectTree from id.
+                } else {
+                    result = false;
+                }
             }
 
             entityManagerMSI.getTransaction().commit();

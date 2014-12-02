@@ -61,6 +61,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataBoxRsetPeptideSpectrum;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.utils.IconManager;
+import java.awt.Cursor;
 
 import java.awt.event.ActionEvent;
 
@@ -239,6 +240,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
             if (DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
                 m_generateMatchButton.setEnabled(true);
             }
+        }else {
+             m_generateMatchButton.setEnabled(false);
         }
         
         
@@ -298,10 +301,11 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
                 } else {
                     m_logger.error("Fail to generate spectrum matches for peptide_match.id=" + m_previousPeptideMatch.getId());
                 }
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
         };
         
-        
+        setCursor(new Cursor(Cursor.WAIT_CURSOR));
         GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(spectrumMatchCallback, null, m_dataBox.getProjectId(), m_previousPeptideMatch.getResultSetId(), null, m_previousPeptideMatch.getId());
         AccessServiceThread.getAccessServiceThread().addTask(task);
         

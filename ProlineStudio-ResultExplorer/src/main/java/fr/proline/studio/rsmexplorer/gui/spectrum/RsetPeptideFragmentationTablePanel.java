@@ -80,12 +80,13 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
 
     
     public void setData(DPeptideMatch peptideMatch, PeptideFragmentationData peptideFragmentationData) {
-    	if(peptideFragmentationData == null) {
+    	// we need to update the fragmentation data, in case the fragmentationData was not null and is now null
+        /*if(peptideFragmentationData == null) {
         	return;
         }
     	if(peptideFragmentationData.isEmpty) {
         	return;
-        }
+        }*/
         if (!m_isDisplayed) {
             // postpone update
             m_peptideMatchPostponed = peptideMatch;
@@ -141,11 +142,11 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
         }
         if (!m_isDisplayed) {
             // update display
-            if (m_peptideMatchPostponed != null) {
+            //if (m_peptideMatchPostponed != null) {
                 updateDisplay(m_peptideMatchPostponed, m_peptideFragmentationDataPostponed);
                 m_peptideMatchPostponed = null;
                 m_peptideFragmentationDataPostponed = null;
-            }
+            //}
         }
         m_isDisplayed = showed;
     }

@@ -2,9 +2,8 @@ package fr.proline.studio.graphics;
 
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
-import java.awt.FontMetrics;
+import java.awt.Font;
 import java.awt.Graphics2D;
-import java.text.DecimalFormat;
 
 /**
  * X Axis
@@ -48,8 +47,13 @@ public class XAxis extends Axis {
         
         g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
         
-        FontMetrics metrics = g.getFontMetrics(g.getFont());
-        int height = metrics.getHeight();
+        if (m_valuesFont == null) {
+            m_valuesFont = g.getFont().deriveFont(Font.PLAIN, 10);
+            m_valuesFontMetrics = g.getFontMetrics(m_valuesFont);
+        }
+        g.setFont(m_valuesFont);
+
+        int height = m_valuesFontMetrics.getHeight();
 
         
         double multForRounding = Math.pow(10,digits);
@@ -67,7 +71,7 @@ public class XAxis extends Axis {
             }
             
             String s = m_df.format(xDisplay);
-            int stringWidth = metrics.stringWidth(s);
+            int stringWidth = m_valuesFontMetrics.stringWidth(s);
             
             int posX = pX-stringWidth/2;
             if (posX>previousEndX+2) { // check to avoid to overlap labels
@@ -80,6 +84,23 @@ public class XAxis extends Axis {
             if (pX>pixelStop) {
                 break;
             }
+
+        }
+        
+        if (m_title != null) {
+            if (m_titleFont == null) {
+                m_titleFont = g.getFont().deriveFont(Font.BOLD, 11);
+                m_titleFontMetrics = g.getFontMetrics(m_titleFont);
+            }
+            g.setFont(m_titleFont);
+            g.setColor(Color.black);
+            int titleWidth = m_titleFontMetrics.stringWidth(m_title);
+            int bottom = m_y+m_height;
+            int top = m_y+m_height-PlotPanel.GAP_AXIS_TITLE;
+            int ascent = m_titleFontMetrics.getAscent();
+            int descent = m_titleFontMetrics.getDescent();
+            int baseline=top+((bottom+1-top)/2) - ((ascent + descent)/2) + ascent;
+            g.drawString(m_title, (m_width-titleWidth)/2,baseline);
         }
     }
     

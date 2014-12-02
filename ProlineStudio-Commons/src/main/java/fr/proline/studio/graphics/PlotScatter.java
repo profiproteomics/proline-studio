@@ -102,7 +102,8 @@ public class PlotScatter extends PlotAbstract {
         }
 
         m_plotPanel.updateAxis(this);
-
+        m_plotPanel.setXAxisTitle(compareDataInterface.getDataColumnIdentifier(colX));
+        m_plotPanel.setYAxisTitle(compareDataInterface.getDataColumnIdentifier(colY));
         
         m_plotPanel.repaint();
     }
@@ -147,20 +148,17 @@ public class PlotScatter extends PlotAbstract {
             int y = yAxis.valueToPixel( m_dataY[i]);
 
             g.setColor(CyclicColorPalette.getColor(21, 128));
-            //m_ellipse.setFrame(x-2.5, y-2.5, 5, 5);
-            //g.fill(m_ellipse);
-            
-
             g.fillOval(x-3, y-3, 6, 6);
             
             
 
             
         }
+
         
         paintMarkers(g);
     }
-    //private  Ellipse2D.Double m_ellipse = new Ellipse2D.Double();
+
     
     @Override
     public boolean needsDoubleBuffering() {

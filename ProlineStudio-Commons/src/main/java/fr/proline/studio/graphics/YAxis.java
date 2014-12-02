@@ -2,8 +2,9 @@ package fr.proline.studio.graphics;
 
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
-import java.awt.FontMetrics;
+import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 
 /**
  * Y Axis
@@ -37,8 +38,14 @@ public class YAxis extends Axis {
         }
         
         g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
-        FontMetrics metrics = g.getFontMetrics(g.getFont());
-        int halfAscent = metrics.getAscent()/2;
+        
+        if (m_valuesFont == null) {
+            m_valuesFont = g.getFont().deriveFont(Font.PLAIN, 10);
+            m_valuesFontMetrics = g.getFontMetrics(m_valuesFont);
+        }
+        g.setFont(m_valuesFont);
+        
+        int halfAscent = m_valuesFontMetrics.getAscent()/2;
         
         int pixelStart = valueToPixel(m_minTick);
         int pixelStop = valueToPixel(m_maxTick);
@@ -62,7 +69,7 @@ public class YAxis extends Axis {
             }
             
             String s = m_df.format(yDisplay);
-            int stringWidth = metrics.stringWidth(s);
+            int stringWidth = m_valuesFontMetrics.stringWidth(s);
             
             g.drawString(s, PlotPanel.GAP_FIGURES_Y-stringWidth-6, pY+halfAscent);
             
@@ -74,6 +81,31 @@ public class YAxis extends Axis {
                 break;
             }
         }
+        
+        if (m_title != null) {
+            if (m_titleFont == null) {
+                AffineTransform affineTr = new AffineTransform();
+                affineTr.rotate(-Math.PI / 2);
+                m_titleFont = g.getFont().deriveFont(Font.BOLD, 11).deriveFont(affineTr);
+                m_titleFontMetrics = g.getFontMetrics(m_titleFont);
+            }
+            Font prevFont = g.getFont();
+            
+            g.setFont(m_titleFont);
+            g.setColor(Color.black);
+            int titleWidth = m_titleFontMetrics.stringWidth(m_title);
+            int bottom = m_x;
+            int top = m_x + PlotPanel.GAP_AXIS_TITLE;
+            int ascent = m_titleFontMetrics.getAscent();
+            int descent = m_titleFontMetrics.getDescent();
+            int baseline = top + ((bottom + 1 - top) / 2) - ((ascent + descent) / 2) + ascent;
+            g.drawString(m_title, baseline , m_y+(m_height - titleWidth) / 2);
+            
+            // restore font (necessary due to affine transform
+            g.setFont(prevFont);
+        }
+        
+        
     }
     
     public void paintGrid(Graphics2D g, int x, int width) {

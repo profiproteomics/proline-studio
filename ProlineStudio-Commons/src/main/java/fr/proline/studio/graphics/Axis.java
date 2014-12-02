@@ -1,5 +1,7 @@
 package fr.proline.studio.graphics;
 
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.text.DecimalFormat;
@@ -10,7 +12,11 @@ import java.text.DecimalFormat;
  */
 public abstract class Axis {
 
-    protected String m_title;
+    protected String m_title = null;
+    protected Font m_titleFont = null;
+    protected FontMetrics m_titleFontMetrics;
+    protected Font m_valuesFont = null;
+    protected FontMetrics m_valuesFontMetrics = null;
     
     protected int m_x;
     protected int m_y;

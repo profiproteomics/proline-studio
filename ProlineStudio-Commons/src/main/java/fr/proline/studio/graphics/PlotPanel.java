@@ -26,9 +26,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     
     
     public final static int GAP_FIGURES_Y = 50;
-    public final static int GAP_FIGURES_X = 30;
+    public final static int GAP_FIGURES_X = 24;
     public final static int GAP_END_AXIS = 10;
-    public final static int GAP_AXIS_TITLE = 0; //JPM.TODO
+    public final static int GAP_AXIS_TITLE = 20;
     
     private BufferedImage m_doubleBuffer = null;
     private boolean m_useDoubleBuffering = false;
@@ -58,7 +58,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
 //        g.drawRect(0, 0, bounds.width-1, bounds.height-1);
         
         if (m_xAxis != null) {
-            m_xAxis.setSize(GAP_FIGURES_Y, ((int)bounds.getHeight())-GAP_FIGURES_X /*-GAP_TOP_AXIS*/, bounds.width-GAP_FIGURES_Y-GAP_END_AXIS, GAP_FIGURES_X + GAP_AXIS_TITLE);
+            m_xAxis.setSize(GAP_FIGURES_Y, ((int)bounds.getHeight())-GAP_FIGURES_X -GAP_AXIS_TITLE /*-GAP_TOP_AXIS*/, bounds.width-GAP_FIGURES_Y-GAP_END_AXIS, GAP_FIGURES_X + GAP_AXIS_TITLE);
             plotArea.x = m_xAxis.m_x+1;
             plotArea.width = m_xAxis.m_width-1;
             m_xAxis.paint(g2d);
@@ -66,7 +66,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         }
         
         if (m_yAxis != null) {
-            m_yAxis.setSize(0, GAP_END_AXIS, GAP_FIGURES_Y+GAP_AXIS_TITLE /*+GAP_TOP_AXIS*/, ((int)bounds.getHeight())-GAP_FIGURES_X-GAP_END_AXIS);
+            m_yAxis.setSize(0, GAP_END_AXIS, GAP_FIGURES_Y+GAP_AXIS_TITLE /*+GAP_TOP_AXIS*/, ((int)bounds.getHeight())-GAP_FIGURES_X-GAP_AXIS_TITLE-GAP_END_AXIS);
             plotArea.y = m_yAxis.m_y+1;
             plotArea.height = m_yAxis.m_height-1;
             m_yAxis.paint(g2d);
@@ -77,6 +77,8 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         
         
         if (m_plot != null) {
+            
+            m_useDoubleBuffering = false; //JPM.TODO
             
             if (m_useDoubleBuffering) {
                 boolean createDoubleBuffer = ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth()!=plotArea.width) || (m_doubleBuffer.getHeight()!=plotArea.height)); 
@@ -158,6 +160,20 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         
         m_updateDoubleBuffer = true;
         m_useDoubleBuffering = plot.needsDoubleBuffering();
+    }
+    
+    public void setXAxisTitle(String title) {
+        if  (m_xAxis == null) {
+            return;
+        }
+        m_xAxis.setTitle(title);
+    }
+    
+    public void setYAxisTitle(String title) {
+        if (m_yAxis == null) {
+            return;
+        }
+        m_yAxis.setTitle(title);
     }
     
     public XAxis getXAxis() {

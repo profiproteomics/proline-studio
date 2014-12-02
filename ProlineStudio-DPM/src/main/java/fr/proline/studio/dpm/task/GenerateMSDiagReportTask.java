@@ -10,6 +10,8 @@ import com.google.api.client.util.ArrayMap;
 
  
 
+
+
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo; 
 
@@ -31,13 +33,14 @@ public class GenerateMSDiagReportTask extends AbstractServiceTask {
 
     private Long m_projectId;
     private Long m_resultSetId;
-	public ArrayList<String> m_resultMessages ;
+    private Map<String, Object> m_msdiagParameters; // parameters for MSDiag (such as category intervals...)
+	public ArrayList<Object> m_resultMessages ; // 0: settings 1:data to be returned as json string
     
    // public ExportRSMTask(AbstractServiceCallback callback, DDataset dataset, boolean exportAllPSMs, String[] filePathInfo) {
    //     super(callback, false /** asynchronous */, new TaskInfo("Export Identification Summary " + dataset.getName(), true, TASK_LIST_INFO));
    
     //public GenerateMSDiagReportTask(AbstractServiceCallback callback, String datasetName, Long projectId, Long resultSetId, Long resultSummaryId) {
-    public GenerateMSDiagReportTask(AbstractServiceCallback callback,  Long projectId, Long resultSetId, ArrayList<String> resultMessages) {
+    public GenerateMSDiagReportTask(AbstractServiceCallback callback,  Long projectId, Long resultSetId, Map<String, Object> msdiagParameters, ArrayList<Object> resultMessages) {
         super(callback, false /** asynchronous */,  new TaskInfo( ((resultSetId != null) ? "Generate MSDiag Report for resultSet id "+ resultSetId : "Generate MSDiag Report"), true, TASK_LIST_INFO,TaskInfo.INFO_IMPORTANCE_HIGH));
 
      //   m_dataset = dataset;
@@ -47,6 +50,7 @@ public class GenerateMSDiagReportTask extends AbstractServiceTask {
         m_projectId = projectId;
         m_resultSetId = resultSetId;
         m_resultMessages = resultMessages;
+        m_msdiagParameters = msdiagParameters;
         //JOptionPane.showMessageDialog(null," l 50" + resultMessages.get(resultMessages.size()-1), "GenerateMSDiagReportTask",1);
     	
         //m_resultMessages = new ArrayList<String> (2);
@@ -70,6 +74,7 @@ public class GenerateMSDiagReportTask extends AbstractServiceTask {
             Map<String, Object> params = new HashMap<>();
             params.put("project_id", m_projectId);
             params.put("result_set_id", m_resultSetId);
+            params.put("msdiag_settings", m_msdiagParameters);
             request.setParameters(params);
 
 
@@ -150,14 +155,14 @@ public class GenerateMSDiagReportTask extends AbstractServiceTask {
             
             m_loggerWebcore.debug((getClass().getSimpleName() + " response back from service:\n" + response));
             
-            m_resultMessages.add("Element 0 from GenerateMSDiagReportTask"); //response.toString();
+            //m_resultMessages.add("Element 0 from GenerateMSDiagReportTask"); //response.toString();
             
             GenericJson jsonResult = response.parseAs(GenericJson.class);
             
            // JOptionPane.showMessageDialog(null," l 157\n" + jsonResult, "GenerateMSDiagReportTask",1);
 
             
-            m_resultMessages.add(jsonResult.toPrettyString());
+            //m_resultMessages.add(jsonResult.toPrettyString());
             m_loggerWebcore.debug((getClass().getSimpleName() + " json message back from service:\n" + jsonResult.toPrettyString()));
            
             
@@ -222,7 +227,7 @@ public class GenerateMSDiagReportTask extends AbstractServiceTask {
                         m_loggerProline.debug(getClass().getSimpleName() + " failed : No returned String value");
                         return ServiceState.STATE_FAILED;
                     }
-            //        JOptionPane.showMessageDialog(null," l 222" + receivedStringValue, "GenerateMSDiagReportTask",1);
+                    //JOptionPane.showMessageDialog(null," l 230" + receivedStringValue, "GenerateMSDiagReportTask",1);
 
                    m_resultMessages.add( receivedStringValue); // SEND MESSAGE BACK ***********************
                    return ServiceState.STATE_DONE;

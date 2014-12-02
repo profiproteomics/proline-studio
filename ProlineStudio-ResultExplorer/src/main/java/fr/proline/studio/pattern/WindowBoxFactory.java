@@ -1,11 +1,14 @@
 package fr.proline.studio.pattern;
 
 
+import java.util.HashMap;
+
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import fr.proline.studio.utils.IconManager;
+
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -60,7 +63,7 @@ public class WindowBoxFactory {
         
     }
     
-    public static WindowBox getMSDiagWindowBox(String name, String resultMessage) {
+    public static WindowBox getMSDiagWindowBox(String name, HashMap<String,String> resultMessage) {
         // MSDiag
     	// 
         // create boxes

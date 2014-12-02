@@ -111,7 +111,8 @@ public class IconManager {
         ARROW_DOWN, 
         ARROW_RIGHT,
         ADD_DATA_MIXER,
-        DATA_MIXER;
+        DATA_MIXER,
+        GRID_11X11;
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -395,6 +396,8 @@ public class IconManager {
                return "fr/proline/studio/images/addDataMixer.png";
            case DATA_MIXER:
                return "fr/proline/studio/images/data-mixer.png";
+           case GRID_11X11:
+               return "fr/proline/studio/images/grid11x11.png";
         }
 
 

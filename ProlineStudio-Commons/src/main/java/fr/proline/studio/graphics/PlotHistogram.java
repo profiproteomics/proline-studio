@@ -101,6 +101,9 @@ public class PlotHistogram extends PlotAbstract {
         m_yMax *= 1.2; // we let place at the top to be able to put information
         
         m_plotPanel.updateAxis(this);
+        m_plotPanel.setXAxisTitle(compareDataInterface.getDataColumnIdentifier(colX));
+        m_plotPanel.setYAxisTitle("Percentage %");
+        
         
         m_dataX = new double[bins + 1];
         m_dataY = new double[bins + 1];

@@ -171,6 +171,12 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
+            
+            if (!dataSetNode.isLeaf()) {
+                setEnabled(false);
+                return;
+            }
+            
         }
 
         

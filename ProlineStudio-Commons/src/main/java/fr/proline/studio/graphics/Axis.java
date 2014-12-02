@@ -24,6 +24,7 @@ public abstract class Axis {
     // Min tick and max tick
     protected double m_minTick; 
     protected double m_maxTick;
+    protected double m_tickSpacing;
     
     protected DecimalFormat m_df;
     protected int m_digits = -1;

@@ -3,8 +3,6 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Graphics2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.util.HashSet;
 
 /**
@@ -89,8 +87,8 @@ public class PlotScatter extends PlotAbstract {
             m_xMin = m_xMin-1;  //JPM.TODO : enhance this
             m_xMax = m_xMax+1;
         } else {
-            m_xMin =  m_xMin-deltaX*0.05;
-            m_xMax = m_xMax+deltaX*0.05;
+            m_xMin =  m_xMin-deltaX*0.01;
+            m_xMax = m_xMax+deltaX*0.01;
         }
         
         double deltaY = (m_yMax-m_yMin);
@@ -99,8 +97,8 @@ public class PlotScatter extends PlotAbstract {
             m_yMin = m_yMin-1;  //JPM.TODO : enhance this
             m_yMax = m_yMax+1;
         } else {
-            m_yMin = m_yMin-deltaY*0.05;
-            m_yMax = m_yMax+deltaY*0.05;
+            m_yMin = m_yMin-deltaY*0.01;
+            m_yMax = m_yMax+deltaY*0.01;
         }
 
         m_plotPanel.updateAxis(this);

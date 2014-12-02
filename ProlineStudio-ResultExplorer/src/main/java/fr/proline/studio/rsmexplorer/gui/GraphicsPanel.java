@@ -12,6 +12,7 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -23,6 +24,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
 /**
@@ -90,9 +92,19 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
+        final JToggleButton gridButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.GRID_11X11));
+        gridButton.setSelected(true);
+        gridButton.setFocusPainted(false);
+        gridButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                m_plotPanel.displayGrid(gridButton.isSelected());
+            }
+        });
+        
         ExportButton exportImageButton = new ExportButton("Graphic", m_plotPanel);
 
-        
+        toolbar.add(gridButton);
         toolbar.add(exportImageButton);
 
         return toolbar;

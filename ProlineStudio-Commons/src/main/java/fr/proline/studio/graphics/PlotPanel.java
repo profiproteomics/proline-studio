@@ -34,6 +34,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     private boolean m_useDoubleBuffering = false;
     private boolean m_updateDoubleBuffer = false;
     
+    private boolean m_plotHorizontalGrid = true;
+    private boolean m_plotVerticalGrid = true;
+    
     public PlotPanel() {
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -59,6 +62,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             plotArea.x = m_xAxis.m_x+1;
             plotArea.width = m_xAxis.m_width-1;
             m_xAxis.paint(g2d);
+
         }
         
         if (m_yAxis != null) {
@@ -68,15 +72,30 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             m_yAxis.paint(g2d);
         }
         
+                    
+
+        
+        
         if (m_plot != null) {
             
             if (m_useDoubleBuffering) {
-                if ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth()!=plotArea.width) || (m_doubleBuffer.getHeight()!=plotArea.height) || (m_updateDoubleBuffer)) {
-                    m_doubleBuffer = new BufferedImage(plotArea.width, plotArea.height, BufferedImage.TYPE_INT_ARGB);
+                boolean createDoubleBuffer = ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth()!=plotArea.width) || (m_doubleBuffer.getHeight()!=plotArea.height)); 
+                if (createDoubleBuffer) {
+                        m_doubleBuffer = new BufferedImage(plotArea.width, plotArea.height, BufferedImage.TYPE_INT_ARGB);
+                    }
+                if (createDoubleBuffer || m_updateDoubleBuffer) {
+                    
                     Graphics2D graphicBufferG2d = (Graphics2D) m_doubleBuffer.getGraphics();
                     graphicBufferG2d.setColor(Color.white);
                     graphicBufferG2d.fillRect(0, 0, plotArea.width, plotArea.height);
                     graphicBufferG2d.translate(-plotArea.x, -plotArea.y);
+                    if ((m_plotVerticalGrid) && (m_xAxis != null)) {
+                        m_xAxis.paintGrid(graphicBufferG2d, plotArea.y, plotArea.height);
+                    }
+
+                    if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
+                        m_yAxis.paintGrid(graphicBufferG2d, plotArea.x, plotArea.width);
+                    }
                     m_plot.paint(graphicBufferG2d);
                     m_updateDoubleBuffer = false;
                 }
@@ -87,6 +106,13 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
                 long startPlotTime = System.currentTimeMillis();
                 g.setColor(Color.white);
                 g.fillRect(plotArea.x, plotArea.y, plotArea.width, plotArea.height);
+                if ((m_plotVerticalGrid) && (m_xAxis != null)) {
+                    m_xAxis.paintGrid(g2d, plotArea.y, plotArea.height);
+                }
+
+                if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
+                    m_yAxis.paintGrid(g2d, plotArea.x, plotArea.width);
+                }
                 m_plot.paint(g2d);
                 long stopPlotTime = System.currentTimeMillis();
                 if (stopPlotTime - startPlotTime > 50) {
@@ -100,6 +126,12 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         
     }
   
+    public void displayGrid(boolean v) {
+        m_plotVerticalGrid = v;
+        m_plotHorizontalGrid = v;
+        m_updateDoubleBuffer = true;
+        repaint();
+    }
     
     public void setPlot(PlotAbstract plot) {
         m_plot = plot;

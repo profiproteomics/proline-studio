@@ -12,7 +12,7 @@ import java.text.DecimalFormat;
  */
 public class XAxis extends Axis {
 
-
+    
     
     public XAxis() {
     }
@@ -29,7 +29,7 @@ public class XAxis extends Axis {
         
         m_minTick = ticks.getTickMin();
         m_maxTick = ticks.getTickMax();
-        double tickSpacing = ticks.getTickSpacing();
+        m_tickSpacing = ticks.getTickSpacing();
         
         int digits = ticks.getDigits();
         
@@ -42,7 +42,7 @@ public class XAxis extends Axis {
         int pixelStop = valueToPixel(m_maxTick);
         g.drawLine(pixelStart, m_y, pixelStop, m_y);
         
-        if (pixelStart >= pixelStop) { // avoid infinite loop when histogram is flat
+        if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
         }
         
@@ -57,7 +57,7 @@ public class XAxis extends Axis {
         double x = m_minTick;
         int pX = pixelStart;
         int previousEndX = -Integer.MAX_VALUE;
-        while(true) {
+        while (true) {
             g.drawLine(pX, m_y, pX, m_y+4);
             
             // round x
@@ -75,9 +75,33 @@ public class XAxis extends Axis {
                 previousEndX = posX+stringWidth;
             }
             
-            x += tickSpacing;
+            x += m_tickSpacing;
             pX = valueToPixel(x);
             if (pX>pixelStop) {
+                break;
+            }
+        }
+    }
+    
+    public void paintGrid(Graphics2D g, int y, int height) {
+
+        int pixelStart = valueToPixel(m_minTick);
+        int pixelStop = valueToPixel(m_maxTick);
+
+        if (pixelStart >= pixelStop) { // avoid infinite loop 
+            return;
+        }
+
+        g.setColor(CyclicColorPalette.GRAY_GRID);
+
+        double x = m_minTick;
+        int pX = pixelStart;
+        while (true) {
+            g.drawLine(pX, y, pX, y + height-1);
+
+            x += m_tickSpacing;
+            pX = valueToPixel(x);
+            if (pX > pixelStop) {
                 break;
             }
         }

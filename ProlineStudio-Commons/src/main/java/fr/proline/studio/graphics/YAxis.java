@@ -28,7 +28,7 @@ public class YAxis extends Axis {
         
         m_minTick = ticks.getTickMin();
         m_maxTick = ticks.getTickMax();
-        double tickSpacing = ticks.getTickSpacing();
+        m_tickSpacing = ticks.getTickSpacing();
         
         int digits = ticks.getDigits();
         if ((digits != m_digits) || (m_df == null)) {
@@ -68,7 +68,31 @@ public class YAxis extends Axis {
             
             g.drawLine(PlotPanel.GAP_FIGURES_Y, pY, PlotPanel.GAP_FIGURES_Y-4, pY);
             
-            y += tickSpacing;
+            y += m_tickSpacing;
+            pY = valueToPixel(y);
+            if (pY<pixelStop) {
+                break;
+            }
+        }
+    }
+    
+    public void paintGrid(Graphics2D g, int x, int width) {
+
+        int pixelStart = valueToPixel(m_minTick);
+        int pixelStop = valueToPixel(m_maxTick);
+
+        if (pixelStart <= pixelStop) { // avoid infinite loop 
+            return;
+        }
+
+        g.setColor(CyclicColorPalette.GRAY_GRID);
+
+        double y = m_minTick;
+        int pY = pixelStart;
+        while (true) {
+            g.drawLine(x+1, pY, x+width, pY);
+            
+            y += m_tickSpacing;
             pY = valueToPixel(y);
             if (pY<pixelStop) {
                 break;

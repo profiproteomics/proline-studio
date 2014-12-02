@@ -49,6 +49,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
@@ -301,7 +302,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             
             addMouseListener(new TablePopupMouseAdapter(this));
-            
+            setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         }
         
         /** 

@@ -209,7 +209,7 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         m_generateMatchButton.setIcon(IconManager.getIcon(IconManager.IconType.FRAGMENTATION));
         m_generateMatchButton.setToolTipText("Generate & Store Spectrum Match");
         m_generateMatchButton.addActionListener(new ActionListener() {
-            
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 m_generateMatchButton.setEnabled(false);

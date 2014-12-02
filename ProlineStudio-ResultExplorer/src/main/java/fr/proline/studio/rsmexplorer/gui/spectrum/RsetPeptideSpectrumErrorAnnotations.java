@@ -231,8 +231,16 @@ public class RsetPeptideSpectrumErrorAnnotations {
          plot.addRangeMarker(target2);
          
 
-        int sizeABCserie = fragSer[positionIonABC].masses.length;
-        int sizeXYZserie = fragSer[positionIonXYZ].masses.length;
+        int sizeABCserie = 0;
+        if(positionIonABC>0) 
+        {
+        	sizeABCserie = fragSer[positionIonABC].masses.length;
+        }
+        int sizeXYZserie = 0;
+        if(positionIonXYZ>0)
+        {
+        	sizeXYZserie = fragSer[positionIonXYZ].masses.length;
+        }
 
 
         if (xyzSerieName.contains("z+1")) {

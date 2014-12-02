@@ -10,6 +10,8 @@ import fr.proline.studio.dpm.task.GenerateMSDiagReportTask;
 import fr.proline.studio.rsmexplorer.gui.RsetMSDiagPanel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +23,8 @@ import org.slf4j.LoggerFactory;
 public class DataBoxRsetMSDiag extends AbstractDataBox {
 
 
-    public String m_message_back = "if this message is shown then msdiag data not succesfully passed into...";
-    public ArrayList<String> m_messages_back;
+    public HashMap<String,String> m_message_back = null; //= "if this message is shown then msdiag data not succesfully passed into...";
+    public ArrayList<Object> m_messages_back;
     private ResultSet m_rset = null;
     
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
@@ -34,16 +36,16 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
      * or read back operation (true)
      * @return 
      */
-    public DataBoxRsetMSDiag(String resultMessage/*boolean readData*/) {
+    public DataBoxRsetMSDiag(HashMap<String,String> resultMessageHashMap) {
         super(DataboxType.DataboxRsetMSDiag);
         
-        m_messages_back = new ArrayList<String>(0);
+        m_messages_back = new ArrayList<Object>(2); // will contain the return data for msdiag (0: settings: 1:results)
 
         // Name of this databox
         m_name = "MSDiag databox";
         m_description = "MSDiag results";
-        m_message_back = resultMessage;
-        m_messages_back.add(m_message_back);
+        
+        m_messages_back.add(resultMessageHashMap); // first element is the settings (as hashmap type)
         
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(ResultSet.class, false);
@@ -85,8 +87,8 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
                 m_logger.debug("  get MSDiag data");
                 if (success) {
   
-                	int size = m_messages_back.size();
-                    ((RsetMSDiagPanel)m_panel).setData(m_messages_back.get(size-1)); // send last element containing JSON information (data to be represented)
+                	
+                	((RsetMSDiagPanel)m_panel).setData((String) m_messages_back.get(1)); // send last element containing JSON information (data to be represented)
                                       
                 } else {
                     ((RsetMSDiagPanel)m_panel).setData(null);
@@ -102,8 +104,20 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
       	ResultSet _rset = (m_rset!=null) ? m_rset : (ResultSet) m_previousDataBox.getData(false, ResultSet.class);
 
     	long rSetId = _rset.getId();
+          
+    	Map<String, Object> parameters = new HashMap<>();
+    	String scoreWindow = ((HashMap<String,String>) m_messages_back.get(0)).get("score.windows");  
+    	parameters.put("Score window", scoreWindow);
+    	//--
+    	String maxRank = ((HashMap<String,String>) m_messages_back.get(0)).get("max.rank");
+    	parameters.put("Max rank", maxRank);
+    	//--
+    	String scanGroupSize = ((HashMap<String,String>) m_messages_back.get(0)).get("scan.groups.size");
+    	parameters.put("Scan groups size", scanGroupSize);
+    	//--
     	
-    	task = new GenerateMSDiagReportTask(callback,  getProjectId(), rSetId, m_messages_back);
+    	
+    	task = new GenerateMSDiagReportTask(callback,  getProjectId(), rSetId, parameters,  m_messages_back);
     	
     	((RsetMSDiagPanel)m_panel).setData("task running...please wait.(or come back later)");
         

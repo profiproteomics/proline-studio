@@ -112,8 +112,13 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
     	String maxRank = ((HashMap<String,String>) m_messages_back.get(0)).get("max.rank");
     	parameters.put("Max rank", maxRank);
     	//--
-    	String scanGroupSize = ((HashMap<String,String>) m_messages_back.get(0)).get("scan.groups.size");
+    	String scanGroupSize = "1"; // disabled currently as no report needing this parameter (will change soon)
+    	if(((HashMap<String,String>) m_messages_back.get(0)).containsKey("scan.groups.size"))
+    	{
+    		((HashMap<String,String>) m_messages_back.get(0)).get("scan.groups.size");
+    	}
     	parameters.put("Scan groups size", scanGroupSize);
+    	
     	//--
     	
     	

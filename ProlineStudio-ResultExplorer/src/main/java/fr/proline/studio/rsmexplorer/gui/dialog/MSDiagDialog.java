@@ -1,8 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.studio.dpm.serverfilesystem.RootInfo;
-import fr.proline.studio.dpm.serverfilesystem.ServerFile;
-import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.*;
 import fr.proline.studio.progress.ProgressInterface;
@@ -12,7 +9,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
 import java.util.prefs.Preferences;
@@ -29,16 +25,11 @@ import org.slf4j.LoggerFactory;
 public class MSDiagDialog extends DefaultDialog {
 
     private static MSDiagDialog m_singletonDialog = null;
-    private static final String MSDIAG_SETTINGS = "MSDiag settings";
-
-
-     
+    private static final String MSDIAG_SETTINGS = "General Settings";
+  
     private final static String SETTINGS_KEY = "Settings key for msdiag";
-    
-    
-
+  
     private JComboBox m_parserComboBox;
-//    private int m_previousParserIndex = -1;
     private ParameterList m_sourceParameterList;
     private JPanel m_parserParametersPanel = null;
 
@@ -58,8 +49,7 @@ public class MSDiagDialog extends DefaultDialog {
 
         setTitle("Define settings for Statistical Reports (MSDiag)");
        
-//        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:importmascot");
-        
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:msdiag");    
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
         
@@ -76,8 +66,6 @@ public class MSDiagDialog extends DefaultDialog {
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new java.awt.GridBagLayout());
 
-        // create fileSelectionPanel
-       // JPanel fileSelectionPanel = createFileSelectionPanel();
 
         // create all other parameters panel
         JPanel allParametersPanel = createAllParametersPanel();
@@ -87,12 +75,6 @@ public class MSDiagDialog extends DefaultDialog {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-//        c.gridx = 0;
-//        c.gridy = 0;
-//        c.weightx = 1.0;
-//        c.weighty = 1.0;
-//        internalPanel.add(fileSelectionPanel, c);
 
         c.gridy++;
         c.weighty = 0;
@@ -105,19 +87,15 @@ public class MSDiagDialog extends DefaultDialog {
 
     private JPanel createAllParametersPanel() {
         JPanel allParametersPanel = new JPanel(new GridBagLayout());
-        allParametersPanel.setBorder(BorderFactory.createTitledBorder(" General Parameters "));
+        allParametersPanel.setBorder(BorderFactory.createTitledBorder(" MSDiag Reports Settings "));
         
         // create parserPanel
         JPanel settingsPanel = createSettingsPanel();
         
-//        // create decoyPanel
-//        JPanel decoyPanel = createDecoyPanel();
-        
+       
         // create parameter panel
         m_parserParametersPanel = createMSDiagParametersPanel();
         
-        // create panel with option save Spectrum Matches
-        //JPanel saveSpectrumPanel = createSaveSpectrumPanel();
         
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
@@ -129,14 +107,8 @@ public class MSDiagDialog extends DefaultDialog {
         c.weightx = 1.0;
         allParametersPanel.add(settingsPanel, c);
         
-//        c.gridy++;
-//        allParametersPanel.add(decoyPanel, c);
-        
         c.gridy++;
         allParametersPanel.add(m_parserParametersPanel, c);
-
-        /*c.gridy++;
-        allParametersPanel.add(saveSpectrumPanel, c);*/
         
         // init the first parser parameters panel selected
         m_parserComboBox.setSelectedIndex(0);
@@ -148,8 +120,6 @@ public class MSDiagDialog extends DefaultDialog {
         // Creation of Objects for the Parser Panel
         JPanel parserPanel = new JPanel(new GridBagLayout());
 
-       // JLabel parserLabel = new JLabel("Software Engine :");
-       // parserLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         m_parserComboBox = new JComboBox(createParameters());
         
 
@@ -159,10 +129,6 @@ public class MSDiagDialog extends DefaultDialog {
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-//        c.gridx = 0;
-//        c.gridy = 0;
-//        parserPanel.add(parserLabel, c);
 
         c.gridx++;
         c.gridwidth = 2;
@@ -177,8 +143,6 @@ public class MSDiagDialog extends DefaultDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 m_parserComboBox.getSelectedIndex();
-
-           //     m_previousParserIndex = parserIndex;
 
                 initParameters();
 
@@ -197,7 +161,7 @@ public class MSDiagDialog extends DefaultDialog {
     private JPanel createMSDiagParametersPanel() {
 
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(" MSDiag Parameters "));
+        panel.setBorder(BorderFactory.createTitledBorder(" MSDiag Settings... "));
         return panel;
     }
     
@@ -220,38 +184,30 @@ public class MSDiagDialog extends DefaultDialog {
         ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
         m_parserParametersPanel.add(parameterList.getPanel(), c);
 
-//        // allow spectrum matches for all parsers except Mascot
-//        boolean allowSaveSpectrumMatches = (parameterList.toString().compareTo(MASCOT_PARSER) != 0);
-//        m_saveSpectrumCheckBox.setEnabled(allowSaveSpectrumMatches);
-//        if (!allowSaveSpectrumMatches) {
-//            m_saveSpectrumCheckBox.setSelected(false);
-//        }
     }
     
 
 
     private void reinitialize() {
         
-        // reinit of files selection
-       // ((DefaultListModel) m_fileList.getModel()).removeAllElements();
-   //     m_removeFileButton.setEnabled(false);
+     
         
         // reinit of some parameters
         ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
         parameterList.clean();
         
-     //   updateDecoyRegexEnabled();
+  
     }
 
     @Override
     protected boolean okCalled() {
 
         // check parameters
-//        if (!checkParametersForOK()) {
-//            return false;
-//        }
+        if (!checkParametersForOK()) {
+            return false;
+        }
         
- //       saveParameters(NbPreferences.root());
+        saveParameters(NbPreferences.root());
 
         return true;
 
@@ -316,7 +272,7 @@ public class MSDiagDialog extends DefaultDialog {
                     
                     ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
                     parameterList.loadParameters(filePreferences);
-                    m_sourceParameterList.loadParameters(filePreferences);
+                    //m_sourceParameterList.loadParameters(filePreferences);
                     
                 } catch (Exception e) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Parsing of User Settings File Failed", e);
@@ -330,28 +286,26 @@ public class MSDiagDialog extends DefaultDialog {
  
     
    
- //   private boolean checkParametersForOK() {
-//        // check files selected
-//        int nbFiles = m_fileList.getModel().getSize();
-//        if (nbFiles == 0) {
-//            setStatus(true, "You must select a file to import.");
-//            highlight(m_fileList);
-//            return false;
-//        }
+   private boolean checkParametersForOK() {
+        // check files selected
+        
+        // if problem:    return false;
+        
 
-//        return checkParametersForSave();
-//    }
-//    private boolean checkParametersForSave() {
-//        
-//        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-//        
-//
-//        
-//        // check source parameters
-//        ParameterError error = m_sourceParameterList.checkParameters();
-//        
-//        
-//        // check specific parameters
+        return checkParametersForSave();
+   }
+    
+   private boolean checkParametersForSave() {
+        
+ //       ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+        
+
+        
+        // check source parameters
+        //ParameterError error = m_sourceParameterList.checkParameters();
+        
+        
+        // check specific parameters
 //        if (error == null) {
 //            error = parameterList.checkParameters();
 //        }
@@ -362,85 +316,33 @@ public class MSDiagDialog extends DefaultDialog {
 //            highlight(error.getParameterComponent());
 //            return false;
 //        }
-//               
-//        
-//        return true;
-//    }
+               
+        
+        return true;
+    }
     
-//    private void saveParameters(Preferences preferences) {
-//        
-//        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
-//
-//        // save parser
-//        String parserSelected = parameterList.toString();
-//        preferences.put("IdentificationParser", parserSelected);
-//        
-//        // save file path
-//        if (m_defaultDirectory != null) {
-//          preferences.put("IdentificationFilePath", m_defaultDirectory.getAbsolutePath());  
-//        }
-//
-//        
-//        // Save Other Parameters    
-//        m_sourceParameterList.saveParameters(preferences);
-//        parameterList.saveParameters(preferences);
-//        
-//        if (m_decoyRegexTextField.isEnabled()) {
-//            ArrayList<String> regexArrayList = readRegexArray(m_decoyRegexTextField.getText());
-//            writeRegexArray(preferences, regexArrayList);
-//        }
-//
-//    }
+    private void saveParameters(Preferences preferences) {
+        
+        ParameterList parameterList = (ParameterList) m_parserComboBox.getSelectedItem();
+
+        // save parser
+        String parserSelected = parameterList.toString();
+        preferences.put("IdentificationParser", parserSelected);
+        
+        // save file path
+               
+        // Save Other Parameters    
+        //m_sourceParameterList.saveParameters(preferences);
+        //parameterList.saveParameters(preferences);
+        
+        
+
+    }
     
 
 
     private void restoreInitialParameters(Preferences preferences) {
-        String parser = preferences.get("IdentificationParser", null);
-
-        int parserIndex = -1;
-        if (parser != null) {
-
-         //   int nbParsers = PARSER_NAMES.length;
-//            for (int i = 0; i < nbParsers; i++) {
-//                String parserCur = PARSER_NAMES[i];
-//                if (parser.compareToIgnoreCase(parserCur) == 0) {
-//                    parserIndex = i;
-//                    break;
-//                }
-//            }
-        }
-        if (parserIndex == -1) {
-            parserIndex = 0; // select first parser of the list
-        }
-
-
-        // select the parser
-        m_parserComboBox.setSelectedIndex(parserIndex);
-        
-
-
-        ArrayList<String> roots = ServerFileSystemView.getServerFileSystemView().getLabels(RootInfo.TYPE_RESULT_FILES);
-        if ((roots == null) || (roots.isEmpty())) {
-            // check that the server has sent me at least one root path
-            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Server has returned no Root Path for Result Files. There is a problem with the server installation, please contact your administrator.");
-            return;
-        } else {
-        }
-        
-        
-        //
-        String filePath = preferences.get("IdentificationFilePath", null);
-        if (filePath == null) {
-            if (roots.size()>=1) {
-                filePath = roots.get(0);
-            }
-        }
-        if (filePath != null) {
-            ServerFile f = new ServerFile(filePath, filePath, true, 0, 0);
-            if (f.isDirectory()) {
-            }
-        }
-        
+       
 
     }
 
@@ -454,7 +356,6 @@ public class MSDiagDialog extends DefaultDialog {
    
     
     
-    
     private ParameterList[] createParameters() {
         ParameterList[] plArray = new ParameterList[1];
         plArray[0] = createMSDiagSettings();
@@ -466,7 +367,7 @@ public class MSDiagDialog extends DefaultDialog {
         ParameterList parameterList = new ParameterList(MSDIAG_SETTINGS);
         parameterList.add(new StringParameter("score.windows", "Score windows (ex: 20-40-60)", JTextField.class, "20-40-60", null, null));
         parameterList.add(new IntegerParameter("max.rank", "Max rank", JTextField.class, new Integer(1), new Integer(0), null));
-        parameterList.add(new IntegerParameter("scan.groups.size", "Scan groups size", JTextField.class, new Integer(1), new Integer(0), new Integer(0)));
+        //parameterList.add(new IntegerParameter("scan.groups.size", "Scan groups size", JTextField.class, new Integer(1), new Integer(0), new Integer(0)));
         
         return parameterList;
     }

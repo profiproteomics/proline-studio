@@ -24,6 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.*;
@@ -90,6 +91,23 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         JScrollPane scrollPane = new JScrollPane();
         m_logTable = new LogTable();
         m_logTable.setModel(new LogTableModel());
+        
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(m_logTable.getModel());
+        m_logTable.setRowSorter(sorter);
+            
+        sorter.setComparator(LogTableModel.COLTYPE_TASKINFO_CRITICALITY, new Comparator<TaskInfo>() {
+
+            @Override
+            public int compare(TaskInfo o1, TaskInfo o2) {
+                int cmp = o2.getImportance() - o1.getImportance();
+                if (cmp != 0) {
+                    return cmp; 
+                }
+                return o2.getId()-o1.getId();
+            }
+ 
+                
+        });
 
         TableColumnModel columnModel = m_logTable.getColumnModel();
 
@@ -397,7 +415,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                     return taskInfo.getIdList();
                 }
                 case COLTYPE_TASKINFO_CRITICALITY: {
-                    return taskInfo.getImportanceAsString();
+                    return taskInfo;
                 }
                 case COLTYPE_DESCRIPTION: {
                     return taskInfo.getTaskDescription();
@@ -543,9 +561,9 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
             super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
 
-           // TaskInfo task = (TaskInfo) value;
+            TaskInfo task = (TaskInfo) value;
 
-            //setText(task.getImportanceAsString());
+            setText(task.getImportanceAsString());
 
             return this;
         }

@@ -14,6 +14,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StackedXYBarRenderer;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
@@ -29,6 +30,7 @@ import org.w3c.dom.Document;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
+
 
 
 
@@ -87,6 +89,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	         numberaxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());   
 	         NumberAxis numberaxis1 = new NumberAxis("Y");   
 	         StackedXYBarRenderer renderer = new StackedXYBarRenderer (0);    // put space between bars in parameter.0,...
+	         renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
 	         renderer.setDrawBarOutline(false);  
 	        renderer.setBarPainter(new StandardXYBarPainter());
 	         

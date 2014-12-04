@@ -22,16 +22,14 @@ public class NoneParameter extends BooleanParameter {
     public void initDefault() {
         //No param
     }
-
- 
+    
     @Override
-    public String getStringValue() {
-        return "";
+    public void setValue(String v) {
     }
 
     @Override
     public Object getObjectValue() {
-         return "";
+         return Boolean.TRUE;
     }
     
     @Override

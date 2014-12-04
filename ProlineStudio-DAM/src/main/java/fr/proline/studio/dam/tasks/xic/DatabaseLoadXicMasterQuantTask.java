@@ -881,36 +881,25 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
             masterQuantProteinSet.setProteinSet(dProteinSet);
             // nb PeptideInstance and nbPeptide quantified
-            String queryCountNbPep = "SELECT count(*) "
+            // nb PeptideInstance and nbPeptide quantified
+            String queryCountNbPep = "SELECT count(pi.id) , pepSet.peptideCount "
                     + "FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem pspi, "
                     + "fr.proline.core.orm.msi.PeptideSet pepSet "
                     + "WHERE pi.resultSummary.id=:rsmId AND pi.id = pspi.peptideInstance.id AND "
-                    + "pspi.peptideSet.id = pepSet.id AND pepSet.proteinSet.id=:proteinSetId " ;
+                    + "pspi.peptideSet.id = pepSet.id AND pepSet.proteinSet.id=:proteinSetId AND pi.masterQuantComponentId IS NOT NULL "
+                    + "GROUP BY pepSet.peptideCount " ;
             Query queryCountPep = entityManagerMSI.createQuery(queryCountNbPep);
-            queryCountPep.setParameter("rsmId", resultSummaryId);
+            queryCountPep.setParameter("rsmId", masterQuantProteinSet.getQuantResultSummaryId());
             queryCountPep.setParameter("proteinSetId", masterQuantProteinSet.getProteinSetId());
             int nbPep = 0;
-            try {
-                nbPep = ((Long)queryCountPep.getSingleResult()).intValue();
-            }catch(NoResultException | NonUniqueResultException e) {
-                
+            int nbPepQuant = 0;
+            List resultList = queryCountPep.getResultList();
+            if (!resultList.isEmpty()) {
+                Object[] nb = (Object[])resultList.get(0);
+                nbPep = ((Integer)nb[1]).intValue();
+                nbPepQuant = ((Long)nb[0]).intValue();
             }
             masterQuantProteinSet.setNbPeptides(nbPep);
-            String queryCountNbPepQuant = "SELECT count(*) "
-                    + "FROM fr.proline.core.orm.msi.PeptideInstance pi, fr.proline.core.orm.msi.PeptideSetPeptideInstanceItem pspi, "
-                    + "fr.proline.core.orm.msi.PeptideSet pepSet, MasterQuantComponent q "
-                    + "WHERE pi.resultSummary.id=:rsmId AND pi.id = pspi.peptideInstance.id AND "
-                    + "pspi.peptideSet.id = pepSet.id AND pepSet.proteinSet.id=:proteinSetId  "
-                    + "AND q.resultSummary.id = pi.resultSummary.id AND  q.id = pi.masterQuantComponentId " ;
-            Query queryCountPepQuant = entityManagerMSI.createQuery(queryCountNbPepQuant);
-            queryCountPepQuant.setParameter("rsmId", resultSummaryId);
-            queryCountPepQuant.setParameter("proteinSetId", masterQuantProteinSet.getProteinSetId());
-            int nbPepQuant = 0;
-            try {
-                nbPepQuant = ((Long)queryCountPepQuant.getSingleResult()).intValue();
-            }catch(NoResultException | NonUniqueResultException e) {
-                
-            }
             masterQuantProteinSet.setNbQuantifiedPeptides(nbPepQuant);
             // update in the list
             int index = -1;

@@ -86,13 +86,13 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
         }
     	if(peptideFragmentationData.isEmpty) {
         	return;
-        }*/
+        }
         if (!m_isDisplayed) {
             // postpone update
             m_peptideMatchPostponed = peptideMatch;
             m_peptideFragmentationDataPostponed = peptideFragmentationData;
             return;
-        }
+        }*/
         m_peptideMatchPostponed = null;
         m_peptideFragmentationDataPostponed = null;
         updateDisplay(peptideMatch, peptideFragmentationData);
@@ -139,7 +139,7 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
     public void setShowed(boolean showed) {
         if (showed == m_isDisplayed) {
             return;
-        }
+        }/*
         if (!m_isDisplayed) {
             // update display
             //if (m_peptideMatchPostponed != null) {
@@ -147,7 +147,7 @@ public class RsetPeptideFragmentationTablePanel extends HourglassPanel implement
                 m_peptideMatchPostponed = null;
                 m_peptideFragmentationDataPostponed = null;
             //}
-        }
+        }*/
         m_isDisplayed = showed;
     }
 

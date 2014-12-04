@@ -8,6 +8,8 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
+import fr.proline.studio.gui.InfoDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
@@ -20,10 +22,8 @@ import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.prefs.Preferences;
 import javax.swing.JOptionPane;
 import org.openide.util.NbBundle;
-import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +35,7 @@ import org.slf4j.LoggerFactory;
 public class SpectralCountAction extends AbstractRSMAction {
  
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-    //protected TreeSelectionDialog m_treeSelectionDialog;
 
-  
     final static public String DS_NAME_PROPERTIES="dsName";
     final static public String DS_DESCRIPTION_PROPERTIES="dsDescription";
     final static public String DS_LIST_PROPERTIES="dsList";
@@ -50,6 +48,21 @@ public class SpectralCountAction extends AbstractRSMAction {
     public void actionPerformed(AbstractNode[] selectedNodes, final int x, final int y) { 
         
         final DataSetNode refDatasetNode = (DataSetNode) selectedNodes[0];
+        
+                                
+        DDataset.MergeInformation mergeInfo = refDatasetNode.getDataset().getMergeInformation();
+        if (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY) != 0) {
+            InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "Spectral Count on a Merge of Search Results has not been tested.\nDo you want to proceed ?");
+            exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
+            exitDialog.setButtonName(OptionDialog.BUTTON_CANCEL, "No");
+            exitDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+            exitDialog.setVisible(true);
+
+            if (exitDialog.getButtonClicked() == OptionDialog.BUTTON_CANCEL) {
+                // No clicked
+                return;
+            }
+        }
         
         //Create Child Tree to select RSM to compute SC for
         final IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(refDatasetNode.getDataset(), refDatasetNode.getDataset().getProject().getId());
@@ -81,7 +94,7 @@ public class SpectralCountAction extends AbstractRSMAction {
                    //A Voir :) 
 //                   if(selectedDSNodes.contains(refDatasetNode) && selectedDSNodes.size()>1) 
 //                        error = " Spectral Count is not possible on reference Node and some of its child";
-                       
+
                    for (DataSetNode dsNode : selectedDSNodes) {
                        //TODO : Verif pas père + fils sélectionnés : Que père ou que fils ?!? 
                         if (!dsNode.hasResultSummary()) {
@@ -94,6 +107,8 @@ public class SpectralCountAction extends AbstractRSMAction {
                         }
                         datasetList.add(dsNode.getDataset());
                         params.put(DS_LIST_PROPERTIES,datasetList);
+
+ 
                    }
                    
 

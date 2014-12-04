@@ -334,13 +334,11 @@ public class AddProjectDialog extends DefaultDialog {
 
         
     private void updateEnabled(boolean canModifyValues) {
-        if (!canModifyValues) {
-            m_nameTextField.setEnabled(false);
-            m_descriptionTextArea.setEnabled(false);
-            m_userAccountList.setEnabled(false);
-            m_addUserAccountButton.setEnabled(false);
-            m_removeFileButton.setEnabled(false);
-        }
+        m_nameTextField.setEnabled(canModifyValues);
+        m_descriptionTextArea.setEnabled(canModifyValues);
+        m_userAccountList.setEnabled(canModifyValues);
+        m_addUserAccountButton.setEnabled(canModifyValues);
+        m_removeFileButton.setEnabled(canModifyValues);
     }
     
     @Override

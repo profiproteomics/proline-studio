@@ -51,8 +51,10 @@ public class PlotScatter extends PlotAbstract {
         m_dataY = new double[size];
         
         for (int i = 0; i < size; i++) {
-            m_dataX[i] = ((Number) compareDataInterface.getDataValueAt(i, colX)).doubleValue();
-            m_dataY[i] = ((Number) compareDataInterface.getDataValueAt(i, colY)).doubleValue();
+            Object value = compareDataInterface.getDataValueAt(i, colX);
+            m_dataX[i] = (value == null || ! Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number)value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
+            value = compareDataInterface.getDataValueAt(i, colY);
+            m_dataY[i] = (value == null || ! Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number)value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
         }
         
         // min and max values

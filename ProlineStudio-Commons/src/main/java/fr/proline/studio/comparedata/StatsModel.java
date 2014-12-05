@@ -57,7 +57,8 @@ public class StatsModel implements CompareDataInterface {
     }
     
     public double getValue(int columnIndex) {
-        return ((Number) getDataValueAt(columnIndex, 0)).doubleValue();
+        Object value = getDataValueAt(columnIndex, 0);
+        return value == null ? Double.NaN : ((Number)value).doubleValue(); //CBy TODO a revoir ?
     }
     
     public double sum() {

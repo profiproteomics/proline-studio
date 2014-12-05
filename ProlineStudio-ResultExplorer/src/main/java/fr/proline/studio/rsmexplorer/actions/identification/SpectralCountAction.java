@@ -50,7 +50,7 @@ public class SpectralCountAction extends AbstractRSMAction {
         final DataSetNode refDatasetNode = (DataSetNode) selectedNodes[0];
         
                                 
-        DDataset.MergeInformation mergeInfo = refDatasetNode.getDataset().getMergeInformation();
+        /*DDataset.MergeInformation mergeInfo = refDatasetNode.getDataset().getMergeInformation();
         if (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY) != 0) {
             InfoDialog exitDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Warning", "Spectral Count on a Merge of Search Results has not been tested.\nDo you want to proceed ?");
             exitDialog.setButtonName(OptionDialog.BUTTON_OK, "Yes");
@@ -62,7 +62,7 @@ public class SpectralCountAction extends AbstractRSMAction {
                 // No clicked
                 return;
             }
-        }
+        }*/
         
         //Create Child Tree to select RSM to compute SC for
         final IdentificationTree childTree = IdentificationTree.getCurrentTree().copyDataSetRootSubTree(refDatasetNode.getDataset(), refDatasetNode.getDataset().getProject().getId());
@@ -186,6 +186,13 @@ public class SpectralCountAction extends AbstractRSMAction {
             setEnabled(false);
             return;
         }
+        
+        DDataset.MergeInformation mergeInfo = datasetNode.getDataset().getMergeInformation();
+        if (mergeInfo.compareTo(DDataset.MergeInformation.MERGE_IDENTIFICATION_SUMMARY) != 0) {
+            setEnabled(false);
+            return;
+        }
+        
 
         setEnabled(true);
     }

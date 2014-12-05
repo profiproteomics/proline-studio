@@ -7,6 +7,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
+import fr.proline.studio.progress.ProgressInterface;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +25,7 @@ import javax.swing.event.ChangeListener;
  * 
  * @author JM235353
  */
-public abstract class AbstractDataBox implements ChangeListener, SplittedPanelContainer.UserActions {
+public abstract class AbstractDataBox implements ChangeListener, ProgressInterface, SplittedPanelContainer.UserActions {
    
 
     
@@ -380,6 +381,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         return new SaveDataBoxActionListener(splittedPanel);
     }
     
+    @Override
     public int getLoadingPercentage() {
         if (m_taskMap.isEmpty()) {
             return 100;
@@ -398,6 +400,7 @@ public abstract class AbstractDataBox implements ChangeListener, SplittedPanelCo
         return (int) Math.round(percentage);
     }
     
+    @Override
     public boolean isLoaded() {
         if (m_taskMap.isEmpty()) {
             return true;

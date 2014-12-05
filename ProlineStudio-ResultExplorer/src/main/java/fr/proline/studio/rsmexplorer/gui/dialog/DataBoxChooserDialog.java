@@ -5,6 +5,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.pattern.DataboxManager;
 import fr.proline.studio.pattern.ParameterDistance;
+import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import java.awt.*;
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public class DataBoxChooserDialog extends DefaultDialog {
     private JRadioButton m_tabbedRadioButton;
     private JRadioButton m_splittedRadioButton;
     
+    private AbstractDataBox m_previousDatabox = null;
+    
     public DataBoxChooserDialog(Window parent, ArrayList<GroupParameter> outParameters, boolean firstView) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
@@ -41,6 +44,8 @@ public class DataBoxChooserDialog extends DefaultDialog {
         TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleStartingDataboxList(outParameters);
 
         initDialog(dataBoxMap, firstView);
+        
+        m_previousDatabox = null;
     }
     
     public DataBoxChooserDialog(Window parent, AbstractDataBox previousDatabox, boolean firstView) {
@@ -53,6 +58,8 @@ public class DataBoxChooserDialog extends DefaultDialog {
         TreeMap<ParameterDistance, AbstractDataBox> dataBoxMap = DataboxManager.getDataboxManager().findCompatibleDataboxList(previousDatabox);
 
         initDialog(dataBoxMap, firstView);
+        
+        m_previousDatabox = previousDatabox;
     }
 
     
@@ -191,8 +198,20 @@ public class DataBoxChooserDialog extends DefaultDialog {
              highlight(m_dataBoxTable);
              return false;
         }
-        
 
+        if ((m_previousDatabox!= null) && (!m_previousDatabox.isLoaded())) {
+
+            ProgressBarDialog dialog = ProgressBarDialog.getDialog(this, m_previousDatabox, "Data loading", "This functionnality is not available while data is loading. Please Wait.");
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
+
+            if (!dialog.isWaitingFinished()) {
+                return false;
+            }
+        }
+
+        m_previousDatabox = null;
+        
         return true;
         
        

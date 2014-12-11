@@ -13,8 +13,9 @@ public class SearchToggleButton extends JToggleButton {
 
     public SearchToggleButton(final SearchFloatingPanel searchPanel) {
 
-        setIcon(IconManager.getIcon(IconManager.IconType.SEARCH11));
+        setIcon(IconManager.getIcon(IconManager.IconType.SEARCH));
         setToolTipText("Search");
+        setFocusPainted(false);
 
         addActionListener(new ActionListener() {
 

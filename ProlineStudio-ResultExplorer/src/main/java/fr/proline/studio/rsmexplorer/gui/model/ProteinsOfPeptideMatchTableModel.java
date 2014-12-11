@@ -32,7 +32,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     private DProteinMatch[] m_proteinMatchArray = null;
 
     
-    private ArrayList<Integer> m_filteredIds = null;
+    
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
 

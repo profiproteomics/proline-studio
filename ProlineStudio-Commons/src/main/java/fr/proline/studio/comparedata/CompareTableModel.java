@@ -32,6 +32,10 @@ public class CompareTableModel extends FilterTableModel {
         fireTableStructureChanged();
     }
     
+    public CompareDataInterface getDataInterface() {
+        return m_dataInterface;
+    }
+    
     @Override
     public int getRowCount() {
         if (m_dataInterface == null) {

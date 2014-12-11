@@ -1,9 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.comparedata.CompareTableModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -21,7 +23,7 @@ import javax.swing.JToolBar;
  *
  * @author JM235353
  */
-public class ResultComparePanel extends JPanel implements DataBoxPanelInterface {
+public class ResultComparePanel extends JPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -146,6 +148,16 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface 
 
     @Override
     public void setLoaded(int id) {}
+
+    @Override
+    public CompareDataInterface getCompareDataInterface() {
+        return ((CompareTableModel) m_dataTable.getModel()).getDataInterface();
+    }
+
+    @Override
+    public CrossSelectionInterface getCrossSelectionInterface() {
+        return m_dataTable;
+    }
 
     
     private class DataTable extends DecoratedMarkerTable {

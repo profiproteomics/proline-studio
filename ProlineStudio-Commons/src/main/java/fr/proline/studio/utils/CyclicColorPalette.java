@@ -25,6 +25,8 @@ public class CyclicColorPalette {
     public static Color GRAY_TEXT_LIGHT = new Color(142, 136, 131);
     public static Color GRAY_TEXT_DARK = new Color(99, 95, 93);
     public static Color GRAY_GRID = new Color(229, 226, 224);
+    public static Color GRAY_GRID_LOG = new Color(244, 240, 238);
+    public static Color BLUE_SELECTION_ZONE = new Color(0.2f, 0.2f, 1f, 0.5f);
 
     public static Color getColor(int colorIndex) {
         int paletteSize = palette.length * 3;

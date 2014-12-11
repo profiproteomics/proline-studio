@@ -89,7 +89,14 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface 
         toolbar.setFloatable(false);
 
 
-        m_filterButton = new FilterButton(((CompareTableModel) m_dataTable.getModel()));  // does not work for the moment, finish it later
+        m_filterButton = new FilterButton(((CompareTableModel) m_dataTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            }
+            
+        };  // does not work for the moment, finish it later
         m_exportButton = new ExportButton(((CompareTableModel) m_dataTable.getModel()), "Data", m_dataTable);
 
 

@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dpm.data.SpectralCountResultData;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportColumnTextInterface;
@@ -229,7 +230,14 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
         toolbar.add(m_searchToggleButton);
 
-        m_filterButton = new FilterButton(((WSCProteinTableModel) m_proteinTable.getModel()));
+        m_filterButton = new FilterButton(((WSCProteinTableModel) m_proteinTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            }
+            
+        };
 
         m_exportButton = new ExportButton(((WSCProteinTableModel) m_proteinTable.getModel()), "Spectral Counts", m_proteinTable);
 

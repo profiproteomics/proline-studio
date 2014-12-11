@@ -1,12 +1,15 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.BestGraphicsInterface;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.PlotAbstract;
 import fr.proline.studio.graphics.PlotHistogram;
 import fr.proline.studio.graphics.PlotScatter;
 import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.PlotPanel.GridListener;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -18,9 +21,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashSet;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,7 +36,7 @@ import javax.swing.JToolBar;
  *
  * @author JM235353
  */
-public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterface {
+public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterface, GridListener {
 
     
     private AbstractDataBox m_dataBox;
@@ -48,8 +53,13 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
     private PlotAbstract m_plotGraphics = null;
     
     private CompareDataInterface m_values = null;
+    private CrossSelectionInterface m_crossSelectionInterface = null;
     
     private boolean m_isUpdatingCbx = false;
+    
+    private boolean m_dataLocked = false;
+    
+    private JToggleButton m_gridButton = null;
     
     public GraphicsPanel() {
         setLayout(new BorderLayout());
@@ -73,6 +83,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         c.insets = new java.awt.Insets(0, 5, 0, 5);
 
         m_plotPanel = new PlotPanel();
+        m_plotPanel.setGridListener(this);
         JPanel selectPanel = createSelectPanel();
         
         c.gridx = 0;
@@ -92,19 +103,82 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        final JToggleButton gridButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.GRID_11X11));
-        gridButton.setSelected(true);
-        gridButton.setFocusPainted(false);
-        gridButton.addActionListener(new ActionListener() {
+        m_gridButton = new JToggleButton(IconManager.getIcon(IconManager.IconType.GRID));
+        m_gridButton.setSelected(true);
+        m_gridButton.setFocusPainted(false);
+        m_gridButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                m_plotPanel.displayGrid(gridButton.isSelected());
+                m_plotPanel.displayGrid(m_gridButton.isSelected());
             }
         });
         
-        ExportButton exportImageButton = new ExportButton("Graphic", m_plotPanel);
+        final JButton importSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
+        importSelectionButton.setToolTipText( "Import Selection from Previous View");
+        importSelectionButton.setFocusPainted(false);
+        importSelectionButton.addActionListener(new ActionListener() {
 
-        toolbar.add(gridButton);
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (m_crossSelectionInterface != null) {
+                    ArrayList<Integer> selection = m_crossSelectionInterface.getSelection();
+                    m_plotPanel.setSelection(selection);
+                }
+            }
+        });
+        final JButton exportSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.EXPORT_TABLE_SELECTION));
+        exportSelectionButton.setToolTipText("Export Selection to Previous View");
+        exportSelectionButton.setFocusPainted(false);
+        exportSelectionButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (m_crossSelectionInterface != null) {
+                    m_crossSelectionInterface.select(m_plotPanel.getSelection());
+                }
+            }
+        });
+        
+        
+        final JButton lockButton = new JButton(IconManager.getIcon(IconManager.IconType.UNLOCK));
+        lockButton.setToolTipText( "Lock/Unlock Input Data");
+        lockButton.setFocusPainted(false);
+        lockButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                m_dataLocked = ! m_dataLocked;
+                if (m_dataLocked) {
+                    m_values = new LockedDataModel(m_values);
+                } else {
+                    m_values = ((LockedDataModel) m_values).getSrcDataInterface();
+                }
+                
+                m_plotPanel.lockData(m_dataLocked);
+                setDataImpl(m_values, m_crossSelectionInterface);
+                
+                if (m_dataLocked) {
+                    lockButton.setIcon(IconManager.getIcon(IconManager.IconType.LOCK));
+                } else {
+                    lockButton.setIcon(IconManager.getIcon(IconManager.IconType.UNLOCK));
+                }
+                importSelectionButton.setEnabled(!m_dataLocked);
+                exportSelectionButton.setEnabled(!m_dataLocked);
+            }
+        });
+        
+
+        
+        ExportButton exportImageButton = new ExportButton("Graphic", m_plotPanel);
+        
+        
+        // add buttons to toolbar
+        toolbar.add(m_gridButton);
+        toolbar.addSeparator(); // ----
+        toolbar.add(lockButton);
+        toolbar.add(importSelectionButton);
+        toolbar.add(exportSelectionButton);
+        toolbar.addSeparator(); // ----
         toolbar.add(exportImageButton);
 
         return toolbar;
@@ -240,7 +314,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
             m_valueYComboBox.setSelectedIndex(bestColIndexYCbx);
             
             
-            setData(m_values);
+            setDataImpl(m_values, m_crossSelectionInterface);
 
 
         } finally {
@@ -248,9 +322,16 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         }
     }
     
-    public void setData(CompareDataInterface values) {
+    public void setData(CompareDataInterface values, CrossSelectionInterface crossSelectionInterface) {
+        if (m_plotPanel.isLocked()) {
+            return;
+        }
+        setDataImpl(values, crossSelectionInterface);
+    }
+    private void setDataImpl(CompareDataInterface values, CrossSelectionInterface crossSelectionInterface) {
 
         m_values = values;
+        m_crossSelectionInterface = crossSelectionInterface;
         
         if (values == null) {
             return;
@@ -270,7 +351,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
                     }
                     ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
                     ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
-                    m_plotGraphics.update(m_values, refX.getColumnIndex(), refY.getColumnIndex());
+                    m_plotGraphics.update(refX.getColumnIndex(), refY.getColumnIndex());
                 }
                 
             };
@@ -286,11 +367,11 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
         switch (plotType) {
             case HISTOGRAM_PLOT:
-                m_plotGraphics = new PlotHistogram(m_plotPanel, m_values, refX.getColumnIndex());
+                m_plotGraphics = new PlotHistogram(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex());
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
             case SCATTER_PLOT:
-                m_plotGraphics = new PlotScatter(m_plotPanel, m_values, refX.getColumnIndex(), refY.getColumnIndex());
+                m_plotGraphics = new PlotScatter(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex());
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
         }
@@ -326,6 +407,15 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
     @Override
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
+    }
+
+    @Override
+    public void gridChanged() {
+        if (!m_plotPanel.displayGrid()) {
+            m_gridButton.setSelected(false);
+        }
+            
+            
     }
 
     private static class ReferenceToColumn {

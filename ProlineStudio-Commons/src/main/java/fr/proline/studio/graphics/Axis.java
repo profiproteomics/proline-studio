@@ -2,7 +2,6 @@ package fr.proline.studio.graphics;
 
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.text.DecimalFormat;
 
@@ -35,10 +34,28 @@ public abstract class Axis {
     protected DecimalFormat m_df;
     protected int m_digits = -1;
     
+    protected boolean m_log = false;
+    
+    protected boolean m_selected = false;
     
     public Axis() {
     }
 
+    public void setLog(boolean log) {
+        m_log = log;
+        m_df = null; // reinit for display
+    }
+    
+    public boolean isLog() {
+        return m_log;
+    }
+    
+    public boolean canBeInLog() {
+        return (m_minValue>=10e-9);
+    }
+    
+    
+    
     public void setSize(int x, int y, int width, int height) {
         m_x = x;
         m_y = y;
@@ -57,6 +74,16 @@ public abstract class Axis {
         m_title = title;
     }
     
+    public boolean setSelected(boolean v) {
+        boolean changed = v ^ m_selected;
+        m_selected = v;
+        return changed;
+    }
+    
+    public boolean isSelected() {
+        return m_selected;
+    }
+    
     public abstract void paint(Graphics2D g);
 
     public abstract int valueToPixel(double v);
@@ -72,16 +99,28 @@ public abstract class Axis {
     }
 
     public double getMinTick() {
+        if (m_log) {
+            return Math.pow(10, m_minTick);
+        }
         return m_minTick;
     }
 
     public double getMaxTick() {
+         if (m_log) {
+            return Math.pow(10, m_maxTick);
+        }
         return m_maxTick;
     }
 
+    public boolean inside(int x, int y) {
+        return (x>=m_x) && (x<m_x+m_width) && (y>m_y) && (y<m_y+m_height);
+    }
+    
     protected DecimalFormat selectDecimalFormat(int digits) {
         String pattern;
-        if (digits <= 0) {
+        if (m_log) {
+            pattern = ("0.0E0");
+        } else if (digits <= 0) {
             pattern = "#";  // number like "3"
         } else if (digits > 3) { // 3 is 
             pattern = ("0.0E0"); // scientific notation for numbers with too much digits "0.0000532"

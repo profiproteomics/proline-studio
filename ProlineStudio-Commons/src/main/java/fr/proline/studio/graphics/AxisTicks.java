@@ -17,14 +17,23 @@ public class AxisTicks {
     
     private int m_nbDigits;
 
-    public AxisTicks(double min, double max, int maxTicks) {
+    private boolean m_log;
+    
+    public AxisTicks(double min, double max, int maxTicks, boolean log) {
         if (maxTicks <=1) {
             m_maxTicks = 2;
         } else {
             m_maxTicks = maxTicks;
         }
-        m_min = min;
-        m_max = max;
+        m_log = log;
+        
+        if (log) {
+            m_min = Math.log10(min);
+            m_max = Math.log10(max);
+        } else {
+            m_min = min;
+            m_max = max;
+        }
         calculate();
     }
 
@@ -33,7 +42,7 @@ public class AxisTicks {
     }
     
     public double getTickMax() {
-        return m_max;
+        return m_calculatedMax;
     }
     
     public double getTickSpacing() {
@@ -45,11 +54,19 @@ public class AxisTicks {
     }
     
     private void calculate() {
-        m_calculatedRange = niceNum(m_max - m_min, false);
-        m_tickSpacing = niceNum(m_calculatedRange / (m_maxTicks - 1), true);
-        m_nbDigits = -(int) Math.round(Math.floor(Math.log10(m_calculatedRange / (m_maxTicks - 1))));
-        m_calculatedMin = Math.floor(m_min / m_tickSpacing) * m_tickSpacing;
-        m_calculatedMax = Math.ceil(m_calculatedMax / m_tickSpacing) * m_tickSpacing;
+        if (m_log) {
+            m_calculatedMin = Math.floor(m_min);
+            m_calculatedMax = Math.ceil(m_max);
+            m_calculatedRange = m_calculatedMax-m_calculatedMin;
+            m_tickSpacing = 1;
+            m_nbDigits = 0;
+        } else {
+            m_calculatedRange = niceNum(m_max - m_min, false);
+            m_tickSpacing = niceNum(m_calculatedRange / (m_maxTicks - 1), true);
+            m_nbDigits = -(int) Math.round(Math.floor(Math.log10(m_calculatedRange / (m_maxTicks - 1))));
+            m_calculatedMin = Math.floor(m_min / m_tickSpacing) * m_tickSpacing;
+            m_calculatedMax = Math.ceil(m_max / m_tickSpacing) * m_tickSpacing;
+        }
     }
 
     /**

@@ -35,6 +35,7 @@ public class ExportButton extends JButton implements ActionListener {
         
         setIcon(IconManager.getIcon(IconManager.IconType.EXPORT));
         setToolTipText("Export Data...");
+        setFocusPainted(false);
 
         addActionListener(this);
     }

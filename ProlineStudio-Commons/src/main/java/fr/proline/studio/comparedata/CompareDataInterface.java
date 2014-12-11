@@ -11,6 +11,7 @@ public interface CompareDataInterface {
     public Class getDataColumnClass(int columnIndex);
     public Object getDataValueAt(int rowIndex, int columnIndex);
     public int[] getKeysColumn();
+    public int getInfoColumn();
     public void setName(String name);
     public String getName();
     

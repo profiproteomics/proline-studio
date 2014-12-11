@@ -158,6 +158,10 @@ public class DiffDataModel extends AbstractJoinDataModel {
         
     }
 
+    @Override
+    public int getInfoColumn() {
+        return 0;
+    }
 
     
 }

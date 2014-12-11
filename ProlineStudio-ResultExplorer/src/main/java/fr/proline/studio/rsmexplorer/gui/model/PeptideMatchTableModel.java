@@ -840,6 +840,11 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
         return -1;
     }
 
+    @Override
+    public int getInfoColumn() {
+        return convertColToColUsed(COLTYPE_PEPTIDE_NAME);
+    }
+
 
 
 }

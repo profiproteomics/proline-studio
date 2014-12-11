@@ -84,7 +84,7 @@ public abstract class AbstractJoinDataModel implements CompareDataInterface  {
     
     protected void joinKeys() {
         
-                // find all different keys
+        // find all different keys
         m_allKeys = new ArrayList();
         HashSet keysFound = new HashSet();
         m_keyToRow1 = new HashMap<>();
@@ -150,4 +150,6 @@ public abstract class AbstractJoinDataModel implements CompareDataInterface  {
     public String getName() {
         return m_name;
     }
+    
+
 }

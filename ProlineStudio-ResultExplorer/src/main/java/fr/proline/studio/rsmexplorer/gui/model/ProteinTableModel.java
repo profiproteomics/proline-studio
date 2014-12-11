@@ -17,6 +17,7 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
 
 
 
+
     public enum Column {
         PROTEIN_ID("Id", Long.class, 0),
         PROTEIN_NAME("Protein", String.class, 1),
@@ -313,6 +314,12 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
     @Override
     public String getName() {
         return m_modelName;
+    }
+    
+    
+    @Override
+    public int getInfoColumn() {
+        return Column.PROTEIN_NAME.m_colId;
     }
     
     public static class Sameset {

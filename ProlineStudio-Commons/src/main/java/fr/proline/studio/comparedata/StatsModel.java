@@ -91,5 +91,10 @@ public class StatsModel implements CompareDataInterface {
     public double standardDeviation() {
         return Math.sqrt(variance());
     }
+
+    @Override
+    public int getInfoColumn() {
+        return m_sourceDataInterface.getInfoColumn();
+    }
     
 }

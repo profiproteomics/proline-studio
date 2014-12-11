@@ -404,6 +404,11 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
         return m_modelName;
     }
 
+    @Override
+    public int getInfoColumn() {
+        return COLTYPE_PROTEIN_NAME;
+    }
+
 
 
  

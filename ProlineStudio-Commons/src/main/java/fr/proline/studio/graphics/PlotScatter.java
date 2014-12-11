@@ -43,53 +43,49 @@ public class PlotScatter extends PlotAbstract {
         return acceptedValues;
     }
     
+    
+    @Override
+    public String getToolTipText(double x, double y) {
+        int indexFound = findPoint(x, y);
+        if (indexFound == -1) {
+            return null;
+        }
+        if (m_sb == null) {
+            m_sb = new StringBuilder();
+        }
+        m_sb.append("<HTML>");
+        m_sb.append(m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString());
+        m_sb.append("<BR>");
+        m_sb.append(m_plotPanel.getXAxis().getTitle());
+        m_sb.append(" : ");
+        m_sb.append(m_plotPanel.getXAxis().getDecimalFormat().format(x));
+        m_sb.append("<BR>");
+        m_sb.append(m_plotPanel.getYAxis().getTitle());
+        m_sb.append(" : ");
+        m_sb.append(m_plotPanel.getYAxis().getDecimalFormat().format(y));
+        m_sb.append("</HTML>");
+        String tooltip = m_sb.toString();
+        m_sb.setLength(0);
+        return tooltip;
+ 
+    }
+    private StringBuilder m_sb = null;
+    
     @Override
     public boolean select(double x, double y, boolean append) {
         
-        double rangeX = m_xMax-m_xMin;
-        double rangeY = m_yMax-m_yMin;
-        
-        double distanceMin = Double.MAX_VALUE;
-        int nearestDataIndex = -1;
+        int indexFound = findPoint(x, y);
+
         int size = m_dataX.length;
-        for (int i = size-1; i >=0 ; i--) { // reverse loop to select first the data in foreground
-            double dataX = m_dataX[i];
-            double dataY = m_dataY[i];
-        
-            double normalizedDistanceX = (rangeX<=10e-10) ? 0 : (x-dataX)/rangeX;
-            if (normalizedDistanceX<0) {
-                normalizedDistanceX = -normalizedDistanceX;
-            }
-            
-            double normalizedDistanceY = (rangeY<=10e-10) ? 0 : (y-dataY)/rangeY;
-            if (normalizedDistanceY<0) {
-                normalizedDistanceY = -normalizedDistanceY;
-            }
-            
-            double squaredDistance = normalizedDistanceX*normalizedDistanceX+normalizedDistanceY*normalizedDistanceY;
-            if (distanceMin>squaredDistance) {
-                distanceMin = squaredDistance;
-                nearestDataIndex = i;
-            }
-            
-            if (!append) {
+        if (!append) {
+            for (int i = 0; i < size; i++) {
                 m_selected[i] = false;
             }
         }
 
-        
-        
-        if (nearestDataIndex != -1) {
-            
+        if (indexFound != -1) {
 
-            if (Math.abs(m_plotPanel.getXAxis().valueToPixel(x)-m_plotPanel.getXAxis().valueToPixel( m_dataX[nearestDataIndex]))>SELECT_SENSIBILITY) {
-                return false;
-            }
-            if (Math.abs(m_plotPanel.getYAxis().valueToPixel(y)-m_plotPanel.getYAxis().valueToPixel( m_dataY[nearestDataIndex]))>SELECT_SENSIBILITY) {
-                return false;
-            }
-            
-            m_selected[nearestDataIndex] = true;
+            m_selected[indexFound] = true;
             
             return true;
         }
@@ -144,6 +140,53 @@ public class PlotScatter extends PlotAbstract {
         }
     }
     
+
+    private int findPoint(double x, double y) {
+        
+        double rangeX = m_xMax-m_xMin;
+        double rangeY = m_yMax-m_yMin;
+        
+        double distanceMin = Double.MAX_VALUE;
+        int nearestDataIndex = -1;
+        int size = m_dataX.length;
+        for (int i = size-1; i >=0 ; i--) { // reverse loop to select first the data in foreground
+            double dataX = m_dataX[i];
+            double dataY = m_dataY[i];
+        
+            double normalizedDistanceX = (rangeX<=10e-10) ? 0 : (x-dataX)/rangeX;
+            if (normalizedDistanceX<0) {
+                normalizedDistanceX = -normalizedDistanceX;
+            }
+            
+            double normalizedDistanceY = (rangeY<=10e-10) ? 0 : (y-dataY)/rangeY;
+            if (normalizedDistanceY<0) {
+                normalizedDistanceY = -normalizedDistanceY;
+            }
+            
+            double squaredDistance = normalizedDistanceX*normalizedDistanceX+normalizedDistanceY*normalizedDistanceY;
+            if (distanceMin>squaredDistance) {
+                distanceMin = squaredDistance;
+                nearestDataIndex = i;
+            }
+            
+
+        }
+
+        
+        
+        if (nearestDataIndex != -1) {
+
+            if (Math.abs(m_plotPanel.getXAxis().valueToPixel(x)-m_plotPanel.getXAxis().valueToPixel( m_dataX[nearestDataIndex]))>SELECT_SENSIBILITY) {
+                return -1;
+            }
+            if (Math.abs(m_plotPanel.getYAxis().valueToPixel(y)-m_plotPanel.getYAxis().valueToPixel( m_dataY[nearestDataIndex]))>SELECT_SENSIBILITY) {
+                return -1;
+            }
+
+        }
+
+        return nearestDataIndex;
+    }
 
     
     @Override

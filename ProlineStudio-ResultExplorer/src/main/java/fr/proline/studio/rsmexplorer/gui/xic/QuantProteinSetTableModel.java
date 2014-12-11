@@ -722,4 +722,9 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public String getName() {
         return m_modelName;
     }
+
+    @Override
+    public int getInfoColumn() {
+        return COLTYPE_PROTEIN_SET_NAME;
+    }
 }

@@ -14,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
@@ -54,6 +55,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     public PlotPanel() {
         addMouseListener(this);
         addMouseMotionListener(this);
+        ToolTipManager.sharedInstance().registerComponent(this);
     }
     
     @Override
@@ -192,6 +194,18 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         repaint();
     }
 
+    
+    /*@Override
+    public String getToolTipText(MouseEvent e) {
+        if ((m_xAxis == null) || (m_yAxis == null)) {
+            return null;
+        }
+        m_tooltipDisplayed = true;
+        return m_plot.getToolTipText(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
+    }*/
+
+    private boolean m_tooltipDisplayed = false;
+    
     public void updateAxis(PlotAbstract plot) {
         
         if (plot.needsXAxis()) {
@@ -380,7 +394,10 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) {}
+    public void mouseMoved(MouseEvent e) {
+        String s =  m_plot.getToolTipText(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
+        setToolTipText(s); 
+    }
 
     
     private JPopupMenu createAxisPopup(final Axis axis) {

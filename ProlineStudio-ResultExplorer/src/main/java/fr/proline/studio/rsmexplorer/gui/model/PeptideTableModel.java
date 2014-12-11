@@ -487,5 +487,10 @@ public class PeptideTableModel extends FilterTableModel implements CompareDataIn
         return m_modelName;
     }
 
+    @Override
+    public int getInfoColumn() {
+        return COLTYPE_PEPTIDE_NAME;
+    }
+
     
 }

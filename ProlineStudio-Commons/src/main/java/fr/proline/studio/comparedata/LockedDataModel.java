@@ -16,6 +16,7 @@ public class LockedDataModel implements CompareDataInterface, BestGraphicsInterf
     private final String[] m_columnIdentifiers;
     private final Class[] m_columnClasses;
     private final int[] m_keysColumns;
+    private final int m_infoCol;
     private final String m_name;
     private final Object[][] m_data;
     
@@ -38,10 +39,16 @@ public class LockedDataModel implements CompareDataInterface, BestGraphicsInterf
                 m_data[i][j] = src.getDataValueAt(i, j);
             }
         }
+        m_infoCol= src.getInfoColumn();
     }
 
     public CompareDataInterface getSrcDataInterface() {
         return m_src;
+    }
+    
+    @Override
+    public int getInfoColumn() {
+        return m_infoCol;
     }
     
     @Override
@@ -107,4 +114,6 @@ public class LockedDataModel implements CompareDataInterface, BestGraphicsInterf
         }
         return -1;
     }
+
+
 }

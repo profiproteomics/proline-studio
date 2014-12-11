@@ -44,6 +44,10 @@ public abstract class PlotAbstract {
     }
     
     
+    
+    public abstract String getToolTipText(double x, double y);
+    
+    
     public void update(int colX, int colY) {
         m_colX = colX;
         m_colY = colY;

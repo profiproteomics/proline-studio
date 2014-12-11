@@ -45,6 +45,11 @@ public class PlotHistogram extends PlotAbstract {
     }
     
     @Override
+    public String getToolTipText(double x, double y) {
+        return null;
+    }
+    
+    @Override
     public boolean select(double x, double y, boolean append) {
         
 

@@ -563,6 +563,11 @@ public class PeptideInstanceTableModel extends LazyTableModel implements Compare
         return m_modelName;
     }
 
+    @Override
+    public int getInfoColumn() {
+        return COLTYPE_PEPTIDE_NAME;
+    }
+
     
     
 }

@@ -527,6 +527,11 @@ public class ProteinSetTableModel extends LazyTableModel implements CompareDataI
         return m_modelName;
     }
 
+    @Override
+    public int getInfoColumn() {
+        return COLTYPE_PROTEIN_SET_NAME;
+    }
+
     public class ProteinCount implements Comparable {
 
         private final int m_sameSetCount;
@@ -578,5 +583,6 @@ public class ProteinSetTableModel extends LazyTableModel implements CompareDataI
         }
         
     }
+
 
 }

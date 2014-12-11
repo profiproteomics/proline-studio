@@ -74,6 +74,10 @@ public abstract class Axis {
         m_title = title;
     }
     
+    public String getTitle() {
+        return m_title;
+    }
+    
     public boolean setSelected(boolean v) {
         boolean changed = v ^ m_selected;
         m_selected = v;
@@ -133,4 +137,8 @@ public abstract class Axis {
         }
         return new DecimalFormat(pattern);
     }
+    
+    public DecimalFormat getDecimalFormat() {
+        return m_df;
+    } 
 }

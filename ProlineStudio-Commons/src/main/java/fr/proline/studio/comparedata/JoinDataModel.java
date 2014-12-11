@@ -125,6 +125,9 @@ public class JoinDataModel extends AbstractJoinDataModel {
         return null;
     }
 
-
+    @Override
+    public int getInfoColumn() {
+        return 0;
+    }
     
 }

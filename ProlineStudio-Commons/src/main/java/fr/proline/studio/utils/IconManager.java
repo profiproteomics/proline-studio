@@ -61,8 +61,8 @@ public class IconManager {
         ARROW_RIGHT_SMALL,
         PLUS11,
         MINUS11,
+        SEARCH_ARROW,
         SEARCH,
-        SEARCH11,
         FUNNEL,
         FUNNEL_ACTIVATED,
         EXPORT,
@@ -112,7 +112,12 @@ public class IconManager {
         ARROW_RIGHT,
         ADD_DATA_MIXER,
         DATA_MIXER,
-        GRID_11X11;
+        GRID,
+        IMPORT_TABLE_SELECTION,
+        EXPORT_TABLE_SELECTION,
+        LOCK,
+        UNLOCK;
+        
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
@@ -294,16 +299,16 @@ public class IconManager {
                 return "fr/proline/studio/images/plus11x11.png";
             case MINUS11:
                 return "fr/proline/studio/images/minus11x11.png";
+            case SEARCH_ARROW:
+                return "fr/proline/studio/images/search-arrow.png";
             case SEARCH:
                 return "fr/proline/studio/images/search.png";
-            case SEARCH11:
-                return "fr/proline/studio/images/search11x12.png";
             case FUNNEL:
-                return "fr/proline/studio/images/funnel11x11.png";
+                return "fr/proline/studio/images/funnel.png";
             case FUNNEL_ACTIVATED:
-                return "fr/proline/studio/images/funnelActivated11x11.png";
+                return "fr/proline/studio/images/funnelActivated.png";
             case EXPORT:
-                return "fr/proline/studio/images/export11x11.png";
+                return "fr/proline/studio/images/exportData.png";
             case EXPORT_IMAGE:
                 return "fr/proline/studio/images/exportImage.png";
             case CHART:
@@ -396,8 +401,16 @@ public class IconManager {
                return "fr/proline/studio/images/addDataMixer.png";
            case DATA_MIXER:
                return "fr/proline/studio/images/data-mixer.png";
-           case GRID_11X11:
-               return "fr/proline/studio/images/grid11x11.png";
+           case GRID:
+               return "fr/proline/studio/images/grid.png";
+           case IMPORT_TABLE_SELECTION:
+               return "fr/proline/studio/images/importTableSelection.png";
+           case EXPORT_TABLE_SELECTION:
+               return "fr/proline/studio/images/exportTableSelection.png";
+           case LOCK:
+               return "fr/proline/studio/images/lock.png";
+           case UNLOCK:
+               return "fr/proline/studio/images/lock-unlock.png";
         }
 
 

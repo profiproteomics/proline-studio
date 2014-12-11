@@ -7,7 +7,12 @@ import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.TextMarker;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
 import fr.proline.studio.utils.CyclicColorPalette;
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Path2D;
+import java.util.ArrayList;
+
+
 import java.util.HashSet;
 
 /**
@@ -22,11 +27,14 @@ public class PlotHistogram extends PlotAbstract {
     
     private double[] m_dataX;
     private double[] m_dataY;
+    private boolean[] m_selected;
 
+    private StatsModel m_values;
+    private int m_bins;
     
-    public PlotHistogram(PlotPanel plotPanel, CompareDataInterface compareDataInterface, int colX) {
-        super(plotPanel);
-        update(compareDataInterface, colX, -1); 
+    public PlotHistogram(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX) {
+        super(plotPanel, compareDataInterface, crossSelectionInterface);
+        update(colX, -1); 
     }
 
 
@@ -37,24 +45,106 @@ public class PlotHistogram extends PlotAbstract {
     }
     
     @Override
-    public final void update(CompareDataInterface compareDataInterface, int colX, int colY) { // colY not used for histogram
+    public boolean select(double x, double y, boolean append) {
+        
+
+        double y2 = 0;
+        int size = m_dataX.length;
+        for (int i=0;i<size-1;i++) {
+            double x1 = m_dataX[i];
+            double x2 = m_dataX[i+1];
+            double y1 = m_dataY[i];
+            
+            if ((x>=x1) && (x<=x2) && (y>=y2) && (y<=y1)) {
+                m_selected[i] = true;
+            } else {
+                if (!append) {
+                    m_selected[i] = false;
+                }
+            }            
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public boolean select(Path2D.Double path, double minX, double maxX, double minY, double maxY, boolean append) {
+
+        double y2 = 0;
+        int size = m_dataX.length;
+        for (int i=0;i<size-1;i++) {
+            double x1 = m_dataX[i];
+            double x2 = m_dataX[i+1];
+            double y1 = m_dataY[i];
+
+            if (path.intersects(x1, y2, x2-x1, y1-y2)) {
+                m_selected[i] = true;
+            } else {
+                if (!append) {
+                    m_selected[i] = false;
+                }
+            }            
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public ArrayList<Integer> getSelection() {
+        
+        ArrayList<Integer> selection = new ArrayList();
+        
+        int size = m_values.getRowCount();
+        for (int i=0;i<size;i++) {
+            double v = m_values.getValue(i);
+            int index = (int) (((v - m_xMin) / (m_xMax-m_xMin)) * (m_bins));
+            if (index >= m_bins) {
+                index = m_bins - 1;
+            }
+            if (m_selected[index]) {
+                selection.add(i);
+            }
+        }
+
+        return selection;
+    }
+    
+    @Override
+    public void setSelection(ArrayList<Integer> selection) {
+        for (int i = 0; i < m_selected.length; i++) {
+            m_selected[i] = false;
+        }
+
+        for (int i = 0; i < selection.size(); i++) {
+            double v = m_values.getValue(selection.get(i));
+            int index = (int) (((v - m_xMin) / (m_xMax - m_xMin)) * (m_bins));
+            if (index >= m_bins) {
+                index = m_bins - 1;
+            }
+            m_selected[index] = true;
+        }
+    }
+    
+    
+    @Override
+    public final void update() {
          
-        StatsModel values = new StatsModel(compareDataInterface, colX);
+        m_values = new StatsModel(m_compareDataInterface, m_colX);
         
         clearMarkers();
         
         // number of bins
-        int size = values.getRowCount();
+        int size = m_values.getRowCount();
         if (size == 0) {
 
             return;
         }
 
         // min and max values
-        double min = values.getValue(0);
-        double max = values.getValue(0);
+        double min = m_values.getValue(0);
+        double max = m_values.getValue(0);
         for (int i = 1; i < size; i++) {
-            double v = values.getValue(i);
+            double v = m_values.getValue(i);
             if (v < min) {
                 min = v;
             } else if (v > max) {
@@ -65,31 +155,31 @@ public class PlotHistogram extends PlotAbstract {
         m_xMax = max;
         
         // bins
-        double std = values.standardDeviation();
-        int bins = (int) Math.round((max-min)/(3.5*std*Math.pow(size, -1/3.0)));
-        if (bins<10) {
-            bins = 10;
+        double std = m_values.standardDeviation();
+        m_bins = (int) Math.round((max-min)/(3.5*std*Math.pow(size, -1/3.0)));
+        if (m_bins<10) {
+            m_bins = 10;
         }
         
-        double[] data = new double[values.getRowCount()];
+        double[] data = new double[m_values.getRowCount()];
         for (int i=0;i<data.length;i++) {
-            data[i] = values.getValue(i);
+            data[i] = m_values.getValue(i);
         }
         
         double delta = max-min;
-        double[] histogram = new double[bins];
+        double[] histogram = new double[m_bins];
         for (int i = 0; i < size; i++) {
-            double v = values.getValue(i);
-            int index = (int) (((v - min) / delta) * (bins));
-            if (index >= bins) {
-                index = bins - 1;
+            double v = m_values.getValue(i);
+            int index = (int) (((v - min) / delta) * (m_bins));
+            if (index >= m_bins) {
+                index = m_bins - 1;
             }
 
             histogram[index]++;
         }
         
         m_yMax = 0;
-        for (int i = 0; i < bins; i++) {
+        for (int i = 0; i < m_bins; i++) {
             double y = histogram[i] / size * 100;
             histogram[i] = y;
             if (y > m_yMax) {
@@ -101,23 +191,27 @@ public class PlotHistogram extends PlotAbstract {
         m_yMax *= 1.2; // we let place at the top to be able to put information
         
         m_plotPanel.updateAxis(this);
-        m_plotPanel.setXAxisTitle(compareDataInterface.getDataColumnIdentifier(colX));
+        m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colX));
         m_plotPanel.setYAxisTitle("Percentage %");
         
         
-        m_dataX = new double[bins + 1];
-        m_dataY = new double[bins + 1];
-        double binDelta = delta / bins;
-        for (int i = 0; i < bins; i++) {
+
+        m_dataX = new double[m_bins + 1];
+        m_dataY = new double[m_bins + 1];
+        m_selected = new boolean[m_bins + 1];
+        double binDelta = delta / m_bins;
+        for (int i = 0; i < m_bins; i++) {
             m_dataX[i] = min + i * binDelta;
             m_dataY[i] = histogram[i];
+            m_selected[i] = false;
         }
-        m_dataX[bins] = m_dataX[bins - 1] + binDelta;
-        m_dataY[bins] = m_dataY[bins - 1];
+        m_dataX[m_bins] = m_dataX[m_bins - 1] + binDelta;
+        m_dataY[m_bins] = m_dataY[m_bins - 1];
+        m_selected[m_bins] = false;
 
 
         // add Stdev value
-        double mean = values.mean();
+        double mean = m_values.mean();
         addMarker(new XDeltaMarker(m_plotPanel, mean, mean+std, yStdevLabel));
         addMarker(new LineMarker(m_plotPanel, mean+std, LineMarker.ORIENTATION_VERTICAL));
         
@@ -132,7 +226,7 @@ public class PlotHistogram extends PlotAbstract {
         addMarker(new LabelMarker(m_plotPanel, mean, yMeanLabel, "Mean : "+mean, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_BOTTOM));
         
         // add Title
-        addMarker(new TextMarker(m_plotPanel, 0.05, 0.95, values.getDataColumnIdentifier(0) +" Histogram"));
+        addMarker(new TextMarker(m_plotPanel, 0.05, 0.95, m_values.getDataColumnIdentifier(0) +" Histogram"));
         
         m_plotPanel.repaint();
     }
@@ -178,10 +272,14 @@ public class PlotHistogram extends PlotAbstract {
             int x2 = xAxis.valueToPixel( m_dataX[i+1]);
             int y1 = yAxis.valueToPixel( m_dataY[i]);
             
-            g.setColor(CyclicColorPalette.getColor(21));
+            if (m_selected[i]) {
+                g.setColor(Color.red);
+            } else {
+                g.setColor(CyclicColorPalette.getColor(21));
+            }
             g.fillRect(x1, y1 , x2-x1, y2-y1);
             
-            g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
+            g.setColor(CyclicColorPalette.getColor(13));
             g.drawRect(x1, y1 , x2-x1, y2-y1);
             
         }

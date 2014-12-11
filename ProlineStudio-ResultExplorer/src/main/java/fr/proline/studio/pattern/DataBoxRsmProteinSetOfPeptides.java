@@ -10,6 +10,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.RsmProteinSetPanel;
 import java.util.Arrays;
 
@@ -130,6 +131,9 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
             }
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+            }
+            if (parameterType.equals(CrossSelectionInterface.class)) {
+                return ((CompareDataProviderInterface)m_panel).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);

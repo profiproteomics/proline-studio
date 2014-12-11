@@ -11,6 +11,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.RsmPeptidesPanel;
 
 
@@ -50,6 +51,12 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(CompareDataInterface.class, true);
         registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(CrossSelectionInterface.class, true);
+        registerOutParameter(outParameter);
+        
+        
         
     }
     
@@ -132,6 +139,11 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }
+            if (parameterType.equals(CrossSelectionInterface.class)) {
+                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+            }
+            
+            
         }
         return super.getData(getArray, parameterType);
     }

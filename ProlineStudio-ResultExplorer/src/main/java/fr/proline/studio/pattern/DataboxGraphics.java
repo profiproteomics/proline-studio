@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.GraphicsPanel;
 import fr.proline.studio.rsmexplorer.gui.StatsHistogramPanel;
 import fr.proline.studio.stats.ValuesForStatsAbstract;
@@ -39,7 +40,8 @@ public class DataboxGraphics extends AbstractDataBox  {
     @Override
     public void dataChanged() {
         final CompareDataInterface values = (m_values!=null) ? m_values : (CompareDataInterface) m_previousDataBox.getData(false, CompareDataInterface.class);
-        ((GraphicsPanel)m_panel).setData(values);
+        final CrossSelectionInterface crossSelectionInterface = (m_values!=null) ? null : (CrossSelectionInterface) m_previousDataBox.getData(false, CrossSelectionInterface.class);
+        ((GraphicsPanel)m_panel).setData(values, crossSelectionInterface);
     }
     
     @Override

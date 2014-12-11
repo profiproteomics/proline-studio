@@ -10,6 +10,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 
 
 /**
@@ -116,6 +117,9 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
             }
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+            }
+            if (parameterType.equals(CrossSelectionInterface.class)) {
+                return  ((CompareDataProviderInterface)m_panel).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);

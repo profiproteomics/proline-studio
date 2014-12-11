@@ -11,6 +11,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
 
 /**
@@ -124,8 +125,12 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
         if (parameterType!= null) {
             if (parameterType.equals(DPeptideMatch.class)) {
                 return ((PeptideMatchPanel)m_panel).getSelectedPeptideMatch();
-            } else if (parameterType.equals(CompareDataInterface.class)) {
+            } 
+            if (parameterType.equals(CompareDataInterface.class)) {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+            }
+            if (parameterType.equals(CrossSelectionInterface.class)) {
+                return ((CompareDataProviderInterface)m_panel).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);

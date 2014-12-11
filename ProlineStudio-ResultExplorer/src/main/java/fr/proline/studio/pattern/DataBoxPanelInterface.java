@@ -1,5 +1,6 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 
 /**

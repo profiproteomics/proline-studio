@@ -34,11 +34,13 @@ import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +53,7 @@ import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
+import javax.swing.ToolTipManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
@@ -69,6 +72,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
     private MarkerContainerPanel m_markerContainerPanel;
     
+    private boolean m_displayForProteinSet;
     private DQuantitationChannel[] m_quantChannels;
     
     private FilterButton m_filterButton;
@@ -87,6 +91,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private void initComponents() {
         setLayout(new BorderLayout());
 
+        ToolTipManager.sharedInstance().setInitialDelay(0);
+        ToolTipManager.sharedInstance().setDismissDelay(5000);
+        
         m_search = new XICPeptideSearch();
         m_searchPanel = new SearchFloatingPanel(m_search);
         final JPanel peptidePanel = createPeptidePanel();
@@ -223,9 +230,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<DMasterQuantPeptide> peptides, boolean finished) {
+    public void setData(Long taskId, boolean displayForProteinSet, DQuantitationChannel[] quantChannels,  List<DMasterQuantPeptide> peptides, boolean finished) {
         m_quantChannels = quantChannels;
-        
+        this.m_displayForProteinSet = displayForProteinSet;
         ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).setData(taskId, quantChannels, peptides);
 
         // select the first row
@@ -239,6 +246,10 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             List<Integer> listIdsToHide = ((QuantPeptideTableModel)m_quantPeptideTable.getModel()).getDefaultColumnsToHide();
             for (Integer id : listIdsToHide) {
                 m_quantPeptideTable.getColumnExt(id.intValue()).setVisible(false);
+            }
+            if (!m_displayForProteinSet) {
+                // hide the cluster column
+                m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_CLUSTER).setVisible(false);
             }
             // hide the id column
             m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
@@ -255,6 +266,10 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             List<Integer> listIdsToHide = ((QuantPeptideTableModel)m_quantPeptideTable.getModel()).getDefaultColumnsToHide();
             for (Integer id : listIdsToHide) {
                 m_quantPeptideTable.getColumnExt(id.intValue()).setVisible(false);
+            }
+            if (!m_displayForProteinSet) {
+                // hide the cluster column
+                m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_CLUSTER).setVisible(false);
             }
             // hide the id column
             m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
@@ -313,10 +328,22 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
-            
             addMouseListener(new TablePopupMouseAdapter(this));
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         }
+        
+        //Implement table cell tool tips.
+        @Override
+        public String getToolTipText(MouseEvent e) {
+            Point p = e.getPoint();
+            int rowIndex = rowAtPoint(p);
+            int colIndex = columnAtPoint(p);
+            int realColumnIndex = convertColumnIndexToModel(colIndex);
+            int realRowIndex = convertRowIndexToModel(rowIndex);
+            QuantPeptideTableModel tableModel = (QuantPeptideTableModel) getModel();
+            return tableModel.getTootlTipValue(realRowIndex, realColumnIndex);
+        }
+
         
         /** 
          * Called whenever the value of the selection changes.
@@ -603,7 +630,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             QuantPeptideTableModel model = ((QuantPeptideTableModel) m_quantPeptideTable.getModel());
             
             List<TableColumn> columns = m_quantPeptideTable.getColumns(true);
-            for (int i=QuantPeptideTableModel.COLTYPE_PEPTIDE_NAME+1;i<columns.size();i++) {
+            for (int i=QuantPeptideTableModel.LAST_STATIC_COLUMN+1;i<columns.size();i++) {
                 int rsmCur = model.getQCNumber(i);
                 int type = model.getTypeNumber(i);
                 boolean visible = m_rsmList.isVisible(rsmCur) && m_xicList.isVisible(type);

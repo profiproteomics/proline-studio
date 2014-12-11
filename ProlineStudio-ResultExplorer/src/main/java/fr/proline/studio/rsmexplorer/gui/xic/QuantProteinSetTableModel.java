@@ -355,7 +355,16 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         //return null; // should never happen
     }
 
-
+    public DMasterQuantProteinSet getMasterQuantProteinSet(int row) {
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+        
+        // Retrieve QuantProtein Set
+        DMasterQuantProteinSet quantProteinSet = m_proteinSets.get(rowFiltered);
+        return quantProteinSet;
+    }
     
     public DProteinSet getProteinSet(int row) {
         int rowFiltered = row;
@@ -604,7 +613,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         List<Integer> listIds = new ArrayList();
         if (m_quantChannels != null) {
             for (int i=m_quantChannels.length-1; i>=0; i--) {
-                listIds.add(m_columnNames.length+COLTYPE_ABUNDANCE+(i*m_columnNamesQC.length));
+                listIds.add(m_columnNames.length+COLTYPE_RAW_ABUNDANCE+(i*m_columnNamesQC.length));
                 listIds.add(m_columnNames.length+COLTYPE_SELECTION_LEVEL+(i*m_columnNamesQC.length));
             }
         }

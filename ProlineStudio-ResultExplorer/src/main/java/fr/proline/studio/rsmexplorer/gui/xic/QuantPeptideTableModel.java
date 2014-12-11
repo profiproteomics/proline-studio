@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.core.orm.msi.dto.DCluster;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
@@ -8,6 +9,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringDiffFilter;
+import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
@@ -26,8 +28,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_NAME = 1;
-    private static final String[] m_columnNames = {"Id", "Peptide Sequence"};
-    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Identified Peptide Sequence"};
+    public static final int COLTYPE_PEPTIDE_CLUSTER = 2;
+    public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_CLUSTER;
+    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Cluster"};
+    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Identified Peptide Sequence", "Cluster Number"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_ABUNDANCE = 1;
@@ -60,7 +64,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
     @Override
     public String getColumnName(int col) {
-        if (col <= COLTYPE_PEPTIDE_NAME) {
+        if (col <= LAST_STATIC_COLUMN) {
             return m_columnNames[col];
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
@@ -84,7 +88,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     
     @Override
     public String getExportColumnName(int col) {
-        if (col <= COLTYPE_PEPTIDE_NAME) {
+        if (col <= LAST_STATIC_COLUMN) {
             return m_columnNames[col];
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
@@ -106,7 +110,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
     @Override
     public String getToolTipForHeader(int col) {
-        if (col <= COLTYPE_PEPTIDE_NAME) {
+        if (col <= LAST_STATIC_COLUMN) {
             return m_toolTipColumns[col];
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
@@ -153,6 +157,106 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         return m_quantPeptides.size();
     }
 
+    /**
+     * returns the tooltip to display for a given row and a given col
+     * for the cluster returns the abundances list
+     * @param row
+     * @param col
+     * @return 
+     */
+    public String getTootlTipValue(int row, int col) {
+        if (m_quantPeptides == null || row <0) {
+            return "";
+        }
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+        // Retrieve Quant Peptide
+        DMasterQuantPeptide peptide = m_quantPeptides.get(rowFiltered);
+        DCluster cluster = peptide.getCluster();
+        if (col == COLTYPE_PEPTIDE_CLUSTER && cluster != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<html>");
+            sb.append("Cluster ");
+            sb.append(cluster.getClusterId());
+            sb.append("<br/>");
+            if (cluster.getAbundances() != null) {
+                sb.append("<table><tr> ");
+                List<Float> abundances = cluster.getAbundances();
+                for (int a = 0; a < m_quantChannels.length; a++) {
+                    sb.append("<td>");
+                    String rsmHtmlColor = CyclicColorPalette.getHTMLColor(a);
+                    sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+                    sb.append("Abundance");
+                    sb.append("<br/>");
+                    sb.append(m_quantChannels[a].getResultFileName());
+                    sb.append("<br/>");
+                    sb.append(m_quantChannels[a].getRawFileName());
+                    sb.append("</td>");
+                }
+                sb.append("</tr><tr> ");
+                // we suppose that the abundances are in the "good" order
+                for (Float abundance : abundances) {
+                    sb.append("<td>");
+                    sb.append(abundance.isNaN()?"":abundance);
+                    sb.append("</td>");
+                }
+                sb.append("</tr></table>");
+            }
+
+            return sb.toString();
+        } else if (cluster != null ) {
+            int a = getAbundanceCol(col);
+            if (a >= 0) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("<html>");
+                sb.append("Cluster ");
+                sb.append(cluster.getClusterId());
+                sb.append("<br/>");
+                if (cluster.getAbundances() != null) {
+                    sb.append("<table><tr> ");
+                    List<Float> abundances = cluster.getAbundances();
+                    sb.append("<td>");
+                    String rsmHtmlColor = CyclicColorPalette.getHTMLColor(a);
+                    sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+                    sb.append("Abundance");
+                    sb.append("<br/>");
+                    sb.append(m_quantChannels[a].getResultFileName());
+                    sb.append("<br/>");
+                    sb.append(m_quantChannels[a].getRawFileName());
+                    sb.append("</td>");
+                    sb.append("</tr><tr> ");
+                    // we suppose that the abundances are in the "good" order
+                    sb.append("<td>");
+                    sb.append(abundances.get(a).isNaN()?"":abundances.get(a));
+                    sb.append("</td>");
+                    sb.append("</tr></table>");
+                }
+                return sb.toString();
+            }
+        }
+        return "";
+    }
+    
+    /**
+     * returns -1 if the col is not an Abundance Col, otherwise the id in the quantChannel tab
+     * @param col
+     * @return 
+     */
+    private int getAbundanceCol(int col) {
+        if (m_quantChannels != null) {
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+            int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+            if (id == COLTYPE_ABUNDANCE) {
+                return nbQc;
+            }
+            return -1;
+        }
+        return -1;
+    }
+    
+    
     @Override
     public Object getValueAt(int row, int col) {
 
@@ -182,6 +286,20 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                 }
                 return lazyData;
 
+            }
+            case COLTYPE_PEPTIDE_CLUSTER: {
+                LazyData lazyData = getLazyData(row, col);
+                if (peptideInstance == null ) {
+                    lazyData.setData(null);
+                    givePriorityTo(m_taskId, row, col);
+                } else {
+                    DCluster cluster = peptide.getCluster();
+                    if (cluster == null) {
+                        lazyData.setData("");
+                    }else{
+                        lazyData.setData(cluster.getClusterId());
+                    }
+                }
             }
             default: {
                 // Quant Channel columns 
@@ -360,20 +478,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             case COLTYPE_PEPTIDE_NAME: {
                 return ((StringDiffFilter) filter).filter((String) data);
             }
-            /*case COLTYPE_PROTEIN_SET_DESCRIPTION: {
-             return ((StringFilter) filter).filter((String)data);
-             }
-             case COLTYPE_PROTEIN_SCORE: {
-             return ((DoubleFilter) filter).filter((Float)data);
-             }
-             case COLTYPE_PROTEINS_COUNT:
-             case COLTYPE_PEPTIDES_COUNT:
-             case COLTYPE_SPECTRAL_COUNT:
-             case COLTYPE_UNIQUE_SEQUENCES_COUNT:
-             case COLTYPE_SPECIFIC_SPECTRAL_COUNT: {
-             return ((IntegerFilter) filter).filter((Integer)data);
-             }*/ //JPM.TODO
-
+            case COLTYPE_PEPTIDE_CLUSTER: {
+                return ((StringFilter) filter).filter((String) data);
+            }
         }
 
         return true; // should never happen
@@ -386,13 +493,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             m_filters = new Filter[nbCol];
             m_filters[COLTYPE_PEPTIDE_ID] = null;
             m_filters[COLTYPE_PEPTIDE_NAME] = new StringDiffFilter(getColumnName(COLTYPE_PEPTIDE_NAME));
-            /*m_filters[COLTYPE_PROTEIN_SET_DESCRIPTION] = new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_DESCRIPTION));
-             m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
-             m_filters[COLTYPE_PROTEINS_COUNT] = null;
-             m_filters[COLTYPE_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT));
-             m_filters[COLTYPE_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECTRAL_COUNT));
-             m_filters[COLTYPE_SPECIFIC_SPECTRAL_COUNT] = new IntegerFilter(getColumnName(COLTYPE_SPECIFIC_SPECTRAL_COUNT));
-             m_filters[COLTYPE_UNIQUE_SEQUENCES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_UNIQUE_SEQUENCES_COUNT));   */
+            m_filters[COLTYPE_PEPTIDE_CLUSTER] = new StringFilter(getColumnName(COLTYPE_PEPTIDE_CLUSTER));
         }
     }
 
@@ -466,7 +567,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         List<Integer> listIds = new ArrayList();
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
-                listIds.add(m_columnNames.length + COLTYPE_ABUNDANCE + (i * m_columnNamesQC.length));
+                listIds.add(m_columnNames.length + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
                 listIds.add(m_columnNames.length + COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
             }
         }

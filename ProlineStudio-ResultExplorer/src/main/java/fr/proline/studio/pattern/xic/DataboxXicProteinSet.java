@@ -45,6 +45,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         // One or Multiple ProteinSet
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(DProteinSet.class, true);
+        outParameter.addParameter(DMasterQuantProteinSet.class, true);
         outParameter.addParameter(DDataset.class, true);
         outParameter.addParameter(ResultSummary.class, false);
         registerOutParameter(outParameter);
@@ -136,6 +137,9 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             }
             if (parameterType.equals(DProteinSet.class)) {
                 return ((XicProteinSetPanel) m_panel).getSelectedProteinSet();
+            }
+            if (parameterType.equals(DMasterQuantProteinSet.class)) {
+                return ((XicProteinSetPanel) m_panel).getSelectedMasterQuantProteinSet();
             }
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();

@@ -2,6 +2,7 @@ package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
+import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -27,6 +28,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     private DDataset m_dataset;
     private DProteinSet m_proteinSet;
+    private DMasterQuantProteinSet m_masterQuantProteinSet;
     private List<DMasterQuantPeptide> m_masterQuantPeptideList ;
     
     public DataboxXicPeptideSet() { 
@@ -69,6 +71,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         
         if (!allProteinSet) {
             m_proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
+            m_masterQuantProteinSet = (DMasterQuantProteinSet) m_previousDataBox.getData(false, DMasterQuantProteinSet.class);
             m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
         }
         final int loadingId = setLoading();
@@ -92,7 +95,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                     }
                     DQuantitationChannel[] quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
-                    ((XicPeptidePanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantPeptideList, finished);
+                    ((XicPeptidePanel) m_panel).setData(taskId, m_proteinSet != null, quantitationChannelArray, m_masterQuantPeptideList, finished);
                 } else {
                     ((XicPeptidePanel) m_panel).dataUpdated(subTask, finished);
                 }
@@ -111,7 +114,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         if (allProteinSet) {
             task.initLoadPeptides(getProjectId(), m_dataset, m_masterQuantPeptideList);
         }else {
-            task.initLoadPeptides(getProjectId(), m_dataset, m_proteinSet, m_masterQuantPeptideList);
+            task.initLoadPeptides(getProjectId(), m_dataset, m_proteinSet, m_masterQuantProteinSet, m_masterQuantPeptideList);
         }
         registerTask(task);
 

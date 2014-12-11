@@ -285,6 +285,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         return m_quantProteinSetTable.getSelectedProteinSet();
     }
     
+    public DMasterQuantProteinSet getSelectedMasterQuantProteinSet() {
+        return m_quantProteinSetTable.getSelectedMasterQuantProteinSet();
+    }
+    
     
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
@@ -386,6 +390,30 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
             // Retrieve ProteinMatch selected
             return tableModel.getProteinSet(selectedRow);
+        }
+        
+        public DMasterQuantProteinSet getSelectedMasterQuantProteinSet() {
+
+            // Retrieve Selected Row
+            int selectedRow = getSelectedRow();
+
+            // nothing selected
+            if (selectedRow == -1) {
+                return null;
+
+            }
+
+            QuantProteinSetTableModel tableModel = (QuantProteinSetTableModel) getModel();
+            if (tableModel.getRowCount() == 0) {
+                return null; // this is a wart, for an unknown reason, it happens that the first row
+                // is selected although it does not exist.
+            }
+
+            // convert according to the sorting
+            selectedRow = convertRowIndexToModel(selectedRow);
+
+            // Retrieve ProteinMatch selected
+            return tableModel.getMasterQuantProteinSet(selectedRow);
         }
         
         public boolean selectProteinSet(Long proteinSetId, String searchText) {

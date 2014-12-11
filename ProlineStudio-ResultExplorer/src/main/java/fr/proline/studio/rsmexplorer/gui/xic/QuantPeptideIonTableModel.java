@@ -30,8 +30,8 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
     public static final int COLTYPE_PEPTIDE_ION_CHARGE = 2;
     public static final int COLTYPE_PEPTIDE_ION_MOZ = 3;
     public static final int COLTYPE_PEPTIDE_ION_ELUTION_TIME = 4;
-    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Charge", "MoZ", "<html>Elution<br/>time (s)</html>"};
-    private static final String[] m_columnNamesForFilter = {"Id", "Peptide Sequence", "Charge", "MoZ", "Elution time"};
+    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Charge", "m/z", "<html>Elution<br/>time (s)</html>"};
+    private static final String[] m_columnNamesForFilter = {"Id", "Peptide Sequence", "Charge", "m/z", "Elution time"};
     private static final String[] m_toolTipColumns = {"MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Charge", "Mass to Charge Ratio", "Elution time"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
@@ -508,7 +508,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         List<Integer> listIds = new ArrayList();
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
-                listIds.add(m_columnNames.length + COLTYPE_ABUNDANCE + (i * m_columnNamesQC.length));
+                listIds.add(m_columnNames.length + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
                 listIds.add(m_columnNames.length + COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
             }
         }

@@ -20,10 +20,14 @@ public class ZoomGesture {
     private int m_x1, m_x2, m_y1, m_y2;
     private int m_xStart, m_xEnd, m_yStart, m_yEnd;
     
-    private static final int MIN_ZOOMING_DELTA = 5;
+    private static final int MIN_ZOOMING_DELTA = 10;
     
     public ZoomGesture() {
         
+    }
+    
+    public boolean isZooming() {
+        return m_isZooming;
     }
     
     public void startZooming(int x, int y) {

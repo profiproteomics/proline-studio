@@ -146,7 +146,13 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
         
-        FilterButton filterButton = new FilterButton(((LogTableModel) m_logTable.getModel()));
+        FilterButton filterButton = new FilterButton(((LogTableModel) m_logTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+            }
+            
+        };
         EraserButton taskEraserButton = new EraserButton();
         
         toolbar.add(filterButton);
@@ -610,7 +616,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
         public EraserButton() {
 
-            setIcon(IconManager.getIcon(IconManager.IconType.ERASER_SMALL11));
+            setIcon(IconManager.getIcon(IconManager.IconType.ERASER));
             setToolTipText("Erase All Finished Tasks");
 
             addActionListener(this);

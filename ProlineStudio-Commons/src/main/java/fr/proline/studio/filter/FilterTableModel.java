@@ -2,6 +2,7 @@ package fr.proline.studio.filter;
 
 
 import fr.proline.studio.table.DecoratedTableModel;
+import java.util.ArrayList;
 
 
 /**
@@ -11,7 +12,8 @@ import fr.proline.studio.table.DecoratedTableModel;
 public abstract class FilterTableModel extends DecoratedTableModel implements FilterTableModelInterface {
 
     protected Filter[] m_filters = null;
-
+    protected ArrayList<Integer> m_filteredIds = null;
+    
     
     public FilterTableModel() {
     }

@@ -1,10 +1,13 @@
 package fr.proline.studio.table;
 
 import com.thierry.filtering.TableSelection;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.utils.RelativePainterHighlighter;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -22,7 +25,7 @@ import org.jdesktop.swingx.util.PaintUtils;
  *
  * @author JM235353
  */
-public class DecoratedTable extends JXTable {
+public class DecoratedTable extends JXTable implements CrossSelectionInterface {
 
     private RelativePainterHighlighter.NumberRelativizer m_relativizer = null;
     
@@ -68,6 +71,39 @@ public class DecoratedTable extends JXTable {
     @Override
     protected JTableHeader createDefaultTableHeader() {
         return new CustomTooltipTableHeader(this);
+    }
+
+    @Override
+    public void select(ArrayList<Integer> rows) {
+        ListSelectionModel model = getSelectionModel();
+        model.clearSelection();
+        for (Integer row1 : rows) {
+            int row = convertRowIndexToView(row1);
+            model.addSelectionInterval(row, row); 
+       }
+       
+        int minRow = model.getMinSelectionIndex();
+        if (minRow != -1) {
+            scrollRowToVisible(minRow);
+        }
+    }
+    
+    @Override
+    public ArrayList<Integer> getSelection() {
+        
+        ArrayList<Integer> selectionList = new ArrayList<>();
+        
+        ListSelectionModel selectionModel = getSelectionModel();
+        DecoratedTableModel model = (DecoratedTableModel) getModel();
+        
+        for (int i=0;i<model.getRowCount();i++) {
+            int row = convertRowIndexToView(i);
+            if (selectionModel.isSelectedIndex(row)) {
+                selectionList.add(i);
+            }
+        }
+        
+        return selectionList;
     }
     
     private class CustomTooltipTableHeader extends JXTableHeader {

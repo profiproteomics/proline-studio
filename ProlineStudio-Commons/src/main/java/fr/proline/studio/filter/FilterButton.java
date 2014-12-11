@@ -12,7 +12,7 @@ import org.openide.windows.WindowManager;
  * Button to access to filter dialog from a toolbar
  * @author JM235353
  */
-public class FilterButton extends JButton implements ActionListener {
+public abstract class FilterButton extends JButton implements ActionListener {
     
     private FilterTableModelInterface m_tableModelFilterInterface;
     
@@ -21,6 +21,7 @@ public class FilterButton extends JButton implements ActionListener {
         m_tableModelFilterInterface = tableModelFilterInterface;
         
         setIcon(IconManager.getIcon(IconManager.IconType.FUNNEL ));
+        setFocusPainted(false);
         setToolTipText("Filter...");
 
         addActionListener(this);
@@ -61,6 +62,10 @@ public class FilterButton extends JButton implements ActionListener {
 
 
             m_tableModelFilterInterface.filter();
+            
+            filteringDone();
         }
     }
+    
+    protected abstract void filteringDone();
 }

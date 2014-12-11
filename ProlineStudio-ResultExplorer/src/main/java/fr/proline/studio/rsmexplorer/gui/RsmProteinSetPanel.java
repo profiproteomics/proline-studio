@@ -11,6 +11,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.BookmarkMarker;
@@ -137,6 +138,11 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     @Override
     public CompareDataInterface getCompareDataInterface() {
         return (CompareDataInterface) m_proteinSetTable.getModel();
+    }
+    
+    @Override
+    public CrossSelectionInterface getCrossSelectionInterface() {
+        return m_proteinSetTable;
     }
     
     @Override
@@ -271,7 +277,14 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             toolbar.add(m_searchToggleButton);
         }
         
-        m_filterButton = new FilterButton(((ProteinSetTableModel) m_proteinSetTable.getModel()));
+        m_filterButton = new FilterButton(((ProteinSetTableModel) m_proteinSetTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            }
+            
+        };
 
         m_exportButton = new ExportButton(((ProteinSetTableModel) m_proteinSetTable.getModel()), "Protein Sets", m_proteinSetTable);
 
@@ -337,7 +350,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     
-    private class ProteinSetTable extends LazyTable implements ImportTableSelectionInterface  {
+    private class ProteinSetTable extends LazyTable implements ImportTableSelectionInterface, CrossSelectionInterface  {
 
         
         public ProteinSetTable() {
@@ -493,6 +506,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             }
             
         }
+
 
         
         

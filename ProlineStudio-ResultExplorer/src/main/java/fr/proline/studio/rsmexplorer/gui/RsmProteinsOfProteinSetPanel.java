@@ -9,6 +9,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -135,7 +136,14 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_filterButton = new FilterButton(((ProteinTableModel) m_proteinTable.getModel()));
+        m_filterButton = new FilterButton(((ProteinTableModel) m_proteinTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            }
+            
+        };
         m_exportButton = new ExportButton(((ProteinTableModel) m_proteinTable.getModel()), "Proteins", m_proteinTable);
         m_addCompareDataButton = new AddCompareDataButton(((ProteinTableModel) m_proteinTable.getModel()), (CompareDataInterface) m_proteinTable.getModel()) {
 
@@ -262,6 +270,11 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     @Override
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
+    }
+
+    @Override
+    public CrossSelectionInterface getCrossSelectionInterface() {
+        return m_proteinTable;
     }
 
 

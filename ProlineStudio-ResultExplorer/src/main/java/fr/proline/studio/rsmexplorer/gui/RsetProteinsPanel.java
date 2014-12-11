@@ -29,6 +29,7 @@ import javax.swing.table.TableColumn;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.*;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.search.SearchFloatingPanel;
@@ -168,7 +169,14 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
        
-        m_filterButton = new FilterButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()));
+        m_filterButton = new FilterButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            }
+            
+        };
         m_exportButton = new ExportButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()), "Peptide Match", m_proteinTable);
 
         m_addCompareDataButton = new AddCompareDataButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()), (CompareDataInterface) m_proteinTable.getModel()) {
@@ -377,6 +385,11 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
         return internalPanel;
 
+    }
+
+    @Override
+    public CrossSelectionInterface getCrossSelectionInterface() {
+        return m_proteinTable;
     }
 
     private class ProteinTable extends LazyTable {

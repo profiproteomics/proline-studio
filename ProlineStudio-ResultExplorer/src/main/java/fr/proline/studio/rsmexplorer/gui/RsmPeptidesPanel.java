@@ -13,6 +13,7 @@ import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -153,7 +154,14 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
 
-        m_filterButton = new FilterButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()));
+        m_filterButton = new FilterButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            }
+            
+        };
         
         m_exportButton = new ExportButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()), "Peptide Instances", m_peptideInstanceTable);
         
@@ -246,6 +254,11 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     @Override
     public CompareDataInterface getCompareDataInterface() {
         return (CompareDataInterface) m_peptideInstanceTable.getModel();
+    }
+    
+    @Override
+    public CrossSelectionInterface getCrossSelectionInterface() {
+        return m_peptideInstanceTable;
     }
 
     @Override
@@ -463,6 +476,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         public boolean isLoaded() {
             return m_dataBox.isLoaded();
         }
+
     }
 
     private class Search extends AbstractSearch {

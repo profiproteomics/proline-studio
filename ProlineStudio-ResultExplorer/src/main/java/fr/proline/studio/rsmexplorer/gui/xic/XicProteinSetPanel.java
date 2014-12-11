@@ -13,6 +13,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.JCheckBoxList;
@@ -156,7 +157,14 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
         toolbar.add(m_searchToggleButton);
         
-        m_filterButton = new FilterButton(((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()));
+        m_filterButton = new FilterButton(((QuantProteinSetTableModel) m_quantProteinSetTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            }
+            
+        };
 
         m_exportButton = new ExportButton(((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()), "Protein Sets", m_quantProteinSetTable);
 
@@ -306,6 +314,11 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     @Override
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
+    }
+
+    @Override
+    public CrossSelectionInterface getCrossSelectionInterface() {
+        return m_quantProteinSetTable;
     }
 
     

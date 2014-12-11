@@ -11,6 +11,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.JCheckBoxList;
@@ -149,7 +150,14 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
         toolbar.add(m_searchToggleButton);
         
-        m_filterButton = new FilterButton(((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()));
+        m_filterButton = new FilterButton(((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            }
+            
+        };
 
         m_exportButton = new ExportButton(((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()), "Peptides Ions", m_quantPeptideIonTable);
 
@@ -288,6 +296,11 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
 
     public MasterQuantPeptideIon getSelectedMasterQuantPeptideIon() {
         return m_quantPeptideIonTable.getSelectedMasterQuantPeptideIon();
+    }
+
+    @Override
+    public CrossSelectionInterface getCrossSelectionInterface() {
+        return m_quantPeptideIonTable;
     }
     
     private class QuantPeptideIonTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface   {

@@ -10,18 +10,19 @@ import java.awt.event.ActionListener;
  */
 public class RemoveDataBoxActionListener implements ActionListener {
 
-    private SplittedPanelContainer m_splittedPanel;
-    private AbstractDataBox m_previousDatabox;
+    private final SplittedPanelContainer m_splittedPanel;
+    private final AbstractDataBox m_databox;
 
-    public RemoveDataBoxActionListener(SplittedPanelContainer splittedPanel, AbstractDataBox previousDatabox) {
+    public RemoveDataBoxActionListener(SplittedPanelContainer splittedPanel, AbstractDataBox databox) {
         m_splittedPanel = splittedPanel;
-        m_previousDatabox = previousDatabox;
+        m_databox = databox;
     }
 
     @Override
     public void actionPerformed(ActionEvent event) {
-
-        m_previousDatabox.setNextDataBox(null);
+        if (m_databox.m_previousDataBox != null) {
+            m_databox.m_previousDataBox.removeNextDataBox(m_databox);
+        }
         m_splittedPanel.removeLastPanel();
 
 

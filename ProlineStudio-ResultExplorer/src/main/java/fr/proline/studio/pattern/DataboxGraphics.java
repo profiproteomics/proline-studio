@@ -14,9 +14,17 @@ public class DataboxGraphics extends AbstractDataBox  {
 
     private CompareDataInterface m_values = null;
 
+    private boolean m_defaultLocked = false;
+    
     public DataboxGraphics() {
-        super(DataboxType.DataboxGraphics);
+       this(false);
+    }
+    
+    public DataboxGraphics(boolean defaultLocked) {
+         super(DataboxType.DataboxGraphics);
 
+         m_defaultLocked = defaultLocked;
+         
         // Name of this databox
         m_name = "Graphic";
         m_description = "Graphics : Histogram / Scatter Plot";
@@ -26,12 +34,12 @@ public class DataboxGraphics extends AbstractDataBox  {
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(CompareDataInterface.class, false);
         registerInParameter(inParameter);
-
+        
     }
     
     @Override
     public void createPanel() {
-        GraphicsPanel p = new GraphicsPanel();
+        GraphicsPanel p = new GraphicsPanel(m_defaultLocked);
         p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;

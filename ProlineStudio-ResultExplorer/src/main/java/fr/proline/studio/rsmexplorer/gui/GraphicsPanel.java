@@ -61,9 +61,11 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
     
     private JToggleButton m_gridButton = null;
     
-    public GraphicsPanel() {
+    public GraphicsPanel(boolean dataLocked) {
         setLayout(new BorderLayout());
-
+        
+        m_dataLocked = dataLocked;
+        
         JPanel internalPanel = createInternalPanel();
         add(internalPanel, BorderLayout.CENTER);
 
@@ -116,6 +118,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         final JButton importSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
         importSelectionButton.setToolTipText( "Import Selection from Previous View");
         importSelectionButton.setFocusPainted(false);
+        importSelectionButton.setEnabled(!m_dataLocked);
         importSelectionButton.addActionListener(new ActionListener() {
 
             @Override
@@ -129,6 +132,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         final JButton exportSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.EXPORT_TABLE_SELECTION));
         exportSelectionButton.setToolTipText("Export Selection to Previous View");
         exportSelectionButton.setFocusPainted(false);
+        exportSelectionButton.setEnabled(!m_dataLocked);
         exportSelectionButton.addActionListener(new ActionListener() {
 
             @Override
@@ -140,7 +144,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         });
         
         
-        final JButton lockButton = new JButton(IconManager.getIcon(IconManager.IconType.UNLOCK));
+        final JButton lockButton = new JButton(m_dataLocked ? IconManager.getIcon(IconManager.IconType.LOCK) : IconManager.getIcon(IconManager.IconType.UNLOCK));
         lockButton.setToolTipText( "Lock/Unlock Input Data");
         lockButton.setFocusPainted(false);
         lockButton.addActionListener(new ActionListener() {
@@ -326,7 +330,15 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         if (m_plotPanel.isLocked()) {
             return;
         }
+        if ((m_dataLocked) && !(values instanceof LockedDataModel)) {
+            // wart for first call when directly locked
+            values = new LockedDataModel(values);
+        }
         setDataImpl(values, crossSelectionInterface);
+        if (m_dataLocked) {
+            // check that plotPanel corresponds, it can not correspond at the first call
+            m_plotPanel.lockData(m_dataLocked);
+        }
     }
     private void setDataImpl(CompareDataInterface values, CrossSelectionInterface crossSelectionInterface) {
 

@@ -47,7 +47,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     private SplittedPanelContainer.PanelLayout m_layout = SplittedPanelContainer.PanelLayout.VERTICAL;
     
-    protected AbstractDataBox m_nextDataBox = null;
+    protected ArrayList<AbstractDataBox> m_nextDataBoxArray = null;
     protected AbstractDataBox m_previousDataBox = null;
     
     private int m_loadingId = 0;
@@ -255,11 +255,23 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
     }
     
-    public void setNextDataBox(AbstractDataBox nextDataBox) {
-        m_nextDataBox = nextDataBox;
+    public void addNextDataBox(AbstractDataBox nextDataBox) {
+        if (m_nextDataBoxArray == null) {
+            m_nextDataBoxArray = new ArrayList<>(1);
+        }
+        m_nextDataBoxArray.add(nextDataBox);
+
         if (nextDataBox != null) {
             nextDataBox.m_previousDataBox = this;
         }
+    }
+    
+    public void removeNextDataBox(AbstractDataBox nextDataBox) {
+        if (m_nextDataBoxArray == null) {
+            // should not happen
+            return;
+        }
+        m_nextDataBoxArray.remove(nextDataBox);
     }
     
 
@@ -279,11 +291,13 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     }
     
     public void propagateDataChanged(Class dataType) {
-        if (m_nextDataBox != null) {
-            if (m_nextDataBox.isDataDependant(dataType)) {
-                m_nextDataBox.dataChanged();
+        if (m_nextDataBoxArray != null) {
+            for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
+                if (nextDataBox.isDataDependant(dataType)) {
+                    nextDataBox.dataChanged();
+                }
+                nextDataBox.propagateDataChanged(dataType);
             }
-            m_nextDataBox.propagateDataChanged(dataType);
         }
         
     }

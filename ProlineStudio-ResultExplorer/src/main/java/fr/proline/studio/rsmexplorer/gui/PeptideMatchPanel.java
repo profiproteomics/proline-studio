@@ -354,11 +354,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                         }
                     }
                     // prepare window box
-                    WindowBox wbox = WindowBoxFactory.getHistogramWindowBox("Graphic");
-
-                    wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, CompareDataInterface.class));
-
-
+                    WindowBox wbox = WindowBoxFactory.getGraphicsWindowBox("Graphic", m_dataBox);
 
                     // open a window to display the window box
                     DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);

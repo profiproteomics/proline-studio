@@ -1,10 +1,13 @@
 package fr.proline.studio.comparedata;
 
+import fr.proline.studio.graphics.BestGraphicsInterface;
+import fr.proline.studio.graphics.PlotType;
+
 /**
  *
  * @author JM235353
  */
-public class LockedDataModel implements CompareDataInterface {
+public class LockedDataModel implements CompareDataInterface, BestGraphicsInterface {
     
     private CompareDataInterface m_src;
     
@@ -79,5 +82,29 @@ public class LockedDataModel implements CompareDataInterface {
     @Override
     public String getName() {
         return m_name;
+    }
+
+    @Override
+    public PlotType getBestPlotType() {
+        if (m_src instanceof BestGraphicsInterface) {
+            return ((BestGraphicsInterface) m_src).getBestPlotType();
+        }
+        return null;
+    }
+
+    @Override
+    public int getBestXAxisColIndex(PlotType plotType) {
+        if (m_src instanceof BestGraphicsInterface) {
+            return ((BestGraphicsInterface) m_src).getBestXAxisColIndex(plotType);
+        }
+        return -1;
+    }
+
+    @Override
+    public int getBestYAxisColIndex(PlotType plotType) {
+        if (m_src instanceof BestGraphicsInterface) {
+            return ((BestGraphicsInterface) m_src).getBestYAxisColIndex(plotType);
+        }
+        return -1;
     }
 }

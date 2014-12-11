@@ -37,7 +37,7 @@ public class AddDataBoxActionListener implements ActionListener {
                 // should never happen
             }
 
-            m_previousDatabox.setNextDataBox(genericDatabox);
+            m_previousDatabox.addNextDataBox(genericDatabox);
 
 
             genericDatabox.createPanel();

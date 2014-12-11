@@ -77,13 +77,15 @@ public class WindowBoxFactory {
         
     }
     
-    public static WindowBox getHistogramWindowBox(String name) {
+    public static WindowBox getGraphicsWindowBox(String name, AbstractDataBox srcDatabox) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         //boxes[0] = new DataBoxStatisticsFrequencyResponse();
-        boxes[0] = new DataboxGraphics();
+        boxes[0] = new DataboxGraphics(true);
+        srcDatabox.addNextDataBox(boxes[0]);
         IconManager.IconType iconType = IconManager.IconType.CHART;
-         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
-         return winBox;
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+        boxes[0].dataChanged();
+        return winBox;
     }
     
     public static WindowBox getProteinMatchesForRsetWindowBox(String name, boolean isDecoy) {
@@ -259,7 +261,7 @@ public class WindowBoxFactory {
         // link boxes together
         int nb = boxes.length - 1;
         for (int i = 0; i < nb; i++) {
-            boxes[i].setNextDataBox(boxes[i + 1]);
+            boxes[i].addNextDataBox(boxes[i + 1]);
         }
 
         // create panels for each Box

@@ -15,6 +15,7 @@ import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
@@ -313,7 +314,14 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
         
-        m_filterButton = new FilterButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel()));
+        m_filterButton = new FilterButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel())) {
+
+            @Override
+            protected void filteringDone() {
+                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            }
+            
+        };
         
         m_exportButton = new ExportButton((PeptideMatchTableModel) m_peptideMatchTable.getModel(), "Peptide Match", m_peptideMatchTable);
         
@@ -330,6 +338,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         if (m_startingPanel) {
             m_graphicsButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
             m_graphicsButton.setToolTipText("Graphics : Histogram / Scatter Plot");
+            m_graphicsButton.setFocusPainted(false);
             m_graphicsButton.addActionListener(new ActionListener() {
 
                 @Override
@@ -447,6 +456,11 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
     }
+
+    @Override
+    public CrossSelectionInterface getCrossSelectionInterface() {
+        return m_peptideMatchTable;
+   }
 
     private class Search extends AbstractSearch {
 

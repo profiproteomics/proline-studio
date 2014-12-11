@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.comparedata.JoinDataModel;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -225,6 +226,11 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface,
 
     @Override
     public void setLoaded(int id) {}
+
+    @Override
+    public CrossSelectionInterface getCrossSelectionInterface() {
+        return null;
+    }
 
     
     public static class DataRepresentation {

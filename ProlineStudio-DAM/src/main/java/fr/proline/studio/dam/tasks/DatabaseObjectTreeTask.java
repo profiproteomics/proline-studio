@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideMatch;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
+import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import java.util.Map;
 import javax.persistence.EntityManager;
@@ -56,9 +57,14 @@ public class DatabaseObjectTreeTask extends AbstractDatabaseTask {
 
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {
-            entityManagerMSI.getTransaction().rollback();
-            m_logger.error("DatabaseObjectTree", e);
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            m_taskError = new TaskError(e);
             result = false;
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
         } finally {
             entityManagerMSI.close();
         }

@@ -334,8 +334,12 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             //logger.error(getClass().getSimpleName() + " failed", e);
             taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(DatabaseLoadXicMasterQuantTask.class.getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();
@@ -401,7 +405,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();
@@ -492,7 +500,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();
@@ -556,7 +568,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();
@@ -620,7 +636,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();
@@ -855,7 +875,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();
@@ -980,7 +1004,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();
@@ -1033,7 +1061,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();
@@ -1090,7 +1122,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();

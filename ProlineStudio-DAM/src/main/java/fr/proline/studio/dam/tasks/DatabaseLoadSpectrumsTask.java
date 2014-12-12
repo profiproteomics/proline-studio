@@ -89,7 +89,11 @@ public class DatabaseLoadSpectrumsTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
 

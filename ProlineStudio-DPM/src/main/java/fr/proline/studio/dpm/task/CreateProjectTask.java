@@ -126,7 +126,11 @@ public class CreateProjectTask extends AbstractServiceTask {
 
         } catch (Exception e) {
             m_loggerProline.error(getClass().getSimpleName() + " failed", e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_loggerProline.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();

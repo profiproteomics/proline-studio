@@ -512,7 +512,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();
@@ -600,7 +604,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();
@@ -655,7 +663,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
                 m_taskError = new TaskError(e);
-                entityManagerMSI.getTransaction().rollback();
+                try {
+                    entityManagerMSI.getTransaction().rollback();
+                } catch (Exception rollbackException) {
+                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+                }
                 return false;
             } finally {
                 entityManagerMSI.close();
@@ -693,7 +705,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();
@@ -828,8 +844,12 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();
@@ -900,7 +920,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();
@@ -943,7 +967,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();
@@ -1047,7 +1075,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();
@@ -1075,7 +1107,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();
@@ -1101,7 +1137,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();
@@ -1138,7 +1178,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
                 m_taskError = new TaskError(e);
-                entityManagerUDS.getTransaction().rollback();
+                try {
+                    entityManagerUDS.getTransaction().rollback();
+                } catch (Exception rollbackException) {
+                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+                }
                 return false;
             } finally {
                 entityManagerUDS.close();
@@ -1230,7 +1274,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
                 m_taskError = new TaskError(e);
-                entityManagerUDS.getTransaction().rollback();
+                try {
+                    entityManagerUDS.getTransaction().rollback();
+                } catch (Exception rollbackException) {
+                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+                }
                 return false;
             } finally {
                 entityManagerUDS.close();
@@ -1266,7 +1314,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
                 m_taskError = new TaskError(e);
-                entityManagerUDS.getTransaction().rollback();
+                try {
+                    entityManagerUDS.getTransaction().rollback();
+                } catch (Exception rollbackException) {
+                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+                }
                 return false;
             } finally {
                 entityManagerUDS.close();
@@ -1300,7 +1352,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
                 m_taskError = new TaskError(e);
-                entityManagerUDS.getTransaction().rollback();
+                try {
+                    entityManagerUDS.getTransaction().rollback();
+                } catch (Exception rollbackException) {
+                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+                }
                 return false;
             } finally {
                 entityManagerUDS.close();
@@ -1336,7 +1392,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
             } catch (Exception e) {
                 m_logger.error("updateDatasetAndProjectsTree failed", e);
-                entityManagerUDS.getTransaction().rollback();
+                try {
+                    entityManagerUDS.getTransaction().rollback();
+                } catch (Exception rollbackException) {
+                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+                }
                 return false;
             } finally {
                 entityManagerUDS.close();
@@ -1484,7 +1544,11 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         } catch (Exception e) {
             m_logger.error("updateDatasetAndProjectsTree failed", e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(DatabaseDataSetTask.class.getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();

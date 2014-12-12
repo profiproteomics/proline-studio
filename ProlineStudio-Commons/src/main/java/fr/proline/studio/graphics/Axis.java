@@ -32,6 +32,7 @@ public abstract class Axis {
     protected double m_tickSpacing;
     
     protected DecimalFormat m_df;
+    protected DecimalFormat m_dfPlot;
     protected int m_digits = -1;
     
     protected boolean m_log = false;
@@ -138,7 +139,7 @@ public abstract class Axis {
         return new DecimalFormat(pattern);
     }
     
-    public DecimalFormat getDecimalFormat() {
-        return m_df;
+    public DecimalFormat getExternalDecimalFormat() {
+        return m_dfPlot;
     } 
 }

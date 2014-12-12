@@ -78,6 +78,7 @@ public class XAxis extends Axis {
 
         if ((digits != m_digits) || (m_df == null)) {
             m_df = selectDecimalFormat(digits);
+            m_dfPlot = selectDecimalFormat(digits+2);
             m_digits = digits;
         }
 
@@ -140,6 +141,7 @@ public class XAxis extends Axis {
 
         if (m_df == null) {
             m_df = selectDecimalFormat(-1);
+            m_dfPlot = selectDecimalFormat(-1);
         }
 
         int pixelStart = valueToPixel(Math.pow(10, m_minTick));

@@ -83,6 +83,7 @@ public class YAxis extends Axis {
         int digits = ticks.getDigits();
         if ((digits != m_digits) || (m_df == null)) {
             m_df = selectDecimalFormat(digits);
+            m_dfPlot = selectDecimalFormat(digits+2);
             m_digits = digits;
         }
 
@@ -144,6 +145,7 @@ public class YAxis extends Axis {
 
         if (m_df == null) {
             m_df = selectDecimalFormat(-1);
+            m_dfPlot = selectDecimalFormat(-1);
         }
 
         if (m_selected) {
@@ -175,7 +177,7 @@ public class YAxis extends Axis {
 
 
             
-            String s = m_df.format(Math.pow(10, yDisplay));
+            String s = m_df.format(yDisplay);
             int stringWidth = m_valuesFontMetrics.stringWidth(s);
 
             if (m_selected) {

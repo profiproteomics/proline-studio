@@ -44,14 +44,10 @@ public class PlotHistogram extends PlotAbstract {
         return acceptedValues;
     }
     
-    @Override
-    public String getToolTipText(double x, double y) {
-        return null;
-    }
+
     
     @Override
     public boolean select(double x, double y, boolean append) {
-        
 
         double y2 = 0;
         int size = m_dataX.length;
@@ -94,6 +90,22 @@ public class PlotHistogram extends PlotAbstract {
         return false;
     }
     
+    private int findPoint(double x, double y) {
+        double y2 = 0;
+        int size = m_dataX.length;
+        for (int i=0;i<size-1;i++) {
+            double x1 = m_dataX[i];
+            double x2 = m_dataX[i+1];
+            double y1 = m_dataY[i];
+            
+            if ((x>=x1) && (x<=x2) && (y>=y2) && (y<=y1)) {
+                return i;
+            }           
+        }
+        
+        return -1;
+    }
+    
     @Override
     public ArrayList<Integer> getSelection() {
         
@@ -129,6 +141,33 @@ public class PlotHistogram extends PlotAbstract {
             m_selected[index] = true;
         }
     }
+    
+        @Override
+    public String getToolTipText(double x, double y) {
+        int indexFound = findPoint(x, y);
+        if (indexFound == -1) {
+            return null;
+        }
+        if (m_sb == null) {
+            m_sb = new StringBuilder();
+        }
+        m_sb.append("<HTML>");
+        m_sb.append(m_plotPanel.getXAxis().getTitle());
+        m_sb.append(" : ");
+        m_sb.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]));
+        m_sb.append(" to ");
+        m_sb.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound+1]));
+        m_sb.append("<BR>");
+        m_sb.append(m_plotPanel.getYAxis().getTitle());
+        m_sb.append(" : ");
+        m_sb.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
+        m_sb.append("</HTML>");
+        String tooltip = m_sb.toString();
+        m_sb.setLength(0);
+        return tooltip;
+ 
+    }
+    private StringBuilder m_sb = null;
     
     
     @Override

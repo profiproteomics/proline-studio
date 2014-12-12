@@ -58,11 +58,11 @@ public class PlotScatter extends PlotAbstract {
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getXAxis().getTitle());
         m_sb.append(" : ");
-        m_sb.append(m_plotPanel.getXAxis().getDecimalFormat().format(x));
+        m_sb.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]));
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getYAxis().getTitle());
         m_sb.append(" : ");
-        m_sb.append(m_plotPanel.getYAxis().getDecimalFormat().format(y));
+        m_sb.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
         m_sb.append("</HTML>");
         String tooltip = m_sb.toString();
         m_sb.setLength(0);

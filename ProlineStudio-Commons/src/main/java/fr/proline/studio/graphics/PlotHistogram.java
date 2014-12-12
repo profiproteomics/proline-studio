@@ -317,7 +317,7 @@ public class PlotHistogram extends PlotAbstract {
             int y1 = yAxis.valueToPixel( m_dataY[i]);
             
             if (m_selected[i]) {
-                g.setColor(Color.red);
+                g.setColor(CyclicColorPalette.getColor(5));
             } else {
                 g.setColor(CyclicColorPalette.getColor(21));
             }

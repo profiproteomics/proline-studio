@@ -319,7 +319,7 @@ public class PlotScatter extends PlotAbstract {
             int x = xAxis.valueToPixel( m_dataX[i]);
             int y = yAxis.valueToPixel( m_dataY[i]);
 
-            g.setColor(Color.red);
+            g.setColor(CyclicColorPalette.getColor(5));
             g.fillOval(x-3, y-3, 6, 6);
 
         }

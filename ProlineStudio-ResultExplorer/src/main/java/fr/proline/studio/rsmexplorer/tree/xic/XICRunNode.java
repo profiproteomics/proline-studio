@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.tree.xic;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.IdentificationDataset;
 import fr.proline.core.orm.uds.RawFile;
+import fr.proline.core.orm.uds.Run;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -12,12 +13,14 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseRunsTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
 import java.io.File;
 import java.util.ArrayList;
 import javax.persistence.EntityManager;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import org.openide.nodes.Sheet;
 
@@ -33,7 +36,106 @@ public class XICRunNode extends AbstractNode {
         super(NodeTypes.RUN, data);
     }
 
-    public void init(DDataset dataset, DefaultTreeModel treeModel) {
+    public void init(final DDataset dataset, DefaultTreeModel treeModel) {
+        m_treeModel = treeModel;
+        
+        setIsChanging(true);
+        
+        // look if we find a Raw File
+        if (dataset.getType() == Dataset.DatasetType.IDENTIFICATION) {
+            
+            final ArrayList<RawFile> rawfileFounds = new ArrayList<>(1);
+            final Run[] runOut = new Run[1];
+            final XICRunNode xicRunNode = this;
+            
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    if (success) {
+                        if (!rawfileFounds.isEmpty()) {
+
+                            setIsChanging(false);
+                            m_treeModel.nodeChanged(xicRunNode);
+
+                            RawFile rawFile = rawfileFounds.get(0);
+                            RunInfoData runInfoData = ((RunInfoData) getData());
+                            runInfoData.getRawFileSouce().setLinkedRawFile(rawFile);
+
+                            runInfoData.getRawFileSouce().setLinkedRawFile(rawFile);
+                            runInfoData.setRun(runOut[0]);
+                            warnParent(false);
+
+                        } else {
+                            search(dataset);
+                        }
+                    } else {
+                        // it failed !
+                        m_treeModel.removeNodeFromParent((MutableTreeNode) xicRunNode.getParent());
+                    }
+                    
+                }
+            };
+
+            DatabaseRunsTask task = new DatabaseRunsTask(callback);
+            task.initLoadRawFile(dataset.getId(), rawfileFounds, runOut);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        } else {
+            search(dataset);
+        }
+    }
+    
+    private void search(DDataset dataset) {
+
+        Long rsetId = dataset.getResultSetId();
+        
+        final String[] path = new String[1];
+
+        final XICRunNode _this = this;
+
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                //setIsChanging(false);
+
+                String searchString = path[0];
+                ((RunInfoData) getData()).setPeakListPath(searchString);
+
+                if ((searchString == null) || (searchString.isEmpty())) {
+                    searchString = "*";
+                } else {
+                    searchString = "*" + searchString + "*";
+                }
+
+                ((RunInfoData) getData()).setMessage("Search " + searchString);
+
+                ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(_this);
+
+                search(searchString);
+            }
+        };
+
+        // ask asynchronous loading of data
+        Long projectId = dataset.getProject().getId();
+        DatabaseRunsTask task = new DatabaseRunsTask(callback);
+        task.initLoadPeakListPathForRset(projectId, rsetId, path);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+    }
+    
+    /*
+    public void initOLD(DDataset dataset, DefaultTreeModel treeModel) {
         Long rsetId = dataset.getResultSetId();
         
         m_treeModel = treeModel;
@@ -62,7 +164,11 @@ public class XICRunNode extends AbstractNode {
 
             } catch (Exception e) {
                 m_logger.error(getClass().getSimpleName() + " failed", e);
-                entityManagerUDS.getTransaction().rollback();
+                try {
+                    entityManagerUDS.getTransaction().rollback();
+                } catch (Exception rollbackException) {
+                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+                }
             } finally {
                 entityManagerUDS.close();
             }
@@ -109,7 +215,8 @@ public class XICRunNode extends AbstractNode {
         task.initLoadPeakListPathForRset(projectId, rsetId, path);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
-    }
+    }*/
+    
     
     private void search(String searchString) {
        

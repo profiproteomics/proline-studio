@@ -30,13 +30,16 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     private String[] m_resultPath = null;
     private String m_searchString = null;
     private ArrayList<RawFile> m_rawfileFounds = null;
-        
+    private Run[] m_runOut;    
+    
     private int m_action;
     
     private final static int LOAD_RUN_FOR_RSM = 0;
     private final static int LOAD_PEAKLIST_PATH = 1;
     private final static int SEARCH_RAWFILE = 2;
-    private final static int REGISTER_IDENTIFICATION_DATASET_RUN = 3;
+    private final static int LOAD_RAWFILE = 3;
+    private final static int REGISTER_IDENTIFICATION_DATASET_RUN = 4;
+    
      
     public DatabaseRunsTask(AbstractDatabaseCallback callback){
         super(callback, null);
@@ -64,6 +67,14 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         m_searchString = searchString;
         m_rawfileFounds = rawfileFounds;
         m_action = SEARCH_RAWFILE;
+    }
+    
+    public void initLoadRawFile(Long identificationDatasetId, ArrayList<RawFile> rawfileFounds, Run[] runOut) {
+        setTaskInfo(new TaskInfo(" Load Raw File for Dataset " + identificationDatasetId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW, true /* hide this task to user */));
+        m_datasetId = identificationDatasetId;
+        m_rawfileFounds = rawfileFounds;
+        m_runOut = runOut;
+        m_action = LOAD_RAWFILE;
     }
     
     /**
@@ -104,6 +115,8 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
                 return fetchPeaklistPath();
             case SEARCH_RAWFILE:
                 return searchRawFile();
+            case LOAD_RAWFILE:
+                return loadRawFile();
             case REGISTER_IDENTIFICATION_DATASET_RUN:
                 return registerIdentificationDatasetRun();
         }
@@ -130,7 +143,11 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();
@@ -182,7 +199,11 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerMSI.getTransaction().rollback();
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerMSI.close();
@@ -213,7 +234,11 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         } catch  (RuntimeException e) {
             m_logger.error(getClass().getSimpleName()+" failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();
@@ -222,6 +247,34 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         return true;
     }
     
+    private boolean loadRawFile() {
+        EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
+        try {
+            entityManagerUDS.getTransaction().begin();
+
+            IdentificationDataset identificationDataset = entityManagerUDS.find(IdentificationDataset.class, m_datasetId);
+            if (identificationDataset != null) {
+                RawFile rawFile = identificationDataset.getRawFile();
+                if (rawFile != null) {
+                    m_rawfileFounds.add(rawFile);
+                    m_runOut[0] = identificationDataset.getRun();
+                }
+            }
+            entityManagerUDS.getTransaction().commit();
+
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName() + " failed", e);
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
+            return false;
+        } finally {
+            entityManagerUDS.close();
+        }
+        return true;
+    }
     
     public boolean registerIdentificationDatasetRun() {
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();
@@ -236,7 +289,11 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
             m_taskError = new TaskError(e);
-            entityManagerUDS.getTransaction().rollback();
+            try {
+                entityManagerUDS.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
             return false;
         } finally {
             entityManagerUDS.close();

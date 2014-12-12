@@ -323,7 +323,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
         @Override
         public String getExportRowCell(int row, int col) {
-            return ((WSCProteinTableModel) m_proteinTable.getModel()).getExportRowCell(row,  col);
+            return ((WSCProteinTableModel) m_proteinTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
         }
     }
 

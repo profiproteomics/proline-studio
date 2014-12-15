@@ -182,7 +182,6 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         m_plot = plot;
 
         updateAxis(plot);
-
     }
     
     public ArrayList<Integer> getSelection() {
@@ -194,36 +193,20 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         repaint();
     }
 
-    
-    /*@Override
-    public String getToolTipText(MouseEvent e) {
-        if ((m_xAxis == null) || (m_yAxis == null)) {
-            return null;
-        }
-        m_tooltipDisplayed = true;
-        return m_plot.getToolTipText(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
-    }*/
-
-    private boolean m_tooltipDisplayed = false;
-    
     public void updateAxis(PlotAbstract plot) {
         
         if (plot.needsXAxis()) {
-            if (m_xAxis == null) {
-                m_xAxis = new XAxis();
-            }
-            m_xAxis.setLog(false);
-            m_xAxis.setSelected(false);
-            m_xAxis.setRange(plot.getXMin(), plot.getXMax());
+            XAxis xAxis = getXAxis();
+            xAxis.setLog(false);
+            xAxis.setSelected(false);
+            xAxis.setRange(plot.getXMin(), plot.getXMax());
         }
 
         if (plot.needsYAxis()) {
-            if (m_yAxis == null) {
-                m_yAxis = new YAxis();
-            }
-            m_yAxis.setLog(false);
-            m_yAxis.setSelected(false);
-            m_yAxis.setRange(plot.getYMin(), plot.getYMax());
+           YAxis yAxis = getYAxis();
+            yAxis.setLog(false);
+            yAxis.setSelected(false);
+            yAxis.setRange(plot.getYMin(), plot.getYMax());
         }
         
         m_updateDoubleBuffer = true;
@@ -245,10 +228,16 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     }
     
     public XAxis getXAxis() {
+        if (m_xAxis == null) {
+            m_xAxis = new XAxis();
+        }
         return m_xAxis;
     }
     
     public YAxis getYAxis() {
+        if (m_yAxis == null) {
+            m_yAxis = new YAxis();
+        }
         return m_yAxis;
     }
 
@@ -395,6 +384,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        if (m_plot == null) {
+            return;
+        }
         String s =  m_plot.getToolTipText(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
         setToolTipText(s); 
     }

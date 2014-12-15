@@ -32,7 +32,7 @@ public class XAxis extends Axis {
 
         int maxTicks = m_width / 30;
 
-        AxisTicks ticks = new AxisTicks(m_minValue, m_maxValue, maxTicks, m_log);
+        AxisTicks ticks = new AxisTicks(m_minValue, m_maxValue, maxTicks, m_log, m_isInteger);
 
         if (m_selected) {
             g.setColor(Color.white);

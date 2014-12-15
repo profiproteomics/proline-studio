@@ -39,6 +39,8 @@ public abstract class Axis {
     
     protected boolean m_selected = false;
     
+    protected boolean m_isInteger = false;
+    
     public Axis() {
     }
 
@@ -55,7 +57,9 @@ public abstract class Axis {
         return (m_minValue>=10e-9);
     }
     
-    
+    public void setIsInteger(boolean v) {
+        m_isInteger = v;
+    }
     
     public void setSize(int x, int y, int width, int height) {
         m_x = x;

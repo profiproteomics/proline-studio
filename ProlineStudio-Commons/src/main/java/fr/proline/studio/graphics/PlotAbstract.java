@@ -52,6 +52,19 @@ public abstract class PlotAbstract {
         m_colX = colX;
         m_colY = colY;
         update();
+        updateAxisInteger();
+    }
+    public void updateAxisInteger() {
+        if ((needsXAxis()) && (m_colX != -1)) {
+            Class xClass = m_compareDataInterface.getDataColumnClass(m_colX);
+            boolean isIntegerX = ((xClass.equals(Integer.class)) || (xClass.equals(Long.class)));
+            m_plotPanel.getXAxis().setIsInteger(isIntegerX);
+        }
+        if ((needsYAxis()) && (m_colY != -1)) {
+            Class yClass = m_compareDataInterface.getDataColumnClass(m_colY);
+            boolean isIntegerY = ((yClass.equals(Integer.class)) || (yClass.equals(Long.class)));
+            m_plotPanel.getYAxis().setIsInteger(isIntegerY);
+        }
     }
     public abstract void update();
     public abstract boolean select(double x, double y, boolean append);

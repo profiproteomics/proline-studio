@@ -18,14 +18,16 @@ public class AxisTicks {
     private int m_nbDigits;
 
     private boolean m_log;
+    private boolean m_isInteger;
     
-    public AxisTicks(double min, double max, int maxTicks, boolean log) {
+    public AxisTicks(double min, double max, int maxTicks, boolean log, boolean isInteger) {
         if (maxTicks <=1) {
             m_maxTicks = 2;
         } else {
             m_maxTicks = maxTicks;
         }
         m_log = log;
+        m_isInteger =  isInteger;
         
         if (log) {
             m_min = Math.log10(min);
@@ -55,6 +57,12 @@ public class AxisTicks {
     
     private void calculate() {
         if (m_log) {
+            m_calculatedMin = Math.floor(m_min);
+            m_calculatedMax = Math.ceil(m_max);
+            m_calculatedRange = m_calculatedMax-m_calculatedMin;
+            m_tickSpacing = 1;
+            m_nbDigits = 0;
+        } else if (m_isInteger) {
             m_calculatedMin = Math.floor(m_min);
             m_calculatedMax = Math.ceil(m_max);
             m_calculatedRange = m_calculatedMax-m_calculatedMin;

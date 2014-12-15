@@ -201,7 +201,7 @@ public class PlotScatter extends PlotAbstract {
         m_dataX = new double[size];
         m_dataY = new double[size];
         m_selected = new boolean[size];
-        
+
         for (int i = 0; i < size; i++) {
             Object value = m_compareDataInterface.getDataValueAt(i, m_colX);
             m_dataX[i] = (value == null || ! Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number)value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number

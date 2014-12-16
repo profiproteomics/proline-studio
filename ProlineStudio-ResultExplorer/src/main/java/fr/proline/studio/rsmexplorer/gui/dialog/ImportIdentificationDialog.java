@@ -605,10 +605,24 @@ public class ImportIdentificationDialog extends DefaultDialog {
             regexArrayList.add(0, regexToAdd);
         }
         
-        if (regexArrayList.isEmpty()) {
-            regexArrayList.add("###REV###\\S+"); // Grenoble Regex
-            regexArrayList.add("sp\\|REV_\\S+"); // Strasbourg Regex
+        
+        boolean grenobleRegexFound = false;
+        boolean strasbourgRegexFound = false;
+        for (i=0;i<regexArrayList.size();i++) {
+            String regex = regexArrayList.get(i);
+            if (regex.compareTo("###REV###\\S+") == 0) { // Grenoble Regex
+                grenobleRegexFound = true;
+            } else if (regex.compareTo("sp\\|REV_\\S+") == 0) { // Strasbourg Regex
+                strasbourgRegexFound = true;
+            }
         }
+        if (!grenobleRegexFound) {
+            regexArrayList.add("###REV###\\S+"); 
+        }
+        if (!strasbourgRegexFound) {
+            regexArrayList.add("sp\\|REV_\\S+"); 
+        }
+
 
         
         return regexArrayList;

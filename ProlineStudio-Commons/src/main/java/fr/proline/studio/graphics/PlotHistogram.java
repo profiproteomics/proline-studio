@@ -6,6 +6,8 @@ import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.TextMarker;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
+import fr.proline.studio.parameter.AbstractParameter;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -33,7 +35,7 @@ public class PlotHistogram extends PlotAbstract {
     private int m_bins;
     
     public PlotHistogram(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX) {
-        super(plotPanel, compareDataInterface, crossSelectionInterface);
+        super(plotPanel, PlotType.HISTOGRAM_PLOT, compareDataInterface, crossSelectionInterface);
         update(colX, -1); 
     }
 
@@ -44,7 +46,10 @@ public class PlotHistogram extends PlotAbstract {
         return acceptedValues;
     }
     
-
+    @Override
+    public ParameterList getParameters() {
+        return null;
+    }
     
     @Override
     public boolean select(double x, double y, boolean append) {

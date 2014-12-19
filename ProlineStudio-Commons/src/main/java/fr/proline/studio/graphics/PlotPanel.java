@@ -1,5 +1,7 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.parameter.AbstractParameter;
+import fr.proline.studio.parameter.ParameterList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -153,6 +155,18 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         
     }
     
+    public ParameterList getParameters() {
+        if (m_plot == null) {
+            return null;
+        }
+        return m_plot.getParameters();
+    }
+    
+    public void parametersChanged() {
+        m_updateDoubleBuffer = true;
+        repaint();
+    }
+    
     public void lockData(boolean lock) {
         if (lock == m_dataLocked) {
             return;
@@ -248,6 +262,10 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     @Override
     public void mousePressed(MouseEvent e) {
 
+        if (m_plot == null) {
+            return;
+        }
+        
         int x = e.getX();
         int y = e.getY();
         if (m_plot.inside(x, y)) {

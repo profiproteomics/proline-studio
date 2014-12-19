@@ -1,9 +1,13 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.graphics.ColorOrGradientChooserPanel.GradientSelectorPanel;
+import fr.proline.studio.parameter.ColorOrGradientParameter;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Graphics2D;
 import java.awt.Color;
+import java.awt.LinearGradientPaint;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,28 +25,62 @@ public class PlotScatter extends PlotAbstract {
     
     private double[] m_dataX;
     private double[] m_dataY;
+    
+    private double m_gradientParamValuesMin;
+    private double m_gradientParamValuesMax;
+    private double[] m_gradientParamValues;
+    private int m_gradientParamCol = -1;
+    private Color[] m_gradientColors;
+    private float[] m_gradientFractions;
+    
+    
     private boolean[] m_selected;
 
     private static final int SELECT_SENSIBILITY = 8;
     
-    public PlotScatter(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
-        super(plotPanel, compareDataInterface, crossSelectionInterface);
-        update(colX, colY); 
-    }
-
-    public static HashSet<Class> getAcceptedXValues() {
-        HashSet<Class> acceptedValues = new HashSet(2);
-        acceptedValues.add(Double.class);
-        acceptedValues.add(Float.class);
-        acceptedValues.add(Integer.class);
-        return acceptedValues;
-    }
-
-    public static HashSet<Class> getAcceptedYValues() {
-        HashSet<Class> acceptedValues = new HashSet();
-        return acceptedValues;
-    }
+    private static final String PLOT_SCATTER_COLOR_KEY = "PLOT_SCATTER_COLOR";
     
+    private ParameterList m_parameterList;
+    private ColorOrGradientParameter m_colorParameter;
+    
+    public PlotScatter(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
+        super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
+        update(colX, colY); 
+        
+        m_parameterList = new ParameterList("Scatter Plot Settings");
+
+        
+        ColorOrGradient colorOrGradient = new ColorOrGradient();
+        colorOrGradient.setColor(CyclicColorPalette.getColor(21, 128));
+        float[] fractions = { 0.0f, 1.0f };
+        Color[] colors = { Color.white, Color.red };
+        LinearGradientPaint gradient = ColorOrGradientChooserPanel.getGradientForPanel(colors, fractions);
+        colorOrGradient.setGradient(gradient);
+        
+        m_colorParameter = new ColorOrGradientParameter(PLOT_SCATTER_COLOR_KEY, "Scatter Plot Color", colorOrGradient, null);
+        m_parameterList.add(m_colorParameter);
+    }
+
+    
+    @Override
+    public ParameterList getParameters() {
+
+        // update parameters
+        ArrayList<ReferenceIdName> m_potentialGradientParamArray = new ArrayList<>();
+        HashSet<Class> acceptedValues = m_plotType.getAcceptedValuesAsParam();
+        int nbCol = m_compareDataInterface.getColumnCount();
+        for (int i = 0; i < nbCol; i++) {
+            Class c = m_compareDataInterface.getDataColumnClass(i);
+            if (acceptedValues.contains(c)) {
+                ReferenceIdName ref = new ReferenceIdName(m_compareDataInterface.getDataColumnIdentifier(i), i);
+                m_potentialGradientParamArray.add(ref);
+            }
+        }
+
+        m_colorParameter.setGradientParam(m_potentialGradientParamArray);
+
+        return m_parameterList;
+    }
     
     @Override
     public String getToolTipText(double x, double y) {
@@ -263,6 +301,78 @@ public class PlotScatter extends PlotAbstract {
         m_plotPanel.repaint();
     }
     
+    private void setGradientValues() {
+        ColorOrGradient colorOrGradient = m_colorParameter.getColor();
+        boolean useGradient = !colorOrGradient.isColorSelected();
+        if (!useGradient) {
+            return;
+        }
+        
+        m_gradientColors = colorOrGradient.getGradient().getColors();
+        m_gradientFractions = colorOrGradient.getGradient().getFractions();
+        
+        int gradientParamCol = m_colorParameter.getSelectedReferenceIdName().getColumnIndex();
+        if (gradientParamCol == m_gradientParamCol) {
+            return;
+        }
+        m_gradientParamCol = gradientParamCol;
+        
+        int size = m_compareDataInterface.getRowCount();
+        if ((m_gradientParamValues == null) || (m_gradientParamValues.length != size)) {
+            m_gradientParamValues = new double[size];
+        }
+        if (size == 0) {
+            return;
+        }
+        
+        Object value = m_compareDataInterface.getDataValueAt(0, m_gradientParamCol);
+        double d = (value == null || ! Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number)value).doubleValue();
+        m_gradientParamValues[0] = d;
+
+        m_gradientParamValuesMin = d;
+        m_gradientParamValuesMax = d;
+
+        for (int i = 1; i < size; i++) {
+            value = m_compareDataInterface.getDataValueAt(i, m_gradientParamCol);
+            d = (value == null || ! Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number)value).doubleValue();
+            m_gradientParamValues[i] = d;
+            if (d<m_gradientParamValuesMin) {
+                m_gradientParamValuesMin = d;
+            } else if (d>m_gradientParamValuesMax) {
+                m_gradientParamValuesMax = d;
+            }
+        }
+        
+
+        
+        
+    }
+
+    private Color getColorInGradient(LinearGradientPaint gradient, double d) {
+        double f = (d-m_gradientParamValuesMin)/(m_gradientParamValuesMax-m_gradientParamValuesMin);
+        for (int i=0;i<m_gradientFractions.length-1;i++) {
+            float f1 = m_gradientFractions[i];
+            float f2 = m_gradientFractions[i+1];
+            if ((f>=f1) && (f<=f2)) {
+                Color c1 = m_gradientColors[i];
+                Color c2 = m_gradientColors[i+1];
+                double fInInterval = (f-f1)/(f2-f1);
+                int r = (int) Math.round(  ((double) (c2.getRed()-c1.getRed()))  *fInInterval+(double) c1.getRed() );
+                int g = (int) Math.round(  ((double) (c2.getGreen()-c1.getGreen()))  *fInInterval+(double) c1.getGreen() );
+                int b = (int) Math.round(  ((double) (c2.getBlue()-c1.getBlue()))  *fInInterval+(double) c1.getBlue() );
+                int a = (int) Math.round(  ((double) (c2.getAlpha()-c1.getAlpha()))  *fInInterval+(double) c1.getAlpha() );
+                return new Color(r, g, b, a);
+            }
+        }
+        
+        if (f<= m_gradientFractions[0]) {
+            return m_gradientColors[0];
+        }
+        return m_gradientColors[m_gradientFractions.length-1];
+    }
+
+    
+    
     
     @Override
     public double getXMin() {
@@ -297,7 +407,22 @@ public class PlotScatter extends PlotAbstract {
         int clipHeight = yAxis.valueToPixel(yAxis.getMinTick())-clipY;
         g.setClip(clipX, clipY, clipWidth, clipHeight);
 
+        ColorOrGradient colorOrGradient = m_colorParameter.getColor();
+        boolean useGradient = !colorOrGradient.isColorSelected();
+        
+        Color plotColor = Color.black; // default init
+        LinearGradientPaint gradientPaint = null;
+        int idColGradient = -1;
+
+        if (!useGradient) {
+            plotColor = colorOrGradient.getColor();
+        } else {
+            setGradientValues(); // set gradient values if needed
+            gradientPaint = colorOrGradient.getGradient();
+        }
+ 
         // first plot non selected
+        g.setColor(plotColor);
         int size = m_dataX.length;
         for (int i=0;i<size-1;i++) {
             if (m_selected[i]) {
@@ -306,7 +431,11 @@ public class PlotScatter extends PlotAbstract {
             int x = xAxis.valueToPixel( m_dataX[i]);
             int y = yAxis.valueToPixel( m_dataY[i]);
 
-            g.setColor(CyclicColorPalette.getColor(21, 128));
+            if (useGradient) {
+               plotColor = getColorInGradient(gradientPaint,  m_gradientParamValues[i]);
+               g.setColor(plotColor);
+            }
+            
             g.fillOval(x-3, y-3, 6, 6);
 
         }
@@ -319,8 +448,16 @@ public class PlotScatter extends PlotAbstract {
             int x = xAxis.valueToPixel( m_dataX[i]);
             int y = yAxis.valueToPixel( m_dataY[i]);
 
-            g.setColor(CyclicColorPalette.getColor(5));
+            if (useGradient) {
+               plotColor = getColorInGradient(gradientPaint,  m_gradientParamValues[i]);
+            }
+            
+            g.setColor(plotColor);
             g.fillOval(x-3, y-3, 6, 6);
+            
+            g.setColor(Color.black);
+            g.drawOval(x-3, y-3, 6, 6);
+
 
         }
 

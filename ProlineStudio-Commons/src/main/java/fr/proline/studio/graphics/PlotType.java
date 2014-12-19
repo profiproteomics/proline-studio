@@ -47,17 +47,35 @@ public enum PlotType {
     
     public HashSet<Class> getAcceptedXValues() {
         
-        HashSet<Class> acceptedValues = new HashSet(2);
+        HashSet<Class> acceptedValues = new HashSet(3);
         
         switch (this) {
             case HISTOGRAM_PLOT: 
                 acceptedValues.add(Double.class);
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);
+                break;
             case SCATTER_PLOT: 
                 acceptedValues.add(Double.class);
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);
+                break;
+        }
+        return acceptedValues;
+    }
+    
+    public HashSet<Class> getAcceptedValuesAsParam() {
+        
+        HashSet<Class> acceptedValues = new HashSet(2);
+        
+        switch (this) {
+            case HISTOGRAM_PLOT: 
+                break;
+            case SCATTER_PLOT: 
+                acceptedValues.add(Double.class);
+                acceptedValues.add(Float.class);
+                acceptedValues.add(Integer.class);
+                break;
         }
         return acceptedValues;
     }

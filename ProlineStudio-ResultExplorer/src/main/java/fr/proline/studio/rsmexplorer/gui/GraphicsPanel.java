@@ -11,8 +11,11 @@ import fr.proline.studio.graphics.PlotScatter;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotPanel.GridListener;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.graphics.ReferenceIdName;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.parameter.DefaultParameterDialog;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -31,6 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import org.openide.windows.WindowManager;
 
 /**
  *
@@ -60,6 +64,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
     private boolean m_dataLocked = false;
     
     private JToggleButton m_gridButton = null;
+    
     
     public GraphicsPanel(boolean dataLocked) {
         setLayout(new BorderLayout());
@@ -112,6 +117,29 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
             @Override
             public void actionPerformed(ActionEvent e) {
                 m_plotPanel.displayGrid(m_gridButton.isSelected());
+            }
+        });
+        
+        JButton colorPicker = new JButton(IconManager.getIcon(IconManager.IconType.COLOR_PICKER));
+        colorPicker.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ParameterList parameterList = m_plotPanel.getParameters();
+                if (parameterList == null) {
+                    return;
+                }
+                DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterList);
+                parameterDialog.setLocationRelativeTo(m_plotPanel);
+                parameterDialog.setVisible(true);
+                
+                if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
+                    m_plotPanel.parametersChanged();
+                }
+                
+                
+                
+                
             }
         });
         
@@ -178,6 +206,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         
         // add buttons to toolbar
         toolbar.add(m_gridButton);
+        toolbar.add(colorPicker);
         toolbar.addSeparator(); // ----
         toolbar.add(lockButton);
         toolbar.add(importSelectionButton);
@@ -300,7 +329,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
             for (int i = 0; i < nbValuesType; i++) {
                 Class c = m_values.getDataColumnClass(i);
                 if (acceptedValues.contains(c)) {
-                    ReferenceToColumn ref = new ReferenceToColumn(m_values.getDataColumnIdentifier(i), i);
+                    ReferenceIdName ref = new ReferenceIdName(m_values.getDataColumnIdentifier(i), i);
                     ((DefaultComboBoxModel) m_valueXComboBox.getModel()).addElement(ref);
                     ((DefaultComboBoxModel) m_valueYComboBox.getModel()).addElement(ref);
                     if (bestColX == i) {
@@ -361,8 +390,8 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
                     if (m_isUpdatingCbx) {
                         return;
                     }
-                    ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
-                    ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
+                    ReferenceIdName refX = (ReferenceIdName) m_valueXComboBox.getSelectedItem();
+                    ReferenceIdName refY = (ReferenceIdName) m_valueYComboBox.getSelectedItem();
                     m_plotGraphics.update(refX.getColumnIndex(), refY.getColumnIndex());
                 }
                 
@@ -374,8 +403,8 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
             
         }
         
-        ReferenceToColumn refX = (ReferenceToColumn) m_valueXComboBox.getSelectedItem();
-        ReferenceToColumn refY = (ReferenceToColumn) m_valueYComboBox.getSelectedItem();
+        ReferenceIdName refX = (ReferenceIdName) m_valueXComboBox.getSelectedItem();
+        ReferenceIdName refY = (ReferenceIdName) m_valueYComboBox.getSelectedItem();
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
         switch (plotType) {
             case HISTOGRAM_PLOT:
@@ -430,22 +459,6 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
             
     }
 
-    private static class ReferenceToColumn {
-        private final String m_name;
-        private final int m_columnIndex;
-        public ReferenceToColumn(String name, int columnIndex) {
-            m_name = name;
-            m_columnIndex = columnIndex;
-        }
-        
-        public int getColumnIndex() {
-            return m_columnIndex;
-        }
-        
-        @Override
-        public String toString() {
-            return m_name;
-        }
-    }
+
     
 }

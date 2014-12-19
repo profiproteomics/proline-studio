@@ -3,6 +3,8 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.LockedDataModel;
 import fr.proline.studio.graphics.marker.AbstractMarker;
+import fr.proline.studio.parameter.AbstractParameter;
+import fr.proline.studio.parameter.ParameterList;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
@@ -12,6 +14,8 @@ import java.util.ArrayList;
  * @author JM235353
  */
 public abstract class PlotAbstract {
+    
+    protected PlotType m_plotType;
     
     protected CompareDataInterface m_compareDataInterface = null;
     protected CrossSelectionInterface m_crossSelectionInterface = null;
@@ -37,8 +41,9 @@ public abstract class PlotAbstract {
     
     public abstract void paint(Graphics2D g);
 
-    public PlotAbstract(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
+    public PlotAbstract(PlotPanel plotPanel, PlotType plotType, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
         m_plotPanel = plotPanel;
+        m_plotType = plotType;
         m_compareDataInterface = (m_locked) ? new LockedDataModel(compareDataInterface) : compareDataInterface;
         m_crossSelectionInterface = crossSelectionInterface;
     }
@@ -71,7 +76,7 @@ public abstract class PlotAbstract {
     public abstract boolean select(Path2D.Double path, double minX, double maxX, double minY, double maxY, boolean append);
     
 
-    
+    public abstract ParameterList getParameters();
     
     public void addMarker(AbstractMarker m) {
         if (m_markersList == null) {

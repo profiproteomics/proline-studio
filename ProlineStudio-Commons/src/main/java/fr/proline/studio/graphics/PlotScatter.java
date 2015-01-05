@@ -1,7 +1,6 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.graphics.ColorOrGradientChooserPanel.GradientSelectorPanel;
 import fr.proline.studio.parameter.ColorOrGradientParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -412,7 +411,6 @@ public class PlotScatter extends PlotAbstract {
         
         Color plotColor = Color.black; // default init
         LinearGradientPaint gradientPaint = null;
-        int idColGradient = -1;
 
         if (!useGradient) {
             plotColor = colorOrGradient.getColor();

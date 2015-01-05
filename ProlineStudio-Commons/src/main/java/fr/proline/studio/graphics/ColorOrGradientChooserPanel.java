@@ -17,7 +17,6 @@ import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import javax.swing.ButtonGroup;
-import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -32,7 +31,7 @@ public class ColorOrGradientChooserPanel extends JPanel {
     private JRadioButton m_colorRadioButton = null;
     private JRadioButton m_gradientRadioButton = null;
     
-    private ColorButton m_colorSelectionButton = null;
+    private InternalColorButton m_colorSelectionButton = null;
     private GradientSelectorPanel m_gradientSelector = null;
 
     private ColorOrGradient m_colorOrGradient;
@@ -59,7 +58,8 @@ public class ColorOrGradientChooserPanel extends JPanel {
         }
         
         
-        m_colorSelectionButton = new ColorButton();
+        m_colorSelectionButton = new InternalColorButton();
+        m_colorSelectionButton.initActionListener();
         m_colorSelectionButton.setBackground(color.getColor());
         
         m_gradientSelector = new GradientSelectorPanel();
@@ -114,48 +114,33 @@ public class ColorOrGradientChooserPanel extends JPanel {
         m_gradientSelector.setLinearGradient(c.getGradient());
     }
 
-    public class ColorButton extends JButton {
+    public class InternalColorButton extends ColorButton {
 
-        private static final int WIDTH = 100;
-        private static final int HEIGHT = 35;
+        public InternalColorButton() {
+        }
         
-        private final Dimension m_dimension = new Dimension(WIDTH, HEIGHT);
-        
-        public ColorButton() {
-            addActionListener(new ActionListener() {
+        @Override
+        protected ActionListener getActionListener() {
+
+            final ColorButton colorButton = this;
+            ActionListener a = new ActionListener() {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    
+
                     if (!m_colorRadioButton.isSelected()) {
                         m_colorRadioButton.setSelected(true);
                     }
-                    
+
                     Color newColor = JColorChooser.showDialog(m_colorSelectionButton, null, m_colorSelectionButton.getBackground());
                     if (newColor != null) {
                         m_colorSelectionButton.setBackground(newColor);
                     }
                 }
-            });
-        }
-        
-        @Override
-        public Dimension getPreferredSize() {
-            return m_dimension;
+            };
+            return a;
         }
 
-        @Override
-        protected void paintComponent(Graphics g) {
-            g.setColor(Color.white); // necessary for transparent colors
-            g.fillRect(0, 0, getWidth(), getHeight());
-            
-            g.setColor(getBackground());
-            g.fillRect(0, 0, getWidth(), getHeight());
-            
-            g.setColor(Color.darkGray);
-            g.drawRect(0, 0, getWidth(), getHeight());
-            
-        }
     }
     
     public class GradientSelectorPanel extends JPanel implements MouseListener {

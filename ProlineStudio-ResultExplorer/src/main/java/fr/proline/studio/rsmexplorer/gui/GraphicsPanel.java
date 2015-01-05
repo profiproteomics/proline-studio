@@ -121,6 +121,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         });
         
         JButton colorPicker = new JButton(IconManager.getIcon(IconManager.IconType.COLOR_PICKER));
+        colorPicker.setFocusPainted(false);
         colorPicker.addActionListener(new ActionListener() {
 
             @Override

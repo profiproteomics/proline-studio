@@ -6,7 +6,7 @@ import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.TextMarker;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
-import fr.proline.studio.parameter.AbstractParameter;
+import fr.proline.studio.parameter.ColorParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
@@ -34,9 +34,20 @@ public class PlotHistogram extends PlotAbstract {
     private StatsModel m_values;
     private int m_bins;
     
+    private ColorParameter m_colorParameter;
+    private ParameterList m_parameterList;
+    
+    private static final String PLOT_HISTOGRAM_COLOR_KEY = "PLOT_HISTOGRAM_COLOR";
+    
     public PlotHistogram(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX) {
         super(plotPanel, PlotType.HISTOGRAM_PLOT, compareDataInterface, crossSelectionInterface);
         update(colX, -1); 
+        
+        
+        m_parameterList = new ParameterList("Histogram Plot Settings");
+        Color histogramColor = CyclicColorPalette.getColor(21);
+        m_colorParameter = new ColorParameter(PLOT_HISTOGRAM_COLOR_KEY, "Histogram Plot Color", histogramColor);
+        m_parameterList.add(m_colorParameter);
     }
 
 
@@ -48,7 +59,7 @@ public class PlotHistogram extends PlotAbstract {
     
     @Override
     public ParameterList getParameters() {
-        return null;
+        return m_parameterList;
     }
     
     @Override
@@ -324,11 +335,11 @@ public class PlotHistogram extends PlotAbstract {
             if (m_selected[i]) {
                 g.setColor(CyclicColorPalette.getColor(5));
             } else {
-                g.setColor(CyclicColorPalette.getColor(21));
+                g.setColor(m_colorParameter.getColor());
             }
             g.fillRect(x1, y1 , x2-x1, y2-y1);
             
-            g.setColor(CyclicColorPalette.getColor(13));
+            g.setColor(Color.black);
             g.drawRect(x1, y1 , x2-x1, y2-y1);
             
         }

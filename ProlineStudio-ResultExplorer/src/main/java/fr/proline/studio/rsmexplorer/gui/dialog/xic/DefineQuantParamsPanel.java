@@ -403,6 +403,8 @@ public class DefineQuantParamsPanel extends JPanel{
         c.gridwidth = 2;
         headerPanel.add(m_detectPeakelChB, c);
          m_detectPeakelChB.setEnabled(false);
+         
+         m_extractedXICFromCB.setSelectedIndex(FEATURE_EXTRACTED_XIC_VALUES.length-1);
         
         // to be commented
 //        c.gridwidth = 2;
@@ -487,7 +489,7 @@ public class DefineQuantParamsPanel extends JPanel{
         
         c.gridy++;
         c.gridx = 0;
-        clusteringPanel.add(new JLabel("time tolerance:"), c);
+        clusteringPanel.add(new JLabel("time tolerance (s):"), c);
         c.gridx++;       
         c.weightx = 1;
         clusteringPanel.add(m_clusteringTimeTolTF, c);
@@ -618,7 +620,7 @@ public class DefineQuantParamsPanel extends JPanel{
         
         c1.gridx = 0;
         c1.gridy++;                
-        ftParamsPanel.add(new JLabel("time tolerance:"), c1);        
+        ftParamsPanel.add(new JLabel("time tolerance (s):"), c1);        
         c1.gridx++;   
         c1.weightx = 1;
         ftParamsPanel.add(m_alignmentFeatureMappingTimeToleranceTF, c1);
@@ -700,7 +702,7 @@ public class DefineQuantParamsPanel extends JPanel{
         
         c1.gridx = 0;
         c1.gridy++;                
-        ftParamsPanel.add(new JLabel("time tolerance:"), c1);        
+        ftParamsPanel.add(new JLabel("time tolerance (s):"), c1);        
         c1.gridx++;     
         c1.weightx = 1;
         ftParamsPanel.add(m_featureMappingTimeTolTF, c1);

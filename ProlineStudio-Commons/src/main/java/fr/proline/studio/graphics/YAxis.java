@@ -13,6 +13,8 @@ import java.awt.geom.AffineTransform;
  */
 public class YAxis extends Axis {
 
+    private int m_lastHeight;
+    
     public YAxis() {
     }
 
@@ -108,9 +110,10 @@ public class YAxis extends Axis {
 
         double multForRounding = Math.pow(10, digits);
 
+        m_lastHeight = -1;
         double y = m_minTick;
         int pY = pixelStart;
-
+        int previousEndY = Integer.MAX_VALUE;
         while (true) {
 
             // round y
@@ -121,11 +124,18 @@ public class YAxis extends Axis {
 
             String s = m_df.format(yDisplay);
             int stringWidth = m_valuesFontMetrics.stringWidth(s);
-
-            g.drawString(s, m_x+m_width - stringWidth - 6, pY + halfAscent);
-
-            g.drawLine(m_x+m_width, pY, m_x+m_width - 4, pY);
-
+            int height = (int) Math.round(StrictMath.ceil(m_valuesFontMetrics.getLineMetrics(s, g).getHeight()));
+            if (height>m_lastHeight) {
+                m_lastHeight = height;
+            }
+            
+            if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to overlap labels
+                g.drawString(s, m_x + m_width - stringWidth - 6, pY + halfAscent);
+                g.drawLine(m_x + m_width, pY, m_x + m_width - 4, pY);
+                previousEndY = pY;
+            }
+            
+            
             y += m_tickSpacing;
             pY = valueToPixel(y);
             if (pY < pixelStop) {
@@ -169,7 +179,6 @@ public class YAxis extends Axis {
 
         double y = m_minTick;
         int pY = pixelStart;
-
         while (true) {
 
             // round y
@@ -242,9 +251,14 @@ public class YAxis extends Axis {
 
         double y = m_minTick;
         int pY = pixelStart;
+        int previousEndY = Integer.MAX_VALUE;
         while (true) {
-            g.drawLine(x+1, pY, x+width, pY);
             
+            if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to draw line for overlap labels
+                g.drawLine(x+1, pY, x+width, pY);
+                previousEndY = pY;
+            }
+
             y += m_tickSpacing;
             pY = valueToPixel(y);
             if (pY<pixelStop) {

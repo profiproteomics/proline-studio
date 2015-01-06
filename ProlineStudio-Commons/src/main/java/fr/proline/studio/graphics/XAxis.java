@@ -12,6 +12,8 @@ import java.awt.Graphics2D;
  */
 public class XAxis extends Axis {
 
+    private int m_lastWidth;
+    
     public XAxis() {
 
     }
@@ -106,6 +108,7 @@ public class XAxis extends Axis {
         double x = m_minTick;
         int pX = pixelStart;
         int previousEndX = -Integer.MAX_VALUE;
+        m_lastWidth = -1;
         while (true) {
             g.drawLine(pX, m_y, pX, m_y + 4);
 
@@ -117,11 +120,14 @@ public class XAxis extends Axis {
 
             String s = m_df.format(xDisplay);
             int stringWidth = m_valuesFontMetrics.stringWidth(s);
+            if (stringWidth>m_lastWidth) {
+                m_lastWidth = stringWidth;
+            }
 
-            int posX = pX - stringWidth / 2;
+            int posX = pX - m_lastWidth / 2;
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
                 g.drawString(s, posX, m_y + height + 4);
-                previousEndX = posX + stringWidth;
+                previousEndX = posX + m_lastWidth;
             }
 
             x += m_tickSpacing;
@@ -227,8 +233,14 @@ public class XAxis extends Axis {
 
         double x = m_minTick;
         int pX = pixelStart;
+        int previousEndX = -Integer.MAX_VALUE;
         while (true) {
-            g.drawLine(pX, y, pX, y + height - 1);
+            
+            if (pX > previousEndX + 2) { // check to avoid to display grid for overlap labels
+                g.drawLine(pX, y, pX, y + height - 1);
+                previousEndX = pX + m_lastWidth;
+            }
+            
 
             x += m_tickSpacing;
             pX = valueToPixel(x);
@@ -246,8 +258,6 @@ public class XAxis extends Axis {
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
         }
-
-        
 
         double x = m_minTick;
         int pX = pixelStart;

@@ -299,6 +299,10 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         m_isUpdatingCbx = true;
         try {
 
+            if (m_values == null) {
+                return;
+            }
+            
             // clear combobox
             ((DefaultComboBoxModel) m_valueXComboBox.getModel()).removeAllElements();
             ((DefaultComboBoxModel) m_valueYComboBox.getModel()).removeAllElements();

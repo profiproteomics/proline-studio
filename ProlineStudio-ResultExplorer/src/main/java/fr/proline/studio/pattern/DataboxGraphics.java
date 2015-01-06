@@ -3,8 +3,6 @@ package fr.proline.studio.pattern;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.GraphicsPanel;
-import fr.proline.studio.rsmexplorer.gui.StatsHistogramPanel;
-import fr.proline.studio.stats.ValuesForStatsAbstract;
 
 /**
  *

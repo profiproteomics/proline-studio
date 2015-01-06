@@ -10,7 +10,6 @@ import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
-import fr.proline.studio.stats.ValuesForStatsAbstract;
 
 /**
  * Load the PSM of a Protein Set
@@ -85,7 +84,8 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
                 if (finished) {
                     m_finishedLoading = true;
                     unregisterTask(taskId);
-                    propagateDataChanged(ValuesForStatsAbstract.class);
+                    //propagateDataChanged(ValuesForStatsAbstract.class);
+                    propagateDataChanged(CompareDataInterface.class);
                 }
             }
         };
@@ -104,13 +104,13 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
             if (parameterType.equals(DPeptideMatch.class)) {
                 return ((PeptideMatchPanel)m_panel).getSelectedPeptideMatch();
             }
-            if (parameterType.equals(ValuesForStatsAbstract.class)) {
+            /*if (parameterType.equals(ValuesForStatsAbstract.class)) {
                 if (m_finishedLoading) {
                     return ((PeptideMatchPanel) m_panel).getValuesForStats();
                 } else {
                     return null;
                 }
-            }
+            }*/
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }

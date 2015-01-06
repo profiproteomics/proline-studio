@@ -11,7 +11,6 @@ import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
-import fr.proline.studio.stats.ValuesForStatsAbstract;
 
 /**
  * Databox for all PSM of a ResultSet (Search Result)
@@ -43,9 +42,9 @@ public class DataBoxRsetPSM extends AbstractDataBox {
         outParameter.addParameter(DPeptideMatch.class, true);
         registerOutParameter(outParameter);
 
-        outParameter = new GroupParameter();
+        /*outParameter = new GroupParameter();
         outParameter.addParameter(ValuesForStatsAbstract.class, true);
-        registerOutParameter(outParameter);
+        registerOutParameter(outParameter);*/
         
         outParameter = new GroupParameter();
         outParameter.addParameter(CompareDataInterface.class, true);
@@ -95,7 +94,8 @@ public class DataBoxRsetPSM extends AbstractDataBox {
                 if (finished) {
                     m_finishedLoading = true;
                     unregisterTask(taskId);
-                    propagateDataChanged(ValuesForStatsAbstract.class);
+                    //propagateDataChanged(ValuesForStatsAbstract.class);
+                    propagateDataChanged(CompareDataInterface.class);
                 }
             }
         };
@@ -126,13 +126,13 @@ public class DataBoxRsetPSM extends AbstractDataBox {
                     return m_rset;
                 }
             }
-            if (parameterType.equals(ValuesForStatsAbstract.class)) {
+            /*if (parameterType.equals(ValuesForStatsAbstract.class)) {
                 if (m_finishedLoading) {
                     return ((PeptideMatchPanel)m_panel).getValuesForStats();
                 } else {
                     return null;
                 }
-            }
+            }*/
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }

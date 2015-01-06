@@ -30,9 +30,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
-import fr.proline.studio.stats.ValuesForStatsAbstract;
 import fr.proline.studio.utils.IconManager;
-import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -166,10 +164,10 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         return tableModel.getPeptideMatch(selectedRow);
     }
     
-     public ValuesForStatsAbstract getValuesForStats() {
+     /*public ValuesForStatsAbstract getValuesForStats() {
          return new ValuesForStatsAbstract() {
 
-            private final String[] m_valuesType = {/*"Delta MoZ"*/ "Ppm", "Calc. Mass", "Exp. MoZ", "Charge", "Score" };
+            private final String[] m_valuesType = { "Ppm", "Calc. Mass", "Exp. MoZ", "Charge", "Score" };
             private final int[] m_valuesCol = { PeptideMatchTableModel.COLTYPE_PEPTIDE_PPM, PeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS, PeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, PeptideMatchTableModel.COLTYPE_PEPTIDE_CHARGE, PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE };
 
             private int m_valueCol = ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).convertColToColUsed(m_valuesCol[0]);
@@ -214,7 +212,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                return m_valueType;
             }
         };
-     }
+     }*/
     
 
     private void initComponents() {

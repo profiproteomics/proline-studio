@@ -104,13 +104,6 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
             if (parameterType.equals(DPeptideMatch.class)) {
                 return ((PeptideMatchPanel)m_panel).getSelectedPeptideMatch();
             }
-            /*if (parameterType.equals(ValuesForStatsAbstract.class)) {
-                if (m_finishedLoading) {
-                    return ((PeptideMatchPanel) m_panel).getValuesForStats();
-                } else {
-                    return null;
-                }
-            }*/
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }

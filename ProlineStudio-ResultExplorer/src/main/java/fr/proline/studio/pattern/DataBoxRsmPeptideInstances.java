@@ -140,7 +140,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+                return ((CompareDataProviderInterface) m_panel).getCrossSelectionInterface();
             }
             
             

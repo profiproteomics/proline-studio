@@ -89,7 +89,7 @@ public class QuantProfileXICPanel extends JPanel {
     private void init() {
         // completeMode can be changed in the preferences file with the Profilizer key
         Preferences preferences = NbPreferences.root();
-        this.completeMode = preferences.getBoolean("Profilizer", false);
+        this.completeMode = preferences.getBoolean("Profi", false);
         
         m_parameterList = new ParameterList(QuantProfileXICDialog.SETTINGS_KEY);
         createParameters();
@@ -185,7 +185,9 @@ public class QuantProfileXICPanel extends JPanel {
             m_tabbedPane.addTab("Pep. configuration", null, getQuantPeptidesConfigurationPanel(), "Parameters used for peptides quantitation");
             m_tabbedPane.addTab("Prot. configuration", null, getQuantProteinsConfigurationPanel(), "Parameters used for proteins quantitation");
         }else {
-            m_tabbedPane.addTab("Peptides configuration", null, getPeptidesPanel(), "Specify peptides to consider for quantitation and parameter used for peptides quantitation");
+            m_tabbedPane.addTab("Pep. selection", null, getPeptidesPanel(),  "Specify peptides to consider for quantitation");
+            m_tabbedPane.addTab("Pep. configuration", null, getPeptidesConfigurationPanel(),  "Parameters used for peptides quantitation");
+            m_tabbedPane.addTab("Prot. configuration", null, getProteinsConfigurationPanel(), "Parameters used for proteins quantitation");
         }
 
         m_scrollPane = new JScrollPane();
@@ -223,14 +225,6 @@ public class QuantProfileXICPanel extends JPanel {
         c.weightx = 1;
 //        c.gridwidth = 1;
         pepPanel.add(m_discardOxidizedPeptidesChB, c);
-        
-        
-        // applyNormalization
-        c.gridy++;
-//        c.gridx++;
-        c.weightx = 1;
-//        c.gridwidth = 1;
-        pepPanel.add(m_applyPepNormalizationChB, c);
         
         
         northPanel.add(pepPanel, BorderLayout.NORTH);
@@ -333,6 +327,28 @@ public class QuantProfileXICPanel extends JPanel {
         return northPanel;        
     }
      
+     private JPanel getPeptidesConfigurationPanel(){
+        JPanel northPanel = new JPanel(new BorderLayout());
+        JPanel pepQuantConfigPanel = new JPanel();
+        pepQuantConfigPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 5, 5);
+
+     
+        // applyNormalization
+        c.gridx = 0;
+        c.gridy=0;
+        c.weightx = 1;
+        c.gridwidth = 2;
+        pepQuantConfigPanel.add(m_applyPepNormalizationChB, c);
+                        
+        
+        northPanel.add(pepQuantConfigPanel, BorderLayout.NORTH);
+        return northPanel;        
+    }
+     
       private JPanel getQuantProteinsConfigurationPanel(){
         JPanel northPanel = new JPanel(new BorderLayout());
         JPanel protQuantConfigPanel = new JPanel();
@@ -406,6 +422,41 @@ public class QuantProfileXICPanel extends JPanel {
         //c.gridx = 0;
         c.gridy++;
         protQuantConfigPanel.add(m_applyProtZTestChB, c);
+
+        northPanel.add(protQuantConfigPanel, BorderLayout.NORTH);
+        return northPanel;        
+        
+    }
+      
+      private JPanel getProteinsConfigurationPanel(){
+        JPanel northPanel = new JPanel(new BorderLayout());
+        JPanel protQuantConfigPanel = new JPanel();
+        protQuantConfigPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 5, 5);
+        
+        c.gridx = 0;
+        c.gridy=0;
+        c.weightx = 0;
+        c.gridwidth = 1;
+        JLabel abundanceSummarizerMethodLabel = new JLabel("Abundance Summarizer Method :");
+        abundanceSummarizerMethodLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        protQuantConfigPanel.add(abundanceSummarizerMethodLabel, c);
+        
+        c.gridx++;
+        c.gridwidth = 1;
+        c.weightx = 1;
+        protQuantConfigPanel.add(m_abundanceSummarizerMethodCB, c);       
+        
+        
+        // applyNormalization
+        c.gridwidth = 2;
+        c.gridx = 0;
+        c.gridy++;
+        protQuantConfigPanel.add(m_applyProtNormalizationChB, c);
+        
 
         northPanel.add(protQuantConfigPanel, BorderLayout.NORTH);
         return northPanel;        

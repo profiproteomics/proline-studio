@@ -217,6 +217,7 @@ public class ProjectExplorerPanel extends JPanel {
                                 projectItem.setIsChanging(false);
                                 getProjectExplorerPanel().selectProject(projectItem);
                                 m_projectsComboBox.repaint();
+                                m_projectsComboBox.setSelectedIndex(m_projectsComboBox.getSelectedIndex());
                                 
                                 if (!userAccountList.isEmpty()) {
                                     // we must add the user account list
@@ -250,6 +251,7 @@ public class ProjectExplorerPanel extends JPanel {
                 final ProjectItem projectItem = (ProjectItem) m_projectsComboBox.getSelectedItem();
                 ProjectIdentificationData projectData = projectItem.getProjectIdentificationData();
                 final Project project = projectData.getProject();
+                final String oldName = project.getName();
 
                 AddProjectDialog dialog = AddProjectDialog.getModifyProjectDialog(WindowManager.getDefault().getMainWindow(), project);
                 int x = (int) m_addProjectButton.getLocationOnScreen().getX() + m_addProjectButton.getWidth();
@@ -277,10 +279,16 @@ public class ProjectExplorerPanel extends JPanel {
 
                         @Override
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                            projectItem.setIsChanging(false);
-                            project.setName(projectName);
-                            project.setDescription(projectDescription);
-                            m_projectsComboBox.repaint();
+                            if (success) {
+                                projectItem.setIsChanging(false);
+                                project.setName(projectName);
+                                project.setDescription(projectDescription);
+                                m_projectsComboBox.repaint();
+                            }else{
+                                projectItem.setIsChanging(false);
+                                project.setName(oldName);
+                                m_projectsComboBox.repaint();
+                            }
                         }
                     };
 

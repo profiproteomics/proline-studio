@@ -140,7 +140,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
 
-            Project p = entityManagerUDS.merge(m_p);
+            Project p = entityManagerUDS.find(Project.class, m_p.getId());
             p.setName(m_name);
             p.setDescription(m_description);
             
@@ -151,11 +151,12 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
                 int nb = m_userAccountList.size();
                 for (int i = 0; i < nb; i++) {
                     UserAccount userAccount = m_userAccountList.get(i);
-                    UserAccount userAccountInDB = entityManagerUDS.merge(userAccount);
+                    UserAccount userAccountInDB = entityManagerUDS.find(UserAccount.class, userAccount.getId());
                     p.addMember(userAccountInDB);
                     m_p.addMember(userAccount);
                 }
             }
+            entityManagerUDS.merge(p);
             
             entityManagerUDS.getTransaction().commit();
 

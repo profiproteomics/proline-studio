@@ -46,7 +46,7 @@ public class IdProjectIdentificationNode extends AbstractNode {
     public void changeNameAndDescription(final String newName, final String newDescription) {
         
         final Project project = getProject();
-        String name = project.getName();
+        final String name = project.getName();
         String description = project.getDescription();
         
         if (((newName != null) && (newName.compareTo(name) != 0)) || ((newDescription != null) && (newDescription.compareTo(description) != 0))) {
@@ -65,10 +65,16 @@ public class IdProjectIdentificationNode extends AbstractNode {
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                    setIsChanging(false);
-                    project.setName(newName);
-                    project.setDescription(newDescription);
-                    ((DefaultTreeModel) IdentificationTree.getCurrentTree().getModel()).nodeChanged(projectNode);
+                    if (success) {
+                        setIsChanging(false);
+                        project.setName(newName);
+                        project.setDescription(newDescription);
+                        ((DefaultTreeModel) IdentificationTree.getCurrentTree().getModel()).nodeChanged(projectNode);
+                    }else{
+                        setIsChanging(false);
+                        project.setName(name);
+                        ((DefaultTreeModel) IdentificationTree.getCurrentTree().getModel()).nodeChanged(projectNode);
+                    }
                 }
             };
 

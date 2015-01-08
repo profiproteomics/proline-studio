@@ -271,23 +271,26 @@ public class RsetPeptideSpectrumErrorPanel extends HourglassPanel implements Dat
         // clear all data
         m_dataSet.removeSeries(SERIES_NAME);
 
- 
         if (pm == null) {
+            m_chart.setTitle("No Data Available");
             return;
         }
         
         Peptide p = pm.getPeptide();
         if (p == null) {
+            m_chart.setTitle("No Data Available");
             return;
         }
         
         DMsQuery msQuery = pm.isMsQuerySet() ? pm.getMsQuery() : null;
         if (msQuery == null) {
+            m_chart.setTitle("No Data Available");
             return;
         }
         
         Spectrum spectrum = msQuery.isSpectrumSet() ? msQuery.getSpectrum() : null;
         if (spectrum == null) {
+            m_chart.setTitle("No Data Available");
             return;
         }
 

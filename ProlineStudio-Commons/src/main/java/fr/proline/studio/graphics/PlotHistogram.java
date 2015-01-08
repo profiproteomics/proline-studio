@@ -202,8 +202,16 @@ public class PlotHistogram extends PlotAbstract {
 
         // min and max values
         double min = m_values.getValue(0);
-        double max = m_values.getValue(0);
-        for (int i = 1; i < size; i++) {
+        int i = 1;
+        while (min != min) { // NaN values
+            if (i>=size) {
+                break;
+            }
+            min = m_values.getValue(i);
+            i++;
+        }
+        double max = min;
+        for (; i < size; i++) {
             double v = m_values.getValue(i);
             if (v < min) {
                 min = v;
@@ -222,13 +230,13 @@ public class PlotHistogram extends PlotAbstract {
         }
         
         double[] data = new double[m_values.getRowCount()];
-        for (int i=0;i<data.length;i++) {
+        for (i=0;i<data.length;i++) {
             data[i] = m_values.getValue(i);
         }
         
         double delta = max-min;
         double[] histogram = new double[m_bins];
-        for (int i = 0; i < size; i++) {
+        for (i = 0; i < size; i++) {
             double v = m_values.getValue(i);
             int index = (int) (((v - min) / delta) * (m_bins));
             if (index >= m_bins) {
@@ -239,7 +247,7 @@ public class PlotHistogram extends PlotAbstract {
         }
         
         m_yMax = 0;
-        for (int i = 0; i < m_bins; i++) {
+        for (i = 0; i < m_bins; i++) {
             double y = histogram[i] / size * 100;
             histogram[i] = y;
             if (y > m_yMax) {
@@ -260,7 +268,7 @@ public class PlotHistogram extends PlotAbstract {
         m_dataY = new double[m_bins + 1];
         m_selected = new boolean[m_bins + 1];
         double binDelta = delta / m_bins;
-        for (int i = 0; i < m_bins; i++) {
+        for (i = 0; i < m_bins; i++) {
             m_dataX[i] = min + i * binDelta;
             m_dataY[i] = histogram[i];
             m_selected[i] = false;

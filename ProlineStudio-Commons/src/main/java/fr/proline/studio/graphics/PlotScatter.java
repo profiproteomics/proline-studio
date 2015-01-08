@@ -422,7 +422,7 @@ public class PlotScatter extends PlotAbstract {
         // first plot non selected
         g.setColor(plotColor);
         int size = m_dataX.length;
-        for (int i=0;i<size-1;i++) {
+        for (int i=0;i<size;i++) {
             if (m_selected[i]) {
                 continue;
             }
@@ -439,7 +439,7 @@ public class PlotScatter extends PlotAbstract {
         }
         
         // plot selected
-        for (int i=0;i<size-1;i++) {
+        for (int i=0;i<size;i++) {
             if (!m_selected[i]) {
                 continue;
             }

@@ -252,7 +252,18 @@ public class PlotScatter extends PlotAbstract {
         double maxX = minX;
         double minY = m_dataY[0];
         double maxY = minY;
-        for (int i = 1; i < size; i++) {
+        int i = 1;
+        while (minX != minX || (minY!=minY)) { // NaN values
+            if (i>=size) {
+                break;
+            }
+            minX = m_dataX[i];
+            maxX = minX;
+            minY = m_dataY[i];
+            maxY = minY;
+            i++;
+        }
+        for (; i < size; i++) {
             double x = m_dataX[i];
             if (x < minX) {
                 minX = x;

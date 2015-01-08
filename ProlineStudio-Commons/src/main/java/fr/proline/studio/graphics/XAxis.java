@@ -124,10 +124,10 @@ public class XAxis extends Axis {
                 m_lastWidth = stringWidth;
             }
 
-            int posX = pX - m_lastWidth / 2;
+            int posX = pX - stringWidth / 2;
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
                 g.drawString(s, posX, m_y + height + 4);
-                previousEndX = posX + m_lastWidth;
+                previousEndX = posX + stringWidth;
             }
 
             x += m_tickSpacing;

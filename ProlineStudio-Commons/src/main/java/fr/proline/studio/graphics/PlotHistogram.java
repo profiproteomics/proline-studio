@@ -29,6 +29,7 @@ public class PlotHistogram extends PlotAbstract {
     
     private double[] m_dataX;
     private double[] m_dataY;
+    private int[] m_dataCountY;
     private boolean[] m_selected;
 
     private StatsModel m_values;
@@ -174,9 +175,12 @@ public class PlotHistogram extends PlotAbstract {
         m_sb.append(" to ");
         m_sb.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound+1]));
         m_sb.append("<BR>");
-        m_sb.append(m_plotPanel.getYAxis().getTitle());
-        m_sb.append(" : ");
+        m_sb.append("Percentage : ");
         m_sb.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
+        m_sb.append(" % ");
+        m_sb.append("<BR>");
+        m_sb.append("Count : ");
+        m_sb.append(m_dataCountY[indexFound]);
         m_sb.append("</HTML>");
         String tooltip = m_sb.toString();
         m_sb.setLength(0);
@@ -223,7 +227,7 @@ public class PlotHistogram extends PlotAbstract {
         m_xMax = max;
         
         // bins
-        double std = m_values.standardDeviation();
+        double std = m_values.standardDeviationNaN();
         m_bins = (int) Math.round((max-min)/(3.5*std*Math.pow(size, -1/3.0)));
         if (m_bins<10) {
             m_bins = 10;
@@ -235,20 +239,24 @@ public class PlotHistogram extends PlotAbstract {
         }
         
         double delta = max-min;
+        m_dataCountY = new int[m_bins];
         double[] histogram = new double[m_bins];
         for (i = 0; i < size; i++) {
             double v = m_values.getValue(i);
+            if (v != v) {
+                continue; // remove NaN values
+            }
             int index = (int) (((v - min) / delta) * (m_bins));
             if (index >= m_bins) {
                 index = m_bins - 1;
             }
 
-            histogram[index]++;
+            m_dataCountY[index]++;
         }
         
         m_yMax = 0;
         for (i = 0; i < m_bins; i++) {
-            double y = histogram[i] / size * 100;
+            double y = ((double)m_dataCountY[i]) / size * 100;
             histogram[i] = y;
             if (y > m_yMax) {
                 m_yMax = y;
@@ -279,7 +287,7 @@ public class PlotHistogram extends PlotAbstract {
 
 
         // add Stdev value
-        double mean = m_values.mean();
+        double mean = m_values.meanNaN();
         addMarker(new XDeltaMarker(m_plotPanel, mean, mean+std, yStdevLabel));
         addMarker(new LineMarker(m_plotPanel, mean+std, LineMarker.ORIENTATION_VERTICAL));
         

@@ -1244,7 +1244,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         entityManagerUDS.persist(d);
         if (mergedParentDataset != null) {
-            entityManagerUDS.persist(mergedParentDataset);
+            entityManagerUDS.merge(mergedParentDataset);
         }
 
         DDataset ddataset = new DDataset(d.getId(), d.getProject(), d.getName(), d.getType(), d.getChildrenCount(), d.getResultSetId(), d.getResultSummaryId(), d.getNumber());

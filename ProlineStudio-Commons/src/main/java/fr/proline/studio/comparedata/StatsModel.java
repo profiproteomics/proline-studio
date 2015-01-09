@@ -5,12 +5,12 @@ package fr.proline.studio.comparedata;
  * @author JM235353
  */
 public class StatsModel implements CompareDataInterface {
-    
-    private CompareDataInterface m_sourceDataInterface;
-    private int m_colSelected;
-    
+
+    private final CompareDataInterface m_sourceDataInterface;
+    private final int m_colSelected;
+
     private String m_modelName;
-    
+
     public StatsModel(CompareDataInterface sourceDataInterface, int colSelected) {
         m_sourceDataInterface = sourceDataInterface;
         m_colSelected = colSelected;
@@ -55,12 +55,13 @@ public class StatsModel implements CompareDataInterface {
     public String getName() {
         return m_modelName;
     }
-    
+
     public double getValue(int columnIndex) {
         Object value = getDataValueAt(columnIndex, 0);
-        return value == null ? Double.NaN : ((Number)value).doubleValue(); //CBy TODO a revoir ?
+        return value == null ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO a revoir ?
     }
-    
+
+    /*
     public double sum() {
 
         double s = 0;
@@ -87,9 +88,60 @@ public class StatsModel implements CompareDataInterface {
         }
         return v / nb;
     }
-
+    
     public double standardDeviation() {
         return Math.sqrt(variance());
+    }
+    
+    */
+
+    public double sumNaN() {
+
+        double s = 0;
+        int nb = getRowCount();
+        for (int i = 0; i < nb; i++) {
+            double d = getValue(i);
+            if (d != d) {
+                continue;
+            }
+            s += d;
+        }
+
+        return s;
+    }
+
+    public double meanNaN() {
+        int nb = getRowCount();
+        int countWithoutNaN = 0;
+        for (int i = 0; i < nb; i++) {
+            double d = getValue(i);
+            if (d != d) {
+                continue;
+            }
+            countWithoutNaN++;
+        }
+        return sumNaN() / countWithoutNaN;
+    }
+
+    public double varianceNaN() {
+        double v = 0;
+        double mean = meanNaN();
+        int nb = getRowCount();
+        for (int i = 0; i < nb; i++) {
+            double d = getValue(i);
+            if (d != d) {
+                continue;
+            }
+            double diff = d - mean;
+            v += diff * diff;
+        }
+        return v / nb;
+    }
+
+    
+
+    public double standardDeviationNaN() {
+        return Math.sqrt(varianceNaN());
     }
 
     @Override

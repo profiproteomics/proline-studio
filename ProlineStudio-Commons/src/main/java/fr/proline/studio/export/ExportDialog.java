@@ -281,6 +281,18 @@ public class ExportDialog extends DefaultDialog  {
         }
 
         File f = new File(fileName);
+        
+        if (f.exists()) {
+            String message = "The file already exists. Do you want to overwrite it ?";
+            String title = "Overwrite ?";
+            String[] options = {"Yes","No"};
+            int reply = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
+            if (reply != JOptionPane.YES_OPTION) {
+                setStatus(true, "File already exists.");
+                return false;
+            }
+        }
+        
         FileWriter fw = null;
         try {
             fw = new FileWriter(f);
@@ -331,7 +343,7 @@ public class ExportDialog extends DefaultDialog  {
 
             Preferences preferences = NbPreferences.root();
             preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
-	
+            return true;
         } else if (m_exportType == ExporterFactory.EXPORT_IMAGE2) {
         	
             try {

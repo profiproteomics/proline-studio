@@ -1267,7 +1267,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 m_dataset.setResultSummaryId(m_resultSummaryId);
                 mergedDataset.setResultSummaryId(m_resultSummaryId);
                                        
-                entityManagerUDS.persist(mergedDataset);
+                entityManagerUDS.merge(mergedDataset);
 
                 entityManagerUDS.getTransaction().commit();
 
@@ -1307,7 +1307,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 m_dataset.setResultSummary(null);                          
                 mergedDataset.getTransientData().setResultSummary(null);
 
-                entityManagerUDS.persist(mergedDataset);
+                entityManagerUDS.merge(mergedDataset);
 
                 entityManagerUDS.getTransaction().commit();
 
@@ -1345,7 +1345,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 m_dataset.setResultSummaryId(m_resultSummaryId);
                 mergedDataset.setResultSummaryId(m_resultSummaryId);
 
-                entityManagerUDS.persist(mergedDataset);
+                entityManagerUDS.merge(mergedDataset);
 
                 entityManagerUDS.getTransaction().commit();
 
@@ -1531,10 +1531,10 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
                for (int i = 0; i < mergedDatasetList.size(); i++) {
                     Dataset mergedDataset = mergedDatasetList.get(i);
-                    entityManagerUDS.persist(mergedDataset);
+                    entityManagerUDS.merge(mergedDataset);
                 }
                 if (mergedParentDataset != null) {
-                    entityManagerUDS.persist(mergedParentDataset);
+                    entityManagerUDS.merge(mergedParentDataset);
                 }
 
 

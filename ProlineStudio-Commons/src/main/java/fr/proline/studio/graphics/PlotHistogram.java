@@ -35,14 +35,19 @@ public class PlotHistogram extends PlotAbstract {
     private StatsModel m_values;
     private int m_bins;
     
-    private ColorParameter m_colorParameter;
-    private ParameterList m_parameterList;
+    private final ColorParameter m_colorParameter;
+    private final ParameterList m_parameterList;
     
     private static final String PLOT_HISTOGRAM_COLOR_KEY = "PLOT_HISTOGRAM_COLOR";
     
-    public PlotHistogram(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX) {
+    public static String HISTOGRAM_COUNT = "Count";
+    public static String HISTOGRAM_PERCENTAGE = "Percentage %";
+    
+    private boolean m_asPercentage = false;
+    
+    public PlotHistogram(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, String paramZ) {
         super(plotPanel, PlotType.HISTOGRAM_PLOT, compareDataInterface, crossSelectionInterface);
-        update(colX, -1); 
+        update(colX, -1, paramZ); 
         
         
         m_parameterList = new ParameterList("Histogram Plot Settings");
@@ -71,7 +76,7 @@ public class PlotHistogram extends PlotAbstract {
         for (int i=0;i<size-1;i++) {
             double x1 = m_dataX[i];
             double x2 = m_dataX[i+1];
-            double y1 = m_dataY[i];
+            double y1 = m_asPercentage ? m_dataY[i] : m_dataCountY[i];
             
             if ((x>=x1) && (x<=x2) && (y>=y2) && (y<=y1)) {
                 m_selected[i] = true;
@@ -93,7 +98,7 @@ public class PlotHistogram extends PlotAbstract {
         for (int i=0;i<size-1;i++) {
             double x1 = m_dataX[i];
             double x2 = m_dataX[i+1];
-            double y1 = m_dataY[i];
+            double y1 = m_asPercentage ? m_dataY[i] : m_dataCountY[i];
 
             if (path.intersects(x1, y2, x2-x1, y1-y2)) {
                 m_selected[i] = true;
@@ -113,7 +118,7 @@ public class PlotHistogram extends PlotAbstract {
         for (int i=0;i<size-1;i++) {
             double x1 = m_dataX[i];
             double x2 = m_dataX[i+1];
-            double y1 = m_dataY[i];
+            double y1 = m_asPercentage ? m_dataY[i] : m_dataCountY[i];
             
             if ((x>=x1) && (x<=x2) && (y>=y2) && (y<=y1)) {
                 return i;
@@ -195,6 +200,8 @@ public class PlotHistogram extends PlotAbstract {
          
         m_values = new StatsModel(m_compareDataInterface, m_colX);
         
+        m_asPercentage = (m_parameterZ.compareTo(HISTOGRAM_PERCENTAGE) == 0);
+        
         clearMarkers();
         
         // number of bins
@@ -256,8 +263,10 @@ public class PlotHistogram extends PlotAbstract {
         
         m_yMax = 0;
         for (i = 0; i < m_bins; i++) {
-            double y = ((double)m_dataCountY[i]) / size * 100;
-            histogram[i] = y;
+            double percentage = ((double)m_dataCountY[i]) / size * 100;
+            histogram[i] = percentage;
+            double y = (m_asPercentage) ? percentage : m_dataCountY[i];
+            
             if (y > m_yMax) {
                 m_yMax = y;
             }
@@ -268,7 +277,7 @@ public class PlotHistogram extends PlotAbstract {
         
         m_plotPanel.updateAxis(this);
         m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colX));
-        m_plotPanel.setYAxisTitle("Percentage %");
+        m_plotPanel.setYAxisTitle(m_asPercentage ? HISTOGRAM_PERCENTAGE : HISTOGRAM_COUNT);
         
         
 
@@ -346,7 +355,7 @@ public class PlotHistogram extends PlotAbstract {
         for (int i=0;i<size-1;i++) {
             int x1 = xAxis.valueToPixel( m_dataX[i]);
             int x2 = xAxis.valueToPixel( m_dataX[i+1]);
-            int y1 = yAxis.valueToPixel( m_dataY[i]);
+            int y1 = yAxis.valueToPixel( m_asPercentage ? m_dataY[i] : m_dataCountY[i]);
             
             if (m_selected[i]) {
                 g.setColor(CyclicColorPalette.getColor(5));

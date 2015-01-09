@@ -51,8 +51,10 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
     private JComboBox<PlotType> m_allPlotsComboBox;
     private JComboBox<String> m_valueXComboBox;
     private JComboBox<String> m_valueYComboBox;
+    private JComboBox<String> m_valueZComboBox;
     private JLabel m_valueXLabel;
     private JLabel m_valueYLabel;
+    private JLabel m_valueZLabel;
     
     private PlotAbstract m_plotGraphics = null;
     
@@ -234,8 +236,10 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         m_allPlotsComboBox = new JComboBox(PlotType.ALL_PLOTS);
         m_valueXComboBox = new JComboBox();
         m_valueYComboBox = new JComboBox();
+        m_valueZComboBox = new JComboBox();
         m_valueXLabel = new JLabel();
         m_valueYLabel = new JLabel();
+        m_valueZLabel = new JLabel();
         updateXYCbxVisibility();
         
         m_allPlotsComboBox.addActionListener(new ActionListener() {
@@ -269,6 +273,12 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         selectPanel.add(m_valueYComboBox, c);
         
         c.gridx++;
+        selectPanel.add(m_valueZLabel, c);
+        
+        c.gridx++;
+        selectPanel.add(m_valueZComboBox, c);
+        
+        c.gridx++;
         c.weightx = 1;
         selectPanel.add(Box.createHorizontalGlue(), c);
         
@@ -285,12 +295,19 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
         m_valueYLabel.setVisible(plotType.needsY());
         m_valueYComboBox.setVisible(plotType.needsY());
         
+        m_valueZLabel.setVisible(plotType.needsZ());
+        m_valueZComboBox.setVisible(plotType.needsZ());
+        
         if (plotType.needsX()) {
             m_valueXLabel.setText(plotType.getXLabel());
         }
         if (plotType.needsY()) {
             m_valueYLabel.setText(plotType.getYLabel());
         }
+        if (plotType.needsZ()) {
+            m_valueZLabel.setText(plotType.getZLabel());
+        }
+        
         
     }
     
@@ -306,6 +323,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
             // clear combobox
             ((DefaultComboBoxModel) m_valueXComboBox.getModel()).removeAllElements();
             ((DefaultComboBoxModel) m_valueYComboBox.getModel()).removeAllElements();
+            ((DefaultComboBoxModel) m_valueZComboBox.getModel()).removeAllElements();
 
             PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
             HashSet<Class> acceptedValues = plotType.getAcceptedXValues();
@@ -350,6 +368,13 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
             
             m_valueXComboBox.setSelectedIndex(bestColIndexXCbx);
             m_valueYComboBox.setSelectedIndex(bestColIndexYCbx);
+            
+            if (plotType.needsZ()) {
+                ArrayList<String> zValues = plotType.getZValues();
+                for (int i=0;i<zValues.size();i++) {
+                    ((DefaultComboBoxModel) m_valueZComboBox.getModel()).addElement(zValues.get(i));
+                }
+            }
             
             
             setDataImpl(m_values, m_crossSelectionInterface);
@@ -397,7 +422,8 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
                     }
                     ReferenceIdName refX = (ReferenceIdName) m_valueXComboBox.getSelectedItem();
                     ReferenceIdName refY = (ReferenceIdName) m_valueYComboBox.getSelectedItem();
-                    m_plotGraphics.update(refX.getColumnIndex(), refY.getColumnIndex());
+                    String zParameter = (String) m_valueZComboBox.getSelectedItem();
+                    m_plotGraphics.update(refX.getColumnIndex(), refY.getColumnIndex(), zParameter);
                 }
                 
             };
@@ -405,15 +431,17 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
             
             m_valueXComboBox.addActionListener(actionForXYCbx);
             m_valueYComboBox.addActionListener(actionForXYCbx);
+            m_valueZComboBox.addActionListener(actionForXYCbx);
             
         }
         
         ReferenceIdName refX = (ReferenceIdName) m_valueXComboBox.getSelectedItem();
         ReferenceIdName refY = (ReferenceIdName) m_valueYComboBox.getSelectedItem();
+        String zParameter = (String) m_valueZComboBox.getSelectedItem();
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
         switch (plotType) {
             case HISTOGRAM_PLOT:
-                m_plotGraphics = new PlotHistogram(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex());
+                m_plotGraphics = new PlotHistogram(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), zParameter);
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
             case SCATTER_PLOT:

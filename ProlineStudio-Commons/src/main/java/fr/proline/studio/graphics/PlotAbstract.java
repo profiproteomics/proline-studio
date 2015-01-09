@@ -21,6 +21,7 @@ public abstract class PlotAbstract {
     protected CrossSelectionInterface m_crossSelectionInterface = null;
     protected int m_colX;
     protected int m_colY;
+    protected String m_parameterZ;
         
     protected PlotPanel m_plotPanel;
     
@@ -53,9 +54,10 @@ public abstract class PlotAbstract {
     public abstract String getToolTipText(double x, double y);
     
     
-    public void update(int colX, int colY) {
+    public void update(int colX, int colY, String parameterZ) {
         m_colX = colX;
         m_colY = colY;
+        m_parameterZ = parameterZ;
         update();
         updateAxisInteger();
     }

@@ -44,7 +44,7 @@ public class PlotScatter extends PlotAbstract {
     
     public PlotScatter(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
-        update(colX, colY); 
+        update(colX, colY, null); 
         
         m_parameterList = new ParameterList("Scatter Plot Settings");
 

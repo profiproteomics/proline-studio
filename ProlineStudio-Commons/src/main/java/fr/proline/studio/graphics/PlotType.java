@@ -1,5 +1,6 @@
 package fr.proline.studio.graphics;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -8,28 +9,33 @@ import java.util.HashSet;
  */
 public enum PlotType {
 
-    HISTOGRAM_PLOT("Histogram", "on", null),
-    SCATTER_PLOT("Scatter Plot", "X Axis:", "Y Axis:");
+    HISTOGRAM_PLOT("Histogram", "on", null, "as"),
+    SCATTER_PLOT("Scatter Plot", "X Axis:", "Y Axis:", null);
     
     public static PlotType[] ALL_PLOTS = { HISTOGRAM_PLOT, SCATTER_PLOT };
     
-    private PlotType(/*int index,*/ String name, String xLabel, String yLabel) {
+    private PlotType(/*int index,*/ String name, String xLabel, String yLabel, String zLabel) {
         //m_index = index;
         m_name = name;
         m_xLabel = xLabel;
         m_yLabel = yLabel;
+        m_zLabel = zLabel;
     }
     
     //private final int m_index;
     private final String m_name;
     private final String m_xLabel;
     private final String m_yLabel;
+    private final String m_zLabel;
     
     public boolean needsX() {
         return m_xLabel != null;
     }
     public boolean needsY() {
         return m_yLabel != null;
+    }
+    public boolean needsZ() {
+        return m_zLabel != null;
     }
     
     public String getXLabel() {
@@ -38,6 +44,10 @@ public enum PlotType {
     
     public String getYLabel() {
         return m_yLabel;
+    }
+    
+    public String getZLabel() {
+        return m_zLabel;
     }
     
     @Override
@@ -78,6 +88,20 @@ public enum PlotType {
                 break;
         }
         return acceptedValues;
+    }
+    
+    public ArrayList<String> getZValues() {
+        switch (this) {
+            case HISTOGRAM_PLOT: { 
+                ArrayList<String> zParams = new ArrayList<>();
+                zParams.add(PlotHistogram.HISTOGRAM_PERCENTAGE);
+                zParams.add(PlotHistogram.HISTOGRAM_COUNT);
+                return zParams;
+            }
+            case SCATTER_PLOT:
+            default:
+                return null;
+        }
     }
     
     

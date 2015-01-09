@@ -94,8 +94,8 @@ public enum PlotType {
         switch (this) {
             case HISTOGRAM_PLOT: { 
                 ArrayList<String> zParams = new ArrayList<>();
-                zParams.add(PlotHistogram.HISTOGRAM_PERCENTAGE);
                 zParams.add(PlotHistogram.HISTOGRAM_COUNT);
+                zParams.add(PlotHistogram.HISTOGRAM_PERCENTAGE);
                 return zParams;
             }
             case SCATTER_PLOT:

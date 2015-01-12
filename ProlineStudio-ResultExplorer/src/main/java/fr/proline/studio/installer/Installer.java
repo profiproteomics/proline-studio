@@ -24,7 +24,7 @@ public class Installer extends ModuleInstall {
     public void restored() {
 
         // set the proline version for the application title
-        System.setProperty("netbeans.buildnumber", "Beta 3 M4"); 
+        System.setProperty("netbeans.buildnumber", "Release 1.0"); 
         
         // initialize the connection to the server as soon as possible
         ServerConnectionManager.getServerConnectionManager();

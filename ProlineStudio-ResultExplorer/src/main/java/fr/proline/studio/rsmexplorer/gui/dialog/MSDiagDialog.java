@@ -47,7 +47,7 @@ public class MSDiagDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
 
-        setTitle("Define settings for Statistical Reports (MSDiag)");
+        setTitle("Define settings for Statistical Reports");
        
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:msdiag");    
         setButtonVisible(BUTTON_LOAD, true);
@@ -87,7 +87,7 @@ public class MSDiagDialog extends DefaultDialog {
 
     private JPanel createAllParametersPanel() {
         JPanel allParametersPanel = new JPanel(new GridBagLayout());
-        allParametersPanel.setBorder(BorderFactory.createTitledBorder(" MSDiag Reports Settings "));
+        allParametersPanel.setBorder(BorderFactory.createTitledBorder(" Statistical Reports Settings "));
         
         // create parserPanel
         JPanel settingsPanel = createSettingsPanel();
@@ -161,7 +161,7 @@ public class MSDiagDialog extends DefaultDialog {
     private JPanel createMSDiagParametersPanel() {
 
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(" MSDiag Settings... "));
+        panel.setBorder(BorderFactory.createTitledBorder(" Statistical Settings... "));
         return panel;
     }
     

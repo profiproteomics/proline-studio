@@ -7,13 +7,13 @@ import fr.proline.studio.pattern.DataboxManager;
 import fr.proline.studio.pattern.ParameterDistance;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.table.DecoratedMarkerTable;
+import fr.proline.studio.table.DecoratedTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.AbstractTableModel;
 
 
 
@@ -284,7 +284,7 @@ public class DataBoxChooserDialog extends DefaultDialog {
 
     }
     
-    private static class DataBoxTableModel extends AbstractTableModel {
+    private static class DataBoxTableModel extends DecoratedTableModel {
 
         public static final int COLTYPE_NAME = 0;
         public static final int COLTYPE_DESCRIPTION = 1;
@@ -347,6 +347,11 @@ public class DataBoxChooserDialog extends DefaultDialog {
 
             }
             return null; // should not happen
+        }
+
+        @Override
+        public String getToolTipForHeader(int col) {
+            return null;
         }
     }
     

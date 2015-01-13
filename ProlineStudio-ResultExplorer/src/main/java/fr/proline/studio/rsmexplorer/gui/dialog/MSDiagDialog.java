@@ -47,7 +47,7 @@ public class MSDiagDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
 
-        setTitle("Define settings for Statistical Reports (MSDiag)");
+        setTitle("Define settings for Statistical Reports");
        
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:msdiag");    
         setButtonVisible(BUTTON_LOAD, true);

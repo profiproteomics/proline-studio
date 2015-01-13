@@ -45,7 +45,7 @@ public class QuantProfileXICDialog extends DefaultDialog {
 
         setTitle("XIC Compute Quantitative Profiles");
 
-        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xic");
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xicprofilizer");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

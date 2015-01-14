@@ -5,8 +5,6 @@ import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.rsmexplorer.actions.identification.RetrieveSCDataAction;
 import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ExportXICAction;
-import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICProteinSetAction;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;

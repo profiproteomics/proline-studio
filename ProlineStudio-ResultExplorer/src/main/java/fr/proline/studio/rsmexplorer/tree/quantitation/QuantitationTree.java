@@ -13,8 +13,8 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.actions.identification.*;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
-import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICPeptideIonAction;
-import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICPeptideSetAction;
+import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
+import fr.proline.studio.rsmexplorer.actions.xic.ExportAbundancesAction;
 import fr.proline.studio.rsmexplorer.tree.*;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -175,14 +175,30 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         } else {
             if (m_mainPopup == null) {
                 // create the actions
-                m_mainActions = new ArrayList<>(15);  // <--- get in sync
+                m_mainActions = new ArrayList<>(11);  // <--- get in sync
                 
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(propertiesAction);
 
                 m_mainActions.add(null);  // separator
 
-                DisplayXICProteinSetAction displayXICProteinSetAction = new DisplayXICProteinSetAction();
+                ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
+                m_mainActions.add(computeQuantProfileAction);
+                
+                m_mainActions.add(null);  // separator
+
+                DisplayXICAction displayXICAction = new DisplayXICAction();
+                m_mainActions.add(displayXICAction);
+                
+                RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
+                m_mainActions.add(retrieveSCDataAction);
+                
+                m_mainActions.add(null);  // separator*
+                
+                ExportAbundancesAction exportXICAction = new ExportAbundancesAction();
+                m_mainActions.add(exportXICAction);
+                
+                /*DisplayXICProteinSetAction displayXICProteinSetAction = new DisplayXICProteinSetAction();
                 m_mainActions.add(displayXICProteinSetAction);
                 
                 
@@ -192,14 +208,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 DisplayXICPeptideIonAction displayXICPeptideIonAction = new DisplayXICPeptideIonAction();
                 m_mainActions.add(displayXICPeptideIonAction);
                 
-                RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
-                m_mainActions.add(retrieveSCDataAction);
                 
-                ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
-                m_mainActions.add(computeQuantProfileAction);
-                
-                m_mainActions.add(null);  // separator
-
                 ExportXICAction exportXICActionIons = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPEP_IONS);
                 m_mainActions.add(exportXICActionIons);
 
@@ -211,7 +220,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 
                 ExportXICAction exportXICActionProtSetProfile = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPROT_SETS);
                 m_mainActions.add(exportXICActionProtSetProfile);
-
+*/
                 m_mainActions.add(null);  // separator
 
                 RenameAction renameQuantitationAction = new RenameAction(AbstractTree.TreeType.TREE_QUANTITATION);

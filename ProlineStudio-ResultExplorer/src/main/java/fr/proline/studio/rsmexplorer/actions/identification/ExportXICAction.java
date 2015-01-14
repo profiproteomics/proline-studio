@@ -20,7 +20,6 @@ import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
-import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ public class ExportXICAction extends AbstractRSMAction {
 
     public enum ExportType {
 
-        MASTER_QPEP_IONS("master_quant_peptide_ions", "Quant Peptides ions"), MASTER_QPEPS("master_quant_peptides", "Quant Peptides"), BASIC_MASTER_QPROT_SETS("basic_master_quant_protein_sets", "Quant Proteins Sets"), MASTER_QPROT_SETS("master_quant_protein_sets", "Quant Proteins Sets Profiles");
+        MASTER_QPEP_IONS("master_quant_peptide_ions", "Peptides Ions"), MASTER_QPEPS("master_quant_peptides", "Peptides"), BASIC_MASTER_QPROT_SETS("basic_master_quant_protein_sets", "Proteins Sets"), MASTER_QPROT_SETS("master_quant_protein_sets", "Proteins Sets Refined");
 
         private String m_value;
         private String m_label;
@@ -59,7 +58,7 @@ public class ExportXICAction extends AbstractRSMAction {
     private ExportType m_exportType = null;
 
     public ExportXICAction(ExportType type) {
-        super(NbBundle.getMessage(ExportXICAction.class, "CTL_PrefixExportXICAction") + type.getAsLabel() + "...", AbstractTree.TreeType.TREE_QUANTITATION);
+        super( type.getAsLabel() + "...", AbstractTree.TreeType.TREE_QUANTITATION);
         m_exportType = type;
     }
 
@@ -85,8 +84,8 @@ public class ExportXICAction extends AbstractRSMAction {
                 if (success) {
                     // check if profilizer has already been launched
                     if ((m_exportType.equals(ExportType.MASTER_QPROT_SETS)) && dataSet.getPostQuantProcessingConfig() == null) {
-                        String message = "No Compute Quantitative Profiles has been launched on this XIC.\nSome data may be empty.\nDo you want to continue?";
-                        OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Export profile", message);
+                        String message = "Proteins Sets Abundances have not been refined.\nSome data may be empty.\nDo you want to continue?";
+                        OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Export Refined Proteins Sets Abundances", message);
                         yesNoDialog.setLocation(posx, posy);
                         yesNoDialog.setVisible(true);
                         if (yesNoDialog.getButtonClicked() != DefaultDialog.BUTTON_OK) {

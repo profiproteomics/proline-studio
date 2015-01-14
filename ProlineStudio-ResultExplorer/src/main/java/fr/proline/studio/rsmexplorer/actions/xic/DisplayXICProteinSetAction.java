@@ -1,7 +1,5 @@
 package fr.proline.studio.rsmexplorer.actions.xic;
 
-import fr.proline.core.orm.uds.Dataset;
-import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.pattern.WindowBox;
@@ -20,7 +18,7 @@ import org.openide.util.NbBundle;
 public class DisplayXICProteinSetAction extends AbstractRSMAction {
 
     public DisplayXICProteinSetAction() {
-        super(NbBundle.getMessage(DisplayXICProteinSetAction.class, "CTL_DisplayXicProteinSetAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+        super(NbBundle.getMessage(DisplayXICProteinSetAction.class, "CTL_XicProteinSetAction"), AbstractTree.TreeType.TREE_QUANTITATION);
     }
 
     @Override

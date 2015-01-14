@@ -43,7 +43,7 @@ public class QuantProfileXICDialog extends DefaultDialog {
     private QuantProfileXICDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-        setTitle("XIC Compute Quantitative Profiles");
+        setTitle("Refine Proteins Sets Abundances");
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:xicprofilizer");
 

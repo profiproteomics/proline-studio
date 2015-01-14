@@ -9,7 +9,6 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -76,8 +75,8 @@ public class ComputeQuantitationProfileAction extends AbstractRSMAction {
                 if (success) {
                     // check if profilizer has already been launched
                     if (dataSet.getPostQuantProcessingConfig() != null) {
-                        String message = "Compute Quantitation Profile has already been launched.\nDo you want to relaunch it?";
-                        OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Compute Quant. Profile", message);
+                        String message = "Proteins Sets Abundances have already been refined.\nDo you want to continue?";
+                        OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Refine Proteins Sets Abundances", message);
                         yesNoDialog.setLocation(posx, posy);
                         yesNoDialog.setVisible(true);
                         if (yesNoDialog.getButtonClicked() != DefaultDialog.BUTTON_OK) {

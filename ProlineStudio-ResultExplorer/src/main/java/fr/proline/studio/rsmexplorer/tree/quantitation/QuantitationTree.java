@@ -104,9 +104,11 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         int nbNodes = selectedNodes.length;
 
 
-        if ((nbNodes > 1) || (nbNodes == 0)) {
+        if ((nbNodes == 0)) {
             return;
         }
+        
+        
         AbstractNode n = selectedNodes[0];
         boolean isRootPopup = n.isRoot();
 
@@ -132,6 +134,28 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         JPopupMenu popup;
         ArrayList<AbstractRSMAction> actions;
 
+        if ((nbNodes > 1) ){
+            if (m_mainPopup == null) {
+                // create the actions
+                m_mainActions = new ArrayList<>(1);  // <--- get in sync
+                
+                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                m_mainActions.add(propertiesAction);
+                // add actions to popup
+            }
+            m_mainPopup = new JPopupMenu();
+                for (int i = 0; i < m_mainActions.size(); i++) {
+                    AbstractRSMAction action = m_mainActions.get(i);
+                    if (action == null) {
+                        m_mainPopup.addSeparator();
+                    } else {
+                        m_mainPopup.add(action.getPopupPresenter());
+                    }
+                }
+            popup = m_mainPopup;
+            actions = m_mainActions;
+        }
+        
         if (isRootPopup) {
             if (m_rootPopup == null) {
                 // create the actions

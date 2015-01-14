@@ -5,7 +5,6 @@ import fr.proline.core.orm.uds.InstrumentConfiguration;
 import fr.proline.core.orm.uds.PeaklistSoftware;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.UserAccount;
-import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.module.seq.DatabaseAccess;
 import fr.proline.repository.IDatabaseConnector;
 import java.util.HashMap;

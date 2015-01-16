@@ -1,6 +1,5 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.ParameterList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -32,7 +31,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     private XAxis m_xAxis = null;
     private YAxis m_yAxis = null;
     
-    private PlotAbstract m_plot = null;
+    private java.util.List<PlotAbstract> m_plots = null;
     
     private final ZoomGesture m_zoomGesture = new ZoomGesture();
     private final SelectionGesture m_selectionGesture = new SelectionGesture();
@@ -58,6 +57,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         addMouseListener(this);
         addMouseMotionListener(this);
         ToolTipManager.sharedInstance().registerComponent(this);
+        m_plots = new ArrayList();
     }
     
     @Override
@@ -94,51 +94,57 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
 
         
         
-        if (m_plot != null) {
-
-            
-            if (m_useDoubleBuffering) {
-                boolean createDoubleBuffer = ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth()!=plotArea.width) || (m_doubleBuffer.getHeight()!=plotArea.height)); 
-                if (createDoubleBuffer) {
+        if (m_plots != null) {
+                if (m_useDoubleBuffering) {
+                    boolean createDoubleBuffer = ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth()!=plotArea.width) || (m_doubleBuffer.getHeight()!=plotArea.height));
+                    if (createDoubleBuffer) {
                         m_doubleBuffer = new BufferedImage(plotArea.width, plotArea.height, BufferedImage.TYPE_INT_ARGB);
                     }
-                if (createDoubleBuffer || m_updateDoubleBuffer) {
+                    if (createDoubleBuffer || m_updateDoubleBuffer) {
+                        
+                        Graphics2D graphicBufferG2d = (Graphics2D) m_doubleBuffer.getGraphics();
+                        graphicBufferG2d.setColor(Color.white);
+                        graphicBufferG2d.fillRect(0, 0, plotArea.width, plotArea.height);
+                        graphicBufferG2d.translate(-plotArea.x, -plotArea.y);
+                        if ((m_plotVerticalGrid) && (m_xAxis != null)) {
+                            m_xAxis.paintGrid(graphicBufferG2d, plotArea.y, plotArea.height);
+                        }
+                        
+                        if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
+                            m_yAxis.paintGrid(graphicBufferG2d, plotArea.x, plotArea.width);
+                        }
+                        
+
+                        for (PlotAbstract plot : m_plots) {
+                            plot.paint(graphicBufferG2d);
+                        }
+                        m_updateDoubleBuffer = false;
+                    }
+                    g2d.drawImage(m_doubleBuffer, plotArea.x, plotArea.y, null);
                     
-                    Graphics2D graphicBufferG2d = (Graphics2D) m_doubleBuffer.getGraphics();
-                    graphicBufferG2d.setColor(Color.white);
-                    graphicBufferG2d.fillRect(0, 0, plotArea.width, plotArea.height);
-                    graphicBufferG2d.translate(-plotArea.x, -plotArea.y);
+                } else {
+                    
+                    long startPlotTime = System.currentTimeMillis();
+                    g.setColor(Color.white);
+                    g.fillRect(plotArea.x, plotArea.y, plotArea.width, plotArea.height);
                     if ((m_plotVerticalGrid) && (m_xAxis != null)) {
-                        m_xAxis.paintGrid(graphicBufferG2d, plotArea.y, plotArea.height);
+                        m_xAxis.paintGrid(g2d, plotArea.y, plotArea.height);
                     }
 
                     if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
-                        m_yAxis.paintGrid(graphicBufferG2d, plotArea.x, plotArea.width);
+                        m_yAxis.paintGrid(g2d, plotArea.x, plotArea.width);
                     }
-                    m_plot.paint(graphicBufferG2d);
-                    m_updateDoubleBuffer = false;
-                }
-                g2d.drawImage(m_doubleBuffer, plotArea.x, plotArea.y, null);
-                
-            } else {
+                    
 
-                long startPlotTime = System.currentTimeMillis();
-                g.setColor(Color.white);
-                g.fillRect(plotArea.x, plotArea.y, plotArea.width, plotArea.height);
-                if ((m_plotVerticalGrid) && (m_xAxis != null)) {
-                    m_xAxis.paintGrid(g2d, plotArea.y, plotArea.height);
+                    for (PlotAbstract plot : m_plots) {
+                        plot.paint(g2d);
+                    }
+                    long stopPlotTime = System.currentTimeMillis();
+                    if (stopPlotTime - startPlotTime > 50) {
+                        // display is too slow , we use an image
+                        m_useDoubleBuffering = true;
+                    }
                 }
-
-                if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
-                    m_yAxis.paintGrid(g2d, plotArea.x, plotArea.width);
-                }
-                m_plot.paint(g2d);
-                long stopPlotTime = System.currentTimeMillis();
-                if (stopPlotTime - startPlotTime > 50) {
-                    // display is too slow , we use an image 
-                    m_useDoubleBuffering = true;
-                }
-            }
         }
         
         // set clipping area for zooming and selecting
@@ -156,10 +162,14 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     }
     
     public ParameterList getParameters() {
-        if (m_plot == null) {
+        if (m_plots == null) {
             return null;
         }
-        return m_plot.getParameters();
+        
+        for (PlotAbstract plot : m_plots) {
+            return plot.getParameters();
+        }
+        return null;
     }
     
     public void parametersChanged() {
@@ -193,34 +203,68 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     }
     
     public void setPlot(PlotAbstract plot) {
-        m_plot = plot;
+       m_plots = new ArrayList();
+       m_plots.add(plot);
+
+        updateAxis(plot);
+    }
+    
+    public void clearPlots() {
+        this.m_plots = new ArrayList();
+    }
+    
+    public void addPlot(PlotAbstract plot) {
+        m_plots.add(plot);
 
         updateAxis(plot);
     }
     
     public ArrayList<Integer> getSelection() {
-        return m_plot.getSelection();
+        if (!m_plots.isEmpty()){
+            return m_plots.get(0).getSelection();
+        }else {
+            return null;
+        }
     }
     public void setSelection(ArrayList<Integer> selection) {
-        m_plot.setSelection(selection);
-        m_updateDoubleBuffer = true;
-        repaint();
+        if (!m_plots.isEmpty()){
+            m_plots.get(0).setSelection(selection);
+            m_updateDoubleBuffer = true;
+            repaint();
+       }
     }
 
     public void updateAxis(PlotAbstract plot) {
         
         if (plot.needsXAxis()) {
+            boolean firstP = false;
+            if (m_xAxis == null || m_plots.size() == 1) {
+                firstP = true;
+            }
             XAxis xAxis = getXAxis();
             xAxis.setLog(false);
             xAxis.setSelected(false);
-            xAxis.setRange(plot.getXMin(), plot.getXMax());
+            if (firstP ) {
+                xAxis.setRange(plot.getXMin() , plot.getXMax());
+            }else{
+                xAxis.setRange(Math.min(plot.getXMin(), xAxis.getMinValue()) , Math.max(plot.getXMax(), xAxis.getMaxValue()));
+                
+            }
         }
 
         if (plot.needsYAxis()) {
+            boolean firstP = false;
+            if (m_yAxis == null || m_plots.size() == 1) {
+                firstP = true;
+            }
            YAxis yAxis = getYAxis();
             yAxis.setLog(false);
             yAxis.setSelected(false);
-            yAxis.setRange(plot.getYMin(), plot.getYMax());
+            if (firstP) {
+                yAxis.setRange(plot.getYMin(), plot.getYMax());
+            }else{
+                yAxis.setRange(Math.min(plot.getYMin(), yAxis.getMinValue()), Math.max(plot.getYMax(), yAxis.getMaxValue()));
+            }
         }
         
         m_updateDoubleBuffer = true;
@@ -262,13 +306,13 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     @Override
     public void mousePressed(MouseEvent e) {
 
-        if (m_plot == null) {
+        if (m_plots == null || m_plots.isEmpty()) {
             return;
         }
         
         int x = e.getX();
         int y = e.getY();
-        if (m_plot.inside(x, y)) {
+        if (m_plots.get(0).inside(x, y)) {
             // Mouse Pressed in the plot area
             
             // deselect axis
@@ -334,7 +378,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
                 double valueX = m_xAxis.pixelToValue(p.x);
                 double valueY = m_yAxis.pixelToValue(p.y);
 
-                m_plot.select(valueX, valueY, isCtrlOrShiftDown);
+                if (!m_plots.isEmpty()){
+                    m_plots.get(0).select(valueX, valueY, isCtrlOrShiftDown);
+                }
                 m_updateDoubleBuffer = true;
                 mustRepaint = true;
             } else if (action == SelectionGesture.ACTION_SURROUND) {
@@ -356,7 +402,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
                 double yMin = m_yAxis.pixelToValue(m_selectionGesture.getMaxY()); // inversion of min max is normal between pixel and Y Axis
                 double yMax = m_yAxis.pixelToValue(m_selectionGesture.getMinY());
                 
-                m_plot.select(path, xMin, xMax, yMin, yMax, isCtrlOrShiftDown);
+                if (!m_plots.isEmpty()){
+                    m_plots.get(0).select(path, xMin, xMax, yMin, yMax, isCtrlOrShiftDown);
+                }
                 m_updateDoubleBuffer = true;
                 mustRepaint = true;
             }
@@ -372,7 +420,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
                 m_yAxis.setRange(m_yAxis.pixelToValue(m_zoomGesture.getEndY()), m_yAxis.pixelToValue(m_zoomGesture.getStartY()));
                 m_updateDoubleBuffer = true;
             } else if (action == ZoomGesture.ACTION_UNZOOM) {
-                updateAxis(m_plot);
+                if (!m_plots.isEmpty()){
+                    updateAxis(m_plots.get(0));
+                }
                 m_updateDoubleBuffer = true;
             }
             mustRepaint = true;
@@ -381,6 +431,11 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         if (mustRepaint) {
             repaint();
         }
+    }
+    
+    public void repaintUpdateDoubleBuffer() {
+        m_updateDoubleBuffer = true;
+        repaint();
     }
 
     @Override
@@ -402,11 +457,30 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        if (m_plot == null) {
+        if (m_plots == null || m_plots.isEmpty()) {
             return;
         }
-        String s =  m_plot.getToolTipText(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
-        setToolTipText(s); 
+        String s =  "<html>";
+        boolean hasToolTip = false;
+        for (PlotAbstract plot : m_plots) {
+            plot.setIsPaintMarker(false);
+            boolean isPlotSelected = plot.isMouseOnPlot(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
+            plot.setIsPaintMarker(isPlotSelected);
+            String toolTipForPlot = plot.getToolTipText(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
+            if (toolTipForPlot != null && !toolTipForPlot.isEmpty()){
+                s += toolTipForPlot;
+                hasToolTip = true;
+                s += "<br/>";
+                
+            }
+            
+        }
+        s += "</html>";
+        if (hasToolTip) {
+            setToolTipText(s); 
+        }
+        repaintUpdateDoubleBuffer();
+        
     }
 
     

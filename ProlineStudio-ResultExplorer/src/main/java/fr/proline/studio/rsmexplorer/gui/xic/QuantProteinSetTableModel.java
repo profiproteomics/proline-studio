@@ -90,8 +90,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             sb.append(m_columnNamesQC[id]);
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
-            sb.append("<br/>");
-            sb.append(m_quantChannels[nbQc].getRawFileName());
+            /*sb.append("<br/>");
+            sb.append(m_quantChannels[nbQc].getRawFileName());*/
             
             sb.append("</html>");
             return sb.toString();
@@ -576,8 +576,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         String rsmHtmlColor = CyclicColorPalette.getHTMLColor(i);
         sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
         sb.append(m_quantChannels[i].getResultFileName());
-        sb.append("<br/>");
-        sb.append(m_quantChannels[i].getRawFileName());
+       /* sb.append("<br/>");
+        sb.append(m_quantChannels[i].getRawFileName());*/
         sb.append("</html>");
 
         return sb.toString();
@@ -726,5 +726,20 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     @Override
     public int getInfoColumn() {
         return COLTYPE_PROTEIN_SET_NAME;
+    }
+    
+    @Override
+    public Map<String, Object> getExternalData() {
+        return null;
+    }
+    
+    @Override
+    public Color getPlotColor() {
+        return null;
+    }
+    
+    @Override
+    public String getPlotTitle() {
+        return null;
     }
 }

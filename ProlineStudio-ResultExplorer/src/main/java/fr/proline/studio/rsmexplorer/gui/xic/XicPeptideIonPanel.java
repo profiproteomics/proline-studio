@@ -79,6 +79,9 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     private JToggleButton m_searchToggleButton;
     private XICPeptideIonSearch m_search = null;
     
+    private JLabel m_titleLabel;
+    private String TABLE_TITLE = "Peptides Ions";
+    
 
     public XicPeptideIonPanel() {
         initComponents();
@@ -135,6 +138,9 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         JPanel internalPanel = createInternalPanel();
 
         JToolBar toolbar = initToolbar();
+        
+        m_titleLabel = new JLabel(TABLE_TITLE);
+        peptideIonPanel.add(m_titleLabel, BorderLayout.NORTH);
         peptideIonPanel.add(toolbar, BorderLayout.WEST);
         peptideIonPanel.add(internalPanel, BorderLayout.CENTER);
 
@@ -227,7 +233,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_quantChannels = quantChannels;
         
         ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).setData(taskId, quantChannels, peptideIons);
-
+        m_titleLabel.setText(TABLE_TITLE +" ("+peptideIons.size()+")");
         // select the first row
         if ((peptideIons != null) && (peptideIons.size() > 0)) {
             m_quantPeptideIonTable.getSelectionModel().setSelectionInterval(0, 0);

@@ -4,7 +4,6 @@ package fr.proline.studio.rsmexplorer.gui.model;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.LazyTable;
-import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
@@ -17,8 +16,10 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.utils.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Table Model for PeptideInstance of a Rsm
@@ -568,6 +569,19 @@ public class PeptideInstanceTableModel extends LazyTableModel implements Compare
         return COLTYPE_PEPTIDE_NAME;
     }
 
+    @Override
+    public Map<String, Object> getExternalData() {
+        return null;
+    }
     
+    @Override
+    public Color getPlotColor() {
+        return null;
+    }
+    
+    @Override
+    public String getPlotTitle() {
+        return null;
+    }
     
 }

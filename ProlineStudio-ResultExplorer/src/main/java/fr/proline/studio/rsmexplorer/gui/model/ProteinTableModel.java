@@ -6,8 +6,9 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.IconManager;
-import java.io.File;
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Table Model for Proteins
@@ -320,6 +321,21 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
     @Override
     public int getInfoColumn() {
         return Column.PROTEIN_NAME.m_colId;
+    }
+    
+    @Override
+    public Map<String, Object> getExternalData() {
+        return null;
+    }
+    
+    @Override
+    public Color getPlotColor() {
+        return null;
+    }
+    
+    @Override
+    public String getPlotTitle() {
+        return null;
     }
     
     public static class Sameset {

@@ -90,7 +90,7 @@ public class QuantProfileXICPanel extends JPanel {
         // completeMode can be changed in the preferences file with the Profilizer key
         Preferences preferences = NbPreferences.root();
         this.completeMode = preferences.getBoolean("Profi", false);
-        
+        this.completeMode = true;
         m_parameterList = new ParameterList(QuantProfileXICDialog.SETTINGS_KEY);
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());

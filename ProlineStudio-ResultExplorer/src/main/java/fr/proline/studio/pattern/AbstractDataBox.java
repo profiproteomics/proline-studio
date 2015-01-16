@@ -4,6 +4,8 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.pattern.xic.DataboxChildFeature;
+import fr.proline.studio.pattern.xic.DataboxXicPeakelForFeature;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
@@ -82,7 +84,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataboxCompareResult(24),
         DataboxXicPeptideSet(25),
         DataboxXicPeptideIon(26),
-        DataboxGraphics(27);
+        DataboxGraphics(27),
+        DataboxXicChildFeature(28),
+        DataboxXicPeakelForFeature(29),
+        DataboxMultiGraphics(30);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -151,6 +156,12 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxXicPeptideIon();
                 case DataboxGraphics:
                     return new DataboxGraphics();
+                case DataboxXicChildFeature:
+                    return new DataboxChildFeature();
+                case DataboxXicPeakelForFeature:
+                    return new DataboxXicPeakelForFeature();
+                case DataboxMultiGraphics:
+                    return new DataboxMultiGraphics();
             }
             return null; // should not happen
         }

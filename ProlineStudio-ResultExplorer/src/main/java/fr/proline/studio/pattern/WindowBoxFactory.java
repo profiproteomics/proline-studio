@@ -4,6 +4,7 @@ package fr.proline.studio.pattern;
 import java.util.HashMap;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
@@ -81,6 +82,16 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         //boxes[0] = new DataBoxStatisticsFrequencyResponse();
         boxes[0] = new DataboxGraphics(true);
+        srcDatabox.addNextDataBox(boxes[0]);
+        IconManager.IconType iconType = IconManager.IconType.CHART;
+        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+        boxes[0].dataChanged();
+        return winBox;
+    }
+    
+    public static WindowBox getMultiGraphicsWindowBox(String name, AbstractDataBox srcDatabox) {
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataboxMultiGraphics(true);
         srcDatabox.addNextDataBox(boxes[0]);
         IconManager.IconType iconType = IconManager.IconType.CHART;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
@@ -190,10 +201,13 @@ public class WindowBoxFactory {
     public static WindowBox getXicQuantProteinSetWindowBox(String name) {
 
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[3];
+        AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataboxXicProteinSet();
         boxes[1] = new DataboxXicPeptideSet();
         boxes[2] = new DataboxXicPeptideIon();
+        boxes[3] = new DataboxChildFeature();
+        //boxes[4] =new DataboxMultiGraphics(true);
+        //boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
@@ -219,7 +233,21 @@ public class WindowBoxFactory {
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
-
+    
+//    public static WindowBox getXicQuantMapWindowBox(String name) {
+//        // create boxes
+//        AbstractDataBox[] boxes = new AbstractDataBox[4];
+//        boxes[0] = new DataboxXicMap();
+//        
+//        boxes[1] = new DataboxXicFeature();
+//        boxes[2] = new DataboxXicPeakel();
+//        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+//        boxes[3] = new DataboxXicPeak();
+//        
+//        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
+//        return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+//    }
+    
     public static WindowBox getTaskListWindowBox() {
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataBoxTaskList();

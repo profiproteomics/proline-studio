@@ -10,9 +10,11 @@ import java.util.HashSet;
 public enum PlotType {
 
     HISTOGRAM_PLOT("Histogram", "on", null, "as"),
-    SCATTER_PLOT("Scatter Plot", "X Axis:", "Y Axis:", null);
+    SCATTER_PLOT("Scatter Plot", "X Axis:", "Y Axis:", null),
+    LINEAR_PLOT("Linear Plot", "X Axis:", "Y Axis:", null);
     
     public static PlotType[] ALL_PLOTS = { HISTOGRAM_PLOT, SCATTER_PLOT };
+    public static PlotType[] LINEAR_PLOTS = {LINEAR_PLOT};
     
     private PlotType(/*int index,*/ String name, String xLabel, String yLabel, String zLabel) {
         //m_index = index;
@@ -66,6 +68,7 @@ public enum PlotType {
                 acceptedValues.add(Integer.class);
                 break;
             case SCATTER_PLOT: 
+            case LINEAR_PLOT: 
                 acceptedValues.add(Double.class);
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);
@@ -82,6 +85,7 @@ public enum PlotType {
             case HISTOGRAM_PLOT: 
                 break;
             case SCATTER_PLOT: 
+            case LINEAR_PLOT: 
                 acceptedValues.add(Double.class);
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);

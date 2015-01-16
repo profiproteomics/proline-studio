@@ -9,8 +9,10 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.utils.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Table Model for Protein Sets
@@ -584,5 +586,18 @@ public class ProteinSetTableModel extends LazyTableModel implements CompareDataI
         
     }
 
+    @Override
+    public Map<String, Object> getExternalData() {
+        return null;
+    }
 
+    @Override
+    public Color getPlotColor() {
+        return null;
+    }
+    
+    @Override
+    public String getPlotTitle() {
+        return null;
+    }
 }

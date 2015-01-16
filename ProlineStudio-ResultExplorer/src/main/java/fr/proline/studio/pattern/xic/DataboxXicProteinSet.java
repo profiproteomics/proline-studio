@@ -14,6 +14,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicProteinSetPanel;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.List;
 public class DataboxXicProteinSet extends AbstractDataBox {
 
     private DDataset m_dataset;
+    private QuantChannelInfo  m_quantChannelInfo;
     private List<DMasterQuantProteinSet> m_masterQuantProteinSetList ;
     
     public DataboxXicProteinSet() { 
@@ -87,6 +89,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                     }
                     DQuantitationChannel[] quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
+                    m_quantChannelInfo = new QuantChannelInfo(quantitationChannelArray);
                     // proteins set 
                     //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
                     //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
@@ -134,6 +137,9 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             }
             if (parameterType.equals(DDataset.class)) {
                 return m_dataset;
+            }
+            if (parameterType.equals(QuantChannelInfo.class)) {
+                return m_quantChannelInfo;
             }
             if (parameterType.equals(DProteinSet.class)) {
                 return ((XicProteinSetPanel) m_panel).getSelectedProteinSet();

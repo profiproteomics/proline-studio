@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 
 import fr.proline.core.orm.msi.Peptide;
-import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
@@ -11,7 +10,9 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.*;
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Map;
 
 
 /**
@@ -491,6 +492,20 @@ public class PeptideTableModel extends FilterTableModel implements CompareDataIn
     public int getInfoColumn() {
         return COLTYPE_PEPTIDE_NAME;
     }
+    
+    @Override
+    public Map<String, Object> getExternalData() {
+        return null;
+    }
 
     
+    @Override
+    public Color getPlotColor() {
+        return null;
+    }
+    
+    @Override
+    public String getPlotTitle() {
+        return null;
+    }
 }

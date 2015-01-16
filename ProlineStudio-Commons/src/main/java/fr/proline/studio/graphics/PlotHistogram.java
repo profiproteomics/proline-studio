@@ -383,4 +383,9 @@ public class PlotHistogram extends PlotAbstract {
         return true;
     }
     
+    @Override
+    public boolean isMouseOnPlot(double x, double y) {
+        return findPoint(x, y) != -1;
+    }
+    
 }

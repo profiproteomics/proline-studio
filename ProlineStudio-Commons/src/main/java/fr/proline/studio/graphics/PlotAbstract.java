@@ -3,7 +3,6 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.LockedDataModel;
 import fr.proline.studio.graphics.marker.AbstractMarker;
-import fr.proline.studio.parameter.AbstractParameter;
 import fr.proline.studio.parameter.ParameterList;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
@@ -117,5 +116,12 @@ public abstract class PlotAbstract {
         int y2 = yAxis.valueToPixel(yAxis.getMinTick());
         return (x>=x1) && (x<=x2) && (y>=y1) && (y<=y2);
     }
+    
+    public void setIsPaintMarker(boolean isPaintMarker) {
+        
+    }
+    
+    public abstract boolean isMouseOnPlot(double x, double y);
+    
 
 }

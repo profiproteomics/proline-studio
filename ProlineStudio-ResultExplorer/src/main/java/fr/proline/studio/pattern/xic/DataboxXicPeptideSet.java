@@ -16,6 +16,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidePanel;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     private DProteinSet m_proteinSet;
     private DMasterQuantProteinSet m_masterQuantProteinSet;
     private List<DMasterQuantPeptide> m_masterQuantPeptideList ;
+    private QuantChannelInfo m_quantChannelInfo;
     
     public DataboxXicPeptideSet() { 
         super(DataboxType.DataboxXicPeptideSet);
@@ -67,13 +69,19 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        boolean allProteinSet = m_previousDataBox == null;
+        final boolean allProteinSet = m_previousDataBox == null;
+        DProteinSet oldProteinSet = m_proteinSet;
         
         if (!allProteinSet) {
             m_proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
             m_masterQuantProteinSet = (DMasterQuantProteinSet) m_previousDataBox.getData(false, DMasterQuantProteinSet.class);
             m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
+            m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
+            if (m_proteinSet == null || m_proteinSet.equals(oldProteinSet)) {
+                return;
+            }
         }
+        
         final int loadingId = setLoading();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -95,6 +103,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                     }
                     DQuantitationChannel[] quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
+                    if (allProteinSet) {
+                        m_quantChannelInfo = new QuantChannelInfo(quantitationChannelArray);
+                    }
                     ((XicPeptidePanel) m_panel).setData(taskId, m_proteinSet != null, quantitationChannelArray, m_masterQuantPeptideList, finished);
                 } else {
                     ((XicPeptidePanel) m_panel).dataUpdated(subTask, finished);
@@ -138,6 +149,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             }
             if (parameterType.equals(DDataset.class)) {
                 return m_dataset;
+            }
+            if (parameterType.equals(QuantChannelInfo.class)) {
+                return m_quantChannelInfo;
             }
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();

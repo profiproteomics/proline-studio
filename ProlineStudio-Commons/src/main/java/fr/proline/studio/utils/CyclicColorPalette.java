@@ -52,7 +52,11 @@ public class CyclicColorPalette {
 
     public static String getHTMLColor(int colorIndex) {
         Color c = getColor(colorIndex);
-        return String.format("%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
+        return getHTMLColor(c);
+    }
+    
+    public static String getHTMLColor(Color color) {
+        return String.format("%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
     }
     
     /*

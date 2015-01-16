@@ -14,8 +14,10 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.utils.RelativePainterHighlighter;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Table Model for Peptide Matches
@@ -409,7 +411,20 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
         return COLTYPE_PROTEIN_NAME;
     }
 
+    @Override
+    public Map<String, Object> getExternalData() {
+        return null;
+    }
 
+    
+    @Override
+    public Color getPlotColor() {
+        return null;
+    }
 
+    @Override
+    public String getPlotTitle() {
+        return null;
+    }
  
 }

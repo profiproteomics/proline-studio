@@ -103,9 +103,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                     }
                     DQuantitationChannel[] quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
-                    if (allProteinSet) {
-                        m_quantChannelInfo = new QuantChannelInfo(quantitationChannelArray);
-                    }
+                    m_quantChannelInfo = new QuantChannelInfo(quantitationChannelArray);
                     ((XicPeptidePanel) m_panel).setData(taskId, m_proteinSet != null, quantitationChannelArray, m_masterQuantPeptideList, finished);
                 } else {
                     ((XicPeptidePanel) m_panel).dataUpdated(subTask, finished);

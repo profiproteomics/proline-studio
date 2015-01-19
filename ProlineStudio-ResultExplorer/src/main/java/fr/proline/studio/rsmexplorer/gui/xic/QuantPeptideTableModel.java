@@ -98,8 +98,6 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             sb.append(m_columnNamesQC[id]);
             sb.append(" ");
             sb.append(m_quantChannels[nbQc].getResultFileName());
-            sb.append(" ");
-            sb.append(m_quantChannels[nbQc].getRawFileName());
             
             return sb.toString();
         }else {

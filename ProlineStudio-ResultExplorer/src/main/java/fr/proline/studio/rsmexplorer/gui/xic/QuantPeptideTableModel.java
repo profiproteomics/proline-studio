@@ -191,8 +191,6 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                     sb.append("Abundance");
                     sb.append("<br/>");
                     sb.append(m_quantChannels[a].getResultFileName());
-                    sb.append("<br/>");
-                    sb.append(m_quantChannels[a].getRawFileName());
                     sb.append("</td>");
                 }
                 sb.append("</tr><tr> ");
@@ -204,7 +202,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                 }
                 sb.append("</tr></table>");
             }
-
+            sb.append("</html>");
             return sb.toString();
         } else if (cluster != null ) {
             int a = getAbundanceCol(col);
@@ -223,8 +221,6 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                     sb.append("Abundance");
                     sb.append("<br/>");
                     sb.append(m_quantChannels[a].getResultFileName());
-                    sb.append("<br/>");
-                    sb.append(m_quantChannels[a].getRawFileName());
                     sb.append("</td>");
                     sb.append("</tr><tr> ");
                     // we suppose that the abundances are in the "good" order
@@ -233,6 +229,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                     sb.append("</td>");
                     sb.append("</tr></table>");
                 }
+                sb.append("</html>");
                 return sb.toString();
             }
         }

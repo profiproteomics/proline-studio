@@ -68,11 +68,15 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     @Override
     public void dataChanged() {
         boolean allProteinSet = m_previousDataBox == null;
+        DProteinSet oldProteinSet = m_proteinSet;
         
         if (!allProteinSet) {
             m_proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
             m_masterQuantProteinSet = (DMasterQuantProteinSet) m_previousDataBox.getData(false, DMasterQuantProteinSet.class);
             m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
+            if (m_proteinSet == null || m_proteinSet.equals(oldProteinSet)) {
+                return;
+            }
         }
         final int loadingId = setLoading();
 

@@ -83,6 +83,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private JToggleButton m_searchToggleButton;
     private XICPeptideSearch m_search = null;
     
+    private JLabel m_titleLabel;
+    private String TABLE_TITLE = "Peptides";
+
 
     public XicPeptidePanel() {
         initComponents();
@@ -142,6 +145,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         JPanel internalPanel = createInternalPanel();
 
         JToolBar toolbar = initToolbar();
+        m_titleLabel = new JLabel(TABLE_TITLE);
+        peptidePanel.add(m_titleLabel, BorderLayout.NORTH);
         peptidePanel.add(toolbar, BorderLayout.WEST);
         peptidePanel.add(internalPanel, BorderLayout.CENTER);
 
@@ -234,7 +239,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_quantChannels = quantChannels;
         this.m_displayForProteinSet = displayForProteinSet;
         ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).setData(taskId, quantChannels, peptides);
-
+        m_titleLabel.setText(TABLE_TITLE +" ("+peptides.size()+")");
         // select the first row
         if ((peptides != null) && (peptides.size() > 0)) {
             m_quantPeptideTable.getSelectionModel().setSelectionInterval(0, 0);

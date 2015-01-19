@@ -86,6 +86,8 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     private JToggleButton m_searchToggleButton;
     private XICProteinSetSearch m_search = null;
     
+    private JLabel m_titleLabel;
+    private String TABLE_TITLE = "Proteins Sets";
 
     public XicProteinSetPanel() {
         initComponents();
@@ -142,6 +144,8 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         JPanel internalPanel = createInternalPanel();
 
         JToolBar toolbar = initToolbar();
+        m_titleLabel = new JLabel(TABLE_TITLE);
+        proteinSetPanel.add(m_titleLabel, BorderLayout.NORTH);
         proteinSetPanel.add(toolbar, BorderLayout.WEST);
         proteinSetPanel.add(internalPanel, BorderLayout.CENTER);
 
@@ -243,6 +247,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         m_quantChannels = quantChannels;
         ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()).setData(taskId, quantChannels, proteinSets);
 
+        m_titleLabel.setText(TABLE_TITLE +" ("+proteinSets.size()+")");
        // select the first row
         if ((proteinSets != null) && (proteinSets.size() > 0)) {
             m_quantProteinSetTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -261,6 +266,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             }
             // hide Id column
             m_quantProteinSetTable.getColumnExt(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID).setVisible(false);
+            
         }
     }
     
@@ -277,7 +283,6 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             }
             // hide Id column
             m_quantProteinSetTable.getColumnExt(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID).setVisible(false);
-            
         }
     }
     

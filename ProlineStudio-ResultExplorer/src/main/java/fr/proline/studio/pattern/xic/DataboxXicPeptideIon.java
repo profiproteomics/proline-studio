@@ -66,10 +66,14 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     @Override
     public void dataChanged() {
         boolean allPeptides = m_previousDataBox == null;
+        DMasterQuantPeptide oldPeptide = m_masterQuantPeptide;
         
         if (!allPeptides) {
             m_masterQuantPeptide = (DMasterQuantPeptide) m_previousDataBox.getData(false, DMasterQuantPeptide.class);
             m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
+            if (m_masterQuantPeptide == null || m_masterQuantPeptide.equals(oldPeptide)) {
+                return;
+        }
         }
         final int loadingId = setLoading();
 

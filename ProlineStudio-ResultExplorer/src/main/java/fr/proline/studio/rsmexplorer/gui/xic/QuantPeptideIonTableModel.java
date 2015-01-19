@@ -77,8 +77,8 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             sb.append(m_columnNamesQC[id]);
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
-            sb.append("<br/>");
-            sb.append(m_quantChannels[nbQc].getRawFileName());
+            /*sb.append("<br/>");
+            sb.append(m_quantChannels[nbQc].getRawFileName());*/
 
             sb.append("</html>");
             return sb.toString();
@@ -99,8 +99,6 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             sb.append(m_columnNamesQC[id]);
             sb.append(" ");
             sb.append(m_quantChannels[nbQc].getResultFileName());
-            sb.append(" ");
-            sb.append(m_quantChannels[nbQc].getRawFileName());
             
             return sb.toString();
         }else {
@@ -471,8 +469,8 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         String rsmHtmlColor = CyclicColorPalette.getHTMLColor(i);
         sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
         sb.append(m_quantChannels[i].getResultFileName());
-        sb.append("<br/>");
-        sb.append(m_quantChannels[i].getRawFileName());
+        /*sb.append("<br/>");
+        sb.append(m_quantChannels[i].getRawFileName());*/
         sb.append("</html>");
 
         return sb.toString();

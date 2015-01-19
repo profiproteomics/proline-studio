@@ -29,10 +29,12 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.List;
 import javax.swing.JButton;
@@ -487,6 +489,18 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         @Override
         public String getExportColumnName(int col) {
             return ((FeatureTableModel) m_featureTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+        }
+        
+        //Implement table cell tool tips.
+        @Override
+        public String getToolTipText(MouseEvent e) {
+            Point p = e.getPoint();
+            int rowIndex = rowAtPoint(p);
+            int colIndex = columnAtPoint(p);
+            int realColumnIndex = convertColumnIndexToModel(colIndex);
+            int realRowIndex = convertRowIndexToModel(rowIndex);
+            FeatureTableModel tableModel = (FeatureTableModel) getModel();
+            return tableModel.getTootlTipValue(realRowIndex, realColumnIndex);
         }
         
     }

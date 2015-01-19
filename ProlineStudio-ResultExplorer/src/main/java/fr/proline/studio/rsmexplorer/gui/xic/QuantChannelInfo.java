@@ -5,9 +5,14 @@
  */
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * map quantChannel info and map info, especilaly to maintain the same colors between the maps and the quantChannels
@@ -67,6 +72,44 @@ public class QuantChannelInfo {
             }
         }
         return null;
+    }
+    
+    private int getQCId(long mapId) {
+        int id = 0;
+        for (DQuantitationChannel m_quantChannel : m_quantChannels) {
+            Long lcmsRawMapId = m_quantChannel.getLcmsRawMapId();
+            if (lcmsRawMapId != null && lcmsRawMapId.equals(mapId)) {
+                return id;
+            }
+            id++;
+        }
+        return -1;
+    }
+    
+    
+    public List<Feature> sortFeatures(List<Feature> features) { 
+        int nb = features.size();
+        List<Feature> list = new ArrayList(nb);
+        Feature[] tab = new Feature[m_quantChannels.length];
+        for(Feature feature:features) {
+            Long featureMapId = feature.getMap().getId();
+            int id = getQCId(featureMapId);
+            if(id == -1 ){
+                return features;
+            }else{
+                tab[id] = feature;
+            }
+        }
+        list = new ArrayList(Arrays.asList(tab));
+        nb = list.size();
+        for (int k=nb-1; k>=0; k--) {
+            if (list.get(k) == null) {
+                list.remove(k);
+            }
+        }
+        features = list;
+        return features;
+        
     }
     
         

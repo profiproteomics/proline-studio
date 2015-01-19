@@ -13,6 +13,7 @@ import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -566,6 +567,28 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
     @Override
     public String getPlotTitle() {
         return null;
+    }
+    
+    public String getTootlTipValue(int row, int col) {
+        if (m_features == null || row <0) {
+            return "";
+        }
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+        // Retrieve Feature
+        Feature feature = m_features.get(rowFiltered);
+        String mapTitle = m_quantChannelInfo.getMapTitle(feature.getMap().getId());
+        Color mapColor = m_quantChannelInfo.getMapColor(feature.getMap().getId());
+        String rsmHtmlColor = CyclicColorPalette.getHTMLColor(mapColor);
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html>");
+        sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
+        sb.append(mapTitle);
+        sb.append("</html>");
+        return sb.toString();
     }
     
 }

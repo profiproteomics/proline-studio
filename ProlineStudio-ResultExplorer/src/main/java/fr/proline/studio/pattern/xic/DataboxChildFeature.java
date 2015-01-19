@@ -90,6 +90,7 @@ public class DataboxChildFeature extends AbstractDataBox {
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
+                m_childFeatureList = m_quantChannelInfo.sortFeatures(m_childFeatureList);
                 if (subTask == null) {
                     ((XicFeaturePanel) m_panel).setData(taskId, m_childFeatureList, m_quantChannelInfo, finished);
                 } else {

@@ -28,6 +28,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     private DDataset m_dataset;
     private DMasterQuantPeptide m_masterQuantPeptide;
     private List<MasterQuantPeptideIon> m_masterQuantPeptideIonList ;
+    private DQuantitationChannel[] quantitationChannelArray = null;
     
     public DataboxXicPeptideIon() { 
         super(DataboxType.DataboxXicPeptideIon);
@@ -94,9 +95,18 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                         DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
                         listQuantChannel = masterChannel.getQuantitationChannels();
                     }
-                    DQuantitationChannel[] quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
+                    boolean qcChanged = true;
+                    if (quantitationChannelArray != null && quantitationChannelArray.length == listQuantChannel.size()) {
+                        for (int q=0; q<quantitationChannelArray.length; q++) {
+                            qcChanged =  !(quantitationChannelArray[q].equals(listQuantChannel.get(q))) ;
+                        }
+                    }
+                    quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
                     ((XicPeptideIonPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, finished);
+                    if (qcChanged) {
+                        ((XicPeptideIonPanel) m_panel).setColumnsVisibility();
+                    }
                 } else {
                     ((XicPeptideIonPanel) m_panel).dataUpdated(subTask, finished);
                 }

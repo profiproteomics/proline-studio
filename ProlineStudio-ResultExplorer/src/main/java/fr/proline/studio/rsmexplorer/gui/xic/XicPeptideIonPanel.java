@@ -241,13 +241,6 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         }
 
         if (finished) {
-            // hide the rawAbundance  and selectionLevel columns
-            List<Integer> listIdsToHide = ((QuantPeptideIonTableModel)m_quantPeptideIonTable.getModel()).getDefaultColumnsToHide();
-            for (Integer id : listIdsToHide) {
-                m_quantPeptideIonTable.getColumnExt(id.intValue()).setVisible(false);
-            }
-            // hide the id column
-            m_quantPeptideIonTable.getColumnExt(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID).setVisible(false);
             // allow to change column visibility
             m_columnVisibilityButton.setEnabled(true);
             m_quantPeptideIonTable.setSortable(true);
@@ -257,16 +250,26 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantPeptideIonTable.dataUpdated(subTask, finished);
         if (finished) {
-            // hide the rawAbundance  and selectionLevel columns
-            List<Integer> listIdsToHide = ((QuantPeptideIonTableModel)m_quantPeptideIonTable.getModel()).getDefaultColumnsToHide();
-            for (Integer id : listIdsToHide) {
-                m_quantPeptideIonTable.getColumnExt(id.intValue()).setVisible(false);
-            }
-            // hide the id column
-            m_quantPeptideIonTable.getColumnExt(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID).setVisible(false);
             // allow to change column visibility
             m_columnVisibilityButton.setEnabled(true);
             m_quantPeptideIonTable.setSortable(true);
+        }
+    }
+    
+    public void setColumnsVisibility() {
+        // hide the rawAbundance  and selectionLevel columns
+        List<Integer> listIdsToHide = ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).getDefaultColumnsToHide();
+        List<TableColumn> columns = m_quantPeptideIonTable.getColumns(true);
+        for (Integer id : listIdsToHide) {
+            boolean columnVisible = ((TableColumnExt) columns.get(id)).isVisible();
+            if(columnVisible) {
+                m_quantPeptideIonTable.getColumnExt(id.intValue()).setVisible(false);
+            }
+        }
+        // hide the id column
+        boolean columnVisible = ((TableColumnExt) columns.get(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID)).isVisible();
+        if(columnVisible) {
+            m_quantPeptideIonTable.getColumnExt(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID).setVisible(false);
         }
     }
     

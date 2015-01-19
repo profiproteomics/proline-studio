@@ -274,13 +274,23 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
     }
 
     public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<MasterQuantPeptideIon> peptideIons) {
+        boolean structureChanged = true;
+        if (this.m_quantChannels !=null && m_quantChannels.length == quantChannels.length ) {
+            for (int i=0; i<m_quantChannels.length; i++) {
+                structureChanged = !(m_quantChannels[i].equals(quantChannels[i]));
+            }
+        }
         this.m_quantPeptideIons = peptideIons;
         this.m_quantChannels = quantChannels;
         this.m_quantChannelNumber = quantChannels.length;
         m_filteredIds = null;
         m_isFiltering = false;
         
-        fireTableStructureChanged();
+        if (structureChanged) {
+            fireTableStructureChanged();
+        }else{
+            fireTableDataChanged();
+        }
 
         m_taskId = taskId;
 

@@ -247,17 +247,6 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         }
 
         if (finished) {
-            // hide the rawAbundance  and selectionLevel columns
-            List<Integer> listIdsToHide = ((QuantPeptideTableModel)m_quantPeptideTable.getModel()).getDefaultColumnsToHide();
-            for (Integer id : listIdsToHide) {
-                m_quantPeptideTable.getColumnExt(id.intValue()).setVisible(false);
-            }
-            if (!m_displayForProteinSet) {
-                // hide the cluster column
-                m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_CLUSTER).setVisible(false);
-            }
-            // hide the id column
-            m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
             // allow to change column visibility
             m_columnVisibilityButton.setEnabled(true);
             m_quantPeptideTable.setSortable(true);
@@ -267,23 +256,36 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantPeptideTable.dataUpdated(subTask, finished);
         if (finished) {
-            // hide the rawAbundance  and selectionLevel columns
-            List<Integer> listIdsToHide = ((QuantPeptideTableModel)m_quantPeptideTable.getModel()).getDefaultColumnsToHide();
-            for (Integer id : listIdsToHide) {
-                m_quantPeptideTable.getColumnExt(id.intValue()).setVisible(false);
-            }
-            if (!m_displayForProteinSet) {
-                // hide the cluster column
-                m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_CLUSTER).setVisible(false);
-            }
-            // hide the id column
-            m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
             // allow to change column visibility
             m_columnVisibilityButton.setEnabled(true);
             m_quantPeptideTable.setSortable(true);
         }
     }
     
+    public void setColumnsVisibility() {
+        // hide the rawAbundance  and selectionLevel columns
+        List<Integer> listIdsToHide = ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).getDefaultColumnsToHide();
+        List<TableColumn> columns = m_quantPeptideTable.getColumns(true);
+        for (Integer id : listIdsToHide) {
+            boolean columnVisible = ((TableColumnExt) columns.get(id)).isVisible();
+            if(columnVisible) {
+                m_quantPeptideTable.getColumnExt(id.intValue()).setVisible(false);
+            }
+        }
+        if (!m_displayForProteinSet) {
+            // hide the cluster column
+            boolean columnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_PEPTIDE_CLUSTER)).isVisible();
+            if(columnVisible) {
+                m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_CLUSTER).setVisible(false);
+            }
+        }
+        // hide the id column
+        boolean columnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID)).isVisible();
+        if(columnVisible) {
+            m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
+        }
+    }
+
     
     @Override
     public void setDataBox(AbstractDataBox dataBox) {

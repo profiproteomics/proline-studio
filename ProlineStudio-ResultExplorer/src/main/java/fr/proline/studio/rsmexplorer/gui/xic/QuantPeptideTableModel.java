@@ -15,6 +15,7 @@ import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import fr.proline.studio.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -113,6 +114,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+            String rawFilePath = StringUtils.truncate(m_quantChannels[nbQc].getRawFilePath(), 50);
 
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
@@ -121,7 +123,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
             sb.append("<br/>");
-            sb.append(m_quantChannels[nbQc].getRawFilePath());
+            sb.append(rawFilePath);
             
 
             sb.append("</html>");

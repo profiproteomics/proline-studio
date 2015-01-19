@@ -206,6 +206,7 @@ public class WindowBoxFactory {
         boxes[1] = new DataboxXicPeptideSet();
         boxes[2] = new DataboxXicPeptideIon();
         boxes[3] = new DataboxChildFeature();
+        boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         //boxes[4] =new DataboxMultiGraphics(true);
         //boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
 

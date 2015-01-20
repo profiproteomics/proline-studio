@@ -11,7 +11,6 @@ import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -40,24 +39,10 @@ public class QuantChannelInfo {
         return  CyclicColorPalette.getHTMLColor(quantChIndex);
     }
     
-    public Color getMapColor (String mapName) {
-        for(int i=0; i<m_quantChannels.length; i++) {
-            String rawFileName = m_quantChannels[i].getRawFileName();
-            int id = rawFileName.indexOf('.') ;
-            if (id != -1) {
-                rawFileName = rawFileName.substring(0, id);
-            }
-            if (rawFileName.equals(mapName)) {
-                return CyclicColorPalette.getColor(i);
-            }
-        }
-        return CyclicColorPalette.getColor(m_quantChannels.length);
-    }
     
     public Color getMapColor (Long mapId) {
         for(int i=0; i<m_quantChannels.length; i++) {
-            Long lcmsRawMapId = m_quantChannels[i].getLcmsRawMapId();
-            if (lcmsRawMapId != null && lcmsRawMapId.equals(mapId)) {
+            if (compareMap( m_quantChannels[i], mapId)) {
                 return CyclicColorPalette.getColor(i);
             }
         }
@@ -66,8 +51,7 @@ public class QuantChannelInfo {
     
     public String getMapTitle (Long mapId) {
         for (DQuantitationChannel m_quantChannel : m_quantChannels) {
-            Long lcmsRawMapId = m_quantChannel.getLcmsRawMapId();
-            if (lcmsRawMapId != null && lcmsRawMapId.equals(mapId)) {
+            if (compareMap( m_quantChannel, mapId)) {
                 return m_quantChannel.getResultFileName();
             }
         }
@@ -77,13 +61,24 @@ public class QuantChannelInfo {
     private int getQCId(long mapId) {
         int id = 0;
         for (DQuantitationChannel m_quantChannel : m_quantChannels) {
-            Long lcmsRawMapId = m_quantChannel.getLcmsRawMapId();
-            if (lcmsRawMapId != null && lcmsRawMapId.equals(mapId)) {
+            if (compareMap( m_quantChannel, mapId)) {
                 return id;
             }
             id++;
         }
         return -1;
+    }
+    
+    private boolean compareMap(DQuantitationChannel m_quantChannel, Long mapId) {
+        Long lcmsRawMapId = m_quantChannel.getLcmsRawMapId();
+        Long lcmsMapId = m_quantChannel.getLcmsMapId();
+        if (lcmsRawMapId != null && lcmsRawMapId.equals(mapId)) {
+            return true;
+        }
+        if (lcmsMapId != null && lcmsMapId.equals(mapId)) {
+            return true;
+        }
+        return false;
     }
     
     

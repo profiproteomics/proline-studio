@@ -368,6 +368,7 @@ public class PlotScatter extends PlotAbstract {
                     double minForMarker = m_xMin;
                     double maxForMarker = m_xMax;
                     double delta = 5 * (m_xMax - m_xMin) / 100;
+                    double yL = yLabel ;
                     for (Double d : values) {
                         addMarker(new LineMarker(m_plotPanel, d, LineMarker.ORIENTATION_VERTICAL));
                         minForMarker = Math.min(minForMarker, d - delta);
@@ -377,13 +378,15 @@ public class PlotScatter extends PlotAbstract {
                             if (j > 0) {
                                 orientation = LabelMarker.ORIENTATION_X_LEFT;
                             }
-                            LabelMarker labelMarker = new LabelMarker(m_plotPanel, d, yLabel, texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP);
+                            
+                            LabelMarker labelMarker = new LabelMarker(m_plotPanel, d, yL, texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP);
                             if (colors != null && colors.size() >= j){
-                                labelMarker = new LabelMarker(m_plotPanel, d, yLabel, texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP, colors.get(j));
+                                labelMarker = new LabelMarker(m_plotPanel, d, yL, texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP, colors.get(j));
                             }
                             addMarker(labelMarker);
                         }
                         j++;
+                        yL = yLabel *1.1;
                         // update xMin and xMax if needed
                         m_xMin = Math.min(m_xMin, minForMarker);
                         m_xMax = Math.max(m_xMax, maxForMarker);

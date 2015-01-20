@@ -81,31 +81,5 @@ public class QuantChannelInfo {
         return false;
     }
     
-    
-    public List<Feature> sortFeatures(List<Feature> features) { 
-        int nb = features.size();
-        List<Feature> list = new ArrayList(nb);
-        Feature[] tab = new Feature[m_quantChannels.length];
-        for(Feature feature:features) {
-            Long featureMapId = feature.getMap().getId();
-            int id = getQCId(featureMapId);
-            if(id == -1 ){
-                return features;
-            }else{
-                tab[id] = feature;
-            }
-        }
-        list = new ArrayList(Arrays.asList(tab));
-        nb = list.size();
-        for (int k=nb-1; k>=0; k--) {
-            if (list.get(k) == null) {
-                list.remove(k);
-            }
-        }
-        features = list;
-        return features;
-        
-    }
-    
         
 }

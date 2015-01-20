@@ -5,17 +5,20 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.utils.StringUtils;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,19 +28,22 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class QuantPeptideTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface {
+public class QuantPeptideTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface,  CompareDataInterface {
 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_NAME = 1;
-    public static final int COLTYPE_PEPTIDE_CLUSTER = 2;
+    public static final int COLTYPE_OVERVIEW = 2;
+    public static final int COLTYPE_PEPTIDE_CLUSTER = 3;
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_CLUSTER;
-    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Cluster"};
-    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Identified Peptide Sequence", "Cluster Number"};
+    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Overview", "Cluster"};
+    private static final String[] m_toolTipColumns = {"MasterQuantPeptide Id", "Identified Peptide Sequence", "Overview", "Cluster Number"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_ABUNDANCE = 1;
     public static final int COLTYPE_RAW_ABUNDANCE = 2;
     public static final int COLTYPE_PSM = 3;
+    
+    private int m_overviewType = COLTYPE_RAW_ABUNDANCE;
 
     private static final String[] m_columnNamesQC = {"Sel. level", "Abundance", "Raw abundance", "Pep. match count"};
     private static final String[] m_toolTipQC = {"Selection level", "Abundance", "Raw abundance", "Peptides match count"};
@@ -49,6 +55,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
+    
+    private String m_modelName;
 
     public QuantPeptideTableModel(LazyTable table) {
         super(table);
@@ -137,6 +145,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     public Class getColumnClass(int col) {
         if (col == COLTYPE_PEPTIDE_ID) {
             return Long.class;
+        }else if (col == COLTYPE_OVERVIEW) {
+            return CompareValueRenderer.CompareValue.class; 
         }
         return LazyData.class;
     }
@@ -255,7 +265,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     
     
     @Override
-    public Object getValueAt(int row, int col) {
+    public Object getValueAt(final int row, int col) {
 
         int rowFiltered = row;
         if ((!m_isFiltering) && (m_filteredIds != null)) {
@@ -284,6 +294,84 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                 return lazyData;
 
             }
+            case COLTYPE_OVERVIEW:
+                return new CompareValueRenderer.CompareValue() {
+
+                    @Override
+                    public int getNumberColumns() {
+                        return m_quantChannels.length ;
+                    }
+
+                    @Override
+                    public Color getColor(int col) {
+                        return CyclicColorPalette.getColor(col);
+                    }
+
+                    @Override
+                    public double getValue(int col) {
+                        if (m_overviewType == -1) {
+                            return 0; // should not happen
+                        }
+                       int realCol = LAST_STATIC_COLUMN+1 + m_overviewType+col*m_columnNamesQC.length;
+                       LazyData lazyData = (LazyData)getValueAt(row, realCol);
+                       if (lazyData != null && lazyData.getData() != null){
+                            if (Number.class.isAssignableFrom(lazyData.getData().getClass())) {
+                                return ((Number)lazyData.getData()).floatValue();
+                            }
+                       }
+                       return 0;
+                    }
+                    
+                    public double getValueNoNaN(int col) {
+                        double val = getValue(col);
+                        if (val != val) { // NaN value
+                            return 0;
+                        }
+                        return val;
+                    }
+
+                    @Override
+                    public double getMaximumValue() {
+                        int nbCols = getNumberColumns();
+                        double maxValue = 0;
+                        for (int i=0;i<nbCols;i++) {
+                            double v = getValue(i);
+                            if (v>maxValue) {
+                                maxValue = v;
+                            }
+                        }
+                        return maxValue;
+                        
+                    }
+
+                    @Override
+                    public double calculateComparableValue() {
+                        int nbColumns = getNumberColumns();
+                        double mean = 0;
+                        for (int i=0;i<nbColumns;i++) {
+                            mean += getValueNoNaN(i);
+                        }
+                        mean /= nbColumns;
+                        
+                        double maxDiff = 0;
+                        for (int i=0;i<nbColumns;i++) {
+                            double diff = getValueNoNaN(i)-mean;
+                            if (diff<0) {
+                                diff = -diff;
+                            }
+                            if (diff>maxDiff) {
+                                maxDiff = diff;
+                            }
+                        }
+                        return maxDiff / mean;
+                    }
+                    
+                    @Override
+                    public int compareTo(CompareValueRenderer.CompareValue o) {
+                        return Double.compare(calculateComparableValue(), o.calculateComparableValue());
+                    }
+                };
+                
             case COLTYPE_PEPTIDE_CLUSTER: {
                 LazyData lazyData = getLazyData(row, col);
                 if (peptideInstance == null ) {
@@ -600,5 +688,103 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
             selectedObjects.add(peptide.getId());
         }
         return selectedObjects;
+    }
+
+    @Override
+    public String getDataColumnIdentifier(int columnIndex) {
+        if (columnIndex <= LAST_STATIC_COLUMN) {
+            return m_columnNames[columnIndex];
+        } else {
+            int nbQc = (columnIndex - m_columnNames.length) / m_columnNamesQC.length;
+            int id = columnIndex - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(m_columnNamesQC[id]);
+            sb.append(' ');
+            sb.append(m_quantChannels[nbQc].getResultFileName());
+            
+            return sb.toString();
+        }
+    }
+
+    @Override
+    public Class getDataColumnClass(int columnIndex) {
+        switch (columnIndex) {
+            case COLTYPE_PEPTIDE_ID: {
+                return Long.class;
+            }
+            case COLTYPE_PEPTIDE_NAME: {
+                return String.class;
+            }
+            case COLTYPE_OVERVIEW: {
+                return CompareValueRenderer.CompareValue.class; 
+            }
+            case COLTYPE_PEPTIDE_CLUSTER: {
+                return Integer.class; 
+            }
+            default: {
+                int nbQc = (columnIndex - m_columnNames.length) / m_columnNamesQC.length;
+                int id = columnIndex - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                switch (id) {
+                    case COLTYPE_SELECTION_LEVEL:
+                        return Integer.class;
+                    case COLTYPE_ABUNDANCE:
+                        return Float.class;
+                    case COLTYPE_RAW_ABUNDANCE:
+                        return Float.class;
+                    case COLTYPE_PSM:
+                        return Integer.class;
+                        
+                }
+
+            }
+        }
+        return null; // should never happen
+
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        Object data = getValueAt(rowIndex, columnIndex);
+        if (data instanceof LazyData) {
+            data = ((LazyData) data).getData();
+        }
+        return data;
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        int[] keys = { COLTYPE_PEPTIDE_NAME };
+        return keys;
+    }
+
+    @Override
+    public int getInfoColumn() {
+         return COLTYPE_PEPTIDE_NAME;
+    }
+
+    @Override
+    public void setName(String name) {
+        m_modelName = name;
+    }
+
+    @Override
+    public String getName() {
+        return m_modelName;
+    }
+
+    @Override
+    public Map<String, Object> getExternalData() {
+        return null;
+    }
+
+    @Override
+    public Color getPlotColor() {
+        return null;
+    }
+
+    @Override
+    public String getPlotTitle() {
+        return null;
     }
 }

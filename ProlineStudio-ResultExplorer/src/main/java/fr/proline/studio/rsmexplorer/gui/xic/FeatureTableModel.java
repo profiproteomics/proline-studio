@@ -4,6 +4,7 @@ import fr.proline.core.orm.lcms.Feature;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.export.ExportColumnTextInterface;
+import fr.proline.studio.export.ExportRowTextInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
@@ -25,7 +26,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class FeatureTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface, CompareDataInterface, BestGraphicsInterface {
+public class FeatureTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface, CompareDataInterface, BestGraphicsInterface,  ExportRowTextInterface {
 
     public static final int COLTYPE_FEATURE_ID = 0;
     public static final int COLTYPE_FEATURE_MAP_NAME = 1;
@@ -586,6 +587,94 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
         sb.append(mapTitle);
         sb.append("</html>");
         return sb.toString();
+    }
+
+    @Override
+    public String getExportRowCell(int row, int col) {
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+        // Retrieve Feature
+        Feature feature = m_features.get(rowFiltered);
+
+        switch (col) {
+            case COLTYPE_FEATURE_ID: {
+                return ""+feature.getId();
+            }
+            case COLTYPE_FEATURE_MAP_NAME: {
+               if (feature.getCharge() == null) {
+                    return "";
+                }else {
+                    return feature.getMap().getName();
+                }
+            }
+            case COLTYPE_FEATURE_MOZ: {
+                if (feature.getCharge() == null) {
+                    return "";
+                }else {
+                    return ""+feature.getMoz();
+                }
+
+            }
+            case COLTYPE_FEATURE_CHARGE: {
+                if (feature.getCharge() == null) {
+                    return "";
+                }else {
+                    return ""+feature.getCharge();
+                }
+
+            }
+            case COLTYPE_FEATURE_ELUTION_TIME: {
+                if (feature.getCharge() == null) {
+                    return "";
+                }else {
+                    return ""+feature.getElutionTime();
+                }
+
+            }
+            case COLTYPE_FEATURE_APEX_INTENSITY: {
+                if (feature.getCharge() == null) {
+                    return "";
+                }else {
+                    return ""+feature.getApexIntensity();
+                }
+
+            }
+            case COLTYPE_FEATURE_INTENSITY: {
+                if (feature.getCharge() == null) {
+                    return "";
+                }else {
+                    return ""+feature.getIntensity();
+                }
+
+            }
+            case COLTYPE_FEATURE_DURATION: {
+               if (feature.getCharge() == null) {
+                    return "";
+                }else {
+                    return ""+feature.getDuration();
+                }
+
+            }
+            case COLTYPE_FEATURE_QUALITY_SCORE: {
+                if (feature.getCharge() == null) {
+                    return "";
+                }else {
+                    return ""+feature.getQualityScore();
+                }
+
+            }
+            case COLTYPE_FEATURE_IS_OVERLAPPING: {
+                if (feature.getCharge() == null) {
+                    return "";
+                }else {
+                    return (feature.getIsOverlapping()?"Yes":"No");
+                }
+
+            }
+        }
+        return ""; // should never happen
     }
     
 }

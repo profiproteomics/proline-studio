@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.export.ExportColumnTextInterface;
+import fr.proline.studio.export.ExportRowTextInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.IntegerFilter;
@@ -24,7 +25,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class QuantPeptideIonTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface {
+public class QuantPeptideIonTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface,  ExportRowTextInterface {
 
     public static final int COLTYPE_PEPTIDE_ION_ID = 0;
     public static final int COLTYPE_PEPTIDE_ION_NAME = 1;
@@ -543,5 +544,86 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             selectedObjects.add(peptideIon.getId());
         }
         return selectedObjects;
+    }
+
+    @Override
+    public String getExportRowCell(int row, int col) {
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+
+        // Retrieve Quant Peptide Ion
+        MasterQuantPeptideIon peptideIon = m_quantPeptideIons.get(rowFiltered);
+
+        switch (col) {
+            case COLTYPE_PEPTIDE_ION_ID: {
+                return ""+peptideIon.getId();
+            }
+            case COLTYPE_PEPTIDE_ION_NAME: {
+                if (peptideIon.getResultSummary() == null) {
+                    return "";
+                } else {
+                    if (peptideIon.getPeptideInstance() == null) {
+                        return "";
+                    }else{
+                        return peptideIon.getPeptideInstance().getPeptide().getSequence();
+                    }
+                }
+
+            }
+            case COLTYPE_PEPTIDE_ION_CHARGE: {
+                if (peptideIon.getResultSummary() == null) {
+                    return "";
+                } else {
+                    return ""+peptideIon.getCharge();
+                }
+
+            }
+            case COLTYPE_PEPTIDE_ION_MOZ: {
+                if (peptideIon.getResultSummary() == null) {
+                    return "";
+                } else {
+                    return ""+peptideIon.getMoz();
+                }
+
+            }
+            case COLTYPE_PEPTIDE_ION_ELUTION_TIME: {
+                if (peptideIon.getResultSummary() == null) {
+                    return "";
+                } else {
+                    return ""+peptideIon.getElutionTime();
+                }
+
+            }
+            default: {
+                // Quant Channel columns 
+                if (peptideIon.getResultSummary() == null) {
+                    return "";
+                } else {
+
+                    // retrieve quantPeptideIon for the quantChannelId
+                    Map<Long, DQuantPeptideIon> quantPeptideIonByQchIds = peptideIon.getQuantPeptideIonByQchIds();
+                    if (quantPeptideIonByQchIds == null) {
+                        return "";
+                    } else {
+                        int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                        int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                        DQuantPeptideIon quantPeptideIon = quantPeptideIonByQchIds.get(m_quantChannels[nbQc].getId());
+                        if (quantPeptideIon == null) {
+                            return "";
+                        } else {
+                            switch (id) {
+                                case COLTYPE_SELECTION_LEVEL : return (quantPeptideIon.getSelectionLevel() == null?"":Integer.toString(quantPeptideIon.getSelectionLevel()));
+                                case COLTYPE_ABUNDANCE : return ((quantPeptideIon.getAbundance() == null || quantPeptideIon.getAbundance().isNaN())? "":Float.toString(quantPeptideIon.getAbundance()));
+                                case COLTYPE_RAW_ABUNDANCE : return ((quantPeptideIon.getRawAbundance() == null || quantPeptideIon.getRawAbundance().isNaN())? "":Float.toString(quantPeptideIon.getRawAbundance()));
+                                case COLTYPE_PSM : return (quantPeptideIon.getPeptideMatchesCount()== null?"":Integer.toString(quantPeptideIon.getPeptideMatchesCount()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+       return ""; // should never happen
     }
 }

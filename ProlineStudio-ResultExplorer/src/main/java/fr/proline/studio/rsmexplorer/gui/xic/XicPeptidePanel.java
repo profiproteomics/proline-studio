@@ -10,6 +10,7 @@ import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportColumnTextInterface;
+import fr.proline.studio.export.ExportRowTextInterface;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.DefaultDialog;
@@ -19,6 +20,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
@@ -330,7 +332,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         return m_quantPeptideTable;
     }
     
-    private class QuantPeptideTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface  {
+    private class QuantPeptideTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface, ExportRowTextInterface  {
 
         private DMasterQuantPeptide m_peptideSelected = null;
         
@@ -338,8 +340,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         public QuantPeptideTable() {
             super(m_peptideScrollPane.getVerticalScrollBar() );
             
-            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
-            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
+            setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
+            //setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
             addMouseListener(new TablePopupMouseAdapter(this));
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -505,7 +507,10 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             return ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
         }
 
-        
+        @Override
+        public String getExportRowCell(int row, int col) {
+            return ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
+        }
     }
 
     

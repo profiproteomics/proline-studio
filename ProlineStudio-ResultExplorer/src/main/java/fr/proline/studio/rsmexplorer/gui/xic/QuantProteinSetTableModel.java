@@ -8,6 +8,7 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.export.ExportColumnTextInterface;
+import fr.proline.studio.export.ExportRowTextInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
@@ -29,7 +30,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface, CompareDataInterface, ExportColumnTextInterface {
+public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface, CompareDataInterface, ExportColumnTextInterface,  ExportRowTextInterface {
 
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
@@ -749,6 +750,84 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     @Override
     public PlotInformation getPlotInformation() {
         return null;
+    }
+
+    @Override
+    public String getExportRowCell(int row, int col) {
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+        
+        // Retrieve Protein Set
+        DMasterQuantProteinSet proteinSet = m_proteinSets.get(rowFiltered);
+        //long rsmId = proteinSet.getResultSummaryId();
+
+        switch (col) {
+            case COLTYPE_PROTEIN_SET_ID: {
+                return ""+proteinSet.getId();
+            }
+            case COLTYPE_PROTEIN_SET_NAME: {
+                // Retrieve typical Protein Match
+                DProteinMatch proteinMatch = null;
+                if (proteinSet.getProteinSet()!= null) {
+                    proteinMatch =proteinSet.getProteinSet().getTypicalProteinMatch();
+                    if (proteinMatch == null) {
+                        return "";
+                    }else {
+                        return proteinMatch.getAccession();
+                    }
+                }else{
+                    return "";
+                }
+            }
+                
+            case COLTYPE_OVERVIEW:
+                return "" ;
+                
+            case COLTYPE_NB_PEPTIDE: {
+               if (proteinSet.getProteinSet()!= null) {
+                    return ""+proteinSet.getNbPeptides();
+                }else{
+                    return "";
+                }
+            }   
+            case COLTYPE_NB_QUANT_PEPTIDE: {
+               if (proteinSet.getProteinSet()!= null) {
+                    return ""+proteinSet.getNbQuantifiedPeptides();
+                }else{
+                    return "";
+                }
+            }       
+                
+            default: {
+                // Quant Channel columns 
+                if (proteinSet.getProteinSet()== null) {
+                    return "";
+                }else{
+                    // retrieve quantProteinSet for the quantChannelId
+                    Map<Long, DQuantProteinSet> quantProteinSetByQchIds = proteinSet.getQuantProteinSetByQchIds() ;
+                    if (quantProteinSetByQchIds == null) {
+                        return "";
+                    }else{
+                        int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
+                        int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
+                        DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(m_quantChannels[nbQc].getId()) ;
+                        if (quantProteinSet == null) {
+                            return "";
+                        } else {
+                            switch (id ) {
+                                case COLTYPE_SELECTION_LEVEL : return (quantProteinSet.getSelectionLevel() == null?"":Integer.toString(quantProteinSet.getSelectionLevel()));
+                                case COLTYPE_ABUNDANCE : return ((quantProteinSet.getAbundance() == null || quantProteinSet.getAbundance().isNaN())? "":Float.toString(quantProteinSet.getAbundance()));
+                                case COLTYPE_RAW_ABUNDANCE : return ((quantProteinSet.getRawAbundance() == null || quantProteinSet.getRawAbundance().isNaN())? "":Float.toString(quantProteinSet.getRawAbundance()));
+                                case COLTYPE_PSM : return (quantProteinSet.getPeptideMatchesCount()== null?"":Integer.toString(quantProteinSet.getPeptideMatchesCount()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return ""; // should never happen
     }
     
 }

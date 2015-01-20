@@ -20,7 +20,7 @@ public class DataFormat {
     }
     
     
-    
+     
     public static String format(Float f, int nbFractionDigits) {
         if (f == null) {
             return null;
@@ -62,6 +62,22 @@ public class DataFormat {
         return String.valueOf(i);
     }
     
+    
+    public static String formatWithGroupingSep(Float f, int nbFractionDigits) {
+        if (f == null) {
+            return null;
+        }
+        
+        DecimalFormat decimalFormat =  new DecimalFormat("###,###.##");
+        DecimalFormatSymbols dfs = decimalFormat.getDecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        dfs.setGroupingSeparator(' ');
+        decimalFormat.setDecimalFormatSymbols(dfs);
+        decimalFormat.setMaximumFractionDigits(nbFractionDigits);
+        decimalFormat.setMinimumFractionDigits(nbFractionDigits);
+        
+        return decimalFormat.format((double) f);
+    }
     
     
 }

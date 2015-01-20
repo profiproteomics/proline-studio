@@ -6,6 +6,7 @@ import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportColumnTextInterface;
+import fr.proline.studio.export.ExportRowTextInterface;
 import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
@@ -17,6 +18,7 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
@@ -284,7 +286,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         return m_featureTable;
     }
     
-    private class FeatureTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface  {
+    private class FeatureTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface , ExportRowTextInterface  {
 
         private Feature m_featureSelected = null;
         
@@ -292,7 +294,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         public FeatureTable() {
             super(m_featureScrollPane.getVerticalScrollBar() );
             
-            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
+            setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             addMouseListener(new TablePopupMouseAdapter(this));
         }
@@ -501,6 +503,11 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             int realRowIndex = convertRowIndexToModel(rowIndex);
             FeatureTableModel tableModel = (FeatureTableModel) getModel();
             return tableModel.getTootlTipValue(realRowIndex, realColumnIndex);
+        }
+
+        @Override
+        public String getExportRowCell(int row, int col) {
+            return ((FeatureTableModel) m_featureTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
         }
         
     }

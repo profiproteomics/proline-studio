@@ -35,6 +35,7 @@ import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMouseAdapter;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
@@ -47,11 +48,14 @@ import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
@@ -542,6 +546,11 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         private JCheckBoxList m_rsmList;
         private JCheckBoxList m_xicList;
         
+        
+        private JRadioButton m_noOverviewRB;
+        private JRadioButton m_abundanceOverviewRB;
+        private JRadioButton m_rawAbundanceOverviewRB;
+        
 
         public XICProteinSetColumnsVisibilityDialog(Window parent, QuantProteinSetTable table, QuantProteinSetTableModel quantProteinSetTableModel) {
             super(parent, Dialog.ModalityType.APPLICATION_MODAL);
@@ -600,16 +609,19 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
                 visibilityTypeList.add(visibilityTypeArray[i]);
             }
             
-             
+            int overviewType = quantProteinSetTableModel.getOverviewType();
+            boolean overviewColumnVisible = ((TableColumnExt) columns.get(QuantProteinSetTableModel.COLTYPE_OVERVIEW)).isVisible();
             
-            JPanel internalPanel = createInternalPanel(rsmList, visibilityRsmList, typeList, visibilityTypeList);
+            
+            
+            JPanel internalPanel = createInternalPanel(rsmList, visibilityRsmList, typeList, visibilityTypeList, overviewColumnVisible, overviewType);
             setInternalComponent(internalPanel);
 
 
             
         }
 
-        private JPanel createInternalPanel(List<String> rsmList, List<Boolean> visibilityList, List<String> typeList, List<Boolean> visibilityTypeList) {
+        private JPanel createInternalPanel(List<String> rsmList, List<Boolean> visibilityList, List<String> typeList, List<Boolean> visibilityTypeList,  boolean overviewColumnVisible, int overviewType) {
             JPanel internalPanel = new JPanel();
 
             internalPanel.setLayout(new GridBagLayout());
@@ -620,8 +632,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
             JLabel idSummaryLabel = new JLabel("Quantitation channel");
             JLabel informationLabel = new JLabel("Information");
+            JLabel overviewLabel = new JLabel("Overview");
             
             JSeparator separator1 = new JSeparator(JSeparator.VERTICAL);
+            JSeparator separator2 = new JSeparator(JSeparator.VERTICAL);
 
             JScrollPane rsmScrollPane = new JScrollPane();
             m_rsmList = new JCheckBoxList(rsmList, visibilityList);
@@ -630,6 +644,9 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             JScrollPane xicScrollPane = new JScrollPane();
             m_xicList = new JCheckBoxList(typeList, visibilityTypeList); 
             xicScrollPane.setViewportView(m_xicList);
+
+            JScrollPane overviewScrollPane = new JScrollPane();
+            overviewScrollPane.setViewportView(createOverviewPanel(overviewColumnVisible, overviewType));
 
             c.gridx = 0;
             c.gridy = 0;
@@ -659,11 +676,84 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             c.weightx = 1;
             c.weighty = 1;
             internalPanel.add(xicScrollPane, c);
+            
+            c.gridy = 0;
+            c.gridx++;
+            c.weightx = 0;
+            c.weighty = 1;
+            c.gridheight = 2;
+            internalPanel.add(separator2, c);
+            
+
+            c.gridx++;
+            c.gridheight = 1;
+            c.weightx = 0;
+            c.weighty = 0;
+            internalPanel.add(overviewLabel, c);
+            
+            c.gridy++;
+            c.weightx = 1;
+            c.weighty = 1;
+            internalPanel.add(overviewScrollPane, c);
 
             return internalPanel;
         }
 
-       
+       private JPanel createOverviewPanel(boolean overviewColumnVisible, int overviewType) {
+            JPanel overviewPanel = new JPanel();
+            overviewPanel.setBackground(Color.white);
+
+            overviewPanel.setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.anchor = GridBagConstraints.NORTHWEST; 
+            c.fill = GridBagConstraints.BOTH;
+            c.insets = new java.awt.Insets(0, 0, 0, 0);
+            
+            m_noOverviewRB = new JRadioButton("No Overview");
+            m_abundanceOverviewRB = new JRadioButton("Overview on Abundance");
+            m_rawAbundanceOverviewRB = new JRadioButton("Overview on Raw Abundance");
+            m_noOverviewRB.setBackground(Color.white);
+            m_abundanceOverviewRB.setBackground(Color.white);
+            m_rawAbundanceOverviewRB.setBackground(Color.white);
+            
+            ButtonGroup group = new ButtonGroup();
+            group.add(m_noOverviewRB);
+            group.add(m_abundanceOverviewRB);
+            group.add(m_rawAbundanceOverviewRB);
+            
+            if (!overviewColumnVisible) {
+                m_noOverviewRB.setSelected(true);
+            } else {
+                switch (overviewType) {
+                    case QuantPeptideTableModel.COLTYPE_ABUNDANCE:
+                        m_abundanceOverviewRB.setSelected(true);
+                        break;
+                    case QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE:
+                        m_rawAbundanceOverviewRB.setSelected(true);
+                        break;
+
+                }
+            }
+            
+            c.gridx = 0;
+            c.gridy = 0;
+            c.weightx = 1;
+            
+            overviewPanel.add(m_noOverviewRB, c);
+            
+            c.gridy++;
+            overviewPanel.add(m_abundanceOverviewRB, c);
+            
+            c.gridy++;
+            overviewPanel.add(m_rawAbundanceOverviewRB, c);
+            
+            c.gridy++;
+            c.weighty = 1;
+            overviewPanel.add(Box.createHorizontalGlue(), c);
+            
+            
+            return overviewPanel;
+        }
         
         @Override
         protected boolean okCalled() {
@@ -680,7 +770,17 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
                     ((TableColumnExt) columns.get(i)).setVisible(visible);
                 }
             }
+            if (m_abundanceOverviewRB.isSelected()) {
+                model.setOverviewType(QuantProteinSetTableModel.COLTYPE_ABUNDANCE);
+            } else if (m_rawAbundanceOverviewRB.isSelected()) {
+                model.setOverviewType(QuantProteinSetTableModel.COLTYPE_RAW_ABUNDANCE);
+            }
             
+            boolean overviewVisible = !m_noOverviewRB.isSelected();
+            boolean columnVisible = ((TableColumnExt) columns.get(QuantProteinSetTableModel.COLTYPE_OVERVIEW)).isVisible();
+            if (overviewVisible ^ columnVisible) {
+                ((TableColumnExt) columns.get(QuantProteinSetTableModel.COLTYPE_OVERVIEW)).setVisible(overviewVisible);
+            }
             
 
             return true;

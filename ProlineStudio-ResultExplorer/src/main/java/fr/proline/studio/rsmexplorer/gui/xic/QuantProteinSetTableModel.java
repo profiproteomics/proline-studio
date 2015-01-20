@@ -40,7 +40,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
     private static final String[] m_columnNames = {"Id", "Protein Set", "Overview", "#Peptide", "<html>#Quant.<br/>Peptide</html>"};
     private static final String[] m_columnNamesForFilter = {"Id", "Protein Set", "Overview", "#Peptide", "#Quant.Peptide"};
-    private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id",  "Identified Protein label", "Overview on Abundance", "Number of Identified Peptides", "Number of Quantified Peptides"};
+    private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id",  "Identified Protein label", "Overview", "Number of Identified Peptides", "Number of Quantified Peptides"};
     
     public static final int COLTYPE_SELECTION_LEVEL = 0;
     public static final int COLTYPE_ABUNDANCE = 1;
@@ -134,6 +134,9 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
     @Override
     public String getToolTipForHeader(int col) {
+        if (col == COLTYPE_OVERVIEW) {
+            return m_toolTipColumns[col]+" on "+m_toolTipQC[m_overviewType] ;
+        }
         if (col<=LAST_STATIC_COLUMN) {
             return m_toolTipColumns[col];
         } else {
@@ -603,6 +606,15 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         }
         
         return m_proteinSets.get(0).getQuantResultSummaryId();
+    }
+    
+    public void setOverviewType(int overviewType) {
+        m_overviewType = overviewType;
+        fireTableDataChanged();
+    }
+    
+    public int getOverviewType() {
+        return m_overviewType;
     }
     
     /**

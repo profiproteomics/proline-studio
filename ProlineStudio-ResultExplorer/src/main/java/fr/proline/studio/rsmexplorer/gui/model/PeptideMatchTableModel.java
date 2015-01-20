@@ -15,9 +15,9 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.BestGraphicsInterface;
+import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.utils.*;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -853,12 +853,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
 
 
     @Override
-    public Color getPlotColor() {
-        return null;
-    }
-    
-    @Override
-    public String getPlotTitle() {
+    public PlotInformation getPlotInformation() {
         return null;
     }
 

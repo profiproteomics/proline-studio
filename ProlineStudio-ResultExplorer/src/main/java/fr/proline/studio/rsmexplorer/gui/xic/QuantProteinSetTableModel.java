@@ -11,6 +11,7 @@ import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -734,12 +735,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
     
     @Override
-    public Color getPlotColor() {
+    public PlotInformation getPlotInformation() {
         return null;
     }
     
-    @Override
-    public String getPlotTitle() {
-        return null;
-    }
 }

@@ -9,6 +9,7 @@ import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.graphics.BestGraphicsInterface;
+import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.LazyData;
@@ -561,12 +562,7 @@ public class PeakelTableModel extends LazyTableModel implements ExportTableSelec
 
     
     @Override
-    public Color getPlotColor() {
-        return m_color;
-    }
-    
-    @Override
-    public String getPlotTitle() {
+    public PlotInformation getPlotInformation() {
         return null;
     }
 }

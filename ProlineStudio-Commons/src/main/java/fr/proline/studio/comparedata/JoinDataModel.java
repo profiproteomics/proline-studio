@@ -1,9 +1,7 @@
 package fr.proline.studio.comparedata;
 
-import java.awt.Color;
+import fr.proline.studio.graphics.PlotInformation;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -139,13 +137,9 @@ public class JoinDataModel extends AbstractJoinDataModel {
     
     
     @Override
-    public Color getPlotColor() {
+    public PlotInformation getPlotInformation() {
         return null;
     }
     
-    @Override
-    public String getPlotTitle() {
-        return null;
-    }
     
 }

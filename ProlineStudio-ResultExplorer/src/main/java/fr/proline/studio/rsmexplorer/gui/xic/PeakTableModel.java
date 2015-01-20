@@ -8,6 +8,7 @@ import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.BestGraphicsInterface;
+import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.LazyData;
@@ -410,15 +411,15 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         return externalData;
     }
     
-    
     @Override
-    public Color getPlotColor() {
-        return m_color;
-    }
-    
-    @Override
-    public String getPlotTitle() {
-        return m_title;
+    public PlotInformation getPlotInformation() {
+        PlotInformation plotInformation = new PlotInformation();
+        plotInformation.setPlotColor(m_color);
+        plotInformation.setPlotTitle(m_title);
+        HashMap<String, String> plotInfo = new HashMap();
+        plotInfo.put("apex Int.", Float.toString(m_peakel.getApexIntensity()));
+        plotInformation.setPlotInfo(plotInfo);
+        return plotInformation;
     }
 
 }

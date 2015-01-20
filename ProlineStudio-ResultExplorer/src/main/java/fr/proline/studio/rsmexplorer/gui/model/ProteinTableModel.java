@@ -4,9 +4,9 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.*;
+import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.utils.IconManager;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -329,14 +329,10 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
     }
     
     @Override
-    public Color getPlotColor() {
+    public PlotInformation getPlotInformation() {
         return null;
     }
     
-    @Override
-    public String getPlotTitle() {
-        return null;
-    }
     
     public static class Sameset {
         

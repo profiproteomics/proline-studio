@@ -1,6 +1,6 @@
 package fr.proline.studio.comparedata;
 
-import java.awt.Color;
+import fr.proline.studio.graphics.PlotInformation;
 import java.util.Map;
 
 /**
@@ -159,13 +159,8 @@ public class StatsModel implements CompareDataInterface {
     
     
     @Override
-    public Color getPlotColor() {
-        return m_sourceDataInterface.getPlotColor();
-    }
-    
-    @Override
-    public String getPlotTitle() {
-        return m_sourceDataInterface.getPlotTitle();
+    public PlotInformation getPlotInformation() {
+        return m_sourceDataInterface.getPlotInformation();
     }
     
 }

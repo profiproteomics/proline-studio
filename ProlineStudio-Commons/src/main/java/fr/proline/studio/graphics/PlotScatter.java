@@ -14,7 +14,9 @@ import java.awt.geom.Path2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Scatter Plot or linear
@@ -43,9 +45,8 @@ public class PlotScatter extends PlotAbstract {
 
     private boolean[] m_selected;
 
-    // could be an imposed color to display data
-    private Color m_imposedColor = null;
-    private String m_plotTitle = null;
+    // could be an imposed color to display data, a title...
+    private PlotInformation m_plotInformation = null;
 
     private static final int SELECT_SENSIBILITY = 8;
 
@@ -106,13 +107,24 @@ public class PlotScatter extends PlotAbstract {
             m_sb = new StringBuilder();
         }
         //m_sb.append("<HTML>");
-        if(m_imposedColor != null) {
-            String rsmHtmlColor = CyclicColorPalette.getHTMLColor(m_imposedColor);
+        if(m_plotInformation != null && m_plotInformation.getPlotColor() != null) {
+            String rsmHtmlColor = CyclicColorPalette.getHTMLColor(m_plotInformation.getPlotColor());
             m_sb.append("<font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
         }
-        if (m_plotTitle != null && !m_plotTitle.isEmpty()) {
-            m_sb.append(m_plotTitle);
-             m_sb.append("<BR>");
+        if (m_plotInformation != null && m_plotInformation.getPlotTitle() != null && !m_plotInformation.getPlotTitle().isEmpty()) {
+            m_sb.append(m_plotInformation.getPlotTitle());
+            m_sb.append("<BR>");
+        }
+        if (m_plotInformation != null && m_plotInformation.getPlotInfo() != null ) {
+            for (Map.Entry<String, String> entrySet : m_plotInformation.getPlotInfo().entrySet()) {
+                Object key = entrySet.getKey();
+                Object value = entrySet.getValue();
+                m_sb.append(key);
+                m_sb.append(": ");
+                m_sb.append(value);
+                m_sb.append("<BR>");
+            }
+            m_sb.append("<BR>");
         }
         m_sb.append(m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString());
         m_sb.append("<BR>");
@@ -498,8 +510,8 @@ public class PlotScatter extends PlotAbstract {
             gradientPaint = colorOrGradient.getGradient();
         }
 
-        if (this.m_imposedColor != null) {
-            plotColor = this.m_imposedColor;
+        if (this.m_plotInformation != null && m_plotInformation.getPlotColor() != null) {
+            plotColor = this.m_plotInformation.getPlotColor();
         }
 
         if (m_isScatter) {
@@ -513,7 +525,7 @@ public class PlotScatter extends PlotAbstract {
                 int x = xAxis.valueToPixel(m_dataX[i]);
                 int y = yAxis.valueToPixel(m_dataY[i]);
 
-                if (useGradient && this.m_imposedColor == null) {
+                if (useGradient && (this.m_plotInformation == null || this.m_plotInformation.getPlotColor() == null ) ) {
                     plotColor = getColorInGradient(gradientPaint, m_gradientParamValues[i]);
                     g.setColor(plotColor);
                 }
@@ -530,7 +542,7 @@ public class PlotScatter extends PlotAbstract {
                 int x = xAxis.valueToPixel(m_dataX[i]);
                 int y = yAxis.valueToPixel(m_dataY[i]);
 
-                if (useGradient && this.m_imposedColor == null) {
+                if (useGradient &&(this.m_plotInformation == null || this.m_plotInformation.getPlotColor() == null)) {
                     plotColor = getColorInGradient(gradientPaint, m_gradientParamValues[i]);
                 }
 
@@ -550,7 +562,7 @@ public class PlotScatter extends PlotAbstract {
                 int y0 = yAxis.valueToPixel(m_dataY[0]);
 
                 for (int i = 0; i < size - 1; i++) {
-                    if (useGradient && this.m_imposedColor == null) {
+                    if (useGradient && (this.m_plotInformation == null || this.m_plotInformation.getPlotColor() == null)) {
                         plotColor = getColorInGradient(gradientPaint, m_gradientParamValues[i]);
                     }
                     int x = xAxis.valueToPixel(m_dataX[i]);
@@ -609,13 +621,10 @@ public class PlotScatter extends PlotAbstract {
         }
     }
 
-    public void setPlotColor(Color color) {
-        this.m_imposedColor = color;
+    public void setPlotInformation(PlotInformation plotInformation) {
+        this.m_plotInformation = plotInformation;
     }
     
-    public void setPlotTitle(String title) {
-        this.m_plotTitle = title;
-    }
     
     @Override
     public void setIsPaintMarker(boolean isPaintMarker) {

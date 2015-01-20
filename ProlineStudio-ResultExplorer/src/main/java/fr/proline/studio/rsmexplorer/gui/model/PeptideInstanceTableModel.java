@@ -15,8 +15,8 @@ import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
+import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.utils.*;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -575,13 +575,9 @@ public class PeptideInstanceTableModel extends LazyTableModel implements Compare
     }
     
     @Override
-    public Color getPlotColor() {
+    public PlotInformation getPlotInformation() {
         return null;
     }
     
-    @Override
-    public String getPlotTitle() {
-        return null;
-    }
     
 }

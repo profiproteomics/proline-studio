@@ -10,7 +10,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.*;
-import java.awt.Color;
+import fr.proline.studio.graphics.PlotInformation;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -500,12 +500,8 @@ public class PeptideTableModel extends FilterTableModel implements CompareDataIn
 
     
     @Override
-    public Color getPlotColor() {
+    public PlotInformation getPlotInformation() {
         return null;
     }
     
-    @Override
-    public String getPlotTitle() {
-        return null;
-    }
 }

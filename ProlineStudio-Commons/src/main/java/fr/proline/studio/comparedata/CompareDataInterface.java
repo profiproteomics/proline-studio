@@ -1,5 +1,6 @@
 package fr.proline.studio.comparedata;
 
+import fr.proline.studio.graphics.PlotInformation;
 import java.awt.Color;
 import java.util.Map;
 
@@ -24,9 +25,7 @@ public interface CompareDataInterface {
     public String getName();
     // return a list of external data to add on the graph, like lineMarker
     public Map<String, Object> getExternalData();
-    // return the color if we want to impose a color for the graph
-    public Color getPlotColor();
-    // return the graph's title 
-    public String getPlotTitle();
+    // return the color if we want to impose a color for the graph, the title, ...
+    public PlotInformation getPlotInformation();
     
 }

@@ -1,8 +1,8 @@
 package fr.proline.studio.comparedata;
 
 import fr.proline.studio.graphics.BestGraphicsInterface;
+import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import java.awt.Color;
 import java.util.Map;
 
 /**
@@ -122,15 +122,9 @@ public class LockedDataModel implements CompareDataInterface, BestGraphicsInterf
         return m_src.getExternalData();
     }
     
-    
     @Override
-    public Color getPlotColor() {
-        return m_src.getPlotColor();
-    }
-    
-    @Override
-    public String getPlotTitle() {
-        return m_src.getPlotTitle();
+    public PlotInformation getPlotInformation() {
+        return m_src.getPlotInformation();
     }
 
 }

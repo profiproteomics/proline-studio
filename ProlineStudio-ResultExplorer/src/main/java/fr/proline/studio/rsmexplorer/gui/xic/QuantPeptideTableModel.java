@@ -117,6 +117,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
     @Override
     public String getToolTipForHeader(int col) {
+        if (col == COLTYPE_OVERVIEW) {
+            return m_toolTipColumns[col]+" on "+m_toolTipQC[m_overviewType] ;
+        }
         if (col <= LAST_STATIC_COLUMN) {
             return m_toolTipColumns[col];
         } else if (m_quantChannels != null) {
@@ -650,6 +653,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         }
 
         return m_quantPeptides.get(0).getQuantResultSummaryId();
+    }
+    
+    public void setOverviewType(int overviewType) {
+        m_overviewType = overviewType;
+        fireTableDataChanged();
+    }
+    
+    public int getOverviewType() {
+        return m_overviewType;
     }
 
     /**

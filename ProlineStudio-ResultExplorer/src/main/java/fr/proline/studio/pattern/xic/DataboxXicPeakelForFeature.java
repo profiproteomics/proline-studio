@@ -92,6 +92,7 @@ public class DataboxXicPeakelForFeature extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class); 
                 }
             }
         };

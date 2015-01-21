@@ -101,6 +101,7 @@ public class DataboxRsetPeptidesOfProtein extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class);
                 }
                 
             }

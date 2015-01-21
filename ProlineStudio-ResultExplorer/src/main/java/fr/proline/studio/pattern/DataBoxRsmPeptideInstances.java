@@ -98,6 +98,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
                
                 if (finished) {
                     unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class);
                 }
             }
         };

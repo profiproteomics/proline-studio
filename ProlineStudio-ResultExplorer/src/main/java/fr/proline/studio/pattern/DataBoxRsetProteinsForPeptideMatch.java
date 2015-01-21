@@ -92,6 +92,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class);
                 }
                 
             }

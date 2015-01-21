@@ -85,6 +85,7 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class);
                 }
                 
             }

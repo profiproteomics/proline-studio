@@ -123,6 +123,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class); 
                 }
             }
         };

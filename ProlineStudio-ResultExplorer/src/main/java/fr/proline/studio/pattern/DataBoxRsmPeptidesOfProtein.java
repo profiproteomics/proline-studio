@@ -97,6 +97,7 @@ public class DataBoxRsmPeptidesOfProtein extends AbstractDataBox {
                 
                 if (finished) {
                     unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class);
                 }
             }
         };

@@ -100,6 +100,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
                 if (finished) {
                     unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class); 
                 }
 
                 if (m_childFeatureList != null) {

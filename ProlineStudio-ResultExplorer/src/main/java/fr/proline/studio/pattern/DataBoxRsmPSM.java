@@ -84,7 +84,6 @@ public class DataBoxRsmPSM extends AbstractDataBox {
                 if (finished) {
                     m_finishedLoading = true;
                     unregisterTask(taskId);
-                    //propagateDataChanged(ValuesForStatsAbstract.class);
                     propagateDataChanged(CompareDataInterface.class);
                 }
             }

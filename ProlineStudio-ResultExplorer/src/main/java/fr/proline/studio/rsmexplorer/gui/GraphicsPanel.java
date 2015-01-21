@@ -128,11 +128,11 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                ParameterList parameterList = m_plotPanel.getParameters();
-                if (parameterList == null) {
+                ArrayList<ParameterList> parameterListArray = m_plotPanel.getParameters();
+                if (parameterListArray == null) {
                     return;
                 }
-                DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterList);
+                DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterListArray);
                 parameterDialog.setLocationRelativeTo(m_plotPanel);
                 parameterDialog.setVisible(true);
                 

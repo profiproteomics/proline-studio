@@ -7,6 +7,7 @@ import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.TextMarker;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
 import fr.proline.studio.parameter.ColorParameter;
+import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 
 
 import java.util.HashSet;
+import javax.swing.JSlider;
 
 /**
  * Histogram Plot
@@ -36,9 +38,11 @@ public class PlotHistogram extends PlotAbstract {
     private int m_bins;
     
     private final ColorParameter m_colorParameter;
-    private final ParameterList m_parameterList;
+    private final IntegerParameter m_binsParameter;
+    private ArrayList<ParameterList> m_parameterListArray = null;
     
     private static final String PLOT_HISTOGRAM_COLOR_KEY = "PLOT_HISTOGRAM_COLOR";
+    private static final String PLOT_HISTOGRAM_BIN_KEY = "PLOT_HISTOGRAM_BIN";
     
     public static String HISTOGRAM_COUNT = "Count";
     public static String HISTOGRAM_PERCENTAGE = "Percentage %";
@@ -50,10 +54,19 @@ public class PlotHistogram extends PlotAbstract {
         update(colX, -1, paramZ); 
         
         
-        m_parameterList = new ParameterList("Histogram Plot Settings");
+        ParameterList parameterColorList = new ParameterList("Colors");
         Color histogramColor = CyclicColorPalette.getColor(21);
         m_colorParameter = new ColorParameter(PLOT_HISTOGRAM_COLOR_KEY, "Histogram Plot Color", histogramColor);
-        m_parameterList.add(m_colorParameter);
+        parameterColorList.add(m_colorParameter);
+        
+        ParameterList parameterSettingsList = new ParameterList("Settings");
+        m_binsParameter = new IntegerParameter(PLOT_HISTOGRAM_BIN_KEY, "Bins", JSlider.class, m_bins, 5, 100);
+        parameterSettingsList.add(m_binsParameter);
+        
+        m_parameterListArray = new ArrayList<>(2);
+        m_parameterListArray.add(parameterColorList);
+        m_parameterListArray.add(parameterSettingsList);
+        
     }
 
 
@@ -64,8 +77,8 @@ public class PlotHistogram extends PlotAbstract {
     }
     
     @Override
-    public ParameterList getParameters() {
-        return m_parameterList;
+    public ArrayList<ParameterList> getParameters() {
+        return m_parameterListArray;
     }
     
     @Override
@@ -194,6 +207,12 @@ public class PlotHistogram extends PlotAbstract {
     }
     private StringBuilder m_sb = null;
     
+    @Override
+    public void parametersChanged() {
+        m_bins = ((Integer)m_binsParameter.getObjectValue());
+        updataDataAccordingToBins();
+        m_plotPanel.updateAxis(this);
+    }
     
     @Override
     public final void update() {
@@ -233,44 +252,6 @@ public class PlotHistogram extends PlotAbstract {
         m_xMin = min;
         m_xMax = max;
         
-        // bins
-        double std = m_values.standardDeviationNaN();
-        m_bins = (int) Math.round((max-min)/(3.5*std*Math.pow(size, -1/3.0)));
-        if (m_bins<10) {
-            m_bins = 10;
-        }
-        
-        double[] data = new double[m_values.getRowCount()];
-        for (i=0;i<data.length;i++) {
-            data[i] = m_values.getValue(i);
-        }
-        
-        double delta = max-min;
-        m_dataCountY = new int[m_bins];
-        double[] histogram = new double[m_bins];
-        for (i = 0; i < size; i++) {
-            double v = m_values.getValue(i);
-            if (v != v) {
-                continue; // remove NaN values
-            }
-            int index = (int) (((v - min) / delta) * (m_bins));
-            if (index >= m_bins) {
-                index = m_bins - 1;
-            }
-
-            m_dataCountY[index]++;
-        }
-        
-        m_yMax = 0;
-        for (i = 0; i < m_bins; i++) {
-            double percentage = ((double)m_dataCountY[i]) / size * 100;
-            histogram[i] = percentage;
-            double y = (m_asPercentage) ? percentage : m_dataCountY[i];
-            
-            if (y > m_yMax) {
-                m_yMax = y;
-            }
-        }
         double yStdevLabel = m_yMax*0.1;
         double yMeanLabel = m_yMax*1.1;
         m_yMax *= 1.2; // we let place at the top to be able to put information
@@ -279,20 +260,16 @@ public class PlotHistogram extends PlotAbstract {
         m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colX));
         m_plotPanel.setYAxisTitle(m_asPercentage ? HISTOGRAM_PERCENTAGE : HISTOGRAM_COUNT);
         
-        
-
-        m_dataX = new double[m_bins + 1];
-        m_dataY = new double[m_bins + 1];
-        m_selected = new boolean[m_bins + 1];
-        double binDelta = delta / m_bins;
-        for (i = 0; i < m_bins; i++) {
-            m_dataX[i] = min + i * binDelta;
-            m_dataY[i] = histogram[i];
-            m_selected[i] = false;
+        // bins
+        double std = m_values.standardDeviationNaN();
+        m_bins = (int) Math.round((max-min)/(3.5*std*Math.pow(size, -1/3.0)));
+        if (m_bins<10) {
+            m_bins = 10;
         }
-        m_dataX[m_bins] = m_dataX[m_bins - 1] + binDelta;
-        m_dataY[m_bins] = m_dataY[m_bins - 1];
-        m_selected[m_bins] = false;
+
+        
+        updataDataAccordingToBins();
+
 
 
         // add Stdev value
@@ -316,6 +293,57 @@ public class PlotHistogram extends PlotAbstract {
         m_plotPanel.repaint();
     }
     
+    private void updataDataAccordingToBins() {
+        
+        int size = m_values.getRowCount();
+        
+        double[] data = new double[m_values.getRowCount()];
+        for (int i=0;i<data.length;i++) {
+            data[i] = m_values.getValue(i);
+        }
+        
+        double delta = m_xMax-m_xMin;
+        m_dataCountY = new int[m_bins];
+        double[] histogram = new double[m_bins];
+        for (int i = 0; i < size; i++) {
+            double v = m_values.getValue(i);
+            if (v != v) {
+                continue; // remove NaN values
+            }
+            int index = (int) (((v - m_xMin) / delta) * (m_bins));
+            if (index >= m_bins) {
+                index = m_bins - 1;
+            }
+
+            m_dataCountY[index]++;
+        }
+        
+        m_yMax = 0;
+        for (int i = 0; i < m_bins; i++) {
+            double percentage = ((double)m_dataCountY[i]) / size * 100;
+            histogram[i] = percentage;
+            double y = (m_asPercentage) ? percentage : m_dataCountY[i];
+            
+            if (y > m_yMax) {
+                m_yMax = y;
+            }
+        }
+        
+        
+        m_dataX = new double[m_bins + 1];
+        m_dataY = new double[m_bins + 1];
+        m_selected = new boolean[m_bins + 1];
+        double binDelta = delta / m_bins;
+        for (int i = 0; i < m_bins; i++) {
+            m_dataX[i] = m_xMin + i * binDelta;
+            m_dataY[i] = histogram[i];
+            m_selected[i] = false;
+        }
+        m_dataX[m_bins] = m_dataX[m_bins - 1] + binDelta;
+        m_dataY[m_bins] = m_dataY[m_bins - 1];
+        m_selected[m_bins] = false;
+
+    }
     
     @Override
     public double getXMin() {

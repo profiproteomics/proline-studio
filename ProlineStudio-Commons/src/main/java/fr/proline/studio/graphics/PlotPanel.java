@@ -161,7 +161,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         
     }
     
-    public ParameterList getParameters() {
+    public ArrayList<ParameterList> getParameters() {
         if (m_plots == null) {
             return null;
         }
@@ -173,6 +173,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     }
     
     public void parametersChanged() {
+        if (m_plot!= null) {
+            m_plot.parametersChanged();
+        }
         m_updateDoubleBuffer = true;
         repaint();
     }

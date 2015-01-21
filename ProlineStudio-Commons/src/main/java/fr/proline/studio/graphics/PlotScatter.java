@@ -4,6 +4,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.parameter.ColorOrGradientParameter;
+import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BasicStroke;
@@ -14,9 +15,8 @@ import java.awt.geom.Path2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.Random;
+import javax.swing.JSlider;
 
 /**
  * Scatter Plot or linear
@@ -35,7 +35,9 @@ public class PlotScatter extends PlotAbstract {
 
     private double[] m_dataX;
     private double[] m_dataY;
-
+    private int[] m_jitterX;
+    private int[] m_jitterY;
+    
     private double m_gradientParamValuesMin;
     private double m_gradientParamValuesMax;
     private double[] m_gradientParamValues;
@@ -51,9 +53,14 @@ public class PlotScatter extends PlotAbstract {
     private static final int SELECT_SENSIBILITY = 8;
 
     private static final String PLOT_SCATTER_COLOR_KEY = "PLOT_SCATTER_COLOR";
+    private static final String PLOT_SCATTER_X_JITTER_KEY = "PLOT_SCATTER_X_JITTER";
+    private static final String PLOT_SCATTER_Y_JITTER_KEY = "PLOT_SCATTER_Y_JITTER";
 
-    private ParameterList m_parameterList;
     private ColorOrGradientParameter m_colorParameter;
+    private IntegerParameter m_jitterXParameter;
+    private IntegerParameter m_jitterYParameter;
+    
+    private ArrayList<ParameterList> m_parameterListArray = null;
     
     private boolean m_isPaintMarker;
     
@@ -63,9 +70,10 @@ public class PlotScatter extends PlotAbstract {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         m_isScatter = isScatter;
         update(colX, colY, null); 
-        
-        m_parameterList = new ParameterList("Scatter Plot Settings");
-
+       
+        // Color parameter
+        ParameterList colorParameteList = new ParameterList("Colors");
+       
         ColorOrGradient colorOrGradient = new ColorOrGradient();
         colorOrGradient.setColor(CyclicColorPalette.getColor(21, 128));
         float[] fractions = {0.0f, 1.0f};
@@ -74,11 +82,24 @@ public class PlotScatter extends PlotAbstract {
         colorOrGradient.setGradient(gradient);
 
         m_colorParameter = new ColorOrGradientParameter(PLOT_SCATTER_COLOR_KEY, "Scatter Plot Color", colorOrGradient, null);
-        m_parameterList.add(m_colorParameter);
+        colorParameteList.add(m_colorParameter);
+        
+        // Jitter parameter
+        ParameterList settingsParameterList = new ParameterList("Settings");
+        
+        m_jitterXParameter = new IntegerParameter(PLOT_SCATTER_X_JITTER_KEY, "X Jitter", JSlider.class, 0, 0, 20);
+        m_jitterYParameter = new IntegerParameter(PLOT_SCATTER_Y_JITTER_KEY, "Y Jitter", JSlider.class, 0, 0, 20);
+        settingsParameterList.add(m_jitterXParameter);
+        settingsParameterList.add(m_jitterYParameter);
+        
+        
+        m_parameterListArray = new  ArrayList<>(2);
+        m_parameterListArray.add(colorParameteList);
+        m_parameterListArray.add(settingsParameterList);
     }
 
     @Override
-    public ParameterList getParameters() {
+    public ArrayList<ParameterList> getParameters() {
 
         // update parameters
         ArrayList<ReferenceIdName> m_potentialGradientParamArray = new ArrayList<>();
@@ -94,7 +115,9 @@ public class PlotScatter extends PlotAbstract {
 
         m_colorParameter.setGradientParam(m_potentialGradientParamArray);
 
-        return m_parameterList;
+
+        
+        return m_parameterListArray;
     }
 
     @Override
@@ -224,9 +247,23 @@ public class PlotScatter extends PlotAbstract {
         for (int i = size - 1; i >= 0; i--) { // reverse loop to select first the data in foreground
             double dataX = m_dataX[i];
             double dataY = m_dataY[i];
+        
+            
+            // take in account jitter
+            if (m_jitterX != null) {
+                XAxis xAxis = m_plotPanel.getXAxis();
+                int xWithJitter = xAxis.valueToPixel(dataX) + m_jitterX[i];
+                dataX = xAxis.pixelToValue(xWithJitter);
+            }
+            if (m_jitterY != null) {
+                YAxis yAxis = m_plotPanel.getYAxis();
+                int yWithJitter = yAxis.valueToPixel(dataY) + m_jitterY[i];
+                dataY = yAxis.pixelToValue(yWithJitter);
+            }
 
-            double normalizedDistanceX = (rangeX <= 10e-10) ? 0 : (x - dataX) / rangeX;
-            if (normalizedDistanceX < 0) {
+            
+            double normalizedDistanceX = (rangeX<=10e-10) ? 0 : (x-dataX)/rangeX;
+            if (normalizedDistanceX<0) {
                 normalizedDistanceX = -normalizedDistanceX;
             }
 
@@ -245,10 +282,12 @@ public class PlotScatter extends PlotAbstract {
 
         if (nearestDataIndex != -1) {
 
-            if (Math.abs(m_plotPanel.getXAxis().valueToPixel(x) - m_plotPanel.getXAxis().valueToPixel(m_dataX[nearestDataIndex])) > SELECT_SENSIBILITY) {
+            int jitterX = (m_jitterX == null) ? 0 : m_jitterX[nearestDataIndex];
+            if (Math.abs(m_plotPanel.getXAxis().valueToPixel(x)-m_plotPanel.getXAxis().valueToPixel( m_dataX[nearestDataIndex])-jitterX)>SELECT_SENSIBILITY) {
                 return -1;
             }
-            if (Math.abs(m_plotPanel.getYAxis().valueToPixel(y) - m_plotPanel.getYAxis().valueToPixel(m_dataY[nearestDataIndex])) > SELECT_SENSIBILITY) {
+             int jitterY = (m_jitterY == null) ? 0 : m_jitterY[nearestDataIndex];
+            if (Math.abs(m_plotPanel.getYAxis().valueToPixel(y)-m_plotPanel.getYAxis().valueToPixel( m_dataY[nearestDataIndex])-jitterY)>SELECT_SENSIBILITY) {
                 return -1;
             }
 
@@ -257,6 +296,52 @@ public class PlotScatter extends PlotAbstract {
         return nearestDataIndex;
     }
 
+    @Override
+    public void parametersChanged() {
+        updateJitter();
+    }
+    
+    private void updateJitter() {
+        
+        int size = m_compareDataInterface.getRowCount();
+        if (size == 0) {
+
+            return;
+        }
+        
+        if ((m_jitterXParameter == null) || (m_jitterYParameter == null) || (m_jitterXParameter.getObjectValue() == null) || (m_jitterYParameter.getObjectValue() == null)) {
+            m_jitterX = null;
+            m_jitterY = null;
+            return;
+        }
+        
+        int jitterX = ((Integer) m_jitterXParameter.getObjectValue());
+        int jitterY = ((Integer) m_jitterYParameter.getObjectValue());
+
+        if (jitterX > 0) {
+            m_jitterX = new int[size];
+            Random r = new Random(System.currentTimeMillis());
+
+            int modulo = jitterX * 2 + 1;
+            for (int i = 0; i < size; i++) {
+                m_jitterX[i] = (r.nextInt(modulo)) - jitterX;
+            }
+        } else {
+            m_jitterX = null;
+        }
+        if (jitterY > 0) {
+            m_jitterY = new int[size];
+            Random r = new Random(System.currentTimeMillis());
+
+            int modulo = jitterY * 2 + 1;
+            for (int i = 0; i < size; i++) {
+                m_jitterY[i] = (r.nextInt(modulo)) - jitterY;
+            }
+        } else {
+            m_jitterY = null;
+        }
+    }
+    
     @Override
     public final void update() {
 
@@ -270,6 +355,9 @@ public class PlotScatter extends PlotAbstract {
         m_dataY = new double[size];
         m_selected = new boolean[size];
 
+        // set jitter values
+        updateJitter();
+        
         for (int i = 0; i < size; i++) {
             Object value = m_compareDataInterface.getDataValueAt(i, m_colX);
             m_dataX[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
@@ -512,6 +600,25 @@ public class PlotScatter extends PlotAbstract {
             setGradientValues(); // set gradient values if needed
             gradientPaint = colorOrGradient.getGradient();
         }
+ 
+
+        
+        // first plot non selected
+        g.setColor(plotColor);
+        int size = m_dataX.length;
+        for (int i=0;i<size;i++) {
+            if (m_selected[i]) {
+                continue;
+            }
+            int x = xAxis.valueToPixel( m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
+            int y = yAxis.valueToPixel( m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
+
+            if (useGradient) {
+               plotColor = getColorInGradient(gradientPaint,  m_gradientParamValues[i]);
+               g.setColor(plotColor);
+            }
+            
+            g.fillOval(x-3, y-3, 6, 6);
 
         if (this.m_plotInformation != null && m_plotInformation.getPlotColor() != null) {
             plotColor = this.m_plotInformation.getPlotColor();
@@ -536,24 +643,8 @@ public class PlotScatter extends PlotAbstract {
                 g.fillOval(x - 3, y - 3, 6, 6);
 
             }
-
-            // plot selected
-            for (int i = 0; i < size; i++) {
-                if (!m_selected[i]) {
-                    continue;
-                }
-                int x = xAxis.valueToPixel(m_dataX[i]);
-                int y = yAxis.valueToPixel(m_dataY[i]);
-
-                if (useGradient &&(this.m_plotInformation == null || this.m_plotInformation.getPlotColor() == null)) {
-                    plotColor = getColorInGradient(gradientPaint, m_gradientParamValues[i]);
-                }
-
-                g.setColor(plotColor);
-                g.fillOval(x - 3, y - 3, 6, 6);
-
-                g.setColor(Color.black);
-                g.drawOval(x - 3, y - 3, 6, 6);
+            int x = xAxis.valueToPixel( m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
+            int y = yAxis.valueToPixel( m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
             }
 

@@ -168,6 +168,12 @@ public class IntegerParameter extends AbstractParameter {
         }
     }
     
+    
+    public void setDefaultValue(Integer defaultValue) {
+        m_defaultValue = defaultValue;
+        initDefault();
+    }
+    
     @Override
     public ParameterError checkParameter() {
         
@@ -228,6 +234,10 @@ public class IntegerParameter extends AbstractParameter {
 
     @Override
     public Object getObjectValue() {
+        if (m_parameterComponent == null) {
+            return null;
+        }
+        
         if (m_graphicalType.equals(JTextField.class)) {
            return ((JTextField) m_parameterComponent).getText();
         }

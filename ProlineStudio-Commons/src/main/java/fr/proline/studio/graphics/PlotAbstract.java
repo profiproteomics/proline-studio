@@ -39,6 +39,8 @@ public abstract class PlotAbstract {
     public abstract ArrayList<Integer> getSelection();
     public abstract void setSelection(ArrayList<Integer> selection);
     
+    public abstract void parametersChanged();
+    
     public abstract void paint(Graphics2D g);
 
     public PlotAbstract(PlotPanel plotPanel, PlotType plotType, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
@@ -77,7 +79,7 @@ public abstract class PlotAbstract {
     public abstract boolean select(Path2D.Double path, double minX, double maxX, double minY, double maxY, boolean append);
     
 
-    public abstract ParameterList getParameters();
+    public abstract ArrayList<ParameterList> getParameters();
     
     public void addMarker(AbstractMarker m) {
         if (m_markersList == null) {

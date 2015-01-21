@@ -10,6 +10,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Iterator;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -238,38 +239,46 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             repaint();
        }
     }
+    
+    private double[] getMinMaxPlots() {
+        double[] tab = new double[4];
+        if(m_plots != null && m_plots.size() > 0) {
+            double minX = m_plots.get(0).getXMin();
+            double maxX = m_plots.get(0).getXMax();
+            double minY = m_plots.get(0).getYMin();
+            double maxY = m_plots.get(0).getYMax();
+            for(int k=1; k<m_plots.size(); k++) {
+                minX = Math.min(minX, m_plots.get(k).getXMin());
+                maxX = Math.max(maxX, m_plots.get(k).getXMax());
+                minY = Math.min(minY, m_plots.get(k).getYMin());
+                maxY = Math.max(maxY, m_plots.get(k).getYMax());
+            }
+            tab[0] = minX; 
+            tab[1] = maxX;
+            tab[2] = minY; 
+            tab[3] = maxY;
+        }
+        return tab;
+    }
 
     public void updateAxis(PlotAbstract plot) {
+        double[] tab = getMinMaxPlots();
         
         if (plot.needsXAxis()) {
-            boolean firstP = false;
-            if (m_xAxis == null || m_plots.size() == 1) {
-                firstP = true;
-            }
+            
             XAxis xAxis = getXAxis();
             xAxis.setLog(false);
             xAxis.setSelected(false);
-            if (firstP ) {
-                xAxis.setRange(plot.getXMin() , plot.getXMax());
-            }else{
-                xAxis.setRange(Math.min(plot.getXMin(), xAxis.getMinValue()) , Math.max(plot.getXMax(), xAxis.getMaxValue()));
-                
-            }
+            xAxis.setRange(tab[0] ,tab[1]);
+            
+            
         }
 
         if (plot.needsYAxis()) {
-            boolean firstP = false;
-            if (m_yAxis == null || m_plots.size() == 1) {
-                firstP = true;
-            }
-           YAxis yAxis = getYAxis();
+            YAxis yAxis = getYAxis();
             yAxis.setLog(false);
             yAxis.setSelected(false);
-            if (firstP) {
-                yAxis.setRange(plot.getYMin(), plot.getYMax());
-            }else{
-                yAxis.setRange(Math.min(plot.getYMin(), yAxis.getMinValue()), Math.max(plot.getYMax(), yAxis.getMaxValue()));
-            }
+            yAxis.setRange(tab[2] ,tab[3]);
         }
         
         m_updateDoubleBuffer = true;

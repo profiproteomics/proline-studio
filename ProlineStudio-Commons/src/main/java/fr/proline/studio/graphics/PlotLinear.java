@@ -327,9 +327,6 @@ public class PlotLinear extends PlotAbstract {
         }
         DecimalFormat df = new DecimalFormat("#.00");
 
-        m_plotPanel.updateAxis(this);
-        m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colX));
-        m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colY));
 
         // add marker if needed
         if (m_compareDataInterface.getExternalData() != null) {
@@ -368,8 +365,7 @@ public class PlotLinear extends PlotAbstract {
                             addMarker(labelMarker);
                         }
                         j++;
-                        //yL = yLabel * 1.1;
-                        yL = yLabel + (m_yMax-m_yMin)*5/100 ;
+                        yL = yLabel * (j+1)*1.1;
                         // update xMin and xMax if needed
                         m_xMin = Math.min(m_xMin, minForMarker);
                         m_xMax = Math.max(m_xMax, maxForMarker);
@@ -380,7 +376,9 @@ public class PlotLinear extends PlotAbstract {
             }
         }
 
-        m_plotPanel.repaint();
+        m_plotPanel.updateAxis(this);
+        m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colX));
+        m_plotPanel.setYAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colY));
     }
 
     private void setGradientValues() {

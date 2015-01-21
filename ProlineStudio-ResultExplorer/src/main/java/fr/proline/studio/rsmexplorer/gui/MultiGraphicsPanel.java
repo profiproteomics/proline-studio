@@ -454,7 +454,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
         switch (plotType) {
             case LINEAR_PLOT:{
-                 m_plotPanel.clearPlots();
+                m_plotPanel.clearPlots();
                 for(int i=0; i<m_valuesList.size(); i++){
                     PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), m_crossSelectionInterfaceList.get(i), refX.getColumnIndex(), refY.getColumnIndex());
                     plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
@@ -462,6 +462,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                     m_plotPanel.addPlot(plotGraphics);
                     m_plotGraphicsList.add(plotGraphics);
                 }
+                m_plotPanel.repaint();
             break;
             }
         }

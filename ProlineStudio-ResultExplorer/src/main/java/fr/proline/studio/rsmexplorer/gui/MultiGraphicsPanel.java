@@ -12,6 +12,8 @@ import fr.proline.studio.graphics.PlotPanel.GridListener;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.parameter.DefaultParameterDialog;
+import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -31,6 +33,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import org.openide.windows.WindowManager;
 
 /**
  *
@@ -43,6 +46,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
 
     private PlotPanel m_plotPanel;
     
+    private boolean m_canChooseColor = false;
     
     private JComboBox<PlotType> m_allPlotsComboBox;
     private JComboBox<String> m_valueXComboBox;
@@ -63,10 +67,11 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     
     private JToggleButton m_gridButton = null;
     
-    public MultiGraphicsPanel(boolean dataLocked) {
+    public MultiGraphicsPanel(boolean dataLocked, boolean canChooseColor) {
         setLayout(new BorderLayout());
         
         m_dataLocked = dataLocked;
+        m_canChooseColor = canChooseColor ;
         m_plotGraphicsList = new ArrayList();
         
         JPanel internalPanel = createInternalPanel();
@@ -179,9 +184,36 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         
         ExportButton exportImageButton = new ExportButton("Graphic", m_plotPanel);
         
+        JButton colorPicker = new JButton(IconManager.getIcon(IconManager.IconType.COLOR_PICKER));
+        colorPicker.setFocusPainted(false);
+        colorPicker.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<ParameterList> parameterListArray = m_plotPanel.getParameters();
+                if (parameterListArray == null) {
+                    return;
+                }
+                DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterListArray);
+                parameterDialog.setLocationRelativeTo(m_plotPanel);
+                parameterDialog.setVisible(true);
+                
+                if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
+                    m_plotPanel.parametersChanged();
+                }
+                
+                
+                
+                
+            }
+        });
+        
         
         // add buttons to toolbar
         toolbar.add(m_gridButton);
+        if (m_canChooseColor) {
+            toolbar.add(colorPicker);
+        }
         toolbar.addSeparator(); // ----
         /*toolbar.add(lockButton);
         toolbar.add(importSelectionButton);
@@ -424,7 +456,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             case LINEAR_PLOT:{
                  m_plotPanel.clearPlots();
                 for(int i=0; i<m_valuesList.size(); i++){
-                    PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), m_crossSelectionInterfaceList.get(i), refX.getColumnIndex(), refY.getColumnIndex(), false);
+                    PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), m_crossSelectionInterfaceList.get(i), refX.getColumnIndex(), refY.getColumnIndex());
                     plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
                     plotGraphics.setIsPaintMarker(false);
                     m_plotPanel.addPlot(plotGraphics);

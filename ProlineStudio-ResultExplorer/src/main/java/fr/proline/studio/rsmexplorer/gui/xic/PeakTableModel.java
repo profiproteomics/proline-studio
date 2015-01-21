@@ -14,6 +14,7 @@ import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import fr.proline.studio.utils.DataFormat;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -416,8 +417,9 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         PlotInformation plotInformation = new PlotInformation();
         plotInformation.setPlotColor(m_color);
         plotInformation.setPlotTitle(m_title);
+        plotInformation.setDrawPoints(false);
         HashMap<String, String> plotInfo = new HashMap();
-        plotInfo.put("apex Int.", Float.toString(m_peakel.getApexIntensity()));
+        plotInfo.put("Apex Int.", DataFormat.formatWithGroupingSep(m_peakel.getApexIntensity(), 0));
         plotInformation.setPlotInfo(plotInfo);
         return plotInformation;
     }

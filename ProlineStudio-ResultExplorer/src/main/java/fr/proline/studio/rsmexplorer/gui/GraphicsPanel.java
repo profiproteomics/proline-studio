@@ -450,7 +450,7 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
             case LINEAR_PLOT:
-                m_plotGraphics = new PlotLinear(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex(), false);
+                m_plotGraphics = new PlotLinear(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex());
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
         }

@@ -20,11 +20,13 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.progress.ProgressBarDialog;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -85,6 +87,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
+    private JButton m_graphicsButton;
     
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
@@ -198,6 +201,35 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
         });
         toolbar.add(m_columnVisibilityButton);
+        
+        // graphics button
+        m_graphicsButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART));
+        m_graphicsButton.setToolTipText("Graphics : Linear Plot");
+        m_graphicsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!((QuantPeptideTableModel) m_quantPeptideTable.getModel()).isLoaded()) {
+
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((QuantPeptideTableModel) m_quantPeptideTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
+                    dialog.setLocation(getLocationOnScreen().x + m_graphicsButton.getWidth() + 5, m_graphicsButton.getLocationOnScreen().y + getHeight() + 5);
+                    dialog.setVisible(true);
+
+                    if (!dialog.isWaitingFinished()) {
+                        return;
+                    }
+                }
+                // prepare window box
+                WindowBox wbox = WindowBoxFactory.getMultiGraphicsWindowBox("Peptide Graphic", m_dataBox);
+                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, List.class));
+
+                // open a window to display the window box
+                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                win.open();
+                win.requestActive();
+            }
+        });
+        
+        //toolbar.add(m_graphicsButton);
         
         return toolbar;
     }

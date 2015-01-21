@@ -21,7 +21,6 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMouseAdapter;

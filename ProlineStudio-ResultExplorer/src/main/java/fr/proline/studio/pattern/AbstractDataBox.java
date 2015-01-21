@@ -297,6 +297,13 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return null;
     }
     
+    public Object getData(boolean getArray, Class parameterType, boolean isList) {
+        if (m_previousDataBox != null) {
+            return m_previousDataBox.getData(getArray, parameterType, isList);
+        }
+        return null;
+    }
+    
     public void setEntryData(Object data) {
         throw new UnsupportedOperationException();
     }

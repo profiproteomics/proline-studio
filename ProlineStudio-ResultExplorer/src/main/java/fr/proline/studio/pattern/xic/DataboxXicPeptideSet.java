@@ -16,6 +16,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.rsmexplorer.gui.xic.PeptidePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptidePanel;
 import java.util.ArrayList;
@@ -56,6 +57,10 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         
         outParameter = new GroupParameter();
         outParameter.addParameter(CompareDataInterface.class, true);
+        registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
 
     }
@@ -118,7 +123,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 } else {
                     ((XicPeptidePanel) m_panel).dataUpdated(subTask, finished);
                 }
-
+                getPeptideTableModelList();
                 setLoaded(loadingId);
                 
                 if (finished) {
@@ -171,9 +176,51 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         }
         return super.getData(getArray, parameterType);
     }
+    
+    @Override
+    public Object getData(boolean getArray, Class parameterType, boolean isList) {
+        if (parameterType != null && isList) {
+            if (parameterType.equals(CompareDataInterface.class)) {
+                return getCompareDataInterfaceList();
+            }
+            if (parameterType.equals(CrossSelectionInterface.class)) {
+                return getCrossSelectionInterfaceList();
+            }
+        }
+        return super.getData(getArray, parameterType, isList);
+    }
    
     @Override
     public String getFullName() {
         return m_dataset.getName()+" "+getName();
+    }
+    
+    private List<CompareDataInterface> getCompareDataInterfaceList() {
+        List<CompareDataInterface> listCDI = new ArrayList();
+        List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
+        for (PeptidePanel peptidePanel : listPeptidePanel) {
+            listCDI.add(peptidePanel.getCompareDataInterface());
+        }
+        return listCDI;
+    }
+
+    private List<CrossSelectionInterface> getCrossSelectionInterfaceList() {
+        List<CrossSelectionInterface> listCSI = new ArrayList();
+        List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
+        for (PeptidePanel peptidePanel : listPeptidePanel) {
+            listCSI.add(peptidePanel.getCrossSelectionInterface());
+        }
+        return listCSI;
+    }
+    
+    private List<PeptidePanel> getPeptideTableModelList() {
+        List<PeptidePanel> list = new ArrayList();
+        // one table model per row
+        for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {
+            PeptidePanel aPepPanel = new PeptidePanel();
+            aPepPanel.setData(quantitationChannelArray, quantPeptide);
+            list.add(aPepPanel);
+        }
+        return list;
     }
 }

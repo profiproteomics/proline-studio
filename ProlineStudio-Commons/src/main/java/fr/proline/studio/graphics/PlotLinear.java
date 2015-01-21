@@ -24,9 +24,6 @@ import java.util.Map;
  */
 public class PlotLinear extends PlotAbstract {
 
-    // scatter or linear mode
-    private boolean m_isScatter = true;
-
     private double m_xMin;
     private double m_xMax;
     private double m_yMin;
@@ -53,19 +50,18 @@ public class PlotLinear extends PlotAbstract {
 
     private ParameterList m_parameterList;
     private ColorOrGradientParameter m_colorParameter;
-    
+
     private boolean m_isPaintMarker;
-    
+
     // for linear plots, draw (or not) the points
-    private boolean m_isDrawPoints  =false;
-    
+    private boolean m_isDrawPoints = false;
+
     private BasicStroke m_strokeLine = new BasicStroke(1.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
-    public PlotLinear(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY, boolean isScatter) {
+    public PlotLinear(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
-        m_isScatter = isScatter;
-        update(colX, colY, null); 
-        
+        update(colX, colY, null);
+
         m_parameterList = new ParameterList("Scatter Plot Settings");
 
         ColorOrGradient colorOrGradient = new ColorOrGradient();
@@ -95,7 +91,7 @@ public class PlotLinear extends PlotAbstract {
             m_sb = new StringBuilder();
         }
         //m_sb.append("<HTML>");
-        if(m_plotInformation != null && m_plotInformation.getPlotColor() != null) {
+        if (m_plotInformation != null && m_plotInformation.getPlotColor() != null) {
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(m_plotInformation.getPlotColor());
             m_sb.append("<font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
         }
@@ -103,7 +99,7 @@ public class PlotLinear extends PlotAbstract {
             m_sb.append(m_plotInformation.getPlotTitle());
             m_sb.append("<BR>");
         }
-        if (m_plotInformation != null && m_plotInformation.getPlotInfo() != null ) {
+        if (m_plotInformation != null && m_plotInformation.getPlotInfo() != null) {
             for (Map.Entry<String, String> entrySet : m_plotInformation.getPlotInfo().entrySet()) {
                 Object key = entrySet.getKey();
                 Object value = entrySet.getValue();
@@ -123,7 +119,7 @@ public class PlotLinear extends PlotAbstract {
         m_sb.append(m_plotPanel.getYAxis().getTitle());
         m_sb.append(" : ");
         m_sb.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
-       // m_sb.append("</HTML>");
+        // m_sb.append("</HTML>");
         String tooltip = m_sb.toString();
         m_sb.setLength(0);
         return tooltip;
@@ -272,8 +268,8 @@ public class PlotLinear extends PlotAbstract {
         double minY = m_dataY[0];
         double maxY = minY;
         int i = 1;
-        while (minX != minX || (minY!=minY)) { // NaN values
-            if (i>=size) {
+        while (minX != minX || (minY != minY)) { // NaN values
+            if (i >= size) {
                 break;
             }
             minX = m_dataX[i];
@@ -323,9 +319,7 @@ public class PlotLinear extends PlotAbstract {
         }
 
         //data must be sorted to be drawn correctly in case of linear plot
-        if (!m_isScatter) {
-            sortData();
-        }
+        sortData();
 
         double yLabel = m_yMax;
         if (m_compareDataInterface.getExternalData() != null) {
@@ -344,7 +338,7 @@ public class PlotLinear extends PlotAbstract {
                 Object o2 = m_compareDataInterface.getExternalData().get(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_TEXT);
                 List<Color> colors = null;
                 if (m_compareDataInterface.getExternalData().containsKey(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_COLOR)) {
-                    colors = (List<Color>)m_compareDataInterface.getExternalData().get(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_COLOR);
+                    colors = (List<Color>) m_compareDataInterface.getExternalData().get(CompareDataInterface.EXTERNAL_DATA_VERTICAL_MARKER_COLOR);
                 }
                 try {
                     List<Double> values = (List<Double>) o;
@@ -356,7 +350,7 @@ public class PlotLinear extends PlotAbstract {
                     double minForMarker = m_xMin;
                     double maxForMarker = m_xMax;
                     double delta = 5 * (m_xMax - m_xMin) / 100;
-                    double yL = yLabel ;
+                    double yL = yLabel;
                     for (Double d : values) {
                         addMarker(new LineMarker(m_plotPanel, d, LineMarker.ORIENTATION_VERTICAL));
                         minForMarker = Math.min(minForMarker, d - delta);
@@ -366,15 +360,16 @@ public class PlotLinear extends PlotAbstract {
                             if (j > 0) {
                                 orientation = LabelMarker.ORIENTATION_X_LEFT;
                             }
-                            
+
                             LabelMarker labelMarker = new LabelMarker(m_plotPanel, d, yL, texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP);
-                            if (colors != null && colors.size() >= j){
+                            if (colors != null && colors.size() >= j) {
                                 labelMarker = new LabelMarker(m_plotPanel, d, yL, texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP, colors.get(j));
                             }
                             addMarker(labelMarker);
                         }
                         j++;
-                        yL = yLabel *1.1;
+                        //yL = yLabel * 1.1;
+                        yL = yLabel + (m_yMax-m_yMin)*5/100 ;
                         // update xMin and xMax if needed
                         m_xMin = Math.min(m_xMin, minForMarker);
                         m_xMax = Math.max(m_xMax, maxForMarker);
@@ -505,80 +500,37 @@ public class PlotLinear extends PlotAbstract {
             plotColor = this.m_plotInformation.getPlotColor();
         }
 
-        if (m_isScatter) {
-            // first plot non selected
-            g.setColor(plotColor);
-            int size = m_dataX.length;
-            for (int i = 0; i < size; i++) {
-                if (m_selected[i]) {
-                    continue;
+        int size = m_dataX.length;
+        if (m_dataX.length > 0) {
+            int x0 = xAxis.valueToPixel(m_dataX[0]);
+            int y0 = yAxis.valueToPixel(m_dataY[0]);
+
+            for (int i = 0; i < size - 1; i++) {
+                if (useGradient && (this.m_plotInformation == null || this.m_plotInformation.getPlotColor() == null)) {
+                    plotColor = getColorInGradient(gradientPaint, m_gradientParamValues[i]);
                 }
                 int x = xAxis.valueToPixel(m_dataX[i]);
                 int y = yAxis.valueToPixel(m_dataY[i]);
-
-                if (useGradient && (this.m_plotInformation == null || this.m_plotInformation.getPlotColor() == null ) ) {
-                    plotColor = getColorInGradient(gradientPaint, m_gradientParamValues[i]);
-                    g.setColor(plotColor);
+                if (m_isDrawPoints) {
+                    g.fillOval(x - 3, y - 3, 6, 6);
                 }
-
-                g.fillOval(x - 3, y - 3, 6, 6);
-
-            }
-
-            // plot selected
-            for (int i = 0; i < size; i++) {
-                if (!m_selected[i]) {
-                    continue;
-                }
-                int x = xAxis.valueToPixel(m_dataX[i]);
-                int y = yAxis.valueToPixel(m_dataY[i]);
-
-                if (useGradient &&(this.m_plotInformation == null || this.m_plotInformation.getPlotColor() == null)) {
-                    plotColor = getColorInGradient(gradientPaint, m_gradientParamValues[i]);
-                }
-
                 g.setColor(plotColor);
-                g.fillOval(x - 3, y - 3, 6, 6);
+                g.setStroke(m_strokeLine);
+                g.drawLine(x0, y0, x, y);
+                x0 = x;
+                y0 = y;
 
-                g.setColor(Color.black);
-                g.drawOval(x - 3, y - 3, 6, 6);
-
-            }
-
-        } else {
-            
-            int size = m_dataX.length;
-            if (m_dataX.length > 0) {
-                int x0 = xAxis.valueToPixel(m_dataX[0]);
-                int y0 = yAxis.valueToPixel(m_dataY[0]);
-
-                for (int i = 0; i < size - 1; i++) {
-                    if (useGradient && (this.m_plotInformation == null || this.m_plotInformation.getPlotColor() == null)) {
-                        plotColor = getColorInGradient(gradientPaint, m_gradientParamValues[i]);
-                    }
-                    int x = xAxis.valueToPixel(m_dataX[i]);
-                    int y = yAxis.valueToPixel(m_dataY[i]);
-                    if (m_isDrawPoints) {
-                        g.fillOval(x - 3, y - 3, 6, 6);
-                    }
-                    g.setColor(plotColor);
-                    g.setStroke(m_strokeLine);
-                    g.drawLine(x0, y0, x, y);
-                    x0 = x;
-                    y0 = y;
-
-                }
             }
         }
 
         if (isPaintMarker()) {
             paintMarkers(g);
         }
-        
+
     }
-    
+
     private boolean isPaintMarker() {
-        return m_isPaintMarker ;
+        return m_isPaintMarker;
     }
 
     @Override
@@ -616,12 +568,11 @@ public class PlotLinear extends PlotAbstract {
 
     public void setPlotInformation(PlotInformation plotInformation) {
         this.m_plotInformation = plotInformation;
-        if (plotInformation != null ) {
+        if (plotInformation != null) {
             setDrawPoints(plotInformation.isDrawPoints());
         }
     }
-    
-    
+
     @Override
     public void setIsPaintMarker(boolean isPaintMarker) {
         this.m_isPaintMarker = isPaintMarker;
@@ -630,14 +581,14 @@ public class PlotLinear extends PlotAbstract {
             this.m_strokeLine = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
         }
     }
-    
+
     @Override
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;
     }
 
     public void setDrawPoints(boolean drawPoints) {
-        this.m_isDrawPoints = drawPoints ;
+        this.m_isDrawPoints = drawPoints;
     }
 
     @Override

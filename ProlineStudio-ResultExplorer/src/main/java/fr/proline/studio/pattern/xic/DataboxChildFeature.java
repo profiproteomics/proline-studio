@@ -6,6 +6,7 @@ import fr.proline.core.orm.lcms.Peakel.Peak;
 import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
@@ -98,11 +99,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
                 setLoaded(loadingId);
 
-                if (finished) {
-                    unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class); 
-                }
-
+                
                 if (m_childFeatureList != null) {
                     for (int i = 0; i < m_childFeatureList.size(); i++) {
                         List<List<Peak>> list = new ArrayList();
@@ -115,6 +112,12 @@ public class DataboxChildFeature extends AbstractDataBox {
                         m_peakList.add(list);
                     }
                 }
+                
+                if (finished) {
+                    unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class); 
+                }
+
             }
         };
 
@@ -141,7 +144,7 @@ public class DataboxChildFeature extends AbstractDataBox {
                     if (peakels.size() > 0) {
                         // get the first 
                         Peakel peakel = peakels.get(0);
-                        if (!m_peakList.get(i).isEmpty() ) {
+                        if (m_peakList.size() > i && !m_peakList.get(i).isEmpty() ) {
                             List<Peak> peaks = m_peakList.get(i).get(0);
                             XicPeakPanel peakPanel = new XicPeakPanel();
                             peakPanel.setData((long) -1, feature, peakel, peaks, color,title, true);
@@ -167,14 +170,27 @@ public class DataboxChildFeature extends AbstractDataBox {
             if (parameterType.equals(Feature.class)) {
                 return ((XicFeaturePanel) m_panel).getSelectedFeature();
             }
-            if (parameterType.equals(List.class)) {
+            if (parameterType.equals(CompareDataInterface.class)) {
+                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+            }
+            if (parameterType.equals(CrossSelectionInterface.class)) {
+                ((CompareDataProviderInterface)m_panel).getCrossSelectionInterface();
+            }
+        }
+        return super.getData(getArray, parameterType);
+    }
+    
+    @Override
+    public Object getData(boolean getArray, Class parameterType, boolean isList) {
+        if (parameterType != null && isList) {
+            if (parameterType.equals(CompareDataInterface.class)) {
                 return getCompareDataInterfaceList();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
                 return getCrossSelectionInterfaceList();
             }
         }
-        return super.getData(getArray, parameterType);
+        return super.getData(getArray, parameterType, isList);
     }
 
     @Override

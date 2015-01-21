@@ -14,31 +14,35 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
     private List<CompareDataInterface> m_valuesList = null;
 
     private boolean m_defaultLocked = false;
+    private boolean m_canChooseColor = false;
     
     public DataboxMultiGraphics() {
-       this(false);
+       this(false, true);
     }
     
-    public DataboxMultiGraphics(boolean defaultLocked) {
+    public DataboxMultiGraphics(boolean defaultLocked, boolean canChooseColor) {
          super(DataboxType.DataboxMultiGraphics);
 
          m_defaultLocked = defaultLocked;
+         m_canChooseColor = canChooseColor ;
          
         // Name of this databox
         m_name = "Graphic";
         m_description = "Graphics : Linear Plot";
 
         // Register Possible in parameters
-        // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(List.class, false);
+        inParameter.addParameter(CompareDataInterface.class, true);
+        registerInParameter(inParameter);
+        
+        inParameter.addParameter(CrossSelectionInterface.class, true);
         registerInParameter(inParameter);
         
     }
     
     @Override
     public void createPanel() {
-        MultiGraphicsPanel p = new MultiGraphicsPanel(m_defaultLocked);
+        MultiGraphicsPanel p = new MultiGraphicsPanel(m_defaultLocked, m_canChooseColor);
         p.setName(m_name);
         p.setDataBox(this);
         m_panel = p;
@@ -46,8 +50,8 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
 
     @Override
     public void dataChanged() {
-        final List<CompareDataInterface> valuesL = (List<CompareDataInterface>) m_previousDataBox.getData(false, List.class);
-        final List<CrossSelectionInterface> crossSelectionInterfaceL =  (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class);
+        final List<CompareDataInterface> valuesL = (List<CompareDataInterface>) m_previousDataBox.getData(false, CompareDataInterface.class, true);
+        final List<CrossSelectionInterface> crossSelectionInterfaceL =  (List<CrossSelectionInterface>) m_previousDataBox.getData(false, CrossSelectionInterface.class, true);
         ((MultiGraphicsPanel)m_panel).setData(valuesL, crossSelectionInterfaceL);
     }
     

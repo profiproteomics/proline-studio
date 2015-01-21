@@ -80,23 +80,9 @@ public class PlotLinear extends PlotAbstract {
     }
 
     @Override
-    public ParameterList getParameters() {
+    public ArrayList<ParameterList> getParameters() {
 
-        // update parameters
-        ArrayList<ReferenceIdName> m_potentialGradientParamArray = new ArrayList<>();
-        HashSet<Class> acceptedValues = m_plotType.getAcceptedValuesAsParam();
-        int nbCol = m_compareDataInterface.getColumnCount();
-        for (int i = 0; i < nbCol; i++) {
-            Class c = m_compareDataInterface.getDataColumnClass(i);
-            if (acceptedValues.contains(c)) {
-                ReferenceIdName ref = new ReferenceIdName(m_compareDataInterface.getDataColumnIdentifier(i), i);
-                m_potentialGradientParamArray.add(ref);
-            }
-        }
-
-        m_colorParameter.setGradientParam(m_potentialGradientParamArray);
-
-        return m_parameterList;
+        return null;
     }
 
     @Override
@@ -652,5 +638,10 @@ public class PlotLinear extends PlotAbstract {
 
     public void setDrawPoints(boolean drawPoints) {
         this.m_isDrawPoints = drawPoints ;
+    }
+
+    @Override
+    public void parametersChanged() {
+        // nothing to do
     }
 }

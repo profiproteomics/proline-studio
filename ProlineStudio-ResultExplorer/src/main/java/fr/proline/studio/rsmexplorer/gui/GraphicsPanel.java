@@ -7,6 +7,7 @@ import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.PlotAbstract;
 import fr.proline.studio.graphics.PlotHistogram;
+import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotScatter;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotPanel.GridListener;
@@ -445,11 +446,11 @@ public class GraphicsPanel extends HourglassPanel implements DataBoxPanelInterfa
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
             case SCATTER_PLOT:
-                m_plotGraphics = new PlotScatter(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex(), true);
+                m_plotGraphics = new PlotScatter(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex());
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
             case LINEAR_PLOT:
-                m_plotGraphics = new PlotScatter(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex(), false);
+                m_plotGraphics = new PlotLinear(m_plotPanel, m_values, m_crossSelectionInterface, refX.getColumnIndex(), refY.getColumnIndex(), false);
                 m_plotPanel.setPlot(m_plotGraphics);
                 break;
         }

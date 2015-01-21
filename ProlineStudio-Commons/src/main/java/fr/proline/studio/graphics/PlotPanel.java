@@ -173,8 +173,10 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     }
     
     public void parametersChanged() {
-        if (m_plot!= null) {
-            m_plot.parametersChanged();
+        if (m_plots!= null) {
+            for (int i=0;i<m_plots.size();i++) {
+                m_plots.get(i).parametersChanged();
+            }
         }
         m_updateDoubleBuffer = true;
         repaint();

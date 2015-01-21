@@ -13,11 +13,15 @@ import java.util.HashMap;
  * @author MB243701
  */
 public class PlotInformation {
+    
     private Color plotColor ;
     
     private String plotTitle;
     
-    // key value information
+    // draw the points for a linear plot
+    private boolean isDrawPoints;
+    
+    // key value information, to be displayed in the tooltip
     private HashMap<String, String> plotInfo;
 
     public PlotInformation() {
@@ -47,6 +51,13 @@ public class PlotInformation {
         this.plotInfo = plotInfo;
     }
     
+    public boolean isDrawPoints() {
+        return this.isDrawPoints;
+    }
+    
+    public void setDrawPoints(boolean drawPoints) {
+        this.isDrawPoints = drawPoints ;
+    }
     
 }
 

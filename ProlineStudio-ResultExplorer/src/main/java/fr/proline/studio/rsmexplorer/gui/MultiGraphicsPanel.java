@@ -7,7 +7,7 @@ import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotAbstract;
-import fr.proline.studio.graphics.PlotScatter;
+import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel.GridListener;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.HourglassPanel;
@@ -16,7 +16,6 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -425,7 +424,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             case LINEAR_PLOT:{
                  m_plotPanel.clearPlots();
                 for(int i=0; i<m_valuesList.size(); i++){
-                    PlotScatter plotGraphics = new PlotScatter(m_plotPanel, m_valuesList.get(i), m_crossSelectionInterfaceList.get(i), refX.getColumnIndex(), refY.getColumnIndex(), false);
+                    PlotLinear plotGraphics = new PlotLinear(m_plotPanel, m_valuesList.get(i), m_crossSelectionInterfaceList.get(i), refX.getColumnIndex(), refY.getColumnIndex(), false);
                     plotGraphics.setPlotInformation(m_valuesList.get(i).getPlotInformation());
                     plotGraphics.setIsPaintMarker(false);
                     m_plotPanel.addPlot(plotGraphics);

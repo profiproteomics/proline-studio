@@ -13,7 +13,6 @@ import java.awt.LinearGradientPaint;
 import java.awt.geom.Path2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +54,9 @@ public class PlotLinear extends PlotAbstract {
 
     // for linear plots, draw (or not) the points
     private boolean m_isDrawPoints = false;
+    
+    // draw a line between points, even if there is a missing value
+    private boolean m_isDrawGap = true;
 
     private BasicStroke m_strokeLine = new BasicStroke(1.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 
@@ -267,35 +269,44 @@ public class PlotLinear extends PlotAbstract {
         double maxX = minX;
         double minY = m_dataY[0];
         double maxY = minY;
-        int i = 1;
-        while (minX != minX || (minY != minY)) { // NaN values
-            if (i >= size) {
-                break;
-            }
-            minX = m_dataX[i];
-            maxX = minX;
-            minY = m_dataY[i];
-            maxY = minY;
-            i++;
-        }
-        for (; i < size; i++) {
+        
+        for(int i=0; i<size; i++) {
             double x = m_dataX[i];
-            if (x < minX) {
-                minX = x;
-            } else if (x > maxX) {
-                maxX = x;
-            }
             double y = m_dataY[i];
-            if (y < minY) {
-                minY = y;
-            } else if (y > maxY) {
-                maxY = y;
+            if (!Double.valueOf(x).isNaN()) {
+                if (Double.valueOf(minX).isNaN()) {
+                    minX = x;
+                }
+                if (Double.valueOf(maxX).isNaN()) {
+                    maxX = x;
+                }
+                minX = Math.min(minX, x);
+                maxX = Math.max(maxX, x);
+            }
+            if (!Double.valueOf(y).isNaN()) {
+                if (Double.valueOf(minY).isNaN()) {
+                    minY = y;
+                }
+                if (Double.valueOf(maxY).isNaN()) {
+                    maxY = y;
+                }
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
             }
         }
+        
+        if (Double.valueOf(minX).isNaN() ||Double.valueOf(minY).isNaN()) {
+            m_dataX = new double[0];
+            m_dataY = new double[0];
+            m_selected = new boolean[0];
+            return;
+        }
+        
         m_xMin = minX;
         m_xMax = maxX;
         m_yMin = minY;
         m_yMax = maxY;
+        
 
         // we let margins
         double deltaX = (m_xMax - m_xMin);
@@ -509,12 +520,15 @@ public class PlotLinear extends PlotAbstract {
                 }
                 int x = xAxis.valueToPixel(m_dataX[i]);
                 int y = yAxis.valueToPixel(m_dataY[i]);
-                if (m_isDrawPoints) {
-                    g.fillOval(x - 3, y - 3, 6, 6);
-                }
+                boolean isDef = !Double.valueOf(m_dataX[i]).isNaN() && !Double.valueOf(m_dataY[i]).isNaN();
                 g.setColor(plotColor);
                 g.setStroke(m_strokeLine);
-                g.drawLine(x0, y0, x, y);
+                if (m_isDrawPoints && isDef) {
+                    g.fillOval(x - 3, y - 3, 6, 6);
+                }
+                if (m_isDrawGap || (!m_isDrawGap && isDef)) {
+                    g.drawLine(x0, y0, x, y);
+                }
                 x0 = x;
                 y0 = y;
 
@@ -568,6 +582,7 @@ public class PlotLinear extends PlotAbstract {
         this.m_plotInformation = plotInformation;
         if (plotInformation != null) {
             setDrawPoints(plotInformation.isDrawPoints());
+            setDrawGap(plotInformation.isDrawGap());
         }
     }
 
@@ -587,6 +602,10 @@ public class PlotLinear extends PlotAbstract {
 
     public void setDrawPoints(boolean drawPoints) {
         this.m_isDrawPoints = drawPoints;
+    }
+    
+    public void setDrawGap(boolean drawGap) {
+        this.m_isDrawGap = drawGap;
     }
 
     @Override

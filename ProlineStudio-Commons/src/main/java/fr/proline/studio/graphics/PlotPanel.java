@@ -241,17 +241,35 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     
     private double[] getMinMaxPlots() {
         double[] tab = new double[4];
-        if(m_plots != null && m_plots.size() > 0) {
+        int nb = m_plots.size();
+        if(m_plots != null && nb > 0) {
             double minX = m_plots.get(0).getXMin();
             double maxX = m_plots.get(0).getXMax();
             double minY = m_plots.get(0).getYMin();
             double maxY = m_plots.get(0).getYMax();
-            for(int k=1; k<m_plots.size(); k++) {
-                minX = Math.min(minX, m_plots.get(k).getXMin());
-                maxX = Math.max(maxX, m_plots.get(k).getXMax());
-                minY = Math.min(minY, m_plots.get(k).getYMin());
-                maxY = Math.max(maxY, m_plots.get(k).getYMax());
-            }
+            for(int k=1; k<nb; k++) {
+                double plotXMin = m_plots.get(k).getXMin();
+                double plotXMax = m_plots.get(k).getXMax();
+                double plotYMin = m_plots.get(k).getYMin();
+                double plotYMax = m_plots.get(k).getYMax();
+                if (plotXMin != 0 && plotXMax != 0) {
+                    if (minX == 0 && maxX == 0) {
+                        minX = plotXMin;
+                         maxX = plotXMax;
+                    }
+                    minX = Math.min(minX, plotXMin);
+                    maxX = Math.max(maxX, plotXMax);
+                }
+                if (plotYMin != 0 && plotYMax != 0) { 
+                    if (minY == 0 && maxY == 0) {
+                        minY = plotYMin;
+                        maxY = plotYMax;
+                    }
+                    minY = Math.min(minY, plotYMin);
+                    maxY = Math.max(maxY, plotYMax);
+                }
+                
+            } 
             tab[0] = minX; 
             tab[1] = maxX;
             tab[2] = minY; 

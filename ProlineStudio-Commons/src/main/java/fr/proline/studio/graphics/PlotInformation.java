@@ -21,6 +21,9 @@ public class PlotInformation {
     // draw the points for a linear plot
     private boolean isDrawPoints;
     
+    // draw gap
+    private boolean isDrawGap;
+    
     // key value information, to be displayed in the tooltip
     private HashMap<String, String> plotInfo;
 
@@ -57,6 +60,14 @@ public class PlotInformation {
     
     public void setDrawPoints(boolean drawPoints) {
         this.isDrawPoints = drawPoints ;
+    }
+    
+    public boolean isDrawGap() {
+        return this.isDrawGap;
+    }
+    
+    public void setDrawGap(boolean drawGap) {
+        this.isDrawGap = drawGap ;
     }
     
 }

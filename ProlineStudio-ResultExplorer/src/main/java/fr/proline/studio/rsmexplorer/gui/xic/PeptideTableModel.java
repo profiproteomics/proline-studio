@@ -26,10 +26,12 @@ import java.util.Map;
  */
 public class PeptideTableModel extends LazyTableModel implements  CompareDataInterface, BestGraphicsInterface, CrossSelectionInterface {
     
-    public static final int COLTYPE_QC_NAME = 0;
-    public static final int COLTYPE_ABUNDANCE = 1;
-    public static final int COLTYPE_RAW_ABUNDANCE = 2;
-    private static final String[] m_columnNames = {"Quant. Channel", "Abundance", "Raw Abundance"};
+    
+    public static final int COLTYPE_QC_ID = 0;
+    public static final int COLTYPE_QC_NAME = 1;
+    public static final int COLTYPE_ABUNDANCE = 2;
+    public static final int COLTYPE_RAW_ABUNDANCE = 3;
+    private static final String[] m_columnNames = {"Id", "Quant. Channel", "Abundance", "Raw Abundance"};
     
     private DMasterQuantPeptide m_quantPeptide = null;
     private DQuantitationChannel[] m_quantChannels = null;
@@ -88,20 +90,23 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
         Map<Long, DQuantPeptide> quantPeptideByQchIds = m_quantPeptide.getQuantPeptideByQchIds();
         DQuantPeptide quantPeptide = quantPeptideByQchIds.get(qc.getId());
         switch (col) {
+            case COLTYPE_QC_ID: {
+                return qc.getId() ;
+            }
             case COLTYPE_QC_NAME: {
                 return qc.getResultFileName() ;
             }
             case COLTYPE_ABUNDANCE: {
                 if (quantPeptide == null || quantPeptide.getAbundance() == null) {
-                    return "";
+                    return null;
                 }
-                return quantPeptide.getAbundance().isNaN() ? "" : quantPeptide.getAbundance();
+                return quantPeptide.getAbundance().isNaN() ? null : quantPeptide.getAbundance();
             }
             case COLTYPE_RAW_ABUNDANCE: {
                 if (quantPeptide == null || quantPeptide.getRawAbundance() == null) {
-                    return "";
+                    return null;
                 }
-                return quantPeptide.getRawAbundance().isNaN() ? "" : quantPeptide.getRawAbundance();
+                return quantPeptide.getRawAbundance().isNaN() ? null : quantPeptide.getRawAbundance();
             }
         }
         return null; // should never happen
@@ -210,6 +215,9 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
     @Override
     public Class getDataColumnClass(int columnIndex) {
         switch (columnIndex) {
+            case COLTYPE_QC_ID: {
+                return Long.class;
+            }
             case COLTYPE_QC_NAME: {
                 return String.class;
             }
@@ -234,7 +242,7 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = { COLTYPE_QC_NAME };
+        int[] keys = { COLTYPE_QC_ID };
         return keys;
     }
 
@@ -263,6 +271,7 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
         PlotInformation plotInformation = new PlotInformation();
         plotInformation.setPlotTitle(m_quantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide().getSequence());
         plotInformation.setDrawPoints(true);
+        plotInformation.setDrawGap(true);
         return plotInformation;
     }
 
@@ -275,7 +284,7 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
     public int getBestXAxisColIndex(PlotType plotType) {
         switch (plotType) {
             case LINEAR_PLOT:
-                return COLTYPE_QC_NAME;
+                return COLTYPE_QC_ID;
         }
         return -1;
     }
@@ -296,3 +305,4 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
     }
     
 }
+

@@ -5,13 +5,9 @@
  */
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * map quantChannel info and map info, especilaly to maintain the same colors between the maps and the quantChannels

@@ -418,6 +418,7 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         plotInformation.setPlotColor(m_color);
         plotInformation.setPlotTitle(m_title);
         plotInformation.setDrawPoints(false);
+        plotInformation.setDrawGap(true);
         HashMap<String, String> plotInfo = new HashMap();
         plotInfo.put("Apex Int.", DataFormat.formatWithGroupingSep(m_peakel.getApexIntensity(), 0));
         plotInformation.setPlotInfo(plotInfo);

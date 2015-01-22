@@ -719,13 +719,14 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     }
         
     public boolean fetchQuantitation() {
-
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();       
         EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_project.getId()).getEntityManagerFactory().createEntityManager();
+        EntityManager entityManagerLCMS = DataStoreConnectorFactory.getInstance().getLcMsDbConnector(m_project.getId()).getEntityManagerFactory().createEntityManager();
         try {
 
             entityManagerUDS.getTransaction().begin();
             entityManagerMSI.getTransaction().begin();
+            entityManagerLCMS.getTransaction().begin();
 
             // force initialization of lazy data (data will be needed for the display of properties)
             Dataset datasetDB = entityManagerUDS.find(Dataset.class, m_dataset.getId());
@@ -768,7 +769,20 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                         }
                         dqc.setResultFileName(resultFileName);
                         dqc.setRawFilePath(rawPath);
-                        
+                        // search for raw map in LCMS database
+                        String queryLcms = "SELECT pmrm.rawMap.id "
+                                + "FROM fr.proline.core.orm.lcms.Map  m, ProcessedMap pm, ProcessedMapRawMapMapping pmrm  "
+                                + "WHERE m.id =:processedMapId "
+                                + "AND m.id = pm.id "
+                                + "AND pm.id = pmrm.id.processedMapId ";
+                        TypedQuery<Long> queryRawMapLcms = entityManagerLCMS.createQuery(queryLcms, Long.class);
+                        queryRawMapLcms.setParameter("processedMapId", qc.getLcmsMapId());
+                        try {
+                            Long rawMapId = queryRawMapLcms.getSingleResult();
+                            dqc.setLcmsRawMapId(rawMapId);
+                        }catch (NoResultException | NonUniqueResultException e) {
+
+                        }
                         listDQuantChannels.add(dqc);
                     }
                     DMasterQuantitationChannel dMaster = new DMasterQuantitationChannel(masterQuantitationChannel.getId(), masterQuantitationChannel.getName(), 
@@ -840,6 +854,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             
             entityManagerUDS.getTransaction().commit();
             entityManagerMSI.getTransaction().commit();
+            entityManagerLCMS.getTransaction().commit();
 
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);
@@ -847,6 +862,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             try {
                 entityManagerUDS.getTransaction().rollback();
                 entityManagerMSI.getTransaction().rollback();
+                entityManagerLCMS.getTransaction().rollback();
             } catch (Exception rollbackException) {
                 m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
             }
@@ -854,6 +870,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         } finally {
             entityManagerUDS.close();
             entityManagerMSI.close();
+            entityManagerLCMS.close();
         }
 
         return true;

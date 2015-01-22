@@ -762,8 +762,8 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                     if (listIds != null && !listIds.isEmpty()) {
                         String queryPeakelLoadS = "SELECT p "
                                 + "FROM fr.proline.core.orm.lcms.Peakel p "
-                                + "WHERE p.id IN (:listId) "
-                                + "ORDER BY p.id ASC ";
+                                + "WHERE p.id IN (:listId) ";
+                                //+ "ORDER BY p.id ASC ";
                         TypedQuery<Peakel> queryPeakelLoad = entityManagerLCMS.createQuery(queryPeakelLoadS, Peakel.class);
                         queryPeakelLoad.setParameter("listId", listIds);
                         List<Peakel> peakelResultList = queryPeakelLoad.getResultList();

@@ -990,8 +990,20 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             // *** load dataset for specified id
             TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name,  d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number)  FROM Dataset d WHERE d.id=:dsId", DDataset.class);
             dataSetQuery.setParameter("dsId", m_datasetId);
-            DDataset ddataSet = dataSetQuery.getSingleResult();
-            m_datasetList.add(ddataSet);
+            DDataset ddataSet = null;
+            try{
+                ddataSet = dataSetQuery.getSingleResult();
+                m_datasetList.add(ddataSet);
+            }catch(NoResultException e) {
+                m_logger.error(getClass().getSimpleName()+" failed -- Dataset with id="+m_datasetId+" doesn't exist anymore in the database", e);
+                m_taskError = new TaskError(e);
+                try {
+                    entityManagerUDS.getTransaction().rollback();
+                } catch (Exception rollbackException) {
+                    m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+                }
+            return false;
+            }
                 
             TypedQuery<Aggregation>  aggregationQuery = entityManagerUDS.createQuery("SELECT d.aggregation FROM Dataset d WHERE d.id = :dsId", Aggregation.class);
             aggregationQuery.setParameter("dsId", m_datasetId);

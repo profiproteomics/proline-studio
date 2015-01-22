@@ -22,7 +22,9 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import java.util.ArrayList;
 import java.util.Map;
+import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
+import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,6 +125,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
 
                                 if (!success) {
                                     ((WSCResultPanel) m_panel).setData(null);
+                                    JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "Error while loading SpectralCount");
                                 } else {
                                     ((WSCResultPanel) m_panel).setData(readScResult);
                                 }

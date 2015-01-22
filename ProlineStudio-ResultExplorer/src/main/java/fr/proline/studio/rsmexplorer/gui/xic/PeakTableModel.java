@@ -41,6 +41,7 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
     private List<Peak> m_peaks = null;
     private Color m_color = null;
     private String m_title = null;
+    private Integer m_isotopeIndex = null;
 
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
@@ -128,10 +129,11 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         return null; // should never happen
     }
 
-    public void setData(Long taskId, Feature feature, Peakel peakel, List<Peak> peaks, Color color, String title) {
+    public void setData(Long taskId, Feature feature, Peakel peakel, Integer isotopeIndex, List<Peak> peaks, Color color, String title) {
         this.m_peaks = peaks;
         this.m_feature = feature;
         this.m_peakel = peakel;
+        this.m_isotopeIndex = isotopeIndex ;
         this.m_color = color;
         this.m_title = title;
         m_filteredIds = null;
@@ -421,6 +423,7 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         plotInformation.setDrawGap(true);
         HashMap<String, String> plotInfo = new HashMap();
         plotInfo.put("Apex Int.", DataFormat.formatWithGroupingSep(m_peakel.getApexIntensity(), 0));
+        plotInfo.put("Isotope index", Integer.toString(m_isotopeIndex));
         plotInformation.setPlotInfo(plotInfo);
         return plotInformation;
     }

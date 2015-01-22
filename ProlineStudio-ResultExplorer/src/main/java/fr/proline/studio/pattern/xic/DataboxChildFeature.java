@@ -147,7 +147,7 @@ public class DataboxChildFeature extends AbstractDataBox {
                         if (m_peakList.size() > i && !m_peakList.get(i).isEmpty() ) {
                             List<Peak> peaks = m_peakList.get(i).get(0);
                             XicPeakPanel peakPanel = new XicPeakPanel();
-                            peakPanel.setData((long) -1, feature, peakel, peaks, color,title, true);
+                            peakPanel.setData((long) -1, feature, peakel, 0, peaks, color,title, true);
                             list.add(peakPanel);     
                         }
                     }

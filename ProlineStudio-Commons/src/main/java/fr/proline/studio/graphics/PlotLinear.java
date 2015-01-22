@@ -365,7 +365,7 @@ public class PlotLinear extends PlotAbstract {
                             addMarker(labelMarker);
                         }
                         j++;
-                        yL = yLabel * (j+1)*1.1;
+                        yL = yLabel * 1.1;
                         // update xMin and xMax if needed
                         m_xMin = Math.min(m_xMin, minForMarker);
                         m_xMax = Math.max(m_xMax, maxForMarker);

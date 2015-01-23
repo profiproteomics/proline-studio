@@ -15,6 +15,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
+import fr.proline.studio.rsmexplorer.gui.renderer.TimestampRenderer;
 import fr.proline.studio.rsmexplorer.tree.identification.IdTransferable;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
@@ -24,12 +25,9 @@ import java.awt.GridBagLayout;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.*;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.AbstractTableModel;
 import org.openide.nodes.Sheet;
 import org.openide.util.NbBundle;
 
@@ -132,6 +130,8 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             setDragEnabled(true);
             TableTransferHandler handler = new TableTransferHandler();
             setTransferHandler(handler);
+            
+            setDefaultRenderer(Timestamp.class, new TimestampRenderer( getDefaultRenderer(String.class)) );
             
             // remove mouse listeners and put them back later
             // (our listener must be executed first so the selection
@@ -418,6 +418,8 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             switch (col) {
                 case COLTYPE_RSET_ID:
                     return Long.class;
+                case COLTYPE_MSISEARCH_SEARCH_DATE:
+                    return Timestamp.class;
                 default:
                     return String.class;
             }
@@ -478,11 +480,9 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
                 case COLTYPE_MSISEARCH_SEARCH_DATE: {
                     MsiSearch msiSearch = rset.getMsiSearch();
                     if (msiSearch == null) {
-                        return "";
+                        return null;
                     }
-                    Timestamp timeStamp = msiSearch.getDate();
-                    return m_df.format(timeStamp);
-
+                    return msiSearch.getDate();
                 }
             }
             return null; // should not happen
@@ -494,7 +494,6 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         }
         
     }
-    private static final DateFormat m_df = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
     
     public class TableTransferHandler extends TransferHandler {
 
@@ -543,12 +542,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             return new IdTransferable(transferKey, m_dataBox.getProjectId());
             
         }
-        
-        /*@Override
-        public void exportAsDrag(JComponent comp, InputEvent e, int action) {
-            super.exportAsDrag(comp, e, action);
 
-        }*/
 
         @Override
         protected void exportDone(JComponent source, Transferable data, int action) {

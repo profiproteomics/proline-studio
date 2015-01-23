@@ -90,6 +90,7 @@ public enum PlotType {
                 acceptedValues.add(Double.class);
                 acceptedValues.add(Float.class);
                 acceptedValues.add(Integer.class);
+                acceptedValues.add(String.class);
                 break;
         }
         return acceptedValues;

@@ -331,25 +331,56 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                     givePriorityTo(m_taskId, row, col);
                 }else{
                     // retrieve quantProteinSet for the quantChannelId
-                    Map<Long, DQuantProteinSet> quantProteinSetByQchIds = proteinSet.getQuantProteinSetByQchIds() ;
+                    int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                    int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                    Map<Long, DQuantProteinSet> quantProteinSetByQchIds = proteinSet.getQuantProteinSetByQchIds();
                     if (quantProteinSetByQchIds == null) {
-                        lazyData.setData("");
+                        
+                        switch (id) {
+                            case COLTYPE_SELECTION_LEVEL:
+                                lazyData.setData(Integer.valueOf(0));
+                                break;
+                            case COLTYPE_ABUNDANCE:
+                                lazyData.setData(Double.valueOf(0));
+                                break;
+                            case COLTYPE_RAW_ABUNDANCE:
+                                lazyData.setData(Double.valueOf(0));
+                                break;
+                            case COLTYPE_PSM:
+                                lazyData.setData(Integer.valueOf(0));
+                                break;
+                        }
                     }else{
-                        int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
-                        int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
                         DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(m_quantChannels[nbQc].getId()) ;
                         if (quantProteinSet == null) {
-                            lazyData.setData("");
+                            switch (id) {
+                                case COLTYPE_SELECTION_LEVEL:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
+                                case COLTYPE_ABUNDANCE:
+                                    lazyData.setData(Double.valueOf(0));
+                                    break;
+                                case COLTYPE_RAW_ABUNDANCE:
+                                    lazyData.setData(Double.valueOf(0));
+                                    break;
+                                case COLTYPE_PSM:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
+                            }
                         } else {
-                            switch (id ) {
-                                case COLTYPE_SELECTION_LEVEL : lazyData.setData(quantProteinSet.getSelectionLevel());
-                                     break;
-                                case COLTYPE_ABUNDANCE : lazyData.setData(quantProteinSet.getAbundance());
-                                     break;
-                                case COLTYPE_RAW_ABUNDANCE : lazyData.setData(quantProteinSet.getRawAbundance());
-                                     break;
-                                case COLTYPE_PSM : lazyData.setData(quantProteinSet.getPeptideMatchesCount());
-                                     break;
+                            switch (id) {
+                                case COLTYPE_SELECTION_LEVEL:
+                                    lazyData.setData(quantProteinSet.getSelectionLevel());
+                                    break;
+                                case COLTYPE_ABUNDANCE:
+                                    lazyData.setData(quantProteinSet.getAbundance().isNaN() ? Double.valueOf(0) : quantProteinSet.getAbundance());
+                                    break;
+                                case COLTYPE_RAW_ABUNDANCE:
+                                    lazyData.setData(quantProteinSet.getRawAbundance().isNaN() ? Double.valueOf(0) : quantProteinSet.getRawAbundance());
+                                    break;
+                                case COLTYPE_PSM:
+                                    lazyData.setData(quantProteinSet.getPeptideMatchesCount());
+                                    break;
                             }
                         }
                     }

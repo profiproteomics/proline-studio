@@ -461,7 +461,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                     if (cluster == null) {
                         lazyData.setData("");
                     }else{
-                        lazyData.setData(cluster.getClusterId());
+                        lazyData.setData(String.valueOf(cluster.getClusterId()));
                     }
                 }
             }
@@ -474,25 +474,51 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                 } else {
 
                     // retrieve quantPeptide for the quantChannelId
+                    int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                    int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
                     Map<Long, DQuantPeptide> quantPeptideByQchIds = peptide.getQuantPeptideByQchIds();
                     if (quantPeptideByQchIds == null) {
-                        lazyData.setData("");
+                         switch (id) {
+                                case COLTYPE_SELECTION_LEVEL:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
+                                case COLTYPE_ABUNDANCE:
+                                    lazyData.setData(Double.valueOf(0));
+                                    break;
+                                case COLTYPE_RAW_ABUNDANCE:
+                                    lazyData.setData(Double.valueOf(0));
+                                    break;
+                                case COLTYPE_PSM:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
+                            }
                     } else {
-                        int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
-                        int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
                         DQuantPeptide quantPeptide = quantPeptideByQchIds.get(m_quantChannels[nbQc].getId());
                         if (quantPeptide == null) {
-                            lazyData.setData("");
+                             switch (id) {
+                                case COLTYPE_SELECTION_LEVEL:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
+                                case COLTYPE_ABUNDANCE:
+                                    lazyData.setData(Double.valueOf(0));
+                                    break;
+                                case COLTYPE_RAW_ABUNDANCE:
+                                    lazyData.setData(Double.valueOf(0));
+                                    break;
+                                case COLTYPE_PSM:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
+                            }
                         } else {
                             switch (id) {
                                 case COLTYPE_SELECTION_LEVEL:
                                     lazyData.setData(quantPeptide.getSelectionLevel());
                                     break;
                                 case COLTYPE_ABUNDANCE:
-                                    lazyData.setData(quantPeptide.getAbundance().isNaN() ? "" : quantPeptide.getAbundance());
+                                    lazyData.setData(quantPeptide.getAbundance().isNaN() ? Double.valueOf(0) : quantPeptide.getAbundance());
                                     break;
                                 case COLTYPE_RAW_ABUNDANCE:
-                                    lazyData.setData(quantPeptide.getRawAbundance().isNaN() ? "" : quantPeptide.getRawAbundance());
+                                    lazyData.setData(quantPeptide.getRawAbundance().isNaN() ? Double.valueOf(0) : quantPeptide.getRawAbundance());
                                     break;
                                 case COLTYPE_PSM:
                                     lazyData.setData(quantPeptide.getPeptideMatchesCount());
@@ -808,7 +834,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                 return CompareValueRenderer.CompareValue.class; 
             }
             case COLTYPE_PEPTIDE_CLUSTER: {
-                return Integer.class; 
+                return String.class; 
             }
             default: {
                 int nbQc = (columnIndex - m_columnNames.length) / m_columnNamesQC.length;

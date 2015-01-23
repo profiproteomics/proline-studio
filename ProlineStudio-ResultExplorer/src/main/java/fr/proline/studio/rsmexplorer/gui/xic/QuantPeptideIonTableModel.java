@@ -241,25 +241,51 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
                 } else {
 
                     // retrieve quantPeptideIon for the quantChannelId
+                    int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                    int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
                     Map<Long, DQuantPeptideIon> quantPeptideIonByQchIds = peptideIon.getQuantPeptideIonByQchIds();
                     if (quantPeptideIonByQchIds == null) {
-                        lazyData.setData("");
+                        switch (id) {
+                                case COLTYPE_SELECTION_LEVEL:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
+                                case COLTYPE_ABUNDANCE:
+                                    lazyData.setData(Double.valueOf(0));
+                                    break;
+                                case COLTYPE_RAW_ABUNDANCE:
+                                    lazyData.setData(Double.valueOf(0));
+                                    break;
+                                case COLTYPE_PSM:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
+                            }
                     } else {
-                        int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
-                        int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
                         DQuantPeptideIon quantPeptideIon = quantPeptideIonByQchIds.get(m_quantChannels[nbQc].getId());
                         if (quantPeptideIon == null) {
-                            lazyData.setData("");
+                            switch (id) {
+                                case COLTYPE_SELECTION_LEVEL:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
+                                case COLTYPE_ABUNDANCE:
+                                    lazyData.setData(Double.valueOf(0));
+                                    break;
+                                case COLTYPE_RAW_ABUNDANCE:
+                                    lazyData.setData(Double.valueOf(0));
+                                    break;
+                                case COLTYPE_PSM:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
+                            }
                         } else {
                             switch (id) {
                                 case COLTYPE_SELECTION_LEVEL:
                                     lazyData.setData(quantPeptideIon.getSelectionLevel());
                                     break;
                                 case COLTYPE_ABUNDANCE:
-                                    lazyData.setData(quantPeptideIon.getAbundance());
+                                    lazyData.setData(quantPeptideIon.getAbundance().isNaN() ? Double.valueOf(0) : quantPeptideIon.getAbundance());
                                     break;
                                 case COLTYPE_RAW_ABUNDANCE:
-                                    lazyData.setData(quantPeptideIon.getRawAbundance());
+                                    lazyData.setData(quantPeptideIon.getRawAbundance().isNaN() ? Double.valueOf(0) : quantPeptideIon.getRawAbundance());
                                     break;
                                 case COLTYPE_PSM:
                                     lazyData.setData(quantPeptideIon.getPeptideMatchesCount());

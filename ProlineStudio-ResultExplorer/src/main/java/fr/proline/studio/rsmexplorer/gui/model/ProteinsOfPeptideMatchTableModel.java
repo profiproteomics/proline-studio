@@ -127,7 +127,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
                     lazyData.setData(new Float(bioSequence.getMass()));
                     return lazyData;
                 } else if (proteinMatch.isDBiosequenceSet()) {
-                    lazyData.setData("");
+                    lazyData.setData(Float.NaN); // unknown
                     return lazyData;
                 }
                 

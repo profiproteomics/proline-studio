@@ -429,7 +429,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
                     DMsQuery msQuery = peptideMatch.getMsQuery();
                     Float precursorIntenstity = msQuery.getPrecursorIntensity();
                     if (precursorIntenstity == null) {
-                        lazyData.setData("");
+                        lazyData.setData(Float.NaN);
                     } else {
                         lazyData.setData(precursorIntenstity);
                     }  

@@ -341,10 +341,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                                 lazyData.setData(Integer.valueOf(0));
                                 break;
                             case COLTYPE_ABUNDANCE:
-                                lazyData.setData(Double.valueOf(0));
+                                lazyData.setData(Float.valueOf(0));
                                 break;
                             case COLTYPE_RAW_ABUNDANCE:
-                                lazyData.setData(Double.valueOf(0));
+                                lazyData.setData(Float.valueOf(0));
                                 break;
                             case COLTYPE_PSM:
                                 lazyData.setData(Integer.valueOf(0));
@@ -358,10 +358,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                                     lazyData.setData(Integer.valueOf(0));
                                     break;
                                 case COLTYPE_ABUNDANCE:
-                                    lazyData.setData(Double.valueOf(0));
+                                    lazyData.setData(Float.valueOf(0));
                                     break;
                                 case COLTYPE_RAW_ABUNDANCE:
-                                    lazyData.setData(Double.valueOf(0));
+                                    lazyData.setData(Float.valueOf(0));
                                     break;
                                 case COLTYPE_PSM:
                                     lazyData.setData(Integer.valueOf(0));
@@ -373,10 +373,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                                     lazyData.setData(quantProteinSet.getSelectionLevel());
                                     break;
                                 case COLTYPE_ABUNDANCE:
-                                    lazyData.setData(quantProteinSet.getAbundance().isNaN() ? Double.valueOf(0) : quantProteinSet.getAbundance());
+                                    lazyData.setData(quantProteinSet.getAbundance().isNaN() ? Float.valueOf(0) : quantProteinSet.getAbundance());
                                     break;
                                 case COLTYPE_RAW_ABUNDANCE:
-                                    lazyData.setData(quantProteinSet.getRawAbundance().isNaN() ? Double.valueOf(0) : quantProteinSet.getRawAbundance());
+                                    lazyData.setData(quantProteinSet.getRawAbundance().isNaN() ? Float.valueOf(0) : quantProteinSet.getRawAbundance());
                                     break;
                                 case COLTYPE_PSM:
                                     lazyData.setData(quantProteinSet.getPeptideMatchesCount());

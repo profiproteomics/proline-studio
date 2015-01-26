@@ -250,10 +250,10 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
                                     lazyData.setData(Integer.valueOf(0));
                                     break;
                                 case COLTYPE_ABUNDANCE:
-                                    lazyData.setData(Double.valueOf(0));
+                                    lazyData.setData(Float.valueOf(0));
                                     break;
                                 case COLTYPE_RAW_ABUNDANCE:
-                                    lazyData.setData(Double.valueOf(0));
+                                    lazyData.setData(Float.valueOf(0));
                                     break;
                                 case COLTYPE_PSM:
                                     lazyData.setData(Integer.valueOf(0));
@@ -267,10 +267,10 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
                                     lazyData.setData(Integer.valueOf(0));
                                     break;
                                 case COLTYPE_ABUNDANCE:
-                                    lazyData.setData(Double.valueOf(0));
+                                    lazyData.setData(Float.valueOf(0));
                                     break;
                                 case COLTYPE_RAW_ABUNDANCE:
-                                    lazyData.setData(Double.valueOf(0));
+                                    lazyData.setData(Float.valueOf(0));
                                     break;
                                 case COLTYPE_PSM:
                                     lazyData.setData(Integer.valueOf(0));
@@ -282,10 +282,10 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
                                     lazyData.setData(quantPeptideIon.getSelectionLevel());
                                     break;
                                 case COLTYPE_ABUNDANCE:
-                                    lazyData.setData(quantPeptideIon.getAbundance().isNaN() ? Double.valueOf(0) : quantPeptideIon.getAbundance());
+                                    lazyData.setData(quantPeptideIon.getAbundance().isNaN() ? Float.valueOf(0) : quantPeptideIon.getAbundance());
                                     break;
                                 case COLTYPE_RAW_ABUNDANCE:
-                                    lazyData.setData(quantPeptideIon.getRawAbundance().isNaN() ? Double.valueOf(0) : quantPeptideIon.getRawAbundance());
+                                    lazyData.setData(quantPeptideIon.getRawAbundance().isNaN() ? Float.valueOf(0) : quantPeptideIon.getRawAbundance());
                                     break;
                                 case COLTYPE_PSM:
                                     lazyData.setData(quantPeptideIon.getPeptideMatchesCount());

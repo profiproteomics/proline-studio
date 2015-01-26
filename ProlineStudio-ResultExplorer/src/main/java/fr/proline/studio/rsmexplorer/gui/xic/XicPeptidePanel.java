@@ -229,7 +229,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             }
         });
         
-        //toolbar.add(m_graphicsButton);
+        toolbar.add(m_graphicsButton);
         
         return toolbar;
     }

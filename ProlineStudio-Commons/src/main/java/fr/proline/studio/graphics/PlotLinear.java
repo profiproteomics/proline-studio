@@ -525,6 +525,7 @@ public class PlotLinear extends PlotAbstract {
         if (m_dataX.length > 0) {
             int x0 = xAxis.valueToPixel(m_dataX[0]);
             int y0 = yAxis.valueToPixel(m_dataY[0]);
+            boolean isDef0 = !Double.valueOf(m_dataX[0]).isNaN() && !Double.valueOf(m_dataY[0]).isNaN();
 
             for (int i = 0; i < size; i++) {
                 if (useGradient && (this.m_plotInformation == null || this.m_plotInformation.getPlotColor() == null)) {
@@ -538,11 +539,12 @@ public class PlotLinear extends PlotAbstract {
                 if (m_isDrawPoints && isDef) {
                     g.fillOval(x - 3, y - 3, 6, 6);
                 }
-                if (m_isDrawGap || (!m_isDrawGap && isDef)) {
+                if (m_isDrawGap || (!m_isDrawGap && isDef && isDef0)) {
                     g.drawLine(x0, y0, x, y);
                 }
                 x0 = x;
                 y0 = y;
+                isDef0 = isDef;
 
             }
         }

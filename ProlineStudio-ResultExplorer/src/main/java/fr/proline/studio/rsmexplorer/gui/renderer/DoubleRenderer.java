@@ -12,9 +12,16 @@ import javax.swing.table.TableCellRenderer;
 public class DoubleRenderer implements TableCellRenderer  {
     
     private TableCellRenderer m_defaultRenderer;
+    private int m_nbDigits = 2;
     
     public DoubleRenderer(TableCellRenderer defaultRenderer) {
         m_defaultRenderer = defaultRenderer;
+        m_nbDigits = 2;
+    }
+    
+    public DoubleRenderer(TableCellRenderer defaultRenderer, int nbDigits) {
+        m_defaultRenderer = defaultRenderer;
+        m_nbDigits = nbDigits;
     }
     
     @Override
@@ -22,7 +29,7 @@ public class DoubleRenderer implements TableCellRenderer  {
 
 
         Double d = (Double) value;
-        String formatedValue = (d != null) ? DataFormat.format(d.doubleValue(), 2) : "";
+        String formatedValue = (d != null) ? DataFormat.format(d.doubleValue(), m_nbDigits) : "";
 
         
 

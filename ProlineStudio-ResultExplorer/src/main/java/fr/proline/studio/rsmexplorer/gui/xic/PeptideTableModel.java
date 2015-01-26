@@ -284,7 +284,7 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
     public int getBestXAxisColIndex(PlotType plotType) {
         switch (plotType) {
             case LINEAR_PLOT:
-                return COLTYPE_QC_ID;
+                return COLTYPE_QC_NAME;
         }
         return -1;
     }

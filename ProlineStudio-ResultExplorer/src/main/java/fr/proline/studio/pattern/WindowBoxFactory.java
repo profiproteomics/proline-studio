@@ -201,17 +201,17 @@ public class WindowBoxFactory {
     public static WindowBox getXicQuantProteinSetWindowBox(String name) {
 
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[5];
+        AbstractDataBox[] boxes = new AbstractDataBox[6];
         boxes[0] = new DataboxXicProteinSet();
         boxes[1] = new DataboxXicPeptideSet();
-        //boxes[2] = new DataboxMultiGraphics(false, true);
-        //boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-        boxes[2] = new DataboxXicPeptideIon();
-        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
-        boxes[3] = new DataboxChildFeature();
-        boxes[3].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-        boxes[4] =new DataboxMultiGraphics(false, false);
-        boxes[4].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
+        boxes[2] = new DataboxMultiGraphics(false, true);
+        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+        boxes[3] = new DataboxXicPeptideIon();
+        boxes[3].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
+        boxes[4] = new DataboxChildFeature();
+        boxes[4].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
+        boxes[5] =new DataboxMultiGraphics(false, false);
+        boxes[5].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));

@@ -256,11 +256,23 @@ public class PlotLinear extends PlotAbstract {
         m_dataY = new double[size];
         m_selected = new boolean[size];
 
+        boolean xAsEnum = m_plotPanel.getXAxis().isEnum();
+        boolean yAsEnum = m_plotPanel.getYAxis().isEnum();
+        
         for (int i = 0; i < size; i++) {
-            Object value = m_compareDataInterface.getDataValueAt(i, m_colX);
-            m_dataX[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
-            value = m_compareDataInterface.getDataValueAt(i, m_colY);
-            m_dataY[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
+            if (xAsEnum) {
+                m_dataX[i] = i;
+            } else {
+                Object value = m_compareDataInterface.getDataValueAt(i, m_colX);
+                m_dataX[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
+            }
+            
+            if (yAsEnum) {
+                 m_dataY[i] = i;
+            } else {
+                Object value = m_compareDataInterface.getDataValueAt(i, m_colY);
+                m_dataY[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
+            }
             m_selected[i] = false;
         }
 
@@ -514,7 +526,7 @@ public class PlotLinear extends PlotAbstract {
             int x0 = xAxis.valueToPixel(m_dataX[0]);
             int y0 = yAxis.valueToPixel(m_dataY[0]);
 
-            for (int i = 0; i < size - 1; i++) {
+            for (int i = 0; i < size; i++) {
                 if (useGradient && (this.m_plotInformation == null || this.m_plotInformation.getPlotColor() == null)) {
                     plotColor = getColorInGradient(gradientPaint, m_gradientParamValues[i]);
                 }

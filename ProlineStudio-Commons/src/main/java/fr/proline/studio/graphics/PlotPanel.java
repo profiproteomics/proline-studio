@@ -1,5 +1,7 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.graphics.Axis.EnumXInterface;
+import fr.proline.studio.graphics.Axis.EnumYInterface;
 import fr.proline.studio.parameter.ParameterList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -24,7 +26,7 @@ import javax.swing.event.PopupMenuListener;
  * Panel to display data with an X and Y Axis
  * @author JM235353
  */
-public class PlotPanel extends JPanel implements MouseListener, MouseMotionListener {
+public class PlotPanel extends JPanel implements MouseListener, MouseMotionListener, EnumXInterface, EnumYInterface {
     
     private static final Color PANEL_BACKGROUND_COLOR = UIManager.getColor ("Panel.background");
     
@@ -318,14 +320,14 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     
     public XAxis getXAxis() {
         if (m_xAxis == null) {
-            m_xAxis = new XAxis();
+            m_xAxis = new XAxis(this);
         }
         return m_xAxis;
     }
     
     public YAxis getYAxis() {
         if (m_yAxis == null) {
-            m_yAxis = new YAxis();
+            m_yAxis = new YAxis(this);
         }
         return m_yAxis;
     }
@@ -540,6 +542,22 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     
     public void setGridListener(GridListener gridListener) {
         m_gridListener = gridListener;
+    }
+
+    @Override
+    public String getEnumValueX(int index) {
+        if ((m_plots == null) || (m_plots.isEmpty())) {
+            return null;
+        }
+        return m_plots.get(0).getEnumValueX(index);
+    }
+
+    @Override
+    public String getEnumValueY(int index) {
+        if ((m_plots == null) || (m_plots.isEmpty())) {
+            return null;
+        }
+        return m_plots.get(0).getEnumValueY(index);
     }
     
     

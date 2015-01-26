@@ -14,8 +14,8 @@ public class XAxis extends Axis {
 
     private int m_lastWidth;
     
-    public XAxis() {
-
+    public XAxis(PlotPanel p) {
+        super(p);
     }
 
     @Override
@@ -105,6 +105,7 @@ public class XAxis extends Axis {
 
         double multForRounding = Math.pow(10, digits);
 
+
         double x = m_minTick;
         int pX = pixelStart;
         int previousEndX = -Integer.MAX_VALUE;
@@ -112,21 +113,32 @@ public class XAxis extends Axis {
         while (true) {
             g.drawLine(pX, m_y, pX, m_y + 4);
 
-            // round x
-            double xDisplay = x;
-            if (digits > 0) {
-                xDisplay = StrictMath.round(xDisplay * multForRounding) / multForRounding;
+            int stringWidth;
+            String label;
+            if (m_isEnum) {
+                label = m_plotPanel.getEnumValueX((int) Math.round(x)); //JPM.WART
+                stringWidth = m_valuesFontMetrics.stringWidth(label);
+                if (stringWidth > m_lastWidth) {
+                    m_lastWidth = stringWidth;
+                }
+            } else {
+                // round x
+                double xDisplay = x;
+                if (digits > 0) {
+                    xDisplay = StrictMath.round(xDisplay * multForRounding) / multForRounding;
+                }
+
+                label = m_df.format(xDisplay);
+                stringWidth = m_valuesFontMetrics.stringWidth(label);
+                if (stringWidth > m_lastWidth) {
+                    m_lastWidth = stringWidth;
+                }
             }
 
-            String s = m_df.format(xDisplay);
-            int stringWidth = m_valuesFontMetrics.stringWidth(s);
-            if (stringWidth>m_lastWidth) {
-                m_lastWidth = stringWidth;
-            }
 
             int posX = pX - stringWidth / 2;
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
-                g.drawString(s, posX, m_y + height + 4);
+                g.drawString(label, posX, m_y + height + 4);
                 previousEndX = posX + stringWidth;
             }
 

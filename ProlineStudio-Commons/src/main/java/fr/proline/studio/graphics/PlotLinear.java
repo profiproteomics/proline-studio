@@ -612,4 +612,23 @@ public class PlotLinear extends PlotAbstract {
     public void parametersChanged() {
         // nothing to do
     }
+    
+    @Override
+    public String getEnumValueX(int index) {
+        if ((index < 0) || (index >= m_dataX.length)) {
+            return "";
+        }
+
+        return m_compareDataInterface.getDataValueAt(index, m_colX).toString();
+
+    }
+
+    @Override
+    public String getEnumValueY(int index) {
+        if ((index < 0) || (index >= m_dataY.length)) {
+            return "";
+        }
+
+        return m_compareDataInterface.getDataValueAt(index, m_colY).toString();
+    }
 }

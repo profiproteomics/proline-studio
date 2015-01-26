@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * Base class for all types of plot
  * @author JM235353
  */
-public abstract class PlotAbstract {
+public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInterface {
     
     protected PlotType m_plotType;
     
@@ -59,19 +59,21 @@ public abstract class PlotAbstract {
         m_colX = colX;
         m_colY = colY;
         m_parameterZ = parameterZ;
+        updateAxisSpecificities();
         update();
-        updateAxisInteger();
     }
-    public void updateAxisInteger() {
+    public void updateAxisSpecificities() {
         if ((needsXAxis()) && (m_colX != -1)) {
             Class xClass = m_compareDataInterface.getDataColumnClass(m_colX);
-            boolean isIntegerX = ((xClass.equals(Integer.class)) || (xClass.equals(Long.class)));
-            m_plotPanel.getXAxis().setIsInteger(isIntegerX);
+            boolean isIntegerX = ((xClass.equals(Integer.class)) || (xClass.equals(Long.class)) || (xClass.equals(String.class)));
+            boolean isEnumX = (xClass.equals(String.class));
+            m_plotPanel.getXAxis().setSpecificities(isIntegerX, isEnumX);
         }
         if ((needsYAxis()) && (m_colY != -1)) {
             Class yClass = m_compareDataInterface.getDataColumnClass(m_colY);
-            boolean isIntegerY = ((yClass.equals(Integer.class)) || (yClass.equals(Long.class)));
-            m_plotPanel.getYAxis().setIsInteger(isIntegerY);
+            boolean isIntegerY = ((yClass.equals(Integer.class)) || (yClass.equals(Long.class))  || (yClass.equals(String.class)));
+            boolean isEnumY = (yClass.equals(String.class));
+            m_plotPanel.getYAxis().setSpecificities(isIntegerY, isEnumY);
         }
     }
     public abstract void update();
@@ -125,5 +127,9 @@ public abstract class PlotAbstract {
     
     public abstract boolean isMouseOnPlot(double x, double y);
     
+    public abstract String getEnumValueX(int index);
+
+    public abstract String getEnumValueY(int index);
+
 
 }

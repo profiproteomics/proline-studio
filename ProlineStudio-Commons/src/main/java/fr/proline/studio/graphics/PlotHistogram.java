@@ -415,5 +415,15 @@ public class PlotHistogram extends PlotAbstract {
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;
     }
+
+    @Override
+    public String getEnumValueX(int index) {
+        return null; // should not be called
+    }
+
+    @Override
+    public String getEnumValueY(int index) {
+        return null; // should not be called
+    }
     
 }

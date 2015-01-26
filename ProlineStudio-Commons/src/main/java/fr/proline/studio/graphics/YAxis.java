@@ -15,7 +15,8 @@ public class YAxis extends Axis {
 
     private int m_lastHeight;
     
-    public YAxis() {
+    public YAxis(PlotPanel p) {
+        super(p);
     }
 
     @Override
@@ -116,21 +117,37 @@ public class YAxis extends Axis {
         int previousEndY = Integer.MAX_VALUE;
         while (true) {
 
-            // round y
-            double yDisplay = y;
-            if (digits > 0) {
-                yDisplay = StrictMath.round(yDisplay * multForRounding) / multForRounding;
+
+
+            String label;
+            int stringWidth;
+            
+            
+            
+            if (m_isEnum) {
+                label = m_plotPanel.getEnumValueY((int) Math.round(y)); //JPM.WART
+                stringWidth = m_valuesFontMetrics.stringWidth(label);
+                int height = (int) Math.round(StrictMath.ceil(m_valuesFontMetrics.getLineMetrics(label, g).getHeight()));
+                if (height > m_lastHeight) {
+                    m_lastHeight = height;
+                }
+            } else {
+                // round y
+                double yDisplay = y;
+                if (digits > 0) {
+                    yDisplay = StrictMath.round(yDisplay * multForRounding) / multForRounding;
+                }
+                label = m_df.format(yDisplay);
+                stringWidth = m_valuesFontMetrics.stringWidth(label);
+                int height = (int) Math.round(StrictMath.ceil(m_valuesFontMetrics.getLineMetrics(label, g).getHeight()));
+                if (height > m_lastHeight) {
+                    m_lastHeight = height;
+                }
             }
 
-            String s = m_df.format(yDisplay);
-            int stringWidth = m_valuesFontMetrics.stringWidth(s);
-            int height = (int) Math.round(StrictMath.ceil(m_valuesFontMetrics.getLineMetrics(s, g).getHeight()));
-            if (height>m_lastHeight) {
-                m_lastHeight = height;
-            }
             
             if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to overlap labels
-                g.drawString(s, m_x + m_width - stringWidth - 6, pY + halfAscent);
+                g.drawString(label, m_x + m_width - stringWidth - 6, pY + halfAscent);
                 g.drawLine(m_x + m_width, pY, m_x + m_width - 4, pY);
                 previousEndY = pY;
             }

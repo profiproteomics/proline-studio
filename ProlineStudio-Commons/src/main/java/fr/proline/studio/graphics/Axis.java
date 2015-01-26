@@ -40,26 +40,40 @@ public abstract class Axis {
     protected boolean m_selected = false;
     
     protected boolean m_isInteger = false;
+    protected boolean m_isEnum = false;
     
-    public Axis() {
+    protected PlotPanel m_plotPanel;
+    
+    public Axis(PlotPanel p) {
+        m_plotPanel = p;
+    }
+    
+    public void setSpecificities(boolean isInteger, boolean isEnum) {
+        m_isInteger = isInteger;
+        m_isEnum = isEnum;
     }
 
+    public boolean isEnum() {
+        return m_isEnum;
+    }
+
+    
     public void setLog(boolean log) {
         m_log = log;
         m_df = null; // reinit for display
     }
+    
+   
     
     public boolean isLog() {
         return m_log;
     }
     
     public boolean canBeInLog() {
-        return (m_minValue>=10e-9);
+        return (m_minValue>=10e-9) && (!m_isEnum);
     }
     
-    public void setIsInteger(boolean v) {
-        m_isInteger = v;
-    }
+
     
     public void setSize(int x, int y, int width, int height) {
         m_x = x;
@@ -146,4 +160,13 @@ public abstract class Axis {
     public DecimalFormat getExternalDecimalFormat() {
         return m_dfPlot;
     } 
+    
+    
+    public interface EnumXInterface {
+        public String getEnumValueX(int index);
+    }
+    
+    public interface EnumYInterface {
+        public String getEnumValueY(int index);
+    }
 }

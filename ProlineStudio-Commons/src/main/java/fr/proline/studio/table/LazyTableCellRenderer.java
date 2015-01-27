@@ -4,6 +4,7 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
 /**
  * Renderer for LazyData : 
@@ -15,14 +16,26 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class LazyTableCellRenderer extends DefaultTableCellRenderer {
 
+    private TableCellRenderer m_childRenderer = null;
+    
     public LazyTableCellRenderer() {
         setIcon(IconManager.getIcon(IconManager.IconType.HOUR_GLASS));
+    }
+    
+    public LazyTableCellRenderer(TableCellRenderer childRenderer) {
+        setIcon(IconManager.getIcon(IconManager.IconType.HOUR_GLASS));
+        m_childRenderer = childRenderer;
     }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
         Object data = ((LazyData) value).getData();
+        
+        if (m_childRenderer != null) {
+            return m_childRenderer.getTableCellRendererComponent(table, data, isSelected, hasFocus, row, column);
+        }
+        
         if (data == null) {
             super.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column);
 

@@ -23,13 +23,14 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
+import fr.proline.studio.table.LazyTableCellRenderer;
 import fr.proline.studio.table.TablePopupMouseAdapter;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -207,8 +208,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_quantPeptideIonTable = new QuantPeptideIonTable();
         m_quantPeptideIonTable.setModel(new QuantPeptideIonTableModel((LazyTable)m_quantPeptideIonTable));
         
-        // hide the id column
-        m_quantPeptideIonTable.getColumnExt(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID).setVisible(false);
+        
         
         m_quantPeptideIonTable.setSortable(false);
 
@@ -235,6 +235,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_quantChannels = quantChannels;
         
         ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).setData(taskId, quantChannels, peptideIons);
+        m_quantPeptideIonTable.setTableRenderer();
         m_titleLabel.setText(TABLE_TITLE +" ("+peptideIons.size()+")");
         // select the first row
         if ((peptideIons != null) && (peptideIons.size() > 0)) {
@@ -322,11 +323,17 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         public QuantPeptideIonTable() {
             super(m_peptideIonScrollPane.getVerticalScrollBar() );
             
-            setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
-            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
-            
             addMouseListener(new TablePopupMouseAdapter(this));
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        }
+        
+        public void setTableRenderer() {
+            getColumnModel().getColumn(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ELUTION_TIME).setCellRenderer(new LazyTableCellRenderer(new TimeRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)))));
+            getColumnModel().getColumn(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_MOZ).setCellRenderer(new LazyTableCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
+            
+            setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
+            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
+            
         }
         
         /** 

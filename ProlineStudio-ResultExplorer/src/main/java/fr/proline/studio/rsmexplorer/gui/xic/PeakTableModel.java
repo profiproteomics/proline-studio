@@ -33,8 +33,8 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
     public static final int COLTYPE_PEAK_INTENSITY = 2;
     
     
-    private static final String[] m_columnNames = {"m/z", "Elution Time", "Intensity"};
-    private static final String[] m_toolTipColumns = {"Mass to Charge Ratio", "Elution Time", "Intensity"};
+    private static final String[] m_columnNames = {"m/z", "Elution Time (min)", "Intensity"};
+    private static final String[] m_toolTipColumns = {"Mass to Charge Ratio", "Elution Time (min)", "Intensity"};
 
     private Feature m_feature = null;
     private Peakel m_peakel;
@@ -324,7 +324,7 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
 
             }
             case COLTYPE_PEAK_ELUTION_TIME: {
-                return peak.getElutionTime();
+                return peak.getElutionTime()/60;
 
             }
             case COLTYPE_PEAK_INTENSITY: {
@@ -387,23 +387,23 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         List<Color> scanColor = new ArrayList();
         if(m_feature != null) {
             if (m_feature.getFirstScan() != null) {
-                scanValues.add(new Double(m_feature.getFirstScan().getTime()));
+                scanValues.add(new Double(m_feature.getFirstScan().getTime()/60));
                 scanText.add(" First Scan: ");
                 scanColor.add(m_color);
             }
             if (m_feature.getLastScan() != null) {
-                scanValues.add(new Double(m_feature.getLastScan().getTime()));
+                scanValues.add(new Double(m_feature.getLastScan().getTime()/60));
                 scanText.add(" Last Scan: ");
                 scanColor.add(m_color);
             }
         } else if (m_peakel != null) {
             if (m_peakel.getFirstScan() != null) {
-                scanValues.add(new Double(m_peakel.getFirstScan().getTime()));
+                scanValues.add(new Double(m_peakel.getFirstScan().getTime()/60));
                 scanText.add("First Scan: ");
                 scanColor.add(m_color);
             }
             if (m_peakel.getLastScan() != null) {
-                scanValues.add(new Double(m_peakel.getLastScan().getTime()));
+                scanValues.add(new Double(m_peakel.getLastScan().getTime()/60));
                 scanText.add("Last Scan: ");
                 scanColor.add(m_color);
             }

@@ -41,9 +41,10 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
     
     
     
-    private static final String[] m_columnNames = {"Id", "Map", "m/z", "Charge", "Elution Time", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping"};
-    private static final String[] m_toolTipColumns = {"Feature Id","Map name", "Mass to Charge Ratio", "Charge", "Elution Time", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping"};
-
+    private static final String[] m_columnNames = {"Id", "Map", "m/z", "Charge", "Elution Time (min)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping"};
+    private static final String[] m_toolTipColumns = {"Feature Id","Map name", "Mass to Charge Ratio", "Charge", "Elution Time (min)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping"};
+    private static final String[] m_columnNamesForExport = {"Id", "Map", "m/z", "Charge", "Elution Time (sec)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping"};
+    
     
     private List<Feature> m_features = null;
     private QuantChannelInfo m_quantChannelInfo = null;
@@ -70,7 +71,7 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
     
     @Override
     public String getExportColumnName(int col) {
-        return m_columnNames[col];
+        return m_columnNamesForExport[col];
         
     }
 

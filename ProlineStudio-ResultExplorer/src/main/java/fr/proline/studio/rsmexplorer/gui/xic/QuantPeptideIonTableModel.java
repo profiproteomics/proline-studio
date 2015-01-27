@@ -32,7 +32,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
     public static final int COLTYPE_PEPTIDE_ION_CHARGE = 2;
     public static final int COLTYPE_PEPTIDE_ION_MOZ = 3;
     public static final int COLTYPE_PEPTIDE_ION_ELUTION_TIME = 4;
-    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Charge", "m/z", "<html>Elution<br/>time (s)</html>"};
+    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Charge", "m/z", "<html>Elution<br/>time (min)</html>"};
     private static final String[] m_columnNamesForFilter = {"Id", "Peptide Sequence", "Charge", "m/z", "Elution time"};
     private static final String[] m_toolTipColumns = {"MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Charge", "Mass to Charge Ratio", "Elution time"};
 

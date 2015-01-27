@@ -494,19 +494,29 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             return;
         }
         String s =  "<html>";
+        int nbPlotTooltip = 0;
         boolean hasToolTip = false;
+        boolean hasMore = false;
         for (PlotAbstract plot : m_plots) {
             plot.setIsPaintMarker(false);
             boolean isPlotSelected = plot.isMouseOnPlot(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
             plot.setIsPaintMarker(isPlotSelected);
             String toolTipForPlot = plot.getToolTipText(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
             if (toolTipForPlot != null && !toolTipForPlot.isEmpty()){
-                s += toolTipForPlot;
+                nbPlotTooltip++;
                 hasToolTip = true;
-                s += "<br/>";
+                if (nbPlotTooltip < 4){
+                    s += toolTipForPlot;
+                    s += "<br/>";
+                }else{
+                    hasMore = true;
+                }
                 
             }
             
+        }
+        if (hasMore) {
+            s += "[...]";
         }
         s += "</html>";
         if (hasToolTip) {

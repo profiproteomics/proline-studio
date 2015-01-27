@@ -52,8 +52,9 @@ public class YAxis extends Axis {
             if (m_titleFont == null) {
                 AffineTransform affineTr = new AffineTransform();
                 affineTr.rotate(-Math.PI / 2);
-                m_titleFont = g.getFont().deriveFont(Font.BOLD, 11).deriveFont(affineTr);
+                m_titleFont = g.getFont().deriveFont(Font.BOLD, 11);
                 m_titleFontMetrics = g.getFontMetrics(m_titleFont);
+                m_titleFont = m_titleFont.deriveFont(affineTr);
             }
             Font prevFont = g.getFont();
 
@@ -69,7 +70,7 @@ public class YAxis extends Axis {
             int ascent = m_titleFontMetrics.getAscent();
             int descent = m_titleFontMetrics.getDescent();
             int baseline = top + ((bottom + 1 - top) / 2) - ((ascent + descent) / 2) + ascent;
-            g.drawString(m_title, baseline, m_y + (m_height - titleWidth) / 2);
+            g.drawString(m_title, baseline, m_y + (m_height + titleWidth) / 2);
 
             // restore font (necessary due to affine transform
             g.setFont(prevFont);

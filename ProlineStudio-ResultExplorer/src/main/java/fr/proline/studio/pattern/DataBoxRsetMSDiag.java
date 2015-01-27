@@ -42,8 +42,8 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
         m_messages_back = new ArrayList<Object>(2); // will contain the return data for msdiag (0: settings: 1:results)
 
         // Name of this databox
-        m_name = "MSDiag databox";
-        m_description = "MSDiag results";
+        m_name = "Statistical databox";
+        m_description = "Statistical results";
         
         m_messages_back.add(resultMessageHashMap); // first element is the settings (as hashmap type)
         

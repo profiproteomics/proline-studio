@@ -15,7 +15,8 @@ public class AxisTicks {
     private double m_calculatedMax;
     private double m_tickSpacing;
     
-    private int m_nbDigits;
+    private int m_nbFractionalDigits;
+    private int m_nbIntegerDigits;
 
     private boolean m_log;
     private boolean m_isInteger;
@@ -51,9 +52,15 @@ public class AxisTicks {
         return m_tickSpacing;
     }
     
-    public int getDigits() {
-        return m_nbDigits;
+    public int getFractionalDigits() {
+        return m_nbFractionalDigits;
     }
+    
+     public int getIntegerDigits() {
+        return m_nbIntegerDigits;
+    }
+    
+    
     
     private void calculate() {
         if (m_log) {
@@ -61,19 +68,22 @@ public class AxisTicks {
             m_calculatedMax = Math.ceil(m_max);
             m_calculatedRange = m_calculatedMax-m_calculatedMin;
             m_tickSpacing = 1;
-            m_nbDigits = 0;
+            m_nbFractionalDigits = 0;
+            m_nbIntegerDigits = 1; // Exponential display : not really used
         } else if (m_isInteger) {
             m_calculatedMin = Math.floor(m_min);
             m_calculatedMax = Math.ceil(m_max);
             m_calculatedRange = m_calculatedMax-m_calculatedMin;
             m_tickSpacing = 1;
-            m_nbDigits = 0;
+            m_nbFractionalDigits = 0;
+            m_nbIntegerDigits = Math.max((int) Math.round(Math.floor(Math.log10(Math.abs(m_calculatedMax)))), (int) Math.round(Math.floor(Math.log10(Math.abs(m_calculatedMin)))));
         } else {
             m_calculatedRange = niceNum(m_max - m_min, false);
             m_tickSpacing = niceNum(m_calculatedRange / (m_maxTicks - 1), true);
-            m_nbDigits = -(int) Math.round(Math.floor(Math.log10(m_calculatedRange / (m_maxTicks - 1))));
+            m_nbFractionalDigits = -(int) Math.round(Math.floor(Math.log10(m_calculatedRange / (m_maxTicks - 1))));
             m_calculatedMin = Math.floor(m_min / m_tickSpacing) * m_tickSpacing;
             m_calculatedMax = Math.ceil(m_max / m_tickSpacing) * m_tickSpacing;
+            m_nbIntegerDigits = Math.max((int) Math.round(Math.floor(Math.log10(Math.abs(Math.ceil(m_calculatedMax))))), (int) Math.round(Math.floor(Math.log10(Math.abs(Math.ceil(m_calculatedMin))))));
         }
     }
 

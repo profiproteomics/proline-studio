@@ -33,7 +33,8 @@ public abstract class Axis {
     
     protected DecimalFormat m_df;
     protected DecimalFormat m_dfPlot;
-    protected int m_digits = -1;
+    protected int m_fractionalDigits = -1;
+    protected int m_integerDigits = -1;
     
     protected boolean m_log = false;
     
@@ -139,22 +140,30 @@ public abstract class Axis {
         return (x>=m_x) && (x<m_x+m_width) && (y>m_y) && (y<m_y+m_height);
     }
     
-    protected DecimalFormat selectDecimalFormat(int digits) {
+    protected DecimalFormat selectDecimalFormat(int fractionalDigits, int integerDigits) {
         String pattern;
         if (m_log) {
             pattern = ("0.0E0");
-        } else if (digits <= 0) {
-            pattern = "#";  // number like "3"
-        } else if (digits > 3) { // 3 is 
-            pattern = ("0.0E0"); // scientific notation for numbers with too much digits "0.0000532"
+        } else if (fractionalDigits <= 0) {
+            // integer value
+            if (integerDigits>4) {
+                pattern = ("0.0E0"); // scientific notation for numbers with too much integerDigits "66666"
+            } else {
+                pattern = "#";  // number like "3"
+            }
+        } else if (fractionalDigits > 3) { // 3 is 
+            pattern = ("0.0E0"); // scientific notation for numbers with too much fractionalDigits "0.0000532"
         } else {
             pattern = "#.";
-            while (digits > 0) {
+            while (fractionalDigits > 0) {
                 pattern += "#";
-                digits--;
+                fractionalDigits--;
             }
         }
         return new DecimalFormat(pattern);
+    }
+    protected DecimalFormat selectLogDecimalFormat() {
+        return new DecimalFormat("0.0E0");
     }
     
     public DecimalFormat getExternalDecimalFormat() {

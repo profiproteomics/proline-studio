@@ -83,11 +83,13 @@ public class YAxis extends Axis {
         m_maxTick = ticks.getTickMax();
         m_tickSpacing = ticks.getTickSpacing();
 
-        int digits = ticks.getDigits();
-        if ((digits != m_digits) || (m_df == null)) {
-            m_df = selectDecimalFormat(digits);
-            m_dfPlot = selectDecimalFormat(digits+2);
-            m_digits = digits;
+        int fractionalDigits = ticks.getFractionalDigits();
+        int integerDigits = ticks.getIntegerDigits();
+        if ((fractionalDigits != m_fractionalDigits) || (integerDigits != m_integerDigits) || (m_df == null)) {
+            m_df = selectDecimalFormat(fractionalDigits, integerDigits);
+            m_dfPlot = selectDecimalFormat(fractionalDigits+2, integerDigits);
+            m_fractionalDigits = fractionalDigits;
+            m_integerDigits = integerDigits;
         }
 
         if (m_selected) {
@@ -109,7 +111,7 @@ public class YAxis extends Axis {
             return;
         }
 
-        double multForRounding = Math.pow(10, digits);
+        double multForRounding = Math.pow(10, fractionalDigits);
 
         m_lastHeight = -1;
         double y = m_minTick;
@@ -134,7 +136,7 @@ public class YAxis extends Axis {
             } else {
                 // round y
                 double yDisplay = y;
-                if (digits > 0) {
+                if (fractionalDigits > 0) {
                     yDisplay = StrictMath.round(yDisplay * multForRounding) / multForRounding;
                 }
                 label = m_df.format(yDisplay);
@@ -171,8 +173,8 @@ public class YAxis extends Axis {
         m_tickSpacing = ticks.getTickSpacing();
 
         if (m_df == null) {
-            m_df = selectDecimalFormat(-1);
-            m_dfPlot = selectDecimalFormat(-1);
+            m_df = selectLogDecimalFormat();
+            m_dfPlot = selectLogDecimalFormat();
         }
 
         if (m_selected) {

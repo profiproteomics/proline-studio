@@ -4,6 +4,7 @@ import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 
 /**
  * X Axis
@@ -76,12 +77,13 @@ public class XAxis extends Axis {
         m_maxTick = ticks.getTickMax();
         m_tickSpacing = ticks.getTickSpacing();
 
-        int digits = ticks.getDigits();
-
-        if ((digits != m_digits) || (m_df == null)) {
-            m_df = selectDecimalFormat(digits);
-            m_dfPlot = selectDecimalFormat(digits+2);
-            m_digits = digits;
+        int fractionalDigits = ticks.getFractionalDigits();
+        int integerDigits = ticks.getIntegerDigits();
+        if ((fractionalDigits != m_fractionalDigits) || (integerDigits != m_integerDigits) || (m_df == null)) {
+            m_df = selectDecimalFormat(fractionalDigits, integerDigits);
+            m_dfPlot = selectDecimalFormat(fractionalDigits+2, integerDigits);
+            m_fractionalDigits = fractionalDigits;
+            m_integerDigits = integerDigits;
         }
 
         int pixelStart = valueToPixel(m_minTick);
@@ -103,7 +105,7 @@ public class XAxis extends Axis {
 
         int height = m_valuesFontMetrics.getHeight();
 
-        double multForRounding = Math.pow(10, digits);
+        double multForRounding = Math.pow(10, fractionalDigits);
 
 
         double x = m_minTick;
@@ -111,7 +113,7 @@ public class XAxis extends Axis {
         int previousEndX = -Integer.MAX_VALUE;
         m_lastWidth = -1;
         while (true) {
-            g.drawLine(pX, m_y, pX, m_y + 4);
+            
 
             int stringWidth;
             String label;
@@ -124,7 +126,7 @@ public class XAxis extends Axis {
             } else {
                 // round x
                 double xDisplay = x;
-                if (digits > 0) {
+                if (fractionalDigits > 0) {
                     xDisplay = StrictMath.round(xDisplay * multForRounding) / multForRounding;
                 }
 
@@ -138,7 +140,23 @@ public class XAxis extends Axis {
 
             int posX = pX - stringWidth / 2;
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
-                g.drawString(label, posX, m_y + height + 4);
+                
+                g.drawLine(pX, m_y, pX, m_y + 4);
+                
+                /*AffineTransform orig = null;
+                if (m_isEnum) {
+                    orig = g.getTransform();
+                    g.translate(posX, m_y + height + 4);
+                    g.rotate(Math.PI/4);
+                    g.drawString(label, 0, 0);  //JPM.TODO
+                    
+                    g.setTransform(orig);
+                } else {*/
+                    g.drawString(label, posX, m_y + height + 4);
+                //}
+                
+
+                
                 previousEndX = posX + stringWidth;
             }
 
@@ -158,8 +176,8 @@ public class XAxis extends Axis {
         m_tickSpacing = ticks.getTickSpacing();
 
         if (m_df == null) {
-            m_df = selectDecimalFormat(-1);
-            m_dfPlot = selectDecimalFormat(-1);
+            m_df = selectLogDecimalFormat();
+            m_dfPlot = selectLogDecimalFormat();
         }
 
         int pixelStart = valueToPixel(Math.pow(10, m_minTick));

@@ -13,6 +13,7 @@ import java.awt.LinearGradientPaint;
 import java.awt.geom.Path2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -59,13 +60,16 @@ public class PlotLinear extends PlotAbstract {
     private boolean m_isDrawGap = true;
 
     private BasicStroke m_strokeLine = new BasicStroke(1.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    
+    private ArrayList<ParameterList> m_parameterListArray = null;
 
     public PlotLinear(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         update(colX, colY, null);
 
-        m_parameterList = new ParameterList("Scatter Plot Settings");
-
+        // Color parameter
+        ParameterList colorParameterList = new ParameterList("Colors");
+       
         ColorOrGradient colorOrGradient = new ColorOrGradient();
         colorOrGradient.setColor(CyclicColorPalette.getColor(21, 128));
         float[] fractions = {0.0f, 1.0f};
@@ -74,13 +78,33 @@ public class PlotLinear extends PlotAbstract {
         colorOrGradient.setGradient(gradient);
 
         m_colorParameter = new ColorOrGradientParameter(PLOT_SCATTER_COLOR_KEY, "Scatter Plot Color", colorOrGradient, null);
-        m_parameterList.add(m_colorParameter);
+        colorParameterList.add(m_colorParameter);
+        
+        
+        m_parameterListArray = new  ArrayList<>(1);
+        m_parameterListArray.add(colorParameterList);
     }
 
     @Override
     public ArrayList<ParameterList> getParameters() {
 
-        return null;
+        // update parameters
+        ArrayList<ReferenceIdName> m_potentialGradientParamArray = new ArrayList<>();
+        HashSet<Class> acceptedValues = m_plotType.getAcceptedValuesAsParam();
+        int nbCol = m_compareDataInterface.getColumnCount();
+        for (int i = 0; i < nbCol; i++) {
+            Class c = m_compareDataInterface.getDataColumnClass(i);
+            if (acceptedValues.contains(c)) {
+                ReferenceIdName ref = new ReferenceIdName(m_compareDataInterface.getDataColumnIdentifier(i), i);
+                m_potentialGradientParamArray.add(ref);
+            }
+        }
+
+        m_colorParameter.setGradientParam(m_potentialGradientParamArray);
+
+
+        
+        return m_parameterListArray;
     }
 
     @Override

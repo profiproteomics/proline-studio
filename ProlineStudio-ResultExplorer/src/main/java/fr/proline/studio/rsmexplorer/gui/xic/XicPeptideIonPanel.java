@@ -328,8 +328,8 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         }
         
         public void setTableRenderer() {
-            getColumnModel().getColumn(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ELUTION_TIME).setCellRenderer(new LazyTableCellRenderer(new TimeRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)))));
-            getColumnModel().getColumn(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_MOZ).setCellRenderer(new LazyTableCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
+            getColumnModel().getColumn(convertColumnIndexToView(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ELUTION_TIME)).setCellRenderer(new LazyTableCellRenderer(new TimeRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)))));
+            getColumnModel().getColumn(convertColumnIndexToView(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_MOZ)).setCellRenderer(new LazyTableCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
             
             setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );

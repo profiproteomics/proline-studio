@@ -219,7 +219,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                     }
                 }
                 // prepare window box
-                WindowBox wbox = WindowBoxFactory.getMultiGraphicsWindowBox("Peptide Graphic", m_dataBox);
+                WindowBox wbox = WindowBoxFactory.getMultiGraphicsWindowBox("Peptide Graphic", m_dataBox, false);
                 wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, List.class));
 
                 // open a window to display the window box

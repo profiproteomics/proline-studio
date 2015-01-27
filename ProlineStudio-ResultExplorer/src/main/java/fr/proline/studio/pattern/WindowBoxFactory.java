@@ -89,9 +89,9 @@ public class WindowBoxFactory {
         return winBox;
     }
     
-    public static WindowBox getMultiGraphicsWindowBox(String name, AbstractDataBox srcDatabox) {
+    public static WindowBox getMultiGraphicsWindowBox(String name, AbstractDataBox srcDatabox, boolean canChooseColor) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataboxMultiGraphics(true, false);
+        boxes[0] = new DataboxMultiGraphics(true, canChooseColor);
         srcDatabox.addNextDataBox(boxes[0]);
         IconManager.IconType iconType = IconManager.IconType.CHART;
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
@@ -204,7 +204,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[6];
         boxes[0] = new DataboxXicProteinSet();
         boxes[1] = new DataboxXicPeptideSet();
-        boxes[2] = new DataboxMultiGraphics(false, true);
+        boxes[2] = new DataboxMultiGraphics(false, false);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
         boxes[3] = new DataboxXicPeptideIon();
         boxes[3].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);

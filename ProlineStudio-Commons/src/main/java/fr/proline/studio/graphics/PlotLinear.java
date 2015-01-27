@@ -10,6 +10,7 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.LinearGradientPaint;
+import java.awt.Point;
 import java.awt.geom.Path2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class PlotLinear extends PlotAbstract {
     private PlotInformation m_plotInformation = null;
 
     private static final int SELECT_SENSIBILITY = 8;
+    private static final int SELECT_SENSIBILITY_POW = SELECT_SENSIBILITY * SELECT_SENSIBILITY;
 
     private static final String PLOT_SCATTER_COLOR_KEY = "PLOT_SCATTER_COLOR";
 
@@ -223,6 +225,60 @@ public class PlotLinear extends PlotAbstract {
         }
     }
 
+    /**
+     * return the  distance between two points
+     *     
+     * @param p1,p2 the two points
+     * @return dist the distance
+     */
+    private static double distance(Point p1, Point p2) {
+        int d2 = (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
+        //return Math.sqrt(d2);
+        return d2;
+    }
+
+    /**
+     * Return the  distance from a point to a segment
+     *     
+     * @param ps,pe the start/end of the segment
+     * @param p the given point
+     * @return the distance from the given point to the segment
+     */
+    private static double distanceToSegment(Point ps, Point pe, Point p) {
+
+        if (ps.x == pe.x && ps.y == pe.y) {
+            return distance(ps, p);
+        }
+
+        int sx = pe.x - ps.x;
+        int sy = pe.y - ps.y;
+
+        int ux = p.x - ps.x;
+        int uy = p.y - ps.y;
+
+        int dp = sx * ux + sy * uy;
+        if (dp < 0) {
+            return distance(ps, p);
+        }
+
+        int sn2 = sx * sx + sy * sy;
+        if (dp > sn2) {
+            return distance(pe, p);
+        }
+
+        double ah2 = dp * dp / sn2;
+        int un2 = ux * ux + uy * uy;
+        //return Math.sqrt(un2 - ah2);
+        return un2 - ah2;
+    }
+
+
+    /**
+     * return the nearest point index for a given point (x,y), depending of the distance to the segments
+     * @param x
+     * @param y
+     * @return 
+     */
     private int findPoint(double x, double y) {
 
         double rangeX = m_xMax - m_xMin;
@@ -254,17 +310,31 @@ public class PlotLinear extends PlotAbstract {
         }
 
         if (nearestDataIndex != -1) {
-
-            if (Math.abs(m_plotPanel.getXAxis().valueToPixel(x) - m_plotPanel.getXAxis().valueToPixel(m_dataX[nearestDataIndex])) > SELECT_SENSIBILITY) {
-                return -1;
+            Point p = new Point(m_plotPanel.getXAxis().valueToPixel(x), m_plotPanel.getYAxis().valueToPixel(y));
+            Point ps = null;
+            Point pe = null;
+            Point pnd = new Point(m_plotPanel.getXAxis().valueToPixel(m_dataX[nearestDataIndex]),  m_plotPanel.getYAxis().valueToPixel(m_dataY[nearestDataIndex]));
+            if (nearestDataIndex > 0) {
+                ps = new Point(m_plotPanel.getXAxis().valueToPixel(m_dataX[nearestDataIndex-1]),  m_plotPanel.getYAxis().valueToPixel(m_dataY[nearestDataIndex-1]));
             }
-            if (Math.abs(m_plotPanel.getYAxis().valueToPixel(y) - m_plotPanel.getYAxis().valueToPixel(m_dataY[nearestDataIndex])) > SELECT_SENSIBILITY) {
-                return -1;
+            if (nearestDataIndex < size-1) {
+                pe = new Point(m_plotPanel.getXAxis().valueToPixel(m_dataX[nearestDataIndex+1]),  m_plotPanel.getYAxis().valueToPixel(m_dataY[nearestDataIndex+1]));
             }
-
+            if (ps != null) {
+                double d0 = distanceToSegment(ps, pnd, p);
+                if (Math.abs(d0) <= SELECT_SENSIBILITY_POW) {
+                    return nearestDataIndex;
+                }
+            }
+            if (pe != null) {
+                double d1 = distanceToSegment(pnd, pe, p);
+                if (Math.abs(d1) <= SELECT_SENSIBILITY_POW) {
+                    return nearestDataIndex;
+                }
+            }
         }
 
-        return nearestDataIndex;
+        return -1;
     }
 
     @Override
@@ -670,3 +740,4 @@ public class PlotLinear extends PlotAbstract {
         return m_compareDataInterface.getDataValueAt(index, m_colY).toString();
     }
 }
+

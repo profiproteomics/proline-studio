@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
-import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
@@ -92,6 +91,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
 
         m_peptidesTable = new PeptideTable();
         m_peptidesTable.setModel(new PeptideTableModel());
+        m_peptidesTable.setTableRenderer();
         m_peptidesTable.getColumnExt(PeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
         m_peptidesTable.displayColumnAsPercentage(PeptideTableModel.COLTYPE_PEPTIDE_SCORE);
 
@@ -215,35 +215,17 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     private class PeptideTable extends DecoratedTable  {
         
         public PeptideTable() {
+            
+        } 
+        
+        public void setTableRenderer() {
+            getColumnModel().getColumn(convertColumnIndexToView(PeptideTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ)).setCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 ) );
+            getColumnModel().getColumn(convertColumnIndexToView(PeptideTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS)).setCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 ) );
             setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             
-            // WART to have 4 digits for deltaMoz
-            /*setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))) {
-
-                @Override
-                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
-                    if (column == PeptideTableModel.COLTYPE_PEPTIDE_DELTA_MOZ) {
-                            if (m_deltaMozRenderer == null) {
-                                m_deltaMozRenderer = new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 6);
-                            }
-                            return m_deltaMozRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                        } else {
-
-
-                            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                        }
-                    }
-
-
-            });*/
-            
-            
-        } 
-        
-        //private FloatRenderer m_deltaMozRenderer = null;
+        }
         
         /** 
          * Called whenever the value of the selection changes.

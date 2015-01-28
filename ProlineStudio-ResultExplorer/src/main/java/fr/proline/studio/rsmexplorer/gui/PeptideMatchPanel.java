@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 
-import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMsQuery;
@@ -32,6 +31,7 @@ import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
+import fr.proline.studio.table.LazyTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -413,6 +413,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         m_peptideMatchTable = new PeptideMatchTable();
         PeptideMatchTableModel peptideMatchTableModel = new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !(m_startingPanel || m_proteinMatchUnknown));
         m_peptideMatchTable.setModel(peptideMatchTableModel);
+        m_peptideMatchTable.setTableRenderer();
         m_peptideMatchTable.displayColumnAsPercentage(peptideMatchTableModel.convertColToColUsed(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE));
 
         m_peptideMatchTable.getColumnExt(PeptideMatchTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
@@ -584,45 +585,19 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         //ProteinSet proteinSetSelected = null;
         public PeptideMatchTable() {
             super(m_scrollPane.getVerticalScrollBar());
+
+            
+        }
+
+        public void setTableRenderer(){
+            PeptideMatchTableModel tableModel = (PeptideMatchTableModel) getModel();
+            getColumnModel().getColumn(tableModel.convertColToColUsed(convertColumnIndexToView(PeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ))).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
+            getColumnModel().getColumn(tableModel.convertColToColUsed(convertColumnIndexToView(PeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS))).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
             setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());
             setDefaultRenderer(DMsQuery.class, new MsQueryRenderer());
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class))  );
-            
-            // WART to have 4 digits for deltaMoz
-            /*setDefaultRenderer(LazyData.class, new LazyTableCellRenderer() {
-
-                @Override
-                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
-                    Object data = ((LazyData) value).getData();
-                    if (data == null) {
-                        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-                        return this;
-                    } else {
-                     
-                        if (convertColumnIndexToModel(column) == PeptideMatchTableModel.COLTYPE_PEPTIDE_DELTA_MOZ) {
-                            if (m_deltaMozRenderer == null) {
-                                m_deltaMozRenderer = new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 6);
-                            }
-                            return m_deltaMozRenderer.getTableCellRendererComponent(table, data, isSelected, hasFocus, row, column);
-                        } else {
-
-
-                            return table.getDefaultRenderer(data.getClass()).getTableCellRendererComponent(table, data, isSelected, hasFocus, row, column);
-                        }
-                    }
-
-
-                }
-            });*/
-
-            
         }
-        //private FloatRenderer m_deltaMozRenderer = null;
-
-
 
         /**
          * Called whenever the value of the selection changes.

@@ -64,6 +64,7 @@ public class PlotLinear extends PlotAbstract {
     private BasicStroke m_strokeLine = new BasicStroke(1.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
     
     private ArrayList<ParameterList> m_parameterListArray = null;
+    
 
     public PlotLinear(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
@@ -138,15 +139,24 @@ public class PlotLinear extends PlotAbstract {
             }
             m_sb.append("<BR>");
         }
+        String labelX = m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]);
+        if (m_plotPanel.getXAxis().isEnum()) {
+            labelX = m_plotPanel.getEnumValueX(indexFound);
+        }
+        String labelY = m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]);
+        if (m_plotPanel.getYAxis().isEnum()) {
+            labelY = m_plotPanel.getEnumValueY(indexFound);
+        }
+        
         m_sb.append(m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString());
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getXAxis().getTitle());
         m_sb.append(" : ");
-        m_sb.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]));
+        m_sb.append(labelX);
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getYAxis().getTitle());
         m_sb.append(" : ");
-        m_sb.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
+        m_sb.append(labelY);
         // m_sb.append("</HTML>");
         String tooltip = m_sb.toString();
         m_sb.setLength(0);

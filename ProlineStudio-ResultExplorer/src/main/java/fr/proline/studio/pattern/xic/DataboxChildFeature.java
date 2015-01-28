@@ -76,9 +76,13 @@ public class DataboxChildFeature extends AbstractDataBox {
         m_masterQuantPeptideIon = (MasterQuantPeptideIon) m_previousDataBox.getData(false, MasterQuantPeptideIon.class);
         m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
         
-        if (m_masterQuantPeptideIon == null || (oldIon != null && m_masterQuantPeptideIon.equals(oldIon))) {
+        if (m_masterQuantPeptideIon != null && (oldIon != null && m_masterQuantPeptideIon.equals(oldIon))) {
             return;
         }
+        if (m_masterQuantPeptideIon == null && oldIon == null) {
+            return;
+        }
+        
         final int loadingId = setLoading();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {

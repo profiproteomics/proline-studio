@@ -64,6 +64,9 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
+    private JButton m_graphicsTypeButton;
+    
+    private boolean m_graphAllPeaks = true;
     
     private boolean m_canGraph ;
     
@@ -174,11 +177,34 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 win.requestActive();
             }
         });
+        
+        // graphic type: all peaks isotope0 from all features or all peaks from the selected feature
+        m_graphicsTypeButton = new JButton(IconManager.getIcon(IconManager.IconType.ISOTOPE));
+        setGraphicTypeToolTip();
+        m_graphicsTypeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                m_graphAllPeaks = !m_graphAllPeaks;
+                setGraphicTypeToolTip();
+                m_dataBox.propagateDataChanged(CompareDataInterface.class);
+            }
+        });
         if(m_canGraph) {
             toolbar.add(m_graphicsButton);
+            toolbar.add(m_graphicsTypeButton);
         }
         
+        
         return toolbar;
+    }
+    
+    private void setGraphicTypeToolTip() {
+        String tooltipText = m_graphAllPeaks?"Display all isotopes for the selected feature":"Display peaks for all features";
+        m_graphicsTypeButton.setToolTipText(tooltipText);
+    }
+    
+    public boolean isGraphAllPeak() {
+        return m_graphAllPeaks;
     }
     
     private JPanel createInternalPanel() {
@@ -319,6 +345,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             }
  
             m_dataBox.propagateDataChanged(Feature.class);
+            m_dataBox.propagateDataChanged(CompareDataInterface.class);
 
         }
         

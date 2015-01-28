@@ -117,7 +117,8 @@ public class IconManager {
         EXPORT_TABLE_SELECTION,
         LOCK,
         UNLOCK,
-        COLOR_PICKER;
+        COLOR_PICKER,
+        ISOTOPE;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -414,6 +415,8 @@ public class IconManager {
                return "fr/proline/studio/images/lock-unlock.png";
            case COLOR_PICKER:
                return "fr/proline/studio/images/color.png";
+           case ISOTOPE:
+               return "fr/proline/studio/images/isotope.png";
         }
 
 

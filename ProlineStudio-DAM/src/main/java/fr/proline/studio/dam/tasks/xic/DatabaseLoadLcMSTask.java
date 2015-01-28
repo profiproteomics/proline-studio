@@ -17,6 +17,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 /**
@@ -760,13 +761,19 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                     queryPeakel.setParameter("featureId", feature.getId());
                     List<Long> listIds = queryPeakel.getResultList();
                     if (listIds != null && !listIds.isEmpty()) {
-                        String queryPeakelLoadS = "SELECT p "
-                                + "FROM fr.proline.core.orm.lcms.Peakel p "
-                                + "WHERE p.id IN (:listId) ";
-                                //+ "ORDER BY p.id ASC ";
-                        TypedQuery<Peakel> queryPeakelLoad = entityManagerLCMS.createQuery(queryPeakelLoadS, Peakel.class);
+                        String queryPeakelLoadS = "SELECT p, fpi.isotopeIndex "
+                                + "FROM fr.proline.core.orm.lcms.Peakel p, FeaturePeakelItem fpi "
+                                + "WHERE p.id IN (:listId) AND p.id = fpi.id.peakelId AND fpi.id.featureId =:featureId ";
+                        Query queryPeakelLoad = entityManagerLCMS.createQuery(queryPeakelLoadS);
                         queryPeakelLoad.setParameter("listId", listIds);
-                        List<Peakel> peakelResultList = queryPeakelLoad.getResultList();
+                        queryPeakelLoad.setParameter("featureId", feature.getId());
+                        List<Object[]> resultPeakelList = queryPeakelLoad.getResultList();
+                        List<Peakel> peakelResultList = new ArrayList();
+                        for (Object[] resCur : resultPeakelList) {
+                            Peakel peakel = (Peakel) resCur[0];
+                            peakel.setIsotopeIndex((Integer)resCur[1]);
+                            peakelResultList.add(peakel);
+                        }
                         m_peakelListPerFeature.add(peakelResultList);
                     } else {
                         m_peakelListPerFeature.add(new ArrayList());

@@ -21,6 +21,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FontRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.LazyTable;
@@ -245,8 +246,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         return internalPanel;
     }                 
     
-    public void setData(Long taskId,  List<Feature> features, QuantChannelInfo quantChannelInfo, boolean finished) {
-        ((FeatureTableModel) m_featureTable.getModel()).setData(taskId,  features, quantChannelInfo);
+    public void setData(Long taskId,  List<Feature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak, boolean finished) {
+        ((FeatureTableModel) m_featureTable.getModel()).setData(taskId,  features, quantChannelInfo, featureHasPeak);
         m_titleLabel.setText(TABLE_TITLE +" ("+features.size()+")");
         // select the first row
         if ((features.size() > 0)) {
@@ -326,6 +327,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         public void setTableRenderer() {
             getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_ELUTION_TIME)).setCellRenderer(new LazyTableCellRenderer(new TimeRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)))));
             getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_MOZ)).setCellRenderer(new LazyTableCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
+            getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_MAP_NAME)).setCellRenderer(new LazyTableCellRenderer(new FontRenderer( getDefaultRenderer(String.class) )) );
             setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
              

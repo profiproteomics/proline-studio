@@ -48,6 +48,7 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
     
     private List<Feature> m_features = null;
     private QuantChannelInfo m_quantChannelInfo = null;
+    private List<Boolean> m_featureHasPeak = null;
 
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
@@ -221,9 +222,10 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
         return null; // should never happen
     }
 
-    public void setData(Long taskId, List<Feature> features, QuantChannelInfo quantChannelInfo) {
+    public void setData(Long taskId, List<Feature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak) {
         this.m_features = features;
         this.m_quantChannelInfo = quantChannelInfo;
+        this.m_featureHasPeak = featureHasPeak ;
         m_filteredIds = null;
         m_isFiltering = false;
 
@@ -678,4 +680,17 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
         return ""; // should never happen
     }
     
+    
+    private Boolean hasFeaturePeaks(int row) {
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+        // Retrieve Feature
+        return m_featureHasPeak.get(rowFiltered);
+    }
+    
+    public Boolean isInItalic(int row) {
+        return !hasFeaturePeaks(row);
+    }
 }

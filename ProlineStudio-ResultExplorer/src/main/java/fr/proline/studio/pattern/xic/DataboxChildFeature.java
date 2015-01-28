@@ -18,7 +18,6 @@ import fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeakPanel;
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -30,6 +29,7 @@ public class DataboxChildFeature extends AbstractDataBox {
     private MasterQuantPeptideIon m_masterQuantPeptideIon;
     private List<Feature> m_childFeatureList;
     private QuantChannelInfo m_quantChannelInfo;
+    private List<Boolean> m_featureHasPeak;
 
     private List<List<Peakel>> m_peakelList;
     private List<List<List<Peak>>> m_peakList;
@@ -94,9 +94,27 @@ public class DataboxChildFeature extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
+                
+                if (m_childFeatureList != null) {
+                    for (int i = 0; i < m_childFeatureList.size(); i++) {
+                        boolean hasPeak = false;
+                        List<List<Peak>> list = new ArrayList();
+                        if (m_peakelList.size() >= i+1) {
+                            for (Peakel peakel : m_peakelList.get(i)) {
+                                List<Peak> listPeak = peakel.getPeakList();
+                                if (listPeak.size() > 0) {
+                                    hasPeak = true;
+                                }
+                                list.add(listPeak);
+                            }
+                        }
+                        m_peakList.add(list);
+                        m_featureHasPeak.add(hasPeak);
+                    }
+                }
+                
                 if (subTask == null) {
-                    ((XicFeaturePanel) m_panel).setData(taskId, m_childFeatureList, m_quantChannelInfo, finished);
+                    ((XicFeaturePanel) m_panel).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
                 } else {
                     ((XicFeaturePanel) m_panel).dataUpdated(subTask, finished);
                 }
@@ -104,18 +122,6 @@ public class DataboxChildFeature extends AbstractDataBox {
                 setLoaded(loadingId);
 
                 
-                if (m_childFeatureList != null) {
-                    for (int i = 0; i < m_childFeatureList.size(); i++) {
-                        List<List<Peak>> list = new ArrayList();
-                        if (m_peakelList.size() >= i+1) {
-                            for (Peakel peakel : m_peakelList.get(i)) {
-                                List<Peak> listPeak = peakel.getPeakList();
-                                list.add(listPeak);
-                            }
-                        }
-                        m_peakList.add(list);
-                    }
-                }
                 
                 if (finished) {
                     unregisterTask(taskId);
@@ -127,6 +133,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
         // ask asynchronous loading of data
         m_childFeatureList = new ArrayList();
+        m_featureHasPeak = new ArrayList();
         m_peakelList = new ArrayList();
         m_peakList = new ArrayList();
         DatabaseLoadLcMSTask task = new DatabaseLoadLcMSTask(callback);

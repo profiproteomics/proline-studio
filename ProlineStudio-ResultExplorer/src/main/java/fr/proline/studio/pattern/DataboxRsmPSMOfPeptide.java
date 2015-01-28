@@ -58,6 +58,10 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
 
         final PeptideInstance peptideInstance = (PeptideInstance) m_previousDataBox.getData(false, PeptideInstance.class);
 
+        if (peptideInstance == null) {
+             ((PeptideMatchPanel)m_panel).setData(-1, null, null, true);
+            return;
+        }
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             

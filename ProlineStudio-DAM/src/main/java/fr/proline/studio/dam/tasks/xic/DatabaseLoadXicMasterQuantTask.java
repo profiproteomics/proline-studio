@@ -940,7 +940,11 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     + "WHERE pepSet.resultSummaryId=:rsmId AND pepSet.proteinSet.id=:proteinSetId AND "
                     + "pi.masterQuantComponentId IS NOT NULL "
                     + "GROUP BY pepSet.peptideCount " ;
+        String queryCountNbPepCount = "SELECT  pepSet.peptideCount "
+                    + "FROM fr.proline.core.orm.msi.PeptideSet pepSet "
+                    + "WHERE pepSet.resultSummaryId=:rsmId AND pepSet.proteinSet.id=:proteinSetId  ";
          Query queryCountPep = entityManagerMSI.createQuery(queryCountNbPep);
+         Query queryCountPepCount = entityManagerMSI.createQuery(queryCountNbPepCount);
         
          for (DMasterQuantProteinSet masterQuantProteinSet : listResult) {
             proteinSetQuery.setParameter("psId", masterQuantProteinSet.getProteinSetId());
@@ -977,6 +981,14 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 Object[] nb = (Object[])resultList.get(0);
                 nbPep = ((Integer)nb[1]).intValue();
                 nbPepQuant = ((Long)nb[0]).intValue();
+            }
+            if (nbPepQuant ==0) {
+                queryCountPepCount.setParameter("rsmId", masterQuantProteinSet.getQuantResultSummaryId());
+                queryCountPepCount.setParameter("proteinSetId", masterQuantProteinSet.getProteinSetId());
+                List rl =queryCountPepCount.getResultList();
+                if (!rl.isEmpty()) {
+                    nbPep = (Integer)rl.get(0);
+                }
             }
             masterQuantProteinSet.setNbPeptides(nbPep);
             masterQuantProteinSet.setNbQuantifiedPeptides(nbPepQuant);

@@ -27,8 +27,6 @@ import fr.proline.studio.rsmexplorer.actions.table.DisplayIdentificationProteinS
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -62,7 +60,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
@@ -374,7 +371,11 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         @Override
         public HashSet exportSelection(int[] rows) {
             QuantProteinSetTableModel tableModel = (QuantProteinSetTableModel) getModel();
-            return tableModel.exportSelection(rows);
+            int[] modelRows = new int[rows.length];
+            for (int i = 0; i < rows.length; i++) {
+                modelRows[i] = convertRowIndexToModel(rows[i]);
+            }
+            return tableModel.exportSelection(modelRows);
         }
         
         

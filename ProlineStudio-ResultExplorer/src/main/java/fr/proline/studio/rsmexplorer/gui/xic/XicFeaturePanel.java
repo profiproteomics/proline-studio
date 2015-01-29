@@ -180,7 +180,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         });
         
         // graphic type: all peaks isotope0 from all features or all peaks from the selected feature
-        m_graphicsTypeButton = new JButton(IconManager.getIcon(IconManager.IconType.ISOTOPE));
+        m_graphicsTypeButton = new JButton(IconManager.getIcon(IconManager.IconType.CHART_ARROW));
         setGraphicTypeToolTip();
         m_graphicsTypeButton.addActionListener(new ActionListener() {
             @Override

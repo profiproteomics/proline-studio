@@ -347,7 +347,6 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             //setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
             addMouseListener(new TablePopupMouseAdapter(this));
-            setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             
         }
         

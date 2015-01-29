@@ -376,7 +376,6 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             //setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
             addMouseListener(new TablePopupMouseAdapter(this));
-            setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         }
         
         //Implement table cell tool tips.

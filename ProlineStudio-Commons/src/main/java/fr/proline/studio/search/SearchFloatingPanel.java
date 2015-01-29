@@ -53,7 +53,14 @@ public class SearchFloatingPanel extends JPanel {
         });
         
         m_searchTextField = new JTextField(16);
-        
+        m_searchTextField.addActionListener(new ActionListener() {
+
+           @Override
+           public void actionPerformed(ActionEvent e) {
+                final String searchText = m_searchTextField.getText();
+                m_search.doSearch(searchText);
+           }
+        });
         m_searchButton = new JButton(IconManager.getIcon(IconManager.IconType.SEARCH_ARROW));
         m_searchButton.setMargin(new Insets(1, 1, 1, 1));
         m_searchButton.setFocusPainted(false);

@@ -324,7 +324,6 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
             super(m_peptideIonScrollPane.getVerticalScrollBar() );
             
             addMouseListener(new TablePopupMouseAdapter(this));
-            setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         }
         
         public void setTableRenderer() {

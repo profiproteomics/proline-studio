@@ -20,8 +20,9 @@ public class AxisTicks {
 
     private boolean m_log;
     private boolean m_isInteger;
+    private boolean m_isEnum;
     
-    public AxisTicks(double min, double max, int maxTicks, boolean log, boolean isInteger) {
+    public AxisTicks(double min, double max, int maxTicks, boolean log, boolean isInteger, boolean isEnum) {
         if (maxTicks <=1) {
             m_maxTicks = 2;
         } else {
@@ -29,6 +30,7 @@ public class AxisTicks {
         }
         m_log = log;
         m_isInteger =  isInteger;
+        m_isEnum = isEnum;
         
         if (log) {
             m_min = Math.log10(min);

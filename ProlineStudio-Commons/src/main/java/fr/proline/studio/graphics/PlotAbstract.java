@@ -121,8 +121,13 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
         return (x>=x1) && (x<=x2) && (y>=y1) && (y<=y2);
     }
     
-    public void setIsPaintMarker(boolean isPaintMarker) {
-        
+    /**
+     * Return true when the Plot Area needs to be repainted
+     * @param isPaintMarker
+     * @return 
+     */
+    public boolean setIsPaintMarker(boolean isPaintMarker) {
+        return false;
     }
     
     public abstract boolean isMouseOnPlot(double x, double y);

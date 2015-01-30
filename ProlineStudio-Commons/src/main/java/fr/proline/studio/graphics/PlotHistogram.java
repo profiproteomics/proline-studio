@@ -186,7 +186,7 @@ public class PlotHistogram extends PlotAbstract {
         if (m_sb == null) {
             m_sb = new StringBuilder();
         }
-        m_sb.append("<HTML>");
+
         m_sb.append(m_plotPanel.getXAxis().getTitle());
         m_sb.append(" : ");
         m_sb.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]));
@@ -199,7 +199,7 @@ public class PlotHistogram extends PlotAbstract {
         m_sb.append("<BR>");
         m_sb.append("Count : ");
         m_sb.append(m_dataCountY[indexFound]);
-        m_sb.append("</HTML>");
+
         String tooltip = m_sb.toString();
         m_sb.setLength(0);
         return tooltip;

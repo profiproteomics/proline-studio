@@ -50,6 +50,9 @@ public class PlotLinear extends PlotAbstract {
 
     private static final String PLOT_SCATTER_COLOR_KEY = "PLOT_SCATTER_COLOR";
 
+    private static final BasicStroke STROKE_1 = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    private static final BasicStroke STROKE_2 = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    
     private ParameterList m_parameterList;
     private ColorOrGradientParameter m_colorParameter;
 
@@ -61,7 +64,7 @@ public class PlotLinear extends PlotAbstract {
     // draw a line between points, even if there is a missing value
     private boolean m_isDrawGap = true;
 
-    private BasicStroke m_strokeLine = new BasicStroke(1.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    private BasicStroke m_strokeLine = STROKE_1;
     
     private ArrayList<ParameterList> m_parameterListArray = null;
     
@@ -119,7 +122,6 @@ public class PlotLinear extends PlotAbstract {
         if (m_sb == null) {
             m_sb = new StringBuilder();
         }
-        //m_sb.append("<HTML>");
         if (m_plotInformation != null && m_plotInformation.getPlotColor() != null) {
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(m_plotInformation.getPlotColor());
             m_sb.append("<font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
@@ -139,13 +141,17 @@ public class PlotLinear extends PlotAbstract {
             }
             m_sb.append("<BR>");
         }
-        String labelX = m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]);
+        String labelX; 
         if (m_plotPanel.getXAxis().isEnum()) {
             labelX = m_plotPanel.getEnumValueX(indexFound);
+        } else {
+            labelX = m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]);
         }
-        String labelY = m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]);
+        String labelY;
         if (m_plotPanel.getYAxis().isEnum()) {
             labelY = m_plotPanel.getEnumValueY(indexFound);
+        } else {
+            labelY = m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]);
         }
         
         m_sb.append(m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString());
@@ -157,7 +163,6 @@ public class PlotLinear extends PlotAbstract {
         m_sb.append(m_plotPanel.getYAxis().getTitle());
         m_sb.append(" : ");
         m_sb.append(labelY);
-        // m_sb.append("</HTML>");
         String tooltip = m_sb.toString();
         m_sb.setLength(0);
         return tooltip;
@@ -425,24 +430,28 @@ public class PlotLinear extends PlotAbstract {
         
 
         // we let margins
-        double deltaX = (m_xMax - m_xMin);
-        if (deltaX <= 10e-10) {
-            // no real delta
-            m_xMin = m_xMin - 1;  //JPM.TODO : enhance this
-            m_xMax = m_xMax + 1;
-        } else {
-            m_xMin = m_xMin - deltaX * 0.01;
-            m_xMax = m_xMax + deltaX * 0.01;
+        if (!xAsEnum) {
+            double deltaX = (m_xMax - m_xMin);
+            if (deltaX <= 10e-10) {
+                // no real delta
+                m_xMin = m_xMin - 1;  //JPM.TODO : enhance this
+                m_xMax = m_xMax + 1;
+            } else {
+                m_xMin = m_xMin - deltaX * 0.01;
+                m_xMax = m_xMax + deltaX * 0.01;
+            }
         }
 
-        double deltaY = (m_yMax - m_yMin);
-        if (deltaY <= 10e-10) {
-            // no real delta
-            m_yMin = m_yMin - 1;  //JPM.TODO : enhance this
-            m_yMax = m_yMax + 1;
-        } else {
-            m_yMin = m_yMin - deltaY * 0.01;
-            m_yMax = m_yMax + deltaY * 0.01;
+        if (!yAsEnum) {
+            double deltaY = (m_yMax - m_yMin);
+            if (deltaY <= 10e-10) {
+                // no real delta
+                m_yMin = m_yMin - 1;  //JPM.TODO : enhance this
+                m_yMax = m_yMax + 1;
+            } else {
+                m_yMin = m_yMin - deltaY * 0.01;
+                m_yMax = m_yMax + deltaY * 0.01;
+            }
         }
 
         //data must be sorted to be drawn correctly in case of linear plot
@@ -705,12 +714,20 @@ public class PlotLinear extends PlotAbstract {
     }
 
     @Override
-    public void setIsPaintMarker(boolean isPaintMarker) {
-        this.m_isPaintMarker = isPaintMarker;
-        this.m_strokeLine = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-        if (isPaintMarker) {
-            this.m_strokeLine = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+    public boolean setIsPaintMarker(boolean isPaintMarker) {
+        
+        boolean modified = isPaintMarker ^ m_isPaintMarker;
+        
+        if (modified) {
+            m_isPaintMarker = isPaintMarker;
+            if (isPaintMarker) {
+                m_strokeLine = STROKE_2;
+            } else {
+                m_strokeLine = STROKE_1;
+            }
         }
+        
+        return modified;
     }
 
     @Override

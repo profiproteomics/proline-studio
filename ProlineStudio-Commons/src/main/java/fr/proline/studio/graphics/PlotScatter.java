@@ -115,17 +115,27 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         if (m_sb == null) {
             m_sb = new StringBuilder();
         }
-        m_sb.append("<HTML>");
+
         m_sb.append(m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString());
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getXAxis().getTitle());
         m_sb.append(" : ");
-        m_sb.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]));
+        boolean xAsEnum = m_plotPanel.getXAxis().isEnum();
+        if (xAsEnum) {
+            m_sb.append(getEnumValueX(indexFound));
+        } else {
+            m_sb.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]));
+        }
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getYAxis().getTitle());
         m_sb.append(" : ");
-        m_sb.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
-        m_sb.append("</HTML>");
+        boolean yAsEnum = m_plotPanel.getXAxis().isEnum();
+        if (yAsEnum) {
+            m_sb.append(getEnumValueY(indexFound));
+        } else {
+            m_sb.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
+        }
+
         String tooltip = m_sb.toString();
         m_sb.setLength(0);
         return tooltip;
@@ -253,7 +263,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             if (Math.abs(m_plotPanel.getXAxis().valueToPixel(x)-m_plotPanel.getXAxis().valueToPixel( m_dataX[nearestDataIndex])-jitterX)>SELECT_SENSIBILITY) {
                 return -1;
             }
-             int jitterY = (m_jitterY == null) ? 0 : m_jitterY[nearestDataIndex];
+            int jitterY = (m_jitterY == null) ? 0 : m_jitterY[nearestDataIndex];
             if (Math.abs(m_plotPanel.getYAxis().valueToPixel(y)-m_plotPanel.getYAxis().valueToPixel( m_dataY[nearestDataIndex])-jitterY)>SELECT_SENSIBILITY) {
                 return -1;
             }
@@ -381,24 +391,28 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         m_yMax = maxY;
 
         // we let margins
-        double deltaX = (m_xMax - m_xMin);
-        if (deltaX <= 10e-10) {
-            // no real delta
-            m_xMin = m_xMin - 1;  //JPM.TODO : enhance this
-            m_xMax = m_xMax + 1;
-        } else {
-            m_xMin = m_xMin - deltaX * 0.01;
-            m_xMax = m_xMax + deltaX * 0.01;
+        if (!xAsEnum) {
+            double deltaX = (m_xMax - m_xMin);
+            if (deltaX <= 10e-10) {
+                // no real delta
+                m_xMin = m_xMin - 1;  //JPM.TODO : enhance this
+                m_xMax = m_xMax + 1;
+            } else {
+                m_xMin = m_xMin - deltaX * 0.01;
+                m_xMax = m_xMax + deltaX * 0.01;
+            }
         }
 
-        double deltaY = (m_yMax - m_yMin);
-        if (deltaY <= 10e-10) {
-            // no real delta
-            m_yMin = m_yMin - 1;  //JPM.TODO : enhance this
-            m_yMax = m_yMax + 1;
-        } else {
-            m_yMin = m_yMin - deltaY * 0.01;
-            m_yMax = m_yMax + deltaY * 0.01;
+        if (!yAsEnum) {
+            double deltaY = (m_yMax - m_yMin);
+            if (deltaY <= 10e-10) {
+                // no real delta
+                m_yMin = m_yMin - 1;  //JPM.TODO : enhance this
+                m_yMax = m_yMax + 1;
+            } else {
+                m_yMin = m_yMin - deltaY * 0.01;
+                m_yMax = m_yMax + deltaY * 0.01;
+            }
         }
 
         m_plotPanel.updateAxis(this);

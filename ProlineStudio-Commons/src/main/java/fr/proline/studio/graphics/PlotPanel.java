@@ -33,7 +33,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     private XAxis m_xAxis = null;
     private YAxis m_yAxis = null;
     
-    private java.util.List<PlotAbstract> m_plots = null;
+    private ArrayList<PlotAbstract> m_plots = null;
     
     private final ZoomGesture m_zoomGesture = new ZoomGesture();
     private final SelectionGesture m_selectionGesture = new SelectionGesture();
@@ -55,6 +55,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     
     private GridListener m_gridListener = null;
     
+    private final Rectangle m_plotArea = new Rectangle();
+
+    
     public PlotPanel() {
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -66,29 +69,46 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     public void paint(Graphics g) {
         
         Graphics2D g2d = (Graphics2D)g;
-         g2d.setRenderingHint( RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint( RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         
-        Rectangle bounds = getBounds();
-        Rectangle plotArea = getBounds();
+        // height and width of the panel
+        int width = getWidth();
+        int height = getHeight();
+        
+        // initialize plotArea
+        m_plotArea.x = 0;
+        m_plotArea.y = 0;
+        m_plotArea.width = width;
+        m_plotArea.height = width;
+
         
         g.setColor(PANEL_BACKGROUND_COLOR);
-        g.fillRect(0, 0, bounds.width, bounds.height);
-        
+        g.fillRect(0, 0, width, height);
+
         g.setColor(Color.darkGray);
-//        g.drawRect(0, 0, bounds.width-1, bounds.height-1);
-        
+
+        int figuresXHeight = GAP_FIGURES_X;
         if (m_xAxis != null) {
-            m_xAxis.setSize(GAP_FIGURES_Y+GAP_AXIS_TITLE, ((int)bounds.getHeight())-GAP_FIGURES_X -GAP_AXIS_TITLE /*-GAP_TOP_AXIS*/, bounds.width-GAP_FIGURES_Y-GAP_AXIS_TITLE-GAP_END_AXIS, GAP_FIGURES_X + GAP_AXIS_TITLE);
-            plotArea.x = m_xAxis.m_x+1;
-            plotArea.width = m_xAxis.m_width-1;
+            
+            // set default size
+            m_xAxis.setSize(GAP_FIGURES_Y+GAP_AXIS_TITLE, height-figuresXHeight -GAP_AXIS_TITLE /*-GAP_TOP_AXIS*/, width-GAP_FIGURES_Y-GAP_AXIS_TITLE-GAP_END_AXIS, figuresXHeight + GAP_AXIS_TITLE);
+            
+            // prepare paint
+            m_xAxis.preparePaint(g2d);
+            
+            // set correct size
+            figuresXHeight = m_xAxis.getMiniMumAxisHeight(figuresXHeight);
+            m_xAxis.setSize(GAP_FIGURES_Y+GAP_AXIS_TITLE, height-figuresXHeight -GAP_AXIS_TITLE /*-GAP_TOP_AXIS*/, width-GAP_FIGURES_Y-GAP_AXIS_TITLE-GAP_END_AXIS, figuresXHeight + GAP_AXIS_TITLE);
+            m_plotArea.x = m_xAxis.m_x+1;
+            m_plotArea.width = m_xAxis.m_width-1;
             m_xAxis.paint(g2d);
 
         }
         
         if (m_yAxis != null) {
-            m_yAxis.setSize(0, GAP_END_AXIS, GAP_FIGURES_Y+GAP_AXIS_TITLE /*+GAP_TOP_AXIS*/, ((int)bounds.getHeight())-GAP_FIGURES_X-GAP_AXIS_TITLE-GAP_END_AXIS);
-            plotArea.y = m_yAxis.m_y+1;
-            plotArea.height = m_yAxis.m_height-1;
+            m_yAxis.setSize(0, GAP_END_AXIS, GAP_FIGURES_Y+GAP_AXIS_TITLE /*+GAP_TOP_AXIS*/, height-figuresXHeight-GAP_AXIS_TITLE-GAP_END_AXIS);
+            m_plotArea.y = m_yAxis.m_y+1;
+            m_plotArea.height = m_yAxis.m_height-1;
             m_yAxis.paint(g2d);
         }
         
@@ -97,23 +117,24 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         
         
         if (m_plots != null) {
+            m_useDoubleBuffering = false; //JPM.TEST fsdqqqqqqqqqqqqqqqqqqqqqqqqqqqq
                 if (m_useDoubleBuffering) {
-                    boolean createDoubleBuffer = ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth()!=plotArea.width) || (m_doubleBuffer.getHeight()!=plotArea.height));
+                    boolean createDoubleBuffer = ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth()!=m_plotArea.width) || (m_doubleBuffer.getHeight()!=m_plotArea.height));
                     if (createDoubleBuffer) {
-                        m_doubleBuffer = new BufferedImage(plotArea.width, plotArea.height, BufferedImage.TYPE_INT_ARGB);
+                        m_doubleBuffer = new BufferedImage(m_plotArea.width, m_plotArea.height, BufferedImage.TYPE_INT_ARGB);
                     }
                     if (createDoubleBuffer || m_updateDoubleBuffer) {
                         
                         Graphics2D graphicBufferG2d = (Graphics2D) m_doubleBuffer.getGraphics();
                         graphicBufferG2d.setColor(Color.white);
-                        graphicBufferG2d.fillRect(0, 0, plotArea.width, plotArea.height);
-                        graphicBufferG2d.translate(-plotArea.x, -plotArea.y);
+                        graphicBufferG2d.fillRect(0, 0, m_plotArea.width, m_plotArea.height);
+                        graphicBufferG2d.translate(-m_plotArea.x, -m_plotArea.y);
                         if ((m_plotVerticalGrid) && (m_xAxis != null)) {
-                            m_xAxis.paintGrid(graphicBufferG2d, plotArea.y, plotArea.height);
+                            m_xAxis.paintGrid(graphicBufferG2d, m_plotArea.y, m_plotArea.height);
                         }
                         
                         if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
-                            m_yAxis.paintGrid(graphicBufferG2d, plotArea.x, plotArea.width);
+                            m_yAxis.paintGrid(graphicBufferG2d, m_plotArea.x, m_plotArea.width);
                         }
                         
 
@@ -122,19 +143,19 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
                         }
                         m_updateDoubleBuffer = false;
                     }
-                    g2d.drawImage(m_doubleBuffer, plotArea.x, plotArea.y, null);
+                    g2d.drawImage(m_doubleBuffer, m_plotArea.x, m_plotArea.y, null);
                     
                 } else {
                     
                     long startPlotTime = System.currentTimeMillis();
                     g.setColor(Color.white);
-                    g.fillRect(plotArea.x, plotArea.y, plotArea.width, plotArea.height);
+                    g.fillRect(m_plotArea.x, m_plotArea.y, m_plotArea.width, m_plotArea.height);
                     if ((m_plotVerticalGrid) && (m_xAxis != null)) {
-                        m_xAxis.paintGrid(g2d, plotArea.y, plotArea.height);
+                        m_xAxis.paintGrid(g2d, m_plotArea.y, m_plotArea.height);
                     }
 
                     if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
-                        m_yAxis.paintGrid(g2d, plotArea.x, plotArea.width);
+                        m_yAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width);
                     }
                     
 
@@ -493,38 +514,51 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         if (m_plots == null || m_plots.isEmpty()) {
             return;
         }
-        String s =  "<html>";
+        
+        double xValue = m_xAxis.pixelToValue(e.getX());
+        double yValue = m_yAxis.pixelToValue(e.getY());
+
         int nbPlotTooltip = 0;
-        boolean hasToolTip = false;
-        boolean hasMore = false;
+        boolean repaintNeeded = false;
         for (PlotAbstract plot : m_plots) {
-            plot.setIsPaintMarker(false);
-            boolean isPlotSelected = plot.isMouseOnPlot(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
-            plot.setIsPaintMarker(isPlotSelected);
-            String toolTipForPlot = plot.getToolTipText(m_xAxis.pixelToValue(e.getX()), m_yAxis.pixelToValue(e.getY()));
+
+            boolean isPlotSelected = plot.isMouseOnPlot(xValue, yValue);
+            repaintNeeded |= plot.setIsPaintMarker(isPlotSelected);
+            
+            String toolTipForPlot = plot.getToolTipText(xValue, yValue);
+            
             if (toolTipForPlot != null && !toolTipForPlot.isEmpty()){
-                nbPlotTooltip++;
-                hasToolTip = true;
-                if (nbPlotTooltip < 4){
-                    s += toolTipForPlot;
-                    s += "<br/>";
-                }else{
-                    hasMore = true;
+                if (nbPlotTooltip == 0) {
+                    m_sbTooltip.append("<html>");
+                }
+
+                if (nbPlotTooltip < 3){
+                    m_sbTooltip.append(toolTipForPlot);
+                    m_sbTooltip.append("<br/>");
                 }
                 
+                nbPlotTooltip++; 
             }
             
         }
-        if (hasMore) {
-            s += "[...]";
+        if (nbPlotTooltip>=3) {
+            m_sbTooltip.append("[...]");
         }
-        s += "</html>";
-        if (hasToolTip) {
-            setToolTipText(s); 
+
+        if (nbPlotTooltip >0) {
+            m_sbTooltip.append("</html>");
+            setToolTipText(m_sbTooltip.toString()); 
+            m_sbTooltip.setLength(0);
+        } else {
+            setToolTipText(null);
         }
-        repaintUpdateDoubleBuffer();
+        
+        if (repaintNeeded) {
+            repaintUpdateDoubleBuffer();
+        }
         
     }
+    private final StringBuilder m_sbTooltip = new StringBuilder();
 
     
     private JPopupMenu createAxisPopup(final Axis axis) {

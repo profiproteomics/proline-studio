@@ -16,6 +16,7 @@ public abstract class Axis {
     protected FontMetrics m_titleFontMetrics;
     protected Font m_valuesFont = null;
     protected FontMetrics m_valuesFontMetrics = null;
+    protected Font m_valuesDiagonalFont = null;
     
     protected int m_x;
     protected int m_y;
@@ -45,8 +46,18 @@ public abstract class Axis {
     
     protected PlotPanel m_plotPanel;
     
+    protected boolean m_mustDrawDiagonalLabels = false;
+    protected int m_labelMinWidth = 0;
+    protected int m_labelMaxWidth = 0;
+    protected int m_minimumAxisHeight = 0;
+    protected int m_minimumAxisWidth = 0;
+    
     public Axis(PlotPanel p) {
         m_plotPanel = p;
+    }
+    
+    public int getMiniMumAxisHeight(int minHeightFromParent) {
+        return StrictMath.max(m_minimumAxisHeight, minHeightFromParent);
     }
     
     public void setSpecificities(boolean isInteger, boolean isEnum) {

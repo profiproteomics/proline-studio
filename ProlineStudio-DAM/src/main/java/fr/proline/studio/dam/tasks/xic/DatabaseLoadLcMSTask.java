@@ -737,27 +737,31 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 TypedQuery<Feature> queryChild = entityManagerLCMS.createQuery(query, Feature.class);
                 queryChild.setParameter("masterFeatureId", m_masterQuantPeptideIon.getLcmsMasterFeatureId());
                 List<Feature> resultList = queryChild.getResultList();
+                List<Feature> allFeature = new ArrayList();
+                allFeature.addAll(resultList);
                 String queryF = "SELECT f "
                             + "FROM fr.proline.core.orm.lcms.Feature f, fr.proline.core.orm.lcms.FeatureClusterItem fci  "
                             + "WHERE f.id = fci.subFeature.id AND "
                             + "fci.clusterFeature.id =:masterFeatureId ";
                 TypedQuery<Feature> queryChildF = entityManagerLCMS.createQuery(queryF, Feature.class);
+                for (Feature feature : resultList) {
+                    queryChildF.setParameter("masterFeatureId", feature.getId());
+                    List<Feature> r2 = queryChildF.getResultList();
+                    if (r2 != null && !r2.isEmpty()) {
+                        allFeature.addAll(r2);
+                    }
+                }
+                
+                //load peakel
                 String queryP = "SELECT fpi.id.peakelId  "
                             + "FROM fr.proline.core.orm.lcms.FeaturePeakelItem fpi "
                             + "WHERE fpi.id.featureId =:featureId "
                             + "ORDER BY fpi.isotopeIndex ASC ";
                 TypedQuery<Long> queryPeakel = entityManagerLCMS.createQuery(queryP, Long.class);
-                for (Feature feature : resultList) {
-                    queryChildF.setParameter("masterFeatureId", feature.getId());
-                    List<Feature> r2 = queryChildF.getResultList();
-                    if (r2 != null && !r2.isEmpty()) {
-                        // load childs for this cluster feature
-                        m_childFeatureList.addAll(r2);
-                    } else {
-                        // no childs: load this feature
-                        m_childFeatureList.add(feature);
-                    }
-                    
+                
+                
+                for (Feature feature : allFeature) {
+                    m_childFeatureList.add(feature);
                     queryPeakel.setParameter("featureId", feature.getId());
                     List<Long> listIds = queryPeakel.getResultList();
                     if (listIds != null && !listIds.isEmpty()) {

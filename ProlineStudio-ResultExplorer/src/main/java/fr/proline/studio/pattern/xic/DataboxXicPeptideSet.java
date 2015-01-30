@@ -123,7 +123,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 } else {
                     ((XicPeptidePanel) m_panel).dataUpdated(subTask, finished);
                 }
-                getPeptideTableModelList();
+                if (!allProteinSet) {
+                    getPeptideTableModelList();
+                }
                 setLoaded(loadingId);
                 
                 if (finished) {

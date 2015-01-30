@@ -738,9 +738,9 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 queryChild.setParameter("masterFeatureId", m_masterQuantPeptideIon.getLcmsMasterFeatureId());
                 List<Feature> resultList = queryChild.getResultList();
                 String queryF = "SELECT f "
-                            + "FROM fr.proline.core.orm.lcms.Feature f, fr.proline.core.orm.lcms.MasterFeatureItem mfi  "
-                            + "WHERE f.id = mfi.childFeature.id AND "
-                            + "mfi.masterFeature.id =:masterFeatureId ";
+                            + "FROM fr.proline.core.orm.lcms.Feature f, fr.proline.core.orm.lcms.FeatureClusterItem fci  "
+                            + "WHERE f.id = fci.subFeature.id AND "
+                            + "fci.clusterFeature.id =:masterFeatureId ";
                 TypedQuery<Feature> queryChildF = entityManagerLCMS.createQuery(queryF, Feature.class);
                 String queryP = "SELECT fpi.id.peakelId  "
                             + "FROM fr.proline.core.orm.lcms.FeaturePeakelItem fpi "

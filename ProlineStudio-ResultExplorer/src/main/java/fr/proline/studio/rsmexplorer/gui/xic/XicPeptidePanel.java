@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -20,6 +21,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
@@ -87,6 +89,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
     private JButton m_graphicsButton;
+    private AddCompareDataButton m_addCompareDataButton;
     
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
@@ -229,6 +232,16 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         });
         
         toolbar.add(m_graphicsButton);
+        
+        m_addCompareDataButton = new AddCompareDataButton(((QuantPeptideTableModel) m_quantPeptideTable.getModel()), (CompareDataInterface)  m_quantPeptideTable.getModel()) {
+            
+            @Override
+            public void actionPerformed(CompareDataInterface compareDataInterface) {
+                compareDataInterface.setName(m_dataBox.getFullName());
+                DataMixerWindowBoxManager.addCompareTableModel(compareDataInterface);
+            }
+        };
+        toolbar.add(m_addCompareDataButton);
         
         return toolbar;
     }

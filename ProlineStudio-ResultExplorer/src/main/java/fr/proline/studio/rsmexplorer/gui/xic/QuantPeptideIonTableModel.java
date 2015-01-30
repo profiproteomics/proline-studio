@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.export.ExportRowTextInterface;
@@ -10,6 +11,7 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringDiffFilter;
+import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
@@ -25,13 +27,14 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class QuantPeptideIonTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface,  ExportRowTextInterface {
+public class QuantPeptideIonTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface,  ExportRowTextInterface, CompareDataInterface {
 
     public static final int COLTYPE_PEPTIDE_ION_ID = 0;
     public static final int COLTYPE_PEPTIDE_ION_NAME = 1;
     public static final int COLTYPE_PEPTIDE_ION_CHARGE = 2;
     public static final int COLTYPE_PEPTIDE_ION_MOZ = 3;
     public static final int COLTYPE_PEPTIDE_ION_ELUTION_TIME = 4;
+    public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_ION_ELUTION_TIME;
     private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Charge", "m/z", "<html>Elution<br/>time (min)</html>"};
     private static final String[] m_columnNamesForFilter = {"Id", "Peptide Sequence", "Charge", "m/z", "Elution time"};
     private static final String[] m_toolTipColumns = {"MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Charge", "Mass to Charge Ratio", "Elution time"};
@@ -51,6 +54,8 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
+    
+    private String m_modelName;
 
     public QuantPeptideIonTableModel(LazyTable table) {
         super(table);
@@ -651,5 +656,100 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             }
         }
        return ""; // should never happen
+    }
+
+    @Override
+    public String getDataColumnIdentifier(int col) {
+        if (col <= LAST_STATIC_COLUMN) {
+            return m_columnNamesForFilter[col];
+        } else {
+            int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+            int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(m_columnNamesQC[id]);
+            sb.append(' ');
+            sb.append(m_quantChannels[nbQc].getResultFileName());
+            
+            return sb.toString();
+        }
+    }
+
+    @Override
+    public Class getDataColumnClass(int col) {
+        switch (col) {
+            case COLTYPE_PEPTIDE_ION_ID: {
+                return Long.class;
+            }
+            case COLTYPE_PEPTIDE_ION_NAME: {
+                return String.class;
+            }
+            case COLTYPE_PEPTIDE_ION_CHARGE: {
+                return Integer.class; 
+            }
+            case COLTYPE_PEPTIDE_ION_MOZ: {
+                return Double.class; 
+            }
+            case COLTYPE_PEPTIDE_ION_ELUTION_TIME: {
+                return Float.class; 
+            }
+            default: {
+                int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                switch (id) {
+                    case COLTYPE_SELECTION_LEVEL:
+                        return Integer.class;
+                    case COLTYPE_ABUNDANCE:
+                        return Float.class;
+                    case COLTYPE_RAW_ABUNDANCE:
+                        return Float.class;
+                    case COLTYPE_PSM:
+                        return Integer.class;
+                        
+                }
+
+            }
+        }
+        return null; // should never happen
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        Object data = getValueAt(rowIndex, columnIndex);
+        if (data instanceof LazyData) {
+            data = ((LazyData) data).getData();
+        }
+        return data;
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        int[] keys = { COLTYPE_PEPTIDE_ION_NAME, COLTYPE_PEPTIDE_ION_ID };
+        return keys;
+    }
+
+    @Override
+    public int getInfoColumn() {
+        return COLTYPE_PEPTIDE_ION_NAME;
+    }
+
+    @Override
+    public void setName(String name) {
+        m_modelName = name;
+    }
+
+    @Override
+    public String getName() {
+        return m_modelName;
+    }
+
+    @Override
+    public Map<String, Object> getExternalData() {
+        return null;
+    }
+
+    @Override
+    public PlotInformation getPlotInformation() {
+        return null;
     }
 }

@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -20,6 +21,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
@@ -77,6 +79,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     private FilterButton m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
+    private AddCompareDataButton m_addCompareDataButton;
     
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
@@ -188,6 +191,16 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
 
         });
         toolbar.add(m_columnVisibilityButton);
+        
+        m_addCompareDataButton = new AddCompareDataButton(((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()), (CompareDataInterface)  m_quantPeptideIonTable.getModel()) {
+            
+            @Override
+            public void actionPerformed(CompareDataInterface compareDataInterface) {
+                compareDataInterface.setName(m_dataBox.getFullName());
+                DataMixerWindowBoxManager.addCompareTableModel(compareDataInterface);
+            }
+        };
+        toolbar.add(m_addCompareDataButton);
         
         return toolbar;
     }

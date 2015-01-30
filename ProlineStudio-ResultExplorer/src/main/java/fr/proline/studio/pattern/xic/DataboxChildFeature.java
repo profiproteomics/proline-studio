@@ -15,6 +15,9 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel;
+import static fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel.VIEW_ALL_GRAPH_PEAKS;
+import static fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel.VIEW_ALL_ISOTOPES_FOR_FEATURE;
+import static fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel.VIEW_ALL_PEAKS_FOR_MAP;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeakPanel;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -55,7 +58,7 @@ public class DataboxChildFeature extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(CompareDataInterface.class, true);
         registerOutParameter(outParameter);
-        
+
         outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
@@ -75,14 +78,14 @@ public class DataboxChildFeature extends AbstractDataBox {
         MasterQuantPeptideIon oldIon = m_masterQuantPeptideIon;
         m_masterQuantPeptideIon = (MasterQuantPeptideIon) m_previousDataBox.getData(false, MasterQuantPeptideIon.class);
         m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
-        
+
         if (m_masterQuantPeptideIon != null && (oldIon != null && m_masterQuantPeptideIon.equals(oldIon))) {
             return;
         }
         if (m_masterQuantPeptideIon == null && oldIon == null) {
             return;
         }
-        
+
         final int loadingId = setLoading();
 
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -94,12 +97,12 @@ public class DataboxChildFeature extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                
+
                 if (m_childFeatureList != null) {
                     for (int i = 0; i < m_childFeatureList.size(); i++) {
                         boolean hasPeak = false;
                         List<List<Peak>> list = new ArrayList();
-                        if (m_peakelList.size() >= i+1) {
+                        if (m_peakelList.size() >= i + 1) {
                             for (Peakel peakel : m_peakelList.get(i)) {
                                 List<Peak> listPeak = peakel.getPeakList();
                                 if (listPeak.size() > 0) {
@@ -112,7 +115,7 @@ public class DataboxChildFeature extends AbstractDataBox {
                         m_featureHasPeak.add(hasPeak);
                     }
                 }
-                
+
                 if (subTask == null) {
                     ((XicFeaturePanel) m_panel).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
                 } else {
@@ -121,11 +124,9 @@ public class DataboxChildFeature extends AbstractDataBox {
 
                 setLoaded(loadingId);
 
-                
-                
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class); 
+                    propagateDataChanged(CompareDataInterface.class);
                 }
 
             }
@@ -145,56 +146,97 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     private List<XicPeakPanel> getPeakTableModelList() {
         List<XicPeakPanel> list = new ArrayList();
+        int viewType = ((XicFeaturePanel) m_panel).getGraphViewType();
         if (m_childFeatureList != null) {
-            if (((XicFeaturePanel) m_panel).isGraphAllPeak()) {
-                for (int i = 0; i < m_childFeatureList.size(); i++) {
-                    Feature feature = m_childFeatureList.get(i);
-                    Color color = m_quantChannelInfo.getMapColor(feature.getMap().getId());
-                    String title = m_quantChannelInfo.getMapTitle(feature.getMap().getId());
-                    if (m_peakelList != null && m_peakelList.size() > i) {
-                        List<Peakel> peakels = m_peakelList.get(i);
-                        if (peakels.size() > 0) {
-                            // get the first isotope
-                            int idP = 0;
-                            for (Peakel peakel : peakels) {
-                                if (peakel.getIsotopeIndex() == 0) {
-                                    if (m_peakList.size() > i && !m_peakList.get(i).isEmpty()) {
-                                        List<Peak> peaks = m_peakList.get(i).get(idP);
+            switch (viewType) {
+                case VIEW_ALL_GRAPH_PEAKS: {
+                    for (int i = 0; i < m_childFeatureList.size(); i++) {
+                        Feature feature = m_childFeatureList.get(i);
+                        Color color = m_quantChannelInfo.getMapColor(feature.getMap().getId());
+                        String title = m_quantChannelInfo.getMapTitle(feature.getMap().getId());
+                        if (m_peakelList != null && m_peakelList.size() > i) {
+                            List<Peakel> peakels = m_peakelList.get(i);
+                            if (peakels.size() > 0) {
+                                // get the first isotope
+                                int idP = 0;
+                                for (Peakel peakel : peakels) {
+                                    if (peakel.getIsotopeIndex() == 0) {
+                                        if (m_peakList.size() > i && !m_peakList.get(i).isEmpty()) {
+                                            List<Peak> peaks = m_peakList.get(i).get(idP);
+                                            XicPeakPanel peakPanel = new XicPeakPanel();
+                                            peakPanel.setData((long) -1, feature, peakel, peakel.getIsotopeIndex(), peaks, color, title, true);
+                                            list.add(peakPanel);
+                                        }
+                                    }
+                                    idP++;
+                                }
+
+                            }
+                        }
+                    }
+                     break;
+                }
+                case VIEW_ALL_ISOTOPES_FOR_FEATURE: {
+                    Feature selectedFeature = ((XicFeaturePanel) m_panel).getSelectedFeature();
+                    if (selectedFeature != null) {
+                        int id = m_childFeatureList.indexOf(selectedFeature);
+                        if (id != -1) {
+                            Color color = m_quantChannelInfo.getMapColor(selectedFeature.getMap().getId());
+                            String title = m_quantChannelInfo.getMapTitle(selectedFeature.getMap().getId());
+                            if (m_peakelList != null && m_peakelList.size() > id) {
+                                List<Peakel> peakels = m_peakelList.get(id);
+                                int nbPeakel = peakels.size();
+                                if (m_peakList.size() > id && !m_peakList.get(id).isEmpty()) {
+                                    List<List<Peak>> listPeaks = m_peakList.get(id);
+                                    for (int p = 0; p < nbPeakel; p++) {
+                                        List<Peak> peaks = listPeaks.get(p);
                                         XicPeakPanel peakPanel = new XicPeakPanel();
-                                        peakPanel.setData((long) -1, feature, peakel, peakel.getIsotopeIndex(), peaks, color, title, true);
+                                        peakPanel.setData((long) -1, selectedFeature, peakels.get(p), peakels.get(p).getIsotopeIndex(), peaks, color, title, true);
                                         list.add(peakPanel);
                                     }
                                 }
-                                idP++;
                             }
-                            
-                            
                         }
                     }
+                    break;
                 }
-            }else{
-                Feature selectedFeature = ((XicFeaturePanel) m_panel).getSelectedFeature();
-                if (selectedFeature != null) {
-                    int id = m_childFeatureList.indexOf(selectedFeature);
-                    if (id != -1) {
-                        Color color = m_quantChannelInfo.getMapColor(selectedFeature.getMap().getId());
-                        String title = m_quantChannelInfo.getMapTitle(selectedFeature.getMap().getId());
-                        if (m_peakelList != null && m_peakelList.size() > id) {
-                            List<Peakel> peakels = m_peakelList.get(id);
-                            int nbPeakel = peakels.size();
-                            if (m_peakList.size() > id && !m_peakList.get(id).isEmpty()) {
-                                List<List<Peak>> listPeaks = m_peakList.get(id);
-                                for (int p=0; p<nbPeakel; p++) {
-                                    List<Peak> peaks = listPeaks.get(p);
-                                    XicPeakPanel peakPanel = new XicPeakPanel();
-                                    peakPanel.setData((long) -1, selectedFeature, peakels.get(p), peakels.get(p).getIsotopeIndex(), peaks, color, title, true);
-                                    list.add(peakPanel);
+                case VIEW_ALL_PEAKS_FOR_MAP: {
+                    Feature selectedFeature = ((XicFeaturePanel) m_panel).getSelectedFeature();
+                    if (selectedFeature != null) {
+                        int id = m_childFeatureList.indexOf(selectedFeature);
+                        if (id != -1) {
+                            for (int i = 0; i < m_childFeatureList.size(); i++) {
+                                Feature feature = m_childFeatureList.get(i);
+                                Color color = m_quantChannelInfo.getMapColor(feature.getMap().getId());
+                                String title = m_quantChannelInfo.getMapTitle(feature.getMap().getId());
+                                if (feature.getMap().getId() == selectedFeature.getMap().getId()) {
+                                    if (m_peakelList != null && m_peakelList.size() > i) {
+                                        List<Peakel> peakels = m_peakelList.get(i);
+                                        if (peakels.size() > 0) {
+                                            // get the first isotope
+                                            int idP = 0;
+                                            for (Peakel peakel : peakels) {
+                                                if (peakel.getIsotopeIndex() == 0) {
+                                                    if (m_peakList.size() > i && !m_peakList.get(i).isEmpty()) {
+                                                        List<Peak> peaks = m_peakList.get(i).get(idP);
+                                                        XicPeakPanel peakPanel = new XicPeakPanel();
+                                                        peakPanel.setData((long) -1, feature, peakel, peakel.getIsotopeIndex(), peaks, color, title, true);
+                                                        list.add(peakPanel);
+                                                    }
+                                                }
+                                                idP++;
+                                            }
+
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+                     break;
                 }
             }
+
         }
 
         return list;
@@ -213,15 +255,15 @@ public class DataboxChildFeature extends AbstractDataBox {
                 return ((XicFeaturePanel) m_panel).getSelectedFeature();
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                ((CompareDataProviderInterface)m_panel).getCrossSelectionInterface();
+                ((CompareDataProviderInterface) m_panel).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);
     }
-    
+
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {

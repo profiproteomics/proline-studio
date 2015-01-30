@@ -67,7 +67,11 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     private JButton m_graphicsButton;
     private JButton m_graphicsTypeButton;
     
-    private boolean m_graphAllPeaks = true;
+   public static final int VIEW_ALL_GRAPH_PEAKS = 0;
+   public static final int VIEW_ALL_ISOTOPES_FOR_FEATURE = 1;
+   public static final int VIEW_ALL_PEAKS_FOR_MAP = 2;
+   
+   private int m_viewType = 0;
     
     private boolean m_canGraph ;
     
@@ -185,7 +189,20 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         m_graphicsTypeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                m_graphAllPeaks = !m_graphAllPeaks;
+                switch(m_viewType) {
+                    case VIEW_ALL_GRAPH_PEAKS: {
+                        m_viewType = VIEW_ALL_ISOTOPES_FOR_FEATURE ;
+                        break;
+                    }
+                    case VIEW_ALL_ISOTOPES_FOR_FEATURE: {
+                        m_viewType = VIEW_ALL_PEAKS_FOR_MAP ;
+                        break;
+                    }
+                    case VIEW_ALL_PEAKS_FOR_MAP: {
+                        m_viewType = VIEW_ALL_GRAPH_PEAKS ;
+                        break;
+                    }
+                }
                 setGraphicTypeToolTip();
                 m_dataBox.propagateDataChanged(CompareDataInterface.class);
             }
@@ -200,12 +217,26 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     }
     
     private void setGraphicTypeToolTip() {
-        String tooltipText = m_graphAllPeaks?"Display all isotopes for the selected feature":"Display peaks for all features";
+        String tooltipText = "";
+        switch (m_viewType) {
+            case VIEW_ALL_GRAPH_PEAKS: {
+                tooltipText = "Display all isotopes for the selected feature";
+                break;
+            }
+            case VIEW_ALL_ISOTOPES_FOR_FEATURE: {
+                tooltipText = "Display peaks for this map";
+                break;
+            }
+            case VIEW_ALL_PEAKS_FOR_MAP: {
+                tooltipText = "Display peaks for all features";
+                break;
+            }
+        }
         m_graphicsTypeButton.setToolTipText(tooltipText);
     }
     
-    public boolean isGraphAllPeak() {
-        return m_graphAllPeaks;
+    public int getGraphViewType() {
+        return m_viewType;
     }
     
     private JPanel createInternalPanel() {

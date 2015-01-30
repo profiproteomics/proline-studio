@@ -63,7 +63,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
     
     public static final int SUB_TASK_COUNT_PEPTIDE_ION = 1;
     public static final int SUB_TASK_PEPTIDE_ION = 0;
-
+    
     // data kept for sub tasks
     private List<Long> m_proteinSetIds = null;
     private List<Long> m_resultSetIds = null;
@@ -726,64 +726,107 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         }
 
         int nbMP = m_masterQuantPeptideList.size();
-        // for each PeptideInstance, load MasterQuantPeptide and list of QuantPeptide
-        String queryDMasterQuantPeptide = "SELECT  new fr.proline.core.orm.msi.dto.DMasterQuantPeptide "
-                    + "(q.id, q.selectionLevel, q.objectTreeId,  q.serializedProperties,  pi.resultSummary.id) "
+        int nbPI = peptideInstanceList.size();
+        //  load MasterQuantPeptide and list of QuantPeptide
+        String queryDMasterQuantPeptide = "SELECT q.id, q.selectionLevel, q.objectTreeId,  q.serializedProperties,  pi.resultSummary.id, pi.id "
                     + "FROM MasterQuantComponent q, PeptideInstance pi "
-                    + " WHERE pi.id =:peptideInstanceId AND  q.id = pi.masterQuantComponentId "
+                    + " WHERE pi.id IN (:listPeptideInstanceId) AND  q.id = pi.masterQuantComponentId "
                     + " ORDER BY q.id ASC ";
-        TypedQuery<DMasterQuantPeptide> masterQuantPeptideQuery = entityManagerMSI.createQuery(queryDMasterQuantPeptide, DMasterQuantPeptide.class);
+        Query mqPeptideQ = entityManagerMSI.createQuery(queryDMasterQuantPeptide);
+        mqPeptideQ.setParameter("listPeptideInstanceId", listPeptideInstanceIds);
+        List<Object[]> resultListMQPeptide = mqPeptideQ.getResultList();
+        List<Long> listObjectTreeId = new ArrayList();
+        List<DMasterQuantPeptide> listMasterQP = new ArrayList();
+        for (Object[] resCur : resultListMQPeptide) {
+            int i=0;
+            long masterQuantPeptideId = (long)resCur[i++];
+            int selectionLevel = (int)resCur[i++];
+            long objectTreeId = (long)resCur[i++];
+            String serializedProp = (String)resCur[i++];
+            long quantRSId = (long)resCur[i++];
+            long peptideInstanceId = (long)resCur[i++];
+            DMasterQuantPeptide masterQuantPeptide = new DMasterQuantPeptide(masterQuantPeptideId, selectionLevel, objectTreeId, serializedProp, quantRSId) ;
+            //search index of peptideInstance
+            DPeptideInstance pi = null;
+            for(int k=0; k<nbPI; k++) {
+                if (peptideInstanceList.get(k).getId() == peptideInstanceId) {
+                    pi = peptideInstanceList.get(k);
+                    break;
+                }
+            }
+            masterQuantPeptide.setPeptideInstance(pi);
+            masterQuantPeptide.setPeptideInstanceId(peptideInstanceId);
+            listObjectTreeId.add(objectTreeId) ;
+            listMasterQP.add(masterQuantPeptide);
+        }
         
-        for (DPeptideInstance peptideInstance : peptideInstanceList) {
-            masterQuantPeptideQuery.setParameter("peptideInstanceId", peptideInstance.getId());
-            //masterQuantPeptideQuery.setParameter("rsmId", peptideInstance.getResultSummary().getId());
-            DMasterQuantPeptide masterQuantPeptide = null;
+        List<ObjectTree> listOt = new ArrayList();
+        if (listObjectTreeId.size() > 0) {
+            String otQuery = "SELECT ot FROM fr.proline.core.orm.msi.ObjectTree ot WHERE id IN (:listId) ";
+            TypedQuery<ObjectTree> queryObjectTree = entityManagerMSI.createQuery(otQuery, ObjectTree.class);
+            queryObjectTree.setParameter("listId", listObjectTreeId);
+            listOt = queryObjectTree.getResultList() ;
+        }
+        for (DMasterQuantPeptide masterQuantPeptide : listMasterQP) {
             int index = -1;
             for(int k=0; k<nbMP; k++) {
-                if (m_masterQuantPeptideList.get(k).getPeptideInstanceId() == peptideInstance.getId()) {
+                if (m_masterQuantPeptideList.get(k).getPeptideInstanceId() == masterQuantPeptide.getPeptideInstanceId()) {
                     index = k;
                     break;
                 }
             }
-            try {
-                masterQuantPeptide = masterQuantPeptideQuery.getSingleResult();
-                if (masterQuantPeptide != null) {
-                    masterQuantPeptide.setPeptideInstance(peptideInstance);
-                    masterQuantPeptide.setPeptideInstanceId(peptideInstance.getId());
-                    // list of quantPeptide
-                    String quantPeptideData = ""; //ObjectTree.clobData
-                    ObjectTree ot = entityManagerMSI.find(ObjectTree.class, masterQuantPeptide.getObjectTreeId()); // get the objectTree from id.
-                    if (ot != null) {
-                        quantPeptideData = ot.getClobData();
-                    } 
-                    Map<Long, DQuantPeptide> quantProteinSetByQchIds = null;
-                    if (quantPeptideData != null && !quantPeptideData.isEmpty()) {
-                        quantProteinSetByQchIds = masterQuantPeptide.parseQuantPeptideFromProperties(quantPeptideData);
-                    }
-                    masterQuantPeptide.setQuantPeptideByQchIds(quantProteinSetByQchIds);
-                    masterQuantPeptide.setCluster( getPeptideCluster(masterQuantPeptide.getId()));
-                    // update the list 
-                    m_masterQuantPeptideList.set(index, masterQuantPeptide);
+            // list of quantPeptide
+            String quantPeptideData = ""; //ObjectTree.clobData
+            ObjectTree ot = null;
+            // search objectTree
+            for (ObjectTree objectTree : listOt) {
+                if (objectTree.getId() == masterQuantPeptide.getObjectTreeId()) {
+                    ot = objectTree;
+                    break;
                 }
-                
-             
-            } catch (NoResultException  e1) {
-                // no master quantPeptide: build a fake masterQuantPeptide to display the peptideInstance
-                masterQuantPeptide = new DMasterQuantPeptide(-1, 0, -1, null, peptideInstance.getResultSummary().getId());
-                masterQuantPeptide.setPeptideInstance(peptideInstance);
-                masterQuantPeptide.setPeptideInstanceId(peptideInstance.getId());
-                // update the list 
-                m_masterQuantPeptideList.set(index, masterQuantPeptide);
-            }catch (NonUniqueResultException e2) {
-                m_logger.error(getClass().getSimpleName()+" failed", e2);
+            }
+            if (ot != null) {
+                quantPeptideData = ot.getClobData();
+            }
+            Map<Long, DQuantPeptide> quantProteinSetByQchIds = null;
+            if (quantPeptideData != null && !quantPeptideData.isEmpty()) {
+                quantProteinSetByQchIds = masterQuantPeptide.parseQuantPeptideFromProperties(quantPeptideData);
+            }
+            masterQuantPeptide.setQuantPeptideByQchIds(quantProteinSetByQchIds);
+            masterQuantPeptide.setCluster(getPeptideCluster(masterQuantPeptide.getId()));
+            // update the list 
+            m_masterQuantPeptideList.set(index, masterQuantPeptide);
+        }
+        
+        // no master quantPeptide: build a fake masterQuantPeptide to display the peptideInstance
+        for (int i = 0; i < nbMP; i++) {
+            DMasterQuantPeptide masterQuantPeptide = m_masterQuantPeptideList.get(i);
+            if (masterQuantPeptide.getId() == -1) {
+                //search index of peptideInstance
+                DPeptideInstance peptideInstance = null;
+                if (masterQuantPeptide.getPeptideInstanceId() > 0 && listPeptideInstanceIds.indexOf(masterQuantPeptide.getPeptideInstanceId()) != -1) {
+                    for (int k = 0; k < nbPI; k++) {
+                        if (peptideInstanceList.get(k).getId() == masterQuantPeptide.getPeptideInstanceId()) {
+                            peptideInstance = peptideInstanceList.get(k);
+                            break;
+                        }
+                    }
+                    DMasterQuantPeptide o = new DMasterQuantPeptide(-1, 0, -1, null, masterQuantPeptide.getQuantResultSummaryId());
+                    o.setPeptideInstance(peptideInstance);
+                    o.setPeptideInstanceId(masterQuantPeptide.getPeptideInstanceId());
+                    o.setPeptideInstance(peptideInstance);
+                    // update the list 
+                    m_masterQuantPeptideList.set(i, o);
+                }
             }
         }
+        
         // load masterQuantPeptide not linked to a peptideInstance
         queryDMasterQuantPeptide = "SELECT  new fr.proline.core.orm.msi.dto.DMasterQuantPeptide"
                     + "(q.id, q.selectionLevel, q.objectTreeId,  q.serializedProperties,  q.resultSummary.id) "
                     + "FROM MasterQuantComponent q "
                     + " WHERE q.id=:masterQuantPeptideId";
-        masterQuantPeptideQuery = entityManagerMSI.createQuery(queryDMasterQuantPeptide, DMasterQuantPeptide.class);
+        TypedQuery<DMasterQuantPeptide> masterQuantPeptideQuery = entityManagerMSI.createQuery(queryDMasterQuantPeptide, DMasterQuantPeptide.class);
         for (Long pepInstanceId : listPeptideInstanceIds) {
             if (pepInstanceId < 0) { // peptideInstanceId contains the -masterQuantPeptideId to load
                 
@@ -1257,5 +1300,6 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         } // end for
         return true;
     }
-
+    
+    
 }

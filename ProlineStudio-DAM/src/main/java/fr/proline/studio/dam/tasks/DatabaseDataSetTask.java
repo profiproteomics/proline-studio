@@ -764,6 +764,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                             Object[] res = (Object[])qMsi.getSingleResult();
                             resultFileName = (String)res[0];
                             rawPath = (String)res[1];
+                            if (resultFileName != null && resultFileName.contains(".")) {
+                                resultFileName = resultFileName.substring(0, resultFileName.indexOf('.'));
+                            }
                         }catch(NoResultException | NonUniqueResultException e){
                             
                         }

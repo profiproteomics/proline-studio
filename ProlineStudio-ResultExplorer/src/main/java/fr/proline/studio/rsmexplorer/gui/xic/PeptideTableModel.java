@@ -269,7 +269,9 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
     @Override
     public PlotInformation getPlotInformation() {
         PlotInformation plotInformation = new PlotInformation();
-        plotInformation.setPlotTitle(m_quantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide().getSequence());
+        if (m_quantPeptide.getPeptideInstance() != null && m_quantPeptide.getPeptideInstance().getBestPeptideMatch() != null) {
+            plotInformation.setPlotTitle(m_quantPeptide.getPeptideInstance().getBestPeptideMatch().getPeptide().getSequence());
+        }
         plotInformation.setDrawPoints(true);
         plotInformation.setDrawGap(true);
         return plotInformation;

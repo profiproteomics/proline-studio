@@ -98,8 +98,10 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private JLabel m_titleLabel;
     private String TABLE_TITLE = "Peptides";
     
+    private boolean m_canGraph ;
 
-    public XicPeptidePanel() {
+    public XicPeptidePanel(boolean canGraph) {
+        this.m_canGraph = canGraph ;
         initComponents();
     }
     
@@ -230,8 +232,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                 win.requestActive();
             }
         });
-        
-        toolbar.add(m_graphicsButton);
+        if (m_canGraph){
+            toolbar.add(m_graphicsButton);
+        }
         
         m_addCompareDataButton = new AddCompareDataButton(((QuantPeptideTableModel) m_quantPeptideTable.getModel()), (CompareDataInterface)  m_quantPeptideTable.getModel()) {
             

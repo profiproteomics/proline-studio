@@ -40,7 +40,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         
         // Name of this databox
         m_name = "XIC Peptides";
-        m_description = "All Peptides of a XIC";
+        m_description = "All XIC Peptides of a ProteinSet";
 
         // Register Possible in parameters
         // One Dataset and list of Peptide

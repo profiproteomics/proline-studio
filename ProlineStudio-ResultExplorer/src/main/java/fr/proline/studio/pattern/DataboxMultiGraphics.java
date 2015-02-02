@@ -28,7 +28,7 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
          
         // Name of this databox
         m_name = "Graphic";
-        m_description = "Graphics : Linear Plot";
+        m_description = "Multi Graphics : Linear Plot";
 
         // Register Possible in parameters
         GroupParameter inParameter = new GroupParameter();

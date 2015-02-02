@@ -1,5 +1,10 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.pattern.xic.DataboxChildFeature;
+import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
+import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
+import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
+import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -14,13 +19,17 @@ public class DataboxManager {
     
     private final AbstractDataBox[] m_dataBoxStartingArray = { new DataBoxRsetAll(), new DataBoxRsetPSM(), new DataBoxRsetAllProteinMatch(),
                                                  new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(),
-                                                 new DataBoxRsmAllProteinSet() };
+                                                 new DataBoxRsmAllProteinSet(), new DataboxXicProteinSet() };
     
     private final AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(),
                                                  new DataBoxRsetProteinsForPeptideMatch(),
                                                  new DataboxRsetPeptidesOfProtein(),
                                                  new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(),
-                                                 new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet(), new DataBoxTaskDescription()/*, new DataBoxStatisticsFrequencyResponse()*/, new DataBoxRsetPeptideFragmentation(), new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(), new DataboxGraphics() };
+                                                 new DataBoxRsmProteinSetOfPeptides(), new DataBoxRsmProteinsOfProteinSet(), 
+                                                 new DataBoxTaskDescription()/*, new DataBoxStatisticsFrequencyResponse()*/, new DataBoxRsetPeptideFragmentation(), 
+                                                 new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(), 
+                                                 new DataboxGraphics(), new DataboxPSMOfMasterQuantPeptide() , 
+                                                 new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature()   };
     
     private DataboxManager() {
     }

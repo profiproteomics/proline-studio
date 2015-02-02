@@ -41,8 +41,8 @@ public class DataboxChildFeature extends AbstractDataBox {
         super(DataboxType.DataboxXicChildFeature);
 
         // Name of this databox
-        m_name = "Features";
-        m_description = "All Child Features for a MasterFeature/MasterQuantPeptideIon";
+        m_name = "XIC Features";
+        m_description = "All  Features for a XIC Peptide Ion";
 
         // Register Possible in parameters
         // One Map 

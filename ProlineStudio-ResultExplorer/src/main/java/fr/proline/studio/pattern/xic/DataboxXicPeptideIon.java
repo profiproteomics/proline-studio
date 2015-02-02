@@ -35,7 +35,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         
         // Name of this databox
         m_name = "XIC Peptides Ions";
-        m_description = "All Peptides Ions of a XIC";
+        m_description = "All Peptides Ions of a XIC Peptide";
 
         // Register Possible in parameters
         // One Dataset and list of Peptide

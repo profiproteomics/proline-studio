@@ -26,6 +26,9 @@ public class SearchFloatingPanel extends JPanel {
 
     
     public SearchFloatingPanel(AbstractSearch search) {
+        this(search, "*", "<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
+    }
+    public SearchFloatingPanel(AbstractSearch search, String defaultSearchValue, String defaultTooltip) {
         
 
         m_search = search;
@@ -53,6 +56,10 @@ public class SearchFloatingPanel extends JPanel {
         });
         
         m_searchTextField = new JTextField(16);
+        if (defaultSearchValue != null) {
+            m_searchTextField.setText(defaultSearchValue);
+        }
+        m_searchTextField.setToolTipText(defaultTooltip);
         m_searchTextField.addActionListener(new ActionListener() {
 
            @Override

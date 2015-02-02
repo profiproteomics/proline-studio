@@ -142,7 +142,7 @@ public class XAxis extends Axis {
             int stringWidth;
             String label;
             if (m_isEnum) {
-                label = m_plotPanel.getEnumValueX((int) Math.round(x)); //JPM.WART
+                label = m_plotPanel.getEnumValueX((int) Math.round(x), false); //JPM.WART
                 if (label.isEmpty()) {
                     label = " "; //JPM.WART
                 }
@@ -270,7 +270,7 @@ public class XAxis extends Axis {
 
             String label;
             if (m_isEnum) {
-                label = m_plotPanel.getEnumValueX((int) Math.round(x)); //JPM.WART
+                label = m_plotPanel.getEnumValueX((int) Math.round(x), false); //JPM.WART
                 if (m_mustDrawDiagonalLabels) {
                     if (label.length() > 20) {
                         label = label.substring(0, 19) + "..";

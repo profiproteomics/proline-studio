@@ -417,12 +417,12 @@ public class PlotHistogram extends PlotAbstract {
     }
 
     @Override
-    public String getEnumValueX(int index) {
+    public String getEnumValueX(int index, boolean fromData ) {
         return null; // should not be called
     }
 
     @Override
-    public String getEnumValueY(int index) {
+    public String getEnumValueY(int index, boolean fromData) {
         return null; // should not be called
     }
     

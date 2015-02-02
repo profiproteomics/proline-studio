@@ -131,10 +131,6 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     }
     
     public abstract boolean isMouseOnPlot(double x, double y);
-    
-    public abstract String getEnumValueX(int index);
-
-    public abstract String getEnumValueY(int index);
 
 
 }

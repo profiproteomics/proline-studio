@@ -183,10 +183,10 @@ public abstract class Axis {
     
     
     public interface EnumXInterface {
-        public String getEnumValueX(int index);
+        public String getEnumValueX(int index, boolean fromData);
     }
     
     public interface EnumYInterface {
-        public String getEnumValueY(int index);
+        public String getEnumValueY(int index, boolean fromData);
     }
 }

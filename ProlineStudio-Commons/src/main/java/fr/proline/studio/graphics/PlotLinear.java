@@ -143,13 +143,13 @@ public class PlotLinear extends PlotAbstract {
         }
         String labelX; 
         if (m_plotPanel.getXAxis().isEnum()) {
-            labelX = m_plotPanel.getEnumValueX(indexFound);
+            labelX = m_plotPanel.getEnumValueX(indexFound, true);
         } else {
             labelX = m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]);
         }
         String labelY;
         if (m_plotPanel.getYAxis().isEnum()) {
-            labelY = m_plotPanel.getEnumValueY(indexFound);
+            labelY = m_plotPanel.getEnumValueY(indexFound, true);
         } else {
             labelY = m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]);
         }
@@ -749,7 +749,7 @@ public class PlotLinear extends PlotAbstract {
     }
     
     @Override
-    public String getEnumValueX(int index) {
+    public String getEnumValueX(int index, boolean fromData) {
         if ((index < 0) || (index >= m_dataX.length)) {
             return "";
         }
@@ -759,7 +759,7 @@ public class PlotLinear extends PlotAbstract {
     }
 
     @Override
-    public String getEnumValueY(int index) {
+    public String getEnumValueY(int index, boolean fromData) {
         if ((index < 0) || (index >= m_dataY.length)) {
             return "";
         }

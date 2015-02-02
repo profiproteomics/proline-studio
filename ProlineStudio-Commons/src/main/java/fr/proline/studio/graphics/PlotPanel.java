@@ -589,19 +589,19 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     }
 
     @Override
-    public String getEnumValueX(int index) {
+    public String getEnumValueX(int index, boolean fromData) {
         if ((m_plots == null) || (m_plots.isEmpty())) {
             return null;
         }
-        return m_plots.get(0).getEnumValueX(index);
+        return m_plots.get(0).getEnumValueX(index, fromData);
     }
 
     @Override
-    public String getEnumValueY(int index) {
+    public String getEnumValueY(int index, boolean fromData) {
         if ((m_plots == null) || (m_plots.isEmpty())) {
             return null;
         }
-        return m_plots.get(0).getEnumValueY(index);
+        return m_plots.get(0).getEnumValueY(index, fromData);
     }
     
     

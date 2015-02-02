@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import javax.swing.JSlider;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Scatter Plot
@@ -29,6 +31,8 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     private double[] m_dataY;
     private int[] m_jitterX;
     private int[] m_jitterY;
+    private String[] m_enumX;
+    private String[] m_enumY;
     
     private double m_gradientParamValuesMin;
     private double m_gradientParamValuesMax;
@@ -116,22 +120,43 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             m_sb = new StringBuilder();
         }
 
-        m_sb.append(m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString());
+        String infoValue;
+        int infoColumn = m_compareDataInterface.getInfoColumn();
+        if (infoColumn == m_colX) {
+            boolean xAsEnum = m_plotPanel.getXAxis().isEnum();
+            if (xAsEnum) {
+                infoValue = getEnumValueX(indexFound, true);
+            } else {
+                infoValue = m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString();
+            }
+        } else if (infoColumn == m_colY) {
+            boolean yAsEnum = m_plotPanel.getYAxis().isEnum();
+            if (yAsEnum) {
+                infoValue = getEnumValueY(indexFound, true);
+            } else {
+                infoValue = m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString();
+            }
+        } else {
+            infoValue = m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString();
+        }
+
+        
+        m_sb.append(infoValue);
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getXAxis().getTitle());
         m_sb.append(" : ");
         boolean xAsEnum = m_plotPanel.getXAxis().isEnum();
         if (xAsEnum) {
-            m_sb.append(getEnumValueX(indexFound));
+            m_sb.append(getEnumValueX(indexFound, true));
         } else {
             m_sb.append(m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]));
         }
         m_sb.append("<BR>");
         m_sb.append(m_plotPanel.getYAxis().getTitle());
         m_sb.append(" : ");
-        boolean yAsEnum = m_plotPanel.getXAxis().isEnum();
+        boolean yAsEnum = m_plotPanel.getYAxis().isEnum();
         if (yAsEnum) {
-            m_sb.append(getEnumValueY(indexFound));
+            m_sb.append(getEnumValueY(indexFound, true));
         } else {
             m_sb.append(m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]));
         }
@@ -337,7 +362,75 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         
         boolean xAsEnum = m_plotPanel.getXAxis().isEnum();
         boolean yAsEnum = m_plotPanel.getYAxis().isEnum();
-        for (int i = 0; i < size; i++) {
+        
+        if (xAsEnum) {
+            HashMap<String, Integer> stringToEnumMap = new HashMap<>();
+            HashMap<Integer, String> enumToStringMap = new  HashMap<>();
+            
+            int enumIndex = 0;
+            for (int i = 0; i < size; i++) {
+
+                String stringValue = m_compareDataInterface.getDataValueAt(i, m_colX).toString();
+                
+                Integer enumIndexCur = stringToEnumMap.get(stringValue);
+                if (enumIndexCur == null) {
+                    enumIndexCur = enumIndex;
+                    stringToEnumMap.put(stringValue, enumIndexCur);
+                    enumToStringMap.put(enumIndexCur, stringValue);
+                    enumIndex++;
+                }
+                m_dataX[i] = enumIndexCur;
+                m_selected[i] = false;
+            }
+            
+            m_enumX = new String[enumToStringMap.size()];
+            Iterator<Integer> itEnum = enumToStringMap.keySet().iterator();
+            while (itEnum.hasNext()) {
+                Integer enumI = itEnum.next();
+                m_enumX[enumI] = enumToStringMap.get(enumI);
+            }
+            
+        } else {
+            for (int i = 0; i < size; i++) {
+                Object value = m_compareDataInterface.getDataValueAt(i, m_colX);
+                m_dataX[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
+                m_selected[i] = false;
+            }
+        }
+        
+        if (yAsEnum) {
+            HashMap<String, Integer> stringToEnumMap = new HashMap<>();
+            HashMap<Integer, String> enumToStringMap = new  HashMap<>();
+            
+            int enumIndex = 0;
+            for (int i = 0; i < size; i++) {
+
+                String stringValue = m_compareDataInterface.getDataValueAt(i, m_colY).toString();
+                
+                Integer enumIndexCur = stringToEnumMap.get(stringValue);
+                if (enumIndexCur == null) {
+                    enumIndexCur = enumIndex;
+                    stringToEnumMap.put(stringValue, enumIndexCur);
+                    enumToStringMap.put(enumIndexCur, stringValue);
+                    enumIndex++;
+                }
+                m_dataY[i] = enumIndexCur;
+            } 
+            
+            m_enumY = new String[enumToStringMap.size()];
+            Iterator<Integer> itEnum = enumToStringMap.keySet().iterator();
+            while (itEnum.hasNext()) {
+                Integer enumI = itEnum.next();
+                m_enumY[enumI] = enumToStringMap.get(enumI);
+            }
+        } else {
+            for (int i = 0; i < size; i++) {
+                Object value = m_compareDataInterface.getDataValueAt(i, m_colY);
+                m_dataY[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
+            }
+        }
+        
+        /*for (int i = 0; i < size; i++) {
             
             if (xAsEnum) {
                 m_dataX[i] = i;
@@ -353,7 +446,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                 m_dataY[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
             }
             m_selected[i] = false;
-        }
+        }*/
 
         // min and max values
         double minX = m_dataX[0];
@@ -608,21 +701,41 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     }
     
     @Override
-    public String getEnumValueX(int index) {
-        if ((index <0) || (index>=m_dataX.length)) {
-            return "";
+    public String getEnumValueX(int index, boolean fromData) {
+        
+        if (fromData) {
+            if ((index < 0) || (index >= m_dataX.length)) {
+                return "";
+            }
+
+            return m_enumX[(int) Math.round(m_dataX[index])];
+        } else {
+             if ((index < 0) || (index >= m_enumX.length)) {
+                return "";
+            }
+
+            return m_enumX[index];
         }
         
-        return m_compareDataInterface.getDataValueAt(index, m_colX).toString();
+        
         
     }
     
     @Override
-    public String getEnumValueY(int index) {
-        if ((index < 0) || (index >= m_dataY.length)) {
-            return "";
-        }
+    public String getEnumValueY(int index, boolean fromData) {
 
-        return m_compareDataInterface.getDataValueAt(index, m_colY).toString();
+        if (fromData) {
+            if ((index < 0) || (index >= m_dataY.length)) {
+                return "";
+            }
+
+            return m_enumY[(int) Math.round(m_dataY[index])];
+        } else {
+            if ((index < 0) || (index >= m_enumY.length)) {
+                return "";
+            }
+
+            return m_enumY[index];
+        }
     }
 }

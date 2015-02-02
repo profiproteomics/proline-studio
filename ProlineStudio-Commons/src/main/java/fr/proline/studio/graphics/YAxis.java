@@ -128,7 +128,7 @@ public class YAxis extends Axis {
             
             
             if (m_isEnum) {
-                label = m_plotPanel.getEnumValueY((int) Math.round(y)); //JPM.WART
+                label = m_plotPanel.getEnumValueY((int) Math.round(y), false); //JPM.WART
                 stringWidth = m_valuesFontMetrics.stringWidth(label);
                 int height = (int) Math.round(StrictMath.ceil(m_valuesFontMetrics.getLineMetrics(label, g).getHeight()));
                 if (height > m_lastHeight) {

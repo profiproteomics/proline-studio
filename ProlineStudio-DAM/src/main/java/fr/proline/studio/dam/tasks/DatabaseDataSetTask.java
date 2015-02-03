@@ -745,8 +745,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             
             if (listMasterQuantitationChannels != null && !listMasterQuantitationChannels.isEmpty()) {
                 masterQuantitationChannels = new ArrayList<>();
-                for (Iterator<MasterQuantitationChannel> it = listMasterQuantitationChannels.iterator(); it.hasNext();) {
-                    MasterQuantitationChannel masterQuantitationChannel = it.next();
+                for (MasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {
                     List<QuantitationChannel> listQuantitationChannels = masterQuantitationChannel.getQuantitationChannels();
                     List<DQuantitationChannel> listDQuantChannels = new ArrayList();
                     for (QuantitationChannel qc : listQuantitationChannels) {
@@ -754,7 +753,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                         // search resultFileName  and raw path
                         String resultFileName = "";
                         String rawPath = "";
-                         String queryMsi = "SELECT msi.resultFileName, pl.path "
+                        Long rsId = null;
+                        String queryMsi = "SELECT msi.resultFileName, pl.path, rsm.resultSet.id "
                                 + "FROM MsiSearch msi, Peaklist pl, ResultSet rs, ResultSummary rsm "
                                 + " WHERE rsm.id=:rsmId AND rsm.resultSet.id = rs.id AND rs.msiSearch.id = msi.id "
                                 + "AND msi.peaklist.id = pl.id ";
@@ -767,11 +767,28 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                             if (resultFileName != null && resultFileName.contains(".")) {
                                 resultFileName = resultFileName.substring(0, resultFileName.indexOf('.'));
                             }
+                            rsId = (Long)res[2];
                         }catch(NoResultException | NonUniqueResultException e){
                             
                         }
                         dqc.setResultFileName(resultFileName);
                         dqc.setRawFilePath(rawPath);
+                        // search for run_identification rawFileName (mzdb fileName) in UDS
+                        String queryUDS  = "SELECT ri.rawFile.rawFileName "
+                                + "FROM fr.proline.core.orm.uds.IdentificationDataset ri, fr.proline.core.orm.uds.Dataset ds "
+                                + "WHERE ri.id = ds.id AND "
+                                + "ds.resultSummaryId =:rsmId AND "
+                                + "ds.resultSetId =:rsId ";
+                        TypedQuery<String> queryMzdb = entityManagerUDS.createQuery(queryUDS, String.class);
+                        queryMzdb.setParameter("rsmId", qc.getIdentResultSummaryId());
+                        queryMzdb.setParameter("rsId", rsId);
+                        String mzdbFile = "";
+                        try{
+                            mzdbFile = queryMzdb.getSingleResult();
+                        }catch(NonUniqueResultException | NoResultException e) {
+                            
+                        }
+                        dqc.setMzdbFileName(mzdbFile);
                         // search for raw map in LCMS database
                         String queryLcms = "SELECT pmrm.rawMap.id "
                                 + "FROM fr.proline.core.orm.lcms.Map  m, ProcessedMap pm, ProcessedMapRawMapMapping pmrm  "
@@ -795,15 +812,15 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     Map<String, Object> propertiesMap = dMaster.getSerializedPropertiesAsMap();
                     DDataset identDataset = null;
                     if (propertiesMap != null) {
-                       Object o = propertiesMap.get("ident_dataset_id");
-                       if (o != null) {
+                        Object o = propertiesMap.get("ident_dataset_id");
+                        if (o != null) {
                             Long identDatasetId = Long.parseLong(o.toString());
                             Dataset identDatasetDB = entityManagerUDS.find(Dataset.class, identDatasetId);
                             if (identDatasetDB != null) {
-                                identDataset = new DDataset(identDatasetDB.getId(), identDatasetDB.getProject(), identDatasetDB.getName(), identDatasetDB.getType(), 
-                                    identDatasetDB.getChildrenCount(), identDatasetDB.getResultSetId(), identDatasetDB.getResultSummaryId(), identDatasetDB.getNumber());
+                                identDataset = new DDataset(identDatasetDB.getId(), identDatasetDB.getProject(), identDatasetDB.getName(), identDatasetDB.getType(),
+                                        identDatasetDB.getChildrenCount(), identDatasetDB.getResultSetId(), identDatasetDB.getResultSummaryId(), identDatasetDB.getNumber());
                             }
-                       }
+                        }
                     }
                     dMaster.setIdentDataset(identDataset);
                     // load the list of quantitation channel linked to this masterQuantitationChannel
@@ -818,7 +835,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                         }
                     }
                     masterQuantitationChannels.add(dMaster);
-                }// end of the for
+                } // end of the for
             }
             m_dataset.setMasterQuantitationChannels(masterQuantitationChannels);
             

@@ -158,7 +158,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements ExportT
             case COLTYPE_PEPTIDE_SCORE: {
                 // Retrieve typical Peptide Match
 
-                Float score = Float.valueOf((float) peptideMatch.getScore()) ;
+                Float score = peptideMatch.getScore() ;
                 lazyData.setData(score);
                 return lazyData;
             }
@@ -190,10 +190,6 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements ExportT
                 lazyData.setData(Float.valueOf((float) peptideMatch.getExperimentalMoz()));
                 return lazyData;
             }
-            /*case COLTYPE_PEPTIDE_DELTA_MOZ: {
-                lazyData.setData(Float.valueOf((float) peptideMatch.getDeltaMoz()));
-                return lazyData;
-            }*/
             case COLTYPE_PEPTIDE_PPM: { 
                 
                 Peptide peptide = peptideMatch.getPeptide();
@@ -238,7 +234,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements ExportT
                 return lazyData;
             }
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
-               lazyData.setData("");
+               lazyData.setData(peptideMatch.getRetentionTime());
                return lazyData ;
             }
             /*case COLTYPE_PEPTIDE_RETENTION_TIME: { //JPM.TODO : can not do it for the moment: Retention Time is on Peptide Instance
@@ -449,20 +445,27 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements ExportT
         if (data == null) {
             return true; // should not happen
         }
+        
+        int rowFiltered = row;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(row).intValue();
+        }
+        
+        // Retrieve Protein Set
+        DPeptideMatch peptideMatch = m_peptideMatchList.get(rowFiltered);
+        
 
         switch (col) {
             case COLTYPE_PEPTIDE_QC_NAME:{
-                int idQc = getPeptideMatchQuantChannel(Long.valueOf(((DPeptideMatch)data).getId())) ;
+                int idQc = getPeptideMatchQuantChannel(Long.valueOf(peptideMatch.getId())) ;
                 if (idQc != -1) {
-                    return ((StringFilter) filter).filter(m_quantitationChannelArray[idQc].getRawFileName());
+                    return ((StringFilter) filter).filter(m_quantitationChannelArray[idQc].getResultFileName());
                 }
             }
             case COLTYPE_PEPTIDE_NAME:
                 return ((StringFilter) filter).filter(((DPeptideMatch)data).getPeptide().getSequence());
             case COLTYPE_PEPTIDE_PTM:
-            case COLTYPE_PEPTIDE_PPM: { 
-                return ((DoubleFilter) filter).filter((Float)data);
-            }  
+            case COLTYPE_PEPTIDE_PPM: 
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
@@ -754,7 +757,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements ExportT
                 return Integer.toString(peptideMatch.getMissedCleavage());
             }
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
-               return "";
+               return Float.toString(peptideMatch.getRetentionTime());
             }
             case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
 

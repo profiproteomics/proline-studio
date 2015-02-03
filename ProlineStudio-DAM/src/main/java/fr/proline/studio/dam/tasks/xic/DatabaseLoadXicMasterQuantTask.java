@@ -1607,16 +1607,29 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
         List sliceOfPeptideMatchIds = subTask.getSubList(m_peptideMatchIds);
 
-        TypedQuery<DMsQuery> msQueryQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DMsQuery(pm.id, msq.id, msq.initialId, s.precursorIntensity) FROM PeptideMatch pm,MsQuery msq, Spectrum s WHERE pm.id IN (:listId) AND pm.msQuery=msq AND msq.spectrum=s", DMsQuery.class);
+        String query = "SELECT pm.id, msq.id, msq.initialId, s.precursorIntensity, s.firstTime "
+                + "FROM PeptideMatch pm,MsQuery msq, Spectrum s "
+                + "WHERE pm.id IN (:listId) AND "
+                + "pm.msQuery=msq AND "
+                + "msq.spectrum=s";
+        Query msQueryQuery = entityManagerMSI.createQuery(query);
         msQueryQuery.setParameter("listId", sliceOfPeptideMatchIds);
 
-        List<DMsQuery> msQueries = msQueryQuery.getResultList();
-        Iterator<DMsQuery> it = msQueries.iterator();
+        List<Object[]> msQueries = msQueryQuery.getResultList();
+        Iterator<Object[]> it = msQueries.iterator();
         while (it.hasNext()) {
-            DMsQuery q = it.next();
+            Object[] o = it.next();
+            int i=0;
+            long pmId = (Long)o[i++];
+            long msqId = (Long)o[i++];
+            int msqInitialId = (Integer)o[i++];
+            Float precursorIntensity = (Float)o[i++];
+            Float retentionTime = (Float)o[i++];
+            DMsQuery q = new DMsQuery(pmId, msqId, msqInitialId, precursorIntensity);
 
             DPeptideMatch peptideMatch = m_peptideMatchMap.get(q.getPeptideMatchId());
             peptideMatch.setMsQuery(q);
+            peptideMatch.setRetentionTime(retentionTime);
 
         }
     }

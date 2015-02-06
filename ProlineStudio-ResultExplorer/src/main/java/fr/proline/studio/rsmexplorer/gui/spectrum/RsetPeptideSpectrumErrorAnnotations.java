@@ -458,28 +458,7 @@ public class RsetPeptideSpectrumErrorAnnotations {
                 }
             }
         }
-        else 
-        { // abcSerieName.equals("")
-        	  float dash[] = {0.01f};
-        	 BasicStroke stk = new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
-             
-			//
-              // draw error
-        	 final XYPointerAnnotation pointer = new XYPointerAnnotation("ERROR no abc serie name" + (sizeXYZserie - 1),
-                     fragTableTheo[6][1],
-                     fragTable[5][1] + orientationFactor * (maxY - minY) * 0.01,
-                     orientationFactor * 6.0 * Math.PI / 4.0);
-             pointer.setBaseRadius(5.0); // distance from pointer to?
-             pointer.setTipRadius(0.0); // length of the pointer
-             pointer.setArrowWidth(2);
-                     
-             
-
-              plot.addAnnotation(pointer);
-        }
-
-
-
+        
         //--------------------- xyz
         double xyzPrev = 0;
         //if(fragTable[6][0] != 0))	

@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.spectrum;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Stroke;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.nio.ByteBuffer;
@@ -231,16 +232,8 @@ public class RsetPeptideSpectrumErrorAnnotations {
          plot.addRangeMarker(target2);
          
 
-        int sizeABCserie = 0;
-        if(positionIonABC>0) 
-        {
-        	sizeABCserie = fragSer[positionIonABC].masses.length;
-        }
-        int sizeXYZserie = 0;
-        if(positionIonXYZ>0)
-        {
-        	sizeXYZserie = fragSer[positionIonXYZ].masses.length;
-        }
+        int sizeABCserie = (fragSer.length==0) ? 0 : fragSer[positionIonABC].masses.length;
+        int sizeXYZserie = (fragSer.length==0) ? 0 : fragSer[positionIonXYZ].masses.length;
 
 
         if (xyzSerieName.contains("z+1")) {
@@ -346,6 +339,7 @@ public class RsetPeptideSpectrumErrorAnnotations {
         TextAnchor pointerAnchor;
 
        
+        
         if (!abcSerieName.equals("")) {
             if(peptideSequence.length() < sizeABCserie )  // fill sequence in case of length problem. should not happen
 	        {
@@ -378,11 +372,7 @@ public class RsetPeptideSpectrumErrorAnnotations {
                     }
                     String aa = "" + peptideSequence.charAt(i);
                     xyta = new XYTextAnnotation(surroundingCharacters + aa + surroundingCharacters, (abcPrev + fragTable[1][i]) / 2, maxY - (maxY - minY) * 0.15);
-                    if (abcPrevFound
-                            || i == 0/*
-                             * abcSerieFirstElementPosition
-                             */
-                            || i == (sizeABCserie - 1)) {// 2 consecutives fragments matching,
+                    if (abcPrevFound || i == 0 || i == (sizeABCserie - 1)) {// 2 consecutives fragments matching,
                         // or first element or last element, then highlight the AA
                         xyta.setPaint(Color.white);
                         xyta.setBackgroundPaint(abc_serie_color);
@@ -427,7 +417,7 @@ public class RsetPeptideSpectrumErrorAnnotations {
                         plot.addAnnotation(pointer);
 
                         // dashed vertical bar over the b number
-                        float yAboveBar = (float) ((maxY - minY) * 0.091);
+                      //  float yAboveBar = (float) ((maxY - minY) * 0.091);
                         float dash[] = {0.01f};
                         //
                         // draw error
@@ -467,6 +457,25 @@ public class RsetPeptideSpectrumErrorAnnotations {
                     abcPrevFound = false;
                 }
             }
+        }
+        else 
+        { // abcSerieName.equals("")
+        	  float dash[] = {0.01f};
+        	 BasicStroke stk = new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 5.0f, dash, 0.5f);
+             
+			//
+              // draw error
+        	 final XYPointerAnnotation pointer = new XYPointerAnnotation("ERROR no abc serie name" + (sizeXYZserie - 1),
+                     fragTableTheo[6][1],
+                     fragTable[5][1] + orientationFactor * (maxY - minY) * 0.01,
+                     orientationFactor * 6.0 * Math.PI / 4.0);
+             pointer.setBaseRadius(5.0); // distance from pointer to?
+             pointer.setTipRadius(0.0); // length of the pointer
+             pointer.setArrowWidth(2);
+                     
+             
+
+              plot.addAnnotation(pointer);
         }
 
 

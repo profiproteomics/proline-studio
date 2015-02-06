@@ -14,7 +14,7 @@ import org.openide.windows.WindowManager;
  */
 public abstract class FilterButton extends JButton implements ActionListener {
     
-    private FilterTableModelInterface m_tableModelFilterInterface;
+    private final FilterTableModelInterface m_tableModelFilterInterface;
     
     public FilterButton(FilterTableModelInterface tableModelFilterInterface) {
 

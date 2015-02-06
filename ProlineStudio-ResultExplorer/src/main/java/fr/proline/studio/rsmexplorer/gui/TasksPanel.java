@@ -25,6 +25,7 @@ import java.awt.event.ActionListener;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.*;
@@ -486,15 +487,21 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 }
 
                 for (int i = 0; i < nbData; i++) {
-                    try {
-                        if (!filter(i)) {
-                            continue;
-                        }
-                    } catch (Exception e) {
-                        //e.printStackTrace();
-                    }
-                    m_filteredIds.add(Integer.valueOf(i));
+                
+                Integer iInteger = i;
+                
+                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
+                    continue;
                 }
+
+                try {
+                     if (!filter(i)) {
+                        continue;
+                    }
+                } catch (Exception e) {
+                }
+                m_filteredIds.add(iInteger);
+            }
 
             } finally {
                 m_isFiltering = false;
@@ -527,6 +534,9 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
 
             return true; // should never happen
         }
+        
+        
+
 
         @Override
         public boolean isLoaded() {
@@ -537,6 +547,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         public int getLoadingPercentage() {
             return 100;
         }
+
     }
 
     public class TaskInfoStepRenderer extends DefaultTableCellRenderer {

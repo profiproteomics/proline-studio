@@ -213,8 +213,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
         
         public PeptideTable() {
             super(m_peptideScrollPane.getVerticalScrollBar() );
-            
-            addMouseListener(new TablePopupMouseAdapter(this));
+
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         }
         

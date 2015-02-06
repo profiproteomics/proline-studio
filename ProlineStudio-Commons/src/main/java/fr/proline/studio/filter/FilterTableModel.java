@@ -3,6 +3,7 @@ package fr.proline.studio.filter;
 
 import fr.proline.studio.table.DecoratedTableModel;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 
 /**
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 public abstract class FilterTableModel extends DecoratedTableModel implements FilterTableModelInterface {
 
     protected Filter[] m_filters = null;
+    protected HashSet<Integer> m_restrainIds = null;
     protected ArrayList<Integer> m_filteredIds = null;
     
     
@@ -63,6 +65,29 @@ public abstract class FilterTableModel extends DecoratedTableModel implements Fi
             }
         }
         return true;
+    }
+    
+    @Override
+    public int convertRowToOriginalModel(int row) {
+        if (m_filteredIds == null) {
+            return row;
+        }
+        return m_filteredIds.get(row);
+    }
+    
+    @Override
+    public void restrain(HashSet<Integer> restrainRowSet) {
+        m_restrainIds = restrainRowSet;
+        filter();
+    }
+    
+    @Override
+    public HashSet<Integer> getRestrainRowSet() {
+        return m_restrainIds;
+    }
+    
+    public boolean hasRestrain() {
+        return (m_restrainIds != null) && (!m_restrainIds.isEmpty());
     }
     
 }

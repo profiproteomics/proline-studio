@@ -288,7 +288,6 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
             
             setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
-            addMouseListener(new TablePopupMouseAdapter(this));
         }
         
         

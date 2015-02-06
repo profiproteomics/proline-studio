@@ -611,7 +611,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
 
     @Override
     public void paint(Graphics2D g) {
-        
+                
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis(); 
         
@@ -637,7 +637,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
  
         // first plot non selected
         g.setColor(plotColor);
-        int size = m_dataX.length;
+        int size = (m_dataX!=null) ? m_dataX.length : 0;
         for (int i=0;i<size;i++) {
             if (m_selected[i]) {
                 continue;

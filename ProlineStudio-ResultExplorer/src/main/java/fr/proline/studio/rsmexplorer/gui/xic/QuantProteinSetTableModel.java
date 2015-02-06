@@ -56,8 +56,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     private int m_quantChannelNumber;
     
     private int m_overviewType = COLTYPE_ABUNDANCE;
-    
-    private ArrayList<Integer> m_filteredIds = null;
+
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
     
@@ -526,10 +525,17 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             }
 
             for (int i = 0; i < nbData; i++) {
+                
+                Integer iInteger = i;
+                
+                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
+                    continue;
+                }
+                
                 if (!filter(i)) {
                     continue;
                 }
-                m_filteredIds.add(Integer.valueOf(i));
+                m_filteredIds.add(iInteger);
             }
 
         } finally {

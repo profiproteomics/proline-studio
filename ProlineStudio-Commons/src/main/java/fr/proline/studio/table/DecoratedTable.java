@@ -9,8 +9,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTableHeader;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
@@ -25,9 +23,11 @@ import org.jdesktop.swingx.util.PaintUtils;
  *
  * @author JM235353
  */
-public class DecoratedTable extends JXTable implements CrossSelectionInterface {
+public abstract class DecoratedTable extends JXTable implements CrossSelectionInterface {
 
     private RelativePainterHighlighter.NumberRelativizer m_relativizer = null;
+    
+    private TablePopupMenu m_popupMenu;
     
     public DecoratedTable() {
 
@@ -38,6 +38,11 @@ public class DecoratedTable extends JXTable implements CrossSelectionInterface {
         addHighlighter(HighlighterFactory.createSimpleStriping());
 
         TableSelection.installCopyAction(this);
+  
+        TablePopupMenu popup = initPopupMenu();
+        if (popup != null) {
+            setTablePopup(popup);
+        }
     }
 
     
@@ -131,6 +136,29 @@ public class DecoratedTable extends JXTable implements CrossSelectionInterface {
             return super.getToolTipText(e);
         }
     }
+    
+    private void setTablePopup(TablePopupMenu popupMenu) {
+        if (m_popupMenu == null) {
+            addMouseListener(new TablePopupMouseAdapter(this));
+        }
+                    
+        popupMenu.preparePopup();
+        m_popupMenu = popupMenu;
+    }
+    
+    public TablePopupMenu getTablePopup() {
+        return m_popupMenu;
+    }
+ 
+    // set as abstract
+    public /*abstract*/ TablePopupMenu initPopupMenu() {
+        return null;
+    }
+    
+    // set as abstract
+    public void prepostPopupMenu() {
+        
+    };
     
     
 }

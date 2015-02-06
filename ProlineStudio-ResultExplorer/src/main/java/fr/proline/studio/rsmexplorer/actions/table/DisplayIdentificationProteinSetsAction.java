@@ -5,6 +5,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import java.util.HashSet;
 import javax.swing.JTable;
@@ -15,16 +16,24 @@ import javax.swing.JTable;
  */
 public class DisplayIdentificationProteinSetsAction extends AbstractTableAction {
 
-    private final AbstractDataBox m_box;
+    private AbstractDataBox m_box;
 
-    public DisplayIdentificationProteinSetsAction(AbstractDataBox box, JTable table) {
-        super(table, "Display Identification Protein Sets");
+    public DisplayIdentificationProteinSetsAction() {
+        super("Display Identification Protein Sets");
 
+    }
+
+    public void setBox(AbstractDataBox box) {
         m_box = box;
     }
 
     @Override
-    public void actionPerformed(JTable table, int[] selectedRows) {
+    public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
+        
+        if (m_box == null) {
+            return; // should not happen
+        }
+        
         ResultSummary rsm = (ResultSummary) m_box.getData(false, ResultSummary.class);
 
         // prepare window box
@@ -37,7 +46,11 @@ public class DisplayIdentificationProteinSetsAction extends AbstractTableAction 
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
         win.open();
         win.requestActive();
+    }
 
+    @Override
+    public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
+        setEnabled(true); // always enabled
     }
 
 }

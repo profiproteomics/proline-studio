@@ -2,7 +2,6 @@ package fr.proline.studio.table;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 /**
@@ -13,9 +12,9 @@ import javax.swing.SwingUtilities;
  */
 public class TablePopupMouseAdapter extends MouseAdapter {
 
-    private final JTable m_table;
+    private final DecoratedTable m_table;
 
-    public TablePopupMouseAdapter(JTable table) {
+    public TablePopupMouseAdapter(DecoratedTable table) {
         m_table = table;
     }
 
@@ -52,6 +51,11 @@ public class TablePopupMouseAdapter extends MouseAdapter {
                 }
             }
 
+            TablePopupMenu popup = m_table.getTablePopup();
+            if (popup != null) {
+                m_table.prepostPopupMenu();
+                popup.show(e.getX(), e.getY(), m_table);
+            }
         }
 
     }

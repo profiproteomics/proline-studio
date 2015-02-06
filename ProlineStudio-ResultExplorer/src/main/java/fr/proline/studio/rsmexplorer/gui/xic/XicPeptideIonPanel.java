@@ -336,7 +336,6 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         public QuantPeptideIonTable() {
             super(m_peptideIonScrollPane.getVerticalScrollBar() );
             
-            addMouseListener(new TablePopupMouseAdapter(this));
         }
         
         public void setTableRenderer() {

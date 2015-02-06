@@ -7,6 +7,7 @@ import fr.proline.studio.filter.FilterTableModel;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 
 /**
@@ -16,9 +17,7 @@ import java.util.ArrayList;
 public class CompareTableModel extends FilterTableModel {
 
     private CompareDataInterface m_dataInterface = null;
-    
-
-    private ArrayList<Integer> m_filteredIds = null;
+   
     private boolean m_isFiltering = false;
     
     public CompareTableModel(CompareDataInterface dataInterface) {
@@ -160,10 +159,17 @@ public class CompareTableModel extends FilterTableModel {
             }
 
             for (int i = 0; i < nbData; i++) {
+                
+                Integer iInteger = i;
+                
+                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
+                    continue;
+                }
+                
                 if (!filter(i)) {
                     continue;
                 }
-                m_filteredIds.add(Integer.valueOf(i));
+                m_filteredIds.add(iInteger);
             }
         } finally {
             m_isFiltering = false;
@@ -181,6 +187,8 @@ public class CompareTableModel extends FilterTableModel {
     public int getLoadingPercentage() {
         return 100;
     }
+
+
 
 
 

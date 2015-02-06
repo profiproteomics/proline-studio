@@ -287,14 +287,21 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
             }
 
             for (int i = 0; i < nbData; i++) {
-                try {
-                if (!filter(i)) {
+                
+                Integer iInteger = i;
+                
+                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
                     continue;
                 }
+                
+                try {
+                    if (!filter(i)) {
+                        continue;
+                    }
                 } catch (Exception e) {
-                    //e.printStackTrace();
+
                 }
-                m_filteredIds.add(Integer.valueOf(i));
+                m_filteredIds.add(iInteger);
             }
 
         } finally {

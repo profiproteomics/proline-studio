@@ -17,7 +17,7 @@ import javax.swing.table.JTableHeader;
  * Table which can be used with marker bars (it inherits display an "histogram" on a column from DecoratedTable)
  * @author JM235353
  */
-public class DecoratedMarkerTable extends DecoratedTable implements MarkerComponentInterface, ChangeListener {
+public abstract class DecoratedMarkerTable extends DecoratedTable implements MarkerComponentInterface, ChangeListener {
 
     private int m_firstVisibleRow = -1;
     private int m_lastVisibleRow = -1;
@@ -31,6 +31,7 @@ public class DecoratedMarkerTable extends DecoratedTable implements MarkerCompon
                 dispatchViewChange();
             }
         });
+
     }
     
     public void setViewport(JViewport viewport) {
@@ -195,5 +196,6 @@ public class DecoratedMarkerTable extends DecoratedTable implements MarkerCompon
             viewChangeListeners.get(i).viewChanged();
         }
     }
+
     
 }

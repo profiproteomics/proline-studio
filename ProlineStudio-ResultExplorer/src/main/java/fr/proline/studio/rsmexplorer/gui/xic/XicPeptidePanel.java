@@ -390,7 +390,6 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
             //setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
-            addMouseListener(new TablePopupMouseAdapter(this));
         }
         
         //Implement table cell tool tips.

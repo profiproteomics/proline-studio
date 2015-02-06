@@ -14,6 +14,8 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.export.ExportRowTextInterface;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.actions.ClearRestrainAction;
+import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
@@ -33,6 +35,7 @@ import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
+import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.table.TablePopupMouseAdapter;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -301,7 +304,6 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     @Override
     public void setDataBox(AbstractDataBox dataBox) {
         m_dataBox = dataBox;
-        m_quantProteinSetTable.initComponentPopupMenu();
     }
     @Override
     public AbstractDataBox getDataBox() {
@@ -343,13 +345,29 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
             //setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
-            addMouseListener(new TablePopupMouseAdapter(this));
             
         }
         
-        public void initComponentPopupMenu() {
-            setComponentPopupMenu(createPopup());
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            TablePopupMenu popupMenu = new TablePopupMenu();
+
+            m_idProteinSetAction = new DisplayIdentificationProteinSetsAction();
+            popupMenu.addAction(m_idProteinSetAction);
+            popupMenu.addAction(null);
+            popupMenu.addAction(new RestrainAction());
+            popupMenu.addAction(new ClearRestrainAction());
+
+            return popupMenu;
         }
+        private DisplayIdentificationProteinSetsAction m_idProteinSetAction;
+        
+        // set as abstract
+        @Override
+        public void prepostPopupMenu() {
+            m_idProteinSetAction.setBox(m_dataBox);
+        }
+
         
         /** 
          * Called whenever the value of the selection changes.
@@ -521,16 +539,6 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             return m_dataBox.isLoaded();
         }
         
-        private JPopupMenu createPopup() {
-            JPopupMenu popupMenu = new JPopupMenu();
-            
-            DisplayIdentificationProteinSetsAction action = new DisplayIdentificationProteinSetsAction(m_dataBox, this);
-
-            popupMenu.add(action);
-            
-            return popupMenu;
-        }
-
 
         @Override
         public String getExportColumnName(int col) {

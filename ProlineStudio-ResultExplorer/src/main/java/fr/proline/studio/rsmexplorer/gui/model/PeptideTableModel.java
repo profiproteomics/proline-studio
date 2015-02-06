@@ -12,6 +12,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 
 
@@ -44,6 +45,7 @@ public class PeptideTableModel extends FilterTableModel implements CompareDataIn
     
     private DPeptideInstance[] m_peptideInstances = null;
 
+    private HashSet<Integer> m_restrainIds = null;
     private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
@@ -426,10 +428,17 @@ public class PeptideTableModel extends FilterTableModel implements CompareDataIn
             }
 
             for (int i = 0; i < nbData; i++) {
+                
+                Integer iInteger = i;
+                
+                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
+                    continue;
+                }
+                
                 if (!filter(i)) {
                     continue;
                 }
-                m_filteredIds.add(Integer.valueOf(i));
+                m_filteredIds.add(iInteger);
             }
 
         } finally {
@@ -438,7 +447,6 @@ public class PeptideTableModel extends FilterTableModel implements CompareDataIn
         fireTableDataChanged();
     }
 
-    
 
 
     @Override
@@ -503,5 +511,7 @@ public class PeptideTableModel extends FilterTableModel implements CompareDataIn
     public PlotInformation getPlotInformation() {
         return null;
     }
+
+
     
 }

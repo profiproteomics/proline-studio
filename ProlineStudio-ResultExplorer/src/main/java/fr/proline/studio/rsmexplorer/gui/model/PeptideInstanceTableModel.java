@@ -47,7 +47,6 @@ public class PeptideInstanceTableModel extends LazyTableModel implements Compare
     private static final String[] m_columnTooltips = {"Peptide Id","Peptide", "Score", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" /*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Protein Set Count", "Retention Time", "Post Translational Modifications"};
     private PeptideInstance[] m_peptideInstances = null;
 
-    private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
 
@@ -424,10 +423,17 @@ public class PeptideInstanceTableModel extends LazyTableModel implements Compare
             }
 
             for (int i = 0; i < nbData; i++) {
+                
+                Integer iInteger = i;
+                
+                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
+                    continue;
+                }
+                
                 if (!filter(i)) {
                     continue;
                 }
-                m_filteredIds.add(Integer.valueOf(i));
+                m_filteredIds.add(iInteger);
             }
 
         } finally {

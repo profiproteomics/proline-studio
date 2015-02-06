@@ -212,10 +212,17 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
             }
 
             for (int i = 0; i < nbData; i++) {
+                
+                Integer iInteger = i;
+                
+                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
+                    continue;
+                }
+                
                 if (!filter(i)) {
                     continue;
                 }
-                m_filteredIds.add(Integer.valueOf(i));
+                m_filteredIds.add(iInteger);
             }
 
         } finally {

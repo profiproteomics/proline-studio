@@ -149,16 +149,10 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     public TablePopupMenu getTablePopup() {
         return m_popupMenu;
     }
- 
-    // set as abstract
-    public /*abstract*/ TablePopupMenu initPopupMenu() {
-        return null;
-    }
-    
-    // set as abstract
-    public void prepostPopupMenu() {
-        
-    };
+
+    public abstract TablePopupMenu initPopupMenu();
+
+    public abstract void prepostPopupMenu();
     
     
 }

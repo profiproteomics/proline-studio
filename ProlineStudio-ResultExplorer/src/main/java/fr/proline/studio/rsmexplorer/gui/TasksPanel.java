@@ -14,6 +14,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.renderer.PercentageRenderer;
 import fr.proline.studio.table.DecoratedMarkerTable;
+import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -287,6 +288,18 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         public void setUpdating(boolean updating) {
             m_isUpdating = updating;
         }
+        
+                @Override
+        public TablePopupMenu initPopupMenu() {
+            return null;
+        }
+
+        // set as abstract
+        @Override
+        public void prepostPopupMenu() {
+            // nothing to do
+        }
+
     }
 
     private static class LogTableModel extends FilterTableModel {
@@ -300,7 +313,7 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
         private static final String[] columnNames = {"", "id", "Category", "Criticality", "Task Description", "Progress"};
         private ArrayList<TaskInfo> m_taskInfoList = null;
 
-        private ArrayList<Integer> m_filteredIds = null;
+
         private boolean m_isFiltering = false;
         private boolean m_filteringAsked = false;
 

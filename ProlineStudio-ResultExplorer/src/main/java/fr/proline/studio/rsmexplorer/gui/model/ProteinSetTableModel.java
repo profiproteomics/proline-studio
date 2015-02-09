@@ -33,7 +33,6 @@ public class ProteinSetTableModel extends LazyTableModel implements CompareDataI
     
     private DProteinSet[] m_proteinSets = null;
     
-    private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
     
@@ -259,6 +258,11 @@ public class ProteinSetTableModel extends LazyTableModel implements CompareDataI
         
         updateMinMax();
         
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();
@@ -270,17 +274,22 @@ public class ProteinSetTableModel extends LazyTableModel implements CompareDataI
     }
     
     private void updateMinMax() {
+        
+        if (m_proteinSets == null) {
+            return;
+        }
+        
         RelativePainterHighlighter.NumberRelativizer relativizer = m_table.getRelativizer();
         if (relativizer == null) {
             return;
         }
 
         double maxScore = 0;
-        int size = getRowCount();
+        int size = m_proteinSets.length;
         for (int i = 0; i < size; i++) {
             
             // Retrieve Protein Set
-            DProteinSet proteinSet = getProteinSet(i);
+            DProteinSet proteinSet = m_proteinSets[i];
 
             DProteinMatch proteinMatch = proteinSet.getTypicalProteinMatch();
             if (proteinMatch != null) {

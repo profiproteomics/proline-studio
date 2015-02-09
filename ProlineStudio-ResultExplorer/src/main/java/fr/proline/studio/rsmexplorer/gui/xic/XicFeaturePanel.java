@@ -8,6 +8,8 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.export.ExportRowTextInterface;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.actions.ClearRestrainAction;
+import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -26,6 +28,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableCellRenderer;
+import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -574,6 +577,18 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         public String getExportRowCell(int row, int col) {
             return ((FeatureTableModel) m_featureTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
         }
+        
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            return null;
+        }
+
+        // set as abstract
+        @Override
+        public void prepostPopupMenu() {
+            // nothing to do
+        }
+
         
     }
     

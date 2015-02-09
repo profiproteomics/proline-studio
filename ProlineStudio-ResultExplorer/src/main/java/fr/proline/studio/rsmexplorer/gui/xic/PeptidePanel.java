@@ -10,6 +10,8 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.filter.actions.ClearRestrainAction;
+import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -17,6 +19,7 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.table.LazyTable;
+import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.table.TablePopupMouseAdapter;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -277,6 +280,23 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
                 setSortable(true);
             }
         }
+        
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            TablePopupMenu popupMenu = new TablePopupMenu();
+
+            popupMenu.addAction(new RestrainAction());
+            popupMenu.addAction(new ClearRestrainAction());
+
+            return popupMenu;
+        }
+
+        // set as abstract
+        @Override
+        public void prepostPopupMenu() {
+            // nothing to do
+        }
+
     }
     
 }

@@ -45,8 +45,7 @@ public class PeptideTableModel extends FilterTableModel implements CompareDataIn
     
     private DPeptideInstance[] m_peptideInstances = null;
 
-    private HashSet<Integer> m_restrainIds = null;
-    private ArrayList<Integer> m_filteredIds = null;
+
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
 
@@ -316,6 +315,11 @@ public class PeptideTableModel extends FilterTableModel implements CompareDataIn
 
     public void setData(DPeptideInstance[] peptideInstances) {
         m_peptideInstances = peptideInstances;
+        
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
         
         if (m_filteringAsked) {
             m_filteringAsked = false;

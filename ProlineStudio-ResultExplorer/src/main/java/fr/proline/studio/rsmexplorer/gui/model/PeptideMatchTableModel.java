@@ -59,7 +59,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
     private boolean m_forRSM;
     private boolean m_hasPrevNextAA;
 
-    private ArrayList<Integer> m_filteredIds = null;
+
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
 
@@ -486,6 +486,13 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
         
         updateMinMax();
         
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        } else if (m_filteredIds != null) {
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();
@@ -496,13 +503,18 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
     }
 
     private void updateMinMax() {
+
+        if (m_peptideMatches == null) {
+            return;
+        }
+        
         RelativePainterHighlighter.NumberRelativizer relativizer = m_table.getRelativizer();
         if (relativizer == null) {
             return;
         }
-        
+     
         double maxScore = 0;
-        int size = getRowCount();
+        int size = m_peptideMatches.length;
         for (int i = 0; i < size; i++) {
             DPeptideMatch peptideMatch = m_peptideMatches[i];
             if (peptideMatch == null) {

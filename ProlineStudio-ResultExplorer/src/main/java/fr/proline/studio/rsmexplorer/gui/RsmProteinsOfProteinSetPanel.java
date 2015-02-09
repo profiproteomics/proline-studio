@@ -9,6 +9,8 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.actions.ClearRestrainAction;
+import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -21,6 +23,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.SamesetRenderer;
 import fr.proline.studio.table.DecoratedTable;
+import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -314,5 +317,22 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         public int getLoadingPercentage() {
             return m_dataBox.getLoadingPercentage();
         }
+        
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            TablePopupMenu popupMenu = new TablePopupMenu();
+
+            popupMenu.addAction(new RestrainAction());
+            popupMenu.addAction(new ClearRestrainAction());
+
+            return popupMenu;
+        }
+
+        // set as abstract
+        @Override
+        public void prepostPopupMenu() {
+            // nothing to do
+        }
+
     }
 }

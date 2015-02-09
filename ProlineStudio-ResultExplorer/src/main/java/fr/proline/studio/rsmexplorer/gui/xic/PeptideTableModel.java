@@ -35,8 +35,7 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
     
     private DMasterQuantPeptide m_quantPeptide = null;
     private DQuantitationChannel[] m_quantChannels = null;
-    
-    private ArrayList<Integer> m_filteredIds = null;
+
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
     
@@ -115,6 +114,13 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
     public void setData(DQuantitationChannel[] quantChannels, DMasterQuantPeptide peptide) {
         this.m_quantChannels  =quantChannels ;
         this.m_quantPeptide = peptide ;
+        
+        
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();

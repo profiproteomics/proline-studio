@@ -5,12 +5,15 @@ import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.comparedata.CompareTableModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.actions.ClearRestrainAction;
+import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.table.DecoratedMarkerTable;
+import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -168,6 +171,17 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
 
         public void dataUpdated() {
 
+        }
+        
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            return null;
+        }
+
+        // set as abstract
+        @Override
+        public void prepostPopupMenu() {
+            // nothing to do
         }
 
     }

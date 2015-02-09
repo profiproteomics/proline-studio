@@ -50,7 +50,6 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
     private QuantChannelInfo m_quantChannelInfo = null;
     private List<Boolean> m_featureHasPeak = null;
 
-    private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
     
@@ -231,6 +230,11 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
 
         m_taskId = taskId;
 
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();

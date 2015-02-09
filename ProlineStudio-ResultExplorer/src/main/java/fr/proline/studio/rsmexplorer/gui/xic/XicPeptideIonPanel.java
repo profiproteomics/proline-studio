@@ -13,6 +13,8 @@ import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.export.ExportRowTextInterface;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.actions.ClearRestrainAction;
+import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
@@ -33,6 +35,7 @@ import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableCellRenderer;
+import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.table.TablePopupMouseAdapter;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -500,6 +503,22 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         }
 
         
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            TablePopupMenu popupMenu = new TablePopupMenu();
+
+            popupMenu.addAction(new RestrainAction());
+            popupMenu.addAction(new ClearRestrainAction());
+
+            return popupMenu;
+        }
+
+        // set as abstract
+        @Override
+        public void prepostPopupMenu() {
+            // nothing to do
+        }
+
     }
 
     

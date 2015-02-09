@@ -3,8 +3,6 @@ package fr.proline.studio.rsmexplorer.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.math.BigDecimal;
-import java.math.MathContext;
 import javax.swing.JTable;
 
 
@@ -15,6 +13,7 @@ import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.Fragm
 import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.TheoreticalFragmentSeries_AW;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
+import fr.proline.studio.table.TablePopupMenu;
 import java.util.List;
 
 import javax.swing.table.TableColumn;
@@ -65,6 +64,16 @@ public class MSDiagTable_1stColumnIsString extends DecoratedTable {
 
 	    }
 
+    @Override
+    public TablePopupMenu initPopupMenu() {
+        return null;
+    }
+
+    // set as abstract
+    @Override
+    public void prepostPopupMenu() {
+        // nothing to do
+    }
 
 	  
 	

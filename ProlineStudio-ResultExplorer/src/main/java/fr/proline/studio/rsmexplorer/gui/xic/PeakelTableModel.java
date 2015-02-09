@@ -47,7 +47,6 @@ public class PeakelTableModel extends LazyTableModel implements ExportTableSelec
     private Color m_color = null;
     private String m_title = null;
 
-    private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
     
@@ -230,6 +229,11 @@ public class PeakelTableModel extends LazyTableModel implements ExportTableSelec
 
         m_taskId = taskId;
 
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();

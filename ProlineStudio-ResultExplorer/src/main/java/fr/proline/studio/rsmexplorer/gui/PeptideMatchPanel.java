@@ -14,6 +14,8 @@ import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.actions.ClearRestrainAction;
+import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -32,6 +34,7 @@ import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableCellRenderer;
+import fr.proline.studio.table.TablePopupMenu;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -712,6 +715,22 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         @Override
         public boolean isLoaded() {
             return m_dataBox.isLoaded();
+        }
+        
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            TablePopupMenu popupMenu = new TablePopupMenu();
+
+            popupMenu.addAction(new RestrainAction());
+            popupMenu.addAction(new ClearRestrainAction());
+
+            return popupMenu;
+        }
+
+        // set as abstract
+        @Override
+        public void prepostPopupMenu() {
+            // nothing to do
         }
     }
 }

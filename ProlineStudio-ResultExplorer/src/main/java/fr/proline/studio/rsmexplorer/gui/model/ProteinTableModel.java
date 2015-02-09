@@ -44,7 +44,7 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
     private DProteinMatch[] m_subSetMatches = null;
     private Long m_rsmId = null;
     private long m_typicalProteinMatchId;
-    private ArrayList<Integer> m_filteredIds = null;
+
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
     private ProgressInterface m_progressInterface = null;
@@ -158,6 +158,11 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
         m_sameSetMatches = sameSetMatches;
         m_subSetMatches = subSetMatches;
 
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();

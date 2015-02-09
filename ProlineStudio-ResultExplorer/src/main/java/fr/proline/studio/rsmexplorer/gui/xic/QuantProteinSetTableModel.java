@@ -421,6 +421,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         
         m_taskId = taskId;
         
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();

@@ -54,7 +54,6 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     private DQuantitationChannel[] m_quantChannels = null;
     private int m_quantChannelNumber;
 
-    private ArrayList<Integer> m_filteredIds = null;
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
     
@@ -547,12 +546,15 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         m_isFiltering = false;
         if (structureChanged) {
             fireTableStructureChanged();
-        }else{
-            fireTableDataChanged();
         }
 
         m_taskId = taskId;
 
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();

@@ -146,6 +146,11 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
 
         updateMinMax();
         
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();
@@ -168,7 +173,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
         }
 
         double maxScore = 0;
-        int size = getRowCount();
+        int size = m_proteinMatchArray.length;
         for (int i = 0; i < size; i++) {
             DProteinMatch proteinMatch = m_proteinMatchArray[i];
             double score = proteinMatch.getScore();

@@ -2,9 +2,6 @@ package fr.proline.studio.filter.actions;
 
 import fr.proline.studio.filter.FilterTableModelInterface;
 import fr.proline.studio.table.AbstractTableAction;
-import java.awt.event.ActionEvent;
-import java.util.HashSet;
-import javax.swing.AbstractAction;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 

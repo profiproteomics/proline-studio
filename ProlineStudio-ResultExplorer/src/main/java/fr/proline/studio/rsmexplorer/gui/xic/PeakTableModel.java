@@ -43,7 +43,7 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
     private String m_title = null;
     private Integer m_isotopeIndex = null;
 
-    private ArrayList<Integer> m_filteredIds = null;
+
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
     
@@ -141,6 +141,11 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
 
         m_taskId = taskId;
 
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();

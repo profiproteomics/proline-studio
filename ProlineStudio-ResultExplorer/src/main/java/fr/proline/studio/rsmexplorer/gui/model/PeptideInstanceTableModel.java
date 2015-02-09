@@ -303,6 +303,11 @@ public class PeptideInstanceTableModel extends LazyTableModel implements Compare
         
         updateMinMax();
         
+        if (m_restrainIds != null) {
+            m_restrainIds = null;
+            m_filteringAsked = true;
+        }
+        
         if (m_filteringAsked) {
             m_filteringAsked = false;
             filter();
@@ -313,13 +318,18 @@ public class PeptideInstanceTableModel extends LazyTableModel implements Compare
     }
 
     private void updateMinMax() {
+        
+        if (m_peptideInstances == null) {
+            return;
+        }
+        
         RelativePainterHighlighter.NumberRelativizer relativizer = m_table.getRelativizer();
         if (relativizer == null) {
             return;
         }
-        
+
         double maxScore = 0;
-        int size = getRowCount();
+        int size = m_peptideInstances.length;
         for (int i = 0; i < size; i++) {
             PeptideInstance peptideInstance = m_peptideInstances[i];
             double score = ((DPeptideMatch)peptideInstance.getTransientData().getBestPeptideMatch()).getScore();

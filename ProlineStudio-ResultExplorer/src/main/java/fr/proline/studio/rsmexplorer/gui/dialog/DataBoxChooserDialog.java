@@ -8,6 +8,7 @@ import fr.proline.studio.pattern.ParameterDistance;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
+import fr.proline.studio.table.TablePopupMenu;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -280,6 +281,18 @@ public class DataBoxChooserDialog extends DefaultDialog {
             }
             
         }
+        
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            return null;
+        }
+
+        // set as abstract
+        @Override
+        public void prepostPopupMenu() {
+            // nothing to do
+        }
+
         
 
     }

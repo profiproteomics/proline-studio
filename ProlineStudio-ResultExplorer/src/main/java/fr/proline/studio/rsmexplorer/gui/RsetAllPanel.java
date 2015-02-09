@@ -17,8 +17,10 @@ import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
 import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimestampRenderer;
 import fr.proline.studio.rsmexplorer.tree.identification.IdTransferable;
+import fr.proline.studio.table.AbstractTableAction;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.DecoratedTableModel;
+import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.PropertiesProviderInterface;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -124,7 +126,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
     private class ResultSetTable extends DecoratedMarkerTable {
 
         
-        private JPopupMenu m_popup = null;
+        //private JPopupMenu m_popup = null;
         
         public ResultSetTable() {
             setDragEnabled(true);
@@ -145,9 +147,9 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    if (SwingUtilities.isRightMouseButton(e)) {
+                    /*if (SwingUtilities.isRightMouseButton(e)) {
                         getPopup().show(e.getComponent(), e.getX(), e.getY());
-                    }
+                    }*/
                     
                     
                 }
@@ -192,31 +194,7 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
                 addMouseListener(l);
             }
         }
-        
-        private JPopupMenu getPopup() {
-            if (m_popup == null) {
-                m_popup = new JPopupMenu();
-                
-                // create the actions
-                ArrayList<PropertiesFromTableAction> popupActions = new ArrayList<>(1);  // <--- get in sync
 
-                PropertiesFromTableAction propertiesAction = new PropertiesFromTableAction();
-                popupActions.add(propertiesAction);
-
-
-                // add actions to popup
-                for (int i = 0; i < popupActions.size(); i++) {
-                    PropertiesFromTableAction action = popupActions.get(i);
-                    if (action == null) {
-                        m_popup.addSeparator();
-                    } else {
-                        m_popup.add(action.getPopupPresenter());
-                    }
-                }
-                
-            }
-            return m_popup;
-        }
         
         /**
          * Called whenever the value of the selection changes.
@@ -233,6 +211,22 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             m_dataBox.propagateDataChanged(ResultSet.class);
 
         }
+        
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            
+            TablePopupMenu popupMenu = new TablePopupMenu();
+            popupMenu.addAction(new PropertiesFromTableAction());
+            
+            return popupMenu;
+        }
+
+        // set as abstract
+        @Override
+        public void prepostPopupMenu() {
+            // nothing to do
+        }
+
 
     }
     
@@ -252,20 +246,21 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
     }
     
     
-    private class PropertiesFromTableAction extends AbstractAction {
+    private class PropertiesFromTableAction extends AbstractTableAction {
 
         public PropertiesFromTableAction() {
             super(NbBundle.getMessage(PropertiesAction.class, "CTL_PropertiesAction"));
         }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
 
+
+        @Override
+        public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
+           
             ResultSetTableModel model = (ResultSetTableModel) m_resultSetTable.getModel();
             
             long projectId = m_dataBox.getProjectId();
             
-            int[] selectedRows = m_resultSetTable.getSelectedRows();
+            //int[] selectedRows = m_resultSetTable.getSelectedRows();
             int nbSelectedRset = selectedRows.length;
             final ResultsetPropertiesProvider[] resultPropertiesProviderArray = new ResultsetPropertiesProvider[nbSelectedRset];
             for (int i = 0; i < nbSelectedRset; i++) {
@@ -310,12 +305,15 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             int nbDataToLoad = resultPropertiesProviderArray.length;
             for (int i = 0; i < nbDataToLoad; i++) {
                 resultPropertiesProviderArray[i].loadDataForProperties(dataLoadedCallback);
-            }
+            } 
         }
 
-        public JMenuItem getPopupPresenter() {
-            return new JMenuItem(this);
+        @Override
+        public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
+            setEnabled(selectedRows.length>0);
         }
+        
+        
     }
     
     public abstract class DataLoadedCallback implements Runnable {

@@ -11,7 +11,7 @@
 
   <groupId>fr.proline</groupId>
   <artifactId>ProlineStudio-parent</artifactId>
-  <version>0.1.6-SNAPSHOT</version> <!-- ProlineStudio version -->
+  <version>0.2.1</version> <!-- ProlineStudio version -->
   <packaging>pom</packaging>
 
   <name>ProlineStudio-parent</name>
@@ -34,7 +34,7 @@
   </properties>
 
   <scm>
-    <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/branches/0.2.1_RP1</connection>
+    <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/tags/0.2.1</connection>
   </scm>
  
 

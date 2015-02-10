@@ -436,6 +436,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
                         plotGraphic.update(refX.getColumnIndex(), refY.getColumnIndex(), zParameter);
                         m_plotPanel.updateAxis(plotGraphic);
                     }
+                    m_plotPanel.repaint();
                     
                 }
                 

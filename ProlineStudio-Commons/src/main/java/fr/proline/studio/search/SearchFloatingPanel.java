@@ -161,6 +161,8 @@ public class SearchFloatingPanel extends JPanel {
     
     public void setFocus() {
         m_searchTextField.requestFocus();
+        int endPos = (m_searchTextField.getText().endsWith("*") ? m_searchTextField.getText().length() -1 : m_searchTextField.getText().length());
+        m_searchTextField.select(0, endPos);
     }
     
     

@@ -33,6 +33,7 @@ import org.netbeans.api.db.explorer.JDBCDriverManager;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 
@@ -314,7 +315,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case LOAD_DATASET:
             case CLEAR_DATASET:
             case LOAD_QUANTITATION:
-                return true; // done one time
+                return (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()); // done one time
          
         }
 
@@ -741,103 +742,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             m_dataset.getQuantitationMethod().setLabels(labels);
             m_dataset.setDescription(datasetDB.getDescription());
             
-            List<DMasterQuantitationChannel> masterQuantitationChannels = null;
-            
-            if (listMasterQuantitationChannels != null && !listMasterQuantitationChannels.isEmpty()) {
-                masterQuantitationChannels = new ArrayList<>();
-                for (MasterQuantitationChannel masterQuantitationChannel : listMasterQuantitationChannels) {
-                    List<QuantitationChannel> listQuantitationChannels = masterQuantitationChannel.getQuantitationChannels();
-                    List<DQuantitationChannel> listDQuantChannels = new ArrayList();
-                    for (QuantitationChannel qc : listQuantitationChannels) {
-                        DQuantitationChannel dqc = new DQuantitationChannel(qc);
-                        // search resultFileName  and raw path
-                        String resultFileName = "";
-                        String rawPath = "";
-                        Long rsId = null;
-                        String queryMsi = "SELECT msi.resultFileName, pl.path, rsm.resultSet.id "
-                                + "FROM MsiSearch msi, Peaklist pl, ResultSet rs, ResultSummary rsm "
-                                + " WHERE rsm.id=:rsmId AND rsm.resultSet.id = rs.id AND rs.msiSearch.id = msi.id "
-                                + "AND msi.peaklist.id = pl.id ";
-                        Query qMsi = entityManagerMSI.createQuery(queryMsi);
-                        qMsi.setParameter("rsmId", qc.getIdentResultSummaryId());
-                        try{
-                            Object[] res = (Object[])qMsi.getSingleResult();
-                            resultFileName = (String)res[0];
-                            rawPath = (String)res[1];
-                            if (resultFileName != null && resultFileName.contains(".")) {
-                                resultFileName = resultFileName.substring(0, resultFileName.indexOf('.'));
-                            }
-                            rsId = (Long)res[2];
-                        }catch(NoResultException | NonUniqueResultException e){
-                            
-                        }
-                        dqc.setResultFileName(resultFileName);
-                        dqc.setRawFilePath(rawPath);
-                        // search for run_identification rawFileName (mzdb fileName) in UDS
-                        String queryUDS  = "SELECT ri.rawFile.rawFileName "
-                                + "FROM fr.proline.core.orm.uds.IdentificationDataset ri, fr.proline.core.orm.uds.Dataset ds "
-                                + "WHERE ri.id = ds.id AND "
-                                + "ds.resultSummaryId =:rsmId AND "
-                                + "ds.resultSetId =:rsId ";
-                        TypedQuery<String> queryMzdb = entityManagerUDS.createQuery(queryUDS, String.class);
-                        queryMzdb.setParameter("rsmId", qc.getIdentResultSummaryId());
-                        queryMzdb.setParameter("rsId", rsId);
-                        String mzdbFile = "";
-                        try{
-                            mzdbFile = queryMzdb.getSingleResult();
-                        }catch(NonUniqueResultException | NoResultException e) {
-                            
-                        }
-                        dqc.setMzdbFileName(mzdbFile);
-                        // search for raw map in LCMS database
-                        String queryLcms = "SELECT pmrm.rawMap.id "
-                                + "FROM fr.proline.core.orm.lcms.Map  m, ProcessedMap pm, ProcessedMapRawMapMapping pmrm  "
-                                + "WHERE m.id =:processedMapId "
-                                + "AND m.id = pm.id "
-                                + "AND pm.id = pmrm.id.processedMapId ";
-                        TypedQuery<Long> queryRawMapLcms = entityManagerLCMS.createQuery(queryLcms, Long.class);
-                        queryRawMapLcms.setParameter("processedMapId", qc.getLcmsMapId());
-                        try {
-                            Long rawMapId = queryRawMapLcms.getSingleResult();
-                            dqc.setLcmsRawMapId(rawMapId);
-                        }catch (NoResultException | NonUniqueResultException e) {
-
-                        }
-                        listDQuantChannels.add(dqc);
-                    }
-                    DMasterQuantitationChannel dMaster = new DMasterQuantitationChannel(masterQuantitationChannel.getId(), masterQuantitationChannel.getName(), 
-                            masterQuantitationChannel.getQuantResultSummaryId(), listDQuantChannels, masterQuantitationChannel.getDataset(),
-                            masterQuantitationChannel.getSerializedProperties());
-                    // load the dataset for which the id is stored in the serialized properties
-                    Map<String, Object> propertiesMap = dMaster.getSerializedPropertiesAsMap();
-                    DDataset identDataset = null;
-                    if (propertiesMap != null) {
-                        Object o = propertiesMap.get("ident_dataset_id");
-                        if (o != null) {
-                            Long identDatasetId = Long.parseLong(o.toString());
-                            Dataset identDatasetDB = entityManagerUDS.find(Dataset.class, identDatasetId);
-                            if (identDatasetDB != null) {
-                                identDataset = new DDataset(identDatasetDB.getId(), identDatasetDB.getProject(), identDatasetDB.getName(), identDatasetDB.getType(),
-                                        identDatasetDB.getChildrenCount(), identDatasetDB.getResultSetId(), identDatasetDB.getResultSummaryId(), identDatasetDB.getNumber());
-                            }
-                        }
-                    }
-                    dMaster.setIdentDataset(identDataset);
-                    // load the list of quantitation channel linked to this masterQuantitationChannel
-                    if (listQuantitationChannels != null && !listQuantitationChannels.isEmpty()) {
-                        int id2 = 0;
-                        for (Iterator<QuantitationChannel> itChannel = listQuantitationChannels.iterator(); itChannel.hasNext();) {
-                            QuantitationChannel quantitationChannel = itChannel.next();
-                            // load biologicalSample
-                            BiologicalSample biologicalSample = quantitationChannel.getBiologicalSample();
-                            dMaster.getQuantitationChannels().get(id2).setBiologicalSample(biologicalSample);
-                            id2++;
-                        }
-                    }
-                    masterQuantitationChannels.add(dMaster);
-                } // end of the for
-            }
-            m_dataset.setMasterQuantitationChannels(masterQuantitationChannels);
+            DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_project.getId(), m_dataset, m_taskError);
             
             // load ObjectTree corresponding to the QUANT_PROCESSING_CONFIG
             if (objectTreeIdByName != null && objectTreeIdByName.get("quantitation.label_free_config") != null){

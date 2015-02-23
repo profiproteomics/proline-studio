@@ -430,7 +430,7 @@ public class PlotLinear extends PlotAbstract {
         
 
         // we let margins
-        if (!xAsEnum) {
+        if (!xAsEnum || (xAsEnum && m_xMin == m_xMax)) { 
             double deltaX = (m_xMax - m_xMin);
             if (deltaX <= 10e-10) {
                 // no real delta
@@ -442,7 +442,7 @@ public class PlotLinear extends PlotAbstract {
             }
         }
 
-        if (!yAsEnum) {
+        if (!yAsEnum || (yAsEnum && m_yMin == m_yMax)) { 
             double deltaY = (m_yMax - m_yMin);
             if (deltaY <= 10e-10) {
                 // no real delta
@@ -674,7 +674,7 @@ public class PlotLinear extends PlotAbstract {
 
     @Override
     public boolean needsDoubleBuffering() {
-        return m_dataX.length > 2000;
+        return (m_dataX != null && m_dataX.length > 2000);
     }
 
     @Override

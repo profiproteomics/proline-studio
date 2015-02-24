@@ -222,7 +222,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     @Override
     public Class getColumnClass(int col) {
         if (col == COLTYPE_PEPTIDE_ID) {
-            return Long.class;
+            return String.class;
         }else if (col == COLTYPE_OVERVIEW) {
             return CompareValueRenderer.CompareValue.class; 
         }
@@ -355,7 +355,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
 
         switch (col) {
             case COLTYPE_PEPTIDE_ID: {
-                return peptide.getId() == -1 ? "" : peptide.getId();
+                return peptide.getId() == -1 ? "" : Long.toString(peptide.getId());
             }
             case COLTYPE_PEPTIDE_NAME: {
                 LazyData lazyData = getLazyData(row, col);
@@ -871,6 +871,16 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         Object data = getValueAt(rowIndex, columnIndex);
         if (data instanceof LazyData) {
             data = ((LazyData) data).getData();
+        }
+        int rowFiltered = rowIndex;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(rowIndex).intValue();
+        }
+        // Retrieve Quant Peptide
+        DMasterQuantPeptide peptide = m_quantPeptides.get(rowFiltered);
+
+        if(columnIndex == COLTYPE_PEPTIDE_ID) {
+            return peptide.getId();
         }
         return data;
     }

@@ -315,7 +315,7 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case LOAD_DATASET:
             case CLEAR_DATASET:
             case LOAD_QUANTITATION:
-                return (m_dataset.getMasterQuantitationChannels() == null || m_dataset.getMasterQuantitationChannels().isEmpty()); // done one time
+                return true; // done one time
          
         }
 

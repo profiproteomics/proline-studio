@@ -1,161 +1,161 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <!-- ProFI Master Pom -->
-  <parent>
-    <artifactId>ProFI-Pom</artifactId>
+    <!-- ProFI Master Pom -->
+    <parent>
+        <artifactId>ProFI-Pom</artifactId>
+        <groupId>fr.proline</groupId>
+        <version>0.0.5-SNAPSHOT</version>
+    </parent>
+
     <groupId>fr.proline</groupId>
-    <version>0.0.5-SNAPSHOT</version>
-  </parent>
+    <artifactId>ProlineStudio-parent</artifactId>
+    <version>0.3.0-SNAPSHOT</version> <!-- ProlineStudio version -->
+    <packaging>pom</packaging>
 
-  <groupId>fr.proline</groupId>
-  <artifactId>ProlineStudio-parent</artifactId>
-  <version>0.3.0-SNAPSHOT</version> <!-- ProlineStudio version -->
-  <packaging>pom</packaging>
+    <name>ProlineStudio-parent</name>
 
-  <name>ProlineStudio-parent</name>
+    <modules>
+        <module>branding</module>
+        <module>application</module>
+        <module>ProlineStudio-Commons</module>
+        <module>ProlineStudio-DAM</module>
+        <module>ProlineStudio-ResultExplorer</module>
+        <module>ProlineStudio-CoreWrapper</module>
+        <module>ProlineStudio-Logger</module>
+        <module>ProlineStudio-DPM</module>
+        <module>ProlineStudio-R</module>
+    </modules>
 
-  <modules>
-    <module>branding</module>
-    <module>application</module>
-    <module>ProlineStudio-Commons</module>
-    <module>ProlineStudio-DAM</module>
-    <module>ProlineStudio-ResultExplorer</module>
-    <module>ProlineStudio-CoreWrapper</module>
-    <module>ProlineStudio-Logger</module>
-    <module>ProlineStudio-DPM</module>
-    <module>ProlineStudio-R</module>
-  </modules>
+    <properties>
+        <netbeans.version>RELEASE711</netbeans.version>
+        <brandingToken>prolinestudio</brandingToken>
+    </properties>
 
-  <properties>
-    <netbeans.version>RELEASE711</netbeans.version>
-    <brandingToken>prolinestudio</brandingToken>
-  </properties>
-
-  <scm>
-    <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/trunk</connection>
-  </scm>
+    <scm>
+        <connection>scm:svn:https://bioproj.extra.cea.fr/svn/proline/ProlineStudio/trunk</connection>
+    </scm>
  
 
 
-  <dependencies>
+    <dependencies>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.jfree</groupId>
-        <artifactId>jfreechart</artifactId>
-        <version>1.0.17</version>
-    </dependency>
-    <dependency>
-        <groupId>org.jfree</groupId>
-        <artifactId>jfreesvg</artifactId>
-        <version>1.9</version>
-    </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.17</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreesvg</artifactId>
+            <version>1.9</version>
+        </dependency>
     
-	<dependency>
-	<groupId>batik</groupId>
-	<artifactId>batik-dom</artifactId>
-	<version>1.6</version>
-</dependency>
+        <dependency>
+            <groupId>batik</groupId>
+            <artifactId>batik-dom</artifactId>
+            <version>1.6</version>
+        </dependency>
 
-<dependency>
-	<groupId>batik</groupId>
-	<artifactId>batik-svggen</artifactId>
-	<version>1.6</version>
-</dependency>
-<dependency>
-	<groupId>batik</groupId>
-	<artifactId>batik-ext</artifactId>
-	<version>1.6</version>
-</dependency>
-<dependency>
-	<groupId>batik</groupId>
-	<artifactId>batik-xml</artifactId>
-	<version>1.6</version>
-</dependency>
-<dependency>
-	<groupId>batik</groupId>
-	<artifactId>batik-awt-util</artifactId>
-	<version>1.6</version>
-</dependency>
-<dependency>
-	<groupId>batik</groupId>
-	<artifactId>batik-util</artifactId>
-	<version>1.6</version>
-</dependency>
+        <dependency>
+            <groupId>batik</groupId>
+            <artifactId>batik-svggen</artifactId>
+            <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>batik</groupId>
+            <artifactId>batik-ext</artifactId>
+            <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>batik</groupId>
+            <artifactId>batik-xml</artifactId>
+            <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>batik</groupId>
+            <artifactId>batik-awt-util</artifactId>
+            <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>batik</groupId>
+            <artifactId>batik-util</artifactId>
+            <version>1.6</version>
+        </dependency>
 
 		
-  </dependencies>
+    </dependencies>
 
-  <build>
+    <build>
 
-    <pluginManagement>
-      <plugins>
+        <pluginManagement>
+            <plugins>
 
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>nbm-maven-plugin</artifactId>
-          <version>3.7</version>
-          <extensions>true</extensions>
-          <configuration>
-            <brandingToken>${brandingToken}</brandingToken>
-            <cluster>${brandingToken}</cluster>
-          </configuration>
-        </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>nbm-maven-plugin</artifactId>
+                    <version>3.7</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <brandingToken>${brandingToken}</brandingToken>
+                        <cluster>${brandingToken}</cluster>
+                    </configuration>
+                </plugin>
 
-		<plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <!-- Version inherited from ProFI-Pom -->
-          <configuration>
-            <!-- to have the jar plugin pickup the nbm generated manifest -->
-            <useDefaultManifestFile>true</useDefaultManifestFile>
-          </configuration>
-        </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <!-- Version inherited from ProFI-Pom -->
+                    <configuration>
+                        <!-- to have the jar plugin pickup the nbm generated manifest -->
+                        <useDefaultManifestFile>true</useDefaultManifestFile>
+                    </configuration>
+                </plugin>
 
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <!-- Version inherited from ProFI-Pom -->
-          <configuration>
-            <source>1.7</source> <!-- Java version : 1.7 -->
-            <target>1.7</target>
-          </configuration>
-        </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <!-- Version inherited from ProFI-Pom -->
+                    <configuration>
+                        <source>1.7</source> <!-- Java version : 1.7 -->
+                        <target>1.7</target>
+                    </configuration>
+                </plugin>
         
-        <!--  Maven Release for branches and tags -->
+                <!--  Maven Release for branches and tags -->
 
  
 
-        <plugin>
-            <artifactId>maven-release-plugin</artifactId>
-            <version>2.5.1</version>
-            <configuration>
-                <providerImplementations>
-                    <svn>javasvn</svn>
-                </providerImplementations>
-            </configuration>
-            <dependencies>
-                <dependency>
-                    <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
-                    <artifactId>maven-scm-provider-svnjava</artifactId>
-                    <version>2.1.1</version>
-                    <scope>compile</scope>
-                </dependency>
-            </dependencies>
-        </plugin>
+                <plugin>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.1</version>
+                    <configuration>
+                        <providerImplementations>
+                            <svn>javasvn</svn>
+                        </providerImplementations>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
+                            <artifactId>maven-scm-provider-svnjava</artifactId>
+                            <version>2.1.1</version>
+                            <scope>compile</scope>
+                        </dependency>
+                    </dependencies>
+                </plugin>
 
  
 
 
-      </plugins>
-    </pluginManagement>
+            </plugins>
+        </pluginManagement>
 
-  </build>
+    </build>
 
 </project>

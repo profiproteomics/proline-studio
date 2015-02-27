@@ -44,11 +44,12 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
     public static final int COLTYPE_ABUNDANCE = 1;
     public static final int COLTYPE_RAW_ABUNDANCE = 2;
     public static final int COLTYPE_PSM = 3;
+    public static final int COLTYPE_IDENT_PSM = 4;
     
     private int m_overviewType = COLTYPE_RAW_ABUNDANCE;
 
-    private static final String[] m_columnNamesQC = {"Sel. level", "Abundance", "Raw abundance", "Pep. match count"};
-    private static final String[] m_toolTipQC = {"Selection level", "Abundance", "Raw abundance", "Peptides match count"};
+    private static final String[] m_columnNamesQC = {"Sel. level", "Abundance", "Raw abundance", "Pep. match count", "Ident. Pep. match count"};
+    private static final String[] m_toolTipQC = {"Selection level", "Abundance", "Raw abundance", "Peptides match count", "Identification peptides match count"};
 
     private List<DMasterQuantPeptide> m_quantPeptides = null;
     private DQuantitationChannel[] m_quantChannels = null;
@@ -181,6 +182,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                                 case COLTYPE_ABUNDANCE : return ((quantPeptide.getAbundance() == null || quantPeptide.getAbundance().isNaN())? "":Float.toString(quantPeptide.getAbundance()));
                                 case COLTYPE_RAW_ABUNDANCE : return ((quantPeptide.getRawAbundance() == null || quantPeptide.getRawAbundance().isNaN())? "":Float.toString(quantPeptide.getRawAbundance()));
                                 case COLTYPE_PSM : return (quantPeptide.getPeptideMatchesCount()== null?"":Integer.toString(quantPeptide.getPeptideMatchesCount()));
+                                case COLTYPE_IDENT_PSM : return (quantPeptide.getIdentPeptideMatchCount()== null?"":Integer.toString(quantPeptide.getIdentPeptideMatchCount()));
                             }
                         }
                     }
@@ -490,6 +492,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                                 case COLTYPE_PSM:
                                     lazyData.setData(Integer.valueOf(0));
                                     break;
+                                case COLTYPE_IDENT_PSM:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
                             }
                     } else {
                         DQuantPeptide quantPeptide = quantPeptideByQchIds.get(m_quantChannels[nbQc].getId());
@@ -507,6 +512,9 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                                 case COLTYPE_PSM:
                                     lazyData.setData(Integer.valueOf(0));
                                     break;
+                                case COLTYPE_IDENT_PSM:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
                             }
                         } else {
                             switch (id) {
@@ -520,7 +528,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                                     lazyData.setData(quantPeptide.getRawAbundance().isNaN() ? Float.valueOf(0) : quantPeptide.getRawAbundance());
                                     break;
                                 case COLTYPE_PSM:
-                                    lazyData.setData(quantPeptide.getPeptideMatchesCount());
+                                    lazyData.setData(quantPeptide.getPeptideMatchesCount() == null ? Integer.valueOf(0) : quantPeptide.getPeptideMatchesCount());
+                                    break;
+                                case COLTYPE_IDENT_PSM:
+                                    lazyData.setData(quantPeptide.getIdentPeptideMatchCount() == null ? Integer.valueOf(0) : quantPeptide.getIdentPeptideMatchCount());
                                     break;
                             }
                         }
@@ -785,8 +796,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
         List<Integer> listIds = new ArrayList();
         if (m_quantChannels != null) {
             for (int i = m_quantChannels.length - 1; i >= 0; i--) {
+                listIds.add(m_columnNames.length + COLTYPE_IDENT_PSM + (i * m_columnNamesQC.length));
                 listIds.add(m_columnNames.length + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
                 listIds.add(m_columnNames.length + COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
+                
             }
         }
         return listIds;
@@ -856,8 +869,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements ExportTabl
                     case COLTYPE_RAW_ABUNDANCE:
                         return Float.class;
                     case COLTYPE_PSM:
+                    case COLTYPE_IDENT_PSM:
                         return Integer.class;
-                        
                 }
 
             }

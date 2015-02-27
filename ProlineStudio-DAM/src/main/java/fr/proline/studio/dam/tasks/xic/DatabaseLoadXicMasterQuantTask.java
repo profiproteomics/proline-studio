@@ -871,6 +871,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         mqPeptideQ.setParameter("listPeptideInstanceId", listPeptideInstanceIds);
         List<Object[]> resultListMQPeptide = mqPeptideQ.getResultList();
         List<Long> listObjectTreeId = new ArrayList();
+        List<Long> listPeptideId = new ArrayList();
         List<DMasterQuantPeptide> listMasterQP = new ArrayList();
         for (Object[] resCur : resultListMQPeptide) {
             int i = 0;
@@ -892,9 +893,33 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             masterQuantPeptide.setPeptideInstance(pi);
             masterQuantPeptide.setPeptideInstanceId(peptideInstanceId);
             listObjectTreeId.add(objectTreeId);
+            listPeptideId.add(pi.getPeptideId());
             listMasterQP.add(masterQuantPeptide);
         }
-
+        // load PSM count for each peptide instance in the different quantChannels
+        Map<Long, Map<Long, Integer>> identPSMPerQCIdPerPepId = new HashMap();
+        if (!listPeptideId.isEmpty()){
+            String queryCountPSM = "SELECT pi.peptideMatchCount, pi.resultSummary.id, pi.peptide.id "
+                    + "FROM PeptideInstance pi "
+                    + "WHERE pi.resultSummary.id in (:listRsm) AND pi.peptide.id in (:listPepIds) ";
+            Query queryPSM = entityManagerMSI.createQuery(queryCountPSM);
+            queryPSM.setParameter("listRsm", rsmIdList);
+            queryPSM.setParameter("listPepIds", listPeptideId);
+            List resultListPSM = queryPSM.getResultList();
+            for (Iterator iterator = resultListPSM.iterator(); iterator.hasNext();) {
+                Object[] nb = (Object[]) (iterator.next());
+                int psm = ((Integer) nb[0]).intValue();
+                Long rsmId = ((Long) nb[1]);
+                Long qcId = rsmIdVsQcId.get(rsmId);
+                Long peptideId = ((Long) nb[2]);
+                Map<Long, Integer> identPSMPerQCId = identPSMPerQCIdPerPepId.get(peptideId);
+                if (identPSMPerQCId == null) {
+                    identPSMPerQCId = new HashMap();
+                }
+                identPSMPerQCId.put(qcId, psm);
+                identPSMPerQCIdPerPepId.put(peptideId, identPSMPerQCId);
+            }
+        }
         List<ObjectTree> listOt = new ArrayList();
         if (listObjectTreeId.size() > 0) {
             String otQuery = "SELECT ot FROM fr.proline.core.orm.msi.ObjectTree ot WHERE id IN (:listId) ";
@@ -927,6 +952,18 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
             if (quantPeptideData != null && !quantPeptideData.isEmpty()) {
                 quantProteinSetByQchIds = masterQuantPeptide.parseQuantPeptideFromProperties(quantPeptideData);
             }
+            // ident PSM
+            Map<Long, Integer> identPSMPerQCId = identPSMPerQCIdPerPepId.get(masterQuantPeptide.getPeptideInstance().getPeptideId());
+            if (identPSMPerQCId != null) {
+                for (Entry<Long, DQuantPeptide> entrySet : quantProteinSetByQchIds.entrySet()) {
+                    Long qcId = entrySet.getKey();
+                    DQuantPeptide quantPeptide = entrySet.getValue();
+                    Integer psm  = identPSMPerQCId.get(qcId);
+                    if (psm != null) {
+                       quantPeptide.setIdentPeptideMatchCount(psm);
+                    }
+                }
+            }
             masterQuantPeptide.setQuantPeptideByQchIds(quantProteinSetByQchIds);
             masterQuantPeptide.setCluster(getPeptideCluster(masterQuantPeptide.getId()));
             // update the list 
@@ -950,7 +987,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     o.setPeptideInstance(peptideInstance);
                     o.setPeptideInstanceId(masterQuantPeptide.getPeptideInstanceId());
                     o.setPeptideInstance(peptideInstance);
-                     // load PSM count for each peptide instance in the different quantChannels
+                    // load PSM count for each peptide instance in the different quantChannels
                     String queryCountPSM = "SELECT pi.peptideMatchCount, pi.resultSummary.id "
                             + "FROM PeptideInstance pi "
                             + "WHERE pi.resultSummary.id in (:listRsm) AND pi.peptide.id =:pepId ";
@@ -964,7 +1001,8 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         int psm = ((Integer) nb[0]).intValue();
                         Long rsmId = ((Long) nb[1]);
                         Long qcId = rsmIdVsQcId.get(rsmId);
-                        DQuantPeptide quantPeptide = new DQuantPeptide(Float.NaN, Float.NaN, -1, psm, qcId);
+                        DQuantPeptide quantPeptide = new DQuantPeptide(Float.NaN, Float.NaN, -1, null, qcId);
+                        quantPeptide.setIdentPeptideMatchCount(psm);
                         quantProteinSetByQchIds.put(qcId, quantPeptide);
                         o.setQuantPeptideByQchIds(quantProteinSetByQchIds);
                     }
@@ -999,7 +1037,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         if (ot != null) {
                             quantPeptideData = ot.getClobData();
                         }
-
+                        // no ident psm count as it's not linked to a peptide instance
                         Map<Long, DQuantPeptide> quantProteinSetByQchIds = null;
                         if (quantPeptideData != null && !quantPeptideData.isEmpty()) {
                             quantProteinSetByQchIds = masterQuantPeptide.parseQuantPeptideFromProperties(quantPeptideData);

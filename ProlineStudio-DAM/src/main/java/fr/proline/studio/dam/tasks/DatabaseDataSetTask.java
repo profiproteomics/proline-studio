@@ -31,8 +31,6 @@ import org.netbeans.api.db.explorer.JDBCDriver;
 import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
-import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -247,6 +245,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     /**
      * Load Dataset with specific ID
      * @param datasetId Dataset Id
+     * @param rsmIds
+     * @param returnedDatasetList
+     * @param returnedDatasetNames
      * @param project project Dataset belongs to
      */
     public void initLoadDatasetAndRSMInfo(Long datasetId, ArrayList<Long> rsmIds, ArrayList<DDataset> returnedDatasetList, ArrayList<String> returnedDatasetNames, Project project) {
@@ -1387,6 +1388,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
      *
      * @param databaseObjectsToModify HashMap whose keys can be Project or
      * Parent Dataset
+     * @param identificationTree
+     * @return 
      */
     public static boolean updateDatasetAndProjectsTree(LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify, boolean identificationTree) {
         EntityManager entityManagerUDS = DataStoreConnectorFactory.getInstance().getUdsDbConnector().getEntityManagerFactory().createEntityManager();

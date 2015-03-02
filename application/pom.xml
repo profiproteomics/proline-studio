@@ -15,9 +15,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.run.params.ide />
-        <netbeans.run.params>${netbeans.run.params.ide} -J-Xmx1024m  -J-Dfr.proline.level=1000 </netbeans.run.params> <!-- -J-Dnetbeans.preresolve.classes=true -->
+         <netbeans.run.params.ide /> 
+        <netbeans.run.params>${netbeans.run.params.ide} -J-Xmx1024m  -J-Dfr.proline.level=1000 </netbeans.run.params>  <!-- -J-Dnetbeans.preresolve.classes=true -->
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
+        <sqlite4java.version>1.0.392</sqlite4java.version>
+        <sqlite4java.library.path>${project.build.directory}/${brandingToken}/sqlite4java</sqlite4java.library.path>
     </properties>
 
     <dependencies>
@@ -54,7 +56,7 @@
             <artifactId>org-openide-awt</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
-
+        
         <!-- ProlineStudio dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -85,7 +87,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
-                <etcConfFile>src/main/resources/prolinestudio.conf</etcConfFile>
+                    <etcConfFile>src/main/resources/prolinestudio.conf</etcConfFile>
                 </configuration>
             </plugin>
             <!-- Permits NbModuleSuite to be run in integration-test phase: -->
@@ -98,7 +100,74 @@
                         <all.clusters>${all.clusters}</all.clusters>
                         <branding.token>${brandingToken}</branding.token>
                     </systemPropertyVariables>
+                   <!-- <systemProperties>
+                        <property>
+                            <name>sqlite4java.library.path</name>
+                            <value>${project.build.directory}/${brandingToken}</value>
+                        </property>
+                    </systemProperties> -->
                 </configuration>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+
+                                <artifactItem>
+                                    <groupId>com.almworks.sqlite4java</groupId>
+                                    <artifactId>sqlite4java-win32-x64</artifactId>
+                                    <version>${sqlite4java.version}</version>
+                                    <type>dll</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${sqlite4java.library.path}</outputDirectory>
+                                </artifactItem>
+
+                                <artifactItem>
+                                    <groupId>com.almworks.sqlite4java</groupId>
+                                    <artifactId>libsqlite4java-linux-amd64</artifactId>
+                                    <version>${sqlite4java.version}</version>
+                                    <type>so</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${sqlite4java.library.path}</outputDirectory>
+                                </artifactItem>
+
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+      
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>1.9</version> 
+                <executions>
+                    <execution>
+                        <id>assemble</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assemble</goal>
+                        </goals>
+                        <configuration>
+                            <programs>
+                                <program>
+                                    <mainClass>fr.profi.mzdb.cli.MzDbAccess</mainClass>
+                                    <name>MzDbAccess</name>
+                                </program>
+                            </programs>
+                            <extraJvmArguments>-Dsqlite4java.library.path=${sqlite4java.library.path}</extraJvmArguments> 
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

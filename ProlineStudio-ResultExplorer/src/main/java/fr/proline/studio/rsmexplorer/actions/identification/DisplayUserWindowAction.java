@@ -15,7 +15,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.dialog.DataBoxChooserDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import java.util.ArrayList;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -28,8 +28,8 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
     
     private boolean m_forRsm;
     
-    public DisplayUserWindowAction(boolean forRsm) {
-        super(NbBundle.getMessage(DisplayRsmProteinSetsAction.class, "CTL_DisplayUserWindowAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public DisplayUserWindowAction(boolean forRsm, TreeType treeType) {
+        super(NbBundle.getMessage(DisplayRsmProteinSetsAction.class, "CTL_DisplayUserWindowAction"), treeType);
         m_forRsm = forRsm;
     }
     

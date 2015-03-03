@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import java.util.ArrayList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -22,20 +22,22 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
     
     private JMenu m_menu;
+    private TreeType m_treeType;
     
-    public DisplayRsmAction() {
-        super(NbBundle.getMessage(AddAction.class, "CTL_DisplayRsmAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public DisplayRsmAction(TreeType treeType) {
+        super(NbBundle.getMessage(AddAction.class, "CTL_DisplayRsmAction"), treeType);
+        m_treeType = treeType;
     }
 
     @Override
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
 
-        m_displayRsmPSMAction = new DisplayRsmPSMAction();
-        m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction();
-        m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction();
-        m_manageUserWindowsAction = new ManageUserWindowsAction(true);
-        m_displayUserWindowAction = new DisplayUserWindowAction(true);
+        m_displayRsmPSMAction = new DisplayRsmPSMAction(m_treeType);
+        m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction(m_treeType);
+        m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(m_treeType);
+        m_manageUserWindowsAction = new ManageUserWindowsAction(true, m_treeType);
+        m_displayUserWindowAction = new DisplayUserWindowAction(true, m_treeType);
         
         ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
         int nb = savedWindowsList.size();

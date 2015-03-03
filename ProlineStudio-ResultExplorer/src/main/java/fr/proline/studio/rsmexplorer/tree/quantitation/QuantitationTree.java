@@ -215,6 +215,9 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
                 m_mainActions.add(retrieveSCDataAction);
                 
+                DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                m_mainActions.add(displayRsmAction);
+                
                 m_mainActions.add(null);  // separator*
                 
                 ExportAbundancesAction exportXICAction = new ExportAbundancesAction();

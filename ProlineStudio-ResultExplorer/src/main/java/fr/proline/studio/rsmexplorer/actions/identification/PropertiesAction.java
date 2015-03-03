@@ -161,6 +161,16 @@ public class PropertiesAction extends AbstractRSMAction {
                 
                 sheet.put(dsSet);
                 
+                if (dataset.getResultSummary() != null) {
+                    sheet.put(createResultSummarySheetSet(dataset.getResultSummary()));
+                    try {
+                        Map<String, Object> map = dataset.getResultSummary().getSerializedPropertiesAsMap();
+                        SerializedPropertiesUtil.getProperties(sheet, "SR Properties", map);
+                    } catch (Exception e) {
+                        LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(PropertiesAction.class.getSimpleName() + " properties error ", e);
+                    }
+                }
+                
                 // post quant processing config
                 if (dataset.getQuantProcessingConfig() != null) {
                     try {

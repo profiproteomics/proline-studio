@@ -332,7 +332,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
    
             }
             case COLTYPE_PEPTIDE_RANK: {
-                lazyData.setData(peptideMatch.getCDPrettyRank());
+               lazyData.setData(peptideMatch.getCDPrettyRank() == null? "" : peptideMatch.getCDPrettyRank()); // could be null for quantitation datasetnode
                 return lazyData;
             }
 

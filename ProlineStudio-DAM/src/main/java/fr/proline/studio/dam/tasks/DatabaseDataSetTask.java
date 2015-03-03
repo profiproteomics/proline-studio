@@ -396,18 +396,28 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             // But some Aggregation are null (for identifications) -> identifications are not loaded
             // So we load aggregations afterwards
             
-            List<DDataset> datasetListSelected;
+            List<DDataset> datasetListSelected = new ArrayList();
             if (m_identificationDataset) {
                 TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND d.type<>:quantitationType AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
                 dataSetQuery.setParameter("projectId", projectId);
                 dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
                 datasetListSelected = dataSetQuery.getResultList();
             } else {
-                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND ( d.type=:quantitationType or d.type=:trashType)  AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+                TypedQuery<DDataset> dataSetQueryTrash = entityManagerUDS.createQuery("SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, d.resultSummaryId, d.number) FROM Dataset d WHERE (d.parentDataset IS null) AND (  d.type=:trashType)  AND d.project.id=:projectId  ORDER BY d.number ASC", DDataset.class);
+                dataSetQueryTrash.setParameter("projectId", projectId);
+                //dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
+                dataSetQueryTrash.setParameter("trashType", Dataset.DatasetType.TRASH);
+                datasetListSelected.addAll(dataSetQueryTrash.getResultList());
+                //quant dataset with resultSummaryId from masterQuantChannel
+                String query = "SELECT new fr.proline.core.orm.uds.dto.DDataset(d.id, d.project, d.name, d.type, d.childrenCount, d.resultSetId, mqc.quantResultSummaryId, d.number) "
+                        + "FROM Dataset d, MasterQuantitationChannel mqc "
+                        + "WHERE (d.parentDataset IS null) AND (d.type=:quantitationType)  AND d.project.id=:projectId "
+                        + "AND mqc.dataset.id = d.id "
+                        + "ORDER BY d.number ASC";
+                TypedQuery<DDataset> dataSetQuery = entityManagerUDS.createQuery(query, DDataset.class);
                 dataSetQuery.setParameter("projectId", projectId);
                 dataSetQuery.setParameter("quantitationType", Dataset.DatasetType.QUANTITATION);
-                dataSetQuery.setParameter("trashType", Dataset.DatasetType.TRASH);
-                datasetListSelected = dataSetQuery.getResultList();
+                datasetListSelected.addAll(dataSetQuery.getResultList());
             }
 
 

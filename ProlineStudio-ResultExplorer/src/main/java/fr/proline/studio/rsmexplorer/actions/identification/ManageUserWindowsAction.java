@@ -3,7 +3,7 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.rsmexplorer.gui.dialog.ManageSaveWindowsDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import java.util.ArrayList;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
@@ -16,8 +16,8 @@ public class ManageUserWindowsAction extends AbstractRSMAction {
 
     private boolean m_forRSM;
     
-    public ManageUserWindowsAction(boolean forRSM) {
-        super(NbBundle.getMessage(ManageUserWindowsAction.class, "CTL_ManagerUserWindowsAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public ManageUserWindowsAction(boolean forRSM, TreeType treeType) {
+        super(NbBundle.getMessage(ManageUserWindowsAction.class, "CTL_ManagerUserWindowsAction"), treeType);
         m_forRSM = forRSM;
     }
     

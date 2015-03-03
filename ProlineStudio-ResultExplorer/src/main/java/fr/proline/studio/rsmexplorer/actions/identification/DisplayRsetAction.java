@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import java.util.ArrayList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -21,9 +22,11 @@ public class DisplayRsetAction extends AbstractRSMAction {
    private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
 
    private JMenu m_menu;
+   private TreeType m_treeType;
     
    public DisplayRsetAction() {
        super(NbBundle.getMessage(AddAction.class, "CTL_DisplayRsetAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+       m_treeType = AbstractTree.TreeType.TREE_IDENTIFICATION;
    }
 
     @Override
@@ -32,8 +35,8 @@ public class DisplayRsetAction extends AbstractRSMAction {
         
         m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction();
         m_displayRsetProteinMatchesAction = new DisplayRsetProteinMatchesAction();
-        m_manageUserWindowsAction = new ManageUserWindowsAction(false);
-        m_displayUserWindowAction = new DisplayUserWindowAction(false);
+        m_manageUserWindowsAction = new ManageUserWindowsAction(false, m_treeType);
+        m_displayUserWindowAction = new DisplayUserWindowAction(false, m_treeType);
         
         ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
         int nb = savedWindowsList.size();

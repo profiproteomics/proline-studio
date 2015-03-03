@@ -117,7 +117,6 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         
         
         if (m_plots != null) {
-            m_useDoubleBuffering = false; //JPM.TEST fsdqqqqqqqqqqqqqqqqqqqqqqqqqqqq
                 if (m_useDoubleBuffering) {
                     boolean createDoubleBuffer = ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth()!=m_plotArea.width) || (m_doubleBuffer.getHeight()!=m_plotArea.height));
                     if (createDoubleBuffer) {

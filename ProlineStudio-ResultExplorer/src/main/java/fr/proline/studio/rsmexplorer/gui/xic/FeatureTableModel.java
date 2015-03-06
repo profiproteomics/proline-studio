@@ -37,12 +37,16 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     public static final int COLTYPE_FEATURE_DURATION = 7;
     public static final int COLTYPE_FEATURE_QUALITY_SCORE = 8;
     public static final int COLTYPE_FEATURE_IS_OVERLAPPING = 9;
+    public static final int COLTYPE_FEATURE_PREDICTED_ELUTION_TIME = 10;
+    public static final int COLTYPE_FEATURE_PEAKELS_COUNT = 11;
+    
+    public final static String SERIALIZED_PROP_PREDICTED_ELUTION_TIME = "predicted_elution_time";
+    public final static String SERIALIZED_PROP_PEAKELS_COUNT = "peakels_count";
     
     
-    
-    private static final String[] m_columnNames = {"Id", "Map", "m/z", "Charge", "Elution Time (min)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping"};
-    private static final String[] m_toolTipColumns = {"Feature Id","Map name", "Mass to Charge Ratio", "Charge", "Elution Time (min)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping"};
-    private static final String[] m_columnNamesForExport = {"Id", "Map", "m/z", "Charge", "Elution Time (sec)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping"};
+    private static final String[] m_columnNames = {"Id", "Map", "m/z", "Charge", "Elution Time (min)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "<html>Predicted<br/> El. Time (min)</html>", "#Peakels"};
+    private static final String[] m_toolTipColumns = {"Feature Id","Map name", "Mass to Charge Ratio", "Charge", "Elution Time (min)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Elution time in min", "Peakels count"};
+    private static final String[] m_columnNamesForExport = {"Id", "Map", "m/z", "Charge", "Elution Time (sec)", "Apex Intensity", "Intensity", "Duration (sec)", "Quality Score", "Is Overlapping", "Predicted Elution Time (sec)", "Peakels Count"};
     
     
     private List<Feature> m_features = null;
@@ -207,6 +211,49 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 return lazyData;
 
             }
+            case COLTYPE_FEATURE_PREDICTED_ELUTION_TIME: {
+                LazyData lazyData = getLazyData(row, col);
+                Map<String, Object> prop = null;
+                try {
+                    prop = feature.getSerializedPropertiesAsMap();
+                } catch (Exception ex) {
+                    
+                }
+                if (prop != null) {
+                    Object o = prop.get(SERIALIZED_PROP_PREDICTED_ELUTION_TIME);
+                    if (o != null && o instanceof Double) {
+                        Double predictedElutionTime = (Double)o;
+                        lazyData.setData(new Float(predictedElutionTime));
+                    }else{
+                        lazyData.setData(Float.NaN);
+                    }
+                }else{
+                    lazyData.setData(Float.NaN);
+                }
+                return lazyData;
+            }
+            
+            case COLTYPE_FEATURE_PEAKELS_COUNT:{
+                LazyData lazyData = getLazyData(row, col);
+                Map<String, Object> prop = null;
+                try {
+                    prop = feature.getSerializedPropertiesAsMap();
+                } catch (Exception ex) {
+                    
+                }
+                if (prop != null) {
+                    Object o = prop.get(SERIALIZED_PROP_PEAKELS_COUNT);
+                    if (o != null && o instanceof Integer) {
+                        Integer peakelsCount = (Integer)o;
+                        lazyData.setData(peakelsCount);
+                    }else{
+                        lazyData.setData(0);
+                    }
+                }else{
+                    lazyData.setData(0);
+                }
+                return lazyData;
+            }
         }
         return null; // should never happen
     }
@@ -305,6 +352,8 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         filtersMap.put(COLTYPE_FEATURE_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_FEATURE_INTENSITY), null));
         filtersMap.put(COLTYPE_FEATURE_DURATION, new DoubleFilter(getColumnName(COLTYPE_FEATURE_DURATION), null));
         filtersMap.put(COLTYPE_FEATURE_QUALITY_SCORE, new DoubleFilter(getColumnName(COLTYPE_FEATURE_QUALITY_SCORE), null));
+        filtersMap.put(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME), null));
+        filtersMap.put(COLTYPE_FEATURE_PEAKELS_COUNT, new IntegerFilter(getColumnName(COLTYPE_FEATURE_PEAKELS_COUNT), null));
 
     }
 
@@ -337,10 +386,12 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             case COLTYPE_FEATURE_APEX_INTENSITY:
             case COLTYPE_FEATURE_INTENSITY:
             case COLTYPE_FEATURE_DURATION:
+            case COLTYPE_FEATURE_PREDICTED_ELUTION_TIME:
                 return Float.class;
             case COLTYPE_FEATURE_IS_OVERLAPPING:
                 return Boolean.class;
             case COLTYPE_FEATURE_CHARGE:
+            case COLTYPE_FEATURE_PEAKELS_COUNT:
                 return Integer.class;
         }
         return null; // should not happen
@@ -390,6 +441,36 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             case COLTYPE_FEATURE_IS_OVERLAPPING: {
                 return feature.getIsOverlapping();
 
+            }
+            case COLTYPE_FEATURE_PREDICTED_ELUTION_TIME: {
+                Map<String, Object> prop = null;
+                try {
+                    prop = feature.getSerializedPropertiesAsMap();
+                } catch (Exception ex) {
+                    
+                }
+                if (prop != null) {
+                    Object o = prop.get(SERIALIZED_PROP_PREDICTED_ELUTION_TIME);
+                    if (o != null && o instanceof Double) {
+                        return (Double)o;
+                    }
+                }
+                return null;
+            }
+            case COLTYPE_FEATURE_PEAKELS_COUNT: {
+                Map<String, Object> prop = null;
+                try {
+                    prop = feature.getSerializedPropertiesAsMap();
+                } catch (Exception ex) {
+                    
+                }
+                if (prop != null) {
+                    Object o = prop.get(SERIALIZED_PROP_PEAKELS_COUNT);
+                    if (o != null && o instanceof Integer) {
+                        return (Integer)o;
+                    }
+                }
+                return null;
             }
         }
         return null; // should never happen
@@ -549,8 +630,46 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
                 }
 
             }
+            case COLTYPE_FEATURE_PREDICTED_ELUTION_TIME: {
+                Map<String, Object> prop = null;
+                try {
+                    prop = feature.getSerializedPropertiesAsMap();
+                } catch (Exception ex) {
+                    
+                }
+                if (prop != null) {
+                    Object o = prop.get(SERIALIZED_PROP_PREDICTED_ELUTION_TIME);
+                    if (o != null && o instanceof Double) {
+                        return ((Double)o).toString();
+                    }
+                }
+                return "";
+            }
+            case COLTYPE_FEATURE_PEAKELS_COUNT: {
+                Map<String, Object> prop = null;
+                try {
+                    prop = feature.getSerializedPropertiesAsMap();
+                } catch (Exception ex) {
+                    
+                }
+                if (prop != null) {
+                    Object o = prop.get(SERIALIZED_PROP_PEAKELS_COUNT);
+                    if (o != null && o instanceof Integer) {
+                        return ((Integer)o).toString();
+                    }
+                }
+                return "";
+            }
         }
         return ""; // should never happen
+    }
+    
+    public List<Integer> getDefaultColumnsToHide() {
+        List<Integer> listIds = new ArrayList();
+        listIds.add(COLTYPE_FEATURE_PEAKELS_COUNT);
+        listIds.add(COLTYPE_FEATURE_IS_OVERLAPPING);
+        listIds.add(COLTYPE_FEATURE_QUALITY_SCORE);
+        return listIds; 
     }
     
     

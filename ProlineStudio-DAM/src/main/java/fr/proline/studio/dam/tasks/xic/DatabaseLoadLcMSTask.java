@@ -762,6 +762,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 
                 for (Feature feature : allFeature) {
                     m_childFeatureList.add(feature);
+                    java.util.Map<String,Object>  prop = feature.getSerializedPropertiesAsMap(); //init the serializedProp.
                     queryPeakel.setParameter("featureId", feature.getId());
                     List<Long> listIds = queryPeakel.getResultList();
                     if (listIds != null && !listIds.isEmpty()) {

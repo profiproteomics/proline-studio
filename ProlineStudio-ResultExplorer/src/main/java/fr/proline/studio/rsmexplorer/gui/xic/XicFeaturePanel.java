@@ -286,6 +286,11 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         }
         if (finished) {
             m_featureTable.setSortable(true);
+            // hide the columns
+            /*List<Integer> listIdsToHide = ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
+            for (Integer id : listIdsToHide) {
+                m_featureTable.getColumnExt(id.intValue()).setVisible(false);
+            }*/
         }
     }
     
@@ -293,6 +298,11 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         m_featureTable.dataUpdated(subTask, finished);
         if (finished) {
             m_featureTable.setSortable(true);
+            // hide the columns
+            /*List<Integer> listIdsToHide = ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
+            for (Integer id : listIdsToHide) {
+                m_featureTable.getColumnExt(id.intValue()).setVisible(false);
+            }*/
         }
     }
     
@@ -356,6 +366,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_ELUTION_TIME)).setCellRenderer(new LazyTableCellRenderer(new TimeRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)))));
             getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_MOZ)).setCellRenderer(new LazyTableCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
             getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_MAP_NAME)).setCellRenderer(new LazyTableCellRenderer(new FontRenderer( getDefaultRenderer(String.class) )) );
+            getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_PREDICTED_ELUTION_TIME)).setCellRenderer(new LazyTableCellRenderer(new TimeRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)))));
             setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
              

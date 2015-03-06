@@ -39,6 +39,9 @@ public class TimeRenderer implements TableCellRenderer  {
             return m_defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }
         //long seconds = ((Float)value).longValue();
+        if (((Float)value).isNaN()){
+            return m_defaultRenderer.getTableCellRendererComponent(table, "", isSelected, hasFocus, row, column);
+        }
         float seconds = ((Float)value);
         return m_defaultRenderer.getTableCellRendererComponent(table, getTimeMinutes(seconds), isSelected, hasFocus, row, column);
 

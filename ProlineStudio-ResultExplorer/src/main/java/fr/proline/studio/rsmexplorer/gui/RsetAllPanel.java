@@ -491,6 +491,11 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             return getColumnName(col);
         }
         
+        @Override
+        public String getTootlTipValue(int row, int col) {
+            return null;
+        }
+        
     }
     
     public class TableTransferHandler extends TransferHandler {

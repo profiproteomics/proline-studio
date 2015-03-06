@@ -3,16 +3,16 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
-import fr.proline.studio.export.ExportColumnTextInterface;
-import fr.proline.studio.export.ExportRowTextInterface;
+import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.graphics.PlotInformation;
-import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
@@ -20,6 +20,7 @@ import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class QuantPeptideIonTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface,  ExportRowTextInterface, CompareDataInterface {
+public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalTableModelInterface {
 
     public static final int COLTYPE_PEPTIDE_ION_ID = 0;
     public static final int COLTYPE_PEPTIDE_ION_NAME = 1;
@@ -35,8 +36,8 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
     public static final int COLTYPE_PEPTIDE_ION_MOZ = 3;
     public static final int COLTYPE_PEPTIDE_ION_ELUTION_TIME = 4;
     public static final int LAST_STATIC_COLUMN = COLTYPE_PEPTIDE_ION_ELUTION_TIME;
-    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Charge", "m/z", "<html>Elution<br/>time (min)</html>"};
-    private static final String[] m_columnNamesForFilter = {"Id", "Peptide Sequence", "Charge", "m/z", "Elution time"};
+    private static final String[] m_columnNames = {"Id", "Peptide Sequence", "Charge", "m/z", "<html>Elution<br/>Time (min)</html>"};
+    private static final String[] m_columnNamesForFilter = {"Id", "Peptide Sequence", "Charge", "m/z", "Elution Time"};
     private static final String[] m_toolTipColumns = {"MasterQuantPeptideIon Id", "Identified Peptide Sequence", "Charge", "Mass to Charge Ratio", "Elution time"};
 
     public static final int COLTYPE_SELECTION_LEVEL = 0;
@@ -148,6 +149,11 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             return ""; // should not happen
         }
     }
+    
+    @Override
+    public String getTootlTipValue(int row, int col) {
+        return null;
+    }
 
     @Override
     public Class getColumnClass(int col) {
@@ -167,22 +173,15 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         if (m_quantPeptideIons == null) {
             return 0;
         }
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }
+
         return m_quantPeptideIons.size();
     }
 
     @Override
     public Object getValueAt(int row, int col) {
 
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
-
         // Retrieve Quant Peptide Ion
-        MasterQuantPeptideIon peptideIon = m_quantPeptideIons.get(rowFiltered);
+        MasterQuantPeptideIon peptideIon = m_quantPeptideIons.get(row);
 
         switch (col) {
             case COLTYPE_PEPTIDE_ION_ID: {
@@ -314,7 +313,6 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         this.m_quantPeptideIons = peptideIons;
         this.m_quantChannels = quantChannels;
         this.m_quantChannelNumber = quantChannels.length;
-        m_filteredIds = null;
         m_isFiltering = false;
         
         if (structureChanged) {
@@ -323,50 +321,23 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
 
         m_taskId = taskId;
 
-        if (m_restrainIds != null) {
-            m_restrainIds = null;
-            m_filteringAsked = true;
-        }
-        
-        if (m_filteringAsked) {
-            m_filteringAsked = false;
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
 
     }
 
     public void dataUpdated() {
 
         // no need to do an updateMinMax : scores are known at once
-        if (m_filteredIds != null) {
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
     }
 
     public MasterQuantPeptideIon getPeptideIon(int i) {
-
-        if (m_filteredIds != null) {
-            i = m_filteredIds.get(i).intValue();
-        }
 
         return m_quantPeptideIons.get(i);
     }
 
     public int findRow(long peptideId) {
 
-        if (m_filteredIds != null) {
-            int nb = m_filteredIds.size();
-            for (int i = 0; i < nb; i++) {
-                if (peptideId == m_quantPeptideIons.get(m_filteredIds.get(i)).getId()) {
-                    return i;
-                }
-            }
-            return -1;
-        }
 
         int nb = m_quantPeptideIons.size();
         for (int i = 0; i < nb; i++) {
@@ -378,7 +349,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
 
     }
 
-    public void sortAccordingToModel(ArrayList<Long> peptideIds) {
+    public void sortAccordingToModel(ArrayList<Long> peptideIds, CompoundTableModel compoundTableModel) {
 
         if (m_quantPeptideIons == null) {
             // data not loaded 
@@ -388,10 +359,13 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         HashSet<Long> peptideIdMap = new HashSet<>(peptideIds.size());
         peptideIdMap.addAll(peptideIds);
 
-        int nb = getRowCount();
+        int nb = m_table.getRowCount();
         int iCur = 0;
         for (int iView = 0; iView < nb; iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
+            if (compoundTableModel != null) {
+                iModel = compoundTableModel.convertCompoundRowToBaseModelRow(iModel);
+            }
             // Retrieve Peptide Ion
             MasterQuantPeptideIon p = getPeptideIon(iModel);
             if (peptideIdMap.contains(p.getId())) {
@@ -399,93 +373,27 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
             }
         }
 
-        // need to refilter
-        if (m_filteredIds != null) { // NEEDED ????
-            filter();
-        }
     }
 
+
     @Override
-    public void filter() {
-
-        if (m_quantPeptideIons == null) {
-            // filtering not possible for the moment
-            m_filteringAsked = true;
-            return;
-        }
-
-        m_isFiltering = true;
-        try {
-
-            int nbData = m_quantPeptideIons.size();
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
-
-            for (int i = 0; i < nbData; i++) {
-                
-                Integer iInteger = i;
-                
-                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
-                    continue;
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+        filtersMap.put(COLTYPE_PEPTIDE_ION_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME), null));
+        filtersMap.put(COLTYPE_PEPTIDE_ION_CHARGE, new IntegerFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_CHARGE), null));
+        filtersMap.put(COLTYPE_PEPTIDE_ION_MOZ, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_MOZ), null));
+        
+        ConvertValueInterface minuteConverter = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
                 }
-                
-                if (!filter(i)) {
-                    continue;
-                }
-                m_filteredIds.add(iInteger);
+                return ((Float) o) / 60d;
             }
 
-        } finally {
-            m_isFiltering = false;
-        }
-        fireTableDataChanged();
-    }
+        };
+        filtersMap.put(COLTYPE_PEPTIDE_ION_ELUTION_TIME, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_ELUTION_TIME), minuteConverter));
 
-    @Override
-    public boolean filter(int row, int col) {
-        Filter filter = getColumnFilter(col);
-        if ((filter == null) || (!filter.isUsed())) {
-            return true;
-        }
-
-        Object data = ((LazyData) getValueAt(row, col)).getData();
-        if (data == null) {
-            return true; // should not happen
-        }
-
-        switch (col) {
-            case COLTYPE_PEPTIDE_ION_NAME: {
-                return ((StringDiffFilter) filter).filter((String) data);
-            }
-            case COLTYPE_PEPTIDE_ION_CHARGE: {
-                return ((IntegerFilter) filter).filter((Integer) data);
-            }
-            case COLTYPE_PEPTIDE_ION_MOZ: {
-                return ((DoubleFilter) filter).filter((Double) data);
-            }
-            case COLTYPE_PEPTIDE_ION_ELUTION_TIME: {
-                return ((DoubleFilter) filter).filter((Float) data);
-            }
-
-        }
-
-        return true; // should never happen
-    }
-
-    @Override
-    public void initFilters() {
-        if (m_filters == null) {
-            int nbCol = getColumnCount();
-            m_filters = new Filter[nbCol];
-            m_filters[COLTYPE_PEPTIDE_ION_ID] = null;
-            m_filters[COLTYPE_PEPTIDE_ION_NAME] = new StringDiffFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME));
-            m_filters[COLTYPE_PEPTIDE_ION_CHARGE] = new IntegerFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_CHARGE));
-            m_filters[COLTYPE_PEPTIDE_ION_MOZ] = new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_MOZ));
-            m_filters[COLTYPE_PEPTIDE_ION_ELUTION_TIME] = new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_ELUTION_TIME));
-        }
     }
 
     @Override
@@ -565,33 +473,11 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
         return listIds;
     }
 
-    @Override
-    public HashSet exportSelection(int[] rows) {
 
-        int nbRows = rows.length;
-        HashSet selectedObjects = new HashSet();
-        for (int i = 0; i < nbRows; i++) {
-
-            int row = rows[i];
-            int rowFiltered = row;
-            if ((!m_isFiltering) && (m_filteredIds != null)) {
-                rowFiltered = m_filteredIds.get(row).intValue();
-            }
-
-            // Retrieve PeptideIon
-            MasterQuantPeptideIon peptideIon = m_quantPeptideIons.get(rowFiltered);
-
-            selectedObjects.add(peptideIon.getId());
-        }
-        return selectedObjects;
-    }
 
     @Override
     public String getExportRowCell(int row, int col) {
         int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
 
         // Retrieve Quant Peptide Ion
         MasterQuantPeptideIon peptideIon = m_quantPeptideIons.get(rowFiltered);
@@ -760,5 +646,20 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements ExportT
     @Override
     public PlotInformation getPlotInformation() {
         return null;
+    }
+
+    @Override
+    public PlotType getBestPlotType() {
+        return null;
+    }
+
+    @Override
+    public int getBestXAxisColIndex(PlotType plotType) {
+        return -1;
+    }
+
+    @Override
+    public int getBestYAxisColIndex(PlotType plotType) {
+        return -1;
     }
 }

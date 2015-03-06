@@ -18,8 +18,8 @@ public class DoubleFilter extends Filter {
     private Double m_min;
     private Double m_max;
 
-    public DoubleFilter(String variableName) {
-        super(variableName);
+    public DoubleFilter(String variableName, ConvertValueInterface convertValueInterface) {
+        super(FilterType.FILTER_DOUBLE ,variableName, convertValueInterface);
 
         m_valueKeys = new ArrayList<>(2);
         m_valueKeys.add(VALUE_MIN);

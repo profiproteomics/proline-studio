@@ -117,6 +117,11 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 	        public String getToolTipForHeader(int col) {
 	            return getColumnName(col);
 	        }
+                
+                @Override
+                public String getTootlTipValue(int row, int col) {
+                    return null;
+                }
 
 	        @Override
 	        public int getRowCount() {

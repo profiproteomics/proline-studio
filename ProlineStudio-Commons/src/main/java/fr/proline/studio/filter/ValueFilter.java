@@ -23,15 +23,15 @@ public class ValueFilter extends Filter {
     private ImageIcon[] m_displayIcons = null;
     private int m_index = 0;
 
-    private ValueFilterType m_type;
+    private final ValueFilterType m_type;
     
     public enum ValueFilterType {
         GREATER_EQUAL,
         EQUAL
     }
     
-    public ValueFilter(String variableName, Object[] values, ImageIcon[] displayIcons, ValueFilterType type ) {
-        super(variableName);
+    public ValueFilter(String variableName, Object[] values, ImageIcon[] displayIcons, ValueFilterType type, ConvertValueInterface convertValueInterface ) {
+        super(FilterType.FILTER_VALUE, variableName, convertValueInterface);
         
         m_values = values;
         m_displayIcons = displayIcons;

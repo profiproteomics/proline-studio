@@ -1,34 +1,35 @@
 package fr.proline.studio.comparedata;
 
 
-import fr.proline.studio.filter.DoubleFilter;
+
 import fr.proline.studio.filter.Filter;
-import fr.proline.studio.filter.FilterTableModel;
-import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.filter.StringFilter;
-import java.util.ArrayList;
-import java.util.HashSet;
+import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.table.DecoratedTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.table.LazyData;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 
 
 /**
  *
  * @author JM235353
  */
-public class CompareTableModel extends FilterTableModel {
+public class CompareTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
 
-    private CompareDataInterface m_dataInterface = null;
-   
-    private boolean m_isFiltering = false;
+    private GlobalTableModelInterface m_dataInterface = null;
+
+    private String m_name;
     
-    public CompareTableModel(CompareDataInterface dataInterface) {
+    public CompareTableModel(GlobalTableModelInterface dataInterface) {
         m_dataInterface = dataInterface;
         
     }
     
-    public void setDataInterface(CompareDataInterface dataInterface) {
+    public void setDataInterface(GlobalTableModelInterface dataInterface) {
         m_dataInterface = dataInterface;
-        m_filters = null; // reinit filters
-        fireTableStructureChanged();
     }
     
     public CompareDataInterface getDataInterface() {
@@ -40,11 +41,7 @@ public class CompareTableModel extends FilterTableModel {
         if (m_dataInterface == null) {
             return 0;
         }
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }
-        
-        
+
         return m_dataInterface.getRowCount();
     }
 
@@ -61,13 +58,8 @@ public class CompareTableModel extends FilterTableModel {
         if (m_dataInterface == null) {
             return null; 
         }
-        
-        int rowFiltered = rowIndex;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(rowIndex).intValue();
-        }
-        
-        return m_dataInterface.getDataValueAt(rowFiltered, columnIndex);
+
+        return m_dataInterface.getDataValueAt(rowIndex, columnIndex);
     }
     
     @Override
@@ -79,7 +71,7 @@ public class CompareTableModel extends FilterTableModel {
     }
     
     @Override
-    public Class<?> getColumnClass(int columnIndex) {
+    public Class getColumnClass(int columnIndex) {
         if (m_dataInterface == null) {
             return null;
         }
@@ -90,8 +82,14 @@ public class CompareTableModel extends FilterTableModel {
     public String getToolTipForHeader(int col) {
         return getColumnName(col);
     }
-
+    
     @Override
+    public String getTootlTipValue(int row, int col) {
+        return null;
+    }
+
+    
+    /*@Override
     public void initFilters() {
         if (m_filters == null) {
             int nbCol = getColumnCount();
@@ -100,82 +98,23 @@ public class CompareTableModel extends FilterTableModel {
             for (int i=0;i<nbCol;i++) {
                 Class columnClass = getColumnClass(i);
                 if (columnClass.equals(String.class)) {
-                    m_filters[i] = new StringFilter(getColumnName(i));
+                    m_filters[i] = new StringFilter(getColumnName(i), null);
                 } else if (columnClass.equals(Integer.class)) {
-                    m_filters[i] = new IntegerFilter(getColumnName(i));
+                    m_filters[i] = new IntegerFilter(getColumnName(i), null);
                 } else if (columnClass.equals(Double.class)) {
-                    m_filters[i] = new DoubleFilter(getColumnName(i));
+                    m_filters[i] = new DoubleFilter(getColumnName(i), null);
                 } else if (columnClass.equals(Float.class)) {
-                    m_filters[i] = new DoubleFilter(getColumnName(i));
+                    m_filters[i] = new DoubleFilter(getColumnName(i), null);
                 } else {
                     m_filters[i] = null;
                 }
             }
 
         }
-    }
+    }*/
 
-    @Override
-    public boolean filter(int row, int col) {
-        Filter filter = getColumnFilter(col);
-        if ((filter == null) || (!filter.isUsed())) {
-            return true;
-        }
 
-        Object data = getValueAt(row, col);
-        
-        if (data == null) {
-            return false; // remove null data for the moment. //JPM.TODO ?
-        }
-        
-        
-        Class columnClass = getColumnClass(col);
-        
-        if (columnClass.equals(String.class)) {
-            return ((StringFilter) filter).filter((String) data);
-        } else if (columnClass.equals(Integer.class)) {
-            return ((IntegerFilter) filter).filter((Integer) data);
-        } else if (columnClass.equals(Double.class)) {
-            return ((DoubleFilter) filter).filter((Double) data);
-        } else if (columnClass.equals(Float.class)) {
-            return ((DoubleFilter) filter).filter((Float) data);
-        }
-
-        
-        return true; // should never happen
-    }
-
-    @Override
-    public void filter() {
-
-        m_isFiltering = true;
-        try {
-
-            int nbData = getRowCount();
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
-
-            for (int i = 0; i < nbData; i++) {
-                
-                Integer iInteger = i;
-                
-                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
-                    continue;
-                }
-                
-                if (!filter(i)) {
-                    continue;
-                }
-                m_filteredIds.add(iInteger);
-            }
-        } finally {
-            m_isFiltering = false;
-        }
-        fireTableDataChanged();
-    }
+ 
 
 
     @Override
@@ -187,6 +126,108 @@ public class CompareTableModel extends FilterTableModel {
     public int getLoadingPercentage() {
         return 100;
     }
+
+    @Override
+    public Long getTaskId() {
+        return m_dataInterface.getTaskId();
+    }
+
+    @Override
+    public LazyData getLazyData(int row, int col) {
+        return m_dataInterface.getLazyData(row, col);
+    }
+
+    @Override
+    public void givePriorityTo(Long taskId, int row, int col) {
+        m_dataInterface.givePriorityTo(taskId, row, col);
+    }
+
+    @Override
+    public void sortingChanged(int col) {
+        m_dataInterface.sortingChanged(col);
+    }
+
+    @Override
+    public int getSubTaskId(int col) {
+        return m_dataInterface.getSubTaskId(col);
+    }
+
+    @Override
+    public String getDataColumnIdentifier(int columnIndex) {
+        return m_dataInterface.getDataColumnIdentifier(columnIndex);
+    }
+
+    @Override
+    public Class getDataColumnClass(int columnIndex) {
+        return m_dataInterface.getDataColumnClass(columnIndex);
+    }
+
+    @Override
+    public Object getDataValueAt(int rowIndex, int columnIndex) {
+        return m_dataInterface.getDataValueAt(rowIndex, columnIndex);
+    }
+
+    @Override
+    public int[] getKeysColumn() {
+        return m_dataInterface.getKeysColumn();
+    }
+
+    @Override
+    public int getInfoColumn() {
+        return m_dataInterface.getInfoColumn();
+    }
+
+    @Override
+    public void setName(String name) {
+        m_name = name; 
+    }
+
+    @Override
+    public String getName() {
+        return m_name;
+    }
+
+    @Override
+    public Map<String, Object> getExternalData() {
+        return m_dataInterface.getExternalData();
+    }
+
+    @Override
+    public PlotInformation getPlotInformation() {
+        return m_dataInterface.getPlotInformation();
+    }
+
+    @Override
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+        m_dataInterface.addFilters(filtersMap);
+    }
+
+    @Override
+    public PlotType getBestPlotType() {
+        return m_dataInterface.getBestPlotType();
+    }
+
+    @Override
+    public int getBestXAxisColIndex(PlotType plotType) {
+        return m_dataInterface.getBestXAxisColIndex(plotType);
+    }
+
+    @Override
+    public int getBestYAxisColIndex(PlotType plotType) {
+        return m_dataInterface.getBestYAxisColIndex(plotType);
+    }
+
+    @Override
+    public String getExportRowCell(int row, int col) {
+        return null;
+    }
+
+    @Override
+    public String getExportColumnName(int col) {
+        return getDataColumnIdentifier(col);
+    }
+
+
 
 
 

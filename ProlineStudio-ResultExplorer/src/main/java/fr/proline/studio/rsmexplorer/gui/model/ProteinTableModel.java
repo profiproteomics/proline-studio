@@ -2,19 +2,24 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.table.DecoratedTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.table.LazyData;
 import fr.proline.studio.utils.IconManager;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Table Model for Proteins
  * @author JM235353
  */
-public class ProteinTableModel extends FilterTableModel implements CompareDataInterface {
+public class ProteinTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
+
+
 
 
 
@@ -57,16 +62,12 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
 
     public DProteinMatch getProteinMatch(int row) {
 
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
 
         int sameSetNb = m_sameSetMatches.length;
-        if (rowFiltered < sameSetNb) {
-            return m_sameSetMatches[rowFiltered];
+        if (row < sameSetNb) {
+            return m_sameSetMatches[row];
         }
-        return m_subSetMatches[rowFiltered - sameSetNb];
+        return m_subSetMatches[row - sameSetNb];
     }
 
     @Override
@@ -92,6 +93,11 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
         }
 
     }
+    
+    @Override
+    public String getTootlTipValue(int row, int col) {
+        return null;
+    }
 
 
     @Override
@@ -105,9 +111,6 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
             return 0;
         }
 
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }
 
         return m_sameSetMatches.length + m_subSetMatches.length;
     }
@@ -158,17 +161,7 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
         m_sameSetMatches = sameSetMatches;
         m_subSetMatches = subSetMatches;
 
-        if (m_restrainIds != null) {
-            m_restrainIds = null;
-            m_filteringAsked = true;
-        }
-        
-        if (m_filteringAsked) {
-            m_filteringAsked = false;
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
 
 
     }
@@ -193,91 +186,17 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
         return rowToBeSelected;
     }
 
-    @Override
-    public void filter() {
-
-        if (m_sameSetMatches == null) {
-            // filtering not possible for the moment
-            m_filteringAsked = true;
-            return;
-        }
-
-        m_isFiltering = true;
-        try {
-
-            int nbData = m_sameSetMatches.length + m_subSetMatches.length;
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
-
-            for (int i = 0; i < nbData; i++) {
-                
-                Integer iInteger = i;
-                
-                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
-                    continue;
-                }
-                
-                if (!filter(i)) {
-                    continue;
-                }
-                m_filteredIds.add(iInteger);
-            }
-
-        } finally {
-            m_isFiltering = false;
-        }
-        fireTableDataChanged();
-    }
 
     @Override
-    public boolean filter(int row, int col) {
-        Filter filter = getColumnFilter(col);
-        if ((filter == null) || (!filter.isUsed())) {
-            return true;
-        }
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
-        Object data = getValueAt(row, col);
-        if (data == null) {
-            return true; // should not happen
-        }
+        filtersMap.put(Column.PROTEIN_NAME.ordinal(), new StringFilter(getColumnName(Column.PROTEIN_NAME.ordinal()), null));
+        filtersMap.put(Column.PROTEIN_DESCRIPTION.ordinal(), new StringFilter(getColumnName(Column.PROTEIN_DESCRIPTION.ordinal()), null));
+        filtersMap.put(Column.PROTEIN_SCORE.ordinal(), new DoubleFilter(getColumnName(Column.PROTEIN_SCORE.ordinal()), null));
+        filtersMap.put(Column.PROTEIN_PEPTIDES_COUNT.ordinal(), new IntegerFilter(getColumnName(Column.PROTEIN_PEPTIDES_COUNT.ordinal()), null));
+        filtersMap.put(Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal(), new IntegerFilter(getColumnName(Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal()), null));
+        filtersMap.put(Column.PROTEIN_MASS.ordinal(), new DoubleFilter(getColumnName(Column.PROTEIN_MASS.ordinal()), null));
 
-        switch (Column.values()[col]) {
-            case PROTEIN_NAME: {
-                return ((StringFilter) filter).filter((String) data);
-            }
-            case PROTEIN_DESCRIPTION: {
-                return ((StringFilter) filter).filter((String) data);
-            }
-            case PROTEIN_SCORE:
-            case PROTEIN_MASS: {
-                return ((DoubleFilter) filter).filter((Float) data);
-            }
-            case PROTEIN_PEPTIDES_COUNT: {
-                return ((IntegerFilter) filter).filter((Integer) data);
-            }
-
-        }
-
-        return true; // should never happen
-    }
-
-    @Override
-    public void initFilters() {
-        if (m_filters == null) {
-            int nbCol = getColumnCount();
-            m_filters = new Filter[nbCol];
-            m_filters[Column.PROTEIN_NAME.ordinal()] = null;
-            m_filters[Column.PROTEIN_NAME.ordinal()] = new StringFilter(getColumnName(Column.PROTEIN_NAME.ordinal()));
-            m_filters[Column.PROTEIN_DESCRIPTION.ordinal()] = new StringFilter(getColumnName(Column.PROTEIN_DESCRIPTION.ordinal()));
-            m_filters[Column.SAMESET_SUBSET.ordinal()] = null; //JPM.TODO
-            m_filters[Column.PROTEIN_SCORE.ordinal()] = new DoubleFilter(getColumnName(Column.PROTEIN_SCORE.ordinal()));
-            m_filters[Column.PROTEIN_PEPTIDES_COUNT.ordinal()] = new IntegerFilter(getColumnName(Column.PROTEIN_PEPTIDES_COUNT.ordinal()));
-            m_filters[Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal()] = new IntegerFilter(getColumnName(Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal()));            
-            m_filters[Column.PROTEIN_MASS.ordinal()] = new DoubleFilter(getColumnName(Column.PROTEIN_MASS.ordinal()));
-        }
     }
 
     @Override
@@ -345,6 +264,57 @@ public class ProteinTableModel extends FilterTableModel implements CompareDataIn
         return null;
     }
     
+    
+    @Override
+    public Long getTaskId() {
+        return -1l; // not needed
+    }
+
+    @Override
+    public LazyData getLazyData(int row, int col) {
+        return null; // not needed
+    }
+
+    @Override
+    public void givePriorityTo(Long taskId, int row, int col) {
+        // not needed
+    }
+
+    @Override
+    public void sortingChanged(int col) {
+        // not needed
+    }
+
+    @Override
+    public int getSubTaskId(int col) {
+        return -1; // not needed
+    }
+
+    @Override
+    public PlotType getBestPlotType() {
+        return null; //JPM.TODO
+    }
+
+    @Override
+    public int getBestXAxisColIndex(PlotType plotType) {
+        return -1; //JPM.TODO
+    }
+
+    @Override
+    public int getBestYAxisColIndex(PlotType plotType) {
+        return -1; //JPM.TODO
+    }
+
+    @Override
+    public String getExportRowCell(int row, int col) {
+        return null;
+    }
+
+    @Override
+    public String getExportColumnName(int col) {
+        return getColumnName(col);
+    }
+
     
     public static class Sameset {
         

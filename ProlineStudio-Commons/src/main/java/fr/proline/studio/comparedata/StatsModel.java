@@ -41,7 +41,7 @@ public class StatsModel implements CompareDataInterface {
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
-        return m_sourceDataInterface.getDataValueAt(rowIndex, m_colSelected);
+        return m_sourceDataInterface.getDataValueAt(rowIndex, columnIndex);
     }
 
     @Override
@@ -59,8 +59,8 @@ public class StatsModel implements CompareDataInterface {
         return m_modelName;
     }
 
-    public double getValue(int columnIndex) {
-        Object value = getDataValueAt(columnIndex, 0);
+    public double getValue(int rowIndex) {
+        Object value = getDataValueAt(rowIndex, m_colSelected);
         return value == null ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO a revoir ?
     }
 

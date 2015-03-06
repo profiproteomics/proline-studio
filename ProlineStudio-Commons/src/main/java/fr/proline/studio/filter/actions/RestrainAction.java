@@ -1,14 +1,14 @@
 package fr.proline.studio.filter.actions;
 
-import fr.proline.studio.filter.FilterTableModelInterface;
+
+import fr.proline.studio.filter.FilterTableModelInterfaceV2;
 import fr.proline.studio.table.AbstractTableAction;
-import java.awt.event.ActionEvent;
 import java.util.HashSet;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
 /**
- *
+ * Action to restrain the visible rows of a model
  * @author JM235353
  */
 public class RestrainAction extends AbstractTableAction {
@@ -21,11 +21,11 @@ public class RestrainAction extends AbstractTableAction {
     @Override
     public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
         TableModel tableModel = table.getModel();
-        if (!(tableModel instanceof FilterTableModelInterface)) {
+        if (!(tableModel instanceof FilterTableModelInterfaceV2)) {
             return;
         }
         
-        FilterTableModelInterface filterTableModel = (FilterTableModelInterface) tableModel;
+        FilterTableModelInterfaceV2 filterTableModel = (FilterTableModelInterfaceV2) tableModel;
         
         HashSet<Integer> restrainRowSet = filterTableModel.getRestrainRowSet();
         if (restrainRowSet == null) {

@@ -1,30 +1,23 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.Filter;
-import fr.proline.studio.graphics.BestGraphicsInterface;
-import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * data for one masterQuantPeptide : for the different conditions (quant channels), abundances values
  * @author MB243701
  */
-public class PeptideTableModel extends LazyTableModel implements  CompareDataInterface, BestGraphicsInterface, CrossSelectionInterface {
+public class PeptideTableModel extends LazyTableModel implements  GlobalTableModelInterface /*, CrossSelectionInterface*/ {
     
     
     public static final int COLTYPE_QC_ID = 0;
@@ -64,27 +57,27 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
     public String getToolTipForHeader(int col) {
         return getColumnName(col);
     }
+    
+    @Override
+    public String getTootlTipValue(int row, int col) {
+        return null;
+    }
 
     @Override
     public int getRowCount() {
         if (m_quantChannels == null) {
             return 0;
         }
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }
+
         return m_quantChannels.length ;
     }
 
 
     @Override
     public Object getValueAt(int row, int col) {
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
+
         // Retrieve QuantChannel
-        DQuantitationChannel qc = m_quantChannels[rowFiltered];
+        DQuantitationChannel qc = m_quantChannels[row];
         // retrieve quantPeptide for the quantChannelId
         Map<Long, DQuantPeptide> quantPeptideByQchIds = m_quantPeptide.getQuantPeptideByQchIds();
         DQuantPeptide quantPeptide = quantPeptideByQchIds.get(qc.getId());
@@ -115,100 +108,23 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
         this.m_quantChannels  =quantChannels ;
         this.m_quantPeptide = peptide ;
         
-        
-        if (m_restrainIds != null) {
-            m_restrainIds = null;
-            m_filteringAsked = true;
-        }
-        
-        if (m_filteringAsked) {
-            m_filteringAsked = false;
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
+
     }
     
     public void dataUpdated() {
 
         // no need to do an updateMinMax : scores are known at once
-        if (m_filteredIds != null) {
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
-    }
-    
-    
-    @Override
-    public void initFilters() {
-        if (m_filters == null) {
-            int nbCol = getColumnCount();
-            m_filters = new Filter[nbCol];
-        }
-    }
-
-    @Override
-    public void filter() {
-        if (m_quantChannels == null) {
-            // filtering not possible for the moment
-            m_filteringAsked = true;
-            return;
-        }
-
-        m_isFiltering = true;
-        try {
-
-            int nbData = m_quantChannels.length;
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
-
-            for (int i = 0; i < nbData; i++) {
-                
-                Integer iInteger = i;
-                
-                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
-                    continue;
-                }
-                
-                if (!filter(i)) {
-                    continue;
-                }
-                m_filteredIds.add(iInteger);
-            }
-
-        } finally {
-            m_isFiltering = false;
-        }
         fireTableDataChanged();
     }
-
+    
+    
     @Override
-    public boolean filter(int row, int col) {
-        Filter filter = getColumnFilter(col);
-        if ((filter == null) || (!filter.isUsed())) {
-            return true;
-        }
-
-        Object data = ((LazyData) getValueAt(row, col)).getData();
-        if (data == null) {
-            return true; // should not happen
-        }
-
-        /*switch (col) {
-            case COLTYPE_PEPTIDE_NAME: {
-                return ((StringDiffFilter) filter).filter((String) data);
-            }
-            case COLTYPE_PEPTIDE_CLUSTER: {
-                return ((StringFilter) filter).filter((String) data);
-            }
-        }*/
-
-        return true; // should never happen
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+        
     }
+
+
 
     @Override
     public boolean isLoaded() {
@@ -309,7 +225,7 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
         return COLTYPE_RAW_ABUNDANCE;
     }
 
-    @Override
+    /*@Override
     public void select(ArrayList<Integer> rows) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -317,6 +233,16 @@ public class PeptideTableModel extends LazyTableModel implements  CompareDataInt
     @Override
     public ArrayList<Integer> getSelection() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }*/
+
+    @Override
+    public String getExportRowCell(int row, int col) {
+        return null;
+    }
+
+    @Override
+    public String getExportColumnName(int col) {
+        return getColumnName(col);
     }
     
 }

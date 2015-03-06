@@ -4,13 +4,11 @@ import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.Peakel.Peak;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.export.ExportColumnTextInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
-import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
@@ -18,7 +16,7 @@ import fr.proline.studio.utils.DataFormat;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +24,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class PeakTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface, CompareDataInterface , BestGraphicsInterface {
+public class PeakTableModel extends LazyTableModel implements GlobalTableModelInterface {
 
     public static final int COLTYPE_PEAK_MOZ = 0;
     public static final int COLTYPE_PEAK_ELUTION_TIME = 1;
@@ -68,10 +66,20 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         return m_columnNames[col];
         
     }
+    
+    @Override
+    public String getExportRowCell(int row, int col) {
+        return null; // no specific export
+    }
 
     @Override
     public String getToolTipForHeader(int col) {
         return m_toolTipColumns[col];
+    }
+    
+    @Override
+    public String getTootlTipValue(int row, int col) {
+        return null;
     }
 
     @Override
@@ -89,9 +97,7 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         if (m_peaks == null) {
             return 0;
         }
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }
+
         return m_peaks.size();
     }
 
@@ -99,12 +105,8 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
     @Override
     public Object getValueAt(int row, int col) {
 
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
         // Retrieve Peak
-        Peak peak = m_peaks.get(rowFiltered);
+        Peak peak = m_peaks.get(row);
 
         switch (col) {
            case COLTYPE_PEAK_MOZ: {
@@ -136,55 +138,27 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         this.m_isotopeIndex = isotopeIndex ;
         this.m_color = color;
         this.m_title = title;
-        m_filteredIds = null;
         m_isFiltering = false;
 
         m_taskId = taskId;
 
-        if (m_restrainIds != null) {
-            m_restrainIds = null;
-            m_filteringAsked = true;
-        }
-        
-        if (m_filteringAsked) {
-            m_filteringAsked = false;
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
 
     }
 
     public void dataUpdated() {
 
         // no need to do an updateMinMax : scores are known at once
-        if (m_filteredIds != null) {
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
+
     }
 
     public Peak getPeak(int i) {
-
-        if (m_filteredIds != null) {
-            i = m_filteredIds.get(i).intValue();
-        }
 
         return m_peaks.get(i);
     }
 
     public int findRow(float elutionTime) {
-
-        if (m_filteredIds != null) {
-            int nb = m_filteredIds.size();
-            for (int i = 0; i < nb; i++) {
-                if (elutionTime == m_peaks.get(m_filteredIds.get(i)).getElutionTime()) {
-                    return i;
-                }
-            }
-            return -1;
-        }
 
         int nb = m_peaks.size();
         for (int i = 0; i < nb; i++) {
@@ -198,78 +172,13 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
 
 
     @Override
-    public void filter() {
-
-        if (m_peaks == null) {
-            // filtering not possible for the moment
-            m_filteringAsked = true;
-            return;
-        }
-
-        m_isFiltering = true;
-        try {
-
-            int nbData = m_peaks.size();
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
-
-            for (int i = 0; i < nbData; i++) {
-                
-                Integer iInteger = i;
-                
-                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
-                    continue;
-                }
-                
-                if (!filter(i)) {
-                    continue;
-                }
-                m_filteredIds.add(iInteger);
-            }
-
-        } finally {
-            m_isFiltering = false;
-        }
-        fireTableDataChanged();
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+        filtersMap.put(COLTYPE_PEAK_MOZ, new DoubleFilter(getColumnName(COLTYPE_PEAK_MOZ), null));
+        filtersMap.put(COLTYPE_PEAK_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_PEAK_ELUTION_TIME), null));
+        filtersMap.put(COLTYPE_PEAK_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_PEAK_INTENSITY), null));
     }
+    
 
-    @Override
-    public boolean filter(int row, int col) {
-        Filter filter = getColumnFilter(col);
-        if ((filter == null) || (!filter.isUsed())) {
-            return true;
-        }
-
-        Object data = ((LazyData) getValueAt(row, col)).getData();
-        if (data == null) {
-            return true; // should not happen
-        }
-
-        switch (col) {
-            case COLTYPE_PEAK_MOZ:
-            case COLTYPE_PEAK_ELUTION_TIME:
-            case COLTYPE_PEAK_INTENSITY:
-            {
-                return ((DoubleFilter) filter).filter((Double) data);
-            }
-        }
-
-        return true; // should never happen
-    }
-
-    @Override
-    public void initFilters() {
-        if (m_filters == null) {
-            int nbCol = getColumnCount();
-            m_filters = new Filter[nbCol];
-            m_filters[COLTYPE_PEAK_MOZ] = new DoubleFilter(getColumnName(COLTYPE_PEAK_MOZ));
-            m_filters[COLTYPE_PEAK_ELUTION_TIME] = new DoubleFilter(getColumnName(COLTYPE_PEAK_ELUTION_TIME));
-            m_filters[COLTYPE_PEAK_INTENSITY] = new DoubleFilter(getColumnName(COLTYPE_PEAK_INTENSITY));
-        }
-    }
 
     @Override
     public int getLoadingPercentage() {
@@ -281,28 +190,7 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         return m_table.isLoaded();
     }
     
-    
 
-    @Override
-    public HashSet exportSelection(int[] rows) {
-
-        int nbRows = rows.length;
-        HashSet selectedObjects = new HashSet();
-        for (int i = 0; i < nbRows; i++) {
-
-            int row = rows[i];
-            int rowFiltered = row;
-            if ((!m_isFiltering) && (m_filteredIds != null)) {
-                rowFiltered = m_filteredIds.get(row).intValue();
-            }
-
-            // Retrieve Peak
-            Peak peak = m_peaks.get(rowFiltered);
-
-            selectedObjects.add(peak);
-        }
-        return selectedObjects;
-    }
     
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
@@ -323,12 +211,9 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
-        int rowFiltered = rowIndex;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(rowIndex).intValue();
-        }
+
         // Retrieve Peak
-        Peak peak = m_peaks.get(rowFiltered);
+        Peak peak = m_peaks.get(rowIndex);
 
         switch (columnIndex) {
             case COLTYPE_PEAK_MOZ: {
@@ -439,5 +324,8 @@ public class PeakTableModel extends LazyTableModel implements ExportTableSelecti
         plotInformation.setPlotInfo(plotInfo);
         return plotInformation;
     }
+
+
+
 
 }

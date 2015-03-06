@@ -5,16 +5,16 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
-import fr.proline.studio.export.ExportColumnTextInterface;
-import fr.proline.studio.export.ExportRowTextInterface;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
@@ -23,6 +23,7 @@ import fr.proline.studio.utils.StringUtils;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface, CompareDataInterface, ExportColumnTextInterface,  ExportRowTextInterface {
+public class QuantProteinSetTableModel extends LazyTableModel implements ExportTableSelectionInterface, GlobalTableModelInterface {
 
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
@@ -157,6 +158,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             return sb.toString();
         }
     }
+    
+    @Override
+    public String getTootlTipValue(int row, int col) {
+        return null;
+    }
 
     @Override
     public Class getColumnClass(int col) {
@@ -179,22 +185,16 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         if (m_proteinSets == null) {
             return 0;
         }
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }
+
         return m_proteinSets.size();
     }
 
     @Override
     public Object getValueAt(final int row, int col) {
-        
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
+
         
         // Retrieve Protein Set
-        DMasterQuantProteinSet proteinSet = m_proteinSets.get(rowFiltered);
+        DMasterQuantProteinSet proteinSet = m_proteinSets.get(row);
         //long rsmId = proteinSet.getResultSummaryId();
 
         switch (col) {
@@ -391,24 +391,16 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
 
     public DMasterQuantProteinSet getMasterQuantProteinSet(int row) {
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
-        
+
         // Retrieve QuantProtein Set
-        DMasterQuantProteinSet quantProteinSet = m_proteinSets.get(rowFiltered);
+        DMasterQuantProteinSet quantProteinSet = m_proteinSets.get(row);
         return quantProteinSet;
     }
     
     public DProteinSet getProteinSet(int row) {
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
-        
+
         // Retrieve Protein Set
-        DMasterQuantProteinSet quantProteinSet = m_proteinSets.get(rowFiltered);
+        DMasterQuantProteinSet quantProteinSet = m_proteinSets.get(row);
         return quantProteinSet.getProteinSet();
     }
      
@@ -420,18 +412,9 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         fireTableStructureChanged();
         
         m_taskId = taskId;
-        
-        if (m_restrainIds != null) {
-            m_restrainIds = null;
-            m_filteringAsked = true;
-        }
-        
-        if (m_filteringAsked) {
-            m_filteringAsked = false;
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+
+        fireTableDataChanged();
+
         
         
     }
@@ -441,35 +424,18 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
         // no need to do an updateMinMax : scores are known at once
         
-        if (m_filteredIds != null) {
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
+
     }
 
     public DMasterQuantProteinSet getQuantProteinSet(int i) {
-        
-        if (m_filteredIds != null) {
-            i = m_filteredIds.get(i).intValue();
-        }
-        
+
         return m_proteinSets.get(i);
     }
     
     
     public int findRow(long proteinSetId) {
-        
-        if (m_filteredIds != null) {
-            int nb = m_filteredIds.size();
-            for (int i = 0; i < nb; i++) {
-                if (proteinSetId == m_proteinSets.get(m_filteredIds.get(i)).getProteinSetId()) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-        
+
         int nb = m_proteinSets.size();
         for (int i=0;i<nb;i++) {
             if (proteinSetId == m_proteinSets.get(i).getProteinSetId()) {
@@ -481,7 +447,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
     
     
-    public void sortAccordingToModel(ArrayList<Long> proteinSetIds) {
+    public void sortAccordingToModel(ArrayList<Long> proteinSetIds, CompoundTableModel compoundTableModel) {
         
         if (m_proteinSets == null) {
             // data not loaded 
@@ -491,104 +457,32 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         HashSet<Long> proteinSetIdMap = new HashSet<>(proteinSetIds.size());
         proteinSetIdMap.addAll(proteinSetIds);
         
-        int nb = getRowCount();
+        int nb = m_table.getRowCount();
         int iCur = 0;
         for (int iView=0;iView<nb;iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
+            if (compoundTableModel != null) {
+                iModel = compoundTableModel.convertCompoundRowToBaseModelRow(iModel);
+            }
             // Retrieve Protein Set
             DMasterQuantProteinSet ps = getQuantProteinSet(iModel);
             if (  proteinSetIdMap.contains(ps.getProteinSetId())  ) {
                 proteinSetIds.set(iCur++,ps.getProteinSetId());
             }
         }
-        
-        // need to refilter
-        if (m_filteredIds != null) { // NEEDED ????
-            filter();
-        }
+
     }
 
 
 
-    @Override
-    public void filter() {
-        
-        if (m_proteinSets == null) {
-            // filtering not possible for the moment
-            m_filteringAsked = true;
-            return;
-        }
-        
-        m_isFiltering = true;
-        try {
-
-            int nbData = m_proteinSets.size();
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
-
-            for (int i = 0; i < nbData; i++) {
-                
-                Integer iInteger = i;
-                
-                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
-                    continue;
-                }
-                
-                if (!filter(i)) {
-                    continue;
-                }
-                m_filteredIds.add(iInteger);
-            }
-
-        } finally {
-            m_isFiltering = false;
-        }
-        fireTableDataChanged();
-    }
-
-    
-    @Override
-    public boolean filter(int row, int col) {
-        Filter filter = getColumnFilter(col);
-        if ((filter == null) || (!filter.isUsed())) {
-            return true;
-        }
-        
-        Object data = ((LazyData) getValueAt(row, col)).getData();
-        if (data == null) {
-            return true; // should not happen
-        }
-        
-        switch (col) {
-            case COLTYPE_PROTEIN_SET_NAME: {
-                return ((StringFilter) filter).filter((String)data);
-            }
-            case COLTYPE_NB_PEPTIDE: {
-                return ((IntegerFilter) filter).filter((Integer)data);
-            }
-            case COLTYPE_NB_QUANT_PEPTIDE: {
-                return ((IntegerFilter) filter).filter((Integer)data);
-            }
-        }
-        
-        return true; // should never happen
-    }
-
 
     @Override
-    public void initFilters() {
-        if (m_filters == null) {
-            int nbCol = getColumnCount();
-            m_filters = new Filter[nbCol];
-            m_filters[COLTYPE_PROTEIN_SET_ID] = null;
-            m_filters[COLTYPE_PROTEIN_SET_NAME] = new StringFilter(getColumnNameForFilter(COLTYPE_PROTEIN_SET_NAME));
-            m_filters[COLTYPE_OVERVIEW] = null;            
-            m_filters[COLTYPE_NB_PEPTIDE] = new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_PEPTIDE)); 
-            m_filters[COLTYPE_NB_QUANT_PEPTIDE] = new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_QUANT_PEPTIDE));        
-        }
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+
+        filtersMap.put(COLTYPE_PROTEIN_SET_NAME, new StringFilter(getColumnNameForFilter(COLTYPE_PROTEIN_SET_NAME), null));
+        filtersMap.put(COLTYPE_NB_PEPTIDE, new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_PEPTIDE), null));
+        filtersMap.put(COLTYPE_NB_QUANT_PEPTIDE, new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_QUANT_PEPTIDE), null));
+
     }
 
     @Override
@@ -684,13 +578,9 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         for (int i = 0; i < nbRows; i++) {
 
             int row = rows[i];
-            int rowFiltered = row;
-            if ((!m_isFiltering) && (m_filteredIds != null)) {
-                rowFiltered = m_filteredIds.get(row).intValue();
-            }
 
             // Retrieve Protein Set
-            DMasterQuantProteinSet proteinSet = m_proteinSets.get(rowFiltered);
+            DMasterQuantProteinSet proteinSet = m_proteinSets.get(row);
 
             selectedObjects.add(proteinSet.getProteinSet().getId());
         }
@@ -796,13 +686,9 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
     @Override
     public String getExportRowCell(int row, int col) {
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
-        
+
         // Retrieve Protein Set
-        DMasterQuantProteinSet proteinSet = m_proteinSets.get(rowFiltered);
+        DMasterQuantProteinSet proteinSet = m_proteinSets.get(row);
         //long rsmId = proteinSet.getResultSummaryId();
 
         switch (col) {
@@ -870,6 +756,21 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             }
         }
         return ""; // should never happen
+    }
+
+    @Override
+    public PlotType getBestPlotType() {
+        return null; //JPM.TODO
+    }
+
+    @Override
+    public int getBestXAxisColIndex(PlotType plotType) {
+        return -1; //JPM.TODO
+    }
+
+    @Override
+    public int getBestYAxisColIndex(PlotType plotType) {
+        return -1; //JPM.TODO
     }
     
 }

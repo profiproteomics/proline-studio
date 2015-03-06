@@ -28,7 +28,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -37,6 +37,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
 import java.awt.*;
@@ -58,12 +59,12 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
     private ProteinTable m_proteinTable;
     private MarkerContainerPanel m_markerContainerPanel;
     private JButton m_decoyButton;
-    private boolean m_startingPanel;
+    private final boolean m_startingPanel;
     
-    private SearchFloatingPanel m_searchPanel;
+    private final SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
 
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private AddCompareDataButton m_addCompareDataButton;
 
@@ -172,7 +173,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
        
-        m_filterButton = new FilterButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_proteinTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -180,9 +181,9 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
             }
             
         };
-        m_exportButton = new ExportButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()), "Peptide Match", m_proteinTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_proteinTable.getModel()), "Peptide Match", m_proteinTable);
 
-        m_addCompareDataButton = new AddCompareDataButton(((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()), (CompareDataInterface) m_proteinTable.getModel()) {
+        m_addCompareDataButton = new AddCompareDataButton(((CompoundTableModel) m_proteinTable.getModel()), (CompareDataInterface) m_proteinTable.getModel()) {
 
             @Override
             public void actionPerformed(CompareDataInterface compareDataInterface) {
@@ -227,20 +228,22 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
         }
 
+        CompoundTableModel compoundTableModel = (CompoundTableModel) m_proteinTable.getModel();
+
         // convert according to the sorting
         selectedRow = m_proteinTable.convertRowIndexToModel(selectedRow);
-
+        selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
 
         // Retrieve ProteinSet selected
-        ProteinsOfPeptideMatchTableModel tableModel = (ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel();
+        ProteinsOfPeptideMatchTableModel tableModel = (ProteinsOfPeptideMatchTableModel) compoundTableModel.getBaseModel();
 
         return tableModel.getProteinMatch(selectedRow);
     }
 
     public void setDataProteinMatchArray(DProteinMatch[] proteinMatchArray, boolean finished) {
         // Modify the Model
-        ((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()).setData(proteinMatchArray);
+        ((ProteinsOfPeptideMatchTableModel) (((CompoundTableModel)  m_proteinTable.getModel()).getBaseModel())).setData(proteinMatchArray);
 
         // Select the first row
         if (proteinMatchArray.length>0) {
@@ -282,7 +285,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
 
         // Modify the Model
-        ((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()).setData(proteinMatchArray);
+        ((ProteinsOfPeptideMatchTableModel) (((CompoundTableModel)  m_proteinTable.getModel()).getBaseModel())).setData(proteinMatchArray);
 
         // Select the first row
         m_proteinTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -300,7 +303,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
     }
 
     private void clearData() {
-        ((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()).setData(null);
+        ((ProteinsOfPeptideMatchTableModel) (((CompoundTableModel) m_proteinTable.getModel()).getBaseModel())).setData(null);
 
     }
 
@@ -349,7 +352,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         m_proteinScrollPane = new JScrollPane();
 
         m_proteinTable = new ProteinTable();
-        m_proteinTable.setModel(new ProteinsOfPeptideMatchTableModel(m_proteinTable));
+        m_proteinTable.setModel(new CompoundTableModel(new ProteinsOfPeptideMatchTableModel(m_proteinTable), true));
         
         
         
@@ -439,7 +442,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
                 selectionWillBeRestored(true);
                 try {
-                    ((ProteinsOfPeptideMatchTableModel) getModel()).dataUpdated();
+                    ((ProteinsOfPeptideMatchTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
                 } finally {
                     selectionWillBeRestored(false);
                 }
@@ -455,7 +458,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
                     // if the subtask correspond to the loading of the data of the sorted column,
                     // we keep the row selected visible
-                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((ProteinsOfPeptideMatchTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
+                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
                         scrollRowToVisible(rowSelectedInView);
                     }
 
@@ -473,12 +476,18 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         }
 
         public boolean selectProteinMatch(Long proteinMatchId, String searchText) {
-            ProteinsOfPeptideMatchTableModel tableModel = (ProteinsOfPeptideMatchTableModel) getModel();
+
+            ProteinsOfPeptideMatchTableModel tableModel = (ProteinsOfPeptideMatchTableModel) ((CompoundTableModel)getModel()).getBaseModel();
             int row = tableModel.findRow(proteinMatchId);
             if (row == -1) {
                 return false;
             }
-
+            row = ((CompoundTableModel)getModel()).convertBaseModelRowToCompoundRow(row);
+            if (row == -1) {
+                return false;
+            }
+            
+            
             // JPM.hack we need to keep the search text
             // to be able to give it if needed to the panel
             // which display proteins of a protein set
@@ -545,7 +554,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                 return;
             }
             searchIndex = -1;
-            ((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()).sortAccordingToModel(proteinMatchIds);
+            ((ProteinsOfPeptideMatchTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel()).sortAccordingToModel(proteinMatchIds, (CompoundTableModel) m_proteinTable.getModel());
         }
 
         @Override
@@ -598,7 +607,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                         // contruct the Map of proteinMatchId
                         if (!proteinMatchIds.isEmpty()) {
 
-                            ((ProteinsOfPeptideMatchTableModel) m_proteinTable.getModel()).sortAccordingToModel(proteinMatchIds);
+                            ((ProteinsOfPeptideMatchTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel()).sortAccordingToModel(proteinMatchIds, (CompoundTableModel) m_proteinTable.getModel());
 
                             
                                                       int checkLoopIndex = -1;

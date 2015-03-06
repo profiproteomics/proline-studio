@@ -1,17 +1,15 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
-import fr.proline.studio.export.ExportColumnTextInterface;
-import fr.proline.studio.export.ExportRowTextInterface;
+import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
-import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
@@ -19,6 +17,7 @@ import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +25,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class FeatureTableModel extends LazyTableModel implements ExportTableSelectionInterface, ExportColumnTextInterface, CompareDataInterface, BestGraphicsInterface,  ExportRowTextInterface {
+public class FeatureTableModel extends LazyTableModel implements GlobalTableModelInterface {
 
     public static final int COLTYPE_FEATURE_ID = 0;
     public static final int COLTYPE_FEATURE_MAP_NAME = 1;
@@ -50,9 +49,6 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
     private QuantChannelInfo m_quantChannelInfo = null;
     private List<Boolean> m_featureHasPeak = null;
 
-    private boolean m_isFiltering = false;
-    private boolean m_filteringAsked = false;
-    
     private String m_modelName;
 
     public FeatureTableModel(LazyTable table) {
@@ -98,9 +94,7 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
         if (m_features == null) {
             return 0;
         }
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }
+
         return m_features.size();
     }
 
@@ -108,12 +102,8 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
     @Override
     public Object getValueAt(int row, int col) {
 
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
         // Retrieve Feature
-        Feature feature = m_features.get(rowFiltered);
+        Feature feature = m_features.get(row);
 
         switch (col) {
             case COLTYPE_FEATURE_ID: {
@@ -225,73 +215,36 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
         this.m_features = features;
         this.m_quantChannelInfo = quantChannelInfo;
         this.m_featureHasPeak = featureHasPeak ;
-        m_filteredIds = null;
-        m_isFiltering = false;
 
         m_taskId = taskId;
 
-        if (m_restrainIds != null) {
-            m_restrainIds = null;
-            m_filteringAsked = true;
-        }
-        
-        if (m_filteringAsked) {
-            m_filteringAsked = false;
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
 
     }
 
     public void dataUpdated() {
 
         // no need to do an updateMinMax : scores are known at once
-        if (m_filteredIds != null) {
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
+
     }
 
     public Feature getFeature(int i) {
-
-        if (m_filteredIds != null) {
-            i = m_filteredIds.get(i).intValue();
-        }
 
         return m_features.get(i);
     }
     
     public Color getPlotColor(int i) {
 
-        if (m_filteredIds != null) {
-            i = m_filteredIds.get(i).intValue();
-        }
-
         return m_quantChannelInfo.getMapColor(m_features.get(i).getMap().getId());
     }
     
     public String getPlotTitle(int i) {
 
-        if (m_filteredIds != null) {
-            i = m_filteredIds.get(i).intValue();
-        }
-
         return m_quantChannelInfo.getMapTitle(m_features.get(i).getMap().getId());
     }
 
     public int findRow(long featureId) {
-
-        if (m_filteredIds != null) {
-            int nb = m_filteredIds.size();
-            for (int i = 0; i < nb; i++) {
-                if (featureId == m_features.get(m_filteredIds.get(i)).getId()) {
-                    return i;
-                }
-            }
-            return -1;
-        }
 
         int nb = m_features.size();
         for (int i = 0; i < nb; i++) {
@@ -303,7 +256,7 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
 
     }
 
-    public void sortAccordingToModel(ArrayList<Long> featureIds) {
+    public void sortAccordingToModel(ArrayList<Long> featureIds, CompoundTableModel compoundTableModel) {
 
         if (m_features == null) {
             // data not loaded 
@@ -313,10 +266,13 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
         HashSet<Long> featureIdMap = new HashSet<>(featureIds.size());
         featureIdMap.addAll(featureIds);
 
-        int nb = getRowCount();
+        int nb = m_table.getRowCount();
         int iCur = 0;
         for (int iView = 0; iView < nb; iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
+            if (compoundTableModel != null) {
+                iModel = compoundTableModel.convertCompoundRowToBaseModelRow(iModel);
+            }
             // Retrieve Feature
             Feature f = getFeature(iModel);
             if (featureIdMap.contains(f.getId())) {
@@ -324,89 +280,32 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
             }
         }
 
-        // need to refilter
-        if (m_filteredIds != null) { // NEEDED ????
-            filter();
-        }
     }
 
+
+    
     @Override
-    public void filter() {
-
-        if (m_features == null) {
-            // filtering not possible for the moment
-            m_filteringAsked = true;
-            return;
-        }
-
-        m_isFiltering = true;
-        try {
-
-            int nbData = m_features.size();
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
-
-            for (int i = 0; i < nbData; i++) {
-                if (!filter(i)) {
-                    continue;
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+        
+        filtersMap.put(COLTYPE_FEATURE_MOZ, new DoubleFilter(getColumnName(COLTYPE_FEATURE_MOZ), null));
+        filtersMap.put(COLTYPE_FEATURE_CHARGE, new IntegerFilter(getColumnName(COLTYPE_FEATURE_CHARGE), null));
+        
+        ConvertValueInterface minuteConverter = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
                 }
-                m_filteredIds.add(Integer.valueOf(i));
+                return ((Float) o) / 60d;
             }
 
-        } finally {
-            m_isFiltering = false;
-        }
-        fireTableDataChanged();
-    }
+        };
+        filtersMap.put(COLTYPE_FEATURE_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_ELUTION_TIME), minuteConverter));
+        filtersMap.put(COLTYPE_FEATURE_APEX_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_FEATURE_APEX_INTENSITY), null));
+        filtersMap.put(COLTYPE_FEATURE_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_FEATURE_INTENSITY), null));
+        filtersMap.put(COLTYPE_FEATURE_DURATION, new DoubleFilter(getColumnName(COLTYPE_FEATURE_DURATION), null));
+        filtersMap.put(COLTYPE_FEATURE_QUALITY_SCORE, new DoubleFilter(getColumnName(COLTYPE_FEATURE_QUALITY_SCORE), null));
 
-    @Override
-    public boolean filter(int row, int col) {
-        Filter filter = getColumnFilter(col);
-        if ((filter == null) || (!filter.isUsed())) {
-            return true;
-        }
-
-        Object data = ((LazyData) getValueAt(row, col)).getData();
-        if (data == null) {
-            return true; // should not happen
-        }
-
-        switch (col) {
-            case COLTYPE_FEATURE_MOZ:
-            case COLTYPE_FEATURE_ELUTION_TIME:
-            case COLTYPE_FEATURE_APEX_INTENSITY:
-            case COLTYPE_FEATURE_INTENSITY:
-            case COLTYPE_FEATURE_DURATION:
-            case COLTYPE_FEATURE_QUALITY_SCORE:
-            {
-                return ((DoubleFilter) filter).filter((Double) data);
-            }
-            case COLTYPE_FEATURE_CHARGE:
-            {
-                return ((IntegerFilter) filter).filter((Integer) data);
-            }
-        }
-
-        return true; // should never happen
-    }
-
-    @Override
-    public void initFilters() {
-        if (m_filters == null) {
-            int nbCol = getColumnCount();
-            m_filters = new Filter[nbCol];
-            m_filters[COLTYPE_FEATURE_ID] = null;
-            m_filters[COLTYPE_FEATURE_MOZ] = new DoubleFilter(getColumnName(COLTYPE_FEATURE_MOZ));
-            m_filters[COLTYPE_FEATURE_CHARGE] = new IntegerFilter(getColumnName(COLTYPE_FEATURE_CHARGE));
-            m_filters[COLTYPE_FEATURE_ELUTION_TIME] = new DoubleFilter(getColumnName(COLTYPE_FEATURE_ELUTION_TIME));
-            m_filters[COLTYPE_FEATURE_APEX_INTENSITY] = new DoubleFilter(getColumnName(COLTYPE_FEATURE_ELUTION_TIME));
-            m_filters[COLTYPE_FEATURE_INTENSITY] = new DoubleFilter(getColumnName(COLTYPE_FEATURE_ELUTION_TIME));
-            m_filters[COLTYPE_FEATURE_DURATION] = new DoubleFilter(getColumnName(COLTYPE_FEATURE_ELUTION_TIME));
-            m_filters[COLTYPE_FEATURE_QUALITY_SCORE] = new DoubleFilter(getColumnName(COLTYPE_FEATURE_ELUTION_TIME));
-        }
     }
 
     @Override
@@ -418,29 +317,7 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
     public boolean isLoaded() {
         return m_table.isLoaded();
     }
-    
-    
 
-    @Override
-    public HashSet exportSelection(int[] rows) {
-
-        int nbRows = rows.length;
-        HashSet selectedObjects = new HashSet();
-        for (int i = 0; i < nbRows; i++) {
-
-            int row = rows[i];
-            int rowFiltered = row;
-            if ((!m_isFiltering) && (m_filteredIds != null)) {
-                rowFiltered = m_filteredIds.get(row).intValue();
-            }
-
-            // Retrieve Feature
-            Feature feature = m_features.get(rowFiltered);
-
-            selectedObjects.add(feature.getId());
-        }
-        return selectedObjects;
-    }
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
@@ -471,12 +348,9 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
-        int rowFiltered = rowIndex;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(rowIndex).intValue();
-        }
+
         // Retrieve Feature
-        Feature feature = m_features.get(rowFiltered);
+        Feature feature = m_features.get(rowIndex);
 
         switch (columnIndex) {
             case COLTYPE_FEATURE_ID: {
@@ -574,16 +448,14 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
     }
     
     
+    @Override
     public String getTootlTipValue(int row, int col) {
         if (m_features == null || row <0) {
             return "";
         }
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
+
         // Retrieve Feature
-        Feature feature = m_features.get(rowFiltered);
+        Feature feature = m_features.get(row);
         String mapTitle = m_quantChannelInfo.getMapTitle(feature.getMap().getId());
         Color mapColor = m_quantChannelInfo.getMapColor(feature.getMap().getId());
         String rsmHtmlColor = CyclicColorPalette.getHTMLColor(mapColor);
@@ -598,12 +470,9 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
 
     @Override
     public String getExportRowCell(int row, int col) {
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
+
         // Retrieve Feature
-        Feature feature = m_features.get(rowFiltered);
+        Feature feature = m_features.get(row);
 
         switch (col) {
             case COLTYPE_FEATURE_ID: {
@@ -686,15 +555,14 @@ public class FeatureTableModel extends LazyTableModel implements ExportTableSele
     
     
     private Boolean hasFeaturePeaks(int row) {
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
+
         // Retrieve Feature
-        return m_featureHasPeak.get(rowFiltered);
+        return m_featureHasPeak.get(row);
     }
     
     public Boolean isInItalic(int row) {
         return !hasFeaturePeaks(row);
     }
+
+
 }

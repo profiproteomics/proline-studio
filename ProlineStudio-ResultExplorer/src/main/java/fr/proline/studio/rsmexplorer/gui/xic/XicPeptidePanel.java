@@ -10,9 +10,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ExportColumnTextInterface;
-import fr.proline.studio.export.ExportRowTextInterface;
-import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -28,18 +27,16 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.actions.table.DisplayIdentificationProteinSetsAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
-import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.table.TablePopupMouseAdapter;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -54,7 +51,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -88,8 +84,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     
     private boolean m_displayForProteinSet;
     private DQuantitationChannel[] m_quantChannels;
-    
-    private FilterButton m_filterButton;
+
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
     private JButton m_graphicsButton;
@@ -180,7 +176,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
         toolbar.add(m_searchToggleButton);
         
-        m_filterButton = new FilterButton(((QuantPeptideTableModel) m_quantPeptideTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_quantPeptideTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -189,7 +185,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             
         };
 
-        m_exportButton = new ExportButton(((QuantPeptideTableModel) m_quantPeptideTable.getModel()), "Peptides", m_quantPeptideTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_quantPeptideTable.getModel()), "Peptides", m_quantPeptideTable);
 
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
@@ -216,9 +212,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_graphicsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!((QuantPeptideTableModel) m_quantPeptideTable.getModel()).isLoaded()) {
+                if (!((CompoundTableModel) m_quantPeptideTable.getModel()).isLoaded()) {
 
-                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((QuantPeptideTableModel) m_quantPeptideTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((CompoundTableModel) m_quantPeptideTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
                     dialog.setLocation(getLocationOnScreen().x + m_graphicsButton.getWidth() + 5, m_graphicsButton.getLocationOnScreen().y + getHeight() + 5);
                     dialog.setVisible(true);
 
@@ -240,7 +236,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             toolbar.add(m_graphicsButton);
         }
         
-        m_addCompareDataButton = new AddCompareDataButton(((QuantPeptideTableModel) m_quantPeptideTable.getModel()), (CompareDataInterface)  m_quantPeptideTable.getModel()) {
+        m_addCompareDataButton = new AddCompareDataButton(((CompoundTableModel) m_quantPeptideTable.getModel()), (CompareDataInterface)  m_quantPeptideTable.getModel()) {
             
             @Override
             public void actionPerformed(CompareDataInterface compareDataInterface) {
@@ -267,7 +263,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_peptideScrollPane = new JScrollPane();
         
         m_quantPeptideTable = new QuantPeptideTable();
-        m_quantPeptideTable.setModel(new QuantPeptideTableModel((LazyTable)m_quantPeptideTable));
+        m_quantPeptideTable.setModel(new CompoundTableModel(new QuantPeptideTableModel((LazyTable)m_quantPeptideTable), true));
         
         // hide the id column
         m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
@@ -296,7 +292,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     public void setData(Long taskId, boolean displayForProteinSet, DQuantitationChannel[] quantChannels,  List<DMasterQuantPeptide> peptides, boolean finished) {
         m_quantChannels = quantChannels;
         this.m_displayForProteinSet = displayForProteinSet;
-        ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).setData(taskId, quantChannels, peptides);
+        ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptides);
         m_titleLabel.setText(TABLE_TITLE +" ("+peptides.size()+")");
         // select the first row
         if ((peptides != null) && (peptides.size() > 0)) {
@@ -322,7 +318,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     
     public void setColumnsVisibility() {
         // hide the rawAbundance  and selectionLevel columns
-        List<Integer> listIdsToHide = ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).getDefaultColumnsToHide();
+        List<Integer> listIdsToHide = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
         List<TableColumn> columns = m_quantPeptideTable.getColumns(true);
         for (Integer id : listIdsToHide) {
             boolean columnVisible = ((TableColumnExt) columns.get(id)).isVisible();
@@ -383,11 +379,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         return m_quantPeptideTable;
     }
     
-    private class QuantPeptideTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface, ExportRowTextInterface  {
+    private class QuantPeptideTable extends LazyTable implements ExportModelInterface  {
 
-        private DMasterQuantPeptide m_peptideSelected = null;
-        
-        
         public QuantPeptideTable() {
             super(m_peptideScrollPane.getVerticalScrollBar() );
             
@@ -401,10 +394,16 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         public String getToolTipText(MouseEvent e) {
             Point p = e.getPoint();
             int rowIndex = rowAtPoint(p);
+            if (rowIndex<0) {
+                return null;
+            }
             int colIndex = columnAtPoint(p);
+            if (colIndex<0) {
+                return null;
+            }
             int realColumnIndex = convertColumnIndexToModel(colIndex);
             int realRowIndex = convertRowIndexToModel(rowIndex);
-            QuantPeptideTableModel tableModel = (QuantPeptideTableModel) getModel();
+            CompoundTableModel tableModel = (CompoundTableModel) getModel();
             return tableModel.getTootlTipValue(realRowIndex, realColumnIndex);
         }
 
@@ -427,8 +426,13 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         }
         
         public boolean selectPeptide(Long peptideId, String searchText) {
-            QuantPeptideTableModel tableModel = (QuantPeptideTableModel) getModel();
+  
+            QuantPeptideTableModel tableModel = (QuantPeptideTableModel) ((CompoundTableModel)getModel()).getBaseModel();
             int row = tableModel.findRow(peptideId);
+            if (row == -1) {
+                return false;
+            }
+            row = ((CompoundTableModel)getModel()).convertBaseModelRowToCompoundRow(row);
             if (row == -1) {
                 return false;
             }
@@ -467,7 +471,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             
             selectionWillBeRestored(true);
             try {
-                ((QuantPeptideTableModel) getModel()).dataUpdated();
+                ((QuantPeptideTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
             } finally {
                 selectionWillBeRestored(false);
             }
@@ -483,7 +487,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((QuantPeptideTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
                     scrollRowToVisible(rowSelectedInView);
                 }
                     
@@ -521,11 +525,6 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         }
         
 
-        @Override
-        public HashSet exportSelection(int[] rows) {
-            QuantPeptideTableModel tableModel = (QuantPeptideTableModel) getModel();
-            return tableModel.exportSelection(rows);
-        }
 
         public DMasterQuantPeptide getSelectedMasterQuantPeptide() {
 
@@ -537,28 +536,31 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                 return null;
 
             }
-
-            QuantPeptideTableModel tableModel = (QuantPeptideTableModel) getModel();
-            if (tableModel.getRowCount() == 0) {
+            
+            CompoundTableModel compoundTableModel = (CompoundTableModel) getModel();
+            if (compoundTableModel.getRowCount() == 0) {
                 return null; // this is a wart, for an unknown reason, it happens that the first row
                 // is selected although it does not exist.
             }
 
             // convert according to the sorting
             selectedRow = convertRowIndexToModel(selectedRow);
+            selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
-            // Retrieve Peptide selected
+            // Retrieve PeptideIon selected
+            QuantPeptideTableModel tableModel = (QuantPeptideTableModel) compoundTableModel.getBaseModel();
             return tableModel.getPeptide(selectedRow);
+
         }
 
         @Override
         public String getExportColumnName(int col) {
-            return ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+            return ((CompoundTableModel) m_quantPeptideTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
         }
 
         @Override
         public String getExportRowCell(int row, int col) {
-            return ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
+            return ((CompoundTableModel) m_quantPeptideTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
         }
         
         @Override
@@ -797,7 +799,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         @Override
         protected boolean okCalled() {
 
-            QuantPeptideTableModel model = ((QuantPeptideTableModel) m_quantPeptideTable.getModel());
+            QuantPeptideTableModel model = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel());
             
             List<TableColumn> columns = m_quantPeptideTable.getColumns(true);
             for (int i=QuantPeptideTableModel.LAST_STATIC_COLUMN+1;i<columns.size();i++) {
@@ -848,7 +850,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                 return;
             }
             searchIndex = -1;
-            ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).sortAccordingToModel(peptideInstanceIds);
+            ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).sortAccordingToModel(peptideInstanceIds, (CompoundTableModel) m_quantPeptideTable.getModel());
+        
         }
 
         @Override
@@ -902,9 +905,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
                         if (!peptideInstanceIds.isEmpty()) {
 
-                            ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).sortAccordingToModel(peptideInstanceIds);
-
-                            
+                            ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).sortAccordingToModel(peptideInstanceIds, (CompoundTableModel) m_quantPeptideTable.getModel());
+        
                              int checkLoopIndex = -1;
                              while (true) {
                                 // search already done, display next result
@@ -938,7 +940,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                     }
                 };
 
-                Long rsmId = ((QuantPeptideTableModel) m_quantPeptideTable.getModel()).getResultSummaryId();
+                Long rsmId = ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).getResultSummaryId();
 
                 // Load data if needed asynchronously
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, m_dataBox.getProjectId(), rsmId, searchText, peptideInstanceIds));

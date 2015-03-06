@@ -78,7 +78,7 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
                 
                 m_lastAction = LastAction.ACTION_SORTING;
 
-                ((LazyTableModel) getModel()).sortingChanged(col);
+                ((LazyTableModelInterface) getModel()).sortingChanged(col);
                 sortingChanged(col);
             }
         });
@@ -108,7 +108,7 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
 
         m_lastAction = LastAction.ACTION_SCROLLING;
 
-        Long taskId = ((LazyTableModel) getModel()).getTaskId();
+        Long taskId = ((LazyTableModelInterface) getModel()).getTaskId();
         if (taskId != null) {
             AccessDatabaseThread.getAccessDatabaseThread().clearIndexPriorityTo(taskId);
         }

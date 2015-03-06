@@ -8,25 +8,27 @@ import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.SequenceMatch;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
+import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
-import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.*;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Table Model for PeptideMatch of a RSet
  * @author JM235353
  */
-public class PeptideMatchTableModel extends LazyTableModel implements CompareDataInterface, BestGraphicsInterface  {
+public class PeptideMatchTableModel extends LazyTableModel implements GlobalTableModelInterface  {
 
     public static final int COLTYPE_PEPTIDE_ID = 0;
     public static final int COLTYPE_PEPTIDE_PREVIOUS_AA = 1;
@@ -56,12 +58,9 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
     private DPeptideMatch[] m_peptideMatches = null; // some of the DPeptideMatch can be null : they are loaded in sub task
     private long[] m_peptideMatchesId = null;
 
-    private boolean m_forRSM;
-    private boolean m_hasPrevNextAA;
+    private final boolean m_forRSM;
+    private final boolean m_hasPrevNextAA;
 
-
-    private boolean m_isFiltering = false;
-    private boolean m_filteringAsked = false;
 
     private String m_modelName;
     
@@ -102,11 +101,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
     
     
     public DPeptideMatch getPeptideMatch(int row) {
-        
-        if (m_filteredIds != null) {
-            row = m_filteredIds.get(row).intValue();
-        }
-        
+
         return m_peptideMatches[row];
 
     }
@@ -125,6 +120,11 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
     @Override
     public String getToolTipForHeader(int col) {
         return m_columnTooltips[m_colUsed[col]];
+    }
+    
+    @Override
+    public String getTootlTipValue(int row, int col) {
+        return null;
     }
 
     @Override
@@ -171,11 +171,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
         if (m_peptideMatches == null) {
             return 0;
         }
-        
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }
-        
+
         return m_peptideMatches.length;
     }
 
@@ -185,15 +181,9 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
         LazyData lazyData = getLazyData(row,col);
         
         col =  m_colUsed[col];
-        
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
-        
-        
+
         // Retrieve Protein Set
-        DPeptideMatch peptideMatch = m_peptideMatches[rowFiltered];
+        DPeptideMatch peptideMatch = m_peptideMatches[row];
 
         
         
@@ -486,19 +476,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
         
         updateMinMax();
         
-        if (m_restrainIds != null) {
-            m_restrainIds = null;
-            m_filteringAsked = true;
-        } else if (m_filteredIds != null) {
-            m_filteringAsked = true;
-        }
-        
-        if (m_filteringAsked) {
-            m_filteringAsked = false;
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+        fireTableDataChanged();
 
     }
 
@@ -544,25 +522,11 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
         
         // call to updateMinMax() is not necessary : peptideMatch are loaded in one time
         
-        if (m_filteredIds != null) {
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
+         fireTableDataChanged();
+
     }
     
     public int findRow(long peptideMatchId) {
-
-        if (m_filteredIds != null) {
-            int nb = m_filteredIds.size();
-            for (int i = 0; i < nb; i++) {
-                if (peptideMatchId == m_peptideMatchesId[m_filteredIds.get(i)]) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
 
         int nb = m_peptideMatches.length;
         for (int i = 0; i < nb; i++) {
@@ -574,7 +538,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
 
     }
 
-    public void sortAccordingToModel(ArrayList<Long> peptideMatchIds) {
+    public void sortAccordingToModel(ArrayList<Long> peptideMatchIds, CompoundTableModel compoundTableModel) {
         
         if (m_peptideMatches == null) {
             // data not loaded 
@@ -584,180 +548,93 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
         HashSet<Long> peptideMatchIdMap = new HashSet<>(peptideMatchIds.size());
         peptideMatchIdMap.addAll(peptideMatchIds);
 
-        int nb = getRowCount();
+        int nb = m_table.getRowCount();
         int iCur = 0;
         for (int iView = 0; iView < nb; iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
-
+            if (compoundTableModel != null) {
+                iModel = compoundTableModel.convertCompoundRowToBaseModelRow(iModel);
+            }
             Long psId = m_peptideMatchesId[iModel];
             if (peptideMatchIdMap.contains(psId)) {
                 peptideMatchIds.set(iCur++, psId);
             }
 
         }
-        
-        // need to refilter
-        if (m_filteredIds != null) { // NEEDED ????
-            filter();
-        }
+
 
     }
+
     
     @Override
-    public void filter() {
-
-        if (m_peptideMatches == null) {
-            // filtering not possible for the moment
-            m_filteringAsked = true;
-            return;
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+        
+        int colIdx = 0;
+        colIdx++;//COLTYPE_PEPTIDE_ID
+        
+        // COLTYPE_PEPTIDE_PREVIOUS_AA
+        if (m_hasPrevNextAA) {
+            filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null));
+            colIdx++;
         }
-
-        m_isFiltering = true;
-        try {
-
-            int nbData = m_peptideMatches.length;
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
-
-            for (int i = 0; i < nbData; i++) {
-                
-                Integer iInteger = i;
-                
-                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
-                    continue;
+        
+        ConvertValueInterface peptideConverter = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
                 }
-                
-                if (!filter(i)) {
-                    continue;
+                return ((DPeptideMatch) o).getPeptide().getSequence();
+            }
+            
+        };
+        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), peptideConverter)); //COLTYPE_PEPTIDE_NAME
+        colIdx++;
+
+        
+        // COLTYPE_PEPTIDE_NEXT_AA
+        if (m_hasPrevNextAA) {
+            filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null));
+            colIdx++;
+        }
+            
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null)); //COLTYPE_PEPTIDE_SCORE
+        colIdx++;
+
+        // COLTYPE_PEPTIDE_START and COLTYPE_PEPTIDE_STOP
+        if (m_hasPrevNextAA) {
+            filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null)); colIdx++; // COLTYPE_PEPTIDE_START
+            filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null)); colIdx++; // COLTYPE_PEPTIDE_STOP
+        }
+           
+                    
+        
+        ConvertValueInterface msQueryConverter = new ConvertValueInterface() {
+            @Override
+            public Object convertValue(Object o) {
+                if (o == null) {
+                    return null;
                 }
-                m_filteredIds.add(iInteger);
+                return ((DMsQuery) o).getInitialId();
             }
-
-        } finally {
-            m_isFiltering = false;
+            
+        };
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), msQueryConverter));  colIdx++;//COLTYPE_PEPTIDE_MSQUERY
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_RANK
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_CALCULATED_MASS
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_DELTA_MOZ  (COLTYPE_PEPTIDE_PPM)
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_CHARGE
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_MISSED_CLIVAGE
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_ION_PARENT_INTENSITY
+        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_PTM
+            
+        //COLTYPE_PEPTIDE_PROTEIN_SET_NAMES
+        if (m_forRSM) {
+            filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null)); colIdx++;
         }
-        fireTableDataChanged();
-    }
-    
-    @Override
-    public boolean filter(int row, int col) {
-
-        Filter filter = getColumnFilter(col);
-        if ((filter == null) || (!filter.isUsed())) {
-            return true;
-        }
-        
-        Object data = getValueAt(row, col);
-        if (data == null) {
-            return true; // should not happen
-        }
-        if (data instanceof LazyData) {
-            data = ((LazyData) data).getData();
-            if (data == null) {
-                return true; // should not happen
-            }
-        }
-        
-        switch (m_colUsed[col]) {
-            case COLTYPE_PEPTIDE_PREVIOUS_AA: 
-            case COLTYPE_PEPTIDE_NEXT_AA:{
-                return ((StringFilter) filter).filter(data.toString());
-            }
-            case COLTYPE_PEPTIDE_NAME:
-                return ((StringFilter) filter).filter(((DPeptideMatch)data).getPeptide().getSequence());
-            case COLTYPE_PEPTIDE_PTM:
-            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: {
-                return ((StringFilter) filter).filter((String)data);
-            }
-            case COLTYPE_PEPTIDE_PPM: {  //  COLTYPE_PEPTIDE_DELTA_MOZ
-                return ((DoubleFilter) filter).filter((Float)data);
-            }  
-            case COLTYPE_PEPTIDE_SCORE:
-            case COLTYPE_PEPTIDE_CALCULATED_MASS:
-            case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
-                return ((DoubleFilter) filter).filter((Float)data);
-            }
-            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
-              if (data instanceof String) {
-                  return true;
-              } else {
-                  return ((DoubleFilter) filter).filter((Float)data);
-              }
-            }
-            case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
-            case COLTYPE_PEPTIDE_CHARGE: 
-            case COLTYPE_PEPTIDE_RANK:
-            case COLTYPE_PEPTIDE_START:
-            case COLTYPE_PEPTIDE_STOP: {
-                return ((IntegerFilter) filter).filter((Integer)data);
-            }
-            case COLTYPE_PEPTIDE_MSQUERY: {
-                return ((IntegerFilter) filter).filter(((DMsQuery)data).getInitialId());
-            }
-    
-        }
-        
-        return true; // should never happen
-    }
 
 
-    @Override
-    public void initFilters() {
-        
-        if (m_filters == null) {
-            
-            // "Charge", "Missed Clivage", /*"RT",*/ "Ion Parent Intensity", "Post Translational Modifications", "Protein Sets"};
-    
-            
-            int nbCol = getColumnCount();
-            m_filters = new Filter[nbCol];
-            int colIdx = 0;
-            
-            
-            m_filters[colIdx] = null;  colIdx++;//COLTYPE_PEPTIDE_ID
-            
-            // COLTYPE_PEPTIDE_PREVIOUS_AA
-            if (m_hasPrevNextAA) {
-                m_filters[colIdx] = new StringFilter(getColumnName(colIdx)); colIdx++;
-            }
-            
-            m_filters[colIdx] = new StringFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_NAME
-            
-            //COLTYPE_PEPTIDE_NEXT_AA
-            if (m_hasPrevNextAA) {
-                m_filters[colIdx] = new StringFilter(getColumnName(colIdx)); colIdx++;
-            }
-            
-            m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_SCORE
-            
-            // COLTYPE_PEPTIDE_START and COLTYPE_PEPTIDE_STOP
-            if (m_hasPrevNextAA) {
-                m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx)); colIdx++; // COLTYPE_PEPTIDE_START
-                m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx)); colIdx++; // COLTYPE_PEPTIDE_STOP
-            }
-            
-            
-            m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_MSQUERY
-            m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_RANK
-            m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_CALCULATED_MASS
-            m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ
-            m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_DELTA_MOZ  (COLTYPE_PEPTIDE_PPM)
-            m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_CHARGE
-            m_filters[colIdx] = new IntegerFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_MISSED_CLIVAGE
-            m_filters[colIdx] = new DoubleFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_ION_PARENT_INTENSITY
-            m_filters[colIdx] = new StringFilter(getColumnName(colIdx));  colIdx++;//COLTYPE_PEPTIDE_PTM
-            
-            //COLTYPE_PEPTIDE_PROTEIN_SET_NAMES
-            if (m_forRSM) {
-                m_filters[colIdx] = new StringFilter(getColumnName(colIdx)); colIdx++;
-            }
-
-        }
- 
-        
     }
 
     @Override
@@ -874,6 +751,16 @@ public class PeptideMatchTableModel extends LazyTableModel implements CompareDat
     @Override
     public PlotInformation getPlotInformation() {
         return null;
+    }
+
+    @Override
+    public String getExportRowCell(int row, int col) {
+        return null; // no specific export
+    }
+
+    @Override
+    public String getExportColumnName(int col) {
+        return getColumnName(col);
     }
 
 }

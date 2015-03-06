@@ -13,7 +13,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -31,6 +31,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableCellRenderer;
@@ -68,7 +69,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
     
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
     private AddCompareDataButton m_addCompareDataButton;
@@ -111,8 +112,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                 }
             }
         }
-        
-        ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).setData(taskId, peptideMatches, peptideMatchesId);
+
+        ((PeptideMatchTableModel) ((CompoundTableModel)m_peptideMatchTable.getModel()).getBaseModel()).setData(taskId, peptideMatches, peptideMatchesId);
 
         // select the first row
         if ((peptideMatches != null) && (peptideMatches.length > 0)) {
@@ -160,63 +161,14 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         // convert according to the sorting
         selectedRow = table.convertRowIndexToModel(selectedRow);
 
+        CompoundTableModel compoundTableModel = ((CompoundTableModel)table.getModel());
+        selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
 
         // Retrieve ProteinSet selected
-        PeptideMatchTableModel tableModel = (PeptideMatchTableModel) table.getModel();
+        PeptideMatchTableModel tableModel = (PeptideMatchTableModel) compoundTableModel.getBaseModel();
         return tableModel.getPeptideMatch(selectedRow);
     }
-    
-     /*public ValuesForStatsAbstract getValuesForStats() {
-         return new ValuesForStatsAbstract() {
-
-            private final String[] m_valuesType = { "Ppm", "Calc. Mass", "Exp. MoZ", "Charge", "Score" };
-            private final int[] m_valuesCol = { PeptideMatchTableModel.COLTYPE_PEPTIDE_PPM, PeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS, PeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ, PeptideMatchTableModel.COLTYPE_PEPTIDE_CHARGE, PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE };
-
-            private int m_valueCol = ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).convertColToColUsed(m_valuesCol[0]);
-            
-            private String m_valueType = m_valuesType[0];
-            
-             
-            @Override
-            public double getValue(int i) {
-                PeptideMatchTableModel tableModel = (PeptideMatchTableModel) m_peptideMatchTable.getModel();
-                LazyData lazyData =  (LazyData) tableModel.getValueAt(i, m_valueCol);
-                if (lazyData != null) {
-                    return ((Number)lazyData.getData()).doubleValue();
-                }
-                return Double.NaN;
-            }
-
-            @Override
-            public int size() {
-                PeptideMatchTableModel tableModel = (PeptideMatchTableModel) m_peptideMatchTable.getModel();
-                return tableModel.getRowCount();
-            }
-
-            @Override
-            public String[] getAvailableValueTypes() {
-                return m_valuesType;
-            }
-
-            @Override
-            public void setValueType(String valueType) {
-                m_valueType = valueType;
-                for (int i=0;i<m_valuesType.length;i++) {
-                    if (m_valuesType[i].compareTo(valueType) == 0) {
-                        m_valueCol = ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).convertColToColUsed(m_valuesCol[i]);
-                    }
-                }
-            }
-
-            @Override
-            public String getValueType() {
-                
-               return m_valueType;
-            }
-        };
-     }*/
-    
 
     private void initComponents() {
         
@@ -315,7 +267,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
         
-        m_filterButton = new FilterButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peptideMatchTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -324,10 +276,10 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             
         };
         
-        m_exportButton = new ExportButton((PeptideMatchTableModel) m_peptideMatchTable.getModel(), "Peptide Match", m_peptideMatchTable);
+        m_exportButton = new ExportButton((CompoundTableModel) m_peptideMatchTable.getModel(), "Peptide Match", m_peptideMatchTable);
         
               
-        m_addCompareDataButton = new AddCompareDataButton(((PeptideMatchTableModel) m_peptideMatchTable.getModel()), (CompareDataInterface) m_peptideMatchTable.getModel()) {
+        m_addCompareDataButton = new AddCompareDataButton(((CompoundTableModel) m_peptideMatchTable.getModel()), (CompareDataInterface) m_peptideMatchTable.getModel()) {
 
             @Override
             public void actionPerformed(CompareDataInterface compareDataInterface) {
@@ -344,9 +296,9 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (!((PeptideMatchTableModel) m_peptideMatchTable.getModel()).isLoaded()) {
+                    if (!((CompoundTableModel) m_peptideMatchTable.getModel()).isLoaded()) {
 
-                        ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((PeptideMatchTableModel) m_peptideMatchTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
+                        ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((CompoundTableModel) m_peptideMatchTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
                         dialog.setLocation(getLocationOnScreen().x + m_graphicsButton.getWidth() + 5, m_graphicsButton.getLocationOnScreen().y + getHeight() + 5);
                         dialog.setVisible(true);
 
@@ -415,7 +367,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         m_scrollPane = new JScrollPane();
         m_peptideMatchTable = new PeptideMatchTable();
         PeptideMatchTableModel peptideMatchTableModel = new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !(m_startingPanel || m_proteinMatchUnknown));
-        m_peptideMatchTable.setModel(peptideMatchTableModel);
+        CompoundTableModel compoundTableModel = new CompoundTableModel(peptideMatchTableModel, true);
+        m_peptideMatchTable.setModel(compoundTableModel);
         m_peptideMatchTable.setTableRenderer();
         m_peptideMatchTable.displayColumnAsPercentage(peptideMatchTableModel.convertColToColUsed(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE));
 
@@ -472,7 +425,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                 return;
             }
             searchIndex = -1;
-            ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).sortAccordingToModel(peptideMatchIds);
+            ((PeptideMatchTableModel) ((CompoundTableModel) m_peptideMatchTable.getModel()).getBaseModel()).sortAccordingToModel(peptideMatchIds, (CompoundTableModel) m_peptideMatchTable.getModel());
         }
 
         @Override
@@ -526,7 +479,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
                         if (!peptideMatchIds.isEmpty()) {
 
-                            ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).sortAccordingToModel(peptideMatchIds);
+                            ((PeptideMatchTableModel) ((CompoundTableModel) m_peptideMatchTable.getModel()).getBaseModel()).sortAccordingToModel(peptideMatchIds, (CompoundTableModel) m_peptideMatchTable.getModel());
 
                              int checkLoopIndex = -1;
                              while (true) {
@@ -564,7 +517,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                     }
                 };
 
-                long rsetId = ((PeptideMatchTableModel) m_peptideMatchTable.getModel()).getResultSetId();
+                long rsetId = ((PeptideMatchTableModel) ((CompoundTableModel) m_peptideMatchTable.getModel()).getBaseModel()).getResultSetId();
 
                 
                 // Load data if needed asynchronously
@@ -593,7 +546,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         }
 
         public void setTableRenderer(){
-            PeptideMatchTableModel tableModel = (PeptideMatchTableModel) getModel();
+            PeptideMatchTableModel tableModel = ((PeptideMatchTableModel) ((CompoundTableModel)getModel()).getBaseModel());
             getColumnModel().getColumn(tableModel.convertColToColUsed(convertColumnIndexToView(PeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ))).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
             getColumnModel().getColumn(tableModel.convertColToColUsed(convertColumnIndexToView(PeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS))).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
             setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());
@@ -623,8 +576,13 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         }
 
         public boolean selectPeptideMatch(Long proteinSetId, String searchText) {
-            PeptideMatchTableModel tableModel = (PeptideMatchTableModel) getModel();
+
+            PeptideMatchTableModel tableModel = (PeptideMatchTableModel) ((CompoundTableModel)getModel()).getBaseModel();
             int row = tableModel.findRow(proteinSetId);
+            if (row == -1) {
+                return false;
+            }
+            row = ((CompoundTableModel)getModel()).convertBaseModelRowToCompoundRow(row);
             if (row == -1) {
                 return false;
             }
@@ -666,7 +624,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
                 selectionWillBeRestored(true);
                 try {
-                    ((PeptideMatchTableModel) getModel()).dataUpdated();
+                    ((PeptideMatchTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
                 } finally {
                     selectionWillBeRestored(false);
                 }
@@ -680,7 +638,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
                     // if the subtask correspond to the loading of the data of the sorted column,
                     // we keep the row selected visible
-                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((PeptideMatchTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
+                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
                         ((PeptideMatchTable) m_peptideMatchTable).scrollRowToVisible(rowSelectedInView);
                     }
 

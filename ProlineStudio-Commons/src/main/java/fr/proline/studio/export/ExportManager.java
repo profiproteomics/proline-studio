@@ -14,7 +14,7 @@ import javax.swing.table.TableCellRenderer;
  */
 public class ExportManager {
 
-    private JTable m_table;
+    private final JTable m_table;
 
     public ExportManager(JTable table) {
         m_table = table;
@@ -53,12 +53,12 @@ public class ExportManager {
             m_exporter.startSheet(m_name);
 
             // headers
-            boolean columnTextInterface = (m_table instanceof ExportColumnTextInterface);
+            boolean columnTextInterface = (m_table instanceof ExportModelInterface);
             int nbCol = m_table.getColumnCount();
             if (columnTextInterface) {
                 m_exporter.startRow();
                 for (int j = 0; j < nbCol; j++) {
-                    String colName = ((ExportColumnTextInterface)m_table).getExportColumnName(j);
+                    String colName = ((ExportModelInterface)m_table).getExportColumnName(j);
                     m_exporter.addCell(colName);
                 }
             } else {
@@ -76,14 +76,19 @@ public class ExportManager {
             int lastPercentage = 0;
             int percentage;
             for (int row = 0; row < nbRow; row++) {
-                boolean rowTextInterface =(m_table instanceof ExportRowTextInterface);
+                boolean rowTextInterface =(m_table instanceof ExportModelInterface);
                 if (rowTextInterface){
                     m_exporter.startRow();
                     for (int col = 0; col < nbCol; col++) {
-                        String text = ((ExportRowTextInterface)m_table).getExportRowCell(row, col);
+                        String text = ((ExportModelInterface)m_table).getExportRowCell(row, col);
+                        if (text == null) {
+                            TableCellRenderer renderer = m_table.getCellRenderer(row, col);
+                            Component c = m_table.prepareRenderer(renderer, row, col);
+                            text = componentToText(c);
+                        }
                         m_exporter.addCell(text);
                     }
-                }else{
+                } else {
                     m_exporter.startRow();
                     for (int col = 0; col < nbCol; col++) {
                         TableCellRenderer renderer = m_table.getCellRenderer(row, col);

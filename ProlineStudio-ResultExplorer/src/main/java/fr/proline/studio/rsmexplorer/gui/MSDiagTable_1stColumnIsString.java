@@ -137,6 +137,11 @@ public class MSDiagTable_1stColumnIsString extends DecoratedTable {
 	            return getColumnName(col);
 	        }
 
+                @Override
+                public String getTootlTipValue(int row, int col) {
+                    return null;
+                }
+                
 	        @Override
 	        public int getRowCount() {
 	            return m_nbRows;
@@ -167,6 +172,7 @@ public class MSDiagTable_1stColumnIsString extends DecoratedTable {
 	        	return m_matrixValues[rowIndex][columnIndex];
 	        
 	        }
+
 
 	    }
 

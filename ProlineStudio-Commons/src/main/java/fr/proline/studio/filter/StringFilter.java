@@ -18,8 +18,8 @@ public class StringFilter extends Filter {
     private String m_filterText = null;
     private Pattern m_searchPattern;
 
-    public StringFilter(String variableName) {
-        super(variableName);
+    public StringFilter(String variableName, ConvertValueInterface convertValueInterface) {
+        super(FilterType.FILTER_STRING, variableName, convertValueInterface);
     }
 
     public boolean filter(String value) {

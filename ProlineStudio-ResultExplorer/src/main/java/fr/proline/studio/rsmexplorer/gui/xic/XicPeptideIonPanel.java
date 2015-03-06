@@ -10,9 +10,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchMasterQuantPeptideIonTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ExportColumnTextInterface;
-import fr.proline.studio.export.ExportRowTextInterface;
-import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -31,12 +30,11 @@ import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
-import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableCellRenderer;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.table.TablePopupMouseAdapter;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -48,7 +46,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -58,7 +55,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
@@ -79,7 +75,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     
     private DQuantitationChannel[] m_quantChannels;
     
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
     private AddCompareDataButton m_addCompareDataButton;
@@ -165,7 +161,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
         toolbar.add(m_searchToggleButton);
         
-        m_filterButton = new FilterButton(((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_quantPeptideIonTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -174,7 +170,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
             
         };
 
-        m_exportButton = new ExportButton(((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()), "Peptides Ions", m_quantPeptideIonTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_quantPeptideIonTable.getModel()), "Peptides Ions", m_quantPeptideIonTable);
 
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
@@ -187,7 +183,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                XICPeptideIonColumnsVisibilityDialog dialog = new XICPeptideIonColumnsVisibilityDialog(WindowManager.getDefault().getMainWindow(), m_quantPeptideIonTable, (QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel() );
+                XICPeptideIonColumnsVisibilityDialog dialog = new XICPeptideIonColumnsVisibilityDialog(WindowManager.getDefault().getMainWindow(), m_quantPeptideIonTable, (QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel() );
                 dialog.setLocation(m_columnVisibilityButton.getLocationOnScreen().x +m_columnVisibilityButton.getWidth(), m_columnVisibilityButton.getLocationOnScreen().y + m_columnVisibilityButton.getHeight());
                 dialog.setVisible(true);
             }
@@ -195,7 +191,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         });
         toolbar.add(m_columnVisibilityButton);
         
-        m_addCompareDataButton = new AddCompareDataButton(((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()), (CompareDataInterface)  m_quantPeptideIonTable.getModel()) {
+        m_addCompareDataButton = new AddCompareDataButton(((CompoundTableModel) m_quantPeptideIonTable.getModel()), (CompareDataInterface)  m_quantPeptideIonTable.getModel()) {
             
             @Override
             public void actionPerformed(CompareDataInterface compareDataInterface) {
@@ -222,7 +218,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_peptideIonScrollPane = new JScrollPane();
         
         m_quantPeptideIonTable = new QuantPeptideIonTable();
-        m_quantPeptideIonTable.setModel(new QuantPeptideIonTableModel((LazyTable)m_quantPeptideIonTable));
+        m_quantPeptideIonTable.setModel(new CompoundTableModel(new QuantPeptideIonTableModel((LazyTable)m_quantPeptideIonTable), true));
         
         
         
@@ -250,7 +246,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<MasterQuantPeptideIon> peptideIons, boolean finished) {
         m_quantChannels = quantChannels;
         
-        ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).setData(taskId, quantChannels, peptideIons);
+       ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptideIons);
         m_quantPeptideIonTable.setTableRenderer();
         m_titleLabel.setText(TABLE_TITLE +" ("+peptideIons.size()+")");
         // select the first row
@@ -277,7 +273,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     
     public void setColumnsVisibility() {
         // hide the rawAbundance  and selectionLevel columns
-        List<Integer> listIdsToHide = ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).getDefaultColumnsToHide();
+        List<Integer> listIdsToHide = ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
         List<TableColumn> columns = m_quantPeptideIonTable.getColumns(true);
         for (Integer id : listIdsToHide) {
             boolean columnVisible = ((TableColumnExt) columns.get(id)).isVisible();
@@ -331,10 +327,8 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         return m_quantPeptideIonTable;
     }
     
-    private class QuantPeptideIonTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface, ExportRowTextInterface    {
+    private class QuantPeptideIonTable extends LazyTable implements ExportModelInterface {
 
-        private MasterQuantPeptideIon m_peptideIonSelected = null;
-        
         
         public QuantPeptideIonTable() {
             super(m_peptideIonScrollPane.getVerticalScrollBar() );
@@ -368,8 +362,13 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         }
         
         public boolean selectPeptideIon(Long peptideIonId, String searchText) {
-            QuantPeptideIonTableModel tableModel = (QuantPeptideIonTableModel) getModel();
+
+            QuantPeptideIonTableModel tableModel = (QuantPeptideIonTableModel) ((CompoundTableModel)getModel()).getBaseModel();
             int row = tableModel.findRow(peptideIonId);
+            if (row == -1) {
+                return false;
+            }
+            row = ((CompoundTableModel)getModel()).convertBaseModelRowToCompoundRow(row);
             if (row == -1) {
                 return false;
             }
@@ -408,7 +407,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
             
             selectionWillBeRestored(true);
             try {
-                ((QuantPeptideIonTableModel) getModel()).dataUpdated();
+                ((QuantPeptideIonTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
             } finally {
                 selectionWillBeRestored(false);
             }
@@ -424,7 +423,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((QuantPeptideIonTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
                     scrollRowToVisible(rowSelectedInView);
                 }
                     
@@ -462,11 +461,6 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         }
         
 
-        @Override
-        public HashSet exportSelection(int[] rows) {
-            QuantPeptideIonTableModel tableModel = (QuantPeptideIonTableModel) getModel();
-            return tableModel.exportSelection(rows);
-        }
 
         public MasterQuantPeptideIon getSelectedMasterQuantPeptideIon() {
 
@@ -479,27 +473,29 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
 
             }
 
-            QuantPeptideIonTableModel tableModel = (QuantPeptideIonTableModel) getModel();
-            if (tableModel.getRowCount() == 0) {
+            CompoundTableModel compoundTableModel = (CompoundTableModel) m_quantPeptideIonTable.getModel();
+            if (compoundTableModel.getRowCount() == 0) {
                 return null; // this is a wart, for an unknown reason, it happens that the first row
                 // is selected although it does not exist.
             }
 
             // convert according to the sorting
             selectedRow = convertRowIndexToModel(selectedRow);
+            selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
             // Retrieve PeptideIon selected
+            QuantPeptideIonTableModel tableModel = (QuantPeptideIonTableModel) compoundTableModel.getBaseModel();
             return tableModel.getPeptideIon(selectedRow);
         }
 
         @Override
         public String getExportColumnName(int col) {
-            return ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+            return ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
         }
 
         @Override
         public String getExportRowCell(int row, int col) {
-            return ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
+            return ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
         }
 
         
@@ -653,7 +649,8 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         @Override
         protected boolean okCalled() {
 
-            QuantPeptideIonTableModel model = ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel());
+            
+            QuantPeptideIonTableModel model = (QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel();
             
             List<TableColumn> columns = m_quantPeptideIonTable.getColumns(true);
             for (int i=QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ELUTION_TIME+1;i<columns.size();i++) {
@@ -693,7 +690,8 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                 return;
             }
             searchIndex = -1;
-            ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).sortAccordingToModel(peptideIonsIds);
+            ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).sortAccordingToModel(peptideIonsIds, (CompoundTableModel) m_quantPeptideIonTable.getModel());
+        
         }
 
         @Override
@@ -747,7 +745,8 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
 
                         if (!peptideIonsIds.isEmpty()) {
 
-                            ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).sortAccordingToModel(peptideIonsIds);
+                            ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).sortAccordingToModel(peptideIonsIds, (CompoundTableModel) m_quantPeptideIonTable.getModel());
+        
 
                             
                              int checkLoopIndex = -1;
@@ -783,7 +782,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                     }
                 };
 
-                Long rsmId = ((QuantPeptideIonTableModel) m_quantPeptideIonTable.getModel()).getResultSummaryId();
+                Long rsmId = ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).getResultSummaryId();
 
                 // Load data if needed asynchronously
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchMasterQuantPeptideIonTask(callback, m_dataBox.getProjectId(), rsmId, searchText, peptideIonsIds));

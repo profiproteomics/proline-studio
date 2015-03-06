@@ -4,7 +4,6 @@ package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DBioSequence;
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.dam.tasks.DatabaseProteinMatchesTask;
@@ -13,17 +12,21 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.utils.RelativePainterHighlighter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Table Model for Peptide Matches
  * @author JM235353
  */
-public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements CompareDataInterface {
+public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements GlobalTableModelInterface {
 
     public static final int COLTYPE_PROTEIN_ID             = 0;
     public static final int COLTYPE_PROTEIN_NAME           = 1;
@@ -46,10 +49,6 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     
     public DProteinMatch getProteinMatch(int row) {
 
-        if (m_filteredIds != null) {
-            row = m_filteredIds.get(row).intValue();
-        }
-        
         return m_proteinMatchArray[row];
     }
 
@@ -66,6 +65,11 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     @Override
     public String getToolTipForHeader(int col) {
         return getColumnName(col);
+    }
+    
+    @Override
+    public String getTootlTipValue(int row, int col) {
+        return null;
     }
     
     @Override
@@ -90,10 +94,6 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
         if (m_proteinMatchArray == null) {
             return 0;
         }
-                        
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }
 
         return m_proteinMatchArray.length;
     }
@@ -101,14 +101,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     @Override
     public Object getValueAt(int row, int col) {
 
-               
-        int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }
-        
-        
-        DProteinMatch proteinMatch = m_proteinMatchArray[rowFiltered];
+        DProteinMatch proteinMatch = m_proteinMatchArray[row];
 
         switch (col) {
             case COLTYPE_PROTEIN_ID:
@@ -145,19 +138,8 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
         m_proteinMatchArray = proteinMatchArray;
 
         updateMinMax();
-        
-        if (m_restrainIds != null) {
-            m_restrainIds = null;
-            m_filteringAsked = true;
-        }
-        
-        if (m_filteringAsked) {
-            m_filteringAsked = false;
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
-        
+
+        fireTableDataChanged();
 
     }
     
@@ -185,7 +167,7 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
 
     }
     
-    public int findRowToSelect(String searchedText) {
+    /*public int findRowToSelect(String searchedText) {
         int rowToBeSelected = 0;
         if ((searchedText != null) && (searchedText.length() > 0)) {
 
@@ -200,21 +182,10 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
         }
 
         return rowToBeSelected;
-    }
+    }*/
 
     public int findRow(long proteinMatchId) {
-        
-        if (m_filteredIds != null) {
-            int nb = m_filteredIds.size();
-            for (int i = 0; i < nb; i++) {
-                if (proteinMatchId == m_proteinMatchArray[m_filteredIds.get(i)].getId()) {
-                    return i;
-                }
-            }
-            return -1;
-        }
 
-        
         int nb = m_proteinMatchArray.length;
         for (int i = 0; i < nb; i++) {
             if (proteinMatchId == m_proteinMatchArray[i].getId()) {
@@ -237,16 +208,12 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     public void dataUpdated() {
         // no need to do an updateMinMax : scores are known at once
 
-        if (m_filteredIds != null) {
-            filter();
-        } else {
-            fireTableDataChanged();
-        }
-        
+        fireTableDataChanged();
+
     }
 
     
-    public void sortAccordingToModel(ArrayList<Long> proteinMatchIds) {
+    public void sortAccordingToModel(ArrayList<Long> proteinMatchIds, CompoundTableModel compoundTableModel) {
         
         if (m_proteinMatchArray == null) {
             // data not loaded 
@@ -256,118 +223,31 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
         HashSet<Long> proteinMatchIdMap = new HashSet<>(proteinMatchIds.size());
         proteinMatchIdMap.addAll(proteinMatchIds);
 
-        int nb = getRowCount();
+        int nb = m_table.getRowCount();
         int iCur = 0;
         for (int iView = 0; iView < nb; iView++) {
             int iModel = m_table.convertRowIndexToModel(iView);
+            if (compoundTableModel != null) {
+                iModel = compoundTableModel.convertCompoundRowToBaseModelRow(iModel);
+            }
             DProteinMatch pm = m_proteinMatchArray[iModel];
             if (proteinMatchIdMap.contains(pm.getId())) {
                 proteinMatchIds.set(iCur++, pm.getId());
             }
         }
 
-        // need to refilter
-        if (m_filteredIds != null) { // NEEDED ????
-            filter();
-        }
-    }
-    
-        @Override
-    public void filter() {
-
-        if (m_proteinMatchArray == null) {
-            // filtering not possible for the moment
-            m_filteringAsked = true;
-            return;
-        }
-
-        m_isFiltering = true;
-        try {
-
-            int nbData = m_proteinMatchArray.length;
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
-
-            for (int i = 0; i < nbData; i++) {
-                
-                Integer iInteger = i;
-                
-                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
-                    continue;
-                }
-                
-                try {
-                    if (!filter(i)) {
-                        continue;
-                    }
-                } catch (Exception e) {
-
-                }
-                m_filteredIds.add(iInteger);
-            }
-
-        } finally {
-            m_isFiltering = false;
-        }
-        fireTableDataChanged();
-    }
-    
-    @Override
-    public boolean filter(int row, int col) {
-        Filter filter = getColumnFilter(col);
-        if ((filter == null) || (!filter.isUsed())) {
-            return true;
-        }
-        
-        Object data = getValueAt(row, col);
-        if (data == null) {
-            return true; // should not happen
-        }
-        if (data instanceof LazyData) {
-            data = ((LazyData) data).getData();
-            if (data == null) {
-                return true; // should not happen
-            }
-        }
-        
-        switch (col) {
-            case COLTYPE_PROTEIN_NAME:
-                return ((StringFilter) filter).filter((String)data);
-            case COLTYPE_PROTEIN_SCORE: {
-                return ((DoubleFilter) filter).filter((Float)data);
-            }
-            case COLTYPE_PROTEIN_MASS: {
-              if (data instanceof String) {
-                  return true;
-              } else {
-                  return ((DoubleFilter) filter).filter((Float)data);
-              }
-            } case COLTYPE_PROTEIN_PEPTIDES_COUNT: {
-                return ((IntegerFilter) filter).filter((Integer)data);
-            }
-
-    
-        }
-        
-        return true; // should never happen
     }
 
+    
 
     @Override
-    public void initFilters() {
-        if (m_filters == null) {
-            int nbCol = getColumnCount();
-            m_filters = new Filter[nbCol];
-            m_filters[COLTYPE_PROTEIN_ID] = null;
-            m_filters[COLTYPE_PROTEIN_NAME] = new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME));
-            m_filters[COLTYPE_PROTEIN_SCORE] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE));
-            m_filters[COLTYPE_PROTEIN_PEPTIDES_COUNT] = new IntegerFilter(getColumnName(COLTYPE_PROTEIN_PEPTIDES_COUNT));
-            m_filters[COLTYPE_PROTEIN_MASS] = new DoubleFilter(getColumnName(COLTYPE_PROTEIN_MASS));
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
-        }
+        filtersMap.put(COLTYPE_PROTEIN_NAME, new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME), null));
+        filtersMap.put(COLTYPE_PROTEIN_SCORE, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE), null));
+        filtersMap.put(COLTYPE_PROTEIN_PEPTIDES_COUNT, new IntegerFilter(getColumnName(COLTYPE_PROTEIN_PEPTIDES_COUNT), null));
+        filtersMap.put(COLTYPE_PROTEIN_MASS, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_MASS), null));
+
     }
 
     @Override
@@ -432,6 +312,31 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     @Override
     public PlotInformation getPlotInformation() {
         return null;
+    }
+
+    @Override
+    public PlotType getBestPlotType() {
+        return null; //JPM.TODO
+    }
+
+    @Override
+    public int getBestXAxisColIndex(PlotType plotType) {
+        return -1; //JPM.TODO
+    }
+
+    @Override
+    public int getBestYAxisColIndex(PlotType plotType) {
+        return -1; //JPM.TODO
+    }
+
+    @Override
+    public String getExportRowCell(int row, int col) {
+        return null; // no specific export
+    }
+
+    @Override
+    public String getExportColumnName(int col) {
+        return getColumnName(col);
     }
 
  

@@ -8,6 +8,7 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTableHeader;
@@ -69,7 +70,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     }
     
     public String getToolTipForHeader(int modelColumn) {
-        return ((DecoratedTableModel) getModel()).getToolTipForHeader(modelColumn);
+        return ((DecoratedTableModelInterface) getModel()).getToolTipForHeader(modelColumn);
     }
     
     
@@ -99,7 +100,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
         ArrayList<Integer> selectionList = new ArrayList<>();
         
         ListSelectionModel selectionModel = getSelectionModel();
-        DecoratedTableModel model = (DecoratedTableModel) getModel();
+        AbstractTableModel model = (AbstractTableModel) getModel();
         
         for (int i=0;i<model.getRowCount();i++) {
             int row = convertRowIndexToView(i);

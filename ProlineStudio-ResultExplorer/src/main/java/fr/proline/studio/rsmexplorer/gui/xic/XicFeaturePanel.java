@@ -5,11 +5,8 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ExportColumnTextInterface;
-import fr.proline.studio.export.ExportRowTextInterface;
-import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
+import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -25,7 +22,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FontRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
-import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableCellRenderer;
 import fr.proline.studio.table.TablePopupMenu;
@@ -41,7 +38,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
-import java.util.HashSet;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -65,7 +61,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
 
     private MarkerContainerPanel m_markerContainerPanel;
     
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
     private JButton m_graphicsTypeButton;
@@ -146,7 +142,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
        
-        m_filterButton = new FilterButton(((FeatureTableModel) m_featureTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_featureTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -154,7 +150,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             }
         };
 
-        m_exportButton = new ExportButton(((FeatureTableModel) m_featureTable.getModel()), "Features", m_featureTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_featureTable.getModel()), "Features", m_featureTable);
 
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
@@ -165,9 +161,9 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         m_graphicsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!((FeatureTableModel) m_featureTable.getModel()).isLoaded()) {
+                if (!((CompoundTableModel) m_featureTable.getModel()).isLoaded()) {
 
-                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((FeatureTableModel) m_featureTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((CompoundTableModel) m_featureTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
                     dialog.setLocation(getLocationOnScreen().x + m_graphicsButton.getWidth() + 5, m_graphicsButton.getLocationOnScreen().y + getHeight() + 5);
                     dialog.setVisible(true);
 
@@ -256,7 +252,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         m_featureScrollPane = new JScrollPane();
         
         m_featureTable = new FeatureTable();
-        m_featureTable.setModel(new FeatureTableModel((LazyTable)m_featureTable));
+        m_featureTable.setModel(new CompoundTableModel(new FeatureTableModel((LazyTable)m_featureTable), true));
         m_featureTable.setTableRenderer();
         
         // hide the id column
@@ -281,7 +277,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     }                 
     
     public void setData(Long taskId,  List<Feature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak, boolean finished) {
-        ((FeatureTableModel) m_featureTable.getModel()).setData(taskId,  features, quantChannelInfo, featureHasPeak);
+        ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).setData(taskId,  features, quantChannelInfo, featureHasPeak);
         m_titleLabel.setText(TABLE_TITLE +" ("+features.size()+")");
         // select the first row
         if ((features.size() > 0)) {
@@ -348,10 +344,8 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         return m_featureTable;
     }
     
-    private class FeatureTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface , ExportRowTextInterface  {
+    private class FeatureTable extends LazyTable implements ExportModelInterface  {
 
-        private Feature m_featureSelected = null;
-        
         
         public FeatureTable() {
             super(m_featureScrollPane.getVerticalScrollBar() );
@@ -386,8 +380,13 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         }
         
         public boolean selectFeature(Long featureId, String searchText) {
-            FeatureTableModel tableModel = (FeatureTableModel) getModel();
+
+            FeatureTableModel tableModel = (FeatureTableModel) ((CompoundTableModel)getModel()).getBaseModel();
             int row = tableModel.findRow(featureId);
+            if (row == -1) {
+                return false;
+            }
+            row = ((CompoundTableModel)getModel()).convertBaseModelRowToCompoundRow(row);
             if (row == -1) {
                 return false;
             }
@@ -426,7 +425,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             
             selectionWillBeRestored(true);
             try {
-                ((FeatureTableModel) getModel()).dataUpdated();
+                ((FeatureTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
             } finally {
                 selectionWillBeRestored(false);
             }
@@ -442,7 +441,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((FeatureTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
                     scrollRowToVisible(rowSelectedInView);
                 }
                     
@@ -478,13 +477,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         public boolean isLoaded() {
             return m_dataBox.isLoaded();
         }
-        
 
-        @Override
-        public HashSet exportSelection(int[] rows) {
-            FeatureTableModel tableModel = (FeatureTableModel) getModel();
-            return tableModel.exportSelection(rows);
-        }
 
         public Feature getSelectedFeature() {
 
@@ -497,17 +490,20 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
 
             }
 
-            FeatureTableModel tableModel = (FeatureTableModel) getModel();
-            if (tableModel.getRowCount() == 0) {
+            CompoundTableModel compoundTableModel = (CompoundTableModel) getModel();
+            if (compoundTableModel.getRowCount() == 0) {
                 return null; // this is a wart, for an unknown reason, it happens that the first row
                 // is selected although it does not exist.
             }
 
             // convert according to the sorting
             selectedRow = convertRowIndexToModel(selectedRow);
+            selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
-            // Retrieve Peptide selected
+            // Retrieve PeptideIon selected
+            FeatureTableModel tableModel = (FeatureTableModel) compoundTableModel.getBaseModel();
             return tableModel.getFeature(selectedRow);
+
         }
         
         public Color getPlotColor() {
@@ -520,17 +516,20 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
 
             }
 
-            FeatureTableModel tableModel = (FeatureTableModel) getModel();
-            if (tableModel.getRowCount() == 0) {
+            CompoundTableModel compoundTableModel = (CompoundTableModel) getModel();
+            if (compoundTableModel.getRowCount() == 0) {
                 return null; // this is a wart, for an unknown reason, it happens that the first row
                 // is selected although it does not exist.
             }
 
             // convert according to the sorting
             selectedRow = convertRowIndexToModel(selectedRow);
+            selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
-            // Retrieve Peptide selected
+            // Retrieve PeptideIon selected
+            FeatureTableModel tableModel = (FeatureTableModel) compoundTableModel.getBaseModel();
             return tableModel.getPlotColor(selectedRow);
+
         }
         
         public String getPlotTitle() {
@@ -543,22 +542,30 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
 
             }
 
-            FeatureTableModel tableModel = (FeatureTableModel) getModel();
-            if (tableModel.getRowCount() == 0) {
+             CompoundTableModel compoundTableModel = (CompoundTableModel) getModel();
+            if (compoundTableModel.getRowCount() == 0) {
                 return null; // this is a wart, for an unknown reason, it happens that the first row
                 // is selected although it does not exist.
             }
 
             // convert according to the sorting
             selectedRow = convertRowIndexToModel(selectedRow);
+            selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
-            // Retrieve Peptide selected
+            // Retrieve PeptideIon selected
+            FeatureTableModel tableModel = (FeatureTableModel) compoundTableModel.getBaseModel();
             return tableModel.getPlotTitle(selectedRow);
+
         }
 
         @Override
         public String getExportColumnName(int col) {
-            return ((FeatureTableModel) m_featureTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+            return ((CompoundTableModel) m_featureTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+        }
+        
+        @Override
+        public String getExportRowCell(int row, int col) {
+            return ((CompoundTableModel) m_featureTable.getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
         
         //Implement table cell tool tips.
@@ -566,17 +573,20 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         public String getToolTipText(MouseEvent e) {
             Point p = e.getPoint();
             int rowIndex = rowAtPoint(p);
+            if (rowIndex<0) {
+                return null;
+            }
             int colIndex = columnAtPoint(p);
+            if (colIndex<0) {
+                return null;
+            }
             int realColumnIndex = convertColumnIndexToModel(colIndex);
             int realRowIndex = convertRowIndexToModel(rowIndex);
-            FeatureTableModel tableModel = (FeatureTableModel) getModel();
-            return tableModel.getTootlTipValue(realRowIndex, realColumnIndex);
+
+            return ((CompoundTableModel)getModel()).getTootlTipValue(realRowIndex, realColumnIndex);
         }
 
-        @Override
-        public String getExportRowCell(int row, int col) {
-            return ((FeatureTableModel) m_featureTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
-        }
+
         
         @Override
         public TablePopupMenu initPopupMenu() {

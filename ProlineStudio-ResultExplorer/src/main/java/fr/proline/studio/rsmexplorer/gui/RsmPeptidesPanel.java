@@ -12,6 +12,7 @@ import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -27,6 +28,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableCellRenderer;
@@ -56,7 +58,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
 
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private AddCompareDataButton m_addCompareDataButton;
     
@@ -157,7 +159,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         // Search Button
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
 
-        m_filterButton = new FilterButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peptideInstanceTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -166,9 +168,9 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             
         };
         
-        m_exportButton = new ExportButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()), "Peptide Instances", m_peptideInstanceTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_peptideInstanceTable.getModel()), "Peptide Instances", m_peptideInstanceTable);
         
-        m_addCompareDataButton = new AddCompareDataButton(((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()), (CompareDataInterface) m_peptideInstanceTable.getModel()) {
+        m_addCompareDataButton = new AddCompareDataButton(((CompoundTableModel) m_peptideInstanceTable.getModel()), (CompareDataInterface) m_peptideInstanceTable.getModel()) {
 
             @Override
             public void actionPerformed(CompareDataInterface compareDataInterface) {
@@ -219,7 +221,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         m_scrollPane = new JScrollPane();
 
         m_peptideInstanceTable = new PeptideInstanceTable();
-        m_peptideInstanceTable.setModel(new PeptideInstanceTableModel((LazyTable) m_peptideInstanceTable));
+        m_peptideInstanceTable.setModel(new CompoundTableModel(new PeptideInstanceTableModel((LazyTable) m_peptideInstanceTable), true));
         m_peptideInstanceTable.setTableRenderer();
         m_peptideInstanceTable.getColumnExt(PeptideInstanceTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
         
@@ -287,7 +289,8 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
         }
 
-        ((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()).setData(taskId, peptideInstances);
+        ((PeptideInstanceTableModel) ((CompoundTableModel) m_peptideInstanceTable.getModel()).getBaseModel()).setData(taskId, peptideInstances);
+
 
         // select the first row
         if ((peptideInstances != null) && (peptideInstances.length > 0)) {
@@ -323,10 +326,11 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         // convert according to the sorting
         selectedRow = table.convertRowIndexToModel(selectedRow);
 
-
+        CompoundTableModel compoundTableModel = ((CompoundTableModel)table.getModel());
+        selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
         // Retrieve ProteinSet selected
-        PeptideInstanceTableModel tableModel = (PeptideInstanceTableModel) table.getModel();
+        PeptideInstanceTableModel tableModel = (PeptideInstanceTableModel) compoundTableModel.getBaseModel();
         return tableModel.getPeptideInstance(selectedRow);
     }
 
@@ -374,8 +378,13 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         }
 
         public boolean selectPeptideInstance(Long peptideInstanceId, String searchText) {
-            PeptideInstanceTableModel tableModel = (PeptideInstanceTableModel) getModel();
+
+            PeptideInstanceTableModel tableModel = (PeptideInstanceTableModel) ((CompoundTableModel)getModel()).getBaseModel();
             int row = tableModel.findRow(peptideInstanceId);
+            if (row == -1) {
+                return false;
+            }
+            row = ((CompoundTableModel)getModel()).convertBaseModelRowToCompoundRow(row);
             if (row == -1) {
                 return false;
             }
@@ -414,7 +423,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
                 selectionWillBeRestored(true);
                 try {
-                    ((PeptideInstanceTableModel) getModel()).dataUpdated();
+                    ((PeptideInstanceTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
                 } finally {
                     selectionWillBeRestored(false);
                 }
@@ -428,7 +437,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
                     // if the subtask correspond to the loading of the data of the sorted column,
                     // we keep the row selected visible
-                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((PeptideInstanceTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
+                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
                         ((PeptideInstanceTable) m_peptideInstanceTable).scrollRowToVisible(rowSelectedInView);
                     }
 
@@ -496,7 +505,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
                 return;
             }
             searchIndex = -1;
-            ((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()).sortAccordingToModel(peptideInstanceIds);
+            ((PeptideInstanceTableModel) ((CompoundTableModel) m_peptideInstanceTable.getModel()).getBaseModel()).sortAccordingToModel(peptideInstanceIds, (CompoundTableModel) m_peptideInstanceTable.getModel());
         }
 
         @Override
@@ -550,7 +559,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
                         if (!peptideInstanceIds.isEmpty()) {
 
-                            ((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()).sortAccordingToModel(peptideInstanceIds);
+                            ((PeptideInstanceTableModel) ((CompoundTableModel) m_peptideInstanceTable.getModel()).getBaseModel()).sortAccordingToModel(peptideInstanceIds, (CompoundTableModel) m_peptideInstanceTable.getModel());
 
                             
                              int checkLoopIndex = -1;
@@ -586,7 +595,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
                     }
                 };
 
-                ResultSummary rsm = ((PeptideInstanceTableModel) m_peptideInstanceTable.getModel()).getResultSummary();
+                ResultSummary rsm = ((PeptideInstanceTableModel)((CompoundTableModel) m_peptideInstanceTable.getModel()).getBaseModel()).getResultSummary();
 
                 // Load data if needed asynchronously
                 AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, m_dataBox.getProjectId(), rsm.getId(), searchText, peptideInstanceIds));

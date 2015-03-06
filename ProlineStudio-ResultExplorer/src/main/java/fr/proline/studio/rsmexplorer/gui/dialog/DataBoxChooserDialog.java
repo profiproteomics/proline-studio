@@ -366,6 +366,11 @@ public class DataBoxChooserDialog extends DefaultDialog {
         public String getToolTipForHeader(int col) {
             return null;
         }
+        
+        @Override
+        public String getTootlTipValue(int row, int col) {
+            return null;
+        }
     }
     
 }

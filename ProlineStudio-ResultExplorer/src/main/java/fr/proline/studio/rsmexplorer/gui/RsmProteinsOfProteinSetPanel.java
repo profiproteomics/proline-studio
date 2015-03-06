@@ -8,7 +8,7 @@ import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -22,6 +22,7 @@ import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.SamesetRenderer;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.URLCellRenderer;
@@ -49,7 +50,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     private ProteinTable m_proteinTable;
     private JScrollPane m_scrollPane;
 
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private AddCompareDataButton m_addCompareDataButton;
     
@@ -102,7 +103,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         
         m_scrollPane = new javax.swing.JScrollPane();
         m_proteinTable = new ProteinTable();
-        m_proteinTable.setModel(new ProteinTableModel((ProgressInterface) m_proteinTable));
+        m_proteinTable.setModel(new CompoundTableModel(new ProteinTableModel((ProgressInterface) m_proteinTable), true));
         m_scrollPane.setViewportView(m_proteinTable);
 
         
@@ -139,7 +140,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_filterButton = new FilterButton(((ProteinTableModel) m_proteinTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_proteinTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -147,8 +148,8 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
             }
             
         };
-        m_exportButton = new ExportButton(((ProteinTableModel) m_proteinTable.getModel()), "Proteins", m_proteinTable);
-        m_addCompareDataButton = new AddCompareDataButton(((ProteinTableModel) m_proteinTable.getModel()), (CompareDataInterface) m_proteinTable.getModel()) {
+        m_exportButton = new ExportButton(((CompoundTableModel) m_proteinTable.getModel()), "Proteins", m_proteinTable);
+        m_addCompareDataButton = new AddCompareDataButton(((CompoundTableModel) m_proteinTable.getModel()), (CompareDataInterface) m_proteinTable.getModel()) {
 
             @Override
             public void actionPerformed(CompareDataInterface compareDataInterface) {
@@ -180,20 +181,19 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
         }
 
-        ProteinTableModel tableModel = (ProteinTableModel) table.getModel();
-        if (tableModel.getRowCount() == 0) {
+        CompoundTableModel compoundTableModel = (CompoundTableModel) table.getModel();
+        if (compoundTableModel.getRowCount() == 0) {
             return null; // this is a wart, for an unknown reason, it happens that the first row
             // is selected although it does not exist.
         }
         
         // convert according to the sorting
         selectedRow = table.convertRowIndexToModel(selectedRow);
-
+        selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
 
         // Retrieve ProteinMatch selected
-
-
+        ProteinTableModel tableModel = (ProteinTableModel) compoundTableModel.getBaseModel();
         return tableModel.getProteinMatch(selectedRow);
     }
 
@@ -229,11 +229,15 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
 
         // Modify the Model
+        ((ProteinTableModel) (((CompoundTableModel)  m_proteinTable.getModel()).getBaseModel())).setData(proteinSet.getResultSummaryId(), proteinSet.getTypicalProteinMatch().getId() ,sameSetArray, subSetArray);
         
-        ((ProteinTableModel) m_proteinTable.getModel()).setData(proteinSet.getResultSummaryId(), proteinSet.getTypicalProteinMatch().getId() ,sameSetArray, subSetArray);
-
+        
         // Select the Row
-        int row = ((ProteinTableModel) m_proteinTable.getModel()).findRowToSelect(searchedText);
+        int row = ((ProteinTableModel) (((CompoundTableModel)  m_proteinTable.getModel()).getBaseModel())).findRowToSelect(searchedText);
+        if (row != -1) {
+            row = ((CompoundTableModel) m_proteinTable.getModel()).convertBaseModelRowToCompoundRow(row);
+        }
+
         m_proteinTable.getSelectionModel().setSelectionInterval(row, row);
 
         m_proteinTable.setSortable(true);
@@ -242,7 +246,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
 
     private void clearData() {
         m_proteinNameTextField.setText("");
-        ((ProteinTableModel) m_proteinTable.getModel()).setData(-1, -1, null, null);
+        ((ProteinTableModel) (((CompoundTableModel)  m_proteinTable.getModel()).getBaseModel())).setData(-1, -1, null, null);
 
     }
 

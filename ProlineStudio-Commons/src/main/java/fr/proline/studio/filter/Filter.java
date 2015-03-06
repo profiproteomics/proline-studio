@@ -1,5 +1,6 @@
 package fr.proline.studio.filter;
 
+import fr.proline.studio.table.LazyData;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.util.ArrayList;
@@ -12,7 +13,13 @@ import javax.swing.JPanel;
  */
 public abstract class Filter {
 
-
+    public enum FilterType {
+        FILTER_INTEGER,
+        FILTER_STRING,
+        FILTER_STRING_DIFF,
+        FILTER_VALUE,
+        FILTER_DOUBLE
+    }
     
     //protected HashMap<Integer, String> m_values = null;
     protected ArrayList<Integer> m_valueKeys = null;
@@ -22,8 +29,29 @@ public abstract class Filter {
     protected boolean m_used;
     protected boolean m_defined;
     
-    public Filter(String variableName) {
+    protected final FilterType m_type;
+    
+    private final ConvertValueInterface m_convertValueInterface;
+    
+    public Filter(FilterType type, String variableName, ConvertValueInterface convertValueInterface) {
+        m_type = type;
         m_variableName = variableName;
+        m_convertValueInterface = convertValueInterface;
+    }
+    
+    public Object convertValue(Object o) {
+        if (o instanceof LazyData) {
+            o = ((LazyData) o).getData();
+        }
+
+        if (m_convertValueInterface == null) {
+            return o;
+        }
+        return m_convertValueInterface.convertValue(o);
+    }
+    
+    public FilterType getFilterType() {
+        return m_type;
     }
     
     public abstract FilterStatus checkValues();

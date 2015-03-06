@@ -10,7 +10,7 @@ import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -19,11 +19,13 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
+import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
@@ -46,7 +48,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     private PeptideTable m_peptidesTable;
     private JScrollPane m_scrollPane;
 
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     
     private DProteinMatch m_currentProteinMatch = null;
@@ -93,7 +95,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
 
 
         m_peptidesTable = new PeptideTable();
-        m_peptidesTable.setModel(new PeptideTableModel());
+        m_peptidesTable.setModel(new CompoundTableModel(new PeptideTableModel(), true));
         m_peptidesTable.setTableRenderer();
         m_peptidesTable.getColumnExt(PeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
         m_peptidesTable.displayColumnAsPercentage(PeptideTableModel.COLTYPE_PEPTIDE_SCORE);
@@ -115,7 +117,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_filterButton = new FilterButton(((PeptideTableModel) m_peptidesTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peptidesTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -123,8 +125,8 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             }
             
         };
-        m_exportButton = new ExportButton(((PeptideTableModel) m_peptidesTable.getModel()), "Peptides", m_peptidesTable);
-        m_addCompareDataButton = new AddCompareDataButton(((PeptideTableModel) m_peptidesTable.getModel()), (CompareDataInterface) m_peptidesTable.getModel()) {
+        m_exportButton = new ExportButton(((ProgressInterface) m_peptidesTable.getModel()), "Peptides", m_peptidesTable);
+        m_addCompareDataButton = new AddCompareDataButton(((CompoundTableModel) m_peptidesTable.getModel()), (CompareDataInterface) m_peptidesTable.getModel()) {
 
             @Override
             public void actionPerformed(CompareDataInterface compareDataInterface) {
@@ -151,7 +153,11 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         } 
         
         int indexInModelSelected = m_peptidesTable.convertRowIndexToModel(selectedIndex);
-        return ((PeptideTableModel) m_peptidesTable.getModel()).getPeptide(indexInModelSelected);
+        CompoundTableModel compoundTableModel = ((CompoundTableModel)m_peptidesTable.getModel());
+        indexInModelSelected = compoundTableModel.convertCompoundRowToBaseModelRow(indexInModelSelected);
+        
+        
+        return ((PeptideTableModel) compoundTableModel.getBaseModel()).getPeptide(indexInModelSelected);
         
     }
     
@@ -162,14 +168,14 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         }
 
         m_currentProteinMatch = proteinMatch;
-        
+
         if ((proteinMatch == null) || (rsm == null)) {
-            ((PeptideTableModel) m_peptidesTable.getModel()).setData(null);
+            ((PeptideTableModel)((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel()).setData(null);
         } else {
             PeptideSet peptideSet = proteinMatch.getPeptideSet(rsm.getId());
             DPeptideInstance[] peptideInstances = peptideSet.getTransientDPeptideInstances();
 
-            ((PeptideTableModel) m_peptidesTable.getModel()).setData(peptideInstances);
+            ((PeptideTableModel)((CompoundTableModel) m_peptidesTable.getModel()).getBaseModel()).setData(peptideInstances);
 
             // select the first peptide
             if ((peptideInstances != null) && (peptideInstances.length > 0)) {

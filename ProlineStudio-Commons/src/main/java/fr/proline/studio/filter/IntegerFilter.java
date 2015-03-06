@@ -17,8 +17,8 @@ public class IntegerFilter extends Filter {
     private Integer m_min;
     private Integer m_max;
 
-    public IntegerFilter(String variableName) {
-        super(variableName);
+    public IntegerFilter(String variableName, ConvertValueInterface convertValueInterface) {
+        super(FilterType.FILTER_INTEGER, variableName, convertValueInterface);
     }
 
     public boolean filter(int value) {

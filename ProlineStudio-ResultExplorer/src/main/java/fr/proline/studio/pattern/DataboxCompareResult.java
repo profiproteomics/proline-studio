@@ -4,6 +4,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.ResultComparePanel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 
 /**
  *
@@ -49,7 +50,7 @@ public class DataboxCompareResult extends AbstractDataBox {
 
     @Override
     public void dataChanged() {
-        CompareDataInterface dataInterface = (CompareDataInterface) m_previousDataBox.getData(false, CompareDataInterface.class);
+        GlobalTableModelInterface dataInterface = (GlobalTableModelInterface) m_previousDataBox.getData(false, GlobalTableModelInterface.class);
 
         ((ResultComparePanel) m_panel).setData(dataInterface);
 

@@ -22,8 +22,8 @@ public class StringDiffFilter extends Filter {
     private int m_selIndex = 0;
     
     
-    public StringDiffFilter(String variableName) {
-        super(variableName);
+    public StringDiffFilter(String variableName, ConvertValueInterface convertValueInterface) {
+        super(FilterType.FILTER_STRING_DIFF, variableName, convertValueInterface);
     }
 
     public boolean filter(String value) {

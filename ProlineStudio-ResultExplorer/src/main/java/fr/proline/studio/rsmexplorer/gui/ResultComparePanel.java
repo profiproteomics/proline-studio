@@ -4,15 +4,16 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.comparedata.CompareTableModel;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -31,7 +32,7 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
     private AbstractDataBox m_dataBox;
 
 
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     
     private JScrollPane m_dataScrollPane = new JScrollPane();
@@ -67,7 +68,7 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
         m_dataScrollPane = new JScrollPane();
 
         m_dataTable = new DataTable();
-        m_dataTable.setModel(new CompareTableModel(null));
+        m_dataTable.setModel(new CompoundTableModel(new CompareTableModel(null), true));
         
 
 
@@ -94,7 +95,7 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
         toolbar.setFloatable(false);
 
 
-        m_filterButton = new FilterButton(((CompareTableModel) m_dataTable.getModel())) {
+        m_filterButton = new FilterButtonV2((((CompoundTableModel) m_dataTable.getModel()))) {
 
             @Override
             protected void filteringDone() {
@@ -102,7 +103,7 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
             }
             
         };  // does not work for the moment, finish it later
-        m_exportButton = new ExportButton(((CompareTableModel) m_dataTable.getModel()), "Data", m_dataTable);
+        m_exportButton = new ExportButton(((ProgressInterface) m_dataTable.getModel()), "Data", m_dataTable);
 
 
         toolbar.add(m_filterButton);
@@ -112,7 +113,7 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
     }
     
     
-    public void setData(CompareDataInterface dataInterface) {
+    public void setData(GlobalTableModelInterface dataInterface) {
         ((CompareTableModel) m_dataTable.getModel()).setDataInterface(dataInterface);
         m_markerContainerPanel.setMaxLineNumber(dataInterface.getRowCount());
     }

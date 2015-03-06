@@ -1,12 +1,13 @@
 package fr.proline.studio.filter.actions;
 
-import fr.proline.studio.filter.FilterTableModelInterface;
+
+import fr.proline.studio.filter.FilterTableModelInterfaceV2;
 import fr.proline.studio.table.AbstractTableAction;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
 /**
- *
+ * Action used to clear the restrain put on displayed rows of a model
  * @author JM235353
  */
 public class ClearRestrainAction extends AbstractTableAction {
@@ -19,11 +20,11 @@ public class ClearRestrainAction extends AbstractTableAction {
     @Override
     public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
         TableModel tableModel = table.getModel();
-        if (!(tableModel instanceof FilterTableModelInterface)) {
+        if (!(tableModel instanceof FilterTableModelInterfaceV2)) {
             return;
         }
         
-        FilterTableModelInterface filterTableModel = (FilterTableModelInterface) tableModel;
+        FilterTableModelInterfaceV2 filterTableModel = (FilterTableModelInterfaceV2) tableModel;
         
         filterTableModel.restrain(null);
 
@@ -32,12 +33,12 @@ public class ClearRestrainAction extends AbstractTableAction {
     @Override
     public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
         TableModel tableModel = table.getModel();
-        if (!(tableModel instanceof FilterTableModelInterface)) {
+        if (!(tableModel instanceof FilterTableModelInterfaceV2)) {
             setEnabled(false);
             return;
         }
         
-        FilterTableModelInterface filterTableModel = (FilterTableModelInterface) tableModel;
+        FilterTableModelInterfaceV2 filterTableModel = (FilterTableModelInterfaceV2) tableModel;
         setEnabled(filterTableModel.hasRestrain());
         
     }

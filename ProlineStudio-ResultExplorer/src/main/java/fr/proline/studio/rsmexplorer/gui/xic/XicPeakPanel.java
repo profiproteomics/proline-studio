@@ -7,10 +7,8 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ExportColumnTextInterface;
-import fr.proline.studio.filter.FilterButton;
-import fr.proline.studio.filter.actions.ClearRestrainAction;
-import fr.proline.studio.filter.actions.RestrainAction;
+import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -24,10 +22,9 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.table.TablePopupMouseAdapter;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -61,7 +58,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
 
     private MarkerContainerPanel m_markerContainerPanel;
     
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
     
@@ -128,7 +125,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_filterButton = new FilterButton(((PeakTableModel) m_peakTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peakTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -136,7 +133,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
             }
         };
 
-        m_exportButton = new ExportButton(((PeakTableModel) m_peakTable.getModel()), "Peaks", m_peakTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_peakTable.getModel()), "Peaks", m_peakTable);
 
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
@@ -147,9 +144,9 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
         m_graphicsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!((PeakTableModel) m_peakTable.getModel()).isLoaded()) {
+                if (!((CompoundTableModel) m_peakTable.getModel()).isLoaded()) {
 
-                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((PeakTableModel) m_peakTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((CompoundTableModel) m_peakTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
                     dialog.setLocation(getLocationOnScreen().x + m_graphicsButton.getWidth() + 5, m_graphicsButton.getLocationOnScreen().y + getHeight() + 5);
                     dialog.setVisible(true);
 
@@ -187,7 +184,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
         m_peakScrollPane = new JScrollPane();
         
         m_peakTable = new PeakTable();
-        m_peakTable.setModel(new PeakTableModel((LazyTable)m_peakTable));
+        m_peakTable.setModel(new CompoundTableModel(new PeakTableModel((LazyTable)m_peakTable), true));
         
         
         m_peakTable.setSortable(false);
@@ -209,7 +206,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
     }                 
     
     public void setData(Long taskId,  Feature feature, Peakel peakel, Integer isotopeIndex, List<Peak> peaks, Color color, String title, boolean finished) {
-        ((PeakTableModel) m_peakTable.getModel()).setData(taskId, feature, peakel,  isotopeIndex, peaks, color, title);
+        ((PeakTableModel)((CompoundTableModel) m_peakTable.getModel()).getBaseModel()).setData(taskId, feature, peakel,  isotopeIndex, peaks, color, title);
 
         // select the first row
         if ((peaks != null) && (peaks.size() > 0)) {
@@ -268,7 +265,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
         return m_peakTable;
     }
     
-    private class PeakTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface  {
+    private class PeakTable extends LazyTable implements ExportModelInterface  {
 
         private Peak m_peakSelected = null;
         
@@ -300,8 +297,13 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
         }
         
         public boolean selectPeak(Long peakId, String searchText) {
-            PeakTableModel tableModel = (PeakTableModel) getModel();
+
+            PeakTableModel tableModel = (PeakTableModel) ((CompoundTableModel)getModel()).getBaseModel();
             int row = tableModel.findRow(peakId);
+            if (row == -1) {
+                return false;
+            }
+            row = ((CompoundTableModel)getModel()).convertBaseModelRowToCompoundRow(row);
             if (row == -1) {
                 return false;
             }
@@ -340,7 +342,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
             
             selectionWillBeRestored(true);
             try {
-                ((PeakTableModel) getModel()).dataUpdated();
+                ((PeakTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
             } finally {
                 selectionWillBeRestored(false);
             }
@@ -356,7 +358,7 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((PeakTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
                     scrollRowToVisible(rowSelectedInView);
                 }
                     
@@ -393,11 +395,6 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
         }
         
 
-        @Override
-        public HashSet exportSelection(int[] rows) {
-            PeakTableModel tableModel = (PeakTableModel) getModel();
-            return tableModel.exportSelection(rows);
-        }
 
         public Peak getSelectedPeak() {
 
@@ -410,22 +407,31 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
 
             }
 
-            PeakTableModel tableModel = (PeakTableModel) getModel();
-            if (tableModel.getRowCount() == 0) {
+            
+             CompoundTableModel compoundTableModel = (CompoundTableModel) getModel();
+            if (compoundTableModel.getRowCount() == 0) {
                 return null; // this is a wart, for an unknown reason, it happens that the first row
                 // is selected although it does not exist.
             }
 
             // convert according to the sorting
             selectedRow = convertRowIndexToModel(selectedRow);
+            selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
-            // Retrieve Peptide selected
+            // Retrieve PeptideIon selected
+            PeakTableModel tableModel = (PeakTableModel) compoundTableModel.getBaseModel();
             return tableModel.getPeak(selectedRow);
+
         }
 
         @Override
         public String getExportColumnName(int col) {
-            return ((PeakTableModel) m_peakTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+            return ((CompoundTableModel) m_peakTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+        }
+        
+        @Override
+        public String getExportRowCell(int row, int col) {
+            return ((CompoundTableModel) m_peakTable.getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
         }
 
         @Override
@@ -438,6 +444,8 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
         public void prepostPopupMenu() {
             // nothing to do
         }
+
+
 
         
     }

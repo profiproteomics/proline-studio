@@ -6,8 +6,8 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ExportColumnTextInterface;
-import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -23,10 +23,9 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.table.TablePopupMouseAdapter;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,7 +36,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.util.HashSet;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLayeredPane;
@@ -60,7 +58,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
 
     private MarkerContainerPanel m_markerContainerPanel;
     
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
     
@@ -127,7 +125,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_filterButton = new FilterButton(((PeakelTableModel) m_peakelTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peakelTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -135,7 +133,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
             }
         };
 
-        m_exportButton = new ExportButton(((PeakelTableModel) m_peakelTable.getModel()), "Peakels", m_peakelTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_peakelTable.getModel()), "Peakels", m_peakelTable);
 
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
@@ -146,9 +144,9 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
         m_graphicsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!((PeakelTableModel) m_peakelTable.getModel()).isLoaded()) {
+                if (!((CompoundTableModel) m_peakelTable.getModel()).isLoaded()) {
 
-                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((PeakelTableModel) m_peakelTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((CompoundTableModel) m_peakelTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
                     dialog.setLocation(getLocationOnScreen().x + m_graphicsButton.getWidth() + 5, m_graphicsButton.getLocationOnScreen().y + getHeight() + 5);
                     dialog.setVisible(true);
 
@@ -186,7 +184,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
         m_peakelScrollPane = new JScrollPane();
         
         m_peakelTable = new PeakelTable();
-        m_peakelTable.setModel(new PeakelTableModel((LazyTable)m_peakelTable));
+        m_peakelTable.setModel(new CompoundTableModel(new PeakelTableModel((LazyTable)m_peakelTable), true));
         
         // hide the id column
         m_peakelTable.getColumnExt(PeakelTableModel.COLTYPE_PEAKEL_ID).setVisible(false);
@@ -281,11 +279,8 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
         return m_peakelTable;
     }
     
-    private class PeakelTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface  {
+    private class PeakelTable extends LazyTable implements ExportModelInterface {
 
-        private Peakel m_peakelSelected = null;
-        
-        
         public PeakelTable() {
             super(m_peakelScrollPane.getVerticalScrollBar() );
             
@@ -312,8 +307,13 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
         }
         
         public boolean selectPeakel(Long peakelId, String searchText) {
-            PeakelTableModel tableModel = (PeakelTableModel) getModel();
+
+            PeakelTableModel tableModel = (PeakelTableModel) ((CompoundTableModel)getModel()).getBaseModel();
             int row = tableModel.findRow(peakelId);
+            if (row == -1) {
+                return false;
+            }
+            row = ((CompoundTableModel)getModel()).convertBaseModelRowToCompoundRow(row);
             if (row == -1) {
                 return false;
             }
@@ -352,7 +352,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
             
             selectionWillBeRestored(true);
             try {
-                ((PeakelTableModel) getModel()).dataUpdated();
+                ((PeakelTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
             } finally {
                 selectionWillBeRestored(false);
             }
@@ -368,7 +368,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((PeakelTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
                     scrollRowToVisible(rowSelectedInView);
                 }
                     
@@ -405,11 +405,6 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
         }
         
 
-        @Override
-        public HashSet exportSelection(int[] rows) {
-            PeakelTableModel tableModel = (PeakelTableModel) getModel();
-            return tableModel.exportSelection(rows);
-        }
 
         public Peakel getSelectedPeakel() {
 
@@ -422,17 +417,21 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
 
             }
 
-            PeakelTableModel tableModel = (PeakelTableModel) getModel();
-            if (tableModel.getRowCount() == 0) {
+                        
+            CompoundTableModel compoundTableModel = (CompoundTableModel) getModel();
+            if (compoundTableModel.getRowCount() == 0) {
                 return null; // this is a wart, for an unknown reason, it happens that the first row
                 // is selected although it does not exist.
             }
 
             // convert according to the sorting
             selectedRow = convertRowIndexToModel(selectedRow);
+            selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
-            // Retrieve Peptide selected
-            return tableModel.getPeakel(selectedRow);
+            // Retrieve PeptideIon selected
+            PeakelTableModel peakelTableModel = (PeakelTableModel) compoundTableModel.getBaseModel();
+            return peakelTableModel.getPeakel(selectedRow);
+
         }
         
         public Feature getFeature() {
@@ -452,7 +451,12 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
 
         @Override
         public String getExportColumnName(int col) {
-            return ((PeakelTableModel) m_peakelTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+            return ((CompoundTableModel) m_peakelTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+        }
+        
+        @Override
+        public String getExportRowCell(int row, int col) {
+            return null; // no specific export
         }
 
         @Override
@@ -470,6 +474,8 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
         public void prepostPopupMenu() {
             // nothing to do
         }
+
+
 
         
     }

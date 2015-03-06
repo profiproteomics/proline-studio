@@ -18,9 +18,9 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
-import fr.proline.studio.table.TablePopupMouseAdapter;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -132,7 +132,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
         m_peptideScrollPane = new JScrollPane();
         
         m_peptideTable = new PeptideTable();
-        m_peptideTable.setModel(new PeptideTableModel((LazyTable)m_peptideTable));
+        m_peptideTable.setModel(new CompoundTableModel(new PeptideTableModel((LazyTable)m_peptideTable), true));
         
         
         m_peptideTable.setSortable(false);
@@ -159,7 +159,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
     public void setData(DQuantitationChannel[] quantChannels,  DMasterQuantPeptide peptide) {
         m_quantChannels = quantChannels;
         m_peptide = peptide ;
-        ((PeptideTableModel) m_peptideTable.getModel()).setData( quantChannels, peptide);
+        ((PeptideTableModel) ((CompoundTableModel) m_peptideTable.getModel()).getBaseModel()).setData( quantChannels, peptide);
         // select the first row
         if (peptide != null && m_quantChannels != null && m_quantChannels.length > 0) {
             m_peptideTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -207,7 +207,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
 
     @Override
     public CrossSelectionInterface getCrossSelectionInterface() {
-        return (CrossSelectionInterface) m_peptideTable.getModel();
+        return m_peptideTable;
     }
     
     private class PeptideTable extends LazyTable {
@@ -248,7 +248,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
             
             selectionWillBeRestored(true);
             try {
-                ((PeptideTableModel) getModel()).dataUpdated();
+                ((PeptideTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
             } finally {
                 selectionWillBeRestored(false);
             }
@@ -264,7 +264,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
                 
                 // if the subtask correspond to the loading of the data of the sorted column,
                 // we keep the row selected visible
-                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((PeptideTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
+                if (((keepLastAction == LastAction.ACTION_SELECTING ) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId( getSortedColumnIndex() )) ) {
                     scrollRowToVisible(rowSelectedInView);
                 }
                     

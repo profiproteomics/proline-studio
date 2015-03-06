@@ -8,7 +8,7 @@ import fr.proline.studio.filter.FilterTableModel;
  * Table Model to deal with LazyData (data which will be loaded later)
  * @author JM235353
  */
-public abstract class LazyTableModel extends FilterTableModel {
+public abstract class LazyTableModel extends DecoratedTableModel implements LazyTableModelInterface {
     
     protected LazyTable m_table;
     protected Long m_taskId = null;
@@ -30,7 +30,7 @@ public abstract class LazyTableModel extends FilterTableModel {
      * @param col
      * @return 
      */
-    protected LazyData getLazyData(int row, int col) {
+    public LazyData getLazyData(int row, int col) {
         
         int sortedColumn = ((LazyTable) m_table).getSortedColumnIndex();
         sortedColumn = (sortedColumn == -1) ? -1 : m_table.convertColumnIndexToModel(sortedColumn);
@@ -61,7 +61,7 @@ public abstract class LazyTableModel extends FilterTableModel {
      * @param row
      * @param col 
      */
-    protected void givePriorityTo(Long taskId, int row, int col) {
+    public void givePriorityTo(Long taskId, int row, int col) {
         int sortedCol = m_table.getSortedColumnIndex();
         if (sortedCol ==-1) {
             AccessDatabaseThread.getAccessDatabaseThread().addPriorityIndex(taskId, row);

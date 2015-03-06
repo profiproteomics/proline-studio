@@ -86,6 +86,7 @@ public abstract class FilterTableModel extends DecoratedTableModel implements Fi
         return m_restrainIds;
     }
     
+    @Override
     public boolean hasRestrain() {
         return (m_restrainIds != null) && (!m_restrainIds.isEmpty());
     }

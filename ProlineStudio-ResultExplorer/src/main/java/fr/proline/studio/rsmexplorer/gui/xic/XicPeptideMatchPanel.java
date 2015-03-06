@@ -7,9 +7,8 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ExportColumnTextInterface;
-import fr.proline.studio.export.ExportRowTextInterface;
-import fr.proline.studio.filter.FilterButton;
+import fr.proline.studio.export.ExportModelInterface;
+import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
@@ -22,7 +21,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
-import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableCellRenderer;
 import fr.proline.studio.table.TablePopupMenu;
@@ -35,7 +34,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JLabel;
@@ -58,7 +56,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
 
     private MarkerContainerPanel m_markerContainerPanel;
 
-    private FilterButton m_filterButton;
+    private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
 
     private JLabel m_titleLabel;
@@ -126,7 +124,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-        m_filterButton = new FilterButton(((XicPeptideMatchTableModel) m_psmTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_psmTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -134,7 +132,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
             }
         };
 
-        m_exportButton = new ExportButton(((XicPeptideMatchTableModel) m_psmTable.getModel()), "PSM", m_psmTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_psmTable.getModel()), "PSM", m_psmTable);
 
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
@@ -156,7 +154,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         m_psmScrollPane = new JScrollPane();
 
         m_psmTable = new XicPeptideMatchTable();
-        m_psmTable.setModel(new XicPeptideMatchTableModel((LazyTable) m_psmTable));
+        m_psmTable.setModel(new CompoundTableModel(new XicPeptideMatchTableModel((LazyTable) m_psmTable), true));
         m_psmTable.setTableRenderer();
 
         // hide the id column
@@ -243,7 +241,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         return m_psmTable;
     }
 
-    private class XicPeptideMatchTable extends LazyTable implements ExportTableSelectionInterface, ExportColumnTextInterface, ExportRowTextInterface {
+    private class XicPeptideMatchTable extends LazyTable implements ExportModelInterface {
 
         private DPeptideMatch m_psmSelected = null;
 
@@ -283,12 +281,17 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         }
 
         public boolean selectPSM(Long peptideMatchId, String searchText) {
-            XicPeptideMatchTableModel tableModel = (XicPeptideMatchTableModel) getModel();
+
+            XicPeptideMatchTableModel tableModel = (XicPeptideMatchTableModel) ((CompoundTableModel)getModel()).getBaseModel();
             int row = tableModel.findRow(peptideMatchId);
             if (row == -1) {
                 return false;
             }
-
+            row = ((CompoundTableModel)getModel()).convertBaseModelRowToCompoundRow(row);
+            if (row == -1) {
+                return false;
+            }
+            
             // JPM.hack we need to keep the search text
             // to be able to give it if needed to the panel
             // which display proteins of a protein set
@@ -321,7 +324,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
             // Update Model (but protein set table must not react to the model update)
                 selectionWillBeRestored(true);
                 try {
-                    ((XicPeptideMatchTableModel) getModel()).dataUpdated();
+                    ((XicPeptideMatchTableModel) (((CompoundTableModel) getModel()).getBaseModel())).dataUpdated();
                 } finally {
                     selectionWillBeRestored(false);
                 }
@@ -334,7 +337,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
 
                 // if the subtask correspond to the loading of the data of the sorted column,
                     // we keep the row selected visible
-                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((XicPeptideMatchTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
+                    if (((keepLastAction == LastAction.ACTION_SELECTING) || (keepLastAction == LastAction.ACTION_SORTING)) && (subTask.getSubTaskId() == ((CompoundTableModel) getModel()).getSubTaskId(getSortedColumnIndex()))) {
                         scrollRowToVisible(rowSelectedInView);
                     }
 
@@ -371,11 +374,6 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
             return m_dataBox.isLoaded();
         }
 
-        @Override
-        public HashSet exportSelection(int[] rows) {
-            XicPeptideMatchTableModel tableModel = (XicPeptideMatchTableModel) getModel();
-            return tableModel.exportSelection(rows);
-        }
 
         public DPeptideMatch getSelectedPSM() {
 
@@ -388,40 +386,52 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
 
             }
 
-            XicPeptideMatchTableModel tableModel = (XicPeptideMatchTableModel) getModel();
-            if (tableModel.getRowCount() == 0) {
+                                    
+            CompoundTableModel compoundTableModel = (CompoundTableModel) getModel();
+            if (compoundTableModel.getRowCount() == 0) {
                 return null; // this is a wart, for an unknown reason, it happens that the first row
                 // is selected although it does not exist.
             }
 
             // convert according to the sorting
             selectedRow = convertRowIndexToModel(selectedRow);
+            selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
 
-            // Retrieve Peptide selected
+            // Retrieve PeptideIon selected
+            XicPeptideMatchTableModel tableModel = (XicPeptideMatchTableModel) compoundTableModel.getBaseModel();
             return tableModel.getPSM(selectedRow);
+
         }
 
         @Override
         public String getExportColumnName(int col) {
-            return ((XicPeptideMatchTableModel) m_psmTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+            return ((CompoundTableModel) m_psmTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
         }
 
+        @Override
+        public String getExportRowCell(int row, int col) {
+            return ((CompoundTableModel) getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
+        }
+        
         //Implement table cell tool tips.
         @Override
         public String getToolTipText(MouseEvent e) {
             Point p = e.getPoint();
             int rowIndex = rowAtPoint(p);
+            if (rowIndex<0) {
+                return null;
+            }
             int colIndex = columnAtPoint(p);
+            if (colIndex<0) {
+                return null;
+            }
             int realColumnIndex = convertColumnIndexToModel(colIndex);
             int realRowIndex = convertRowIndexToModel(rowIndex);
-            XicPeptideMatchTableModel tableModel = (XicPeptideMatchTableModel) getModel();
+            CompoundTableModel tableModel = (CompoundTableModel) getModel();
             return tableModel.getTootlTipValue(realRowIndex, realColumnIndex);
         }
 
-        @Override
-        public String getExportRowCell(int row, int col) {
-            return ((XicPeptideMatchTableModel) getModel()).getExportRowCell(convertRowIndexToModel(row), convertColumnIndexToModel(col));
-        }
+
         
         @Override
         public TablePopupMenu initPopupMenu() {

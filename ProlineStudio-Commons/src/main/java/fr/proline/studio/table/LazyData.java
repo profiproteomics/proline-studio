@@ -1,9 +1,11 @@
 package fr.proline.studio.table;
 
+import fr.proline.studio.filter.ConvertValueInterface;
+
 /**
  * LazyData can wrap any sort of data which will be loaded later.
  */
-public class LazyData implements Comparable<LazyData> {
+public class LazyData implements Comparable<LazyData>  {
 
     private Comparable m_data = null;
 
@@ -50,4 +52,5 @@ public class LazyData implements Comparable<LazyData> {
             return super.toString();
         return m_data.toString();
     }
+
 }

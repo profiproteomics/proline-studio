@@ -137,6 +137,7 @@ public class DataboxChildFeature extends AbstractDataBox {
         m_childFeatureList = new ArrayList();
         m_featureHasPeak = new ArrayList();
         m_peakelList = new ArrayList();
+        m_peakList = new ArrayList();
         
         DatabaseLoadLcMSTask task = new DatabaseLoadLcMSTask(callback);
         task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_childFeatureList, m_peakelList);

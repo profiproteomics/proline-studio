@@ -32,12 +32,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -255,6 +253,12 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         m_featureTable.setModel(new CompoundTableModel(new FeatureTableModel((LazyTable)m_featureTable), true));
         m_featureTable.setTableRenderer();
         
+        
+        // hide the columns
+        List<Integer> listIdsToHide = ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
+        for (Integer id : listIdsToHide) {
+            m_featureTable.getColumnExt(id.intValue()).setVisible(false);
+        }
         // hide the id column
         m_featureTable.getColumnExt(FeatureTableModel.COLTYPE_FEATURE_ID).setVisible(false);
         
@@ -286,11 +290,6 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         }
         if (finished) {
             m_featureTable.setSortable(true);
-            // hide the columns
-            /*List<Integer> listIdsToHide = ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
-            for (Integer id : listIdsToHide) {
-                m_featureTable.getColumnExt(id.intValue()).setVisible(false);
-            }*/
         }
     }
     
@@ -298,11 +297,6 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         m_featureTable.dataUpdated(subTask, finished);
         if (finished) {
             m_featureTable.setSortable(true);
-            // hide the columns
-            /*List<Integer> listIdsToHide = ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
-            for (Integer id : listIdsToHide) {
-                m_featureTable.getColumnExt(id.intValue()).setVisible(false);
-            }*/
         }
     }
     
@@ -580,22 +574,22 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         }
         
         //Implement table cell tool tips.
-        @Override
-        public String getToolTipText(MouseEvent e) {
-            Point p = e.getPoint();
-            int rowIndex = rowAtPoint(p);
-            if (rowIndex<0) {
-                return null;
-            }
-            int colIndex = columnAtPoint(p);
-            if (colIndex<0) {
-                return null;
-            }
-            int realColumnIndex = convertColumnIndexToModel(colIndex);
-            int realRowIndex = convertRowIndexToModel(rowIndex);
-
-            return ((CompoundTableModel)getModel()).getTootlTipValue(realRowIndex, realColumnIndex);
-        }
+//        @Override
+//        public String getToolTipText(MouseEvent e) {
+//            Point p = e.getPoint();
+//            int rowIndex = rowAtPoint(p);
+//            if (rowIndex<0) {
+//                return null;
+//            }
+//            int colIndex = columnAtPoint(p);
+//            if (colIndex<0) {
+//                return null;
+//            }
+//            int realColumnIndex = convertColumnIndexToModel(colIndex);
+//            int realRowIndex = convertRowIndexToModel(rowIndex);
+//
+//            return ((CompoundTableModel)getModel()).getTootlTipValue(realRowIndex, realColumnIndex);
+//        }
 
 
         

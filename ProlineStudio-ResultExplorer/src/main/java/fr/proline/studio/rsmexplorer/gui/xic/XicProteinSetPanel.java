@@ -928,7 +928,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
                     }
                 };
 
-                Long rsmId = ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel()).getResultSummaryId();
+                Long rsmId = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getResultSummaryId();
 
 
                 // Load data if needed asynchronously

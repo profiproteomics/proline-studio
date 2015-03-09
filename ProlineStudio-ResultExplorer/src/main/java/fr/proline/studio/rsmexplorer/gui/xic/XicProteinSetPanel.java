@@ -787,7 +787,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         @Override
         protected boolean okCalled() {
 
-            QuantProteinSetTableModel model = ((QuantProteinSetTableModel) m_quantProteinSetTable.getModel());
+            QuantProteinSetTableModel model = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel());
             
             List<TableColumn> columns = m_quantProteinSetTable.getColumns(true);
             for (int i=QuantProteinSetTableModel.LAST_STATIC_COLUMN+1;i<columns.size();i++) {

@@ -198,7 +198,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                XICPeptideColumnsVisibilityDialog dialog = new XICPeptideColumnsVisibilityDialog(WindowManager.getDefault().getMainWindow(), m_quantPeptideTable, (QuantPeptideTableModel) m_quantPeptideTable.getModel() );
+                XICPeptideColumnsVisibilityDialog dialog = new XICPeptideColumnsVisibilityDialog(WindowManager.getDefault().getMainWindow(), m_quantPeptideTable, (QuantPeptideTableModel)((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel() );
                 dialog.setLocation(m_columnVisibilityButton.getLocationOnScreen().x +m_columnVisibilityButton.getWidth(), m_columnVisibilityButton.getLocationOnScreen().y + m_columnVisibilityButton.getHeight());
                 dialog.setVisible(true);
             }

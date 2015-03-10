@@ -6,8 +6,6 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
-import javax.swing.table.TableModel;
-import org.jdesktop.swingx.JXTable;
 import org.openide.windows.WindowManager;
 
 /**

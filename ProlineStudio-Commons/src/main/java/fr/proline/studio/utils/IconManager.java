@@ -118,7 +118,8 @@ public class IconManager {
         LOCK,
         UNLOCK,
         COLOR_PICKER,
-        CHART_ARROW;
+        CHART_ARROW,
+        CALCULATOR;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -417,6 +418,8 @@ public class IconManager {
                return "fr/proline/studio/images/color.png";
            case CHART_ARROW:
                return "fr/proline/studio/images/chart-arrow.png";
+           case CALCULATOR:
+               return "fr/proline/studio/images/calculator.png";
         }
 
 

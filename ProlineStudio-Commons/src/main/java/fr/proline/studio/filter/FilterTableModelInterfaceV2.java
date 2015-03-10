@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
  */
 public interface FilterTableModelInterfaceV2 extends GlobalTableModelInterface {
 
+    public void setTableModelSource(GlobalTableModelInterface tableModelSource);
+    public GlobalTableModelInterface getTableModelSource();
     
     public void initFilters();
     

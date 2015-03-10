@@ -5,7 +5,6 @@ import fr.proline.studio.filter.FilterTableModelInterfaceV2;
 import fr.proline.studio.filter.FilterTableModelV2;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,10 +21,7 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     private GlobalTableModelInterface m_baseModel = null;
     private GlobalTableModelInterface m_lastModel = null;
     private FilterTableModelInterfaceV2 m_filterModel = null;
-    
-    
-    private ArrayList<LazyTableModel> m_models = new ArrayList<>();
-    
+
     public CompoundTableModel(GlobalTableModelInterface baseModel, boolean filterCapability) {
         m_baseModel = baseModel;
         m_lastModel = baseModel;
@@ -34,8 +30,32 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
         
     }
 
+    public void addModel(ChildModelInterface model) {
+        
+        ((AbstractTableModel)m_lastModel).removeTableModelListener(this);
+        
+        if (m_filterModel != null) {
+            model.setParentModel(m_filterModel.getTableModelSource());
+            m_filterModel.setTableModelSource(model);
+        } else {
+            model.setParentModel(m_lastModel);
+            m_lastModel = model;
+        }
+        
+        ((AbstractTableModel)m_lastModel).addTableModelListener(this);
+        ((AbstractTableModel)model).fireTableStructureChanged();
+    }
+    
     public GlobalTableModelInterface getBaseModel() {
         return m_baseModel;
+    }
+    
+    public GlobalTableModelInterface getLastNonFilterModel() {
+        if (m_filterModel == null) {
+            return m_lastModel;
+        } else {
+            return m_filterModel.getTableModelSource();
+        }
     }
     
     public int convertCompoundRowToBaseModelRow(int row) {
@@ -81,7 +101,7 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     @Override
     public void initFilters() {
         if (m_filterModel == null) {
-            m_filterModel = new FilterTableModelV2(m_baseModel);
+            m_filterModel = new FilterTableModelV2(m_lastModel);
             m_lastModel = m_filterModel;
             m_filterModel.addTableModelListener(this);
         }
@@ -290,6 +310,16 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     @Override
     public String getExportColumnName(int col) {
         return m_lastModel.getExportColumnName(col);
+    }
+
+    @Override
+    public void setTableModelSource(GlobalTableModelInterface tableModelSource) {
+        // nothing to do
+    }
+
+    @Override
+    public GlobalTableModelInterface getTableModelSource() {
+        return null;
     }
 
 

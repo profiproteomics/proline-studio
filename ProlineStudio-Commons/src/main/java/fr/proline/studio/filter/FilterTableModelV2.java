@@ -11,13 +11,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
 /**
  * Model use to filter data and/or restrain rows of another model
  * @author JM235353
  */
-public class FilterTableModelV2 extends DecoratedTableModel implements FilterTableModelInterfaceV2 {
+public class FilterTableModelV2 extends DecoratedTableModel implements FilterTableModelInterfaceV2, TableModelListener {
 
     protected LinkedHashMap<Integer, Filter> m_filters = null;
     protected HashSet<Integer> m_restrainIds = null;
@@ -32,10 +34,19 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
         setTableModelSource(tableModelSource);
     }
     
+    @Override
     public void setTableModelSource(GlobalTableModelInterface tableModelSource) {
+        if (m_tableModelSource != null) {
+            m_tableModelSource.removeTableModelListener(this);
+        }
         m_tableModelSource = tableModelSource;
-        
+        m_tableModelSource.addTableModelListener(this);
         initFilters();
+    }
+    
+    @Override
+    public GlobalTableModelInterface getTableModelSource() {
+        return m_tableModelSource;
     }
     
     @Override
@@ -156,12 +167,7 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     public void filter() {
         try {
         int nbData = ((AbstractTableModel) m_tableModelSource).getRowCount();
-        
-        /*if (nbData == 0) {
-            // filtering not possible for the moment
-            m_filteringAsked = true;
-            return;
-        }*/
+
         
         m_isFiltering = true;
         try {
@@ -346,6 +352,11 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     @Override
     public String getExportColumnName(int col) {
         return m_tableModelSource.getExportColumnName(col);
+    }
+
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        filter();
     }
     
 }

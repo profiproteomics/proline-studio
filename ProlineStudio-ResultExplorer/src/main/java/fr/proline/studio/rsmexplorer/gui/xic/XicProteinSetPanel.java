@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.calc.CalcDialog;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
@@ -24,6 +25,7 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
+import fr.proline.studio.rserver.JythonTest;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayIdentificationProteinSetsAction;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
@@ -85,6 +87,9 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     private JButton m_columnVisibilityButton;
     private AddCompareDataButton m_addCompareDataButton;
     
+    private JButton m_testButton;
+    
+
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
     private XICProteinSetSearch m_search = null;
@@ -205,6 +210,20 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             }
         };
         toolbar.add(m_addCompareDataButton);
+        
+        m_testButton = new JButton(IconManager.getIcon(IconManager.IconType.CALCULATOR));
+        m_testButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CalcDialog dialog = CalcDialog.getCalcDialog(null, m_quantProteinSetTable);
+                dialog.setVisible(true);
+                //JythonTest.test(m_quantProteinSetTable);
+    
+            }
+
+        });
+        toolbar.add(m_testButton);
         
         return toolbar;
     }

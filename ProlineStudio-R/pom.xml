@@ -23,14 +23,24 @@
         Versions are based on IDE releases, e.g.: RELEASE691
         To create your own repository, use: nbm:populate-repository
         -->
-        <repository>
+        
+        <!--<repository>
+            <id>bedatadriven</id>
+            <name>bedatadriven public repo</name>
+            <url>http://nexus.bedatadriven.com/content/groups/public/</url>
+        </repository> -->
+        
+        <!-- <repository>
             <id>netbeans</id>
             <name>NetBeans</name>
             <url>http://bits.netbeans.org/maven2/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </repository>
+        </repository> -->
+
+
+
     </repositories>
 
     <dependencies>
@@ -90,7 +100,40 @@
             <version>${netbeans.version}</version>
             <type>nbm</type>
         </dependency>
+        
+        
+        <dependency>
+	  <groupId>org.python</groupId>
+	  <artifactId>jython</artifactId>
+	  <version>2.2</version>
+        </dependency>
+        
+        <dependency>
+	  <groupId>org.apache.commons</groupId>
+	  <artifactId>commons-math</artifactId>
+	  <version>2.0</version>
+        </dependency>
+        
+
+
+
+        
+       <!-- <dependency>
+            <groupId>org.renjin</groupId>
+            <artifactId>renjin-script-engine</artifactId>
+            <version>0.7.0-RC7</version>
+        </dependency> -->
+        
+        <!-- <dependency>
+      <groupId>org.renjin</groupId>  
+       <artifactId>renjin-script-engine</artifactId>  
+       <version>0.7.0-RC7</version> 
+      <scope>system</scope>
+<systemPath>D://renjin/renjin-script-engine-0.7.0-RC7-jar-with-dependencies.jar</systemPath>
+</dependency> -->
+        
     </dependencies>
+
 
 
 
@@ -103,7 +146,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publicPackages>
-                        <publicPackage>fr.proline.studio.rserver</publicPackage>
+                        <publicPackage>fr.proline.studio.calc</publicPackage>
+                        <publicPackage>fr.proline.studio.python.data</publicPackage>
+                        <publicPackage>fr.proline.studio.python.math</publicPackage>
+                        <publicPackage>fr.proline.studio.rserver.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

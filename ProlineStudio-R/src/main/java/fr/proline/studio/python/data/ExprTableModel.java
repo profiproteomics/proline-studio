@@ -132,7 +132,10 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
-        return getValueAt(rowIndex, columnIndex);
+        if (columnIndex>=m_parentModel.getColumnCount()) {
+            return m_column.getValueAt(rowIndex);
+        }
+        return m_parentModel.getDataValueAt(rowIndex, columnIndex);
     }
 
     @Override

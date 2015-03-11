@@ -119,7 +119,8 @@ public class IconManager {
         UNLOCK,
         COLOR_PICKER,
         CHART_ARROW,
-        CALCULATOR;
+        CALCULATOR,
+        MZSCOPE;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -420,6 +421,8 @@ public class IconManager {
                return "fr/proline/studio/images/chart-arrow.png";
            case CALCULATOR:
                return "fr/proline/studio/images/calculator.png";
+           case MZSCOPE:
+               return "fr/proline/studio/images/mzscope.png";
         }
 
 

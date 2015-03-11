@@ -11,6 +11,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
@@ -260,7 +261,10 @@ public class DataboxChildFeature extends AbstractDataBox {
                 return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                ((CompareDataProviderInterface) m_panel).getCrossSelectionInterface();
+                return ((CompareDataProviderInterface) m_panel).getCrossSelectionInterface();
+            }
+            if (parameterType.equals(MzScopeInterface.class)) {
+                return ((XicFeaturePanel) m_panel).getMzScopeInterface();
             }
         }
         return super.getData(getArray, parameterType);

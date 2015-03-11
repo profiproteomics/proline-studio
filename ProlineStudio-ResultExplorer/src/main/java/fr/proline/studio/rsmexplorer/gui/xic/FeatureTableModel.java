@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
@@ -8,6 +9,7 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
@@ -25,7 +27,7 @@ import java.util.Map;
  *
  * @author JM235353
  */
-public class FeatureTableModel extends LazyTableModel implements GlobalTableModelInterface {
+public class FeatureTableModel extends LazyTableModel implements GlobalTableModelInterface, MzScopeInterface {
 
     public static final int COLTYPE_FEATURE_ID = 0;
     public static final int COLTYPE_FEATURE_MAP_NAME = 1;
@@ -712,6 +714,24 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     
     public Boolean isInItalic(int row) {
         return !hasFeaturePeaks(row);
+    }
+
+    @Override
+    public List<String> getMzdbFileName() {
+        List<String> fileNames = new ArrayList();
+        for (Feature feature : m_features) {
+            DQuantitationChannel qc = m_quantChannelInfo.getQuantChannelForMap(feature.getMap().getId());
+            if (qc != null) {
+                if (qc.getMzdbFileName() != null) {
+                    String fn = qc.getMzdbFileName()+".mzdb";
+                    if (!fileNames.contains(fn)) {
+                        fileNames.add(fn);
+                    }
+                }
+            }
+        }
+        
+        return fileNames;
     }
 
 

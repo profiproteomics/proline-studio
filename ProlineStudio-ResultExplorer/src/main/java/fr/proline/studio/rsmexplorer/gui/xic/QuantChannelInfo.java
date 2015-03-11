@@ -54,16 +54,16 @@ public class QuantChannelInfo {
         return null;
     }
     
-    private int getQCId(long mapId) {
-        int id = 0;
-        for (DQuantitationChannel m_quantChannel : m_quantChannels) {
-            if (compareMap( m_quantChannel, mapId)) {
-                return id;
+    
+    public DQuantitationChannel getQuantChannelForMap(long mapId) {
+        for (DQuantitationChannel quantChannel : m_quantChannels) {
+            if (compareMap( quantChannel, mapId)) {
+                return quantChannel;
             }
-            id++;
         }
-        return -1;
+        return null;
     }
+    
     
     private boolean compareMap(DQuantitationChannel m_quantChannel, Long mapId) {
         Long lcmsRawMapId = m_quantChannel.getLcmsRawMapId();

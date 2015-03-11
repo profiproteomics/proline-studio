@@ -87,7 +87,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataboxGraphics(27),
         DataboxXicChildFeature(28),
         DataboxMultiGraphics(29),
-        DataboxPSMOfMasterQuantPeptide(30);
+        DataboxPSMOfMasterQuantPeptide(30),
+        DataBoxMzScope(31);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -162,6 +163,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxMultiGraphics();
                 case DataboxPSMOfMasterQuantPeptide:
                     return new DataboxPSMOfMasterQuantPeptide();
+                 case DataBoxMzScope:
+                    return new DataBoxMzScope();
             }
             return null; // should not happen
         }

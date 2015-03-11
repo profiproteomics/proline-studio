@@ -238,20 +238,15 @@ public class WindowBoxFactory {
         return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
-//    public static WindowBox getXicQuantMapWindowBox(String name) {
-//        // create boxes
-//        AbstractDataBox[] boxes = new AbstractDataBox[4];
-//        boxes[0] = new DataboxXicMap();
-//        
-//        boxes[1] = new DataboxXicFeature();
-//        boxes[2] = new DataboxXicPeakel();
-//        boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
-//        boxes[3] = new DataboxXicPeak();
-//        
-//        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-//        return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
-//    }
-    
+    public static WindowBox getMzScopeWindowBox() {
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxMzScope();
+
+        WindowBox winBox = new WindowBox("MzScope", generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.MZSCOPE));
+
+        return winBox;
+    }
+
     public static WindowBox getTaskListWindowBox() {
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataBoxTaskList();

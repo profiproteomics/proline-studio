@@ -11,6 +11,8 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.mzscope.AddMzScopeButton;
+import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.WindowBox;
@@ -63,6 +65,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
     private JButton m_graphicsTypeButton;
+    private AddMzScopeButton m_mzscopeButton;
     
    public static final int VIEW_ALL_GRAPH_PEAKS = 0;
    public static final int VIEW_ALL_ISOTOPES_FOR_FEATURE = 1;
@@ -209,6 +212,32 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             toolbar.add(m_graphicsTypeButton);
         }
         
+        // mzscope
+        m_mzscopeButton = new AddMzScopeButton(((CompoundTableModel) m_featureTable.getModel()), (FeatureTableModel) ((CompoundTableModel)m_featureTable.getModel()).getBaseModel()) {
+            @Override
+            public void actionPerformed(MzScopeInterface mzScopeInterface) {
+                if (!((CompoundTableModel) m_featureTable.getModel()).isLoaded()) {
+
+                    ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), ((CompoundTableModel) m_featureTable.getModel()), "Data loading", "Histogram functionnality is not available while data is loading. Please Wait.");
+                    dialog.setLocation(getLocationOnScreen().x + m_mzscopeButton.getWidth() + 5, m_mzscopeButton.getLocationOnScreen().y + getHeight() + 5);
+                    dialog.setVisible(true);
+
+                    if (!dialog.isWaitingFinished()) {
+                        return;
+                    }
+                }
+                // prepare window box
+                WindowBox wbox = WindowBoxFactory.getMzScopeWindowBox();
+                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, MzScopeInterface.class));
+
+                // open a window to display the window box
+                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                win.open();
+                win.requestActive();
+            }
+        };
+        toolbar.add(m_mzscopeButton);
+        
         
         return toolbar;
     }
@@ -343,6 +372,10 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     }
     
 
+    public MzScopeInterface getMzScopeInterface() {
+        return (FeatureTableModel) ((CompoundTableModel)m_featureTable.getModel()).getBaseModel();
+    }
+    
     @Override
     public CrossSelectionInterface getCrossSelectionInterface() {
         return m_featureTable;

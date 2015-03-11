@@ -78,6 +78,14 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             return m_columnNames.length+m_quantChannelNumber*m_columnNamesQC.length;
         }
     }
+    
+    public int getColumnQCCount(){
+        if (m_quantChannels == null) {
+            return 0;
+        }else{
+            return m_quantChannelNumber*m_columnNamesQC.length;
+        }
+    }
 
     @Override
     public String getColumnName(int col) {

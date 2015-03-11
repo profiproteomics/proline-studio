@@ -808,7 +808,9 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             QuantProteinSetTableModel model = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel());
             
             List<TableColumn> columns = m_quantProteinSetTable.getColumns(true);
-            for (int i=QuantProteinSetTableModel.LAST_STATIC_COLUMN+1;i<columns.size();i++) {
+            int nbQCCol = model.getColumnQCCount();
+            int end = QuantProteinSetTableModel.LAST_STATIC_COLUMN+1 + nbQCCol;
+            for (int i=QuantProteinSetTableModel.LAST_STATIC_COLUMN+1;i<end;i++) {
                 int rsmCur = model.getQCNumber(i);
                 int type = model.getTypeNumber(i);
                 boolean visible = m_rsmList.isVisible(rsmCur) && m_xicList.isVisible(type);

@@ -1,21 +1,15 @@
 package fr.proline.studio.calc;
 
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.python.data.ColData;
-import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.Table;
-import fr.proline.studio.table.CompoundTableModel;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
 import javax.swing.JPanel;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.table.TableModel;
-import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
+import org.jdesktop.swingx.JXTable;
 
 /**
  *
@@ -27,7 +21,7 @@ public class CalcDialog extends DefaultDialog {
     
     private static CalcDialog m_calcDialog = null;
 
-    public static CalcDialog getCalcDialog(Window parent, JTable t) {
+    public static CalcDialog getCalcDialog(Window parent, JXTable t) {
         if (m_calcDialog == null) {
             m_calcDialog = new CalcDialog(parent);
         }
@@ -61,6 +55,7 @@ public class CalcDialog extends DefaultDialog {
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
+        c.weighty = 1.0;
         internalPanel.add(m_calcTextArea, c);
 
         

@@ -6,6 +6,7 @@ import fr.profi.util.StringUtils;
 import fr.proline.studio.dam.taskinfo.AbstractLongTask;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.util.JMSConstants;
 import java.util.Enumeration;
 import java.util.Map;
@@ -31,7 +32,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     // callback is called by the AccessServiceThread when the service is done
     protected AbstractJMSCallback m_callback;
     
-    protected Session m_session = null;
     protected MessageProducer m_producer = null;
     protected MessageConsumer m_responseConsumer = null;
     protected TemporaryQueue m_replyQueue = null;
@@ -39,13 +39,12 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     protected JMSState m_currentState = null;
     
     protected int m_id;
-    //protected boolean m_synchronous;
     protected TaskError m_taskError = null;
+     private long m_startRun = -1;
     
     protected static int m_idIncrement = 0;
 
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
-    /*protected static final Logger m_loggerWebcore = LoggerFactory.getLogger("ProlineWebCore");*/
     
     public static final String TASK_LIST_INFO = "JMS";
     
@@ -66,19 +65,21 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     }
     
     /**
-     * Method called by the AccessServiceThread to ask for the service to be done
+     * Method called by the AccessJMSManagerThread to ask for the service to be done
+     * @param connection
+     * @throws javax.jms.JMSException
      */
     public void askJMS(Connection connection) throws JMSException {
-
+        m_startRun = System.currentTimeMillis();
         try {
-            m_id = m_idIncrement++;
+           // VDS : already in constructor ?
+            //m_id = m_idIncrement++;
 
             /*
              * Thread specific : Session, Producer, Consumer ...
              */
-            // Step 5. Create a JMS Session (Session MUST be confined in current Thread)
-            // Not transacted, AUTO_ACKNOWLEDGE
-            m_session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            // Get JMS Session (Session MUST be confined in current Thread)            
+            Session m_session  = AccessJMSManagerThread.getAccessJMSManagerThread().getSession();
 
             // Step 6. Create a JMS Message Producer (Producer MUST be confined in current Thread)
             m_producer = m_session.createProducer(JMSConstants.getServiceQueue());
@@ -95,16 +96,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
             m_currentState = JMSState.STATE_FAILED;
             m_taskError = new TaskError(ex);
             callback(false);
-        } finally {
 
-            if (m_session != null) {
-                try {
-                    m_session.close();
-                    m_loggerProline.info("JMS Session closed");
-                } catch (Exception exClose) {
-                    m_loggerProline.error("Error closing JMS Session", exClose);
-                }
-            }
         }
     }
     
@@ -124,18 +116,19 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     /**
      * Method called by the ServiceStatusThread
      * to check if the service is done
+     * @return current JMS Task State (one of AbstractJMSTask.JMSState)
      */
     public AbstractJMSTask.JMSState getJMSState() {
         return m_currentState;
     }
 
     
-    
     @Override
-    public final void onMessage(final Message jmsMessage) {
-       
+    public final void onMessage(final Message jmsMessage) {       
         m_loggerProline.info("Receiving message n° " + MESSAGE_COUNT_SEQUENCE.incrementAndGet() + " : " + formatMessage(jmsMessage));
-
+        long endRun = System.currentTimeMillis();
+        this.m_taskInfo.setDuration(endRun-m_startRun);
+        
         try {
             taskDone(jmsMessage);
         } catch (Exception e) {
@@ -154,16 +147,14 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
              m_currentState = JMSState.STATE_FAILED;
              callback(false);
         }
-
+        
+        try {
+            jmsMessage.acknowledge();
+        } catch (JMSException ex) {
+            m_loggerProline.error("Error running JMS Message acknowledge", ex);
+        }
+        
     }
-    
-    /**
-     * Method called to know if the task is synchronous
-     */
-    /*public boolean isSynchronous() {
-        return m_synchronous;
-    }*/
-
     
 
     /**
@@ -198,12 +189,10 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
             m_callback.run(success);
             getTaskInfo().setFinished(success, m_taskError, false);
         }
-
-
     }
     
     
-        /**
+    /**
      * Formats some Header filds, Properties and Body of the given JMS Message to print usefull debug info.
      */
     protected String formatMessage(final Message message) {
@@ -275,7 +264,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
 	    sb.append(obj);
 	}
 
-    }  
+    } 
     
     protected void traceJSONResponse(final String jsonString) throws JSONRPC2ParseException {
 	final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
@@ -283,7 +272,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
 	if (jsonMessage instanceof JSONRPC2Notification) {
 	    final JSONRPC2Notification jsonNotification = (JSONRPC2Notification) jsonMessage;
 
-	    System.out.println("JSON Notification method: " + jsonNotification.getMethod());
+	    m_loggerProline.debug("JSON Notification method: " + jsonNotification.getMethod());
 
 	    final Map<String, Object> namedParams = jsonNotification.getNamedParams();
 
@@ -306,13 +295,13 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
 		    buff.append(" : ").append(entry.getValue());
 		}
 
-		System.out.println(buff);
+		m_loggerProline.debug(buff.toString());
 	    }
 
 	} else if (jsonMessage instanceof JSONRPC2Response) {
 	    final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
 
-	    System.out.println("JSON Response Id: " + jsonResponse.getID());
+	    m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
 
 	    final JSONRPC2Error jsonError = jsonResponse.getError();
 
@@ -324,9 +313,9 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
 	    final Object result = jsonResponse.getResult();
 
 	    if (result == null) {
-		System.out.println("No result");
+		m_loggerProline.debug("No result");
 	    } else {
-		System.out.println("Result :\n" + result);
+		m_loggerProline.debug("Result :\n" + result);
 	    }
 
 	}

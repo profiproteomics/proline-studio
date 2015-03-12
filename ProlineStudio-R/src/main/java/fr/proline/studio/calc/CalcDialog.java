@@ -11,6 +11,7 @@ import java.awt.GridBagLayout;
 import java.awt.Window;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.TableModel;
 import org.python.core.PyObject;
@@ -22,7 +23,7 @@ import org.python.util.PythonInterpreter;
  */
 public class CalcDialog extends DefaultDialog {
     
-    private JTextField m_calcTextField = null;
+    private JTextArea m_calcTextArea = null;
     
     private static CalcDialog m_calcDialog = null;
 
@@ -41,6 +42,8 @@ public class CalcDialog extends DefaultDialog {
         setTitle("Stats Calculator");
         
         setInternalComponent(createInternalPanel());
+        
+        setResizable(true);
     }
     
     private JPanel createInternalPanel() {
@@ -52,13 +55,13 @@ public class CalcDialog extends DefaultDialog {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        m_calcTextField = new JTextField(); 
-        m_calcTextField.setText("Stats.pvalue( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )");
+        m_calcTextArea = new JTextArea(10, 40); 
+        m_calcTextArea.setText("Stats.pvalue( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )");
 
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
-        internalPanel.add(m_calcTextField, c);
+        internalPanel.add(m_calcTextArea, c);
 
         
         return internalPanel;
@@ -71,7 +74,7 @@ public class CalcDialog extends DefaultDialog {
         interpreter.exec("from fr.proline.studio.python.data import Col");
         interpreter.exec("from fr.proline.studio.python.data import Table");
         interpreter.exec("from fr.proline.studio.python.math import Stats");
-        interpreter.exec("_res = "+m_calcTextField.getText());  // ColTest('Test')+ColTest('Foo')
+        interpreter.exec("_res = "+m_calcTextArea.getText());  // ColTest('Test')+ColTest('Foo')
         PyObject res = interpreter.get("_res");
 
         if (res instanceof ColData) {

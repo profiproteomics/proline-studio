@@ -19,10 +19,10 @@ import javax.swing.event.TableModelEvent;
  */
 public class ExprTableModel extends DecoratedTableModel implements ChildModelInterface {
 
-    private final ColData m_column;
+    private final Col m_column;
     private GlobalTableModelInterface m_parentModel;
     
-    public ExprTableModel(ColData column, GlobalTableModelInterface parentModel) {
+    public ExprTableModel(Col column, GlobalTableModelInterface parentModel) {
         m_column = column;
         m_parentModel = parentModel;
     }

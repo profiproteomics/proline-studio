@@ -16,7 +16,7 @@ import org.python.core.PyTuple;
  */
 public class Stats {
     
-    public static ColData ttest(PyTuple p1, PyTuple p2) throws MathException {
+    public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
         
         
         
@@ -28,17 +28,7 @@ public class Stats {
             DescriptiveStatistics ds1 = _toDescriptiveStatistics(p1, row);
             DescriptiveStatistics ds2 = _toDescriptiveStatistics(p2, row);
 
-            TTest tTest = new TTestImpl();
 
-           // calculate pvalue
-           /*double pvalue;
-             try {
-             pvalue = -Math.log10(tTest.tTest(ds1.getValues(), ds2.getValues()));
-             } catch (IllegalArgumentException ex) {
-             pvalue = -1.0;
-             } catch (MathException ex) {
-             pvalue = -1.0;
-             }*/
             // calculate ttd
             double m1 = ds1.getMean();
             double m2 = ds2.getMean();
@@ -48,7 +38,7 @@ public class Stats {
             ttdArray.add(ttd);
         }
         
-        return new ColData(ttdArray, "ttest");
+        return new ColData(ttdArray, "ttd");
     }
     
     public static ColData pvalue(PyTuple p1, PyTuple p2) throws MathException {

@@ -1,6 +1,10 @@
 package fr.proline.studio.python.data;
 
+import fr.proline.studio.python.util.Conversion;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.LazyData;
+import java.util.ArrayList;
+import org.python.core.Py;
 import org.python.core.PyObject;
 
 /**
@@ -18,13 +22,44 @@ public class ColRef extends Col {
     }
     
     @Override
+    public Col mutable() {
+        int nb = __len__();
+        ArrayList<Double> resultArray = new ArrayList<>(nb);
+        for (int i = 0; i < nb; i++) {
+            Number v = Conversion.convertToJavaNumber(getValueAt(i));
+            if (v ==  null) {
+                 resultArray.add(null);
+            } else {
+                 resultArray.add(v.doubleValue());
+            }
+        }
+        return new ColData(resultArray, getColumnName());
+    }
+    
+    @Override
     public Object getValueAt(int row) {
-        return m_tableModel.getValueAt(row, m_modelCol);
+        Object o =  m_tableModel.getValueAt(row, m_modelCol);
+        if (o instanceof LazyData) {
+            o = ((LazyData) o).getData();
+        }
+        return o;
     }
 
     @Override
     public int getRowCount() {
         return m_tableModel.getRowCount();
     }
+    
+    @Override
+    public String getColumnName() {
+        return m_tableModel.getColumnName(m_modelCol);
+    }
+
+    @Override
+    public void setValuetAt(int row, Object o) {
+        throw Py.TypeError("Tried to modify constant col");
+    }
+
+
 
 }

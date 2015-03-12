@@ -17,6 +17,7 @@ import org.openide.util.NbBundle;
 public class AddAction extends AbstractRSMAction {
 
     private ImportSearchResultAsDatasetAction m_identificationAction;
+    private ImportSearchResultAsDatasetJMSAction m_identificationJmsAction;
     private AggregateAction m_aggregateAction;
     
     private JMenu m_menu;
@@ -30,12 +31,15 @@ public class AddAction extends AbstractRSMAction {
         m_menu = new JMenu((String) getValue(NAME));
         
         m_identificationAction = new ImportSearchResultAsDatasetAction();
+        m_identificationJmsAction = new ImportSearchResultAsDatasetJMSAction();
         m_aggregateAction = new AggregateAction();
         
         JMenuItem identificationItem = new JMenuItem(m_identificationAction);
+        JMenuItem identificationJmsItem = new JMenuItem(m_identificationJmsAction);
         JMenuItem aggregateItem = new JMenuItem(m_aggregateAction);
         
         m_menu.add(identificationItem);
+        m_menu.add(identificationJmsItem);
         m_menu.add(aggregateItem);
 
         return m_menu;
@@ -46,10 +50,11 @@ public class AddAction extends AbstractRSMAction {
 
         
         m_identificationAction.updateEnabled(selectedNodes);
+        m_identificationJmsAction.updateEnabled(selectedNodes);
         m_aggregateAction.updateEnabled(selectedNodes);
         
         
-        boolean isEnabled = m_identificationAction.isEnabled() || m_aggregateAction.isEnabled();
+        boolean isEnabled = m_identificationAction.isEnabled() || m_identificationJmsAction.isEnabled() || m_aggregateAction.isEnabled();
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

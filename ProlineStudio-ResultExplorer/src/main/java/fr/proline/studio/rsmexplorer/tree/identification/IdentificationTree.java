@@ -602,6 +602,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 ImportSearchResultAsRsetAction importAction = new ImportSearchResultAsRsetAction();
                 m_allImportedActions.add(importAction);
                 
+                ImportSearchResultAsRsetJMSAction importJmsAction = new ImportSearchResultAsRsetJMSAction();
+                m_allImportedActions.add(importJmsAction);
+
                 m_allImportedPopup = new JPopupMenu();
                 
                 for (int i = 0; i < m_allImportedActions.size(); i++) {
@@ -645,20 +648,23 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 MergeAction mergeAction = new MergeAction();
                 m_mainActions.add(mergeAction);
                 
+                MergeJMSAction mergeJmsAction = new MergeJMSAction();
+                m_mainActions.add(mergeJmsAction);
+
                 ValidateAction validateAction = new ValidateAction();
                 m_mainActions.add(validateAction);
                 
-                //ValidateJMSAction validateJMSAction = new ValidateJMSAction();
-                //m_mainActions.add(validateJMSAction);
+                ValidateJMSAction validateJMSAction = new ValidateJMSAction();
+                m_mainActions.add(validateJMSAction);
                 
                 ChangeTypicalProteinAction changeTypicalProteinAction = new ChangeTypicalProteinAction();
                 m_mainActions.add(changeTypicalProteinAction);
                 
+                ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction();
+                m_mainActions.add(changeTypicalProteinJmsAction);
+                
                 GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
                 m_mainActions.add(generateSpectrumMatchesAction);
-                
-                //CompareWithSCAction computeSCAction = new CompareWithSCAction(); //JPM.BETA : removed Spectral count for beta
-                //m_mainActions.add(computeSCAction); 
                 
                 SpectralCountAction spectralCountAction = new SpectralCountAction();
                 m_mainActions.add(spectralCountAction); 

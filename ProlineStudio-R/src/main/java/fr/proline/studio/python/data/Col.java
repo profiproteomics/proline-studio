@@ -48,7 +48,7 @@ public abstract class Col extends PyObject {
     @Override
     public void __setitem__(PyObject key, PyObject value) {
         if (key instanceof PyInteger) {
-            setValuetAt( ((PyInteger)key).getValue() , key);
+            setValuetAt( ((PyInteger)key).getValue() , value);
             return;
         }
         throw Py.TypeError("Unexpected Type Found "+key.getClass().getName());

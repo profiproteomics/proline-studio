@@ -1,8 +1,14 @@
 package fr.proline.studio.dpm.task.jms;
 
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +21,7 @@ import javax.jms.TextMessage;
  *
  * @author JM235353
  */
-public class ValidationJMSTaskJPM extends AbstractJMSTask  {
+public class ValidationTask extends AbstractJMSTask  {
 
     //PSM PreFilter
     public static String RANK_FILTER_KEY = "RANK";
@@ -43,26 +49,24 @@ public class ValidationJMSTaskJPM extends AbstractJMSTask  {
     private String m_description;
     private HashMap<String, String> m_argumentsMap;
     private String m_scoringType = null;
-    
-
-    
-
-    
-    public ValidationJMSTaskJPM(AbstractJMSCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, String scoringType) {
+    private Integer[] m_resultSummaryId = null;    
+        
+    public ValidationTask(AbstractJMSCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, String scoringType) {
         super(callback, new TaskInfo("JMS Validation of Search Result " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
         m_description = description;
         m_argumentsMap = argumentsMap;
+        m_resultSummaryId = resultSummaryId;
         m_scoringType = scoringType;
     }
     
     
     @Override
     public void taskRun() throws JMSException {
-            final JSONRPC2Request jsonRequest = new JSONRPC2Request("tot", Integer.valueOf(m_id));
+            final JSONRPC2Request jsonRequest = new JSONRPC2Request("process", Integer.valueOf(m_id));
             jsonRequest.setNamedParams(createParams());
            
-            final TextMessage message = m_session.createTextMessage(jsonRequest.toJSONString());
+            final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
 
             /* ReplyTo = Temporary Destination Queue for Server -> Client response */
             message.setJMSReplyTo(m_replyQueue);
@@ -79,16 +83,42 @@ public class ValidationJMSTaskJPM extends AbstractJMSTask  {
         final TextMessage textMessage = (TextMessage) jmsMessage;
         final String jsonString = textMessage.getText();
 
+        final JSONRPC2Message jsonMessage = JSONRPC2Message.parse(jsonString);
+        if(jsonMessage instanceof JSONRPC2Notification) {
+            m_loggerProline.warn("JSON Notification method: " + ((JSONRPC2Notification) jsonMessage).getMethod()+" instead of JSON Response");
+            throw new Exception("Invalid JSONRPC2Message type");
+        } else if (jsonMessage instanceof JSONRPC2Response)  {
+            
+            final JSONRPC2Response jsonResponse = (JSONRPC2Response) jsonMessage;
+	    m_loggerProline.debug("JSON Response Id: " + jsonResponse.getID());
+
+	    final JSONRPC2Error jsonError = jsonResponse.getError();
+
+	    if (jsonError != null) {
+		m_loggerProline.error("JSON Error code {}, message : \"{}\"", jsonError.getCode(), jsonError.getMessage());
+		m_loggerProline.error("JSON Throwable", jsonError);
+                throw jsonError;
+	    }
+
+	    final Object result = jsonResponse.getResult();
+
+	    if (result == null || ! Long.class.isInstance(result) ) {
+		m_loggerProline.debug("Invalid or no result");
+                throw new Exception("null or invalid result "+result);
+	    } else {
+		m_loggerProline.debug("Result :\n" + result);
+                m_resultSummaryId[0] = ((Long) result).intValue();
+	    }
+        }
+        
         /*
          * TODO Use JSON-RPC Response
          */
-        traceJSONResponse(jsonString);
+        //traceJSONResponse(jsonString);
         m_currentState = JMSState.STATE_DONE;
 
-
     }
-
-    
+  
     
     private HashMap<String, Object> createParams() {
 

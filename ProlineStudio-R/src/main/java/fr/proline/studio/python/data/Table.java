@@ -57,6 +57,7 @@ public class Table {
     }
     
     public static void addColumn(Col col) {
+
         TableModel model = Table.getCurrentTable().getModel();
         if (model instanceof CompoundTableModel) {
             ((CompoundTableModel) model).addModel(new ExprTableModel(col, ((CompoundTableModel) model).getLastNonFilterModel()));

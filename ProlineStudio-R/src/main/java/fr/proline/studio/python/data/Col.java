@@ -13,13 +13,21 @@ import org.python.core.PyObject;
  */
 public abstract class Col extends PyObject {
     
+    protected String m_columnName = null;
+    
     public abstract Object getValueAt(int row);
     
     public abstract void setValuetAt(int row, Object o);
 
     public abstract int getRowCount();
+
+    public void setColumnName(String columnName) {
+        m_columnName = columnName;
+    }
     
-    public abstract String getColumnName();
+    public String getColumnName() {
+        return m_columnName;
+    }
     
     public abstract Col mutable();
 
@@ -320,5 +328,135 @@ public abstract class Col extends PyObject {
     @Override
     public PyObject __rmul__(PyObject left) {
         return __mul__(left);
+    }
+    
+    @Override
+    public PyObject __div__(PyObject right) {
+        if (right instanceof Col) {
+
+            int nb = __len__();
+            if (right.__len__() != nb) {
+                throw Py.TypeError("Tried to mul Columns with different sizes");
+            }
+
+            ArrayList<Double> resultArray = new ArrayList<>(nb);
+            Col rightCol = (Col) right;
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                Object o2 = rightCol.getValueAt(i);
+                if ((o1 == null) || (o2 == null)) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number) || !(o2 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                double d = ((Number) o1).doubleValue() / ((Number) o2).doubleValue();
+                resultArray.add(d);
+            }
+
+            return new ColData(resultArray, getColumnName() + '/' + rightCol.getColumnName());
+        } else if (right instanceof PyInteger) {
+
+            int v = ((PyInteger) right).getValue();
+
+            int nb = __len__();
+            ArrayList<Double> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                double d = ((Number) o1).doubleValue() / v;
+                resultArray.add(d);
+            }
+            return new ColData(resultArray, getColumnName() + '/' + String.valueOf(v));
+        } else if (right instanceof PyFloat) {
+
+            double v = ((PyFloat) right).getValue();
+
+            int nb = __len__();
+            ArrayList<Double> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                double d = ((Number) o1).doubleValue() / v;
+                resultArray.add(d);
+            }
+            return new ColData(resultArray, getColumnName() + '/' + String.valueOf(v));
+        }
+        throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
+    }
+    
+    @Override
+    public PyObject __rdiv__(PyObject left) {
+        if (left instanceof Col) {
+
+            int nb = __len__();
+            if (left.__len__() != nb) {
+                throw Py.TypeError("Tried to mul Columns with different sizes");
+            }
+
+            ArrayList<Double> resultArray = new ArrayList<>(nb);
+            Col rightCol = (Col) left;
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                Object o2 = rightCol.getValueAt(i);
+                if ((o1 == null) || (o2 == null)) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number) || !(o2 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                double d = ((Number) o2).doubleValue() / ((Number) o1).doubleValue();
+                resultArray.add(d);
+            }
+
+            return new ColData(resultArray, getColumnName() + '/' + rightCol.getColumnName());
+        } else if (left instanceof PyInteger) {
+
+            int v = ((PyInteger) left).getValue();
+
+            int nb = __len__();
+            ArrayList<Double> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                double d = v / ((Number) o1).doubleValue();
+                resultArray.add(d);
+            }
+            return new ColData(resultArray, String.valueOf(v) + '/' + getColumnName());
+        } else if (left instanceof PyFloat) {
+
+            double v = ((PyFloat) left).getValue();
+
+            int nb = __len__();
+            ArrayList<Double> resultArray = new ArrayList<>(nb);
+            for (int i = 0; i < nb; i++) {
+                Object o1 = getValueAt(i);
+                if (o1 == null) {
+                    throw Py.TypeError("Col with null values");
+                }
+                if (!(o1 instanceof Number)) {
+                    throw Py.TypeError("Col with non numeric values");
+                }
+                double d = v / ((Number) o1).doubleValue();
+                resultArray.add(d);
+            }
+            return new ColData(resultArray, String.valueOf(v) + '/' + getColumnName());
+        }
+        throw Py.TypeError("Type Mismatch for + " + left.getClass().getName());
     }
 }

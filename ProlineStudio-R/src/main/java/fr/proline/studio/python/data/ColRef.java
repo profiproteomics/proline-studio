@@ -49,17 +49,20 @@ public class ColRef extends Col {
     public int getRowCount() {
         return m_tableModel.getRowCount();
     }
-    
-    @Override
-    public String getColumnName() {
-        return m_tableModel.getColumnName(m_modelCol);
-    }
 
     @Override
     public void setValuetAt(int row, Object o) {
         throw Py.TypeError("Tried to modify constant col");
     }
 
+        
+    public String getColumnName() {
+        if ((m_columnName == null) || (m_columnName.isEmpty())) {
+           return m_tableModel.getColumnName(m_modelCol); 
+        }
+        return m_columnName;
+    }
+    
 
 
 }

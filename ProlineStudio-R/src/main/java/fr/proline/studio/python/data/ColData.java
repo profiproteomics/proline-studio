@@ -12,11 +12,10 @@ import org.python.core.Py;
 public class ColData extends Col {
     
     private final ArrayList<Double> m_data;
-    private String m_name;
     
     public ColData(ArrayList<Double> data, String name) {
         m_data = data;
-        m_name = name;
+        m_columnName = name;
     }
 
     ColData() {
@@ -50,10 +49,6 @@ public class ColData extends Col {
         return m_data.size();
     }
     
-    @Override
-    public String getColumnName() {
-        return m_name;
-    }
 
     
 }

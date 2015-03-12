@@ -74,8 +74,10 @@ public class CalcDialog extends DefaultDialog {
         interpreter.exec("from fr.proline.studio.python.data import Col");
         interpreter.exec("from fr.proline.studio.python.data import Table");
         interpreter.exec("from fr.proline.studio.python.math import Stats");
-        interpreter.exec("_res = "+m_calcTextArea.getText());  // ColTest('Test')+ColTest('Foo')
-        PyObject res = interpreter.get("_res");
+        interpreter.exec("import math");
+        interpreter.exec(m_calcTextArea.getText());  // ColTest('Test')+ColTest('Foo')
+        
+        /*PyObject res = interpreter.get("_res");
 
         if (res instanceof ColData) {
             ColData col = (ColData) res;
@@ -83,7 +85,7 @@ public class CalcDialog extends DefaultDialog {
             if (model instanceof CompoundTableModel) {
                 ((CompoundTableModel) model).addModel(new ExprTableModel(col, ((CompoundTableModel) model).getLastNonFilterModel()));
             }
-        }
+        }*/
 
         return true;
     }

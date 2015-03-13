@@ -353,8 +353,9 @@ public class CalcDialog extends JDialog {
     }
     
     private void fillFunctions() {
-        m_functionsListModel.addElement(new Function("ttd", "Stats.ttd( (,) , (,) )", "ttd = Stats.ttd( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
-        m_functionsListModel.addElement(new Function("pvalue", "Stats.pvalue( (,) , (,) )", "pvalue = Stats.pvalue( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
+        m_functionsListModel.addElement(new Function("pvalue", "pvalue = Stats.pvalue( (,) , (,) )", "pvalue = Stats.pvalue( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
+        m_functionsListModel.addElement(new Function("ttd", "ttd = Stats.ttd( (,) , (,) )", "ttd = Stats.ttd( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
+        
     }
     
     private void execute() {

@@ -139,7 +139,7 @@ public class DataBoxMzScope extends AbstractDataBox{
                 mozList.add(mzdbInfo.getMoz());
             }
         }
-        ((StudioMzScopePanel) m_panel).setData((long)-1, fileList, mozList, true);
+        ((StudioMzScopePanel) m_panel).setData((long)-1, fileList, mzdbInfos, true);
         setLoaded(loadingId);
     }
     

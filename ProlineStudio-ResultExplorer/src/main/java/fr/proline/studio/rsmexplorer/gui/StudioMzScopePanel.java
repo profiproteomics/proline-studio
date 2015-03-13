@@ -14,6 +14,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JScrollPane;
 import fr.profi.mzscope.ui.event.ExtractFeatureListener;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.mzscope.MzdbInfo;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
@@ -127,14 +128,15 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
     }
     
     
-    public void setData(Long taskId, List<File> mzdbFile, List<Double> mozList, boolean finished) {
+    public void setData(Long taskId, List<File> mzdbFile, List<MzdbInfo> mzdbList, boolean finished) {
         int i=0;
         for (File file : mzdbFile) {
+            MzdbInfo info = mzdbList.get(i);
             if (!this.m_mzdbFiles.contains(file)){
                 this.m_mzdbFiles.add(file);
-                m_mzScope.openRawAndExtract(file, mozList.get(i));
+                m_mzScope.openRawAndExtract(file, info.getMoz(), info.getElutionTime(), info.getFirstScan(), info.getLastScan());
             }else{
-                m_mzScope.extractRawFile(file, mozList.get(i));  
+                m_mzScope.extractRawFile(file, info.getMoz(), info.getElutionTime(), info.getFirstScan(), info.getLastScan());  
             }
             i++;
         }

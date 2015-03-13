@@ -38,7 +38,7 @@ public class Stats {
             ttdArray.add(ttd);
         }
         
-        return new ColData(ttdArray, "ttd");
+        return new ColData(ttdArray, null);
     }
     
     public static ColData pvalue(PyTuple p1, PyTuple p2) throws MathException {
@@ -69,7 +69,7 @@ public class Stats {
             resArray.add(pvalue);
         }
 
-        return new ColData(resArray, "pvalue");
+        return new ColData(resArray, null);
     }
     
     private static DescriptiveStatistics _toDescriptiveStatistics(PyTuple p, int row) {

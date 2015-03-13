@@ -84,7 +84,7 @@ public abstract class Col extends PyObject {
                 resultArray.add(d);
             }
             
-            return new ColData(resultArray, getColumnName()+'+'+rightCol.getColumnName());
+            return new ColData(resultArray, null);
         } else if (right instanceof PyInteger) {
             
             int v = ((PyInteger) right).getValue();
@@ -102,7 +102,7 @@ public abstract class Col extends PyObject {
                 double d = ((Number) o1).doubleValue()+v;
                 resultArray.add(d);
             }
-            return new ColData(resultArray, getColumnName()+'+'+String.valueOf(v));
+            return new ColData(resultArray, null);
         } else if (right instanceof PyFloat) {
             
             double v = ((PyFloat) right).getValue();
@@ -120,7 +120,7 @@ public abstract class Col extends PyObject {
                 double d = ((Number) o1).doubleValue()+v;
                 resultArray.add(d);
             }
-            return new ColData(resultArray, getColumnName()+'+'+String.valueOf(v));
+            return new ColData(resultArray, null);
         }
         throw Py.TypeError("Type Mismatch for + "+right.getClass().getName());
     }
@@ -154,7 +154,7 @@ public abstract class Col extends PyObject {
                 resultArray.add(d);
             }
             
-            return new ColData(resultArray, getColumnName()+'-'+rightCol.getColumnName());
+            return new ColData(resultArray, null);
         } else if (right instanceof PyInteger) {
             
             int v = ((PyInteger) right).getValue();
@@ -172,7 +172,7 @@ public abstract class Col extends PyObject {
                 double d = ((Number) o1).doubleValue()-v;
                 resultArray.add(d);
             }
-            return new ColData(resultArray, getColumnName()+'-'+String.valueOf(v));
+            return new ColData(resultArray, null);
         } else if (right instanceof PyFloat) {
             
             double v = ((PyFloat) right).getValue();
@@ -190,7 +190,7 @@ public abstract class Col extends PyObject {
                 double d = ((Number) o1).doubleValue()-v;
                 resultArray.add(d);
             }
-            return new ColData(resultArray, getColumnName()+'-'+String.valueOf(v));
+            return new ColData(resultArray, null);
         }
         throw Py.TypeError("Type Mismatch for + "+right.getClass().getName());
     }
@@ -219,7 +219,7 @@ public abstract class Col extends PyObject {
                 resultArray.add(d);
             }
             
-            return new ColData(resultArray, leftCol.getColumnName()+'-'+getColumnName());
+            return new ColData(resultArray, null);
         } else if (left instanceof PyInteger) {
             
             int v = ((PyInteger) left).getValue();
@@ -237,7 +237,7 @@ public abstract class Col extends PyObject {
                 double d = v-((Number) o1).doubleValue();
                 resultArray.add(d);
             }
-            return new ColData(resultArray, String.valueOf(v)+'-'+getColumnName());
+            return new ColData(resultArray, null);
         } else if (left instanceof PyFloat) {
             
             double v = ((PyFloat) left).getValue();
@@ -255,7 +255,7 @@ public abstract class Col extends PyObject {
                 double d = v-((Number) o1).doubleValue();
                 resultArray.add(d);
             }
-            return new ColData(resultArray, String.valueOf(v)+'-'+getColumnName());
+            return new ColData(resultArray, null);
         }
         throw Py.TypeError("Type Mismatch for + "+left.getClass().getName());
     }
@@ -284,7 +284,7 @@ public abstract class Col extends PyObject {
                 resultArray.add(d);
             }
 
-            return new ColData(resultArray, getColumnName() + '*' + rightCol.getColumnName());
+            return new ColData(resultArray, null);
         } else if (right instanceof PyInteger) {
 
             int v = ((PyInteger) right).getValue();
@@ -302,7 +302,7 @@ public abstract class Col extends PyObject {
                 double d = ((Number) o1).doubleValue() * v;
                 resultArray.add(d);
             }
-            return new ColData(resultArray, getColumnName() + '*' + String.valueOf(v));
+            return new ColData(resultArray, null);
         } else if (right instanceof PyFloat) {
 
             double v = ((PyFloat) right).getValue();
@@ -320,7 +320,7 @@ public abstract class Col extends PyObject {
                 double d = ((Number) o1).doubleValue() * v;
                 resultArray.add(d);
             }
-            return new ColData(resultArray, getColumnName() + '*' + String.valueOf(v));
+            return new ColData(resultArray, null);
         }
         throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
     }
@@ -354,7 +354,7 @@ public abstract class Col extends PyObject {
                 resultArray.add(d);
             }
 
-            return new ColData(resultArray, getColumnName() + '/' + rightCol.getColumnName());
+            return new ColData(resultArray, null);
         } else if (right instanceof PyInteger) {
 
             int v = ((PyInteger) right).getValue();
@@ -372,7 +372,7 @@ public abstract class Col extends PyObject {
                 double d = ((Number) o1).doubleValue() / v;
                 resultArray.add(d);
             }
-            return new ColData(resultArray, getColumnName() + '/' + String.valueOf(v));
+            return new ColData(resultArray, null);
         } else if (right instanceof PyFloat) {
 
             double v = ((PyFloat) right).getValue();
@@ -390,7 +390,7 @@ public abstract class Col extends PyObject {
                 double d = ((Number) o1).doubleValue() / v;
                 resultArray.add(d);
             }
-            return new ColData(resultArray, getColumnName() + '/' + String.valueOf(v));
+            return new ColData(resultArray, null);
         }
         throw Py.TypeError("Type Mismatch for + " + right.getClass().getName());
     }
@@ -419,7 +419,7 @@ public abstract class Col extends PyObject {
                 resultArray.add(d);
             }
 
-            return new ColData(resultArray, getColumnName() + '/' + rightCol.getColumnName());
+            return new ColData(resultArray, null);
         } else if (left instanceof PyInteger) {
 
             int v = ((PyInteger) left).getValue();
@@ -437,7 +437,7 @@ public abstract class Col extends PyObject {
                 double d = v / ((Number) o1).doubleValue();
                 resultArray.add(d);
             }
-            return new ColData(resultArray, String.valueOf(v) + '/' + getColumnName());
+            return new ColData(resultArray, null);
         } else if (left instanceof PyFloat) {
 
             double v = ((PyFloat) left).getValue();
@@ -455,7 +455,7 @@ public abstract class Col extends PyObject {
                 double d = v / ((Number) o1).doubleValue();
                 resultArray.add(d);
             }
-            return new ColData(resultArray, String.valueOf(v) + '/' + getColumnName());
+            return new ColData(resultArray, null);
         }
         throw Py.TypeError("Type Mismatch for + " + left.getClass().getName());
     }

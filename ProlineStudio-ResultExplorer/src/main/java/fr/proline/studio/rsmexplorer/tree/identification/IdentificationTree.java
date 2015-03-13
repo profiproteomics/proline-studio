@@ -590,7 +590,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             // creation of the popup if needed
             if (m_allImportedPopup == null) {
                  // create the actions
-                m_allImportedActions = new ArrayList<>(3);  // <--- get in sync
+                m_allImportedActions = new ArrayList<>(4);  // <--- get in sync
    
 
                 
@@ -627,7 +627,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             if (m_mainPopup == null) {
 
                 // create the actions
-                m_mainActions = new ArrayList<>(12);  // <--- get in sync
+                m_mainActions = new ArrayList<>(21);  // <--- get in sync
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction();
                 m_mainActions.add(displayRsetAction);
@@ -677,6 +677,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 ExportRSMAction exportRSMAction = new ExportRSMAction();
                 m_mainActions.add(exportRSMAction);                        
                 
+                ExportRSMJMSAction exportJmsRSMAction = new ExportRSMJMSAction();
+                m_mainActions.add(exportJmsRSMAction);                        
+
                 GenerateMSDiagReportAction msDiagReportAction = new GenerateMSDiagReportAction();
                 m_mainActions.add(msDiagReportAction);                        
                 

@@ -15,6 +15,7 @@ import fr.proline.studio.mzscope.AddMzScopeButton;
 import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
@@ -226,14 +227,9 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                         return;
                     }
                 }
-                // prepare window box
-                WindowBox wbox = WindowBoxFactory.getMzScopeWindowBox();
-                wbox.setEntryData(m_dataBox.getProjectId(), m_dataBox.getData(false, MzScopeInterface.class));
-
-                // open a window to display the window box
-                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
-                win.open();
-                win.requestActive();
+                MzScopeInterface mzscopeInterface = (MzScopeInterface)m_dataBox.getData(false, MzScopeInterface.class);
+                MzScopeWindowBoxManager.addMzdbScope(mzscopeInterface);
+                
             }
         };
         toolbar.add(m_mzscopeButton);

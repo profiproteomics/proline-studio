@@ -133,6 +133,8 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
             if (!this.m_mzdbFiles.contains(file)){
                 this.m_mzdbFiles.add(file);
                 m_mzScope.openRawAndExtract(file, mozList.get(i));
+            }else{
+                m_mzScope.extractRawFile(file, mozList.get(i));  
             }
             i++;
         }

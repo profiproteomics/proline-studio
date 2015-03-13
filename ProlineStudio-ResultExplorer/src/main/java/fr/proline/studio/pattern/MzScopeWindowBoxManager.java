@@ -30,8 +30,6 @@ public class MzScopeWindowBoxManager {
                 m_win.open();
                 m_win.requestActive();
             }
-            m_windowBox = null;
-            m_win = null;
         }
     }
     

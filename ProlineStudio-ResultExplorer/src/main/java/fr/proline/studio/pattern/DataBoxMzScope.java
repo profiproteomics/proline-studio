@@ -4,6 +4,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.mzscope.MzScopeInterface;
+import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.rsmexplorer.gui.StudioMzScopePanel;
 import java.io.File;
 import java.util.ArrayList;
@@ -127,15 +128,18 @@ public class DataBoxMzScope extends AbstractDataBox{
         // ask asynchronous loading of data
         
         //registerTask(task)
-       List<String> fileNames =  mzScope.getMzdbFileName();
+       List<MzdbInfo> mzdbInfos =  mzScope.getMzdbInfo();
        List<File> fileList = new ArrayList();
-        for (String f : fileNames) {
+       List<Double> mozList = new ArrayList();
+        for (MzdbInfo mzdbInfo : mzdbInfos) {
+            String f = mzdbInfo.getFileName();
             File file = new File(m_mzdbDir+File.separator+f);
             if (file.exists()){
                 fileList.add(file);
+                mozList.add(mzdbInfo.getMoz());
             }
         }
-        ((StudioMzScopePanel) m_panel).setData((long)-1, fileList, true);
+        ((StudioMzScopePanel) m_panel).setData((long)-1, fileList, mozList, true);
         setLoaded(loadingId);
     }
     

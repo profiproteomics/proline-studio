@@ -9,8 +9,8 @@ import java.util.List;
  */
 public interface MzScopeInterface {
     /**
-     * returns the mzdb filenames to display
+     * returns the mzdb information to display
      * @return 
      */
-    public List<String> getMzdbFileName();
+    public List<MzdbInfo> getMzdbInfo();
 }

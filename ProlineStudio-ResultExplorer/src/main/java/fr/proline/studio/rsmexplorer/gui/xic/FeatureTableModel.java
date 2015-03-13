@@ -10,6 +10,7 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.mzscope.MzScopeInterface;
+import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
@@ -717,21 +718,24 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     }
 
     @Override
-    public List<String> getMzdbFileName() {
-        List<String> fileNames = new ArrayList();
+    public List<MzdbInfo> getMzdbInfo() {
+        List<MzdbInfo> mzdbInfos = new ArrayList();
+        List<String> fileNameList = new ArrayList();
         for (Feature feature : m_features) {
             DQuantitationChannel qc = m_quantChannelInfo.getQuantChannelForMap(feature.getMap().getId());
             if (qc != null) {
                 if (qc.getMzdbFileName() != null) {
                     String fn = qc.getMzdbFileName()+".mzdb";
-                    if (!fileNames.contains(fn)) {
-                        fileNames.add(fn);
+                    MzdbInfo mzdbInfo = new MzdbInfo(fn, feature.getMoz());
+                    if (!fileNameList.contains(fn)) {
+                        mzdbInfos.add(mzdbInfo);
+                        fileNameList.add(fn);
                     }
                 }
             }
         }
         
-        return fileNames;
+        return mzdbInfos;
     }
 
 

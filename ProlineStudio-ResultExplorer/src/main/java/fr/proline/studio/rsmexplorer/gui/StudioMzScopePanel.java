@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
+import fr.profi.mzscope.MzScope;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -11,7 +12,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import javax.swing.JLayeredPane;
 import javax.swing.JScrollPane;
-import fr.profi.mzscope.ui.MzScopePanel;
 import fr.profi.mzscope.ui.event.ExtractFeatureListener;
 import fr.proline.studio.dam.tasks.SubTask;
 import java.awt.GridBagConstraints;
@@ -33,7 +33,9 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
 
     private JScrollPane m_mzscopeScrollPane;
     
-    private MzScopePanel m_mzScopePanel;
+    private MzScope m_mzScope;
+    private JPanel m_mzScopePanel;
+    
     
     private List<File> m_mzdbFiles = null;
     
@@ -102,8 +104,8 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
-        m_mzScopePanel = new MzScopePanel(WindowManager.getDefault().getMainWindow());
-        m_mzScopePanel.addExtractFeatureListener(this);
+        m_mzScope = new MzScope();
+        m_mzScopePanel = m_mzScope.createMzScopePanel(WindowManager.getDefault().getMainWindow());
         // create objects
         
         c.gridx = 0;
@@ -125,12 +127,14 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
     }
     
     
-    public void setData(Long taskId, List<File> mzdbFile, boolean finished) {
+    public void setData(Long taskId, List<File> mzdbFile, List<Double> mozList, boolean finished) {
+        int i=0;
         for (File file : mzdbFile) {
             if (!this.m_mzdbFiles.contains(file)){
                 this.m_mzdbFiles.add(file);
-                m_mzScopePanel.openRaw(file);
+                m_mzScope.openRawAndExtract(file, mozList.get(i));
             }
+            i++;
         }
     }
     

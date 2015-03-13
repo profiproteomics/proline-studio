@@ -6,6 +6,7 @@ import fr.proline.studio.python.data.Table;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
@@ -13,18 +14,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextPane;
 import javax.swing.JToolBar;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.TableModel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
 import org.python.util.PythonInterpreter;
 import org.jdesktop.swingx.JXTable;
 import org.python.core.PyFloat;
@@ -39,7 +48,10 @@ import org.python.core.PyStringMap;
  */
 public class CalcDialog extends JDialog {
     
-    private JTextArea m_codeArea = null;
+    private JTextPane m_codeArea = null;
+    DefaultHighlighter m_errorHighlighter = null;
+    Highlighter.HighlightPainter m_errorHighlighterPainter = null;
+    private boolean m_isHighlighting = false;
     private JTextField m_statusTextField = null;
     private JButton m_executeButton = null;
     private JButton m_loadButton = null;
@@ -67,13 +79,14 @@ public class CalcDialog extends JDialog {
     private CalcDialog(Window parent) {
          super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
-        setTitle("Stats Calculator");
+        setTitle("Python Calculator");
         
         add(createInternalPanel());
         
-        setSize(680, 400);
+        
         setResizable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        pack();
     }
     
 
@@ -94,31 +107,53 @@ public class CalcDialog extends JDialog {
 
         c.gridx = 0;
         c.gridy = 0;
-        c.weightx = 0;
-        c.weighty = 1;
-        c.gridheight = 3;
-        internalPanel.add(createTabbedPane(), c);
-        
-        c.gridx = 1;
-        c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
+        c.gridheight = 2;
+        internalPanel.add(createTabbedPane(), c);
+        
+        c.gridx++;
+        c.gridy = 0;
+        c.weightx = 2;
+        c.weighty = 1;
         c.gridheight = 1;
-        internalPanel.add(createCodePanel(), c);
+        internalPanel.add(createCodeArea(), c);
 
         c.gridy++;
         c.weighty = 0;
         internalPanel.add(m_statusTextField, c);
         
-        c.gridy++;
-        internalPanel.add(createCalcButtons(), c);
+        c.gridx++;
+        c.gridy = 0;
+        c.weightx = 0;
+        c.weighty = 1;
+        c.gridheight = 2;
+        internalPanel.add(createCodeToolBar(), c);
+        
+        
+        //c.gridy++;
+        //internalPanel.add(createCalcButtons(), c);
         
         
         return internalPanel;
     }
     
     private JTabbedPane createTabbedPane() {
-        m_tabbedPane = new JTabbedPane();
+        
+        final Dimension d = new Dimension(180, 400);
+        m_tabbedPane = new JTabbedPane() {
+
+            @Override
+            public Dimension getMinimumSize() {
+                return d;
+            }
+            
+            @Override
+            public Dimension getPreferredSize() {
+                return d;
+            }
+          
+        };
 
         m_columnsListModel = new DefaultListModel();
         final JList columns = new JList(m_columnsListModel);
@@ -127,19 +162,20 @@ public class CalcDialog extends JDialog {
         columnsScrollPane.setViewportView(columns);
         m_tabbedPane.add("Columns", columnsScrollPane);
         
+        m_functionsListModel = new DefaultListModel();
+        fillFunctions();
+        final JList functions = new JList(m_functionsListModel);
+        JScrollPane functionsScrollPane = new JScrollPane();
+        functionsScrollPane.setViewportView(functions);
+        m_tabbedPane.add("Functions", functionsScrollPane);
+        
         m_resultsListModel = new DefaultListModel();
         final JList results = new JList(m_resultsListModel);
         results.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane resultsScrollPane = new JScrollPane();
         resultsScrollPane.setViewportView(results);
         m_tabbedPane.add("Results", resultsScrollPane);
-        
-        m_functionsListModel = new DefaultListModel();
-        JList functions = new JList(m_functionsListModel);
-        JScrollPane functionsScrollPane = new JScrollPane();
-        functionsScrollPane.setViewportView(functions);
-        m_tabbedPane.add("Functions", functionsScrollPane);
-        
+
         
         columns.addMouseListener(new MouseAdapter() {
             @Override
@@ -173,33 +209,86 @@ public class CalcDialog extends JDialog {
             }
         });
         
+        functions.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    Function function = (Function) functions.getSelectedValue();
+                    if (function == null) {
+                        return;
+                    }
+                    function.action();
+
+                    functions.clearSelection();
+                }
+
+            }
+        });
+        
+        functions.addMouseMotionListener(new MouseMotionListener() {
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                ListModel m = functions.getModel();
+                int index = functions.locationToIndex(e.getPoint());
+                if (index > -1) {
+                    functions.setToolTipText(((Function)m.getElementAt(index)).getDescription());
+                } else {
+                    functions.setToolTipText(null);
+                }
+            }
+
+        });
+        
         return m_tabbedPane;
     }
     
-    private JPanel createCodePanel() {
-        JPanel codePanel = new JPanel(new GridBagLayout());
+    private JComponent createCodeArea() {
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5); 
+        final Dimension d = new Dimension(420, 400);
+        m_codeArea = new JTextPane() {
 
-        m_codeArea = new JTextArea(10, 40); 
+            @Override
+            public Dimension getMinimumSize() {
+                return d;
+            }
+            
+            @Override
+            public Dimension getPreferredSize() {
+                return d;
+            }
+          
+        };
+        m_errorHighlighter = new DefaultHighlighter();
+        m_errorHighlighterPainter = new DefaultHighlighter.DefaultHighlightPainter(new Color(255,90,90));
+        m_codeArea.setHighlighter(m_errorHighlighter);
+        m_codeArea.getDocument().addDocumentListener(new DocumentListener () {
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                removeHighlighting();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                removeHighlighting();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                removeHighlighting();
+            }
+            
+        });
         JScrollPane codeScrollPane = new JScrollPane();
-        //codeScrollPane.getViewport().setBackground(Color.white);
         codeScrollPane.setViewportView(m_codeArea);
+
         
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1;
-        c.weighty = 1;
-        codePanel.add(codeScrollPane, c);
-        
-        c.gridx++;
-        c.weightx = 0;
-        codePanel.add(createCodeToolBar(), c);
-        
-        return codePanel;
+        return codeScrollPane;
     }
     
     private JToolBar createCodeToolBar() {
@@ -209,14 +298,14 @@ public class CalcDialog extends JDialog {
         m_executeButton = new JButton(IconManager.getIcon(IconManager.IconType.EXECUTE));
         toolbar.add(m_executeButton);
         
-        JButton saveButton = new JButton(IconManager.getIcon(IconManager.IconType.SAVE_WND));
-        toolbar.add(saveButton);
+        m_saveButton = new JButton(IconManager.getIcon(IconManager.IconType.SAVE_WND));
+        toolbar.add(m_saveButton);
         
-        JButton loadButton = new JButton(IconManager.getIcon(IconManager.IconType.LOAD_SETTINGS));
-        toolbar.add(loadButton);
+        m_loadButton = new JButton(IconManager.getIcon(IconManager.IconType.LOAD_SETTINGS));
+        toolbar.add(m_loadButton);
         
-        JButton clearButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
-        toolbar.add(clearButton);
+        m_clearButton = new JButton(IconManager.getIcon(IconManager.IconType.ERASER));
+        toolbar.add(m_clearButton);
         
         
         m_executeButton.addActionListener(new ActionListener() {
@@ -229,10 +318,19 @@ public class CalcDialog extends JDialog {
             
         });
         
+        m_clearButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                m_codeArea.setText("");
+            }
+            
+        });
+        
         return toolbar;
     }
     
-    private JPanel createCalcButtons() {
+    /*private JPanel createCalcButtons() {
         JPanel calcButtonsPanel = new JPanel(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -241,7 +339,7 @@ public class CalcDialog extends JDialog {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         return calcButtonsPanel;
-    }
+    }*/
     
     private void fillColumns() {
         m_columnsListModel.clear();
@@ -254,11 +352,16 @@ public class CalcDialog extends JDialog {
         }
     }
     
+    private void fillFunctions() {
+        m_functionsListModel.addElement(new Function("ttd", "Stats.ttd( (,) , (,) )", "ttd = Stats.ttd( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
+        m_functionsListModel.addElement(new Function("pvalue", "Stats.pvalue( (,) , (,) )", "pvalue = Stats.pvalue( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
+    }
+    
     private void execute() {
 
         m_statusTextField.setText("");
-
         m_resultsListModel.clear();
+        removeHighlighting();
         
         PythonInterpreter interpreter = new PythonInterpreter();
         
@@ -288,22 +391,49 @@ public class CalcDialog extends JDialog {
                 }
             }
 
-            m_tabbedPane.setSelectedIndex(1); // Tab with results
+            m_tabbedPane.setSelectedIndex(2); // Tab with results
             
         } catch (Throwable e) {
             int lineError = -1;
             StackTraceElement[] stackTraceArray = e.getStackTrace();
-            String error = "Executing Error";
+            String error = null;
             for (int i = 0; i < stackTraceArray.length; i++) {
-                String line = stackTraceArray[i].toString();
-                if ((line != null) && (!line.isEmpty())) {
-                    error = line;
+                if (error == null) {
+                    String lineCode = stackTraceArray[i].toString();
+                    if ((lineCode != null) && (!lineCode.isEmpty())) {
+                        error = lineCode;
+                        lineError = stackTraceArray[i].getLineNumber();
+                    }
+                } else if (lineError == -1) {
                     lineError = stackTraceArray[i].getLineNumber();
+                } else {
                     break;
                 }
             }
+            if (error == null) {
+                error = "Executing Error";
+            }
+            
             if (lineError != -1) {
-                m_statusTextField.setText("At line "+lineError+":"+error);
+
+                try {
+                    int[] offset = getLineOffsets(m_codeArea.getText(), lineError);
+                    if (offset != null) {
+                        m_errorHighlighter.addHighlight(offset[0], offset[1], m_errorHighlighterPainter);
+                        m_isHighlighting = true;
+                    } else {
+                        lineError = -1;
+                    }
+                } catch (Exception e2) {
+                    lineError = -1;
+                }
+                
+                
+            }
+            
+            if (lineError != -1) {
+                m_statusTextField.setText("At line "+lineError+": "+error);
+  
             } else {
                 m_statusTextField.setText(error);
             }
@@ -320,6 +450,52 @@ public class CalcDialog extends JDialog {
                 ((CompoundTableModel) model).addModel(new ExprTableModel(col, ((CompoundTableModel) model).getLastNonFilterModel()));
             }
         }*/
+
+    }
+    
+    private int[] getLineOffsets(String text, int lineNumber) throws BadLocationException {
+        
+        int offset = 0;
+        int lineIndex = 1;
+        while (true) {
+            int startOffset = javax.swing.text.Utilities.getRowStart(m_codeArea, offset);
+            int endOffset = javax.swing.text.Utilities.getRowEnd(m_codeArea, offset);
+            if (lineIndex == lineNumber) {
+                return new int[] {startOffset, endOffset};
+            }
+            lineIndex++;
+            offset = endOffset+1;
+            if (offset>=text.length()) {
+                break;
+            }
+        }
+
+        return null;
+    }
+    
+    private void removeHighlighting() {
+        if (!m_isHighlighting) {
+            return;
+        }
+        m_errorHighlighter.removeAllHighlights();
+        m_isHighlighting = false;
+    }
+    
+    public void centerToWindow(Window w) {
+
+
+        int width = getWidth();
+        int height = getHeight();
+
+        int frameX = w.getX();
+        int frameY = w.getY();
+        int frameWidth = w.getWidth();
+        int frameHeight = w.getHeight();
+
+        int x = frameX + (frameWidth - width) / 2;
+        int y = frameY + (frameHeight - height) / 2;
+
+        setLocation(x, y);
 
     }
     
@@ -375,8 +551,44 @@ public class CalcDialog extends JDialog {
         public void action() {
             int pos = m_codeArea.getCaretPosition();
             int index = m_index+1;
-            m_codeArea.insert("Table.col("+index+")", pos);
+            try {
+                m_codeArea.getDocument().insertString(pos, "Table.col("+index+")", null);
+            } catch(BadLocationException e) {
+                
+            }
         }
+    }
+    
+    public class Function {
+        private final String m_name;
+        private final String m_insertText;
+        private final String m_description;
+        
+        public Function(String name, String insertText, String description) {
+            m_name = name;
+            m_insertText = insertText;
+            m_description = description;
+        }
+        
+        public void action() {
+            int pos = m_codeArea.getCaretPosition();
+            try {
+                m_codeArea.getDocument().insertString(pos, m_insertText, null);
+            } catch (BadLocationException e) {
+
+            }
+        }
+        
+        @Override
+        public String toString() {
+            return m_name;
+        }
+
+        
+        public String getDescription() {
+            return m_description;
+        }
+        
     }
 
 }

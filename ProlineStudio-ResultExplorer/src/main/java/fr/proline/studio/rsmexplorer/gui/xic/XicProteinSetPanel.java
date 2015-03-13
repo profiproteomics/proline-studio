@@ -215,10 +215,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                CalcDialog dialog = CalcDialog.getCalcDialog(null, m_quantProteinSetTable);
+                CalcDialog dialog = CalcDialog.getCalcDialog(WindowManager.getDefault().getMainWindow(), m_quantProteinSetTable);
+                dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 dialog.setVisible(true);
-                //JythonTest.test(m_quantProteinSetTable);
-    
+
             }
 
         });

@@ -37,7 +37,7 @@ public class ChangeTypicalProteinTask extends AbstractJMSTask {
     
     @Override
     public void taskRun() throws JMSException {
-        final JSONRPC2Request jsonRequest = new JSONRPC2Request("process", Integer.valueOf(m_id));
+        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConstants.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_id));
         jsonRequest.setNamedParams(createParams());
            
         final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());

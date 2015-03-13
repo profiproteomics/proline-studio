@@ -39,6 +39,13 @@ public class JMSConstants {
 
     public static final String PROLINE_SERVICE_VERSION_KEY = "Proline_ServiceVersion";
     
+    public static final String HORNET_Q_SAVE_STREAM_KEY = "JMS_HQ_SaveStream";
+    
+    public static final String PROLINE_PROCESS_METHOD_NAME = "process";
+    
+    public static final String PROLINE_GET_RSC_METHOD_NAME = "get_resource_as_stream";
+    
+    
     private static Connection connection = null;
     private static Queue serviceQueue = null;
     

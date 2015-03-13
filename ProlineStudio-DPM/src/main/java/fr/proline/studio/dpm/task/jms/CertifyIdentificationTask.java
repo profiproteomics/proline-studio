@@ -46,7 +46,7 @@ public class CertifyIdentificationTask extends AbstractJMSTask {
     public void taskRun() throws JMSException  {
 
         // create the request
-        final JSONRPC2Request jsonRequest = new JSONRPC2Request("process", Integer.valueOf(m_id));
+        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConstants.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_id));
         //Add Service parameters
         jsonRequest.setNamedParams(createParams());
 

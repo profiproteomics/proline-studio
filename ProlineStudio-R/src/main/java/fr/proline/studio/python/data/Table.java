@@ -49,7 +49,7 @@ public class Table {
         if ((colIndex<1) || (colIndex>nbCol)) {
             throw new IndexOutOfBoundsException("No Column at index "+colIndex);
         }
-        return new ColRef(m_currentTable.convertColumnIndexToModel(colIndex), (CompoundTableModel) m_currentTable.getModel());
+        return new ColRef(m_currentTable.convertColumnIndexToModel(colIndex-1), (CompoundTableModel) m_currentTable.getModel());
     }
     
     public static PyTuple col(int colIndex1, int colIndex2) {

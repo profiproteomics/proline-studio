@@ -42,9 +42,6 @@ public class ExportRSMTask extends AbstractServiceTask {
         Map<String, Object> params = new HashMap<>();
         params.put("file_format", "TEMPLATED"); //Ou MZIDENTML ...
         // **** Pour la version FILE :"file_name" & "file_directory" 
-        // **** Pour la version STREAM :"file_name" sert de prefixe (modifier dans la version +1 :=) 
-        //params.put("file_name", "testExcel"); 
-        //params.put("file_directory", "D:/Vero/temp");
         params.put("output_mode", "STREAM"); // *** ou STREAM
             
         ArrayList rsmIdents = new ArrayList();

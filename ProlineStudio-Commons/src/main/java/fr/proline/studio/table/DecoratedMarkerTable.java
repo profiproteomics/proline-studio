@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableModel;
 
 /**
  * Table which can be used with marker bars (it inherits display an "histogram" on a column from DecoratedTable)
@@ -117,7 +118,12 @@ public abstract class DecoratedMarkerTable extends DecoratedTable implements Mar
     
     @Override
     public void stateChanged(ChangeEvent e) {
+        calculateVisibleRange();
 
+    }
+    
+    @Override
+    public void calculateVisibleRange() {
         Rectangle viewRect = m_viewport.getViewRect();
 
         m_firstVisibleRow = rowAtPoint(new Point(0, viewRect.y));
@@ -131,13 +137,11 @@ public abstract class DecoratedMarkerTable extends DecoratedTable implements Mar
             // Handle empty space below last row
             m_lastVisibleRow = getModel().getRowCount() - 1;
         }
-        //  System.out.println(firstVisibleRow + " " + lastVisibleRow);
-        
-        
+ 
     }
 
     @Override
-    public int getRowInModel(int y) {
+    public int getRowInNonFilteredModel(int y) {
         
         Rectangle viewRect = m_viewport.getViewRect();
         
@@ -148,24 +152,47 @@ public abstract class DecoratedMarkerTable extends DecoratedTable implements Mar
         }
         
         int row = rowAtPoint(new Point(0, y+viewRect.y-headerHeight));
-        //System.out.println(row);
+        if (row == -1) {
+            return -1;
+        }
 
-        return convertRowIndexToModel(row);
+        int rowInModel = convertRowIndexToModel(row);
+        
+        TableModel model = getModel();
+        if (model instanceof CompoundTableModel) {
+            rowInModel = ((CompoundTableModel) model).convertCompoundRowToBaseModelRow(rowInModel);
+        }
+        
+        return rowInModel;
     }
     
     @Override
-    public int convertRowIndexToModel(int rowIndex) {
+    public int convertRowIndexToNonFilteredModel(int rowIndex) {
         if (rowIndex == -1) {
             return -1;
         }
-        return super.convertRowIndexToModel(rowIndex);
+        rowIndex = super.convertRowIndexToModel(rowIndex);
+        TableModel model = getModel();
+        if (model instanceof CompoundTableModel) {
+            rowIndex = ((CompoundTableModel) model).convertCompoundRowToBaseModelRow(rowIndex);
+        }
+        return rowIndex;
     }
     
     @Override
-    public int convertRowIndexToView(int rowIndex) {
+    public int convertRowIndexNonFilteredModelToView(int rowIndex) {
         if (rowIndex == -1) {
             return -1;
         }
+        TableModel model = getModel();
+        if (model instanceof CompoundTableModel) {
+            rowIndex = ((CompoundTableModel) model).convertBaseModelRowToCompoundRow(rowIndex);
+        }
+        
+        if (rowIndex == -1) {
+            return -1;
+        }
+        
         return super.convertRowIndexToView(rowIndex);
     }
 

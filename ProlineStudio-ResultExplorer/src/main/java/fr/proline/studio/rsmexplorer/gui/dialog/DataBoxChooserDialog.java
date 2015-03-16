@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 
 
 
@@ -252,6 +253,11 @@ public class DataBoxChooserDialog extends DefaultDialog {
         
         public DataBoxTable() {
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        }
+        
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
         }
         
         /**

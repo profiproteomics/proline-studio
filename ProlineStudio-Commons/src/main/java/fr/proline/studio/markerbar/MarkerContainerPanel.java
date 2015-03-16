@@ -12,12 +12,14 @@ import java.util.TreeMap;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 /**
  * Panel which contains MarkerBar at left, OverviewBar at right, and a user panel in the center
  * @author JM235353
  */
-public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
+public class MarkerContainerPanel extends JPanel implements ViewChangeListener, TableModelListener {
 
     private TreeMap<Integer, ArrayList<AbstractMarker>> m_markers = new TreeMap<>();
     private HashMap<Class, MarkerRendererInterface> m_renderers = new HashMap<>();
@@ -33,10 +35,12 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     public MarkerContainerPanel(JScrollPane sp, MarkerComponentInterface markerComponent) {
 
         m_markerComponent = markerComponent;
+        
         m_markerBar = new MarkerBar(this);
         m_overviewBar = new OverviewBar(this);
 
         markerComponent.addViewChangeListerner(this);
+        markerComponent.addTableModelListener(this);
         
         setLayout(new GridBagLayout());
 
@@ -103,7 +107,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
         Integer rowKey = Integer.valueOf(marker.getRow());
         ArrayList<AbstractMarker> markersInRow = m_markers.get(rowKey);
         if (markersInRow == null) {
-            markersInRow = new ArrayList<AbstractMarker>(1);
+            markersInRow = new ArrayList<>(1);
             m_markers.put(rowKey, markersInRow);
         }
         markersInRow.add(marker);
@@ -200,7 +204,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
         Iterator<Integer> it = m_markers.keySet().iterator();
         while (it.hasNext()) {
             Integer rowKey = it.next();
-            int row = m_markerComponent.convertRowIndexToView(rowKey.intValue());
+            int row = m_markerComponent.convertRowIndexNonFilteredModelToView(rowKey.intValue());
             int distance = Math.abs(rowInView-row);
             if (distance<minDistance) {
                 minDistance = distance;
@@ -211,7 +215,7 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
             return rowInView;
         }
         
-        return m_markerComponent.convertRowIndexToView(nearestRowKey.intValue());
+        return m_markerComponent.convertRowIndexNonFilteredModelToView(nearestRowKey.intValue());
         
 
         
@@ -235,9 +239,15 @@ public class MarkerContainerPanel extends JPanel implements ViewChangeListener {
     
      public void setMaxLineNumber(int maxLineNumber) {
          if ((m_markerBar != null) && (m_markerBar.setMaxLineNumber(maxLineNumber)) && (m_markerBar.isLineNumbersDisplayed()) ) {
+            m_markerComponent.calculateVisibleRange();
             revalidate();
             repaint();
          }
+    }
+
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        viewChanged();
     }
     
 }

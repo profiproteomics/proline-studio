@@ -63,6 +63,7 @@ import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
@@ -363,6 +364,11 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             //setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
             
+        }
+        
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
         }
         
         @Override

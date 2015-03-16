@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import org.openide.nodes.Sheet;
 import org.openide.util.NbBundle;
 
@@ -195,6 +196,10 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
             }
         }
 
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
+        }
         
         /**
          * Called whenever the value of the selection changes.

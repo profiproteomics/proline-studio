@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import org.openide.windows.TopComponent;
 
 /**
@@ -98,6 +99,10 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         if ((proteinSets != null) && (proteinSets.length > 0)) {
             m_proteinSetTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(proteinSets.length);
+            
+            if (!m_firstPanel) {
+                m_markerContainerPanel.removeAllMarkers();
+            }
         }
         
         if (finished) {
@@ -368,6 +373,11 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
 
 
+        }
+        
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
         }
         
         /** 

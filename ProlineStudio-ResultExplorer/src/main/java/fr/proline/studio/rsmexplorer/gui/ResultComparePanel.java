@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import javax.swing.event.TableModelListener;
 
 /**
  *
@@ -170,6 +171,11 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
 
         }
 
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
+        }
+        
         public void dataUpdated() {
 
         }

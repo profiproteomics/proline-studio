@@ -65,6 +65,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
@@ -387,6 +388,11 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
             //setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
             setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
+        }
+        
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
         }
         
         //Implement table cell tool tips.

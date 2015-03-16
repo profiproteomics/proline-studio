@@ -42,6 +42,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 
 /**
  *
@@ -259,6 +260,11 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
             setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))));
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class)));
 
+        }
+        
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
         }
 
         /**

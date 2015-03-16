@@ -39,6 +39,7 @@ import javax.swing.*;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 
 /**
@@ -275,6 +276,11 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
         }
 
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
+        }
+        
         public boolean selectProtein(Integer row) {
 
             // must convert row index if there is a sorting

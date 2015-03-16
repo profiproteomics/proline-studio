@@ -41,6 +41,7 @@ import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import org.openide.windows.TopComponent;
 
 /**
@@ -296,6 +297,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         if ((peptideInstances != null) && (peptideInstances.length > 0)) {
             m_peptideInstanceTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(peptideInstances.length);
+            
         }
 
         if (finished) {
@@ -357,6 +359,11 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class)));
         }
 
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
+        }
+        
         /**
          * Called whenever the value of the selection changes.
          *

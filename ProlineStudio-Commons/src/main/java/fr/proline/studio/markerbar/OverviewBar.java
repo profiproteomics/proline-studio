@@ -49,7 +49,10 @@ public class OverviewBar extends AbstractBar  implements MouseListener {
             for (int i = 0; i < size; i++) {
                 AbstractMarker marker = markersArrayList.get(i);
 
-                int graphicalRow = markerComponentInterface.convertRowIndexToView(row.intValue());
+                int graphicalRow = markerComponentInterface.convertRowIndexNonFilteredModelToView(row.intValue());
+                if (graphicalRow == -1) {
+                    continue;
+                }
                 
                 int y = (int) Math.round(((double) graphicalRow) * h);
 

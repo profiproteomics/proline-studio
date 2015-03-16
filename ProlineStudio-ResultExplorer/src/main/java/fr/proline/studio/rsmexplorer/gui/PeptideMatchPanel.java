@@ -44,6 +44,7 @@ import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -120,6 +121,9 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             m_peptideMatchTable.getSelectionModel().setSelectionInterval(0, 0);
             
             m_markerContainerPanel.setMaxLineNumber(peptideMatches.length);
+            if (!m_startingPanel) {
+                m_markerContainerPanel.removeAllMarkers();
+            }
         }
         
         if (finished) {
@@ -689,6 +693,11 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         @Override
         public void prepostPopupMenu() {
             // nothing to do
+        }
+
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
         }
     }
 }

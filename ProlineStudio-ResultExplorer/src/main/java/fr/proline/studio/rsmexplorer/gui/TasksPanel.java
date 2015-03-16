@@ -36,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
@@ -266,6 +267,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             setDefaultRenderer(Float.class, new PercentageRenderer( getDefaultRenderer(String.class)) );
         }
 
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
+        }
+        
         /**
          * Called whenever the value of the selection changes.
          *

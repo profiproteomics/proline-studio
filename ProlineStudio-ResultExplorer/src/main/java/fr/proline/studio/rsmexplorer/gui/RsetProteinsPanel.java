@@ -44,6 +44,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.event.TableModelListener;
 import org.openide.windows.TopComponent;
 
 /**
@@ -252,6 +253,10 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
         if (proteinMatchArray != null) {
             m_markerContainerPanel.setMaxLineNumber(proteinMatchArray.length);
+            
+            if (!m_startingPanel) {
+                m_markerContainerPanel.removeAllMarkers();
+            }
         }
 
         ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
@@ -292,6 +297,10 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
         if (proteinMatchArray != null) {
             m_markerContainerPanel.setMaxLineNumber(proteinMatchArray.length);
+            
+            if (!m_startingPanel) {
+                m_markerContainerPanel.removeAllMarkers();
+            }
         }
         
         m_proteinTable.setSortable(true);
@@ -410,6 +419,11 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
             setDefaultRenderer(Double.class, new DoubleRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))));
         }
 
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
+        }
+        
         /**
          * Called whenever the value of the selection changes.
          *

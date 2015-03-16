@@ -47,6 +47,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelListener;
 import org.openide.windows.WindowManager;
 
 /**
@@ -393,6 +394,11 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
             setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
              
+        }
+        
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
         }
         
         /** 

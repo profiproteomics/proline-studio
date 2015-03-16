@@ -34,6 +34,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.ToolTipManager;
+import javax.swing.event.TableModelListener;
 
 /**
  *
@@ -164,6 +165,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
         if (peptide != null && m_quantChannels != null && m_quantChannels.length > 0) {
             m_peptideTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(m_quantChannels.length);
+            
         }
 
         m_peptideTable.setSortable(true);
@@ -218,6 +220,11 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
             super(m_peptideScrollPane.getVerticalScrollBar() );
 
             setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        }
+        
+        @Override
+        public void addTableModelListener(TableModelListener l) {
+            getModel().addTableModelListener(l);
         }
         
         public void selectionWillBeRestored(boolean b) {

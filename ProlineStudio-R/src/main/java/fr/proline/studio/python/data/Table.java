@@ -37,7 +37,7 @@ public class Table {
             String name = m_currentTable.getColumnName(i);
             if (colName.compareToIgnoreCase(name) == 0) {
                 int modelCol = m_currentTable.convertColumnIndexToModel(i);
-                return new ColRef(modelCol+1, (CompoundTableModel) m_currentTable.getModel());
+                return new ColRef(modelCol, (CompoundTableModel) m_currentTable.getModel());
             }
         }
         throw new RuntimeException("Column not found "+colName);

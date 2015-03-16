@@ -3,6 +3,9 @@ package fr.proline.studio.calc;
 
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.Table;
+import fr.proline.studio.table.DecoratedTable;
+import fr.proline.studio.table.DecoratedTableModel;
+import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Dialog;
@@ -14,7 +17,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -22,6 +27,7 @@ import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
@@ -57,7 +63,7 @@ public class CalcDialog extends JDialog {
     private JButton m_loadButton = null;
     private JButton m_saveButton = null;
     private JButton m_clearButton = null;
-    private DefaultListModel m_columnsListModel = null;
+    ColumnTableModel m_columnTableModel = null;
     private DefaultListModel m_resultsListModel = null;
     private DefaultListModel m_functionsListModel = null;
     private JTabbedPane m_tabbedPane = null;
@@ -91,51 +97,41 @@ public class CalcDialog extends JDialog {
     
 
     
-    private JPanel createInternalPanel() {
+    private JComponent createInternalPanel() {
    
-        JPanel internalPanel = new JPanel(new GridBagLayout());
+        JPanel rightPanel = new JPanel(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-
         
         m_statusTextField = new JTextField();
         m_statusTextField.setForeground(Color.red);
         m_statusTextField.setEditable(false);
-
+        
+        
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
-        c.gridheight = 2;
-        internalPanel.add(createTabbedPane(), c);
+        rightPanel.add(createCodeArea(), c);
         
-        c.gridx++;
-        c.gridy = 0;
-        c.weightx = 2;
-        c.weighty = 1;
-        c.gridheight = 1;
-        internalPanel.add(createCodeArea(), c);
-
         c.gridy++;
         c.weighty = 0;
-        internalPanel.add(m_statusTextField, c);
+        rightPanel.add(m_statusTextField, c);
         
         c.gridx++;
         c.gridy = 0;
         c.weightx = 0;
         c.weighty = 1;
         c.gridheight = 2;
-        internalPanel.add(createCodeToolBar(), c);
+        rightPanel.add(createCodeToolBar(), c);
         
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, createTabbedPane(), rightPanel);
+
         
-        //c.gridy++;
-        //internalPanel.add(createCalcButtons(), c);
-        
-        
-        return internalPanel;
+        return splitPane;
     }
     
     private JTabbedPane createTabbedPane() {
@@ -155,11 +151,12 @@ public class CalcDialog extends JDialog {
           
         };
 
-        m_columnsListModel = new DefaultListModel();
-        final JList columns = new JList(m_columnsListModel);
-        columns.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        m_columnTableModel = new ColumnTableModel();
+        ColumnTable columnsTable = new ColumnTable();
+        columnsTable.setModel(m_columnTableModel);
         JScrollPane columnsScrollPane = new JScrollPane();
-        columnsScrollPane.setViewportView(columns);
+        columnsScrollPane.setViewportView(columnsTable);
         m_tabbedPane.add("Columns", columnsScrollPane);
         
         m_functionsListModel = new DefaultListModel();
@@ -176,22 +173,7 @@ public class CalcDialog extends JDialog {
         resultsScrollPane.setViewportView(results);
         m_tabbedPane.add("Results", resultsScrollPane);
 
-        
-        columns.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    Column column = (Column) columns.getSelectedValue();
-                    if (column == null) {
-                        return;
-                    }
-                    column.action();
 
-                    columns.clearSelection();
-                }
-
-            }
-        });
         
         results.addMouseListener(new MouseAdapter() {
             @Override
@@ -342,14 +324,20 @@ public class CalcDialog extends JDialog {
     }*/
     
     private void fillColumns() {
-        m_columnsListModel.clear();
+
+        
+        
         JXTable table = Table.getCurrentTable();
         TableModel model = table.getModel();
         int nbColumns = table.getColumnCount();
+        ArrayList<Column> columnList = new ArrayList<>(nbColumns);
         for (int i=0;i<nbColumns;i++) {
             String colName = model.getColumnName(table.convertColumnIndexToModel(i));
-            m_columnsListModel.addElement(new Column(colName, i));
+            columnList.add(new Column(colName, i));
         }
+        m_columnTableModel.setValues(columnList);
+        
+        
     }
     
     private void fillFunctions() {
@@ -540,6 +528,25 @@ public class CalcDialog extends JDialog {
         private final int m_index;
         
         public Column(String name, int index) {
+            
+            String uname = name.toUpperCase();
+            
+            String BR = "<BR/>";
+            int iBR = uname.indexOf(BR);
+            while (iBR != -1) {
+                name = name.substring(0, iBR)+" "+name.substring(iBR+BR.length(), name.length());
+                uname = name.toUpperCase();
+                iBR = uname.indexOf(BR);
+            }
+            
+            BR = "<BR>";
+            iBR = uname.indexOf(BR);
+            while (iBR != -1) {
+                name = name.substring(0, iBR)+" "+name.substring(iBR+BR.length(), name.length());
+                uname = name.toUpperCase();
+                iBR = uname.indexOf(BR);
+            }
+            
             m_name = name;
             m_index = index;
         }
@@ -547,6 +554,10 @@ public class CalcDialog extends JDialog {
         @Override
         public String toString() {
             return m_name;
+        }
+        
+        public Integer getIndex() {
+            return Integer.valueOf( m_index+1);
         }
         
         public void action() {
@@ -590,6 +601,133 @@ public class CalcDialog extends JDialog {
             return m_description;
         }
         
+    }
+
+    
+       public static class ColumnTable extends DecoratedTable implements MouseListener {
+
+        public ColumnTable() {
+
+            setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            addMouseListener(this);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if (e.getClickCount() == 2) {
+                int row = getSelectedRow();
+                if (row == -1) {
+                    return;
+                }
+                row = convertRowIndexToModel(row);
+                Column c = ((ColumnTableModel) getModel()).getColumn(row);
+
+                if (c == null) {
+                    return;
+                }
+                c.action();
+
+                clearSelection();
+            }
+
+        }
+
+        @Override
+        public TablePopupMenu initPopupMenu() {
+            return null;
+        }
+
+        @Override
+        public void prepostPopupMenu() {
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+        }
+
+    }
+
+    public static class ColumnTableModel extends DecoratedTableModel {
+
+        public static final int COLTYPE_COLUMN_ID = 0;
+        public static final int COLTYPE_COLUMN_NAME = 1;
+
+        private static final String[] m_columnNames = {"Index", "Column"};
+        private static final String[] m_columnTooltips = {"Column Index", "Column Name"};
+
+        ArrayList<Column> m_columns = null;
+
+        public void setValues(ArrayList<Column> columns) {
+            m_columns = columns;
+            fireTableDataChanged();
+        }
+
+        @Override
+        public int getRowCount() {
+            if (m_columns == null) {
+                return 0;
+            }
+            return m_columns.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return m_columnNames.length;
+        }
+
+        @Override
+        public Class getColumnClass(int col) {
+            switch (col) {
+                case COLTYPE_COLUMN_ID:
+                    return Integer.class;
+                case COLTYPE_COLUMN_NAME:
+                    return String.class;
+            }
+            return null;
+        }
+
+        @Override
+        public String getColumnName(int col) {
+            return m_columnNames[col];
+        }
+        
+        @Override
+        public Object getValueAt(int row, int col) {
+            switch (col) {
+                case COLTYPE_COLUMN_ID:
+                    return m_columns.get(row).getIndex();
+                case COLTYPE_COLUMN_NAME:
+                    return m_columns.get(row).toString();
+            }
+            return null;
+        }
+
+        public Column getColumn(int row) {
+            return m_columns.get(row);
+        }
+
+        @Override
+        public String getToolTipForHeader(int col) {
+            return m_columnTooltips[col];
+        }
+
+        @Override
+        public String getTootlTipValue(int row, int col) {
+            return null;
+        }
+
     }
 
 }

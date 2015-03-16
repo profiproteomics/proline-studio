@@ -17,7 +17,7 @@ public class ColRef extends Col {
     private final CompoundTableModel m_tableModel;
     
     public ColRef(int col, CompoundTableModel model) {
-        m_modelCol = col-1;
+        m_modelCol = col;
         m_tableModel = model;
     }
     
@@ -56,6 +56,7 @@ public class ColRef extends Col {
     }
 
         
+    @Override
     public String getColumnName() {
         if ((m_columnName == null) || (m_columnName.isEmpty())) {
            return m_tableModel.getColumnName(m_modelCol); 

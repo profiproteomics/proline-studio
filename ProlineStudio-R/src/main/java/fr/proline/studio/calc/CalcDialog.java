@@ -3,6 +3,10 @@ package fr.proline.studio.calc;
 
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.Table;
+import fr.proline.studio.python.interpreter.CalcCallback;
+import fr.proline.studio.python.interpreter.CalcInterpreterTask;
+import fr.proline.studio.python.interpreter.CalcInterpreterThread;
+import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
@@ -40,13 +44,8 @@ import javax.swing.table.TableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
-import org.python.util.PythonInterpreter;
 import org.jdesktop.swingx.JXTable;
-import org.python.core.PyFloat;
-import org.python.core.PyInteger;
-import org.python.core.PyList;
-import org.python.core.PyObject;
-import org.python.core.PyStringMap;
+
 
 /**
  *
@@ -295,6 +294,7 @@ public class CalcDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 m_executeButton.setEnabled(false);
+                m_codeArea.setEnabled(false);
                 execute();
             }
             
@@ -352,93 +352,49 @@ public class CalcDialog extends JDialog {
         m_resultsListModel.clear();
         removeHighlighting();
         
-        PythonInterpreter interpreter = new PythonInterpreter();
-        
-        try {
-            interpreter.exec("from fr.proline.studio.python.data import Col");
-            interpreter.exec("from fr.proline.studio.python.data import Table");
-            interpreter.exec("from fr.proline.studio.python.math import Stats");
-            interpreter.exec("import math");
-            interpreter.exec(m_codeArea.getText());
+        CalcInterpreterThread interpreterThread = CalcInterpreterThread.getCalcInterpreterThread();
+        CalcCallback callback = new CalcCallback() {
 
-            PyStringMap locals = (PyStringMap) interpreter.getLocals();
-            PyList keysList = locals.keys();
-            int nbKeys = keysList.size();
-            for (int i=0;i<nbKeys;i++) {
-                PyObject key = keysList.__getitem__(i);
-                PyObject value = locals.get(key);
-                if (value instanceof ColData) {
-                    ColData col = (ColData) value;
-                    String columnName = col.getColumnName();
-                    if ((columnName == null) || (columnName.isEmpty())) {
-                        col.setColumnName(key.toString());
+            @Override
+            public void run(ArrayList<ResultVariable> variables, String error, int lineError) {
+                if (variables != null) {
+                    int nb = variables.size();
+                    for (int i = 0; i < nb; i++) {
+                        m_resultsListModel.addElement(variables.get(i));
                     }
-                }
-                if ((value instanceof ColData) || (value instanceof PyInteger) || (value instanceof PyFloat)) {
-                    
-                    m_resultsListModel.addElement(new ResultVariable(key.toString(), value));
-                }
-            }
+                    m_tabbedPane.setSelectedIndex(2); // Tab with results
+                } else if (error != null) {
+                    if (lineError != -1) {
 
-            m_tabbedPane.setSelectedIndex(2); // Tab with results
-            
-        } catch (Throwable e) {
-            int lineError = -1;
-            StackTraceElement[] stackTraceArray = e.getStackTrace();
-            String error = null;
-            for (int i = 0; i < stackTraceArray.length; i++) {
-                if (error == null) {
-                    String lineCode = stackTraceArray[i].toString();
-                    if ((lineCode != null) && (!lineCode.isEmpty())) {
-                        error = lineCode;
-                        lineError = stackTraceArray[i].getLineNumber();
+                        try {
+                            int[] offset = getLineOffsets(m_codeArea.getText(), lineError);
+                            if (offset != null) {
+                                m_errorHighlighter.addHighlight(offset[0], offset[1], m_errorHighlighterPainter);
+                                m_isHighlighting = true;
+                            } else {
+                                lineError = -1;
+                            }
+                        } catch (Exception e2) {
+                            lineError = -1;
+                        }
+
                     }
-                } else if (lineError == -1) {
-                    lineError = stackTraceArray[i].getLineNumber();
-                } else {
-                    break;
-                }
-            }
-            if (error == null) {
-                error = "Executing Error";
-            }
-            
-            if (lineError != -1) {
 
-                try {
-                    int[] offset = getLineOffsets(m_codeArea.getText(), lineError);
-                    if (offset != null) {
-                        m_errorHighlighter.addHighlight(offset[0], offset[1], m_errorHighlighterPainter);
-                        m_isHighlighting = true;
+                    if (lineError != -1) {
+                        m_statusTextField.setText("At line " + lineError + ": " + error);
+
                     } else {
-                        lineError = -1;
+                        m_statusTextField.setText(error);
                     }
-                } catch (Exception e2) {
-                    lineError = -1;
                 }
                 
-                
+                m_executeButton.setEnabled(true);
+                m_codeArea.setEnabled(true);
             }
             
-            if (lineError != -1) {
-                m_statusTextField.setText("At line "+lineError+": "+error);
-  
-            } else {
-                m_statusTextField.setText(error);
-            }
-        }
+        };
         
-        m_executeButton.setEnabled(true);
-        
-        /*PyObject res = interpreter.get("_res");
-
-        if (res instanceof ColData) {
-            ColData col = (ColData) res;
-            TableModel model = Table.getCurrentTable().getModel();
-            if (model instanceof CompoundTableModel) {
-                ((CompoundTableModel) model).addModel(new ExprTableModel(col, ((CompoundTableModel) model).getLastNonFilterModel()));
-            }
-        }*/
+        interpreterThread.addTask(new CalcInterpreterTask(m_codeArea.getText(), callback));
 
     }
     
@@ -488,39 +444,7 @@ public class CalcDialog extends JDialog {
 
     }
     
-    public class ResultVariable {
-        
-        private final String m_name;
-        private final PyObject m_value;
-        private boolean m_actionDone = false;
-        
-        ResultVariable(String name, PyObject v) {
-            m_name = name;
-            m_value = v;
-        }
-        
-        @Override
-        public String toString() {
-            if (m_value instanceof ColData) {
-                return m_name;
-            } else if (m_value instanceof PyFloat) {
-                return m_name+"="+((PyFloat) m_value).getValue();
-            } else if (m_value instanceof PyInteger) {
-                return m_name+"="+((PyInteger) m_value).getValue();
-            }
-            return null; // should not happen
-        }
-        
-        public void action() {
-            if (m_actionDone) {
-                return;
-            }
-            if (m_value instanceof ColData) {
-                m_actionDone = true;
-                Table.addColumn((ColData) m_value);
-            }
-        }
-    }
+
     
     public class Column {
         

@@ -1,5 +1,6 @@
 package fr.proline.studio.pattern;
 
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
@@ -451,6 +452,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
         return true;
     }
+
     
 
 }

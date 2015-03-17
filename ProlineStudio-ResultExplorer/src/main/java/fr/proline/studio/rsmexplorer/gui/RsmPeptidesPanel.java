@@ -11,7 +11,6 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
@@ -485,8 +484,18 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         public TablePopupMenu initPopupMenu() {
             TablePopupMenu popupMenu = new TablePopupMenu();
 
-            popupMenu.addAction(new RestrainAction());
-            popupMenu.addAction(new ClearRestrainAction());
+            popupMenu.addAction(new RestrainAction() {
+                @Override
+                public void filteringDone() {
+                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                }
+            });
+            popupMenu.addAction(new ClearRestrainAction() {
+                @Override
+                public void filteringDone() {
+                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                }
+            });
 
             return popupMenu;
         }

@@ -256,8 +256,18 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         public TablePopupMenu initPopupMenu() {
             TablePopupMenu popupMenu = new TablePopupMenu();
 
-            popupMenu.addAction(new RestrainAction());
-            popupMenu.addAction(new ClearRestrainAction());
+            popupMenu.addAction(new RestrainAction() {
+                @Override
+                public void filteringDone() {
+                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                }
+            });
+            popupMenu.addAction(new ClearRestrainAction() {
+                @Override
+                public void filteringDone() {
+                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                }
+            });
 
             return popupMenu;
         }

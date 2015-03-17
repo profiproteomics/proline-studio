@@ -286,7 +286,13 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
 
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
-        return m_tableModelSource.getDataValueAt(rowIndex, columnIndex);
+        
+        int rowFiltered = rowIndex;
+        if ((!m_isFiltering) && (m_filteredIds != null)) {
+            rowFiltered = m_filteredIds.get(rowIndex).intValue();
+        }
+        return m_tableModelSource.getDataValueAt(rowFiltered, columnIndex);
+
     }
 
     @Override

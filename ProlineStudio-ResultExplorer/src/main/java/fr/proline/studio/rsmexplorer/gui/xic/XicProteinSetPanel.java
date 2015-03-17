@@ -378,8 +378,18 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             m_idProteinSetAction = new DisplayIdentificationProteinSetsAction();
             popupMenu.addAction(m_idProteinSetAction);
             popupMenu.addAction(null);
-            popupMenu.addAction(new RestrainAction());
-            popupMenu.addAction(new ClearRestrainAction());
+            popupMenu.addAction(new RestrainAction() {
+                @Override
+                public void filteringDone() {
+                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                }
+            });
+            popupMenu.addAction(new ClearRestrainAction() {
+                @Override
+                public void filteringDone() {
+                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                }
+            });
 
             return popupMenu;
         }

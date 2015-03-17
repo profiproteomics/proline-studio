@@ -11,7 +11,7 @@ import javax.swing.table.TableModel;
  * Action to restrain the visible rows of a model
  * @author JM235353
  */
-public class RestrainAction extends AbstractTableAction {
+public abstract class RestrainAction extends AbstractTableAction {
 
     public RestrainAction() {
         super("View Selected Data");
@@ -41,7 +41,11 @@ public class RestrainAction extends AbstractTableAction {
         }
         
         filterTableModel.restrain(restrainRowSet);
+        
+        filteringDone();
     }
+
+    public abstract void filteringDone();
 
     @Override
     public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {

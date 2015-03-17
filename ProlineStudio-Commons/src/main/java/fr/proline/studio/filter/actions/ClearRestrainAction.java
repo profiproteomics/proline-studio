@@ -10,7 +10,7 @@ import javax.swing.table.TableModel;
  * Action used to clear the restrain put on displayed rows of a model
  * @author JM235353
  */
-public class ClearRestrainAction extends AbstractTableAction {
+public abstract class ClearRestrainAction extends AbstractTableAction {
 
     public ClearRestrainAction() {
         super("View All Data");
@@ -28,8 +28,11 @@ public class ClearRestrainAction extends AbstractTableAction {
         
         filterTableModel.restrain(null);
 
+        filteringDone();
     }
 
+    public abstract void filteringDone();
+    
     @Override
     public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
         TableModel tableModel = table.getModel();

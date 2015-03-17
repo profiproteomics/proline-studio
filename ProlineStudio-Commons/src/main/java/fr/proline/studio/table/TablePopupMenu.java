@@ -18,6 +18,7 @@ public class TablePopupMenu extends JPopupMenu {
     private int m_col;
     private int[] m_selectedRows;
     private JTable m_table;
+
     
     public void addAction(AbstractTableAction action) {
         m_actions.add(action);

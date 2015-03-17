@@ -10,7 +10,6 @@ import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.filter.FilterButton;
 import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
@@ -532,8 +531,18 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         public TablePopupMenu initPopupMenu() {
             TablePopupMenu popupMenu = new TablePopupMenu();
 
-            popupMenu.addAction(new RestrainAction());
-            popupMenu.addAction(new ClearRestrainAction());
+            popupMenu.addAction(new RestrainAction() {
+                @Override
+                public void filteringDone() {
+                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                }
+            });
+            popupMenu.addAction(new ClearRestrainAction() {
+                @Override
+                public void filteringDone() {
+                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                }
+            });
 
             return popupMenu;
         }

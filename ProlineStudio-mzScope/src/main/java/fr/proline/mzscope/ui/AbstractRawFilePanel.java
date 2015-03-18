@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  */
 abstract public class AbstractRawFilePanel extends javax.swing.JPanel implements IRawFilePlot, KeyEventDispatcher, ScanHeaderListener {
 
-    final private static Logger logger = LoggerFactory.getLogger(AbstractRawFilePanel.class);
+    final private static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.AbstractRawFilePanel");
     final private static DecimalFormat xFormatter = new DecimalFormat("0.0000");
     final private static DecimalFormat yFormatter = new DecimalFormat("0.###E0");
     final private static Font tickLabelFont = new Font("SansSerif", java.awt.Font.PLAIN, 10);

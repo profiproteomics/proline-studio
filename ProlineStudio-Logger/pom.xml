@@ -25,6 +25,16 @@
             <artifactId>slf4j-api</artifactId>  
             <!-- Version inherited from ProFI-Pom -->
         </dependency>  
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <!-- Version inherited from ProFI-Pom -->
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <!-- Version inherited from ProFI-Pom -->
+        </dependency>
     </dependencies>
 
     <build>
@@ -40,6 +50,9 @@
                         <publicPackage>org.slf4j</publicPackage>
                         <publicPackage>org.slf4j.helpers</publicPackage>
                         <publicPackage>org.slf4j.spi</publicPackage>
+                        <publicPackage>org.slf4j.impl</publicPackage>
+                        <publicPackage>ch.qos.logback.core.*</publicPackage>
+                        <publicPackage>ch.qos.logback.classic.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

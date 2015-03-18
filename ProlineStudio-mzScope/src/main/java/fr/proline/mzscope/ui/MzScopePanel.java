@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeatureListener, ExtractionListener {
 
-    private final static Logger logger = LoggerFactory.getLogger(MzScopePanel.class);
+    private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.MzScopePanel");
 
     private Frame parentFrame = null;
     private JSplitPane mainSplitPane = null;

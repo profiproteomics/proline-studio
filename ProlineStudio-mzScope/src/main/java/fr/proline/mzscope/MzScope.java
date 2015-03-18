@@ -9,6 +9,8 @@ import fr.proline.mzscope.ui.MzScopePanel;
 import java.awt.Frame;
 import java.io.File;
 import javax.swing.JPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * main entry point for mzscope
@@ -16,6 +18,7 @@ import javax.swing.JPanel;
  */
 public class MzScope implements IMzScope{
 
+    private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope");
     private MzScopePanel mzScopePanel;
     
     public MzScope() {
@@ -56,6 +59,7 @@ public class MzScope implements IMzScope{
      */
     @Override
     public void extractRawFile(File file, double moz, double elutionTime, double firstScanTime, double lastScanTime) {
+        logger.debug("extractRawFile for "+file.getName()+" on "+moz);
         mzScopePanel.extractRawFile(file, moz, elutionTime,  firstScanTime, lastScanTime);
     }
 }

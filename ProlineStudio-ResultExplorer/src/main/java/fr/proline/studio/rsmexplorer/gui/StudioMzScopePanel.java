@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
-import fr.profi.mzscope.MzScope;
+import fr.proline.mzscope.MzScope;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -12,7 +12,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import javax.swing.JLayeredPane;
 import javax.swing.JScrollPane;
-import fr.profi.mzscope.ui.event.ExtractFeatureListener;
+import fr.proline.mzscope.ui.event.ExtractFeatureListener;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.mzscope.MzdbInfo;
 import java.awt.GridBagConstraints;

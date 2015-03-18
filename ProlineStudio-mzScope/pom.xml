@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>ProlineStudio-parent</artifactId>
+        <groupId>fr.proline</groupId>
+        <version>0.3.0-SNAPSHOT</version>
+    </parent>
+  
+    <groupId>fr.proline</groupId>
+    <artifactId>ProlineStudio-mzScope</artifactId>
+    <packaging>nbm</packaging>
+    
+    <name>ProlineStudio-mzScope</name>
+    <description>Proline module to display mzdb files</description>
+    
+    <properties>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target> 
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <sqlite4java.version>1.0.392</sqlite4java.version>
+    </properties>
+    
+    <dependencies>
+        <!-- Proline -->
+        <dependency>
+            <groupId>fr.profi</groupId>
+            <artifactId>mzdb-access</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.profi</groupId>
+            <artifactId>mzdb-processing</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        
+        <!--  -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>16.0.1</version>
+            <type>jar</type>
+        </dependency>
+        
+        <!-- xml processing  -->
+        <dependency>
+            <groupId>org.agmip.thirdparty</groupId>
+            <artifactId>ximpleware-vtd-xml</artifactId>
+            <version>2.11</version>
+        </dependency>
+        
+        <!-- JXTable -->
+        <dependency>
+            <groupId>org.swinglabs.swingx</groupId>
+            <artifactId>swingx-all</artifactId>
+            <version>1.6.3</version>
+            <type>jar</type>
+        </dependency>
+        
+        <!--
+        <dependency>
+            <groupId>com.jtattoo</groupId>
+            <artifactId>JTattoo</artifactId>
+            <version>1.6.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jdesktop</groupId>
+            <artifactId>beansbinding</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+        -->
+        
+        <!-- Logger -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <!-- <version>1.7.6</version>  -->
+            <exclusions>
+                <exclusion> 
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion> 
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions> 
+        </dependency>
+        <!--
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId> -->
+        <!--<version>1.1.2</version> -->
+        <!--</dependency>-->
+        
+        <!--  propertySheet Panel -->
+        <dependency>
+            <groupId>L2FProd</groupId>
+            <artifactId>l2fprod-common-all</artifactId>
+            <version>7.3-20070317</version>
+        </dependency>
+        
+        <!--  JFree graph -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.17</version>
+        </dependency>
+        
+        <!--  JFree common -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jcommon</artifactId>
+            <version>1.0.21</version>
+        </dependency>
+        
+        <!--  xml serialization -->
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.7</version>
+        </dependency> 
+        
+        <!-- org.scala-lang -->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+        </dependency>
+        
+        <!-- sqlite4java -->
+        <!-- SQLite Jar then native libraries -->
+        <dependency>
+            <groupId>com.almworks.sqlite4java</groupId>
+            <artifactId>sqlite4java</artifactId>
+            <version>${sqlite4java.version}</version>
+        </dependency>
+        
+    </dependencies>
+    
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+                <!-- Version inherited from ProlineStudio-parent -->
+                <extensions>true</extensions>
+                <configuration>
+                    <publicPackages>
+                        <publicPackage>fr.proline.mzscope.*</publicPackage>
+                        <publicPackage>fr.proline.studio.mzscope</publicPackage>
+                    </publicPackages>
+                </configuration>
+            </plugin>
+            
+            <!--  Maven Release for branches and tags -->
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <providerImplementations>
+                        <svn>javasvn</svn>
+                    </providerImplementations>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
+                        <artifactId>maven-scm-provider-svnjava</artifactId>
+                        <version>2.1.1</version>
+                        <scope>compile</scope>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+        </plugins>
+    </build>
+    
+</project>

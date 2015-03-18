@@ -44,10 +44,17 @@
     </repositories>
 
     <dependencies>
-        <dependency>
+         <dependency>
             <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-api-annotations-common</artifactId>
+            <artifactId>org-netbeans-modules-settings</artifactId>
             <version>${netbeans.version}</version>
+            <type>jar</type>
+        </dependency> 
+        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ProlineStudio-CoreWrapper</artifactId>
+            <version>${project.version}</version>
         </dependency>
         
         <!-- R Dependencies -->
@@ -101,6 +108,18 @@
             <type>nbm</type>
         </dependency>
         
+        <dependency> 
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>  
+        <!-- Version inherited from ProFI-Pom -->
+      </dependency>  
+      
+      <dependency>
+            <groupId>org.swinglabs.swingx</groupId>
+            <artifactId>swingx-all</artifactId>
+            <version>1.6.3</version>
+            <type>jar</type>
+        </dependency>
         
         <dependency>
 	  <groupId>org.python</groupId>
@@ -131,7 +150,7 @@
       <scope>system</scope>
 <systemPath>D://renjin/renjin-script-engine-0.7.0-RC7-jar-with-dependencies.jar</systemPath>
 </dependency> -->
-        
+       
     </dependencies>
 
 

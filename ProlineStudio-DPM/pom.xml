@@ -25,32 +25,39 @@
             <artifactId>ProlineStudio-Logger</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- NetBeans dependencies -->
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-api-annotations-common</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client</artifactId>
             <version>1.13.1-beta</version>
 
-	    <!-- Use SLF4J instead of Apache common-loggings -->
+            <!-- Use SLF4J instead of Apache common-loggings -->
             <exclusions>
-              <exclusion>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-              </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
-	<!-- Use SLF4J instead of Apache common-loggings -->
+        <!-- Use SLF4J instead of Apache common-loggings -->
         <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>jcl-over-slf4j</artifactId>
-          <version>1.7.5</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.5</version>
         </dependency>
+        
+        <dependency> 
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>  
+            <!-- Version inherited from ProFI-Pom -->
+        </dependency>  
+      
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>3.2.1.Final</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.google.http-client</groupId>

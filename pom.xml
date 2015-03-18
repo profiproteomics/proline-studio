@@ -17,15 +17,17 @@
     <name>ProlineStudio-parent</name>
 
     <modules>
+        <module>ProlineStudio-Logger</module>
+        <module>ProlineStudio-CoreWrapper</module>
         <module>branding</module>
         <module>application</module>
         <module>ProlineStudio-Commons</module>
         <module>ProlineStudio-DAM</module>
         <module>ProlineStudio-ResultExplorer</module>
-        <module>ProlineStudio-CoreWrapper</module>
-        <module>ProlineStudio-Logger</module>
         <module>ProlineStudio-DPM</module>
         <module>ProlineStudio-R</module>
+        <module>ProlineStudio-mzScope</module>
+        
     </modules>
 
     <properties>
@@ -61,7 +63,7 @@
             <groupId>batik</groupId>
             <artifactId>batik-dom</artifactId>
             <version>1.6</version>
-        </dependency>
+        </dependency> 
 
         <dependency>
             <groupId>batik</groupId>
@@ -89,7 +91,7 @@
             <version>1.6</version>
         </dependency>
 
-		
+	
     </dependencies>
 
     <build>

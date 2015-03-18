@@ -5,8 +5,6 @@ import fr.proline.studio.rserver.node.RTree;
 import java.awt.GridLayout;
 import javax.swing.JScrollPane;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 

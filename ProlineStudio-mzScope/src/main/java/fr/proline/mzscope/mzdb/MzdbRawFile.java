@@ -263,7 +263,14 @@ public class MzdbRawFile implements IRawFile {
                 Peakel[] a = {peakel};
                 //creates a Feature associated to this peakel
                 Feature feature = new Feature(peakel.getMz(), 0, JavaConverters.asScalaBufferConverter(l).asScala(), false);
-                result.add(feature);
+                if (minMz == 0 && maxMz == 0){
+                    result.add(feature);
+                }else{
+                    //check that the feature is in the mass range
+                    if (feature.getMz()>= minMz && feature.getMz() <= maxMz){
+                        result.add(feature);
+                    }
+                }
             }
         } catch (SQLiteException | StreamCorruptedException ex) {
             logger.error("Error while getting LcMs RunSlice Iterator: "+ ex);

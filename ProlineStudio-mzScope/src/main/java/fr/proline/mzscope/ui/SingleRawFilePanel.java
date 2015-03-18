@@ -7,7 +7,7 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.util.CyclicColorPalette;
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;

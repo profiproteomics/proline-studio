@@ -135,6 +135,9 @@
                         <publicPackage>org.xml.sax</publicPackage>
                         <publicPackage>org.xml.sax.ext</publicPackage>
                         <publicPackage>org.xml.sax.helpers</publicPackage>
+                        <publicPackage>javax.xml.stream.*</publicPackage>
+                        <publicPackage>javax.xml.stream.events.*</publicPackage>
+                        <publicPackage>org.dom4j.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

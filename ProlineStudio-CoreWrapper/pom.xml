@@ -187,6 +187,8 @@
                         <publicPackage>org.xml.sax.helpers</publicPackage>
                         <publicPackage>scala.*</publicPackage>
                         <publicPackage>org.slf4j.impl.*</publicPackage>
+                        <publicPackage>org.apache.commons.*</publicPackage>
+                        <publicPackage>com.fasterxml.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

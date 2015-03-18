@@ -12,7 +12,7 @@ import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
-import fr.proline.mzscope.util.CyclicColorPalette;
+import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.mzscope.util.MzScopeConstants;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;

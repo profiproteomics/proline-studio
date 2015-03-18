@@ -130,16 +130,16 @@ public class DataBoxMzScope extends AbstractDataBox{
         //registerTask(task)
        List<MzdbInfo> mzdbInfos =  mzScope.getMzdbInfo();
        List<File> fileList = new ArrayList();
-       List<Double> mozList = new ArrayList();
+       List<MzdbInfo> infos = new ArrayList();
         for (MzdbInfo mzdbInfo : mzdbInfos) {
             String f = mzdbInfo.getFileName();
             File file = new File(m_mzdbDir+File.separator+f);
             if (file.exists()){
                 fileList.add(file);
-                mozList.add(mzdbInfo.getMoz());
+                infos.add(mzdbInfo);
             }
         }
-        ((StudioMzScopePanel) m_panel).setData((long)-1, fileList, mzdbInfos, true);
+        ((StudioMzScopePanel) m_panel).setData((long)-1, fileList, infos, true);
         setLoaded(loadingId);
     }
     

@@ -46,6 +46,11 @@
             <artifactId>ProlineStudio-CoreWrapper</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ProlineStudio-Logger</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <!--  -->
         <dependency>
@@ -84,11 +89,12 @@
         -->
         
         <!-- Logger -->
+        <!--
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <artifactId>slf4j-api</artifactId> -->
             <!-- <version>1.7.6</version>  -->
-            <exclusions>
+           <!-- <exclusions>
                 <exclusion> 
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -98,7 +104,7 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
             </exclusions> 
-        </dependency>
+        </dependency> -->
         <!--
     <dependency>
         <groupId>ch.qos.logback</groupId>

@@ -47,7 +47,6 @@ public class XICExtractionPanel extends JPanel {
     private JScrollPane scrollPane;
     private JPanel internalPanel;
     private JPanel mainPanel;
-    private JPanel panelMassTol;
     private JPanel panelMassRange;
     private JLabel massRangeLabel;
     private JTextField massRangeTF;
@@ -112,23 +111,15 @@ public class XICExtractionPanel extends JPanel {
             c.gridx = 0;
             c.gridy = 0;
             c.weightx = 1.0;
-            mainPanel.add(getMassTolPanel(),c);
+            mainPanel.add(getPanelMass(),c);
+            c.gridy++;
+            mainPanel.add(getPanelTolerance(),c);
             c.gridy++;
             mainPanel.add(getDisplayPanel(),c);
         }
         return mainPanel;
     }
 
-    private JPanel getMassTolPanel() {
-        if (panelMassTol == null) {
-            panelMassTol = new JPanel();
-            panelMassTol.setName("panelMassTol");
-            panelMassTol.setLayout(new FlowLayout(FlowLayout.LEADING));
-            panelMassTol.add(getPanelMass());
-            panelMassTol.add(getPanelTolerance());
-        }
-        return panelMassTol;
-    }
 
     private JPanel getDisplayPanel() {
         if (panelDisplay == null) {
@@ -201,7 +192,7 @@ public class XICExtractionPanel extends JPanel {
         if (toleranceLabel == null) {
             toleranceLabel = new JLabel();
             toleranceLabel.setName("toleranceLabel");
-            toleranceLabel.setText("Tol (ppm):");
+            toleranceLabel.setText("Tolerance (ppm):");
         }
         return toleranceLabel;
     }

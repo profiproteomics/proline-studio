@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
-import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -50,12 +49,10 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
     private JSplitPane mainSplitPane = null;
     private JSplitPane mainLeftSplitPane = null;
     private JSplitPane mainRightSplitPane = null;
-    private JSplitPane extractionSplitPane = null;
     private JFileChooser fileChooser = null;
     private JTabbedPane viewersTabPane = null;
     private JTabbedPane featuresTabPane = null;
     private RawFilesPanel rawFilePanel = null;
-    private ObjectInspectorPanel propertySheetPanel = null;
     private XICExtractionPanel extractXICPanel = null;
 
     private IRawFilePlot selectedRawFilePanel;
@@ -104,7 +101,7 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
             this.mainLeftSplitPane.setDividerLocation(230);
             this.mainLeftSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 
-            this.mainLeftSplitPane.setRightComponent(getFeaturesTabPane());
+            this.mainLeftSplitPane.setRightComponent(getExtractXICPanel());
             this.mainLeftSplitPane.setLeftComponent(getRawFilePanel());
         }
 
@@ -117,7 +114,7 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
             this.mainRightSplitPane.setDividerLocation(320);
             this.mainRightSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 
-            this.mainRightSplitPane.setRightComponent(getExtractionSplitPane());
+            this.mainRightSplitPane.setRightComponent(getFeaturesTabPane());
             this.mainRightSplitPane.setLeftComponent(getViewersTabPane());
         }
 
@@ -139,17 +136,6 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         return this.featuresTabPane;
     }
 
-    private JSplitPane getExtractionSplitPane() {
-        if (this.extractionSplitPane == null) {
-            this.extractionSplitPane = new JSplitPane();
-            this.extractionSplitPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
-            this.extractionSplitPane.setDividerLocation(370);
-            this.extractionSplitPane.setRightComponent(getPropertySheetPanel());
-            this.extractionSplitPane.setLeftComponent(getExtractXICPanel());
-        }
-        return this.extractionSplitPane;
-    }
-
     private JTabbedPane getViewersTabPane() {
         if (this.viewersTabPane == null) {
             viewersTabPane = new JTabbedPane();
@@ -168,12 +154,6 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         this.selectedRawFilePanel = (IRawFilePlot) viewersTabPane.getSelectedComponent();
     }
 
-    private ObjectInspectorPanel getPropertySheetPanel() {
-        if (this.propertySheetPanel == null) {
-            this.propertySheetPanel = new ObjectInspectorPanel(Feature.class);
-        }
-        return this.propertySheetPanel;
-    }
 
     private XICExtractionPanel getExtractXICPanel() {
         if (this.extractXICPanel == null) {

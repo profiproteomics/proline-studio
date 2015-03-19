@@ -90,7 +90,7 @@ public class GenerateSpectrumMatchesAction extends AbstractRSMAction {
 
             DataSetNode datasetNode = (DataSetNode) node;
 
-            if (!datasetNode.isLeaf()) {
+            if (!datasetNode.hasResultSet()) {
                 setEnabled(false);
                 return;
             }

@@ -5,6 +5,8 @@
  */
 package fr.proline.studio.utils;
 
+import java.awt.FontMetrics;
+
 /**
  * utils for String
  * @author MB243701
@@ -26,5 +28,13 @@ public class StringUtils {
             return text;
         }
         return text.substring(textSize-nbCharac);
+    }
+    
+    /* returns the pixel-lenght of a string */
+    public static int lenghtOfString(String s, FontMetrics fm) {
+       if (fm == null || s == null)
+            return 0;
+       else 
+           return fm.stringWidth(s);
     }
 }

@@ -53,6 +53,8 @@ public class PlotLinear extends PlotAbstract {
     private static final BasicStroke STROKE_1 = new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
     private static final BasicStroke STROKE_2 = new BasicStroke(2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
     
+    private boolean strokeFixed = false;
+    
     private ParameterList m_parameterList;
     private ColorOrGradientParameter m_colorParameter;
 
@@ -175,7 +177,7 @@ public class PlotLinear extends PlotAbstract {
 
         int indexFound = findPoint(x, y);
 
-        int size = m_dataX.length;
+        int size = m_dataX == null?0:m_dataX.length;
         if (!append) {
             for (int i = 0; i < size; i++) {
                 m_selected[i] = false;
@@ -196,7 +198,7 @@ public class PlotLinear extends PlotAbstract {
     public boolean select(Path2D.Double path, double minX, double maxX, double minY, double maxY, boolean append) {
 
         boolean aSelection = false;
-        int size = m_dataX.length;
+        int size = m_dataX == null? 0:m_dataX.length;
         for (int i = 0; i < size; i++) {
 
             double dataX = m_dataX[i];
@@ -301,7 +303,7 @@ public class PlotLinear extends PlotAbstract {
 
         double distanceMin = Double.MAX_VALUE;
         int nearestDataIndex = -1;
-        int size = m_dataX.length;
+        int size = m_dataX== null?0: m_dataX.length;
         for (int i = size - 1; i >= 0; i--) { // reverse loop to select first the data in foreground
             double dataX = m_dataX[i];
             double dataY = m_dataY[i];
@@ -634,8 +636,8 @@ public class PlotLinear extends PlotAbstract {
             plotColor = this.m_plotInformation.getPlotColor();
         }
 
-        int size = m_dataX.length;
-        if (m_dataX.length > 0) {
+        int size = m_dataX == null? 0:m_dataX.length;
+        if (size > 0) {
             int x0 = xAxis.valueToPixel(m_dataX[0]);
             int y0 = yAxis.valueToPixel(m_dataY[0]);
             boolean isDef0 = !Double.valueOf(m_dataX[0]).isNaN() && !Double.valueOf(m_dataY[0]).isNaN();
@@ -688,7 +690,7 @@ public class PlotLinear extends PlotAbstract {
     }
 
     private void sortData() {
-        int dataSize = m_dataX.length;
+        int dataSize = m_dataX == null?0:m_dataX.length;
         int j;
         if (dataSize > 1) {
             for (int i = 1; i < dataSize; i++) {
@@ -715,7 +717,9 @@ public class PlotLinear extends PlotAbstract {
 
     @Override
     public boolean setIsPaintMarker(boolean isPaintMarker) {
-        
+        if (strokeFixed){
+            return false;
+        }
         boolean modified = isPaintMarker ^ m_isPaintMarker;
         
         if (modified) {
@@ -765,6 +769,11 @@ public class PlotLinear extends PlotAbstract {
         }
 
         return m_compareDataInterface.getDataValueAt(index, m_colY).toString();
+    }
+    
+    public void setStrokeFixed(boolean b){
+        this.strokeFixed = b;
+        m_strokeLine = STROKE_1;
     }
 }
 

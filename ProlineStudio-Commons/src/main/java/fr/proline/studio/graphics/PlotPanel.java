@@ -3,7 +3,16 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.graphics.Axis.EnumXInterface;
 import fr.proline.studio.graphics.Axis.EnumYInterface;
 import fr.proline.studio.parameter.ParameterList;
-import java.awt.*;
+import fr.proline.studio.utils.StringUtils;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
@@ -11,7 +20,10 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -56,9 +68,27 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     private GridListener m_gridListener = null;
     
     private final Rectangle m_plotArea = new Rectangle();
+    
+    List<PlotPanelListener> m_listeners = new ArrayList<PlotPanelListener>();
+    
+    private boolean m_drawCursor = false;
+    // show coord.
+    private String m_coordX="";
+    private String m_coordY="";
+    private int m_posx;
+    private int m_posy;
+    /* font coord */
+    private final static Font coordFont = new Font("dialog", Font.BOLD, 9);
+    private final static Color coordColor = Color.GRAY;
+    
+    private final static NumberFormat nfE = NumberFormat.getNumberInstance();
+    private final static DecimalFormat formatE = (DecimalFormat)nfE;
+    private final static NumberFormat nf = NumberFormat.getNumberInstance();
+    private final static DecimalFormat format = (DecimalFormat)nf;
 
     
     public PlotPanel() {
+        formatE.applyPattern("0.#####E0");
         addMouseListener(this);
         addMouseMotionListener(this);
         ToolTipManager.sharedInstance().registerComponent(this);
@@ -181,6 +211,32 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         m_zoomGesture.paint(g2d);
         m_selectionGesture.paint(g2d);
         
+        if (this.m_drawCursor){
+            // show coord
+            paintCoord(g2d);
+        }
+        
+    }
+    
+    private void paintCoord(Graphics2D g){
+        int lx = StringUtils.lenghtOfString(m_coordX, getFontMetrics(coordFont));
+        int ly = StringUtils.lenghtOfString(m_coordY, getFontMetrics(coordFont));
+        int maxl = Math.max(lx, ly);
+        g.setColor(coordColor);
+        g.setFont(coordFont);
+        int px = m_posx + 10;
+        int py = m_posy ;
+        // on the edges
+        if(px+maxl > this.getWidth()){
+            px = m_posx-maxl-10;
+        }
+        if (py - 10 <0){
+            py = 10;
+        }else if (py +20 > this.getHeight()){
+            py = this.getHeight() - 20;
+        }
+        g.drawString(m_coordX, px, py);
+        g.drawString(m_coordY, px, (py + 15));
     }
     
     public ArrayList<ParameterList> getParameters() {
@@ -216,6 +272,10 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     }
     public boolean isLocked() {
         return m_dataLocked;
+    }
+    
+    public void setDrawCursor(boolean drawCursor){
+        this.m_drawCursor = drawCursor;
     }
   
     public void displayGrid(boolean v) {
@@ -354,11 +414,16 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        double xValue = m_xAxis.pixelToValue(e.getX());
+        double yValue = m_yAxis.pixelToValue(e.getY());
+        fireMouseClicked(e, xValue, yValue);
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        if (m_drawCursor){
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
         if (m_plots == null || m_plots.isEmpty()) {
             return;
         }
@@ -384,7 +449,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        
+        if (m_drawCursor){
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
         boolean mustRepaint = false;
         
         int x = e.getX();
@@ -490,15 +557,35 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         m_updateDoubleBuffer = true;
         repaint();
     }
+    
+    public void addListener(PlotPanelListener listener) {
+        m_listeners.add(listener);
+    }
+    
+    protected void fireMouseClicked(MouseEvent e, double xValue, double yValue){
+        // Notify 
+        for (PlotPanelListener l : m_listeners)
+            l.plotPanelMouseClicked(e, xValue, yValue);
+    }
 
     @Override
     public void mouseEntered(MouseEvent e) {}
 
     @Override
-    public void mouseExited(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {
+        if (m_drawCursor){
+            m_coordX="";
+            m_coordY="";
+            repaint();
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
+    }
 
     @Override
     public void mouseDragged(MouseEvent e) {
+        if (m_drawCursor){
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
         if (m_selectionGesture.isSelecting()) {
             m_selectionGesture.continueSelection(e.getX(), e.getY());
             repaint();
@@ -507,15 +594,36 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             repaint();
         }
     }
-
+    
     @Override
     public void mouseMoved(MouseEvent e) {
-        if (m_plots == null || m_plots.isEmpty()) {
+        if (m_plots == null || m_plots.isEmpty() || e == null) {
+            m_coordX = "";
+            m_coordY = "";
+            if (m_drawCursor){
+                repaint();
+            }
             return;
         }
         
         double xValue = m_xAxis.pixelToValue(e.getX());
         double yValue = m_yAxis.pixelToValue(e.getY());
+        
+        if (m_drawCursor){
+            setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+            if ((xValue>-0.1 && xValue<0.1) || xValue>=10000 || xValue<=-10000){
+                m_coordX = formatE.format(xValue);
+            }else{
+                m_coordX =format.format(xValue);
+            }
+            if ((yValue>-0.1 && yValue<0.1) || yValue>=10000 || yValue<=-10000){
+                m_coordY = formatE.format(yValue);
+            }else{
+                m_coordY =  format.format(yValue);
+            }
+            m_posx = e.getX() ;
+            m_posy = e.getY();
+        }
 
         int nbPlotTooltip = 0;
         boolean repaintNeeded = false;
@@ -552,7 +660,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             setToolTipText(null);
         }
         
-        if (repaintNeeded) {
+        if (repaintNeeded || m_drawCursor) {
             repaintUpdateDoubleBuffer();
         }
         

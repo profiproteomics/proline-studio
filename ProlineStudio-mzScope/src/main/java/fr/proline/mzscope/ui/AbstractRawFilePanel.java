@@ -13,6 +13,12 @@ import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
 import fr.proline.mzscope.util.KeyEventDispatcherDecorator;
 import fr.proline.mzscope.util.MzScopeConstants;
+import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.graphics.PlotLinear;
+import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.PlotPanelListener;
+import fr.proline.studio.graphics.marker.LabelMarker;
+import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -24,6 +30,7 @@ import java.awt.KeyEventDispatcher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -52,7 +59,6 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import static org.jfree.chart.renderer.AbstractRenderer.DEFAULT_STROKE;
 import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRendererState;
@@ -69,7 +75,7 @@ import org.slf4j.LoggerFactory;
  * base for raw file panel. The panel could be a SingleRawFilePanel or MultiRawFilePanel
  * @author CB205360
  */
-public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlot, KeyEventDispatcher, ScanHeaderListener {
+public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlot, KeyEventDispatcher, ScanHeaderListener, PlotPanelListener {
 
     final private static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.AbstractRawFilePanel");
     final private static DecimalFormat xFormatter = new DecimalFormat("0.0000");
@@ -85,7 +91,10 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     private JPanel spectrumContainerPanel;
     
     protected ChartPanel chromatogramPanel;
-    protected ChartPanel spectrumPanel;
+    //protected ChartPanel spectrumPanel;
+    protected PlotPanel spectrumPlotPanel;
+    protected PlotLinear scanPlotLinear;
+    protected JToolBar spectrumToolbar;
     private HeaderSpectrumPanel headerSpectrumPanel;
     protected JToolBar toolbar;
     protected Chromatogram currentChromatogram;
@@ -133,7 +142,6 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
             mainPanel = new JPanel();
             mainPanel.setName("mainPanel");
             mainPanel.setLayout(new BorderLayout());
-            mainPanel.setBackground(new java.awt.Color(240, 240, 40));
             if (displayScan){
                 mainPanel.add(getSplitPane(), BorderLayout.CENTER);
             }else{
@@ -174,6 +182,15 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
            spectrumContainerPanel.setLayout(new BorderLayout());
         }
         return spectrumContainerPanel;
+    }
+    
+    private JToolBar getSpectrumToolbar(){
+        spectrumToolbar = new JToolBar(JToolBar.VERTICAL);
+        spectrumToolbar.setFloatable(false);
+        ExportButton exportImageButton = new ExportButton("Graphic", spectrumPlotPanel);
+        spectrumToolbar.add(exportImageButton);
+
+        return spectrumToolbar;
     }
     
     private void initChartPanels(){
@@ -227,66 +244,19 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         xyplot.setRangeGridlinePaint(CyclicColorPalette.GRAY_GRID);
 
         // Create Scan Charts
-        dataset = new XYSeriesCollection();
-        JFreeChart scanChart = ChartFactory.createXYLineChart("", null, null, dataset, PlotOrientation.VERTICAL, false, true, false);
-        xyplot = scanChart.getXYPlot();
-        XYItemRenderer renderer = xyplot.getRenderer();
-        renderer.setSeriesPaint(0, CyclicColorPalette.getColor(1));
-        xyplot.setDomainPannable(true);
-        xyplot.setDomainCrosshairVisible(true);
-        xyplot.setDomainCrosshairLockedOnData(false);
-        xyplot.setRangeCrosshairVisible(false);
-        xyplot.getDomainAxis().setTickLabelFont(tickLabelFont);
-        xyplot.getRangeAxis().setTickLabelFont(tickLabelFont);
-        xyplot.setBackgroundPaint(CyclicColorPalette.GRAY_BACKGROUND);
-        xyplot.setRangeGridlinePaint(CyclicColorPalette.GRAY_GRID);
-        spectrumPanel = new ChartPanel(scanChart);
+        spectrumPlotPanel = new PlotPanel();
+        spectrumPlotPanel.addListener(this);
+        spectrumPlotPanel.setDrawCursor(true);
         List<Integer> emptyListScanIndex = new ArrayList<>();
         emptyListScanIndex.add(0);
         headerSpectrumPanel = new HeaderSpectrumPanel(null, emptyListScanIndex);
         headerSpectrumPanel.addScanHeaderListener(this);
-        spectrumPanel.setMouseWheelEnabled(true);
-
-        spectrumPanel.addChartMouseListener(new ChartMouseListener() {
-
-            @Override
-            public void chartMouseMoved(ChartMouseEvent event) {
-                int deviceX = event.getTrigger().getX();
-
-                JFreeChart jfreechart = event.getChart();
-                if ((jfreechart != null) && (currentScan != null)) {
-                    XYPlot xyplot = event.getChart().getXYPlot();
-                    double domain = xyplot.getDomainAxis().java2DToValue(deviceX, spectrumPanel.getScreenDataArea(), xyplot.getDomainAxisEdge());
-                    double[] domainValues = ((currentScan.getPeaksMz() == null) ? currentScan.getMasses() : currentScan.getPeaksMz());
-                    float[] rangeValues = ((currentScan.getPeaksIntensities() == null) ? currentScan.getIntensities() : currentScan.getPeaksIntensities());
-                    int result = Arrays.binarySearch(domainValues, domain);
-                    if (~result < domainValues.length) {
-                        xyplot.clearAnnotations();
-                        StringBuilder builder = new StringBuilder();
-                        builder.append(xFormatter.format(domainValues[~result])).append(" - ");
-                        builder.append(yFormatter.format(rangeValues[~result]));
-                        double y = rangeValues[~result];
-                        final Rectangle2D area = spectrumPanel.getChartRenderingInfo().getPlotInfo().getDataArea();
-                        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(xyplot.getRangeAxisLocation(), PlotOrientation.VERTICAL);
-                        double pY = xyplot.getRangeAxis().valueToJava2D(y, area, rangeEdge);
-                        double angle = (pY < 60.0) ? -5.0 * Math.PI / 4.0 : -Math.PI / 2.0;
-                        xyplot.addAnnotation(new XYPointerAnnotation(builder.toString(), domainValues[~result], rangeValues[~result], angle));
-                    }
-                }
-            }
-
-            @Override
-            public void chartMouseClicked(ChartMouseEvent event) {
-                JFreeChart jfreechart = event.getChart();
-                if ((jfreechart != null) && (currentScan != null)) {
-                    scanMouseClicked(event);
-                }
-            }
-        });
-
+        spectrumPlotPanel.repaint();
+        
         spectrumContainerPanel.removeAll();
         spectrumContainerPanel.add(headerSpectrumPanel, BorderLayout.NORTH);
-        spectrumContainerPanel.add(spectrumPanel, BorderLayout.CENTER);
+        spectrumContainerPanel.add(spectrumPlotPanel, BorderLayout.CENTER);
+        spectrumContainerPanel.add(getSpectrumToolbar(), BorderLayout.WEST);
     }
     
     private JToolBar initToolbar() {
@@ -360,17 +330,21 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         int scanIdx = getCurrentRawfile().getScanId(d * 60.0);
         displayScan(scanIdx);
     }
-
-    protected void scanMouseClicked(ChartMouseEvent event) {
-        if ((event.getTrigger().getClickCount() == 2)) {
-            XYPlot xyplot = event.getChart().getXYPlot();
-            double domain = xyplot.getDomainAxis().java2DToValue(event.getTrigger().getX(), spectrumPanel.getScreenDataArea(), xyplot.getDomainAxisEdge());
+    
+    @Override
+    public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue){
+        if (e.getClickCount() == 2) {
+            scanPlotLinear.clearMarkers();
+            double yStdevLabel = scanPlotLinear.getYMax()*0.1;
+            scanPlotLinear.addMarker(new LineMarker(spectrumPlotPanel, xValue, LineMarker.ORIENTATION_VERTICAL));
+            scanPlotLinear.addMarker(new LabelMarker(spectrumPlotPanel, xValue, yStdevLabel, "Mass "+xValue, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_TOP));
+            double domain = xValue;
             float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
             double maxMz = domain + domain * ppmTol / 1e6;
             double minMz = domain - domain * ppmTol / 1e6;
-            if ((event.getTrigger().getModifiers() & KeyEvent.ALT_MASK) != 0) {
+            if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0){
                 addChromatogram(minMz, maxMz);
-            } else {
+            }else {
                 switch (xicModeDisplay) {
                     case MzScopeConstants.MODE_DISPLAY_XIC_REPLACE: {
                         extractChromatogram(minMz, maxMz);
@@ -384,6 +358,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
             }
         }
     }
+
     
     public void addChromatogram(double minMz, double maxMz) {
         SwingWorker worker = new AbstractXICExtractionWorker(getCurrentRawfile(), minMz, maxMz) {
@@ -550,30 +525,29 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
             if (currentScan != null) {
                 Color plotColor = getPlotColor(getCurrentRawfile());
                 currentScanTime = currentScan.getRetentionTime();
-                XYSeries series = new XYSeries(currentScan.getTitle());
-                double[] masses = currentScan.getMasses();
-                float[] intensities = currentScan.getIntensities();
-                for (int k = 0; k < currentScan.getMasses().length; k++) {
-                    series.add(masses[k], intensities[k]);
-                }
+                ScanModel scanModel = new ScanModel(currentScan);
+                scanModel.setColor(plotColor);
+                scanPlotLinear = new PlotLinear(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
+                scanPlotLinear.setIsPaintMarker(true);
+                scanPlotLinear.setStrokeFixed(true);
+                scanPlotLinear.setPlotInformation(scanModel.getPlotInformation());
+                spectrumPlotPanel.setPlot(scanPlotLinear);
+                spectrumPlotPanel.repaint();
+                
 
-                XYSeriesCollection dataset = new XYSeriesCollection();
-                dataset.addSeries(series);
-                spectrumPanel.getChart().setTitle(new TextTitle(currentScan.getTitle(), titleFont));
                 headerSpectrumPanel.setMzdbFileName(getCurrentRawfile().getName());
                 updateScanIndexList();
                 headerSpectrumPanel.setScan(currentScan);
-                XYPlot xyplot = spectrumPanel.getChart().getXYPlot();
-                xyplot.setDataset(dataset);
+                /*
                 if (currentScan.getDataType() == Scan.ScanType.CENTROID) {
                     stickRenderer.setSeriesPaint(0, plotColor);
                     xyplot.setRenderer(stickRenderer);
                 } else {
                     lineRenderer.setSeriesPaint(0, plotColor);
                     xyplot.setRenderer(lineRenderer);
-                }
-                xyplot.getRangeAxis().setUpperMargin(0.3);
-                chromatogramPanel.getChart().getXYPlot().setDomainCrosshairValue(currentScan.getRetentionTime() / 60.0);
+                }*/
+                //xyplot.getRangeAxis().setUpperMargin(0.3);
+                //chromatogramPanel.getChart().getXYPlot().setDomainCrosshairValue(currentScan.getRetentionTime() / 60.0);
             }
         }
     }

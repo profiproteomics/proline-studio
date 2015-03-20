@@ -9,10 +9,13 @@ import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MzScopePreferences;
+import fr.proline.studio.graphics.marker.LabelMarker;
+import fr.proline.studio.graphics.marker.LineMarker;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,11 +72,15 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
         return currentChromatogram.rawFile;
     }
 
+    
     @Override
-    protected void scanMouseClicked(ChartMouseEvent event) {
-        if ((event.getTrigger().getClickCount() == 2)) {
-            XYPlot xyplot = event.getChart().getXYPlot();
-            double domain = xyplot.getDomainAxis().java2DToValue(event.getTrigger().getX(), spectrumPanel.getScreenDataArea(), xyplot.getDomainAxisEdge());
+    public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue){
+        if (e.getClickCount() == 2) {
+            scanPlotLinear.clearMarkers();
+            double yStdevLabel = scanPlotLinear.getYMax()*0.1;
+            scanPlotLinear.addMarker(new LineMarker(spectrumPlotPanel, xValue, LineMarker.ORIENTATION_VERTICAL));
+            scanPlotLinear.addMarker(new LabelMarker(spectrumPlotPanel, xValue, yStdevLabel, "Mass "+xValue, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_TOP));
+            double domain = xValue;
             float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
             double maxMz = domain + domain * ppmTol / 1e6;
             double minMz = domain - domain * ppmTol / 1e6;

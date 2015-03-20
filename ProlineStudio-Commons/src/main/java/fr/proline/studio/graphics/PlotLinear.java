@@ -6,11 +6,13 @@ import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.parameter.ColorOrGradientParameter;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.studio.utils.DataFormat;
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.LinearGradientPaint;
 import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.geom.Path2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -69,6 +71,8 @@ public class PlotLinear extends PlotAbstract {
     private BasicStroke m_strokeLine = STROKE_1;
     
     private ArrayList<ParameterList> m_parameterListArray = null;
+    
+    private boolean displayAntiAliasing = true;
     
 
     public PlotLinear(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
@@ -147,13 +151,13 @@ public class PlotLinear extends PlotAbstract {
         if (m_plotPanel.getXAxis().isEnum()) {
             labelX = m_plotPanel.getEnumValueX(indexFound, true);
         } else {
-            labelX = m_plotPanel.getXAxis().getExternalDecimalFormat().format(m_dataX[indexFound]);
+            labelX = DataFormat.format(m_dataX[indexFound],4);
         }
         String labelY;
         if (m_plotPanel.getYAxis().isEnum()) {
             labelY = m_plotPanel.getEnumValueY(indexFound, true);
         } else {
-            labelY = m_plotPanel.getYAxis().getExternalDecimalFormat().format(m_dataY[indexFound]);
+            labelY = DataFormat.format(m_dataY[indexFound],4);
         }
         
         m_sb.append(m_compareDataInterface.getDataValueAt(indexFound, m_compareDataInterface.getInfoColumn()).toString());
@@ -635,7 +639,10 @@ public class PlotLinear extends PlotAbstract {
         if (this.m_plotInformation != null && m_plotInformation.getPlotColor() != null) {
             plotColor = this.m_plotInformation.getPlotColor();
         }
-
+        if (displayAntiAliasing){
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+        
         int size = m_dataX == null? 0:m_dataX.length;
         if (size > 0) {
             int x0 = xAxis.valueToPixel(m_dataX[0]);
@@ -774,6 +781,10 @@ public class PlotLinear extends PlotAbstract {
     public void setStrokeFixed(boolean b){
         this.strokeFixed = b;
         m_strokeLine = STROKE_1;
+    }
+    
+    public void setAntiAliasing(boolean displayAntiAliasing){
+        this.displayAntiAliasing = displayAntiAliasing;
     }
 }
 

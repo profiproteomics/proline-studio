@@ -214,6 +214,7 @@ public class HeaderSpectrumPanel extends JPanel {
         if (this.textFieldRetentionTime == null) {
             textFieldRetentionTime = new JTextField();
             textFieldRetentionTime.setToolTipText("retention time in min");
+            textFieldRetentionTime.setColumns(6);
             textFieldRetentionTime.setName("textFieldRetentionTime");
             textFieldRetentionTime.addActionListener(new ActionListener() {
                 @Override
@@ -229,6 +230,7 @@ public class HeaderSpectrumPanel extends JPanel {
         if (this.textFieldMsLevel == null) {
             textFieldMsLevel = new JTextField();
             textFieldMsLevel.setEditable(false);
+            textFieldMsLevel.setColumns(3);
             textFieldMsLevel.setName("textFieldMsLevel");
             textFieldMsLevel.setToolTipText("msLevel");
         }

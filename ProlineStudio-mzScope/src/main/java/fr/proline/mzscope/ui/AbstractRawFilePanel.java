@@ -93,7 +93,6 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     private JPanel spectrumContainerPanel;
     
     protected ChartPanel chromatogramPanel;
-    //protected ChartPanel spectrumPanel;
     protected PlotPanel spectrumPlotPanel;
     protected PlotAbstract scanPlot;
     protected JToolBar spectrumToolbar;
@@ -103,8 +102,6 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     protected Scan currentScan;
     protected Float currentScanTime = null;
     
-    private final XYItemRenderer stickRenderer = new XYItemStickRenderer();
-    private final XYItemRenderer lineRenderer = new XYLineAndShapeRenderer(true, false);
     
     private boolean keepMsLevel = true;
 
@@ -534,12 +531,13 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
                     scanPlot = new PlotStick(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
                     ((PlotStick)scanPlot).setStrokeFixed(true);
                     ((PlotStick)scanPlot).setPlotInformation(scanModel.getPlotInformation());
+                    ((PlotStick)scanPlot).setIsPaintMarker(true);
                 } else {
                     scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
                     ((PlotLinear)scanPlot).setStrokeFixed(true);
                     ((PlotLinear)scanPlot).setPlotInformation(scanModel.getPlotInformation());
+                    ((PlotLinear)scanPlot).setIsPaintMarker(true);
                 }
-                scanPlot.setIsPaintMarker(true);
                 
                 spectrumPlotPanel.setPlot(scanPlot);
                 spectrumPlotPanel.repaint();

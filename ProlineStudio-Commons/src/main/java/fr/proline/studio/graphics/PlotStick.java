@@ -687,6 +687,7 @@ public class PlotStick extends PlotAbstract {
     @Override
     public boolean setIsPaintMarker(boolean isPaintMarker) {
         if (strokeFixed){
+            m_isPaintMarker = true;
             return false;
         }
         boolean modified = isPaintMarker ^ m_isPaintMarker;

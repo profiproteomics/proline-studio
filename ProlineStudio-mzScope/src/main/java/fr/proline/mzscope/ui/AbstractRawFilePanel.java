@@ -5,24 +5,34 @@
  */
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.util.KeyEventDispatcherDecorator;
 import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
-import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.mzscope.util.KeyEventDispatcherDecorator;
 import fr.proline.mzscope.util.MzScopeConstants;
+import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.graphics.PlotAbstract;
+import fr.proline.studio.graphics.PlotLinear;
+import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.PlotPanelListener;
+import fr.proline.studio.graphics.PlotStick;
+import fr.proline.studio.graphics.marker.LabelMarker;
+import fr.proline.studio.graphics.marker.LineMarker;
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.KeyEventDispatcher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -31,7 +41,9 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 import org.jfree.chart.ChartFactory;
@@ -62,28 +74,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * base for raw file panel. The panel could be a SingleRawFilePanel or MultiRawFilePanel
  * @author CB205360
  */
-abstract public class AbstractRawFilePanel extends javax.swing.JPanel implements IRawFilePlot, KeyEventDispatcher, ScanHeaderListener {
+public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlot, KeyEventDispatcher, ScanHeaderListener, PlotPanelListener {
 
     final private static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.AbstractRawFilePanel");
     final private static DecimalFormat xFormatter = new DecimalFormat("0.0000");
     final private static DecimalFormat yFormatter = new DecimalFormat("0.###E0");
     final private static Font tickLabelFont = new Font("SansSerif", java.awt.Font.PLAIN, 10);
     final private static Font titleFont = new Font("SansSerif", java.awt.Font.PLAIN, 12);
-
+    
+    private boolean displayScan = true;
+    
+    private JSplitPane splitPane;
+    private JPanel mainPanel;
+    private JPanel chromatogramContainerPanel;
+    private JPanel spectrumContainerPanel;
+    
     protected ChartPanel chromatogramPanel;
-    protected ChartPanel spectrumPanel;
+    //protected ChartPanel spectrumPanel;
+    protected PlotPanel spectrumPlotPanel;
+    protected PlotAbstract scanPlot;
+    protected JToolBar spectrumToolbar;
     private HeaderSpectrumPanel headerSpectrumPanel;
     protected JToolBar toolbar;
     protected Chromatogram currentChromatogram;
     protected Scan currentScan;
     protected Float currentScanTime = null;
-
+    
     private final XYItemRenderer stickRenderer = new XYItemStickRenderer();
     private final XYItemRenderer lineRenderer = new XYLineAndShapeRenderer(true, false);
-
+    
     private boolean keepMsLevel = true;
 
     protected List<Marker> listMsMsMarkers;
@@ -91,21 +113,89 @@ abstract public class AbstractRawFilePanel extends javax.swing.JPanel implements
     
     protected int xicModeDisplay = MzScopeConstants.MODE_DISPLAY_XIC_REPLACE;
 
-    /**
-     * Creates new form IRawFilePlotPanel
-     */
     public AbstractRawFilePanel() {
+        super();
         init();
     }
-
+    
+    /**
+     * If displayScan is true, display the chromatogram and the scan, otherwise display only the chromatogram
+     * @param displayScan 
+     */
+    public void setDisplayScan(boolean displayScan){
+        this.displayScan = displayScan;
+    }
+    
     private void init() {
         listMsMsMarkers = new ArrayList();
         initComponents();
         initChartPanels();
         KeyEventDispatcherDecorator.addKeyEventListener(this);
     }
+    
+    private void initComponents() {
+        this.setLayout(new BorderLayout());
+        this.add(getMainPanel(), BorderLayout.CENTER);
+    }
+    
+    
+    private JPanel getMainPanel(){
+        if (mainPanel == null){
+            mainPanel = new JPanel();
+            mainPanel.setName("mainPanel");
+            mainPanel.setLayout(new BorderLayout());
+            if (displayScan){
+                mainPanel.add(getSplitPane(), BorderLayout.CENTER);
+            }else{
+                mainPanel.add(getChromatogramContainerPanel(), BorderLayout.CENTER);
+            }
+        }
+        return mainPanel;
+    }
 
-    private void initChartPanels() {
+    private JSplitPane getSplitPane() {
+        if (this.splitPane == null) {
+            splitPane = new JSplitPane();
+            splitPane.setDividerLocation(160);
+            splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+            splitPane.setResizeWeight(0.5);
+            splitPane.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            splitPane.setDoubleBuffered(true);
+            splitPane.setOneTouchExpandable(true);
+            splitPane.setTopComponent(getChromatogramContainerPanel());
+            splitPane.setBottomComponent(getSpectrumContainerPanel());
+        }
+        return splitPane;
+    }
+    
+    private JPanel getChromatogramContainerPanel(){
+        if (this.chromatogramContainerPanel == null){
+           chromatogramContainerPanel =new JPanel();
+           chromatogramContainerPanel.setName("chromatogramContainerPanel");
+           chromatogramContainerPanel.setLayout(new BorderLayout());
+        }
+        return chromatogramContainerPanel;
+    }
+    
+    private JPanel getSpectrumContainerPanel(){
+        if (this.spectrumContainerPanel == null){
+           spectrumContainerPanel =new JPanel();
+           spectrumContainerPanel.setName("spectrumContainerPanel");
+           spectrumContainerPanel.setLayout(new BorderLayout());
+        }
+        return spectrumContainerPanel;
+    }
+    
+    private JToolBar getSpectrumToolbar(){
+        spectrumToolbar = new JToolBar(JToolBar.VERTICAL);
+        spectrumToolbar.setFloatable(false);
+        ExportButton exportImageButton = new ExportButton("Graphic", spectrumPlotPanel);
+        spectrumToolbar.add(exportImageButton);
+
+        return spectrumToolbar;
+    }
+    
+    private void initChartPanels(){
         XYSeriesCollection dataset = new XYSeriesCollection();
         JFreeChart chromatogramChart = ChartFactory.createXYLineChart("", null, null, dataset, PlotOrientation.VERTICAL, false, true, false);
         chromatogramPanel = new ChartPanel(chromatogramChart);
@@ -156,68 +246,21 @@ abstract public class AbstractRawFilePanel extends javax.swing.JPanel implements
         xyplot.setRangeGridlinePaint(CyclicColorPalette.GRAY_GRID);
 
         // Create Scan Charts
-        dataset = new XYSeriesCollection();
-        JFreeChart scanChart = ChartFactory.createXYLineChart("", null, null, dataset, PlotOrientation.VERTICAL, false, true, false);
-        xyplot = scanChart.getXYPlot();
-        XYItemRenderer renderer = xyplot.getRenderer();
-        renderer.setSeriesPaint(0, CyclicColorPalette.getColor(1));
-        xyplot.setDomainPannable(true);
-        xyplot.setDomainCrosshairVisible(true);
-        xyplot.setDomainCrosshairLockedOnData(false);
-        xyplot.setRangeCrosshairVisible(false);
-        xyplot.getDomainAxis().setTickLabelFont(tickLabelFont);
-        xyplot.getRangeAxis().setTickLabelFont(tickLabelFont);
-        xyplot.setBackgroundPaint(CyclicColorPalette.GRAY_BACKGROUND);
-        xyplot.setRangeGridlinePaint(CyclicColorPalette.GRAY_GRID);
-        spectrumPanel = new ChartPanel(scanChart);
+        spectrumPlotPanel = new PlotPanel();
+        spectrumPlotPanel.addListener(this);
+        spectrumPlotPanel.setDrawCursor(true);
         List<Integer> emptyListScanIndex = new ArrayList<>();
         emptyListScanIndex.add(0);
         headerSpectrumPanel = new HeaderSpectrumPanel(null, emptyListScanIndex);
         headerSpectrumPanel.addScanHeaderListener(this);
-        spectrumPanel.setMouseWheelEnabled(true);
-
-        spectrumPanel.addChartMouseListener(new ChartMouseListener() {
-
-            @Override
-            public void chartMouseMoved(ChartMouseEvent event) {
-                int deviceX = event.getTrigger().getX();
-
-                JFreeChart jfreechart = event.getChart();
-                if ((jfreechart != null) && (currentScan != null)) {
-                    XYPlot xyplot = event.getChart().getXYPlot();
-                    double domain = xyplot.getDomainAxis().java2DToValue(deviceX, spectrumPanel.getScreenDataArea(), xyplot.getDomainAxisEdge());
-                    double[] domainValues = ((currentScan.getPeaksMz() == null) ? currentScan.getMasses() : currentScan.getPeaksMz());
-                    float[] rangeValues = ((currentScan.getPeaksIntensities() == null) ? currentScan.getIntensities() : currentScan.getPeaksIntensities());
-                    int result = Arrays.binarySearch(domainValues, domain);
-                    if (~result < domainValues.length) {
-                        xyplot.clearAnnotations();
-                        StringBuilder builder = new StringBuilder();
-                        builder.append(xFormatter.format(domainValues[~result])).append(" - ");
-                        builder.append(yFormatter.format(rangeValues[~result]));
-                        double y = rangeValues[~result];
-                        final Rectangle2D area = spectrumPanel.getChartRenderingInfo().getPlotInfo().getDataArea();
-                        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(xyplot.getRangeAxisLocation(), PlotOrientation.VERTICAL);
-                        double pY = xyplot.getRangeAxis().valueToJava2D(y, area, rangeEdge);
-                        double angle = (pY < 60.0) ? -5.0 * Math.PI / 4.0 : -Math.PI / 2.0;
-                        xyplot.addAnnotation(new XYPointerAnnotation(builder.toString(), domainValues[~result], rangeValues[~result], angle));
-                    }
-                }
-            }
-
-            @Override
-            public void chartMouseClicked(ChartMouseEvent event) {
-                JFreeChart jfreechart = event.getChart();
-                if ((jfreechart != null) && (currentScan != null)) {
-                    scanMouseClicked(event);
-                }
-            }
-        });
-
+        spectrumPlotPanel.repaint();
+        
         spectrumContainerPanel.removeAll();
         spectrumContainerPanel.add(headerSpectrumPanel, BorderLayout.NORTH);
-        spectrumContainerPanel.add(spectrumPanel, BorderLayout.CENTER);
+        spectrumContainerPanel.add(spectrumPlotPanel, BorderLayout.CENTER);
+        spectrumContainerPanel.add(getSpectrumToolbar(), BorderLayout.WEST);
     }
-
+    
     private JToolBar initToolbar() {
         toolbar = new JToolBar();
         toolbar.setOrientation(JToolBar.VERTICAL);
@@ -282,56 +325,28 @@ abstract public class AbstractRawFilePanel extends javax.swing.JPanel implements
             hideMSMSEvents();
         }
     }
-
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-   private void initComponents() {
-
-      jSplitPane1 = new javax.swing.JSplitPane();
-      chromatogramContainerPanel = new javax.swing.JPanel();
-      spectrumContainerPanel = new javax.swing.JPanel();
-
-      setBackground(new java.awt.Color(240, 240, 40));
-      setLayout(new java.awt.BorderLayout());
-
-      jSplitPane1.setDividerLocation(160);
-      jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-      jSplitPane1.setResizeWeight(0.5);
-      jSplitPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-      jSplitPane1.setDoubleBuffered(true);
-      jSplitPane1.setOneTouchExpandable(true);
-
-      chromatogramContainerPanel.setLayout(new java.awt.BorderLayout());
-      jSplitPane1.setTopComponent(chromatogramContainerPanel);
-
-      spectrumContainerPanel.setLayout(new java.awt.BorderLayout());
-      jSplitPane1.setBottomComponent(spectrumContainerPanel);
-
-      add(jSplitPane1, java.awt.BorderLayout.CENTER);
-   }// </editor-fold>//GEN-END:initComponents
-
+    
     protected void chromatogramMouseClicked(ChartMouseEvent event) {
         XYPlot xyplot = chromatogramPanel.getChart().getXYPlot();
         double d = xyplot.getDomainAxis().java2DToValue(event.getTrigger().getX(), chromatogramPanel.getScreenDataArea(), xyplot.getDomainAxisEdge());
         int scanIdx = getCurrentRawfile().getScanId(d * 60.0);
         displayScan(scanIdx);
     }
-
-    protected void scanMouseClicked(ChartMouseEvent event) {
-        if ((event.getTrigger().getClickCount() == 2)) {
-            XYPlot xyplot = event.getChart().getXYPlot();
-            double domain = xyplot.getDomainAxis().java2DToValue(event.getTrigger().getX(), spectrumPanel.getScreenDataArea(), xyplot.getDomainAxisEdge());
+    
+    @Override
+    public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue){
+        if (e.getClickCount() == 2) {
+            scanPlot.clearMarkers();
+            double yStdevLabel = scanPlot.getYMax()*0.1;
+            scanPlot.addMarker(new LineMarker(spectrumPlotPanel, xValue, LineMarker.ORIENTATION_VERTICAL));
+            scanPlot.addMarker(new LabelMarker(spectrumPlotPanel, xValue, yStdevLabel, "Mass "+xValue, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_TOP));
+            double domain = xValue;
             float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
             double maxMz = domain + domain * ppmTol / 1e6;
             double minMz = domain - domain * ppmTol / 1e6;
-            if ((event.getTrigger().getModifiers() & KeyEvent.ALT_MASK) != 0) {
+            if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0){
                 addChromatogram(minMz, maxMz);
-            } else {
+            }else {
                 switch (xicModeDisplay) {
                     case MzScopeConstants.MODE_DISPLAY_XIC_REPLACE: {
                         extractChromatogram(minMz, maxMz);
@@ -346,47 +361,7 @@ abstract public class AbstractRawFilePanel extends javax.swing.JPanel implements
         }
     }
 
-    @Override
-    public void extractChromatogram(double minMz, double maxMz) {
-        SwingWorker worker = new AbstractXICExtractionWorker(getCurrentRawfile(), minMz, maxMz) {
-            @Override
-            protected void done() {
-                try {
-                    displayChromatogram(get());
-                    setMsMsEventButtonEnabled(true);
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.error("Error while extraction chromatogram", e);
-                }
-            }
-        };
-        worker.execute();
-    }
-
-    @Override
-    public Color displayChromatogram(Chromatogram chromato) {
-        setMsMsEventButtonEnabled(true);
-        this.currentChromatogram = chromato;
-        XYSeries series = new XYSeries(chromato.rawFile.getName());
-        for (int k = 0; k < chromato.intensities.length; k++) {
-            series.add(chromato.time[k], chromato.intensities[k]);
-        }
-
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        dataset.addSeries(series);
-        StringBuilder builder = new StringBuilder("Mass range: ");
-        builder.append(xFormatter.format(chromato.minMz)).append("-").append(xFormatter.format(chromato.maxMz));
-        chromatogramPanel.getChart().setTitle(new TextTitle(builder.toString(), titleFont));
-
-        XYPlot xyplot = chromatogramPanel.getChart().getXYPlot();
-        xyplot.clearDomainMarkers();
-        xyplot.setDataset(dataset);
-        xyplot.getRangeAxis().setUpperMargin(0.3);
-        XYItemRenderer renderer = xyplot.getRenderer();
-        Color plotColor = CyclicColorPalette.getColor(1);
-        renderer.setSeriesPaint(0, plotColor);
-        return plotColor;
-    }
-
+    
     public void addChromatogram(double minMz, double maxMz) {
         SwingWorker worker = new AbstractXICExtractionWorker(getCurrentRawfile(), minMz, maxMz) {
             @Override
@@ -401,102 +376,10 @@ abstract public class AbstractRawFilePanel extends javax.swing.JPanel implements
         worker.execute();
     }
     
+    public void updateXicModeDisplay(int mode){
+        xicModeDisplay = mode;
+    }
     
-    @Override
-    public Color addChromatogram(Chromatogram chromato) {
-        XYSeries series = new XYSeries(chromato.rawFile.getName()+"-"+chromato.minMz);
-        for (int k = 0; k < chromato.intensities.length; k++) {
-            series.add(chromato.time[k], chromato.intensities[k]);
-        }
-        XYPlot xyplot = chromatogramPanel.getChart().getXYPlot();
-        ((XYSeriesCollection) xyplot.getDataset()).addSeries(series);
-        Color plotColor = CyclicColorPalette.getColor(xyplot.getDataset().getSeriesCount());
-        xyplot.getRenderer().setSeriesPaint(xyplot.getDataset().getSeriesCount() - 1, plotColor);
-        return plotColor;
-    }
-
-    public abstract Color getPlotColor(IRawFile rawFile);
-
-    @Override
-    public void displayScan(int index) {
-        if ((currentScan == null) || (index != currentScan.getIndex())) {
-            currentScan = getCurrentRawfile().getScan(index);
-            if (currentScan != null) {
-                Color plotColor = getPlotColor(getCurrentRawfile());
-                currentScanTime = currentScan.getRetentionTime();
-                XYSeries series = new XYSeries(currentScan.getTitle());
-                double[] masses = currentScan.getMasses();
-                float[] intensities = currentScan.getIntensities();
-                for (int k = 0; k < currentScan.getMasses().length; k++) {
-                    series.add(masses[k], intensities[k]);
-                }
-
-                XYSeriesCollection dataset = new XYSeriesCollection();
-                dataset.addSeries(series);
-                spectrumPanel.getChart().setTitle(new TextTitle(currentScan.getTitle(), titleFont));
-                headerSpectrumPanel.setMzdbFileName(getCurrentRawfile().getName());
-                updateScanIndexList();
-                headerSpectrumPanel.setScan(currentScan);
-                XYPlot xyplot = spectrumPanel.getChart().getXYPlot();
-                xyplot.setDataset(dataset);
-                if (currentScan.getDataType() == Scan.ScanType.CENTROID) {
-                    stickRenderer.setSeriesPaint(0, plotColor);
-                    xyplot.setRenderer(stickRenderer);
-                } else {
-                    lineRenderer.setSeriesPaint(0, plotColor);
-                    xyplot.setRenderer(lineRenderer);
-                }
-                xyplot.getRangeAxis().setUpperMargin(0.3);
-                chromatogramPanel.getChart().getXYPlot().setDomainCrosshairValue(currentScan.getRetentionTime() / 60.0);
-            }
-        }
-    }
-
-    @Override
-    public void displayFeature(final Feature f) {
-        double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
-        final double maxMz = f.getMz() + f.getMz() * ppm / 1e6;
-        final double minMz = f.getMz() - f.getMz() * ppm / 1e6;
-
-        SwingWorker worker = new SwingWorker<Chromatogram, Void>() {
-            @Override
-            protected Chromatogram doInBackground() throws Exception {
-                return getCurrentRawfile().getXIC(minMz, maxMz);
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    displayChromatogram(get());
-                    displayScan(f.getBasePeakel().getApexScanId());
-                    Marker marker = new IntervalMarker(f.getBasePeakel().getFirstElutionTime() / 60.0, f.getBasePeakel().getLastElutionTime() / 60.0, Color.ORANGE, new BasicStroke(1), Color.RED, new BasicStroke(1), 0.3f);
-                    chromatogramPanel.getChart().getXYPlot().addDomainMarker(marker);
-                    marker = new ValueMarker(f.getElutionTime() / 60.0);
-                    chromatogramPanel.getChart().getXYPlot().addDomainMarker(marker);
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.error("Error while reading chromatogram");
-                }
-            }
-        };
-        worker.execute();
-
-    }
-
-    @Override
-    public Chromatogram getCurrentChromatogram() {
-        return currentChromatogram;
-    }
-
-    abstract void displayTIC();
-
-    abstract void displayBPI();
-
-   // Variables declaration - do not modify//GEN-BEGIN:variables
-   private javax.swing.JPanel chromatogramContainerPanel;
-   private javax.swing.JSplitPane jSplitPane1;
-   private javax.swing.JPanel spectrumContainerPanel;
-   // End of variables declaration//GEN-END:variables
-
     public void showMSMSEvents() {
         //ValueAxis axis = chromatogramPanel.getChart().getXYPlot().getDomainAxis();
         //final double min = axis.getRange().getLowerBound();
@@ -536,6 +419,166 @@ abstract public class AbstractRawFilePanel extends javax.swing.JPanel implements
             chromatogramPanel.getChart().getXYPlot().removeDomainMarker(marker);
         }
         listMsMsMarkers = new ArrayList();
+    }
+    
+    private void updateScanIndexList() {
+        List<Integer> listScanIndex = new ArrayList();
+        if (keepMsLevel) {
+            listScanIndex.add(getCurrentRawfile().getPreviousScanId(currentScan.getIndex(), currentScan.getMsLevel()));
+        } else {
+            listScanIndex.add(currentScan.getIndex() - 1);
+        }
+        listScanIndex.add(currentScan.getIndex());
+        if (keepMsLevel) {
+            listScanIndex.add(getCurrentRawfile().getNextScanId(currentScan.getIndex(), currentScan.getMsLevel()));
+        } else {
+            listScanIndex.add(currentScan.getIndex() + 1);
+        }
+        headerSpectrumPanel.setScanIndexList(listScanIndex);
+    }
+    
+    @Override
+    public Color displayChromatogram(Chromatogram chromato) {
+        setMsMsEventButtonEnabled(true);
+        this.currentChromatogram = chromato;
+        XYSeries series = new XYSeries(chromato.rawFile.getName());
+        for (int k = 0; k < chromato.intensities.length; k++) {
+            series.add(chromato.time[k], chromato.intensities[k]);
+        }
+
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        dataset.addSeries(series);
+        StringBuilder builder = new StringBuilder("Mass range: ");
+        builder.append(xFormatter.format(chromato.minMz)).append("-").append(xFormatter.format(chromato.maxMz));
+        chromatogramPanel.getChart().setTitle(new TextTitle(builder.toString(), titleFont));
+
+        XYPlot xyplot = chromatogramPanel.getChart().getXYPlot();
+        xyplot.clearDomainMarkers();
+        xyplot.setDataset(dataset);
+        xyplot.getRangeAxis().setUpperMargin(0.3);
+        XYItemRenderer renderer = xyplot.getRenderer();
+        Color plotColor = CyclicColorPalette.getColor(1);
+        renderer.setSeriesPaint(0, plotColor);
+        return plotColor;
+    }
+
+    @Override
+    public Color addChromatogram(Chromatogram chromato) {
+        XYSeries series = new XYSeries(chromato.rawFile.getName()+"-"+chromato.minMz);
+        for (int k = 0; k < chromato.intensities.length; k++) {
+            series.add(chromato.time[k], chromato.intensities[k]);
+        }
+        XYPlot xyplot = chromatogramPanel.getChart().getXYPlot();
+        ((XYSeriesCollection) xyplot.getDataset()).addSeries(series);
+        Color plotColor = CyclicColorPalette.getColor(xyplot.getDataset().getSeriesCount());
+        xyplot.getRenderer().setSeriesPaint(xyplot.getDataset().getSeriesCount() - 1, plotColor);
+        return plotColor;
+    }
+
+    @Override
+    public void extractChromatogram(double minMz, double maxMz) {
+        SwingWorker worker = new AbstractXICExtractionWorker(getCurrentRawfile(), minMz, maxMz) {
+            @Override
+            protected void done() {
+                try {
+                    displayChromatogram(get());
+                    setMsMsEventButtonEnabled(true);
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Error while extraction chromatogram", e);
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    @Override
+    public void displayFeature(final Feature f) {
+        double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
+        final double maxMz = f.getMz() + f.getMz() * ppm / 1e6;
+        final double minMz = f.getMz() - f.getMz() * ppm / 1e6;
+
+        SwingWorker worker = new SwingWorker<Chromatogram, Void>() {
+            @Override
+            protected Chromatogram doInBackground() throws Exception {
+                return getCurrentRawfile().getXIC(minMz, maxMz);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    displayChromatogram(get());
+                    displayScan(f.getBasePeakel().getApexScanId());
+                    Marker marker = new IntervalMarker(f.getBasePeakel().getFirstElutionTime() / 60.0, f.getBasePeakel().getLastElutionTime() / 60.0, Color.ORANGE, new BasicStroke(1), Color.RED, new BasicStroke(1), 0.3f);
+                    chromatogramPanel.getChart().getXYPlot().addDomainMarker(marker);
+                    marker = new ValueMarker(f.getElutionTime() / 60.0);
+                    chromatogramPanel.getChart().getXYPlot().addDomainMarker(marker);
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Error while reading chromatogram");
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    @Override
+    public void displayScan(int index) {
+        if ((currentScan == null) || (index != currentScan.getIndex())) {
+            currentScan = getCurrentRawfile().getScan(index);
+            if (currentScan != null) {
+                Color plotColor = getPlotColor(getCurrentRawfile());
+                currentScanTime = currentScan.getRetentionTime();
+                ScanModel scanModel = new ScanModel(currentScan);
+                scanModel.setColor(plotColor);
+                if (currentScan.getDataType() == Scan.ScanType.CENTROID) { // mslevel2
+                    //stick plot
+                    scanPlot = new PlotStick(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
+                    ((PlotStick)scanPlot).setStrokeFixed(true);
+                    ((PlotStick)scanPlot).setPlotInformation(scanModel.getPlotInformation());
+                } else {
+                    scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
+                    ((PlotLinear)scanPlot).setStrokeFixed(true);
+                    ((PlotLinear)scanPlot).setPlotInformation(scanModel.getPlotInformation());
+                }
+                scanPlot.setIsPaintMarker(true);
+                
+                spectrumPlotPanel.setPlot(scanPlot);
+                spectrumPlotPanel.repaint();
+                
+
+                headerSpectrumPanel.setMzdbFileName(getCurrentRawfile().getName());
+                updateScanIndexList();
+                headerSpectrumPanel.setScan(currentScan);
+            }
+        }
+    }
+
+    
+
+    @Override
+    public Chromatogram getCurrentChromatogram() {
+        return currentChromatogram;
+    }
+
+    @Override
+    public void extractChromatogramWithFeature(double minMz, double maxMz, final double elutionTime, final double firstScanTime, final double lastScanTime) {
+        SwingWorker worker = new AbstractXICExtractionWorker(getCurrentRawfile(), minMz, maxMz) {
+            @Override
+            protected void done() {
+                try {
+                    displayChromatogram(get());
+                    setMsMsEventButtonEnabled(true);
+                    XYPlot xyplot = chromatogramPanel.getChart().getXYPlot();
+                    xyplot.clearDomainMarkers();
+                    Marker marker = new IntervalMarker(firstScanTime / 60.0, lastScanTime / 60.0, Color.ORANGE, new BasicStroke(1), Color.RED, new BasicStroke(1), 0.3f);
+                    xyplot.addDomainMarker(marker);
+                    marker = new ValueMarker(elutionTime / 60.0);
+                    xyplot.addDomainMarker(marker);
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Error while extraction chromatogram", e);
+                }
+            }
+        };
+        worker.execute();
     }
 
     @Override
@@ -584,27 +627,17 @@ abstract public class AbstractRawFilePanel extends javax.swing.JPanel implements
     }
 
     @Override
-    public void keepMsLevel(boolean keepMsLevel) {
-        this.keepMsLevel = keepMsLevel;
+    public void keepMsLevel(boolean keep) {
+        this.keepMsLevel = keep;
         updateScanIndexList();
     }
+    
+    protected abstract void displayTIC();
 
-    private void updateScanIndexList() {
-        List<Integer> listScanIndex = new ArrayList();
-        if (keepMsLevel) {
-            listScanIndex.add(getCurrentRawfile().getPreviousScanId(currentScan.getIndex(), currentScan.getMsLevel()));
-        } else {
-            listScanIndex.add(currentScan.getIndex() - 1);
-        }
-        listScanIndex.add(currentScan.getIndex());
-        if (keepMsLevel) {
-            listScanIndex.add(getCurrentRawfile().getNextScanId(currentScan.getIndex(), currentScan.getMsLevel()));
-        } else {
-            listScanIndex.add(currentScan.getIndex() + 1);
-        }
-        headerSpectrumPanel.setScanIndexList(listScanIndex);
-    }
-
+    protected abstract void displayBPI();
+    
+    protected abstract Color getPlotColor(IRawFile rawFile);
+    
     private class XYItemStickRenderer extends AbstractXYItemRenderer {
 
         public XYItemStickRenderer() {
@@ -640,29 +673,4 @@ abstract public class AbstractRawFilePanel extends javax.swing.JPanel implements
         }
     }
     
-    public void updateXicModeDisplay(int mode){
-        xicModeDisplay = mode;
-    }
-    
-    @Override
-    public void extractChromatogramWithFeature(double minMz, double maxMz, final double elutionTime, final double firstScanTime, final double lastScanTime) {
-        SwingWorker worker = new AbstractXICExtractionWorker(getCurrentRawfile(), minMz, maxMz) {
-            @Override
-            protected void done() {
-                try {
-                    displayChromatogram(get());
-                    setMsMsEventButtonEnabled(true);
-                    XYPlot xyplot = chromatogramPanel.getChart().getXYPlot();
-                    xyplot.clearDomainMarkers();
-                    Marker marker = new IntervalMarker(firstScanTime / 60.0, lastScanTime / 60.0, Color.ORANGE, new BasicStroke(1), Color.RED, new BasicStroke(1), 0.3f);
-                    xyplot.addDomainMarker(marker);
-                    marker = new ValueMarker(elutionTime / 60.0);
-                    xyplot.addDomainMarker(marker);
-                } catch (InterruptedException | ExecutionException e) {
-                    logger.error("Error while extraction chromatogram", e);
-                }
-            }
-        };
-        worker.execute();
-    }
 }

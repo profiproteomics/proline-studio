@@ -608,21 +608,27 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         
         double xValue = m_xAxis.pixelToValue(e.getX());
         double yValue = m_yAxis.pixelToValue(e.getY());
-        
-        if (m_drawCursor){
-            setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
-            if ((xValue>-0.1 && xValue<0.1) || xValue>=10000 || xValue<=-10000){
-                m_coordX = formatE.format(xValue);
-            }else{
-                m_coordX =format.format(xValue);
+        boolean isInGridArea = (e.getX() <= m_plotArea.width+m_plotArea.x && e.getX()>=m_plotArea.x && e.getY()>=m_plotArea.y && e.getY()<= m_plotArea.height+m_plotArea.y);
+        if (!isInGridArea) {
+            m_coordX = "";
+            m_coordY = "";
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        } else {
+            if (m_drawCursor) {
+                setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+                if ((xValue > -0.1 && xValue < 0.1) || xValue >= 10000 || xValue <= -10000) {
+                    m_coordX = formatE.format(xValue);
+                } else {
+                    m_coordX = format.format(xValue);
+                }
+                if ((yValue > -0.1 && yValue < 0.1) || yValue >= 10000 || yValue <= -10000) {
+                    m_coordY = formatE.format(yValue);
+                } else {
+                    m_coordY = format.format(yValue);
+                }
+                m_posx = e.getX();
+                m_posy = e.getY();
             }
-            if ((yValue>-0.1 && yValue<0.1) || yValue>=10000 || yValue<=-10000){
-                m_coordY = formatE.format(yValue);
-            }else{
-                m_coordY =  format.format(yValue);
-            }
-            m_posx = e.getX() ;
-            m_posy = e.getY();
         }
 
         int nbPlotTooltip = 0;

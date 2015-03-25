@@ -64,7 +64,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRendererState;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -97,7 +96,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     protected PlotAbstract scanPlot;
     protected JToolBar spectrumToolbar;
     private HeaderSpectrumPanel headerSpectrumPanel;
-    protected JToolBar toolbar;
+    protected JToolBar chromatogramToolbar;
     protected Chromatogram currentChromatogram;
     protected Scan currentScan;
     protected Float currentScanTime = null;
@@ -229,7 +228,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         });
 
         chromatogramContainerPanel.removeAll();
-        chromatogramContainerPanel.add(initToolbar(), BorderLayout.WEST);
+        chromatogramContainerPanel.add(initChromatogramToolbar(), BorderLayout.WEST);
         chromatogramContainerPanel.add(chromatogramPanel, BorderLayout.CENTER);
         chromatogramPanel.setMouseWheelEnabled(true);
         XYPlot xyplot = chromatogramPanel.getChart().getXYPlot();
@@ -258,9 +257,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         spectrumContainerPanel.add(getSpectrumToolbar(), BorderLayout.WEST);
     }
     
-    private JToolBar initToolbar() {
-        toolbar = new JToolBar();
-        toolbar.setOrientation(JToolBar.VERTICAL);
+    private JToolBar initChromatogramToolbar() {
+        chromatogramToolbar = new JToolBar();
+        chromatogramToolbar.setOrientation(JToolBar.VERTICAL);
         JButton displayTICbtn = new JButton("TIC");
         displayTICbtn.setToolTipText("Display TIC Chromatogram");
         displayTICbtn.addActionListener(new ActionListener() {
@@ -269,7 +268,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
                 displayTIC();
             }
         });
-        toolbar.add(displayTICbtn);
+        chromatogramToolbar.add(displayTICbtn);
 
         JButton displayBPIbtn = new JButton("BPI");
         displayBPIbtn.setToolTipText("Display BPI Chromatogram");
@@ -279,7 +278,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
                 displayBPI();
             }
         });
-        toolbar.add(displayBPIbtn);
+        chromatogramToolbar.add(displayBPIbtn);
 
         final JPopupMenu popupMenuMs2 = new JPopupMenu();
         JMenuItem showMsMs = new JMenuItem("Show MS/MS Events");
@@ -308,12 +307,12 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
                 popupMenuMs2.show(displayMS2btn, 0, displayMS2btn.getHeight());
             }
         });
-        toolbar.add(displayMS2btn);
+        chromatogramToolbar.add(displayMS2btn);
         setMsMsEventButtonEnabled(false);
 
-        toolbar.setFloatable(false);
-        toolbar.setRollover(true);
-        return toolbar;
+        chromatogramToolbar.setFloatable(false);
+        chromatogramToolbar.setRollover(true);
+        return chromatogramToolbar;
     }
     
     protected void setMsMsEventButtonEnabled(boolean b) {

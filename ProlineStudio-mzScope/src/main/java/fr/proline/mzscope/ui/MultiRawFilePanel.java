@@ -29,11 +29,9 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -354,8 +352,8 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
                 popupMenu.show(currentChromatoBtn, 0, currentChromatoBtn.getHeight());
             }
         });
-        toolbar.add(currentChromatoBtn);
-        return toolbar;
+        chromatogramToolbar.add(currentChromatoBtn);
+        return chromatogramToolbar;
     }
 
     @Override

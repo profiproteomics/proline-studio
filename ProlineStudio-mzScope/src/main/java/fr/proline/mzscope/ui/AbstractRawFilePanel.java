@@ -10,24 +10,14 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.model.Scan;
-import fr.proline.mzscope.ui.event.ScanHeaderListener;
 import fr.proline.mzscope.util.KeyEventDispatcherDecorator;
 import fr.proline.mzscope.util.MzScopeConstants;
-import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.graphics.PlotAbstract;
-import fr.proline.studio.graphics.PlotLinear;
-import fr.proline.studio.graphics.PlotPanel;
-import fr.proline.studio.graphics.PlotPanelListener;
-import fr.proline.studio.graphics.PlotStick;
-import fr.proline.studio.graphics.marker.LabelMarker;
-import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.KeyEventDispatcher;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,20 +42,14 @@ import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYPointerAnnotation;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.CrosshairState;
 import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.chart.renderer.xy.XYItemRendererState;
 import org.jfree.chart.title.TextTitle;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RectangleEdge;
@@ -74,9 +58,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * base for raw file panel. The panel could be a SingleRawFilePanel or MultiRawFilePanel
+ * composed by 2 main components: ChromatogramPanel and SpectrumPanel (if scan is displayed)
  * @author CB205360
  */
-public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlot, KeyEventDispatcher, ScanHeaderListener, PlotPanelListener {
+public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlot, KeyEventDispatcher{
 
     final private static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.AbstractRawFilePanel");
     final private static DecimalFormat xFormatter = new DecimalFormat("0.0000");
@@ -89,26 +74,18 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     private JSplitPane splitPane;
     private JPanel mainPanel;
     private JPanel chromatogramContainerPanel;
-    private JPanel spectrumContainerPanel;
+    private SpectrumPanel spectrumContainerPanel;
     
     protected ChartPanel chromatogramPanel;
-    protected PlotPanel spectrumPlotPanel;
-    protected PlotAbstract scanPlot;
-    protected JToolBar spectrumToolbar;
-    private HeaderSpectrumPanel headerSpectrumPanel;
     protected JToolBar chromatogramToolbar;
     protected Chromatogram currentChromatogram;
     protected Scan currentScan;
     protected Float currentScanTime = null;
     
     
-    private boolean keepMsLevel = true;
-
     protected List<Marker> listMsMsMarkers;
     protected JButton displayMS2btn;
     
-    protected int xicModeDisplay = MzScopeConstants.MODE_DISPLAY_XIC_REPLACE;
-
     public AbstractRawFilePanel() {
         super();
         init();
@@ -175,21 +152,13 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     
     private JPanel getSpectrumContainerPanel(){
         if (this.spectrumContainerPanel == null){
-           spectrumContainerPanel =new JPanel();
+           spectrumContainerPanel =new SpectrumPanel(this);
            spectrumContainerPanel.setName("spectrumContainerPanel");
            spectrumContainerPanel.setLayout(new BorderLayout());
         }
         return spectrumContainerPanel;
     }
     
-    private JToolBar getSpectrumToolbar(){
-        spectrumToolbar = new JToolBar(JToolBar.VERTICAL);
-        spectrumToolbar.setFloatable(false);
-        ExportButton exportImageButton = new ExportButton("Graphic", spectrumPlotPanel);
-        spectrumToolbar.add(exportImageButton);
-
-        return spectrumToolbar;
-    }
     
     private void initChartPanels(){
         XYSeriesCollection dataset = new XYSeriesCollection();
@@ -242,19 +211,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         xyplot.setRangeGridlinePaint(CyclicColorPalette.GRAY_GRID);
 
         // Create Scan Charts
-        spectrumPlotPanel = new PlotPanel();
-        spectrumPlotPanel.addListener(this);
-        spectrumPlotPanel.setDrawCursor(true);
-        List<Integer> emptyListScanIndex = new ArrayList<>();
-        emptyListScanIndex.add(0);
-        headerSpectrumPanel = new HeaderSpectrumPanel(null, emptyListScanIndex);
-        headerSpectrumPanel.addScanHeaderListener(this);
-        spectrumPlotPanel.repaint();
-        
-        spectrumContainerPanel.removeAll();
-        spectrumContainerPanel.add(headerSpectrumPanel, BorderLayout.NORTH);
-        spectrumContainerPanel.add(spectrumPlotPanel, BorderLayout.CENTER);
-        spectrumContainerPanel.add(getSpectrumToolbar(), BorderLayout.WEST);
+        spectrumContainerPanel.initChart();
     }
     
     private JToolBar initChromatogramToolbar() {
@@ -329,34 +286,23 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         displayScan(scanIdx);
     }
     
-    @Override
-    public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue){
-        if (e.getClickCount() == 2) {
-            scanPlot.clearMarkers();
-            double yStdevLabel = scanPlot.getYMax()*0.1;
-            scanPlot.addMarker(new LineMarker(spectrumPlotPanel, xValue, LineMarker.ORIENTATION_VERTICAL));
-            scanPlot.addMarker(new LabelMarker(spectrumPlotPanel, xValue, yStdevLabel, "Mass "+xValue, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_TOP));
-            double domain = xValue;
-            float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
-            double maxMz = domain + domain * ppmTol / 1e6;
-            double minMz = domain - domain * ppmTol / 1e6;
-            if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0){
-                addChromatogram(minMz, maxMz);
-            }else {
-                switch (xicModeDisplay) {
-                    case MzScopeConstants.MODE_DISPLAY_XIC_REPLACE: {
-                        extractChromatogram(minMz, maxMz);
-                        break;
-                    }
-                    case MzScopeConstants.MODE_DISPLAY_XIC_OVERLAY: {
-                         addChromatogram(minMz, maxMz);
-                        break;
-                    }
+   
+    public void scanMouseClicked(MouseEvent e, double minMz, double maxMz, int xicModeDisplay){
+        if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0) {
+            addChromatogram(minMz, maxMz);
+        } else {
+            switch (xicModeDisplay) {
+                case MzScopeConstants.MODE_DISPLAY_XIC_REPLACE: {
+                    extractChromatogram(minMz, maxMz);
+                    break;
+                }
+                case MzScopeConstants.MODE_DISPLAY_XIC_OVERLAY: {
+                    addChromatogram(minMz, maxMz);
+                    break;
                 }
             }
         }
     }
-
     
     public void addChromatogram(double minMz, double maxMz) {
         SwingWorker worker = new AbstractXICExtractionWorker(getCurrentRawfile(), minMz, maxMz) {
@@ -373,7 +319,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     }
     
     public void updateXicModeDisplay(int mode){
-        xicModeDisplay = mode;
+        if (displayScan){
+            spectrumContainerPanel.updateXicModeDisplay(mode);
+        }
     }
     
     public void showMSMSEvents() {
@@ -417,21 +365,6 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         listMsMsMarkers = new ArrayList();
     }
     
-    private void updateScanIndexList() {
-        List<Integer> listScanIndex = new ArrayList();
-        if (keepMsLevel) {
-            listScanIndex.add(getCurrentRawfile().getPreviousScanId(currentScan.getIndex(), currentScan.getMsLevel()));
-        } else {
-            listScanIndex.add(currentScan.getIndex() - 1);
-        }
-        listScanIndex.add(currentScan.getIndex());
-        if (keepMsLevel) {
-            listScanIndex.add(getCurrentRawfile().getNextScanId(currentScan.getIndex(), currentScan.getMsLevel()));
-        } else {
-            listScanIndex.add(currentScan.getIndex() + 1);
-        }
-        headerSpectrumPanel.setScanIndexList(listScanIndex);
-    }
     
     @Override
     public Color displayChromatogram(Chromatogram chromato) {
@@ -518,34 +451,8 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
 
     @Override
     public void displayScan(int index) {
-        if ((currentScan == null) || (index != currentScan.getIndex())) {
-            currentScan = getCurrentRawfile().getScan(index);
-            if (currentScan != null) {
-                Color plotColor = getPlotColor(getCurrentRawfile());
-                currentScanTime = currentScan.getRetentionTime();
-                ScanModel scanModel = new ScanModel(currentScan);
-                scanModel.setColor(plotColor);
-                if (currentScan.getDataType() == Scan.ScanType.CENTROID) { // mslevel2
-                    //stick plot
-                    scanPlot = new PlotStick(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
-                    ((PlotStick)scanPlot).setStrokeFixed(true);
-                    ((PlotStick)scanPlot).setPlotInformation(scanModel.getPlotInformation());
-                    ((PlotStick)scanPlot).setIsPaintMarker(true);
-                } else {
-                    scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
-                    ((PlotLinear)scanPlot).setStrokeFixed(true);
-                    ((PlotLinear)scanPlot).setPlotInformation(scanModel.getPlotInformation());
-                    ((PlotLinear)scanPlot).setIsPaintMarker(true);
-                }
-                
-                spectrumPlotPanel.setPlot(scanPlot);
-                spectrumPlotPanel.repaint();
-                
-
-                headerSpectrumPanel.setMzdbFileName(getCurrentRawfile().getName());
-                updateScanIndexList();
-                headerSpectrumPanel.setScan(currentScan);
-            }
+        if (displayScan){
+            spectrumContainerPanel.displayScan(index);
         }
     }
 
@@ -612,62 +519,11 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         return false;
     }
 
-    @Override
-    public void updateScanIndex(Integer scanIndex) {
-        displayScan(scanIndex);
-    }
-
-    @Override
-    public void updateRetentionTime(float retentionTime) {
-        int scanIdx = getCurrentRawfile().getScanId(retentionTime);
-        displayScan(scanIdx);
-    }
-
-    @Override
-    public void keepMsLevel(boolean keep) {
-        this.keepMsLevel = keep;
-        updateScanIndexList();
-    }
-    
     protected abstract void displayTIC();
 
     protected abstract void displayBPI();
     
     protected abstract Color getPlotColor(IRawFile rawFile);
     
-    private class XYItemStickRenderer extends AbstractXYItemRenderer {
-
-        public XYItemStickRenderer() {
-        }
-
-        @Override
-        public void drawItem(Graphics2D g2, XYItemRendererState state, Rectangle2D dataArea, PlotRenderingInfo info, XYPlot plot, ValueAxis domainAxis, ValueAxis rangeAxis,
-                XYDataset dataset, int series, int item, CrosshairState crosshairState, int pass) {
-            if (!getItemVisible(series, item)) {
-                return;
-            }
-            double x = dataset.getXValue(series, item);
-            double y = dataset.getYValue(series, item);
-
-            if (!java.lang.Double.isNaN(y)) {
-                RectangleEdge xAxisLocation = plot.getDomainAxisEdge();
-                RectangleEdge yAxisLocation = plot.getRangeAxisEdge();
-                double transX = domainAxis.valueToJava2D(x, dataArea, xAxisLocation);
-                double transY = rangeAxis.valueToJava2D(y, dataArea, yAxisLocation);
-                double transY0 = rangeAxis.valueToJava2D(0.0, dataArea, yAxisLocation);
-                g2.setStroke(DEFAULT_STROKE);
-                g2.setPaint(getItemPaint(series, item));
-                PlotOrientation orientation = plot.getOrientation();
-                if (orientation == PlotOrientation.HORIZONTAL) {
-                    g2.drawLine((int) transY, (int) transX, (int) transY0, (int) transX);
-                } else if (orientation == PlotOrientation.VERTICAL) {
-                    g2.drawLine((int) transX, (int) transY, (int) transX, (int) transY0);
-                }
-//            int domainAxisIndex = plot.getDomainAxisIndex(domainAxis);
-//            int rangeAxisIndex = plot.getRangeAxisIndex(rangeAxis);
-                //updateCrosshairValues(crosshairState, x, y, domainAxisIndex, rangeAxisIndex, transX, transY, orientation);
-            }
-        }
-    }
     
 }

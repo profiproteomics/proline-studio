@@ -70,20 +70,9 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
         return currentChromatogram.rawFile;
     }
 
-    
     @Override
-    public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue){
-        if (e.getClickCount() == 2) {
-            scanPlot.clearMarkers();
-            double yStdevLabel = scanPlot.getYMax()*0.1;
-            scanPlot.addMarker(new LineMarker(spectrumPlotPanel, xValue, LineMarker.ORIENTATION_VERTICAL));
-            scanPlot.addMarker(new LabelMarker(spectrumPlotPanel, xValue, yStdevLabel, "Mass "+xValue, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_TOP));
-            double domain = xValue;
-            float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
-            double maxMz = domain + domain * ppmTol / 1e6;
-            double minMz = domain - domain * ppmTol / 1e6;
-            extractChromatogram(minMz, maxMz);
-        }
+    public void scanMouseClicked(MouseEvent e, double minMz, double maxMz, int xicModeDisplay){
+        extractChromatogram(minMz, maxMz);
     }
 
     @Override

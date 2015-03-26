@@ -61,11 +61,11 @@ public class XAxis extends Axis {
             }
             int titleWidth = m_titleFontMetrics.stringWidth(m_title);
             int bottom = m_y + m_height;
-            int top = m_y + m_height - PlotPanel.GAP_AXIS_TITLE;
+            int top = m_y + m_height - PlotPanel.GAP_AXIS_TITLE - PlotPanel.GAP_AXIS_LINE;
             int ascent = m_titleFontMetrics.getAscent();
             int descent = m_titleFontMetrics.getDescent();
             int baseline = top + ((bottom + 1 - top) / 2) - ((ascent + descent) / 2) + ascent;
-            g.drawString(m_title, (m_width - titleWidth) / 2, baseline);
+            g.drawString(m_title, m_x+(m_width - titleWidth) / 2, baseline);
         }
 
     }
@@ -241,7 +241,7 @@ public class XAxis extends Axis {
 
         int pixelStart = valueToPixel(m_minTick);
         int pixelStop = valueToPixel(m_maxTick);
-        g.drawLine(pixelStart, m_y, pixelStop, m_y);
+        g.drawLine(pixelStart, m_y+PlotPanel.GAP_AXIS_LINE, pixelStop, m_y+PlotPanel.GAP_AXIS_LINE);
 
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
@@ -297,8 +297,8 @@ public class XAxis extends Axis {
 
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
                 
-                g.drawLine(pX, m_y, pX, m_y + 4);
-                g.drawString(label, posX, m_y + height + 4);
+                g.drawLine(pX, m_y+PlotPanel.GAP_AXIS_LINE, pX, m_y + 4+PlotPanel.GAP_AXIS_LINE);
+                g.drawString(label, posX, m_y + height + 4+PlotPanel.GAP_AXIS_LINE);
 
                 
                 previousEndX = posX + m_labelMinWidth;
@@ -326,7 +326,7 @@ public class XAxis extends Axis {
 
         int pixelStart = valueToPixel(Math.pow(10, m_minTick));
         int pixelStop = valueToPixel(Math.pow(10, m_maxTick));
-        g.drawLine(pixelStart, m_y, pixelStop, m_y);
+        g.drawLine(pixelStart, m_y+PlotPanel.GAP_AXIS_LINE, pixelStop, m_y+PlotPanel.GAP_AXIS_LINE);
 
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
@@ -347,7 +347,7 @@ public class XAxis extends Axis {
                 g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
             }
             
-            g.drawLine(pX, m_y, pX, m_y + 4);
+            g.drawLine(pX, m_y+PlotPanel.GAP_AXIS_LINE, pX, m_y + 4+PlotPanel.GAP_AXIS_LINE);
 
             // round x
             double xDisplay = x;
@@ -357,7 +357,7 @@ public class XAxis extends Axis {
 
             int posX = pX - stringWidth / 2;
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
-                g.drawString(s, posX, m_y + height + 4);
+                g.drawString(s, posX, m_y + height + 4+PlotPanel.GAP_AXIS_LINE);
                 previousEndX = posX + stringWidth;
             }
 
@@ -377,7 +377,7 @@ public class XAxis extends Axis {
             for (int i=2;i<=9;i++) {
                 double xMinTick = Math.pow(10, x)*(((double)i)*0.1d);
                 int pMinTick = valueToPixel(xMinTick);
-                 g.drawLine(pMinTick, m_y, pMinTick, m_y + 4);                
+                 g.drawLine(pMinTick, m_y+PlotPanel.GAP_AXIS_LINE, pMinTick, m_y + 4+PlotPanel.GAP_AXIS_LINE);                
             }
 
         }

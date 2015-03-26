@@ -151,6 +151,14 @@ public abstract class Axis {
         return m_maxTick;
     }
 
+    public int getY() {
+        return m_y;
+    }
+
+    public int getHeight() {
+        return m_height;
+    }
+
     public boolean inside(int x, int y) {
         return (x>=m_x) && (x<m_x+m_width) && (y>m_y) && (y<m_y+m_height);
     }

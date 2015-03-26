@@ -239,7 +239,6 @@ public class XAxis extends Axis {
  
     private void paintLinear(Graphics2D g, AxisTicks ticks) {
 
-        
         int pixelStart = valueToPixel(m_minTick);
         int pixelStop = valueToPixel(m_maxTick);
         g.drawLine(pixelStart, m_y, pixelStop, m_y);
@@ -397,7 +396,7 @@ public class XAxis extends Axis {
     
     public void paintGridLinear(Graphics2D g, int y, int height) {
 
-        int pixelStart = valueToPixel(m_minTick);
+        int pixelStart = valueToPixel(m_minTick+m_tickSpacing);
         int pixelStop = valueToPixel(m_maxTick);
 
         if (pixelStart >= pixelStop) { // avoid infinite loop 
@@ -429,16 +428,16 @@ public class XAxis extends Axis {
     }
     
     public void paintGridLog(Graphics2D g, int y, int height) {
-
-        Stroke s = g.getStroke();
-        g.setStroke(dashed);
-        int pixelStart = valueToPixel(Math.pow(10, m_minTick));
+        int pixelStart = valueToPixel(Math.pow(10, m_minTick+m_tickSpacing));
         int pixelStop = valueToPixel(Math.pow(10, m_maxTick));
 
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
         }
-
+        
+        Stroke s = g.getStroke();
+        g.setStroke(dashed);
+        
         double x = m_minTick;
         int pX = pixelStart;
         while (true) {

@@ -261,7 +261,7 @@ public class YAxis extends Axis {
     
     public void paintGridLinear(Graphics2D g, int x, int width) {
                 
-        int pixelStart = valueToPixel(m_minTick);
+        int pixelStart = valueToPixel(m_minTick+m_tickSpacing);
         int pixelStop = valueToPixel(m_maxTick);
 
         if (pixelStart <= pixelStop) { // avoid infinite loop 
@@ -293,17 +293,16 @@ public class YAxis extends Axis {
     }
     
     public void paintGridLog(Graphics2D g, int x, int width) {
-
-        Stroke s = g.getStroke();
-        g.setStroke(dashed);
-        
-        int pixelStart = valueToPixel(Math.pow(10, m_minTick));
+        int pixelStart = valueToPixel(Math.pow(10, m_minTick+m_tickSpacing));
         int pixelStop = valueToPixel(Math.pow(10, m_maxTick));
 
         if (pixelStart <= pixelStop) { // avoid infinite loop 
             return;
         }
-
+        
+        Stroke s = g.getStroke();
+        g.setStroke(dashed);
+        
         
 
         double y = m_minTick;

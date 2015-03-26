@@ -311,6 +311,7 @@ public class XAxis extends Axis {
             }
 
         }
+        g.setFont(m_valuesFont);
 
     }
 

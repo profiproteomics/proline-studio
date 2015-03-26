@@ -88,6 +88,11 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     private final static NumberFormat nf = NumberFormat.getNumberInstance();
     private final static DecimalFormat format = (DecimalFormat)nf;
 
+    // title
+    private String m_plotTitle = null;
+    /* title coord */
+    private final static Font titleFont = new Font("dialog", Font.BOLD, 11);
+    private final static Color titleColor = Color.DARK_GRAY;
     
     public PlotPanel() {
         formatE.applyPattern("0.#####E0");
@@ -95,6 +100,10 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         addMouseMotionListener(this);
         ToolTipManager.sharedInstance().registerComponent(this);
         m_plots = new ArrayList();
+    }
+    
+    public void setPlotTitle(String title){
+        this.m_plotTitle= title;
     }
     
     @Override
@@ -117,6 +126,21 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         g.setColor(PANEL_BACKGROUND_COLOR);
         g.fillRect(0, 0, width, height);
 
+        // title
+        int titleY = 0;
+        if (this.m_plotTitle != null) {
+            int wt = StringUtils.lenghtOfString(m_plotTitle, getFontMetrics(titleFont));
+            int titleX = (width - wt)/2;
+            int ascent = getFontMetrics(titleFont).getAscent();
+            int descent = getFontMetrics(titleFont).getDescent();
+            titleY = ascent;
+            g.setFont(titleFont);
+            g.setColor(titleColor);
+            g.drawString(m_plotTitle, titleX, titleY);
+            titleY += descent;
+        }
+        m_plotArea.y = titleY;
+        
         g.setColor(Color.darkGray);
 
         int figuresXHeight = GAP_FIGURES_X;
@@ -130,7 +154,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             
             // set correct size
             figuresXHeight = m_xAxis.getMiniMumAxisHeight(figuresXHeight);
-            m_xAxis.setSize(GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE, height-figuresXHeight -GAP_AXIS_TITLE /*-GAP_TOP_AXIS*/, width-GAP_FIGURES_Y-GAP_AXIS_TITLE-GAP_END_AXIS, figuresXHeight + GAP_AXIS_TITLE+GAP_AXIS_LINE);
+            m_xAxis.setSize(GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE, height-figuresXHeight -GAP_AXIS_TITLE  /*-GAP_TOP_AXIS*/, width-GAP_FIGURES_Y-GAP_AXIS_TITLE-GAP_END_AXIS, figuresXHeight + GAP_AXIS_TITLE+GAP_AXIS_LINE);
             m_plotArea.x = m_xAxis.m_x+1;
             m_plotArea.width = m_xAxis.m_width-1;
             m_xAxis.paint(g2d);
@@ -138,7 +162,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         }
         
         if (m_yAxis != null) {
-            m_yAxis.setSize(0, GAP_END_AXIS, GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE/*+GAP_TOP_AXIS*/, height-figuresXHeight-GAP_AXIS_TITLE-GAP_END_AXIS);
+            m_yAxis.setSize(0, GAP_END_AXIS+titleY, GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE/*+GAP_TOP_AXIS*/, height-figuresXHeight-GAP_AXIS_TITLE-GAP_END_AXIS-titleY);
             m_plotArea.y = m_yAxis.m_y+1;
             m_plotArea.height = m_yAxis.m_height-1;
             m_yAxis.paint(g2d);

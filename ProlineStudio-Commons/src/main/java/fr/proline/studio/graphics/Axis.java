@@ -1,8 +1,10 @@
 package fr.proline.studio.graphics;
 
+import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.text.DecimalFormat;
 
 /**
@@ -11,6 +13,8 @@ import java.text.DecimalFormat;
  */
 public abstract class Axis {
 
+    protected Stroke dashed = new BasicStroke(1.0f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_MITER,10.0f,new float[] {2.0f,2.0f}, 0.0f); 
+    
     protected String m_title = null;
     protected Font m_titleFont = null;
     protected FontMetrics m_titleFontMetrics;

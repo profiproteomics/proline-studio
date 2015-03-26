@@ -4,6 +4,7 @@ import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 
 /**
@@ -268,7 +269,9 @@ public class YAxis extends Axis {
         }
 
         g.setColor(CyclicColorPalette.GRAY_GRID);
-
+        Stroke s = g.getStroke();
+        g.setStroke(dashed);
+        
         double y = m_minTick;
         int pY = pixelStart;
         int previousEndY = Integer.MAX_VALUE;
@@ -286,10 +289,14 @@ public class YAxis extends Axis {
             }
             
         }
+        g.setStroke(s);
     }
     
     public void paintGridLog(Graphics2D g, int x, int width) {
 
+        Stroke s = g.getStroke();
+        g.setStroke(dashed);
+        
         int pixelStart = valueToPixel(Math.pow(10, m_minTick));
         int pixelStop = valueToPixel(Math.pow(10, m_maxTick));
 
@@ -321,6 +328,8 @@ public class YAxis extends Axis {
                 
             }
         }
+        
+        g.setStroke(s);
     }
     
     @Override

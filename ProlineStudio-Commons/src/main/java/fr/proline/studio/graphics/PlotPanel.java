@@ -49,7 +49,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
     
     private final ZoomGesture m_zoomGesture = new ZoomGesture();
     private final SelectionGesture m_selectionGesture = new SelectionGesture();
-    
+    private final PanAxisGesture m_panAxisGesture = new PanAxisGesture();
     
     public final static int GAP_FIGURES_Y = 50;
     public final static int GAP_FIGURES_X = 24;
@@ -109,7 +109,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         m_plotArea.x = 0;
         m_plotArea.y = 0;
         m_plotArea.width = width;
-        m_plotArea.height = width;
+        m_plotArea.height = height;
 
         
         g.setColor(PANEL_BACKGROUND_COLOR);
@@ -129,8 +129,8 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             // set correct size
             figuresXHeight = m_xAxis.getMiniMumAxisHeight(figuresXHeight);
             m_xAxis.setSize(GAP_FIGURES_Y+GAP_AXIS_TITLE, height-figuresXHeight -GAP_AXIS_TITLE /*-GAP_TOP_AXIS*/, width-GAP_FIGURES_Y-GAP_AXIS_TITLE-GAP_END_AXIS, figuresXHeight + GAP_AXIS_TITLE);
-            m_plotArea.x = m_xAxis.m_x+1;
-            m_plotArea.width = m_xAxis.m_width-1;
+            m_plotArea.x = m_xAxis.m_x+5;
+            m_plotArea.width = m_xAxis.m_width-5;
             m_xAxis.paint(g2d);
 
         }
@@ -138,7 +138,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         if (m_yAxis != null) {
             m_yAxis.setSize(0, GAP_END_AXIS, GAP_FIGURES_Y+GAP_AXIS_TITLE /*+GAP_TOP_AXIS*/, height-figuresXHeight-GAP_AXIS_TITLE-GAP_END_AXIS);
             m_plotArea.y = m_yAxis.m_y+1;
-            m_plotArea.height = m_yAxis.m_height-1;
+            m_plotArea.height = m_yAxis.m_height-5;
             m_yAxis.paint(g2d);
         }
         
@@ -443,7 +443,11 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
                 m_zoomGesture.startZooming(x, y);
             }
             repaint();
-        }
+        } else if (m_xAxis.inside(x, y)) {
+           m_panAxisGesture.startPanning(x, y, PanAxisGesture.X_AXIS_PAN);
+        } else if (m_yAxis.inside(x, y)) {
+           m_panAxisGesture.startPanning(x, y, PanAxisGesture.Y_AXIS_PAN);
+        } 
 
     }
 
@@ -472,7 +476,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
                 popup.show((JComponent) e.getSource(), x, y);
                 mustRepaint = true;
             }
-        } else {
+        } else if (m_panAxisGesture.getAction() != PanAxisGesture.ACTION_PAN) {
             
             if (m_xAxis.inside(x, y)) {
                 mustRepaint |= m_xAxis.setSelected(!m_xAxis.isSelected());
@@ -546,6 +550,8 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
                 m_updateDoubleBuffer = true;
             }
             mustRepaint = true;
+        } else if (m_panAxisGesture.isPanning()) {
+           m_panAxisGesture.stopPanning(e.getX(), e.getY());
         }
         
         if (mustRepaint) {
@@ -592,6 +598,17 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         } else if (m_zoomGesture.isZooming()) {
             m_zoomGesture.moveZooming(e.getX(), e.getY());
             repaint();
+        } else if (m_panAxisGesture.isPanning()) {
+           if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.X_AXIS_PAN) {
+            double delta = m_xAxis.pixelToValue(m_panAxisGesture.getPreviousX()) - m_xAxis.pixelToValue(e.getX());
+            m_xAxis.setRange(m_xAxis.getMinValue()+delta, m_xAxis.getMaxValue()+delta);
+           } else {
+              double delta = m_yAxis.pixelToValue(m_panAxisGesture.getPreviousY()) - m_yAxis.pixelToValue(e.getY());
+              m_yAxis.setRange(m_yAxis.getMinValue()+delta, m_yAxis.getMaxValue()+delta);
+           }
+           m_panAxisGesture.movePan(e.getX(), e.getY());
+            m_updateDoubleBuffer = true;
+            repaint();
         }
     }
     
@@ -612,7 +629,11 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         if (!isInGridArea) {
             m_coordX = "";
             m_coordY = "";
-            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            if (m_xAxis.inside(e.getX(), e.getY())) {
+               setCursor(new Cursor(Cursor.HAND_CURSOR));
+            } else {
+               setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
         } else {
             if (m_drawCursor) {
                 setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));

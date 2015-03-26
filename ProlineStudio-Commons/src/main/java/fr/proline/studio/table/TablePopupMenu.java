@@ -36,7 +36,7 @@ public class TablePopupMenu extends JPopupMenu {
 
    @Override
    public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
-
+       setEnabled(row != -1);
    }
 
    private String componentToText(Component c) {

@@ -16,12 +16,22 @@ public class LineMarker extends AbstractMarker {
     
     private double m_value;
     private int m_orientation;
+    private Color m_markerColor;
     
     public LineMarker(PlotPanel plotPanel, double value, int orientation) {
         super(plotPanel);
         
         m_value = value;
         m_orientation = orientation;
+        m_markerColor = Color.black;
+    }
+    
+    // create a lineMarker Vertical with the specified color
+    public LineMarker(PlotPanel plotPanel, double value, Color markerColor) {
+        super(plotPanel);
+        m_value = value;
+        m_orientation = ORIENTATION_VERTICAL;
+        m_markerColor = markerColor;
     }
     
     @Override
@@ -40,7 +50,7 @@ public class LineMarker extends AbstractMarker {
             int x1 = xAxis.valueToPixel(xAxis.getMinTick());
             int x2 = xAxis.valueToPixel(xAxis.getMaxTick());
 
-            g.setColor(Color.black);
+            g.setColor(m_markerColor);
             g.drawLine(x1, y, x2, y);
 
 
@@ -49,7 +59,7 @@ public class LineMarker extends AbstractMarker {
             int y1 = yAxis.valueToPixel(yAxis.getMinTick());
             int y2 = yAxis.valueToPixel(yAxis.getMaxTick());
             
-            g.setColor(Color.black);
+            g.setColor(m_markerColor);
             g.drawLine(x, y1, x, y2);
         }
         

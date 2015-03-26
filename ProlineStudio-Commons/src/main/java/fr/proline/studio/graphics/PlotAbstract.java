@@ -90,6 +90,18 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
         m_markersList.add(m);
     }
     
+    /**
+     * remove the specified marker, returns true if the marker was in the list, false otherwise
+     * @param m
+     * @return 
+     */
+    public boolean removeMarker(AbstractMarker m) {
+        if (m_markersList != null) {
+            return m_markersList.remove(m);
+        }
+        return false;
+    }
+    
     public void clearMarkers() {
         if (m_markersList == null) {
             return;

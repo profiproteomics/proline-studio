@@ -443,7 +443,7 @@ public class PlotLinear extends PlotAbstract {
                 m_xMin = m_xMin - 1;  //JPM.TODO : enhance this
                 m_xMax = m_xMax + 1;
             } else {
-                m_xMin = m_xMin - deltaX * 0.01;
+               // m_xMin = m_xMin - deltaX * 0.01; // no need to have a margin on xMin
                 m_xMax = m_xMax + deltaX * 0.01;
             }
         }
@@ -455,7 +455,7 @@ public class PlotLinear extends PlotAbstract {
                 m_yMin = m_yMin - 1;  //JPM.TODO : enhance this
                 m_yMax = m_yMax + 1;
             } else {
-                m_yMin = m_yMin - deltaY * 0.01;
+                //m_yMin = m_yMin - deltaY * 0.01; // no need to have a margin on yMin
                 m_yMax = m_yMax + deltaY * 0.01;
             }
         }

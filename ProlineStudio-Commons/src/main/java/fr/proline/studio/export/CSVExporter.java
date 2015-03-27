@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 public class CSVExporter implements ExporterInterface {
 
     private StringBuilder m_sb = new StringBuilder();
+    private static final char separatorCSV = ',';
 
     private int m_curRow = 0;
     private int m_curCell = 0;
@@ -44,7 +45,7 @@ public class CSVExporter implements ExporterInterface {
     @Override
     public void addCell(String t) throws IOException {
         if (m_curCell>0) {
-            m_fw.write(";");
+            m_fw.write(separatorCSV);
         }
         m_curCell++;
         m_fw.write(StringEscapeUtils.escapeCsv(t));

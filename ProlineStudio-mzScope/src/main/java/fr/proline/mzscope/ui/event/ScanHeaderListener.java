@@ -28,5 +28,13 @@ public interface ScanHeaderListener extends EventListener {
      * @param keep 
      */
     public void keepMsLevel(boolean keep);
+    
+    
+    /**
+     * display xic as overlay or replace mode
+     * @param mode 
+     */
+    public void updateXicDisplayMode(int mode);
+    
 
 }

@@ -320,10 +320,12 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         worker.execute();
     }
     
-    public void updateXicModeDisplay(int mode){
+   
+    public int getXicModeDisplay(){
         if (displayScan){
-            spectrumContainerPanel.updateXicModeDisplay(mode);
+            spectrumContainerPanel.getXicModeDisplay();
         }
+        return MzScopeConstants.MODE_DISPLAY_XIC_REPLACE;
     }
     
     public void showMSMSEvents() {

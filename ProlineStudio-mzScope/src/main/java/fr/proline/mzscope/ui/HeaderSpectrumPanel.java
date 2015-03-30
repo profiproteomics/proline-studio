@@ -2,6 +2,7 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
+import fr.proline.mzscope.util.MzScopeConstants;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -36,6 +37,7 @@ public class HeaderSpectrumPanel extends JPanel {
     
     private final static String TXT_KEEP_MSLEVEL = "keep same ms level";
     private final static String TXT_ALL_MSLEVEL = "all ms level";
+    private final static String TXT_XIC_OVERLAY = "XIC Overlay";
 
     private JScrollPane scrollPane;
     private JPanel mainPanel;
@@ -54,6 +56,7 @@ public class HeaderSpectrumPanel extends JPanel {
     private JLabel labelMsLevel;
     private JTextField textFieldMsLevel;
     private JCheckBox cbKeepMsLevel;
+    private JCheckBox cbXicOverlay;
 
     // mzdb fileName
     private String mzdbFileName;
@@ -61,12 +64,16 @@ public class HeaderSpectrumPanel extends JPanel {
     private Scan scan;
     // list of all scanIndex
     private List<Integer> scanIndexList;
+    
+    // true by default, but mode is hidden for multi rawFile
+    private boolean displayXicModeVisible;
 
     //events
     private EventListenerList listenerList = new EventListenerList();
 
-    public HeaderSpectrumPanel(Scan scan, List<Integer> scanIndexList) {
+    public HeaderSpectrumPanel(Scan scan, List<Integer> scanIndexList, boolean displayXicModeVisible) {
         this.scan = scan;
+        this.displayXicModeVisible = displayXicModeVisible;
         this.scanIndexList = scanIndexList;
         initComponents();
     }
@@ -150,6 +157,7 @@ public class HeaderSpectrumPanel extends JPanel {
             panelMsLevel.add(getLabelMsLevel());
             panelMsLevel.add(getTextFieldMsLevel());
             panelMsLevel.add(getCbKeepMsLevel());
+            panelMsLevel.add(getCbXicOverlay());
         }
         return this.panelMsLevel;
     }
@@ -252,6 +260,24 @@ public class HeaderSpectrumPanel extends JPanel {
         }
         return cbKeepMsLevel;
     }
+    
+    private JCheckBox getCbXicOverlay() {
+        if (this.cbXicOverlay == null) {
+            this.cbXicOverlay = new JCheckBox(TXT_XIC_OVERLAY);
+            this.cbXicOverlay.setSelected(false);
+            this.cbXicOverlay.setName("cbXicOverlay");
+            this.cbXicOverlay.setToolTipText("You can also use the Alt key");
+            this.cbXicOverlay.setVisible(displayXicModeVisible);
+            this.cbXicOverlay.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    xicOverlayActionPerformed(e);
+                }
+            });
+        }
+        return cbXicOverlay;
+    }
+    
 
     private void updateScan() {
         if (scan == null) {
@@ -350,6 +376,15 @@ public class HeaderSpectrumPanel extends JPanel {
             }
         }
     }
+    
+    private void fireXicOverlay(int mode) {
+        Object[] listeners = listenerList.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if (listeners[i] == ScanHeaderListener.class) {
+                ((ScanHeaderListener) listeners[i + 1]).updateXicDisplayMode(mode);
+            }
+        }
+    }
 
     public void retentionTimeActionPerformed(ActionEvent evt) {
         if (scan == null) {
@@ -383,7 +418,7 @@ public class HeaderSpectrumPanel extends JPanel {
         fireUpdateScanIndex(scanIndex);
     }
     
-     public void msLevelActionPerformed(ActionEvent evt) {
+    public void msLevelActionPerformed(ActionEvent evt) {
         if (scan == null) {
             return;
         }
@@ -394,6 +429,10 @@ public class HeaderSpectrumPanel extends JPanel {
             cbKeepMsLevel.setText(TXT_ALL_MSLEVEL);
         }
         fireKeepMsLevel(keepMsLevel);
+    }
+    
+    public void xicOverlayActionPerformed(ActionEvent evt) {
+        fireXicOverlay(this.cbXicOverlay.isSelected()?MzScopeConstants.MODE_DISPLAY_XIC_OVERLAY:MzScopeConstants.MODE_DISPLAY_XIC_REPLACE);
     }
 
 }

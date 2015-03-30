@@ -7,19 +7,14 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.ui.event.ExtractionListener;
-import fr.proline.mzscope.util.MzScopeConstants;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -29,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The extraction Panel contains the different parameters that could be changed
- * for: the extraction: mass, tolerance the chromato display: overlay, replace
+ * for: the extraction: mass, tolerance 
  * or sum modes
  *
  * @author MB243701
@@ -38,10 +33,6 @@ public class XICExtractionPanel extends JPanel {
 
     private static Logger logger = LoggerFactory.getLogger(XICExtractionPanel.class);
 
-    private final static String ACTION_COMMAND_REPLACE_MODE = "replace";
-    private final static String ACTION_COMMAND_OVERLAY_MODE = "overlay";
-
-    private int modeDisplay = 0;
 
     private JTabbedPane extractionTabbedPane;
     private JScrollPane scrollPane;
@@ -53,11 +44,6 @@ public class XICExtractionPanel extends JPanel {
     private JPanel panelTolerance;
     private JLabel toleranceLabel;
     private JTextField toleranceTF;
-    private JPanel panelDisplay;
-    private JLabel labelDisplayMode;
-    private JRadioButton rbReplace;
-    private JRadioButton rbOverlay;
-    private ButtonGroup groupDisplayMode;
 
     //events
     private EventListenerList extractionListenerList = new EventListenerList();
@@ -114,32 +100,11 @@ public class XICExtractionPanel extends JPanel {
             mainPanel.add(getPanelMass(),c);
             c.gridy++;
             mainPanel.add(getPanelTolerance(),c);
-            c.gridy++;
-            mainPanel.add(getDisplayPanel(),c);
         }
         return mainPanel;
     }
 
 
-    private JPanel getDisplayPanel() {
-        if (panelDisplay == null) {
-            panelDisplay = new JPanel();
-            panelDisplay.setName("panelDisplay");
-            panelDisplay.setLayout(new BoxLayout(panelDisplay, BoxLayout.Y_AXIS));
-            panelDisplay.add(getLabelDisplayMode());
-            panelDisplay.add(getRbReplace());
-            panelDisplay.add(getRbOverlay());
-            groupDisplayMode = new ButtonGroup();
-            groupDisplayMode.add(getRbReplace());
-            groupDisplayMode.add(getRbOverlay());
-            
-            getLabelDisplayMode().setAlignmentX(Component.LEFT_ALIGNMENT);
-            getRbReplace().setAlignmentX(Component.LEFT_ALIGNMENT);
-            getRbOverlay().setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        }
-        return panelDisplay;
-    }
 
     private JPanel getPanelMass() {
         if (panelMassRange == null) {
@@ -213,47 +178,6 @@ public class XICExtractionPanel extends JPanel {
         return toleranceTF;
     }
 
-    private JLabel getLabelDisplayMode() {
-        if (labelDisplayMode == null) {
-            labelDisplayMode = new JLabel();
-            labelDisplayMode.setName("labelDisplayMode");
-            labelDisplayMode.setText("XIC display mode:");
-        }
-        return labelDisplayMode;
-    }
-
-    private JRadioButton getRbReplace() {
-        if (rbReplace == null) {
-            rbReplace = new JRadioButton("Replace");
-            rbReplace.setName("rbReplace");
-            rbReplace.setSelected(true);
-            rbReplace.setActionCommand(ACTION_COMMAND_REPLACE_MODE);
-            rbReplace.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    replaceModeActionPerformed(e);
-                }
-            });
-        }
-        return rbReplace;
-    }
-
-    private JRadioButton getRbOverlay() {
-        if (rbOverlay == null) {
-            rbOverlay = new JRadioButton("Overlay");
-            rbOverlay.setName("rbOverlay");
-            rbOverlay.setSelected(true);
-            rbOverlay.setActionCommand(ACTION_COMMAND_OVERLAY_MODE);
-            rbOverlay.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    overlayModeActionPerformed(e);
-                }
-            });
-        }
-        return rbOverlay;
-    }
-
 
     private void massRangeTFActionPerformed(java.awt.event.ActionEvent evt) {
         String text = massRangeTF.getText().trim();
@@ -280,17 +204,6 @@ public class XICExtractionPanel extends JPanel {
         MzScopePreferences.getInstance().setMzPPMTolerance(ppm);
     }
 
-    private void replaceModeActionPerformed(ActionEvent evt) {
-        modeDisplay = MzScopeConstants.MODE_DISPLAY_XIC_REPLACE;
-        fireXicModeDisplayChanged();
-    }
-
-    private void overlayModeActionPerformed(ActionEvent evt) {
-        modeDisplay = MzScopeConstants.MODE_DISPLAY_XIC_OVERLAY;
-        fireXicModeDisplayChanged();
-    }
-
-
     /**
      * event register
      *
@@ -308,26 +221,9 @@ public class XICExtractionPanel extends JPanel {
         Object[] listeners = extractionListenerList.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if (listeners[i] == ExtractionListener.class) {
-                ((ExtractionListener) listeners[i + 1]).extractChromatogram(minMz, maxMz, getModeDisplay());
+                ((ExtractionListener) listeners[i + 1]).extractChromatogram(minMz, maxMz);
             }
         }
     }
     
-    private void  fireXicModeDisplayChanged(){
-        Object[] listeners = extractionListenerList.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == ExtractionListener.class) {
-                ((ExtractionListener) listeners[i + 1]).updateXicModeDisplay(getModeDisplay());
-            }
-        }
-    }
-
-    public int getModeDisplay() {
-        return modeDisplay;
-    }
-
-    public void setModeDisplay(int modeDisplay) {
-        this.modeDisplay = modeDisplay;
-    }
-
 }

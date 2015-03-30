@@ -54,7 +54,8 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
         spectrumPlotPanel.setDrawCursor(true);
         List<Integer> emptyListScanIndex = new ArrayList<>();
         emptyListScanIndex.add(0);
-        headerSpectrumPanel = new HeaderSpectrumPanel(null, emptyListScanIndex);
+        boolean multiRawFile = rawFilePanel instanceof MultiRawFilePanel;
+        headerSpectrumPanel = new HeaderSpectrumPanel(null, emptyListScanIndex, !multiRawFile);
         headerSpectrumPanel.addScanHeaderListener(this);
         spectrumPlotPanel.repaint();
         
@@ -150,8 +151,13 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
         headerSpectrumPanel.setScanIndexList(listScanIndex);
     }
     
-    public void updateXicModeDisplay(int mode){
+    @Override
+    public void updateXicDisplayMode(int mode){
         xicModeDisplay = mode;
+    }
+    
+    public int getXicModeDisplay(){
+        return this.xicModeDisplay;
     }
     
 }

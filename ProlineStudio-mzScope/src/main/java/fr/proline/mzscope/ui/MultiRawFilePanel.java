@@ -9,9 +9,9 @@ import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MzScopePreferences;
-import fr.proline.studio.graphics.marker.LabelMarker;
+import fr.proline.studio.graphics.PlotLinear;
+import fr.proline.studio.graphics.marker.IntervalMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,9 +29,6 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import org.jfree.chart.plot.IntervalMarker;
-import org.jfree.chart.plot.Marker;
-import org.jfree.chart.plot.ValueMarker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -215,19 +212,25 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
                     displayChromatogram(chunks.get(0));
                     k = 1;
                     displayScan(f.getBasePeakel().getApexScanId());
-                    Marker marker = new IntervalMarker(f.getBasePeakel().getFirstElutionTime() / 60.0, f.getBasePeakel().getLastElutionTime() / 60.0, Color.ORANGE, new BasicStroke(1), Color.RED, new BasicStroke(1), 0.3f);
-                    chromatogramPanel.getChart().getXYPlot().addDomainMarker(marker);
-                    marker = new ValueMarker(f.getElutionTime() / 60.0);
-                    chromatogramPanel.getChart().getXYPlot().addDomainMarker(marker);
+                    PlotLinear chromatogramPlot= chromatogramPlots.isEmpty()?null:chromatogramPlots.get(0);
+                    if (chromatogramPlot != null){
+                        chromatogramPlot.clearMarkers();
+                        chromatogramPlot.addMarker(new IntervalMarker(chromatogramPlotPanel, Color.ORANGE, Color.RED, f.getBasePeakel().getFirstElutionTime() / 60.0, f.getBasePeakel().getLastElutionTime() / 60.0));
+                        chromatogramPlot.addMarker(new LineMarker(chromatogramPlotPanel,f.getElutionTime() / 60.0, Color.BLUE) );
+                    }
+                    
                 }
                 for (; k < chunks.size(); k++) {
                     logger.info("add additionnal chromato");
                     addChromatogram(chunks.get(k));
                     displayScan(f.getBasePeakel().getApexScanId());
-                    Marker marker = new IntervalMarker(f.getBasePeakel().getFirstElutionTime() / 60.0, f.getBasePeakel().getLastElutionTime() / 60.0, Color.ORANGE, new BasicStroke(1), Color.RED, new BasicStroke(1), 0.3f);
-                    chromatogramPanel.getChart().getXYPlot().addDomainMarker(marker);
-                    marker = new ValueMarker(f.getElutionTime() / 60.0);
-                    chromatogramPanel.getChart().getXYPlot().addDomainMarker(marker);
+                    
+                    PlotLinear chromatogramPlot= chromatogramPlots.isEmpty()?null:chromatogramPlots.get(0);
+                    if (chromatogramPlot != null){
+                        chromatogramPlot.clearMarkers();
+                        chromatogramPlot.addMarker(new IntervalMarker(chromatogramPlotPanel, Color.ORANGE, Color.RED,  f.getBasePeakel().getFirstElutionTime() / 60.0, f.getBasePeakel().getLastElutionTime() / 60.0));
+                        chromatogramPlot.addMarker(new LineMarker(chromatogramPlotPanel,f.getElutionTime() / 60.0, Color.BLUE) );
+                    }
                 }
             }
 

@@ -37,13 +37,13 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
     private HeaderSpectrumPanel headerSpectrumPanel;
     protected PlotAbstract scanPlot;
     protected Scan currentScan;
-    protected Float currentScanTime = null;
     
     private boolean keepMsLevel = true;
     
     protected int xicModeDisplay = MzScopeConstants.MODE_DISPLAY_XIC_REPLACE;
 
     public SpectrumPanel(AbstractRawFilePanel rawFilePanel) {
+        super();
         this.rawFilePanel = rawFilePanel;
     }
     
@@ -91,13 +91,13 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
     @Override
     public void updateScanIndex(Integer scanIndex) {
-        displayScan(scanIndex);
+        rawFilePanel.displayScan(scanIndex);
     }
 
     @Override
     public void updateRetentionTime(float retentionTime) {
         int scanIdx = rawFilePanel.getCurrentRawfile().getScanId(retentionTime);
-        displayScan(scanIdx);
+        rawFilePanel.displayScan(scanIdx);
     }
 
     @Override
@@ -106,35 +106,31 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
         updateScanIndexList();
     }
     
-    public void displayScan(int index) {
-        if ((currentScan == null) || (index != currentScan.getIndex())) {
-            currentScan = rawFilePanel.getCurrentRawfile().getScan(index);
-            if (currentScan != null) {
-                Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile());
-                currentScanTime = currentScan.getRetentionTime();
-                ScanModel scanModel = new ScanModel(currentScan);
-                scanModel.setColor(plotColor);
-                if (currentScan.getDataType() == Scan.ScanType.CENTROID) { // mslevel2
-                    //stick plot
-                    scanPlot = new PlotStick(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
-                    ((PlotStick)scanPlot).setStrokeFixed(true);
-                    ((PlotStick)scanPlot).setPlotInformation(scanModel.getPlotInformation());
-                    ((PlotStick)scanPlot).setIsPaintMarker(true);
-                } else {
-                    scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
-                    ((PlotLinear)scanPlot).setStrokeFixed(true);
-                    ((PlotLinear)scanPlot).setPlotInformation(scanModel.getPlotInformation());
-                    ((PlotLinear)scanPlot).setIsPaintMarker(true);
-                }
-                
-                spectrumPlotPanel.setPlot(scanPlot);
-                spectrumPlotPanel.repaint();
-                
-
-                headerSpectrumPanel.setMzdbFileName(rawFilePanel.getCurrentRawfile().getName());
-                updateScanIndexList();
-                headerSpectrumPanel.setScan(currentScan);
+    public void displayScan(Scan scan) {
+        currentScan = scan;
+        if (currentScan != null) {
+            Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile());
+            ScanModel scanModel = new ScanModel(currentScan);
+            scanModel.setColor(plotColor);
+            if (currentScan.getDataType() == Scan.ScanType.CENTROID) { // mslevel2
+                //stick plot
+                scanPlot = new PlotStick(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
+                ((PlotStick) scanPlot).setStrokeFixed(true);
+                ((PlotStick) scanPlot).setPlotInformation(scanModel.getPlotInformation());
+                ((PlotStick) scanPlot).setIsPaintMarker(true);
+            } else {
+                scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
+                ((PlotLinear) scanPlot).setStrokeFixed(true);
+                ((PlotLinear) scanPlot).setPlotInformation(scanModel.getPlotInformation());
+                ((PlotLinear) scanPlot).setIsPaintMarker(true);
             }
+
+            spectrumPlotPanel.setPlot(scanPlot);
+            spectrumPlotPanel.repaint();
+
+            headerSpectrumPanel.setMzdbFileName(rawFilePanel.getCurrentRawfile().getName());
+            updateScanIndexList();
+            headerSpectrumPanel.setScan(currentScan);
         }
     }
     

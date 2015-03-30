@@ -1,8 +1,16 @@
 package fr.proline.studio.rserver;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.prefs.Preferences;
+import org.openide.util.NbPreferences;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;
@@ -28,6 +36,8 @@ public class RServerManager {
     
     private int m_currentVarIndex = 0;
     
+    private Process m_RProcess = null;
+    
     private RServerManager() {}
 
     public static RServerManager getRServerManager() {
@@ -40,10 +50,106 @@ public class RServerManager {
 
     }
 
+    /**
+     * Démarrage de R
+     * @throws Exception 
+     */
+    public boolean startRProcess() throws Exception {
+
+        if (m_RProcess != null) {
+            return true;
+        }
+         
+        // Look for R.exe in ProlineStudio Path or inf path specified in properties file
+        File f = new File(".");
+        String pathToExe = f.getCanonicalPath()+File.separatorChar+"R"+File.separatorChar+"bin"+File.separatorChar+"R.exe";
+        f = new File(pathToExe);
+        if (!f.exists()) {
+            String defaultExePath = pathToExe;
+            // R.exe not found, try to read it from Preferences
+            Preferences preferences = NbPreferences.root();
+            pathToExe = preferences.get("RServerExePath", null);
+            if (pathToExe == null) {
+                LoggerFactory.getLogger("ProlineStudio.R").error("R.exe not found: "+defaultExePath);
+                LoggerFactory.getLogger("ProlineStudio.R").error("RServerExePath in Preferences file not found : "+pathToExe);
+                return false;
+            } else {
+                f = new File(pathToExe);
+                if (!f.exists()) {
+                    LoggerFactory.getLogger("ProlineStudio.R").error("R.exe not found: "+defaultExePath);
+                    LoggerFactory.getLogger("ProlineStudio.R").error("R.exe not found: "+pathToExe);
+                    return false;
+                }
+            }
+        }
+
+
+        // Start R Process
+        String operatingSystem = System.getProperty("os.name");
+        if (operatingSystem != null && operatingSystem.startsWith("Windows")) {
+
+            String[] cmds = {pathToExe, "-e", "\"library(Rserve);Rserve(TRUE,args='--no-save --slave')\"", "--no-save", "--slave"};
+            m_RProcess = Runtime.getRuntime().exec(cmds);
+
+            // error stream
+            InOutThread errorStreamThread = new InOutThread(m_RProcess.getErrorStream(), null);
+
+            // output stream
+            InOutThread outputStreamThread = new InOutThread(m_RProcess.getInputStream(), null);
+
+            errorStreamThread.start();
+            outputStreamThread.start();
+            
+            return true;
+
+        } else {
+            // linux and MacIntosh ?
+
+            LoggerFactory.getLogger("ProlineStudio.R").error("R Server not available for Linux or MacIntosh");
+            return false;
+            // linux
+            //command = "echo \"" + todo + "\"|" + cmd + " " + rargs;
+            //System.out.println("e=" + e);
+            //Pocess p = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", command});
+        }
+
+
+    }
+    
+    public void stopRProcess() {
+        
+        // close connection if needed
+        close();
+        
+        if (m_RProcess != null) {
+            try {
+                m_RProcess.destroyForcibly();
+            } catch (Exception e) {
+                
+            } finally {
+                m_RProcess = null;
+            }
+        }
+    }
+    
+    public void connect() throws RServerManager.RServerException {
+        String serverURL = "localhost";
+        int port = 6311;
+
+        String user = null;
+        String password = null;
+
+        connect(serverURL, port, user, password);
+
+    }
     public RConnection connect(String host, int port) throws RServerException {
         return connect(host, port, null, null);
     }
     public RConnection connect(String host, int port, String user, String password) throws RServerException {
+        
+        if (m_connection != null) {
+            return m_connection;
+        }
         
         m_host = host;
         m_port = port;
@@ -79,6 +185,8 @@ public class RServerManager {
         m_connection = null;
         
     }
+    
+
     
     public RConnection getConnection() {
         return m_connection;
@@ -189,6 +297,7 @@ public class RServerManager {
     public REXP parseAndEval(String code) throws RServerException {
         
         try {
+            
             REXP result = m_connection.parseAndEval("try(" + code + ",silent=TRUE)");
             if (result.inherits("try-error")) {
                 RServerException e = new RServerException(result.asString());
@@ -225,6 +334,45 @@ public class RServerManager {
         
         public RServerException(String message) {
             super(message);
+        }
+    }
+    
+    private static class InOutThread extends Thread {
+
+        private InputStream m_is;
+        private OutputStream m_os;
+
+        InOutThread(InputStream is) {
+            this(is, null);
+        }
+
+        InOutThread(InputStream is, OutputStream redirect) {
+            m_is = is;
+            m_os = redirect;
+        }
+
+        @Override
+        public void run() {
+            try {
+                PrintWriter pw = null;
+                if (m_os != null) {
+                    pw = new PrintWriter(m_os);
+                }
+
+                InputStreamReader isr = new InputStreamReader(m_is);
+                BufferedReader br = new BufferedReader(isr);
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (pw != null) {
+                        pw.println(line);
+                    }
+                }
+                if (pw != null) {
+                    pw.flush();
+                }
+            } catch (IOException ioe) {
+                //ioe.printStackTrace();
+            }
         }
     }
     

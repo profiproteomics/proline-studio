@@ -29,6 +29,7 @@ public class Installer extends ModuleInstall {
         // initialize the connection to the server as soon as possible
         ServerConnectionManager.getServerConnectionManager();
 
+        
     }
     
     @Override
@@ -49,8 +50,8 @@ public class Installer extends ModuleInstall {
         
         }
         
-        // Close connection to R Server if needed
-        RServerManager.getRServerManager().close();
+        // Close connection to R Server and kill it if needed
+        RServerManager.getRServerManager().stopRProcess();
         
         //Close connection to JMS Server if needed
         JMSConstants.closeConnection();

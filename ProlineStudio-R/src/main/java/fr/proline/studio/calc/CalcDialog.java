@@ -69,6 +69,10 @@ public class CalcDialog extends JDialog {
     
     private static CalcDialog m_calcDialog = null;
 
+    private static final Color ERROR_COLOR = new Color(196,0,0);
+    private static final Color OK_COLOR = new Color(0,196,0);
+    
+    
     public static CalcDialog getCalcDialog(Window parent, JXTable t) {
         if (m_calcDialog == null) {
             m_calcDialog = new CalcDialog(parent);
@@ -106,7 +110,7 @@ public class CalcDialog extends JDialog {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
         m_statusTextField = new JTextField();
-        m_statusTextField.setForeground(Color.red);
+        m_statusTextField.setForeground(ERROR_COLOR);
         m_statusTextField.setEditable(false);
         
         
@@ -341,6 +345,7 @@ public class CalcDialog extends JDialog {
     }
     
     private void fillFunctions() {
+        m_functionsListModel.addElement(new Function("bbinomial", "bbinomial = Stats.bbinomial( (,) , (,) )", "bbinomial = Stats.bbinomial( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
         m_functionsListModel.addElement(new Function("pvalue", "pvalue = Stats.pvalue( (,) , (,) )", "pvalue = Stats.pvalue( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
         m_functionsListModel.addElement(new Function("ttd", "ttd = Stats.ttd( (,) , (,) )", "ttd = Stats.ttd( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
         
@@ -352,17 +357,31 @@ public class CalcDialog extends JDialog {
         m_resultsListModel.clear();
         removeHighlighting();
         
+        final long timeStart = System.currentTimeMillis();
+        
         CalcInterpreterThread interpreterThread = CalcInterpreterThread.getCalcInterpreterThread();
         CalcCallback callback = new CalcCallback() {
 
             @Override
             public void run(ArrayList<ResultVariable> variables, String error, int lineError) {
                 if (variables != null) {
+                    long milliseconds = (System.currentTimeMillis()-timeStart);
+                    int seconds = (int) (milliseconds / 1000) % 60 ;
+                    int minutes = (int) (milliseconds / (1000*60));
+                    milliseconds = (milliseconds % 100);
+                    
+                    
+                    String timeDisplay = String.format("Execution Time: %d:%d.%d",minutes,seconds,milliseconds );
+                    m_statusTextField.setForeground(OK_COLOR);
+                    m_statusTextField.setText(timeDisplay);
+                    
+                    
                     int nb = variables.size();
                     for (int i = 0; i < nb; i++) {
                         m_resultsListModel.addElement(variables.get(i));
                     }
                     m_tabbedPane.setSelectedIndex(2); // Tab with results
+                    
                 } else if (error != null) {
                     if (lineError != -1) {
 
@@ -380,6 +399,7 @@ public class CalcDialog extends JDialog {
 
                     }
 
+                    m_statusTextField.setForeground(ERROR_COLOR);
                     if (lineError != -1) {
                         m_statusTextField.setText("At line " + lineError + ": " + error);
 
@@ -397,6 +417,8 @@ public class CalcDialog extends JDialog {
         interpreterThread.addTask(new CalcInterpreterTask(m_codeArea.getText(), callback));
 
     }
+
+
     
     private int[] getLineOffsets(String text, int lineNumber) throws BadLocationException {
         

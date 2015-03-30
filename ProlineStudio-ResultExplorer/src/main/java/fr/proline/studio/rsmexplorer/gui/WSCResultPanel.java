@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.calc.CalcDialog;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.dpm.data.SpectralCountResultData;
 import fr.proline.studio.export.ExportButton;
@@ -59,6 +60,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;    
     private JButton m_columnVisibilityButton;
+    private JButton m_testButton;
     
     private MarkerContainerPanel m_markerContainerPanel;
     
@@ -260,9 +262,24 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             }
         });
         
+        m_testButton = new JButton(IconManager.getIcon(IconManager.IconType.CALCULATOR));
+        m_testButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CalcDialog dialog = CalcDialog.getCalcDialog(WindowManager.getDefault().getMainWindow(), m_proteinTable);
+                dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                dialog.setVisible(true);
+
+            }
+
+        });
+        
+        
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
         toolbar.add(m_columnVisibilityButton);
+        toolbar.add(m_testButton);
         
         return toolbar;
     }

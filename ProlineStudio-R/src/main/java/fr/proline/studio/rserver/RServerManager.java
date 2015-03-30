@@ -123,7 +123,7 @@ public class RServerManager {
         
         if (m_RProcess != null) {
             try {
-                m_RProcess.destroyForcibly();
+                m_RProcess.destroy(); // does not work with java 7.0 : m_RProcess.destroyForcibly();
             } catch (Exception e) {
                 
             } finally {

@@ -181,7 +181,7 @@ public class RServerConnectionDialog extends ConnectionDialog {
             RServerManager serverR = RServerManager.getRServerManager();
 
             try {
-                serverR.connect(m_serverURL, m_port, m_user, m_password);
+                serverR.connect(m_serverURL, m_port, m_user, m_password, true);
             } catch (RServerManager.RServerException e) {
                 m_taskError = new TaskError(e);
                 //setStatus(true, e.getMessage());

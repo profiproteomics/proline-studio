@@ -59,6 +59,22 @@ public class RServerManager {
         if (m_RProcess != null) {
             return true;
         }
+        
+        // process can have been created outside
+        if (isConnected()) {
+            return true;
+        }
+        
+        // try to connect without starting the process
+        try {
+            connect(false);
+        } catch (Exception e) {
+            
+        }
+        if (isConnected()) {
+            return true;
+        }
+        
          
         // Look for R.exe in ProlineStudio Path or inf path specified in properties file
         File f = new File(".");
@@ -118,6 +134,13 @@ public class RServerManager {
     
     public void stopRProcess() {
         
+        // try to close the process by quitting
+        try {
+            parseAndEval("quit()");
+        } catch (Exception e) {
+            // quit() launches an exception but server is really quitted !
+        }
+        
         // close connection if needed
         close();
         
@@ -133,19 +156,23 @@ public class RServerManager {
     }
     
     public void connect() throws RServerManager.RServerException {
+        connect(true);
+    }
+    public void connect(boolean log) throws RServerManager.RServerException {
         String serverURL = "localhost";
-        int port = 6311;
+        Preferences preferences = NbPreferences.root();
+        int port = preferences.getInt("RServerPort", 6311);
 
         String user = null;
         String password = null;
 
-        connect(serverURL, port, user, password);
+        connect(serverURL, port, user, password, log);
 
     }
     public RConnection connect(String host, int port) throws RServerException {
-        return connect(host, port, null, null);
+        return connect(host, port, null, null, true);
     }
-    public RConnection connect(String host, int port, String user, String password) throws RServerException {
+    public RConnection connect(String host, int port, String user, String password, boolean log) throws RServerException {
         
         if (m_connection != null) {
             return m_connection;
@@ -169,7 +196,9 @@ public class RServerManager {
             return m_connection;
 
         } catch (RserveException e) {
-            LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
+            if (log) {
+                LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", e);
+            }
             m_connection = null;
             throw new RServerException(e.getMessage());
         }

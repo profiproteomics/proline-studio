@@ -14,7 +14,7 @@ public interface ExtractionListener extends EventListener {
      * @param minMz
      * @param MaxMz 
      */
-    public void extractChromatogram(double minMz, double MaxMz);
+    public void extractChromatogramMass(double minMz, double MaxMz);
  
 
 }

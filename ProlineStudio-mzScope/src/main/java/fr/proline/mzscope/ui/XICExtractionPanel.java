@@ -16,7 +16,6 @@ import java.awt.event.ActionListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.event.EventListenerList;
 import org.slf4j.Logger;
@@ -24,17 +23,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The extraction Panel contains the different parameters that could be changed
- * for: the extraction: mass, tolerance 
- * or sum modes
- *
+ * for the extraction: mass, tolerance 
  * @author MB243701
  */
-public class XICExtractionPanel extends JPanel {
+public class XICExtractionPanel extends JPanel{
+    private static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.XICExtractionPanel");
 
-    private static Logger logger = LoggerFactory.getLogger(XICExtractionPanel.class);
-
-
-    private JTabbedPane extractionTabbedPane;
     private JScrollPane scrollPane;
     private JPanel internalPanel;
     private JPanel mainPanel;
@@ -47,7 +41,7 @@ public class XICExtractionPanel extends JPanel {
 
     //events
     private EventListenerList extractionListenerList = new EventListenerList();
-
+    
     public XICExtractionPanel() {
         initComponents();
         toleranceTF.setText(Float.toString(MzScopePreferences.getInstance().getMzPPMTolerance()));
@@ -55,18 +49,9 @@ public class XICExtractionPanel extends JPanel {
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        this.add(getExtractionTabbedPane(), BorderLayout.CENTER);
+        this.add(getScrollPane(), BorderLayout.CENTER);
     }
-
-    private JTabbedPane getExtractionTabbedPane() {
-        if (extractionTabbedPane == null) {
-            extractionTabbedPane = new JTabbedPane();
-            extractionTabbedPane.setName("extractionTabbedPane");
-            extractionTabbedPane.addTab("Extraction", getScrollPane());
-        }
-        return extractionTabbedPane;
-    }
-
+    
     private JScrollPane getScrollPane() {
         if (scrollPane == null) {
             scrollPane = new JScrollPane(getInternalPanel());
@@ -85,7 +70,7 @@ public class XICExtractionPanel extends JPanel {
         }
         return internalPanel;
     }
-
+    
     private JPanel getMainPanel() {
         if (mainPanel == null) {
             mainPanel = new JPanel(new GridBagLayout());
@@ -103,8 +88,6 @@ public class XICExtractionPanel extends JPanel {
         }
         return mainPanel;
     }
-
-
 
     private JPanel getPanelMass() {
         if (panelMassRange == null) {
@@ -157,7 +140,7 @@ public class XICExtractionPanel extends JPanel {
         if (toleranceLabel == null) {
             toleranceLabel = new JLabel();
             toleranceLabel.setName("toleranceLabel");
-            toleranceLabel.setText("Tolerance (ppm):");
+            toleranceLabel.setText("Tol. (ppm):");
         }
         return toleranceLabel;
     }
@@ -177,7 +160,7 @@ public class XICExtractionPanel extends JPanel {
         }
         return toleranceTF;
     }
-
+    
 
     private void massRangeTFActionPerformed(java.awt.event.ActionEvent evt) {
         String text = massRangeTF.getText().trim();
@@ -202,6 +185,7 @@ public class XICExtractionPanel extends JPanel {
     private void toleranceTFActionPerformed(java.awt.event.ActionEvent evt) {
         float ppm = Float.parseFloat(toleranceTF.getText().trim());
         MzScopePreferences.getInstance().setMzPPMTolerance(ppm);
+        massRangeTFActionPerformed(evt);
     }
 
     /**
@@ -221,9 +205,8 @@ public class XICExtractionPanel extends JPanel {
         Object[] listeners = extractionListenerList.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if (listeners[i] == ExtractionListener.class) {
-                ((ExtractionListener) listeners[i + 1]).extractChromatogram(minMz, maxMz);
+                ((ExtractionListener) listeners[i + 1]).extractChromatogramMass(minMz, maxMz);
             }
         }
     }
-    
 }

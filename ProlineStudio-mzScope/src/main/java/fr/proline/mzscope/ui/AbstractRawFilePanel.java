@@ -10,6 +10,7 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.model.Scan;
+import fr.proline.mzscope.ui.event.ExtractionListener;
 import fr.proline.mzscope.util.KeyEventDispatcherDecorator;
 import fr.proline.mzscope.util.MzScopeConstants;
 import fr.proline.studio.export.ExportButton;
@@ -47,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * composed by 2 main components: ChromatogramPanel and SpectrumPanel (if scan is displayed)
  * @author CB205360
  */
-public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlot, KeyEventDispatcher, PlotPanelListener{
+public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlot, KeyEventDispatcher, PlotPanelListener, ExtractionListener{
 
     final private static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.AbstractRawFilePanel");
     final private static DecimalFormat xFormatter = new DecimalFormat("0.0000");
@@ -72,6 +73,10 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     
     protected List<LineMarker> listMsMsMarkers;
     protected JButton displayMS2btn;
+    protected JButton extractBtn;
+    
+    protected XICExtractionPanel extractionPanel;
+    protected JPopupMenu popupMenuExtract;
     
     public AbstractRawFilePanel() {
         super();
@@ -145,7 +150,6 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         }
         return spectrumContainerPanel;
     }
-    
     
     private void initChartPanels(){
         // create ChromatogramPanelPlot
@@ -237,7 +241,23 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
             }
         });
         chromatogramToolbar.add(displayBPIbtn);
+        
+        // extraction 
+        popupMenuExtract = new JPopupMenu();
+        extractionPanel = new XICExtractionPanel();
+        extractionPanel.addExtractionListener(this);
+        popupMenuExtract.add(extractionPanel);
+        extractBtn = new JButton("Extract");
+        extractBtn.setToolTipText("mass range to extract with the specified tolerance");
+        extractBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                popupMenuExtract.show(extractBtn, extractBtn.getWidth()/2, extractBtn.getHeight());
+            }
+        });
+        chromatogramToolbar.add(extractBtn);
 
+        // MS/MS events
         final JPopupMenu popupMenuMs2 = new JPopupMenu();
         JMenuItem showMsMs = new JMenuItem("Show MS/MS Events");
         ActionListener showMsMsEventAction = new ActionListener() {
@@ -452,6 +472,22 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         return plotColor;
     }
 
+    @Override
+    public void extractChromatogramMass(double minMz, double maxMz) {
+        popupMenuExtract.setVisible(false);
+        int extractionMode = getXicModeDisplay();
+        switch (extractionMode) {
+            case MzScopeConstants.MODE_DISPLAY_XIC_REPLACE: {
+                extractChromatogram(minMz, maxMz);
+                break;
+            }
+            case MzScopeConstants.MODE_DISPLAY_XIC_OVERLAY: {
+                addChromatogram(minMz, maxMz);
+                break;
+            }
+        }
+    }
+    
     @Override
     public void extractChromatogram(double minMz, double maxMz) {
         SwingWorker worker = new AbstractXICExtractionWorker(getCurrentRawfile(), minMz, maxMz) {

@@ -10,8 +10,6 @@ import fr.proline.mzscope.ui.dialog.ExtractionParamsDialog;
 import fr.proline.mzscope.ui.event.DisplayFeatureListener;
 import fr.proline.mzscope.ui.event.ExtractFeatureListener;
 import fr.proline.mzscope.ui.event.RawFileListener;
-import fr.proline.mzscope.ui.event.ExtractionListener;
-import fr.proline.mzscope.util.MzScopeConstants;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Frame;
@@ -41,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author MB243701
  */
-public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeatureListener, ExtractionListener {
+public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeatureListener {
 
     private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.MzScopePanel");
 
@@ -53,7 +51,6 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
     private JTabbedPane viewersTabPane = null;
     private JTabbedPane featuresTabPane = null;
     private RawFilesPanel rawFilePanel = null;
-    private XICExtractionPanel extractXICPanel = null;
 
     private IRawFilePlot selectedRawFilePanel;
 
@@ -88,24 +85,12 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
             this.mainSplitPane.setDividerLocation(200);
             this.mainSplitPane.setOneTouchExpandable(true);
 
-            this.mainSplitPane.setLeftComponent(getMainLeftComponent());
+            this.mainSplitPane.setLeftComponent(getRawFilePanel());
             this.mainSplitPane.setRightComponent(getMainRightComponent());
         }
         return this.mainSplitPane;
     }
 
-    private JSplitPane getMainLeftComponent() {
-        if (this.mainLeftSplitPane == null) {
-            this.mainLeftSplitPane = new JSplitPane();
-            this.mainLeftSplitPane.setDividerLocation(230);
-            this.mainLeftSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-
-            this.mainLeftSplitPane.setRightComponent(getExtractXICPanel());
-            this.mainLeftSplitPane.setLeftComponent(getRawFilePanel());
-        }
-
-        return this.mainLeftSplitPane;
-    }
 
     private JSplitPane getMainRightComponent() {
         if (this.mainRightSplitPane == null) {
@@ -153,15 +138,6 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         this.selectedRawFilePanel = (IRawFilePlot) viewersTabPane.getSelectedComponent();
     }
 
-
-    private XICExtractionPanel getExtractXICPanel() {
-        if (this.extractXICPanel == null) {
-            this.extractXICPanel = new XICExtractionPanel();
-            this.extractXICPanel.setName("extractionPanel");
-            this.extractXICPanel.addExtractionListener(this);
-        }
-        return this.extractXICPanel;
-    }
 
     private JFileChooser getFileChooser() {
         if (this.fileChooser == null) {
@@ -632,24 +608,6 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         AbstractRawFilePanel panel = (AbstractRawFilePanel) viewersTabPane.getSelectedComponent();
         if (panel != null) {
             panel.displayFeature(f);
-        }
-    }
-
-    @Override
-    public void extractChromatogram(double minMz, double maxMz) {
-        final AbstractRawFilePanel panel = (AbstractRawFilePanel) viewersTabPane.getSelectedComponent();
-        if (panel != null) {
-            int extractionMode = panel.getXicModeDisplay();
-            switch (extractionMode) {
-                case MzScopeConstants.MODE_DISPLAY_XIC_REPLACE: {
-                    panel.extractChromatogram(minMz, maxMz);
-                    break;
-                }
-                case MzScopeConstants.MODE_DISPLAY_XIC_OVERLAY: {
-                    panel.addChromatogram(minMz, maxMz);
-                    break;
-                }
-            }
         }
     }
 

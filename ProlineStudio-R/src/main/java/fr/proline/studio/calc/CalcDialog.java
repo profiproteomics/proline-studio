@@ -510,7 +510,10 @@ public class CalcDialog extends JDialog {
             int pos = m_codeArea.getCaretPosition();
             int index = m_index+1;
             try {
-                m_codeArea.getDocument().insertString(pos, "Table.col("+index+")", null);
+                String textToAdd = "Table.col("+index+")";
+                m_codeArea.getDocument().insertString(pos, textToAdd, null);
+                m_codeArea.setCaretPosition(pos+textToAdd.length());
+                m_codeArea.getCaret().setVisible(true);
             } catch(BadLocationException e) {
                 
             }
@@ -532,6 +535,8 @@ public class CalcDialog extends JDialog {
             int pos = m_codeArea.getCaretPosition();
             try {
                 m_codeArea.getDocument().insertString(pos, m_insertText, null);
+                m_codeArea.setCaretPosition(pos+m_insertText.length());
+                m_codeArea.getCaret().setVisible(true);
             } catch (BadLocationException e) {
 
             }

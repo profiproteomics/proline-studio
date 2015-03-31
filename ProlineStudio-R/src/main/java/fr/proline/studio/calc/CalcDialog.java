@@ -23,12 +23,20 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -40,11 +48,13 @@ import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import org.jdesktop.swingx.JXTable;
+import org.openide.util.NbPreferences;
 
 
 /**
@@ -54,18 +64,21 @@ import org.jdesktop.swingx.JXTable;
 public class CalcDialog extends JDialog {
     
     private JTextPane m_codeArea = null;
-    DefaultHighlighter m_errorHighlighter = null;
-    Highlighter.HighlightPainter m_errorHighlighterPainter = null;
+    private DefaultHighlighter m_errorHighlighter = null;
+    private Highlighter.HighlightPainter m_errorHighlighterPainter = null;
     private boolean m_isHighlighting = false;
     private JTextField m_statusTextField = null;
     private JButton m_executeButton = null;
     private JButton m_loadButton = null;
     private JButton m_saveButton = null;
     private JButton m_clearButton = null;
-    ColumnTableModel m_columnTableModel = null;
+    private ColumnTableModel m_columnTableModel = null;
     private DefaultListModel m_resultsListModel = null;
     private DefaultListModel m_functionsListModel = null;
     private JTabbedPane m_tabbedPane = null;
+    
+    private JFileChooser m_fileChooser;
+
     
     private static CalcDialog m_calcDialog = null;
 
@@ -235,7 +248,7 @@ public class CalcDialog extends JDialog {
     private JComponent createCodeArea() {
 
         final Dimension d = new Dimension(420, 400);
-        m_codeArea = new JTextPane() {
+        m_codeArea = new JTextPane();/* {
 
             @Override
             public Dimension getMinimumSize() {
@@ -247,7 +260,7 @@ public class CalcDialog extends JDialog {
                 return d;
             }
           
-        };
+        };*/
         m_errorHighlighter = new DefaultHighlighter();
         m_errorHighlighterPainter = new DefaultHighlighter.DefaultHighlightPainter(new Color(255,90,90));
         m_codeArea.setHighlighter(m_errorHighlighter);
@@ -270,6 +283,8 @@ public class CalcDialog extends JDialog {
             
         });
         JScrollPane codeScrollPane = new JScrollPane();
+        codeScrollPane.setMinimumSize(d);
+        codeScrollPane.setPreferredSize(d);
         codeScrollPane.setViewportView(m_codeArea);
 
         
@@ -293,6 +308,74 @@ public class CalcDialog extends JDialog {
         toolbar.add(m_clearButton);
         
         
+        m_saveButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = getPyhtonScriptChooser();
+                int result = chooser.showSaveDialog(m_saveButton);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File file = chooser.getSelectedFile();
+                    try {
+                        
+                        if (file.exists()) {
+                            String message = "The file already exists. Do you want to overwrite it ?";
+                            String title = "Overwrite ?";
+                            String[] options = {"Yes", "No"};
+                            int reply = JOptionPane.showOptionDialog(m_saveButton, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
+                            if (reply != JOptionPane.YES_OPTION) {
+                                return;
+                            }
+                        }
+ 
+                        FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        bw.write(m_codeArea.getText());
+                        bw.close();
+                        fw.close();
+
+                    } catch (Exception ioException) {
+
+                    }
+                }
+            }
+
+        });
+        
+        m_loadButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser chooser = getPyhtonScriptChooser();
+                int result = chooser.showOpenDialog(m_loadButton);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File file = chooser.getSelectedFile();
+                    try {
+                        if (file.exists() && file.canRead()) {
+                            FileReader reader = new FileReader(file);
+                            BufferedReader br = new BufferedReader(reader);
+                            StringBuilder sb = new StringBuilder();
+                            String line;
+                            while ((line = br.readLine()) != null) {
+                                sb.append(line).append('\n');
+                                if (sb.length() > 40000) {
+                                    // security : do not read too much characters if the opened file is not appropriate
+                                    break;
+                                }
+                            }
+                            br.close();
+                            reader.close();
+                            m_codeArea.setText(sb.toString());
+                            m_codeArea.requestFocus();
+                        }
+                    } catch (Exception ioException) {
+
+                    }
+                }
+            }
+
+        });
+        
         m_executeButton.addActionListener(new ActionListener() {
 
             @Override
@@ -315,17 +398,23 @@ public class CalcDialog extends JDialog {
         
         return toolbar;
     }
-    
-    /*private JPanel createCalcButtons() {
-        JPanel calcButtonsPanel = new JPanel(new GridBagLayout());
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
+    private JFileChooser getPyhtonScriptChooser() {
+        if (m_fileChooser == null) {
+            Preferences preferences = NbPreferences.root();
+            String scriptPath = preferences.get("DefaultPythonScriptPath", null);
+            if (scriptPath != null) {
+                m_fileChooser = new JFileChooser(new File(scriptPath));
+            } else {
+                m_fileChooser = new JFileChooser();
+            }
+            m_fileChooser.setMultiSelectionEnabled(false);
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("Python Script File", "py");
+            m_fileChooser.setFileFilter(filter);
+        }
         
-        return calcButtonsPanel;
-    }*/
+        return m_fileChooser;
+    }
     
     private void fillColumns() {
 

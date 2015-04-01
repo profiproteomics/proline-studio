@@ -8,6 +8,7 @@ package fr.proline.mzscope;
 import fr.proline.mzscope.ui.MzScopePanel;
 import java.awt.Frame;
 import java.io.File;
+import java.util.List;
 import javax.swing.JPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,18 +49,30 @@ public class MzScope implements IMzScope{
         mzScopePanel.openRawAndExtract(file, moz, elutionTime, firstScanTime, lastScanTime);
     }
 
-    
-    /**
-     * extract chromatrogram on an existing file at the specified moz
-     * @param file
-     * @param moz 
-     * @param elutionTime 
-     * @param firstScanTime 
-     * @param lastScanTime 
-     */
+
     @Override
-    public void extractRawFile(File file, double moz, double elutionTime, double firstScanTime, double lastScanTime) {
-        logger.debug("extractRawFile for "+file.getName()+" on "+moz);
-        mzScopePanel.extractRawFile(file, moz, elutionTime,  firstScanTime, lastScanTime);
+    public void openRaw(File file) {
+        logger.debug("openRaw for "+file.getName());
+        mzScopePanel.openRaw(file);
     }
+
+
+    @Override
+    public void openRaw(List<File> files) {
+        logger.debug("openRaw for list");
+        mzScopePanel.openRaw(files);
+    }
+
+    @Override
+    public void detectPeakels(File file) {
+        logger.debug("detectPeakel on "+file.getName());
+        mzScopePanel.detectPeakels(file);
+    }
+
+    @Override
+    public void detectPeakels(List<File> fileList) {
+        logger.debug("detectPeakel for list ");
+        mzScopePanel.detectPeakels(fileList);
+    }
+
 }

@@ -9,20 +9,14 @@ import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.ui.dialog.ExtractionParamsDialog;
 import fr.proline.mzscope.ui.event.DisplayFeatureListener;
 import fr.proline.mzscope.ui.event.ExtractFeatureListener;
-import fr.proline.mzscope.ui.event.RawFileListener;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Frame;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.prefs.Preferences;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -39,22 +33,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author MB243701
  */
-public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeatureListener {
+public class MzScopePanel extends JPanel implements  DisplayFeatureListener {
 
     private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.MzScopePanel");
 
     private Frame parentFrame = null;
-    private JSplitPane mainSplitPane = null;
-    private JSplitPane mainLeftSplitPane = null;
     private JSplitPane mainRightSplitPane = null;
-    private JFileChooser fileChooser = null;
     private JTabbedPane viewersTabPane = null;
     private JTabbedPane featuresTabPane = null;
-    private RawFilesPanel rawFilePanel = null;
 
     private IRawFilePlot selectedRawFilePanel;
 
-    private final static String LAST_DIR = "Last directory";
 
     private EventListenerList listenerList = new EventListenerList();
 
@@ -71,25 +60,9 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         mapFeaturePanelRawFile = new HashMap<>();
         mapRawFilePanelRawFile = new HashMap<>();
         setLayout(new BorderLayout());
-        createMainSplitPane();
+        this.add(getMainRightComponent(), BorderLayout.CENTER);
     }
 
-    private void createMainSplitPane() {
-        this.add(getMainSplitPane(), BorderLayout.CENTER);
-    }
-
-    private JSplitPane getMainSplitPane() {
-        if (this.mainSplitPane == null) {
-            this.mainSplitPane = new JSplitPane();
-            this.mainSplitPane.setBorder(null);
-            this.mainSplitPane.setDividerLocation(200);
-            this.mainSplitPane.setOneTouchExpandable(true);
-
-            this.mainSplitPane.setLeftComponent(getRawFilePanel());
-            this.mainSplitPane.setRightComponent(getMainRightComponent());
-        }
-        return this.mainSplitPane;
-    }
 
 
     private JSplitPane getMainRightComponent() {
@@ -105,13 +78,6 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         return this.mainRightSplitPane;
     }
 
-    private RawFilesPanel getRawFilePanel() {
-        if (this.rawFilePanel == null) {
-            this.rawFilePanel = new RawFilesPanel();
-            this.rawFilePanel.addRawFileListener(this);
-        }
-        return this.rawFilePanel;
-    }
 
     private JTabbedPane getFeaturesTabPane() {
         if (this.featuresTabPane == null) {
@@ -138,48 +104,82 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         this.selectedRawFilePanel = (IRawFilePlot) viewersTabPane.getSelectedComponent();
     }
 
-
-    private JFileChooser getFileChooser() {
-        if (this.fileChooser == null) {
-            this.fileChooser = new JFileChooser();
-            this.fileChooser.setDialogTitle("Open Raw file");
-            this.fileChooser.addChoosableFileFilter(new MzdbFilter());
-        }
-        return this.fileChooser;
-    }
-
-    public void openRawMI() {
-        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-        String directory = prefs.get(LAST_DIR, getFileChooser().getCurrentDirectory().getAbsolutePath());
-        fileChooser.setCurrentDirectory(new File(directory));
-        fileChooser.setMultiSelectionEnabled(true);
-        int returnVal = fileChooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File[] files = fileChooser.getSelectedFiles();
-            for (File file : files) {
-                prefs.put(LAST_DIR, file.getParentFile().getAbsolutePath());
-                IRawFile rawfile = RawFileManager.getInstance().addRawFile(file);
-                this.rawFilePanel.addFile(rawfile);
-            }
-        } else {
-            logger.info("File access cancelled by user.");
-        }
+    
+    public Chromatogram getCurrentChromatogram(){
+        return selectedRawFilePanel.getCurrentChromatogram();
     }
 
     public void openRaw(File file) {
-        IRawFile rawfile = RawFileManager.getInstance().addRawFile(file);
-        this.rawFilePanel.addFile(rawfile);
+        IRawFile rawfile = RawFileManager.getInstance().getFile(file.getName());
+        if (rawfile == null){
+            rawfile = RawFileManager.getInstance().addRawFile(file);
+        }
+        boolean fileAlreadyOpen = false;
+        List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
+        if (list != null){
+            for (AbstractRawFilePanel p : list) {
+                if (p instanceof SingleRawFilePanel) {
+                    fileAlreadyOpen = true;
+                    break;
+                }
+            }
+        }
+        if (!fileAlreadyOpen) {
+            displayRawAction(rawfile);
+        }
     }
-
+    
+    public void openRaw(List<File> files) {
+        List<IRawFile> rawfiles = new ArrayList();
+        for (File f : files) {
+            IRawFile rawfile = RawFileManager.getInstance().addRawFile(f);
+            rawfiles.add(rawfile);
+        }
+        displayRawAction(rawfiles);
+    }
+    
+    private boolean isFileAlreadyOpened(File file){
+        IRawFile rawfile = RawFileManager.getInstance().getFile(file.getName());
+        if (rawfile == null){
+            rawfile = RawFileManager.getInstance().addRawFile(file);
+        }
+        boolean fileAlreadyOpen = false;
+        List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
+        if (list != null){
+            for (AbstractRawFilePanel p : list) {
+                if (p instanceof SingleRawFilePanel) {
+                    fileAlreadyOpen = true;
+                    break;
+                }
+            }
+        }
+        return fileAlreadyOpen;
+    }
+    
     public void openRawAndExtract(File file, double moz, double elutionTime, double firstScanTime, double lastScanTime) {
-        IRawFile rawfile = RawFileManager.getInstance().addRawFile(file);
-        this.rawFilePanel.addFile(rawfile);
-        displayRawAction(rawfile);
+        IRawFile rawfile = RawFileManager.getInstance().getFile(file.getName());
+        if (rawfile == null){
+            rawfile = RawFileManager.getInstance().addRawFile(file);
+        }
+        boolean fileAlreadyOpen = false;
+        List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
+        if (list != null){
+            for (AbstractRawFilePanel p : list) {
+                if (p instanceof SingleRawFilePanel) {
+                    fileAlreadyOpen = true;
+                    break;
+                }
+            }
+        }
+        
+        if(!fileAlreadyOpen){
+            displayRawAction(rawfile);
+        }
         float ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
         double minMz = moz;
         double maxMz = minMz + minMz * ppm / 1e6;
         minMz -= minMz * ppm / 1e6;
-        List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
+        list = mapRawFilePanelRawFile.get(rawfile);
         for (AbstractRawFilePanel p : list) {
             if (p instanceof SingleRawFilePanel) {
                 p.extractChromatogramWithFeature(minMz, maxMz, elutionTime, firstScanTime, lastScanTime);
@@ -188,29 +188,6 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         }
     }
 
-    public void extractRawFile(File file, double moz, double elutionTime, double firstScanTime, double lastScanTime) {
-        IRawFile rawfile = RawFileManager.getInstance().getFile(file.getName());
-        if (rawfile != null) {
-            float ppm = MzScopePreferences.getInstance().getMzPPMTolerance();
-            double minMz = moz;
-            double maxMz = minMz + minMz * ppm / 1e6;
-            minMz -= minMz * ppm / 1e6;
-            List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
-            for (AbstractRawFilePanel p : list) {
-                if (p instanceof SingleRawFilePanel) {
-                    p.extractChromatogramWithFeature(minMz, maxMz, elutionTime, firstScanTime, lastScanTime);
-                    break;
-                }
-            }
-        }
-    }
-
-    public void openRaw(List<File> files) {
-        for (File file : files) {
-            IRawFile rawfile = RawFileManager.getInstance().addRawFile(file);
-            this.rawFilePanel.addFile(rawfile);
-        }
-    }
 
     private void addRawTab(String s, Component c) {
         addTab(viewersTabPane, s, c);
@@ -267,7 +244,7 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         tabPane.setTabComponentAt(i, buttonTabComp);
     }
 
-    protected void displayRawAction(IRawFile rawfile) {
+    public void displayRawAction(IRawFile rawfile) {
         if (rawfile == null) {
             return;
         }
@@ -310,7 +287,7 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         }
     }
 
-    protected void displayRawAction(List<IRawFile> rawfiles) {
+    public void displayRawAction(List<IRawFile> rawfiles) {
         String name = "";
         if (rawfiles.size() > 1) {
             String prefix = Strings.commonPrefix(rawfiles.get(0).getName(), rawfiles.get(1).getName());
@@ -361,7 +338,7 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         }
     }
 
-    private void extractFeatures(final IRawFile rawFile, final IRawFile.ExtractionType type, final ExtractionParams params) {
+    public void extractFeatures(final IRawFile rawFile, final IRawFile.ExtractionType type, final ExtractionParams params) {
         if ((selectedRawFilePanel != null) && (viewersTabPane.getSelectedIndex() >= 0)) {
             final String tabName = viewersTabPane.getTitleAt(viewersTabPane.getSelectedIndex());
             //           final IRawFile rawFile = selectedRawFilePanel.getCurrentRawfile();
@@ -401,34 +378,38 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         }
     }
 
-    public void exportChromatogram() {
-        try {
-            DecimalFormat df = new DecimalFormat("#.00");
-            Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-            Chromatogram currentChromatogram = selectedRawFilePanel.getCurrentChromatogram();
-            StringBuilder stb = new StringBuilder();
-            stb.append(prefs.get(LAST_DIR, fileChooser.getCurrentDirectory().getAbsolutePath())).append('/');
-            stb.append("extracted_xic_").append(df.format(currentChromatogram.minMz)).append(".tsv");
-            File file = new File(stb.toString());
-            BufferedWriter output = new BufferedWriter(new FileWriter(file));
-            output.write("index\trt\tintensity\n");
-            for (int k = 0; k < currentChromatogram.time.length; k++) {
-                stb = new StringBuilder();
-                stb.append(k).append("\t").append(currentChromatogram.time[k]).append("\t").append(currentChromatogram.intensities[k]);
-                stb.append("\n");
-                output.write(stb.toString());
-            }
-            logger.info("extracted Chromatogram in " + file.getAbsolutePath());
-            output.close();
-        } catch (Exception e) {
-            logger.error("Enable to write current Chromatogram", e);
-        }
-    }
 
     public void detectPeakelsMI() {
         detectPeakelsMI(selectedRawFilePanel.getCurrentRawfile());
     }
+    
+    public void detectPeakels(File file) {
+        detectPeakelsMI(RawFileManager.getInstance().getFile(file.getName()));
+    }
+    
+    public void detectPeakels(List<File> fileList) {
+        List<IRawFile> listRawFile = new ArrayList();
+        for (File file : fileList) {
+            IRawFile rawFile = RawFileManager.getInstance().getFile(file.getName());
+            listRawFile.add(rawFile);
+        }
+        detectPeakelsMI(listRawFile);
+    }
 
+        
+    public void detectPeakelsMI(List<IRawFile> rawfiles) {
+        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true);
+        dialog.setExtractionParamsTitle("Detect Peakels Parameters");
+        dialog.setLocationRelativeTo(this);
+        dialog.showExtractionParamsDialog();
+        if (dialog.getExtractionParams() != null) {
+            ExtractionParams extractionParams = dialog.getExtractionParams();
+            for (IRawFile rawFile : rawfiles) {
+                extractFeatures(rawFile, IRawFile.ExtractionType.DETECT_PEAKELS, extractionParams);
+            }
+        }
+    }    
+    
     public void detectPeakelsMI(IRawFile rawfile) {
         ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true);
         dialog.setExtractionParamsTitle("Detect Peakels Parameters");
@@ -456,35 +437,22 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         }
     }
 
-    @Override
-    public void displayRaw(IRawFile rawfile) {
-        displayRawAction(rawfile);
-    }
-
-    @Override
-    public void displayRaw(List<IRawFile> rawfiles) {
-        displayRawAction(rawfiles);
-    }
-
-    public void closeAllRaw() {
+    public boolean closeAllRaw() {
         String[] options = {"Yes", "No"};
         int reply = JOptionPane.showOptionDialog(parentFrame, "All files will be closed, do you want to continue?", "Close all files", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
         if (reply == JOptionPane.YES_OPTION) {
             viewersTabPane.removeAll();
             featuresTabPane.removeAll();
-            rawFilePanel.removeAllFiles();
+            //rawFilePanel.removeAllFiles();
             mapFeaturePanelRawFile = new HashMap<>();
             mapRawFilePanelRawFile = new HashMap<>();
+            return true;
         }
-
+        return false;
     }
 
-    @Override
-    public void openRawFile() {
-        openRawMI();
-    }
 
-    @Override
+    
     public void closeRawFile(IRawFile rawfile) {
         //feature panel
         FeaturesPanel featurePanel = mapFeaturePanelRawFile.get(rawfile);
@@ -509,8 +477,6 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
             }
             mapRawFilePanelRawFile.remove(rawfile);
         }
-        //raw FilePanel
-        rawFilePanel.removeFile(rawfile);
     }
 
     private void removeRawFilePanel(IRawFile rawFile, AbstractRawFilePanel panel) {
@@ -536,59 +502,8 @@ public class MzScopePanel extends JPanel implements RawFileListener, DisplayFeat
         return list;
     }
 
-    @Override
-    public void closeAllFiles() {
-        closeAllRaw();
-    }
 
-    @Override
-    public void extractFeatures(IRawFile rawfile) {
-        extractFeaturesMI(rawfile);
-    }
 
-    @Override
-    public void extractFeatures(List<IRawFile> rawfiles) {
-        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true);
-        dialog.setExtractionParamsTitle("Extract Features Parameters");
-        dialog.setLocationRelativeTo(this);
-        dialog.showExtractionParamsDialog();
-        if (dialog.getExtractionParams() != null) {
-            ExtractionParams extractionParams = dialog.getExtractionParams();
-            for (IRawFile rawFile : rawfiles) {
-                extractFeatures(rawFile, IRawFile.ExtractionType.EXTRACT_MS2_FEATURES, extractionParams);
-            }
-
-        }
-    }
-
-    @Override
-    public void detectPeakels(IRawFile rawfile) {
-        detectPeakelsMI(rawfile);
-    }
-
-    @Override
-    public void detectPeakels(List<IRawFile> rawfiles) {
-        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true);
-        dialog.setExtractionParamsTitle("Detect Peakels Parameters");
-        dialog.setLocationRelativeTo(this);
-        dialog.showExtractionParamsDialog();
-        if (dialog.getExtractionParams() != null) {
-            ExtractionParams extractionParams = dialog.getExtractionParams();
-            for (IRawFile rawFile : rawfiles) {
-                extractFeatures(rawFile, IRawFile.ExtractionType.DETECT_PEAKELS, extractionParams);
-            }
-        }
-    }
-
-    @Override
-    public void exportChromatogram(IRawFile rawfile) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void exportChromatogram(List<IRawFile> rawfiles) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
     @Override
     public void displayFeatureInRawFile(Feature f, IRawFile rawFile) {

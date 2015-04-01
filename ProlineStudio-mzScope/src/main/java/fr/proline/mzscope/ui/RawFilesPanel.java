@@ -9,8 +9,6 @@ import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.ui.event.RawFileListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.JComponent;
@@ -20,7 +18,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 import org.slf4j.Logger;
@@ -41,12 +38,12 @@ public class RawFilesPanel extends JPanel {
     private JScrollPane scrollPane;
     private JLabel openedRawFilesLabel;
     private JMenuItem viewRawFileMI;
-    private JMenuItem openRawFileMI;
+   /* private JMenuItem openRawFileMI;
     private JMenuItem closeRawFileMI;
     private JMenuItem closeAllFileMI;
-    private JMenuItem extractFeaturesMI;
+    private JMenuItem extractFeaturesMI;*/
     private JMenuItem detectPeakelsMI;
-    private JMenuItem exportChromatogramMI;
+    //private JMenuItem exportChromatogramMI;
     private EventListenerList listenerList = new EventListenerList();
 
     /**
@@ -68,7 +65,7 @@ public class RawFilesPanel extends JPanel {
         
         initPopupMenu();
         rawFilesList.setComponentPopupMenu(popupMenu);
-        rawFilesList.setLayoutOrientation(javax.swing.JList.HORIZONTAL_WRAP);
+        rawFilesList.setLayoutOrientation(JList.VERTICAL);
         rawFilesList.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -122,20 +119,20 @@ public class RawFilesPanel extends JPanel {
         boolean atLeastOneRawSelected = isRaw && (nbS > 0);
         boolean oneRawSelected = isRaw && (nbS == 1);
         
-        openRawFileMI.setEnabled(true);
+        //openRawFileMI.setEnabled(true);
         viewRawFileMI.setEnabled(atLeastOneRawSelected);
-        closeRawFileMI.setEnabled(oneRawSelected);
-        closeAllFileMI.setEnabled(isRaw);
-        extractFeaturesMI.setEnabled(atLeastOneRawSelected);
+        //closeRawFileMI.setEnabled(oneRawSelected);
+       // closeAllFileMI.setEnabled(isRaw);
+        //extractFeaturesMI.setEnabled(atLeastOneRawSelected);
         detectPeakelsMI.setEnabled(atLeastOneRawSelected);
-        exportChromatogramMI.setEnabled(atLeastOneRawSelected);
+        //exportChromatogramMI.setEnabled(atLeastOneRawSelected);
     }
     
     
     private void initPopupMenu() {
         popupMenu = new JPopupMenu() ;
         // open raw file
-        openRawFileMI = new JMenuItem();
+/*        openRawFileMI = new JMenuItem();
         openRawFileMI.setText("Open Rawfile...");
         openRawFileMI.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
         openRawFileMI.addActionListener(new ActionListener() {
@@ -146,6 +143,7 @@ public class RawFilesPanel extends JPanel {
         });
         popupMenu.add(openRawFileMI);
         popupMenu.addSeparator();
+        */
         // view data
         viewRawFileMI = new JMenuItem();
         viewRawFileMI.setText("View data");
@@ -157,7 +155,7 @@ public class RawFilesPanel extends JPanel {
         });
         popupMenu.add(viewRawFileMI);
         // close raw file
-        closeRawFileMI = new JMenuItem();
+/*        closeRawFileMI = new JMenuItem();
         closeRawFileMI.setText("Close Rawfile");
         closeRawFileMI.addActionListener(new ActionListener() {
             @Override
@@ -166,9 +164,11 @@ public class RawFilesPanel extends JPanel {
             }
         });
         popupMenu.add(closeRawFileMI);
+        */
         popupMenu.addSeparator();
+        
         // close all files
-        closeAllFileMI = new JMenuItem();
+/*        closeAllFileMI = new JMenuItem();
         closeAllFileMI.setText("Close All Rawfile...");
         closeAllFileMI.addActionListener(new ActionListener() {
             @Override
@@ -178,8 +178,9 @@ public class RawFilesPanel extends JPanel {
         });
         popupMenu.add(closeAllFileMI);
         popupMenu.addSeparator();
+        */
         // extract Features
-        extractFeaturesMI = new JMenuItem();
+ /*       extractFeaturesMI = new JMenuItem();
         extractFeaturesMI.setText("Extract Features...");
         extractFeaturesMI.addActionListener(new ActionListener() {
             @Override
@@ -188,6 +189,7 @@ public class RawFilesPanel extends JPanel {
             }
         });
         popupMenu.add(extractFeaturesMI);
+         */
         // detect peakels
         detectPeakelsMI = new JMenuItem();
         detectPeakelsMI.setText("Detect Peakels...");
@@ -199,7 +201,7 @@ public class RawFilesPanel extends JPanel {
         });
         popupMenu.add(detectPeakelsMI);
         // export chromatogram
-        exportChromatogramMI = new JMenuItem();
+ /*       exportChromatogramMI = new JMenuItem();
         exportChromatogramMI.setText("Export Chromatogram");
         exportChromatogramMI.addActionListener(new ActionListener() {
             @Override
@@ -208,6 +210,7 @@ public class RawFilesPanel extends JPanel {
             }
         });
         popupMenu.add(exportChromatogramMI);
+         */
     }
 
     private void rawFilesListMouseClicked(MouseEvent evt) {

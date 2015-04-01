@@ -5,6 +5,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.mzscope.MzdbInfo;
+import fr.proline.studio.rsmexplorer.gui.MzDBFilesPanel;
 import fr.proline.studio.rsmexplorer.gui.StudioMzScopePanel;
 import java.io.File;
 import java.util.ArrayList;
@@ -60,6 +61,7 @@ public class DataBoxMzScope extends AbstractDataBox{
             if (chooser.showOpenDialog(WindowManager.getDefault().getMainWindow()) == JFileChooser.APPROVE_OPTION) { 
                 m_mzdbDir = chooser.getSelectedFile().getAbsolutePath();
                 preferences.put(MZDB_DIRECTORY_KEY, m_mzdbDir);
+                MzDBFilesPanel.getMzdbFilesPanel().updateMzdbDir(m_mzdbDir);
             } else {
                m_mzdbDir = ".";
             }
@@ -129,17 +131,20 @@ public class DataBoxMzScope extends AbstractDataBox{
         
         //registerTask(task)
        List<MzdbInfo> mzdbInfos =  mzScope.getMzdbInfo();
-       List<File> fileList = new ArrayList();
        List<MzdbInfo> infos = new ArrayList();
         for (MzdbInfo mzdbInfo : mzdbInfos) {
             String f = mzdbInfo.getFileName();
-            File file = new File(m_mzdbDir+File.separator+f);
-            if (file.exists()){
-                fileList.add(file);
+            if ( f!= null){
+                File file = new File(m_mzdbDir+File.separator+f);
+                if (file.exists()){
+                    mzdbInfo.setFile(file);
+                    infos.add(mzdbInfo);
+                }
+            }else{
                 infos.add(mzdbInfo);
             }
         }
-        ((StudioMzScopePanel) m_panel).setData((long)-1, fileList, infos, true);
+        ((StudioMzScopePanel) m_panel).setData((long)-1,  infos, true);
         setLoaded(loadingId);
     }
     

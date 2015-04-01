@@ -18,7 +18,6 @@ import fr.proline.studio.mzscope.MzdbInfo;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
@@ -38,10 +37,8 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
     private JPanel m_mzScopePanel;
     
     
-    private List<File> m_mzdbFiles = null;
     
     public StudioMzScopePanel() {
-        m_mzdbFiles = new ArrayList();
         initComponents();
     }
     
@@ -128,17 +125,45 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
     }
     
     
-    public void setData(Long taskId, List<File> mzdbFile, List<MzdbInfo> mzdbList, boolean finished) {
-        int i=0;
-        for (File file : mzdbFile) {
-            MzdbInfo info = mzdbList.get(i);
-            if (!this.m_mzdbFiles.contains(file)){
-                this.m_mzdbFiles.add(file);
-                m_mzScope.openRawAndExtract(file, info.getMoz(), info.getElutionTime(), info.getFirstScan(), info.getLastScan());
-            }else{
-                m_mzScope.extractRawFile(file, info.getMoz(), info.getElutionTime(), info.getFirstScan(), info.getLastScan());  
+    public void setData(Long taskId, List<MzdbInfo> mzdbList, boolean finished) {
+        for (MzdbInfo info : mzdbList) {
+            if (info.isMultiFile()){
+                List<File> files = info.getMzdbFiles();
+                int action = info.getAction();
+                switch(action){
+                    case MzdbInfo.MZSCOPE_VIEW :{
+                        m_mzScope.openRaw(files);
+                        break;
+                    }
+                    case MzdbInfo.MZSCOPE_DETECT_PEAKEL:{
+                        m_mzScope.detectPeakels(files);
+                        break;
+                    }
+                    default:{
+                        break;
+                    }
+                }
+            }else{ // single file
+                File file = info.getMzdbFile();
+                int action = info.getAction();
+                switch(action){
+                    case MzdbInfo.MZSCOPE_VIEW :{
+                        m_mzScope.openRaw(file);
+                        break;
+                    }
+                    case MzdbInfo.MZSCOPE_DETECT_PEAKEL:{
+                        m_mzScope.detectPeakels(file);
+                        break;
+                    }
+                    case MzdbInfo.MZSCOPE_EXTRACT:{
+                        m_mzScope.openRawAndExtract(file, info.getMoz(), info.getElutionTime(), info.getFirstScan(), info.getLastScan());
+                        break;
+                    }
+                    default:{
+                        break;
+                    }
+                }
             }
-            i++;
         }
     }
     

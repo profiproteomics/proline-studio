@@ -726,7 +726,8 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             if (qc != null) {
                 if (qc.getMzdbFileName() != null) {
                     String fn = qc.getMzdbFileName()+".mzdb";
-                    MzdbInfo mzdbInfo = new MzdbInfo(fn, feature.getMoz(), feature.getElutionTime(), feature.getFirstScan().getTime(), feature.getLastScan().getTime());
+                    MzdbInfo mzdbInfo = new MzdbInfo(fn, Double.valueOf(feature.getMoz()), Double.valueOf(feature.getElutionTime()), 
+                            Double.valueOf(feature.getFirstScan().getTime()), Double.valueOf(feature.getLastScan().getTime()));
                     if (!fileNameList.contains(fn)) {
                         mzdbInfos.add(mzdbInfo);
                         fileNameList.add(fn);

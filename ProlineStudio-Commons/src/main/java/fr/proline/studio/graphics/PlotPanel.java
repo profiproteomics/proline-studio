@@ -440,9 +440,11 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        double xValue = m_xAxis.pixelToValue(e.getX());
-        double yValue = m_yAxis.pixelToValue(e.getY());
-        fireMouseClicked(e, xValue, yValue);
+        if(m_xAxis != null && m_yAxis != null){
+            double xValue = m_xAxis.pixelToValue(e.getX());
+            double yValue = m_yAxis.pixelToValue(e.getY());
+            fireMouseClicked(e, xValue, yValue);
+        }
     }
 
     @Override

@@ -108,12 +108,21 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
     }
     
     public void displayScan(Scan scan) {
-        currentScan = scan;
-        if (currentScan != null) {
+        
+       double minValue = 0.0; 
+       double maxValue = 0.0;
+       
+       if (currentScan != null) {
+           minValue = spectrumPlotPanel.getXAxis().getMinValue();
+           maxValue = spectrumPlotPanel.getXAxis().getMaxValue();
+       }
+        
+        
+        if (scan != null) {
             Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile());
-            ScanModel scanModel = new ScanModel(currentScan);
+            ScanModel scanModel = new ScanModel(scan);
             scanModel.setColor(plotColor);
-            if (currentScan.getDataType() == Scan.ScanType.CENTROID) { // mslevel2
+            if (scan.getDataType() == Scan.ScanType.CENTROID) { // mslevel2
                 //stick plot
                 scanPlot = new PlotStick(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
                 ((PlotStick) scanPlot).setStrokeFixed(true);
@@ -125,11 +134,14 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
                 ((PlotLinear) scanPlot).setPlotInformation(scanModel.getPlotInformation());
                 ((PlotLinear) scanPlot).setIsPaintMarker(true);
             }
-
+            
             spectrumPlotPanel.setPlot(scanPlot);
+            if (currentScan != null) {
+               spectrumPlotPanel.getXAxis().setRange(minValue, maxValue);
+            }
             spectrumPlotPanel.repaint();
-
             headerSpectrumPanel.setMzdbFileName(rawFilePanel.getCurrentRawfile().getName());
+            currentScan = scan;
             updateScanIndexList();
             headerSpectrumPanel.setScan(currentScan);
         }

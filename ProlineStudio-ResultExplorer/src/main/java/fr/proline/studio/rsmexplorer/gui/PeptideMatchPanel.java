@@ -32,6 +32,7 @@ import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableCellRenderer;
@@ -93,8 +94,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     }
     
     @Override
-    public CompareDataInterface getCompareDataInterface() {
-        return (CompareDataInterface) m_peptideMatchTable.getModel();
+    public GlobalTableModelInterface getCompareDataInterface() {
+        return (GlobalTableModelInterface) m_peptideMatchTable.getModel();
     }
 
     public void setData(long taskId, DPeptideMatch[] peptideMatches, long[] peptideMatchesId, boolean finished) {

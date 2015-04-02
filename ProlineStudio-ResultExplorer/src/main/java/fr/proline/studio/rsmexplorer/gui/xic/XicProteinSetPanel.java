@@ -34,6 +34,7 @@ import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.ExportTableSelectionInterface;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
@@ -329,8 +330,8 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     }
     
     @Override
-    public CompareDataInterface getCompareDataInterface() {
-        return (CompareDataInterface) m_quantProteinSetTable.getModel();
+    public GlobalTableModelInterface getCompareDataInterface() {
+        return (GlobalTableModelInterface) m_quantProteinSetTable.getModel();
     }
 
     @Override

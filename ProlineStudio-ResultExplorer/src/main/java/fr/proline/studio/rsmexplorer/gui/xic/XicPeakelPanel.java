@@ -24,6 +24,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
@@ -240,8 +241,8 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
     }
     
     @Override
-    public CompareDataInterface getCompareDataInterface() {
-        return (CompareDataInterface) m_peakelTable.getModel();
+    public GlobalTableModelInterface getCompareDataInterface() {
+        return (GlobalTableModelInterface) m_peakelTable.getModel();
     }
 
     @Override

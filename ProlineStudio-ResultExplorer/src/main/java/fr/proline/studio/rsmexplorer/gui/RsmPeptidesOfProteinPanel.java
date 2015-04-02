@@ -27,6 +27,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTable;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -195,8 +196,8 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     }
     
     @Override
-    public CompareDataInterface getCompareDataInterface() {
-        return (CompareDataInterface) m_peptidesTable.getModel();
+    public GlobalTableModelInterface getCompareDataInterface() {
+        return (GlobalTableModelInterface) m_peptidesTable.getModel();
     }
     
     

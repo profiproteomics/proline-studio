@@ -19,6 +19,7 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
@@ -202,8 +203,8 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
     }
 
     @Override
-    public CompareDataInterface getCompareDataInterface() {
-        return (CompareDataInterface) m_peptideTable.getModel();
+    public GlobalTableModelInterface getCompareDataInterface() {
+        return (GlobalTableModelInterface) m_peptideTable.getModel();
     }
 
 

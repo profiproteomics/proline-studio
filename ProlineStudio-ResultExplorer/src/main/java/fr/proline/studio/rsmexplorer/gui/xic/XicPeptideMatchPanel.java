@@ -22,6 +22,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableCellRenderer;
 import fr.proline.studio.table.TablePopupMenu;
@@ -214,8 +215,8 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
     }
 
     @Override
-    public CompareDataInterface getCompareDataInterface() {
-        return (CompareDataInterface) m_psmTable.getModel();
+    public GlobalTableModelInterface getCompareDataInterface() {
+        return (GlobalTableModelInterface) m_psmTable.getModel();
     }
 
     @Override

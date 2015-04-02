@@ -28,6 +28,7 @@ import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.ImportTableSelectionInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
@@ -146,8 +147,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
     
     @Override
-    public CompareDataInterface getCompareDataInterface() {
-        return (CompareDataInterface) m_proteinSetTable.getModel();
+    public GlobalTableModelInterface getCompareDataInterface() {
+        return (GlobalTableModelInterface) m_proteinSetTable.getModel();
     }
     
     @Override

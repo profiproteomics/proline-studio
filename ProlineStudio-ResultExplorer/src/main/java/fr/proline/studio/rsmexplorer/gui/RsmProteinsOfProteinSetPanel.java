@@ -24,6 +24,7 @@ import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.SamesetRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTable;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.BorderLayout;
@@ -260,8 +261,8 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     }
     
     @Override
-    public CompareDataInterface getCompareDataInterface() {
-        return (CompareDataInterface) m_proteinTable.getModel();
+    public GlobalTableModelInterface getCompareDataInterface() {
+        return (GlobalTableModelInterface) m_proteinTable.getModel();
     }
     
     @Override

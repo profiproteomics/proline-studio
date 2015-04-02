@@ -69,7 +69,7 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
         m_dataScrollPane = new JScrollPane();
 
         m_dataTable = new DataTable();
-        m_dataTable.setModel(new CompoundTableModel(new CompareTableModel(null), true));
+        m_dataTable.setModel(new CompoundTableModel(null, true));
         
 
 
@@ -115,8 +115,11 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
     
     
     public void setData(GlobalTableModelInterface dataInterface) {
-        ((CompareTableModel) m_dataTable.getModel()).setDataInterface(dataInterface);
-        m_markerContainerPanel.setMaxLineNumber(dataInterface.getRowCount());
+
+        CompoundTableModel model = new CompoundTableModel(dataInterface, true);
+        m_dataTable.setModel(model);
+
+        m_markerContainerPanel.setMaxLineNumber(model.getRowCount());
     }
  
 
@@ -155,8 +158,8 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
     public void setLoaded(int id) {}
 
     @Override
-    public CompareDataInterface getCompareDataInterface() {
-        return ((CompareTableModel) m_dataTable.getModel()).getDataInterface();
+    public GlobalTableModelInterface getCompareDataInterface() {
+        return ((CompoundTableModel) m_dataTable.getModel()).getBaseModel();
     }
 
     @Override

@@ -1,19 +1,21 @@
 package fr.proline.studio.comparedata;
 
+import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import javax.swing.table.AbstractTableModel;
 
 /**
  *
  * @author JM235353
  */
-public abstract class AbstractJoinDataModel implements CompareDataInterface  {
+public abstract class AbstractJoinDataModel extends AbstractTableModel implements GlobalTableModelInterface  {
     
     
     
-    protected CompareDataInterface m_data1;
-    protected CompareDataInterface m_data2;
+    protected GlobalTableModelInterface m_data1;
+    protected GlobalTableModelInterface m_data2;
     
     protected String m_name;
 
@@ -27,7 +29,7 @@ public abstract class AbstractJoinDataModel implements CompareDataInterface  {
     
     protected abstract void setColumns();
     
-    public void setData(CompareDataInterface data1, CompareDataInterface data2) {
+    public void setData(GlobalTableModelInterface data1, GlobalTableModelInterface data2) {
         m_data1 = data1;
         m_data2 = data2;
 
@@ -151,5 +153,14 @@ public abstract class AbstractJoinDataModel implements CompareDataInterface  {
         return m_name;
     }
     
+    @Override
+    public boolean isLoaded() {
+        return m_data1.isLoaded() && m_data2.isLoaded();
+    }
+
+    @Override
+    public int getLoadingPercentage() {
+        return (m_data1.getLoadingPercentage() + m_data2.getLoadingPercentage())/2;
+    }
 
 }

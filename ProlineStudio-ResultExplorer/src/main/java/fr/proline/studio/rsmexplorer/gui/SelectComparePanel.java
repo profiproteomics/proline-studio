@@ -11,6 +11,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.CompareDataProviderInterface;
 import fr.proline.studio.comparedata.JoinDataModel;
 import fr.proline.studio.graphics.CrossSelectionInterface;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -34,8 +35,8 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface,
     private AbstractDataBox m_dataBox;
 
     private AbstractJoinDataModel m_result = null;
-    private CompareDataInterface m_compareDataInterface1;
-    private CompareDataInterface m_compareDataInterface2;
+    private GlobalTableModelInterface m_compareDataInterface1;
+    private GlobalTableModelInterface m_compareDataInterface2;
     
     private JScrollPane m_dataScrollPane;
     private JComboBox m_algorithmCombobox;
@@ -170,7 +171,7 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface,
         m_dataBox.propagateDataChanged(CompareDataInterface.class);
     }
     
-    public void setData(CompareDataInterface compareDataInterface1, CompareDataInterface compareDataInterface2) {
+    public void setData(GlobalTableModelInterface compareDataInterface1, GlobalTableModelInterface compareDataInterface2) {
         if (compareDataInterface2 == null) {
             m_dataRepresentation1 = new DataRepresentation(compareDataInterface1, true);
             m_dataRepresentation1.setPosition(20, 20);
@@ -190,7 +191,7 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface,
     }
            
     @Override
-    public CompareDataInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getCompareDataInterface() {
         return m_result;
     }
 

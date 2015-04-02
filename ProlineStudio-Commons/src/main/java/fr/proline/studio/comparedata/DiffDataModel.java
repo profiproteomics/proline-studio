@@ -1,8 +1,12 @@
 package fr.proline.studio.comparedata;
 
+import fr.proline.studio.filter.Filter;
 import fr.proline.studio.graphics.PlotInformation;
+import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -159,6 +163,11 @@ public class DiffDataModel extends AbstractJoinDataModel {
         
         
     }
+    
+    @Override
+    public String getColumnName(int column) {
+        return getDataColumnIdentifier(column);
+    }
 
     @Override
     public int getInfoColumn() {
@@ -173,6 +182,78 @@ public class DiffDataModel extends AbstractJoinDataModel {
     @Override
     public PlotInformation getPlotInformation() {
         return null;
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        return getDataValueAt(rowIndex, columnIndex);
+    }
+
+    @Override
+    public Long getTaskId() {
+        return -1l; // not used
+    }
+
+    @Override
+    public LazyData getLazyData(int row, int col) {
+        return null; // not used
+    }
+
+    @Override
+    public void givePriorityTo(Long taskId, int row, int col) {
+        // not used
+    }
+
+    @Override
+    public void sortingChanged(int col) {
+        return; // not used
+    }
+
+    @Override
+    public int getSubTaskId(int col) {
+        return -1; // not used
+    }
+
+    @Override
+    public String getToolTipForHeader(int col) {
+        return getColumnName(col);
+    }
+
+    @Override
+    public String getTootlTipValue(int row, int col) {
+        return null; // not used
+    }
+
+    @Override
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+        return; //JPM.TODO
+    }
+
+
+
+    @Override
+    public PlotType getBestPlotType() {
+         return null; //JPM.TODO
+    }
+
+    @Override
+    public int getBestXAxisColIndex(PlotType plotType) {
+         return -1; //JPM.TODO
+    }
+
+    @Override
+    public int getBestYAxisColIndex(PlotType plotType) {
+        return -1; //JPM.TODO
+    }
+
+    @Override
+    public String getExportRowCell(int row, int col) {
+        return null; //JPM.TODO
+    }
+
+    @Override
+    public String getExportColumnName(int col) {
+        return null; //JPM.TODO
     }
     
 }

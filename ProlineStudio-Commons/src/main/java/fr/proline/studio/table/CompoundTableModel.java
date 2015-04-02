@@ -26,13 +26,15 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
         m_baseModel = baseModel;
         m_lastModel = baseModel;
         
-        ((AbstractTableModel)m_baseModel).addTableModelListener(this);
+        if (m_baseModel != null) {
+            ((GlobalTableModelInterface)m_baseModel).addTableModelListener(this);
+        }
         
     }
 
     public void addModel(ChildModelInterface model) {
         
-        ((AbstractTableModel)m_lastModel).removeTableModelListener(this);
+        ((GlobalTableModelInterface)m_lastModel).removeTableModelListener(this);
         
         if (m_filterModel != null) {
             model.setParentModel(m_filterModel.getTableModelSource());
@@ -42,7 +44,7 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
             m_lastModel = model;
         }
         
-        ((AbstractTableModel)m_lastModel).addTableModelListener(this);
+        ((GlobalTableModelInterface)m_lastModel).addTableModelListener(this);
         ((AbstractTableModel)model).fireTableStructureChanged();
     }
     
@@ -73,11 +75,17 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     
     @Override
     public int getRowCount() {
+        if (m_lastModel == null) {
+            return 0;
+        }
         return m_lastModel.getRowCount();
     }
 
     @Override
     public int getColumnCount() {
+        if (m_lastModel == null) {
+            return 0;
+        }
         return m_lastModel.getColumnCount();
     }
 

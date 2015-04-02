@@ -406,7 +406,7 @@ public class XAxis extends Axis {
 
         g.setColor(CyclicColorPalette.GRAY_GRID);
         Stroke s = g.getStroke();
-        g.setStroke(dashed);
+        g.setStroke(DASHED);
         
         double x = m_minTick;
         int pX = pixelStart;
@@ -437,7 +437,7 @@ public class XAxis extends Axis {
         }
         
         Stroke s = g.getStroke();
-        g.setStroke(dashed);
+        g.setStroke(DASHED);
         
         double x = m_minTick;
         int pX = pixelStart;

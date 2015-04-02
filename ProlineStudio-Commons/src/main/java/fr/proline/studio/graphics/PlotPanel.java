@@ -471,9 +471,9 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
                 m_zoomGesture.startZooming(x, y);
             }
             repaint();
-        } else if (m_xAxis.inside(x, y)) {
+        } else if (!SwingUtilities.isRightMouseButton(e) && m_xAxis.inside(x, y)) {
            m_panAxisGesture.startPanning(x, y, PanAxisGesture.X_AXIS_PAN);
-        } else if (m_yAxis.inside(x, y)) {
+        } else if (!SwingUtilities.isRightMouseButton(e) && m_yAxis.inside(x, y)) {
            m_panAxisGesture.startPanning(x, y, PanAxisGesture.Y_AXIS_PAN);
         }
 
@@ -489,8 +489,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         int x = e.getX();
         int y = e.getY();
         
-        if (e.isPopupTrigger()) {
-           
+        if (e.isPopupTrigger() && !m_panAxisGesture.isPanning() && !m_zoomGesture.isZooming()) {
             if (m_xAxis.inside(x, y)) {
                 m_xAxis.setSelected(true);
                 m_yAxis.setSelected(false);
@@ -504,7 +503,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
                 popup.show((JComponent) e.getSource(), x, y);
                 mustRepaint = true;
             }
-        } else if (m_panAxisGesture.getAction() != PanAxisGesture.ACTION_PAN) {
+        } else if ( !m_zoomGesture.isZooming() && !m_selectionGesture.isSelecting() && (m_panAxisGesture.getAction() != PanAxisGesture.ACTION_PAN)) {
             
             if (m_xAxis.inside(x, y)) {
                 mustRepaint |= m_xAxis.setSelected(!m_xAxis.isSelected());

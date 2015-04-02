@@ -10,10 +10,19 @@ import java.awt.Graphics2D;
 public abstract class AbstractMarker {
     
     protected PlotPanel m_plotPanel;
+    protected boolean m_isVisible;
     
     public AbstractMarker(PlotPanel plotPanel) {
         m_plotPanel = plotPanel;
     }
+
+   public boolean isVisible() {
+      return m_isVisible;
+   }
+
+   public void setVisible(boolean m_isVisible) {
+      this.m_isVisible = m_isVisible;
+   }
     
     public abstract void paint(Graphics2D g);
 }

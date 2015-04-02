@@ -270,7 +270,7 @@ public class YAxis extends Axis {
 
         g.setColor(CyclicColorPalette.GRAY_GRID);
         Stroke s = g.getStroke();
-        g.setStroke(dashed);
+        g.setStroke(DASHED);
         
         double y = m_minTick;
         int pY = pixelStart;
@@ -301,7 +301,7 @@ public class YAxis extends Axis {
         }
         
         Stroke s = g.getStroke();
-        g.setStroke(dashed);
+        g.setStroke(DASHED);
         
         
 

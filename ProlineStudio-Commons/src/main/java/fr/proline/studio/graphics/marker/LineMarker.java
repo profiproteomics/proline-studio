@@ -19,28 +19,37 @@ public class LineMarker extends AbstractMarker {
     private Color m_markerColor;
     
     public LineMarker(PlotPanel plotPanel, double value, int orientation) {
+       this(plotPanel, value, orientation, Color.black, true);
+    }
+    
+    public LineMarker(PlotPanel plotPanel, double value, int orientation, Color markerColor, boolean visible) {
         super(plotPanel);
-        
         m_value = value;
         m_orientation = orientation;
-        m_markerColor = Color.black;
+        m_markerColor = markerColor;
+        setVisible(visible);
     }
     
     // create a lineMarker Vertical with the specified color
     public LineMarker(PlotPanel plotPanel, double value, Color markerColor) {
-        super(plotPanel);
-        m_value = value;
-        m_orientation = ORIENTATION_VERTICAL;
-        m_markerColor = markerColor;
+        this(plotPanel, value, ORIENTATION_VERTICAL, markerColor, true);
     }
+
+   public double getValue() {
+      return m_value;
+   }
+
+   public void setValue(double m_value) {
+      this.m_value = m_value;
+   }
     
     @Override
     public void paint(Graphics2D g) {
 
+        if (!isVisible()) return;
+        
         Stroke prevStroke = g.getStroke();
         g.setStroke(dashed);
-        
-
         
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();
@@ -67,6 +76,6 @@ public class LineMarker extends AbstractMarker {
         g.setStroke(prevStroke);
         
     }
-    private final static float dash1[] = {4.0f};
+    private final static float dash1[] = {2.0f};
     private final static BasicStroke dashed = new BasicStroke(1.0f,  BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash1, 0.0f);
 }

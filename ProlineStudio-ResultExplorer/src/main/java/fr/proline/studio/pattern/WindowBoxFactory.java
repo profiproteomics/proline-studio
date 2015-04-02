@@ -71,7 +71,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxRsetMSDiag(resultMessage);
                 
-        IconManager.IconType iconType = IconManager.IconType.WAVE; // TODO: change icon
+        IconManager.IconType iconType = IconManager.IconType.CHART_PIE; // TODO: change icon
         WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
 
         return winBox;
@@ -242,7 +242,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxMzScope();
 
-        WindowBox winBox = new WindowBox("MzScope", generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.MZSCOPE));
+        WindowBox winBox = new WindowBox("MzScope", generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.WAVE));
 
         return winBox;
     }

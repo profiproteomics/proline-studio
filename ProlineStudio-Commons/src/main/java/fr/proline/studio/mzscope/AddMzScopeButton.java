@@ -24,7 +24,7 @@ public abstract class AddMzScopeButton extends JButton implements ActionListener
     }
 
     private void init() {
-        setIcon(IconManager.getIcon(IconManager.IconType.MZSCOPE));
+        setIcon(IconManager.getIcon(IconManager.IconType.WAVE));
         setToolTipText("Add mzdb file to MzScope...");
 
         addActionListener(this);

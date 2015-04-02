@@ -135,7 +135,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
         
     	
     	// data is encoded in JSON string, subformed of other json strings!!!
-    	ImageIcon icon = IconManager.getIcon(IconManager.IconType.WAVE);
+    	ImageIcon icon = IconManager.getIcon(IconManager.IconType.CHART_PIE);
     	
     	
         final String SERIES_NAME = "MSDiag data";

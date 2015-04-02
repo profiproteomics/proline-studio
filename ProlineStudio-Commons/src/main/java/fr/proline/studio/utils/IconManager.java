@@ -120,7 +120,7 @@ public class IconManager {
         COLOR_PICKER,
         CHART_ARROW,
         CALCULATOR,
-        MZSCOPE,
+        CHART_PIE,
         EXECUTE,
         STOP;
         
@@ -423,8 +423,8 @@ public class IconManager {
                return "fr/proline/studio/images/chart-arrow.png";
            case CALCULATOR:
                return "fr/proline/studio/images/calculator.png";
-           case MZSCOPE:
-               return "fr/proline/studio/images/mzscope.png";
+           case CHART_PIE:
+               return "fr/proline/studio/images/chart-pie.png";
            case EXECUTE:
                return "fr/proline/studio/images/execute.png";
            case STOP:

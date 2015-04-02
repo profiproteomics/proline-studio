@@ -409,7 +409,7 @@ public class CalcDialog extends JDialog {
                 m_fileChooser = new JFileChooser();
             }
             m_fileChooser.setMultiSelectionEnabled(false);
-            FileNameExtensionFilter filter = new FileNameExtensionFilter("Python Script File", "py");
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("Python Script File (*.py)", "py");
             m_fileChooser.setFileFilter(filter);
         }
         

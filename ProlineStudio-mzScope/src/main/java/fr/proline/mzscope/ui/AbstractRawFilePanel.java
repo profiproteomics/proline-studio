@@ -450,6 +450,11 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
 
     @Override
     public Color addChromatogram(Chromatogram chromato) {
+        double xMin = Double.NaN, xMax = Double.NaN;
+        if (chromatogramPlotPanel.hasPlots()) {
+           xMin = chromatogramPlotPanel.getXAxis().getMinValue();
+           xMax = chromatogramPlotPanel.getXAxis().getMaxValue();           
+        }
         Color plotColor = CyclicColorPalette.getColor(chromatogramPlots.size()+1);
         ChromatogramXICModel chromatoModel = new ChromatogramXICModel(chromato);
         chromatoModel.setColor(plotColor);
@@ -458,6 +463,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         chromatogramPlot.setIsPaintMarker(true);
         chromatogramPlot.setStrokeFixed(true);
         chromatogramPlotPanel.addPlot(chromatogramPlot);
+        if (!Double.isNaN(xMax) && !Double.isNaN(xMin)) {
+           chromatogramPlotPanel.getXAxis().setRange(xMin, xMax);
+        }
         /*if (currentScan != null && !chromatogramPlots.isEmpty()){
             chromatogramPlots.get(0).clearMarkers();
             chromatogramPlots.get(0).addMarker(new LineMarker(chromatogramPlotPanel, currentScan.getRetentionTime(), Color.BLUE));
@@ -550,6 +558,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
                 chromatogramPlotPanel.repaintUpdateDoubleBuffer();
                 if (displayScan){
                     spectrumContainerPanel.displayScan(currentScan);
+                    if ((currentChromatogram.minMz != -1) && (currentChromatogram.maxMz != -1) && (currentScan.getMsLevel() == 1)) {
+                       spectrumContainerPanel.addMarkerRange(currentChromatogram.minMz, currentChromatogram.maxMz);
+                    }
                 }
             }
         }

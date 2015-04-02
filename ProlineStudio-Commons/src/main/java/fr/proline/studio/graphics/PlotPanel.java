@@ -326,6 +326,10 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
         this.m_plots = new ArrayList();
     }
     
+    public boolean hasPlots() {
+       return this.m_plots.size() > 0;
+    }
+    
     public void addPlot(PlotAbstract plot) {
         m_plots.add(plot);
 
@@ -395,8 +399,7 @@ public class PlotPanel extends JPanel implements MouseListener, MouseMotionListe
             xAxis.setLog(false);
             xAxis.setSelected(false);
             xAxis.setRange(tab[0] ,tab[1]);
-            
-            
+                      
         }
 
         if (plot.needsYAxis()) {

@@ -15,10 +15,12 @@ import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotPanelListener;
 import fr.proline.studio.graphics.PlotStick;
+import fr.proline.studio.graphics.marker.IntervalMarker;
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,14 +80,14 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
     @Override
     public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
         if (e.getClickCount() == 2) {
-            scanPlot.clearMarkers();
-            double yStdevLabel = scanPlot.getYMax()*0.1;
+           if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0)
+               scanPlot.clearMarkers();
             scanPlot.addMarker(new LineMarker(spectrumPlotPanel, xValue, LineMarker.ORIENTATION_VERTICAL));
-            scanPlot.addMarker(new LabelMarker(spectrumPlotPanel, xValue, yStdevLabel, "Mass "+xValue, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_TOP));
             double domain = xValue;
             float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
             double maxMz = domain + domain * ppmTol / 1e6;
             double minMz = domain - domain * ppmTol / 1e6;
+            scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, minMz, maxMz));
             rawFilePanel.scanMouseClicked(e, minMz, maxMz, xicModeDisplay);
         }
     }
@@ -107,14 +109,19 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
         updateScanIndexList();
     }
     
+    public void addMarkerRange(double minMz, double maxMz) {
+       scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, minMz, maxMz));
+    }
+    
     public void displayScan(Scan scan) {
         
-       double minValue = 0.0; 
-       double maxValue = 0.0;
+       double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0;
        
        if (currentScan != null) {
-           minValue = spectrumPlotPanel.getXAxis().getMinValue();
-           maxValue = spectrumPlotPanel.getXAxis().getMaxValue();
+           xMin = spectrumPlotPanel.getXAxis().getMinValue();
+           xMax = spectrumPlotPanel.getXAxis().getMaxValue();
+           yMin = spectrumPlotPanel.getYAxis().getMinValue();
+           yMax = spectrumPlotPanel.getYAxis().getMaxValue();
        }
         
         
@@ -136,8 +143,9 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
             }
             
             spectrumPlotPanel.setPlot(scanPlot);
-            if (currentScan != null) {
-               spectrumPlotPanel.getXAxis().setRange(minValue, maxValue);
+            if ((currentScan != null) && (currentScan.getMsLevel() == scan.getMsLevel())) {
+               spectrumPlotPanel.getXAxis().setRange(xMin, xMax);
+               spectrumPlotPanel.getYAxis().setRange(yMin, yMax);               
             }
             spectrumPlotPanel.repaint();
             headerSpectrumPanel.setMzdbFileName(rawFilePanel.getCurrentRawfile().getName());

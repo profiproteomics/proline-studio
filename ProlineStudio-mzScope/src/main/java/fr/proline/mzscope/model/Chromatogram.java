@@ -14,8 +14,8 @@ public class Chromatogram {
    
    public IRawFile rawFile;
    public String title;
-   public double minMz;
-   public double maxMz;
+   public double minMz = -1.0;
+   public double maxMz = -1.0;
    public double[] time;
    public double[] intensities;
    

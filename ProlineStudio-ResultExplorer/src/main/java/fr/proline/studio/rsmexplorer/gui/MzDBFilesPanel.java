@@ -116,6 +116,7 @@ public class MzDBFilesPanel extends JPanel implements RawFileListener{
         if (m_mzdbPathField == null){
             m_mzdbPathField = new JTextField(30);
             m_mzdbPathField.setText(m_mzdbDir);
+            m_mzdbPathField.setEditable(false);
         }
         return m_mzdbPathField;
     }

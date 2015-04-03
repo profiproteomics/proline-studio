@@ -340,7 +340,14 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener {
 
     public void extractFeatures(final IRawFile rawFile, final IRawFile.ExtractionType type, final ExtractionParams params) {
         if ((selectedRawFilePanel != null) && (viewersTabPane.getSelectedIndex() >= 0)) {
-            final String tabName = viewersTabPane.getTitleAt(viewersTabPane.getSelectedIndex());
+            FeaturesPanel fp = mapFeaturePanelRawFile.get(rawFile);
+            if (fp == null){
+                fp = new FeaturesPanel(rawFile);
+                fp.addDisplayFeatureListener(this);
+                addFeatureTab(rawFile.getName(), fp);
+                mapFeaturePanelRawFile.put(rawFile, fp);
+            }
+            final FeaturesPanel featurePanel = fp;
             //           final IRawFile rawFile = selectedRawFilePanel.getCurrentRawfile();
 //            extractFeaturesMI.setEnabled(false);
 //            detectPeakelsMI.setEnabled(false);
@@ -357,14 +364,8 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener {
                     try {
                         List<Feature> features = get();
                         logger.info("{} features/peakels extracted in {}", features.size(), (System.currentTimeMillis() - start) / 1000.0);
-
-                        for (int i = 0; i < featuresTabPane.getComponentCount(); i++) {
-                            if (featuresTabPane.getTitleAt(i).equals(tabName)) {
-                                FeaturesPanel featurePanel = (FeaturesPanel) featuresTabPane.getComponentAt(i);
-                                featurePanel.setFeatures(features);
-                                break;
-                            }
-                        }
+                        featurePanel.setFeatures(features);
+                        featuresTabPane.setSelectedComponent(featurePanel);
 //                        extractFeaturesMI.setEnabled(true);
 //                        detectPeakelsMI.setEnabled(true);
                         fireExtractFeature(true, true);

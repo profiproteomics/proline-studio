@@ -80,8 +80,9 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
     @Override
     public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
         if (e.getClickCount() == 2) {
-           if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0)
+           if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0 && xicModeDisplay != MzScopeConstants.MODE_DISPLAY_XIC_OVERLAY){
                scanPlot.clearMarkers();
+           }
             scanPlot.addMarker(new LineMarker(spectrumPlotPanel, xValue, LineMarker.ORIENTATION_VERTICAL));
             double domain = xValue;
             float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();

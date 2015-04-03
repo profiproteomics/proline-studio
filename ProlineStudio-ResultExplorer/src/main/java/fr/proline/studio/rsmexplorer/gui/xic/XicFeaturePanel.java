@@ -72,7 +72,6 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     
    public static final int VIEW_ALL_GRAPH_PEAKS = 0;
    public static final int VIEW_ALL_ISOTOPES_FOR_FEATURE = 1;
-   public static final int VIEW_ALL_PEAKS_FOR_MAP = 2;
    
    private int m_viewType = 0;
     
@@ -198,10 +197,6 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
                         break;
                     }
                     case VIEW_ALL_ISOTOPES_FOR_FEATURE: {
-                        m_viewType = VIEW_ALL_PEAKS_FOR_MAP ;
-                        break;
-                    }
-                    case VIEW_ALL_PEAKS_FOR_MAP: {
                         m_viewType = VIEW_ALL_GRAPH_PEAKS ;
                         break;
                     }
@@ -249,10 +244,6 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             }
             case VIEW_ALL_ISOTOPES_FOR_FEATURE: {
                 tooltipText = "Display peaks for this map";
-                break;
-            }
-            case VIEW_ALL_PEAKS_FOR_MAP: {
-                tooltipText = "Display peaks for all features";
                 break;
             }
         }

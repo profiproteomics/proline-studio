@@ -18,7 +18,6 @@ import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel;
 import static fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel.VIEW_ALL_GRAPH_PEAKS;
 import static fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel.VIEW_ALL_ISOTOPES_FOR_FEATURE;
-import static fr.proline.studio.rsmexplorer.gui.xic.XicFeaturePanel.VIEW_ALL_PEAKS_FOR_MAP;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeakPanel;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -202,41 +201,6 @@ public class DataboxChildFeature extends AbstractDataBox {
                         }
                     }
                     break;
-                }
-                case VIEW_ALL_PEAKS_FOR_MAP: {
-                    Feature selectedFeature = ((XicFeaturePanel) m_panel).getSelectedFeature();
-                    if (selectedFeature != null) {
-                        int id = m_childFeatureList.indexOf(selectedFeature);
-                        if (id != -1) {
-                            for (int i = 0; i < m_childFeatureList.size(); i++) {
-                                Feature feature = m_childFeatureList.get(i);
-                                Color color = m_quantChannelInfo.getMapColor(feature.getMap().getId());
-                                String title = m_quantChannelInfo.getMapTitle(feature.getMap().getId());
-                                if (feature.getMap().getId() == selectedFeature.getMap().getId()) {
-                                    if (m_peakelList != null && m_peakelList.size() > i) {
-                                        List<Peakel> peakels = m_peakelList.get(i);
-                                        if (peakels.size() > 0) {
-                                            // get the first isotope
-                                            int idP = 0;
-                                            for (Peakel peakel : peakels) {
-                                                if (peakel.getIsotopeIndex() == 0) {
-                                                    if (m_peakList.size() > i && !m_peakList.get(i).isEmpty()) {
-                                                        List<Peak> peaks = m_peakList.get(i).get(idP);
-                                                        XicPeakPanel peakPanel = new XicPeakPanel();
-                                                        peakPanel.setData((long) -1, feature, peakel, peakel.getIsotopeIndex(), peaks, color, title, true);
-                                                        list.add(peakPanel);
-                                                    }
-                                                }
-                                                idP++;
-                                            }
-
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                     break;
                 }
             }
 

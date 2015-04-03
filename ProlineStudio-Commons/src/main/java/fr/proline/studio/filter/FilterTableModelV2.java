@@ -365,4 +365,9 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
         filter();
     }
     
+    
+    @Override
+    public String getColumnName(int column) {
+        return m_tableModelSource.getColumnName(column);
+    }
 }

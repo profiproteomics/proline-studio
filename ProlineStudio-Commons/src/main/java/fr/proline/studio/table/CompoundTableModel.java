@@ -292,7 +292,7 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        // nothing to do
+        m_lastModel.addFilters(filtersMap);
     }
 
     @Override

@@ -28,7 +28,7 @@ public class ExportButton extends JButton implements ActionListener {
             
     public ExportButton(ProgressInterface progressInterface, String exportName, JXTable table) {
 
-        m_progressInterface = progressInterface;
+        setProgressInterface(progressInterface);
         
         m_exportName = exportName;
         m_table = table;
@@ -39,6 +39,11 @@ public class ExportButton extends JButton implements ActionListener {
 
         addActionListener(this);
     }
+    
+    public final void setProgressInterface(ProgressInterface progressInterface) {
+        m_progressInterface = progressInterface;
+    }
+    
     
     public ExportButton(String exportName,  ImageExporterInterface exportablePicture) {
 

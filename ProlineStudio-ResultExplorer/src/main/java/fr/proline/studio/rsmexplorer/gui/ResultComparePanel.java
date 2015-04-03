@@ -118,6 +118,8 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
 
         CompoundTableModel model = new CompoundTableModel(dataInterface, true);
         m_dataTable.setModel(model);
+        m_filterButton.setModelFilterInterface(model);
+        m_exportButton.setProgressInterface(model);
 
         m_markerContainerPanel.setMaxLineNumber(model.getRowCount());
     }

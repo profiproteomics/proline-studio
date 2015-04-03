@@ -1,6 +1,9 @@
 package fr.proline.studio.comparedata;
 
+import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
+import fr.proline.studio.filter.IntegerFilter;
+import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.table.LazyData;
@@ -191,7 +194,46 @@ public class JoinDataModel extends AbstractJoinDataModel {
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        return; //JPM.TODO
+        if (!joinPossible()) {
+            return;
+        }
+        
+        LinkedHashMap<Integer, Filter> filtersMap1 = new LinkedHashMap<>();
+        m_data1.addFilters(filtersMap1);
+        
+        LinkedHashMap<Integer, Filter> filtersMap2 = new LinkedHashMap<>();
+        m_data2.addFilters(filtersMap2);
+        
+        
+        int nbColumns = getColumnCount();
+        for (int i=0;i<nbColumns;i++) {
+            if (i==0) {
+                Class c = getDataColumnClass(0);
+                if (c.equals(Double.class)) {
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                } else if (c.equals(Integer.class)) {
+                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null));
+                } else if (c.equals(String.class)) {
+                    filtersMap.put(i, new StringFilter(getColumnName(i), null));
+                }
+            } else {
+                int colIndex = i-1;
+                if (colIndex < m_allColumns1.size()) {
+                    Filter f = filtersMap1.get(m_allColumns1.get(colIndex));
+                    if (f != null) {
+                        filtersMap.put(i, f);
+                    }
+                } else {
+                    colIndex -= m_allColumns1.size();
+                    if (colIndex < m_allColumns2.size()) {
+                        Filter f = filtersMap2.get(m_allColumns2.get(colIndex));
+                        if (f != null) {
+                            filtersMap.put(i, f);
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
@@ -213,12 +255,16 @@ public class JoinDataModel extends AbstractJoinDataModel {
 
     @Override
     public String getExportRowCell(int row, int col) {
-        return null; //JPM.TODO
+        Object o = getValueAt(row, col);
+        if (o == null) {
+            return "";
+        }
+        return o.toString();
     }
 
     @Override
     public String getExportColumnName(int col) {
-        return null; //JPM.TODO
+        return getColumnName(col);
     }
     
     

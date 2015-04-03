@@ -16,11 +16,11 @@ import org.openide.windows.WindowManager;
  */
 public abstract class FilterButtonV2 extends JButton implements ActionListener {
     
-    private final FilterTableModelInterfaceV2 m_tableModelFilterInterface;
+    private FilterTableModelInterfaceV2 m_tableModelFilterInterface;
     
     public FilterButtonV2(FilterTableModelInterfaceV2 tableModelFilterInterface) {
 
-        m_tableModelFilterInterface = tableModelFilterInterface;
+        setModelFilterInterface(tableModelFilterInterface);
         
         setIcon(IconManager.getIcon(IconManager.IconType.FUNNEL ));
         setFocusPainted(false);
@@ -29,6 +29,10 @@ public abstract class FilterButtonV2 extends JButton implements ActionListener {
         addActionListener(this);
     }
 
+    public final void setModelFilterInterface(FilterTableModelInterfaceV2 tableModelFilterInterface) {
+        m_tableModelFilterInterface = tableModelFilterInterface;
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         

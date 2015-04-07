@@ -9,11 +9,10 @@ import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.ui.event.ExtractionListener;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -73,18 +72,10 @@ public class XICExtractionPanel extends JPanel{
     
     private JPanel getMainPanel() {
         if (mainPanel == null) {
-            mainPanel = new JPanel(new GridBagLayout());
+            mainPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
             mainPanel.setName("mainPanel");
-            GridBagConstraints c = new GridBagConstraints();
-            c.anchor = GridBagConstraints.NORTHWEST;
-            c.fill = GridBagConstraints.BOTH;
-            c.insets = new java.awt.Insets(5, 5, 5, 5);
-            c.gridx = 0;
-            c.gridy = 0;
-            c.weightx = 1.0;
-            mainPanel.add(getPanelMass(),c);
-            c.gridy++;
-            mainPanel.add(getPanelTolerance(),c);
+            mainPanel.add(getPanelMass());
+            mainPanel.add(getPanelTolerance());
         }
         return mainPanel;
     }
@@ -140,7 +131,7 @@ public class XICExtractionPanel extends JPanel{
         if (toleranceLabel == null) {
             toleranceLabel = new JLabel();
             toleranceLabel.setName("toleranceLabel");
-            toleranceLabel.setText("Tol. (ppm):");
+            toleranceLabel.setText("Tolerance. (ppm):");
         }
         return toleranceLabel;
     }
@@ -163,18 +154,37 @@ public class XICExtractionPanel extends JPanel{
     
 
     private void massRangeTFActionPerformed(java.awt.event.ActionEvent evt) {
+        if (massRangeTF.getText() == null || massRangeTF.getText().isEmpty()){
+            return;
+        }
         String text = massRangeTF.getText().trim();
         double minMz = Double.NaN;
         double maxMz = Double.NaN;
         String[] masses = text.split("-");
-        minMz = Double.parseDouble(masses[0]);
+        try{
+            minMz = Double.parseDouble(masses[0]);
+        }catch(NumberFormatException e){
+            JOptionPane.showMessageDialog(this, "The mass is incorrect: "+masses[0]);
+            return;
+        }
         if (masses.length == 1) {
-            float ppm = Float.parseFloat(toleranceTF.getText().trim());
-            MzScopePreferences.getInstance().setMzPPMTolerance(ppm);
-            maxMz = minMz + minMz * ppm / 1e6;
-            minMz -= minMz * ppm / 1e6;
+            try{
+                float ppm = Float.parseFloat(toleranceTF.getText().trim());
+                MzScopePreferences.getInstance().setMzPPMTolerance(ppm);
+                maxMz = minMz + minMz * ppm / 1e6;
+                minMz -= minMz * ppm / 1e6;
+            }catch(NumberFormatException e){
+                JOptionPane.showMessageDialog(this, "The tolerance is incorrect: "+toleranceTF.getText().trim());
+                return;
+            }
+            
         } else {
-            maxMz = Double.parseDouble(masses[1]);
+            try{
+                maxMz = Double.parseDouble(masses[1]);
+            }catch(NumberFormatException e){
+                JOptionPane.showMessageDialog(this, "The max mass is incorrect: "+masses[1]);
+                return;
+            }
         }
 //        if (rawFilePlot != null) {
 //            rawFilePlot.extractChromatogram(minMz, maxMz);

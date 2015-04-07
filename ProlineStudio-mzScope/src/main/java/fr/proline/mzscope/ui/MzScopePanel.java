@@ -9,6 +9,8 @@ import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.ui.dialog.ExtractionParamsDialog;
 import fr.proline.mzscope.ui.event.DisplayFeatureListener;
 import fr.proline.mzscope.ui.event.ExtractFeatureListener;
+import fr.proline.mzscope.ui.event.ExtractionListener;
+import fr.proline.mzscope.util.MzScopeConstants;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Frame;
@@ -33,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author MB243701
  */
-public class MzScopePanel extends JPanel implements  DisplayFeatureListener {
+public class MzScopePanel extends JPanel implements  DisplayFeatureListener , ExtractionListener{
 
     private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.mzScope.MzScopePanel");
 
@@ -44,6 +46,7 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener {
 
     private IRawFilePlot selectedRawFilePanel;
 
+    private XICExtractionPanel extractionPanel = null;
 
     private EventListenerList listenerList = new EventListenerList();
 
@@ -60,10 +63,18 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener {
         mapFeaturePanelRawFile = new HashMap<>();
         mapRawFilePanelRawFile = new HashMap<>();
         setLayout(new BorderLayout());
+        this.add(getExtractionPanel(), BorderLayout.NORTH);
         this.add(getMainRightComponent(), BorderLayout.CENTER);
     }
 
 
+    private XICExtractionPanel getExtractionPanel(){
+        if (extractionPanel == null){
+            extractionPanel = new XICExtractionPanel();
+            extractionPanel.addExtractionListener(this);
+        }
+        return extractionPanel;
+    }
 
     private JSplitPane getMainRightComponent() {
         if (this.mainRightSplitPane == null) {
@@ -526,5 +537,24 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener {
             panel.displayFeature(f);
         }
     }
+    
+    @Override
+    public void extractChromatogramMass(double minMz, double maxMz) {
+        AbstractRawFilePanel panel = (AbstractRawFilePanel) viewersTabPane.getSelectedComponent();
+        if (panel != null) {
+            int extractionMode = panel.getXicModeDisplay();
+            switch (extractionMode) {
+                case MzScopeConstants.MODE_DISPLAY_XIC_REPLACE: {
+                    panel.extractChromatogram(minMz, maxMz);
+                    break;
+                }
+                case MzScopeConstants.MODE_DISPLAY_XIC_OVERLAY: {
+                    panel.addChromatogram(minMz, maxMz);
+                    break;
+                }
+            }
+        }
+    }
+    
 
 }

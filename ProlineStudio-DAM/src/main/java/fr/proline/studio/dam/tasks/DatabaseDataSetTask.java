@@ -1162,7 +1162,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
 
         //JPM.TODO : reuse objects for multiple queries
         
-        Project mergedProject = entityManagerUDS.merge(m_project);
+        //Project mergedProject = entityManagerUDS.merge(m_project);
+        Project mergedProject = entityManagerUDS.find(Project.class, m_project.getId());
         
         
         

@@ -709,8 +709,9 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
             WSCProteinTableModel model = (WSCProteinTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel();
             
+            int nbColumnsModel = model.getColumnCount();
             List<TableColumn> columns = m_proteinTable.getColumns(true);
-            for (int i=WSCProteinTableModel.COLTYPE_STATUS;i<columns.size();i++) {
+            for (int i=WSCProteinTableModel.COLTYPE_STATUS;i<nbColumnsModel;i++) {
                 int rsmCur = model.getRsmNumber(i);
                 int type = model.getTypeNumber(i);
                 boolean visible = m_rsmList.isVisible(rsmCur) && m_spectralCountList.isVisible(type);

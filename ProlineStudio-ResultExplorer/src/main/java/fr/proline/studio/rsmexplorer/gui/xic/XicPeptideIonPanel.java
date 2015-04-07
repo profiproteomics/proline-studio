@@ -669,8 +669,9 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
             
             QuantPeptideIonTableModel model = (QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel();
             
+            int nbColumnsModel = model.getColumnCount();
             List<TableColumn> columns = m_quantPeptideIonTable.getColumns(true);
-            for (int i=QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ELUTION_TIME+1;i<columns.size();i++) {
+            for (int i=QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ELUTION_TIME+1;i<nbColumnsModel;i++) {
                 int rsmCur = model.getQCNumber(i);
                 int type = model.getTypeNumber(i);
                 boolean visible = m_rsmList.isVisible(rsmCur) && m_xicList.isVisible(type);

@@ -15,6 +15,7 @@ import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.GroupParameter;
+import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptideIonPanel;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,8 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     private DMasterQuantPeptide m_masterQuantPeptide;
     private List<MasterQuantPeptideIon> m_masterQuantPeptideIonList ;
     private DQuantitationChannel[] quantitationChannelArray = null;
+    
+    private QuantChannelInfo m_quantChannelInfo;
     
     public DataboxXicPeptideIon() { 
         super(DataboxType.DataboxXicPeptideIon);
@@ -72,6 +75,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         if (!allPeptides) {
             m_masterQuantPeptide = (DMasterQuantPeptide) m_previousDataBox.getData(false, DMasterQuantPeptide.class);
             m_dataset = (DDataset) m_previousDataBox.getData(false, DDataset.class);
+            m_quantChannelInfo = (QuantChannelInfo) m_previousDataBox.getData(false, QuantChannelInfo.class);
             if (m_masterQuantPeptide == null || m_masterQuantPeptide.equals(oldPeptide)) {
                 return;
             }
@@ -103,6 +107,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                     }
                     quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
+                    m_quantChannelInfo = new QuantChannelInfo(quantitationChannelArray);
                     ((XicPeptideIonPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, finished);
                     if (qcChanged) {
                         ((XicPeptideIonPanel) m_panel).setColumnsVisibility();
@@ -153,6 +158,9 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
                 return ((CompareDataProviderInterface)m_panel).getCrossSelectionInterface();
+            }
+            if (parameterType.equals(QuantChannelInfo.class)) {
+                return m_quantChannelInfo;
             }
         }
         return super.getData(getArray, parameterType);

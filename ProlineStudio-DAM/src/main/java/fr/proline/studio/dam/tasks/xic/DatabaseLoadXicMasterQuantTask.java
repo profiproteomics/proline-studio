@@ -23,6 +23,7 @@ import fr.proline.core.orm.uds.BiologicalSample;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.MasterQuantitationChannel;
 import fr.proline.core.orm.uds.QuantitationChannel;
+import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
@@ -40,6 +41,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -367,6 +369,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
             // fill the current object with the db object
             dataset.setQuantitationMethod(quantMethodDB);
+            // load labels lazydata
+            Set<QuantitationLabel> labels = quantMethodDB.getLabels();
+            labels.size();
             dataset.setDescription(datasetDB.getDescription());
             List<DMasterQuantitationChannel> masterQuantitationChannels = null;
 

@@ -67,6 +67,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     protected JToolBar chromatogramToolbar;
     protected List<PlotLinear> chromatogramPlots;
     protected Chromatogram currentChromatogram;
+    protected List<Chromatogram> listChromatogram;
     protected Scan currentScan;
     protected Float currentScanTime = null;
     
@@ -94,6 +95,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     
     private void init() {
         listMsMsMarkers = new ArrayList();
+        listChromatogram = new ArrayList();
         initComponents();
         initChartPanels();
         KeyEventDispatcherDecorator.addKeyEventListener(this);
@@ -407,6 +409,8 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     public Color displayChromatogram(Chromatogram chromato) {
         setMsMsEventButtonEnabled(true);
         this.currentChromatogram = chromato;
+        listChromatogram = new ArrayList();
+        listChromatogram.add(currentChromatogram);
        /* XYSeries series = new XYSeries(chromato.rawFile.getName());
         for (int k = 0; k < chromato.intensities.length; k++) {
             series.add(chromato.time[k], chromato.intensities[k]);
@@ -450,6 +454,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
 
     @Override
     public Color addChromatogram(Chromatogram chromato) {
+        listChromatogram.add(chromato);
         double xMin = Double.NaN, xMax = Double.NaN;
         if (chromatogramPlotPanel.hasPlots()) {
            xMin = chromatogramPlotPanel.getXAxis().getMinValue();
@@ -558,9 +563,14 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
                 chromatogramPlotPanel.repaintUpdateDoubleBuffer();
                 if (displayScan){
                     spectrumContainerPanel.displayScan(currentScan);
-                    if ((currentChromatogram.minMz != -1) && (currentChromatogram.maxMz != -1) && (currentScan.getMsLevel() == 1)) {
-                       spectrumContainerPanel.addMarkerRange(currentChromatogram.minMz, currentChromatogram.maxMz);
+                    for (Chromatogram chromato : listChromatogram) {
+                        if ((chromato.minMz != -1) && (chromato.maxMz != -1) && (currentScan.getMsLevel() == 1)) {
+                            spectrumContainerPanel.addMarkerRange(chromato.minMz, chromato.maxMz);
+                        }
                     }
+                    /*if ((currentChromatogram.minMz != -1) && (currentChromatogram.maxMz != -1) && (currentScan.getMsLevel() == 1)) {
+                       spectrumContainerPanel.addMarkerRange(currentChromatogram.minMz, currentChromatogram.maxMz);
+                    }*/
                 }
             }
         }

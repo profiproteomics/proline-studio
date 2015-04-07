@@ -143,28 +143,13 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
     public void openRaw(List<File> files) {
         List<IRawFile> rawfiles = new ArrayList();
         for (File f : files) {
-            IRawFile rawfile = RawFileManager.getInstance().addRawFile(f);
+            IRawFile rawfile = RawFileManager.getInstance().getFile(f.getName());
+            if (rawfile == null){
+                rawfile = RawFileManager.getInstance().addRawFile(f);
+            }
             rawfiles.add(rawfile);
         }
         displayRawAction(rawfiles);
-    }
-    
-    private boolean isFileAlreadyOpened(File file){
-        IRawFile rawfile = RawFileManager.getInstance().getFile(file.getName());
-        if (rawfile == null){
-            rawfile = RawFileManager.getInstance().addRawFile(file);
-        }
-        boolean fileAlreadyOpen = false;
-        List<AbstractRawFilePanel> list = mapRawFilePanelRawFile.get(rawfile);
-        if (list != null){
-            for (AbstractRawFilePanel p : list) {
-                if (p instanceof SingleRawFilePanel) {
-                    fileAlreadyOpen = true;
-                    break;
-                }
-            }
-        }
-        return fileAlreadyOpen;
     }
     
     public void openRawAndExtract(File file, double moz, double elutionTime, double firstScanTime, double lastScanTime) {

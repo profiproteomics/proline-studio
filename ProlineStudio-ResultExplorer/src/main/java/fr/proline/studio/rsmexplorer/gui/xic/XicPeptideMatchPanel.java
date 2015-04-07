@@ -181,7 +181,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
     }
 
     public void setData(Long taskId, DQuantitationChannel[] quantChannelArray, QuantChannelInfo quantChannelInfo, List<DPeptideMatch> peptideMatchList, Map<Long, List<Long>> peptideMatchIdListPerQC, boolean finished) {
-        ((XicPeptideMatchTableModel) m_psmTable.getModel()).setData(taskId, quantChannelArray, quantChannelInfo, peptideMatchList, peptideMatchIdListPerQC);
+        ((XicPeptideMatchTableModel) (((CompoundTableModel) m_psmTable.getModel()).getBaseModel())).setData(taskId, quantChannelArray, quantChannelInfo, peptideMatchList, peptideMatchIdListPerQC);
         int nb = 0;
         if (peptideMatchList != null) {
             nb = peptideMatchList.size();
@@ -253,7 +253,6 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
         }
 
         public void setTableRenderer() {
-            XicPeptideMatchTableModel tableModel = (XicPeptideMatchTableModel) getModel();
             getColumnModel().getColumn(convertColumnIndexToView(XicPeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ)).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 4)));
             getColumnModel().getColumn(convertColumnIndexToView(XicPeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS)).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 4)));
             setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());

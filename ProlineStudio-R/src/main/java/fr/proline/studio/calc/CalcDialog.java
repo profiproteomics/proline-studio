@@ -603,6 +603,7 @@ public class CalcDialog extends JDialog {
                 m_codeArea.getDocument().insertString(pos, textToAdd, null);
                 m_codeArea.setCaretPosition(pos+textToAdd.length());
                 m_codeArea.getCaret().setVisible(true);
+                m_codeArea.requestFocusInWindow();
             } catch(BadLocationException e) {
                 
             }
@@ -626,6 +627,7 @@ public class CalcDialog extends JDialog {
                 m_codeArea.getDocument().insertString(pos, m_insertText, null);
                 m_codeArea.setCaretPosition(pos+m_insertText.length());
                 m_codeArea.getCaret().setVisible(true);
+                m_codeArea.requestFocusInWindow();
             } catch (BadLocationException e) {
 
             }

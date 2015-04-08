@@ -379,7 +379,9 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
 
 
     public void detectPeakelsMI() {
-        detectPeakelsMI(selectedRawFilePanel.getCurrentRawfile());
+        if (selectedRawFilePanel != null){
+            detectPeakelsMI(selectedRawFilePanel.getCurrentRawfile());
+        }
     }
     
     public void detectPeakels(File file) {

@@ -321,7 +321,9 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
     }
 
     public void extractFeaturesMI() {
-        extractFeaturesMI(selectedRawFilePanel.getCurrentRawfile());
+        if (selectedRawFilePanel != null){
+            extractFeaturesMI(selectedRawFilePanel.getCurrentRawfile());
+        }
     }
 
     public void extractFeaturesMI(IRawFile rawFile) {

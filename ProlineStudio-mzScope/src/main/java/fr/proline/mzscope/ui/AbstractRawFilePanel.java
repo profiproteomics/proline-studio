@@ -33,9 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
-import javax.swing.JMenuItem;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
@@ -73,7 +72,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     
     protected List<LineMarker> listMsMsMarkers;
     protected LineMarker currentScanMarker; 
-    protected JButton displayMS2btn;
+    protected JCheckBox displayMS2btn;
     
     
     public AbstractRawFilePanel() {
@@ -243,31 +242,12 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         chromatogramToolbar.add(displayBPIbtn);
         
         // MS/MS events
-        final JPopupMenu popupMenuMs2 = new JPopupMenu();
-        JMenuItem showMsMs = new JMenuItem("Show MS/MS Events");
-        ActionListener showMsMsEventAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                showMSMSEvents();
-            }
-        };
-        showMsMs.addActionListener(showMsMsEventAction);
-        popupMenuMs2.add(showMsMs);
-        JMenuItem hideMsMs = new JMenuItem("Hide All MS/MS Events");
-        ActionListener hideMsMsEventAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                hideMSMSEvents();
-            }
-        };
-        hideMsMs.addActionListener(hideMsMsEventAction);
-        popupMenuMs2.add(hideMsMs);
-        displayMS2btn = new JButton("MS/MS");
+        displayMS2btn = new JCheckBox("MS/MS", false);
         displayMS2btn.setToolTipText("Show/Hide MS/MS Events");
         displayMS2btn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                popupMenuMs2.show(displayMS2btn, 0, displayMS2btn.getHeight());
+                displayMsMsEvents(displayMS2btn.isSelected());
             }
         });
         chromatogramToolbar.add(displayMS2btn);
@@ -331,6 +311,14 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
             spectrumContainerPanel.getXicModeDisplay();
         }
         return MzScopeConstants.MODE_DISPLAY_XIC_REPLACE;
+    }
+    
+    private void displayMsMsEvents(boolean showMsMsEvents){
+        if (showMsMsEvents){
+            showMSMSEvents();
+        }else{
+            hideMSMSEvents();
+        }
     }
     
     public void showMSMSEvents() {
@@ -430,6 +418,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
        // xyplot.getRangeAxis().setUpperMargin(0.3);
         //XYItemRenderer renderer = xyplot.getRenderer();
         //renderer.setSeriesPaint(0, plotColor);
+        displayMsMsEvents(displayMS2btn.isSelected());
         return plotColor;
     }
 

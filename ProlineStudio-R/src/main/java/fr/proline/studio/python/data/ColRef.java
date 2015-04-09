@@ -2,6 +2,7 @@ package fr.proline.studio.python.data;
 
 import fr.proline.studio.python.util.Conversion;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
 import org.python.core.Py;
@@ -14,11 +15,11 @@ import org.python.core.PyObject;
 public class ColRef extends Col {
     
     private final int m_modelCol;
-    private final CompoundTableModel m_tableModel;
+    private final GlobalTableModelInterface m_tableModel;
     
     public ColRef(int col, CompoundTableModel model) {
         m_modelCol = col;
-        m_tableModel = model;
+        m_tableModel = model.getLastNonFilterModel();
     }
     
     @Override

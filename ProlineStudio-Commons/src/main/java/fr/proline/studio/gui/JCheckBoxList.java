@@ -5,28 +5,37 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 
 /**
+ * JList for which each item is a checkBox.
+ * Associated ListModel can't be modified, element of the List should be encapsulated. 
+ * Use this class addItem or getElementAt... 
+ * 
  *
  * @author JM235353
  */
 public class JCheckBoxList<E> extends JList {
 
+    DefaultListModel<CheckListItem<E>> model;
+        
     public JCheckBoxList(List<? extends E> list, List<Boolean> visibilityList) {
         
         int size = list.size();
         CheckListItem<E>[] items = new CheckListItem[size];
         
+        model = new DefaultListModel<>();        
         for (int i=0;i<list.size();i++) {
             items[i] = new CheckListItem<>(list.get(i), visibilityList.get(i));
+            model.addElement(items[i]);
         }
-        setListData(items);
-
-
+        super.setModel(model);
+        
         setCellRenderer(new CheckBoxListRenderer());
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         //setVisibleRowCount(visibleRows);
@@ -39,6 +48,11 @@ public class JCheckBoxList<E> extends JList {
         });
     }
 
+    @Override
+    public void setModel(ListModel model) {
+        throw new UnsupportedOperationException("Can't change model");
+    }    
+
     public int getListSize() {
         return getModel().getSize();
     }
@@ -47,6 +61,15 @@ public class JCheckBoxList<E> extends JList {
         return ((CheckListItem) getModel().getElementAt(i)).isSelected();
     }
     
+    public void addItem(int index, E item, Boolean isVisible){
+        CheckListItem<E> cItem = new CheckListItem<>(item, isVisible);
+        model.add(index, cItem);
+    }
+    
+    public E getElementAt(int index){
+        CheckListItem<E> item = (CheckListItem<E>) getModel().getElementAt(index);
+        return item.getItem();
+    }
     
     private void selectItem(Point point) {
         int index = locationToIndex(point);
@@ -68,8 +91,7 @@ public class JCheckBoxList<E> extends JList {
             m_selected = selected;
         }
 
-        @SuppressWarnings("unused")
-        public Object getItem() {
+        public E getItem() {
             return m_item;
         }
 

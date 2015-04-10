@@ -116,7 +116,7 @@ public class ExportRSMTask extends AbstractJMSTask {
             // FOR STREAM ONLY !
             final Object result = jsonResponse.getResult();
             if ((result == null) || (! HashMap.class.isInstance(result)))  {
-                m_loggerProline.error(getClass().getSimpleName() + " failed : No valid file path / inforamtion returned :"+result);
+                m_loggerProline.error(getClass().getSimpleName() + " failed : No valid file path / information returned :"+result);
                 throw new Exception("No  file path returned : "+result);
             }
             

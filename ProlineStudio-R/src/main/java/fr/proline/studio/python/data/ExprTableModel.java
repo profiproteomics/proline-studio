@@ -170,8 +170,14 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        m_parentModel.addFilters(filtersMap);
-        filtersMap.put(m_parentModel.getColumnCount(), new DoubleFilter(m_column.getColumnName(),null));
+        if (filtersMap.isEmpty()) {
+            m_parentModel.addFilters(filtersMap);
+        }
+        
+        Integer key = m_parentModel.getColumnCount();
+        if (!filtersMap.containsKey(key)) {
+            filtersMap.put(m_parentModel.getColumnCount(), new DoubleFilter(m_column.getColumnName(),null));
+        }
     }
 
     @Override

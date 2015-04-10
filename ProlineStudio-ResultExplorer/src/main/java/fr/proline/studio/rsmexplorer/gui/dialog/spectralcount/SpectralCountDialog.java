@@ -5,7 +5,6 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Dialog;
-import java.awt.Dimension;
 import java.awt.Window;
 import java.util.ArrayList;
 import javax.swing.JScrollPane;

@@ -602,8 +602,8 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 ImportSearchResultAsRsetAction importAction = new ImportSearchResultAsRsetAction();
                 m_allImportedActions.add(importAction);
                 
-                ImportSearchResultAsRsetJMSAction importJmsAction = new ImportSearchResultAsRsetJMSAction();
-                m_allImportedActions.add(importJmsAction);
+//                ImportSearchResultAsRsetJMSAction importJmsAction = new ImportSearchResultAsRsetJMSAction();
+//                m_allImportedActions.add(importJmsAction);
 
                 m_allImportedPopup = new JPopupMenu();
                 
@@ -627,7 +627,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             if (m_mainPopup == null) {
 
                 // create the actions
-                m_mainActions = new ArrayList<>(21);  // <--- get in sync
+                m_mainActions = new ArrayList<>(22);  // <--- get in sync
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction();
                 m_mainActions.add(displayRsetAction);
@@ -648,20 +648,20 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 MergeAction mergeAction = new MergeAction();
                 m_mainActions.add(mergeAction);
                 
-                MergeJMSAction mergeJmsAction = new MergeJMSAction();
-                m_mainActions.add(mergeJmsAction);
+//                MergeJMSAction mergeJmsAction = new MergeJMSAction();
+//                m_mainActions.add(mergeJmsAction);
 
                 ValidateAction validateAction = new ValidateAction();
                 m_mainActions.add(validateAction);
                 
-                ValidateJMSAction validateJMSAction = new ValidateJMSAction();
-                m_mainActions.add(validateJMSAction);
+//                ValidateJMSAction validateJMSAction = new ValidateJMSAction();
+//                m_mainActions.add(validateJMSAction);
                 
                 ChangeTypicalProteinAction changeTypicalProteinAction = new ChangeTypicalProteinAction();
                 m_mainActions.add(changeTypicalProteinAction);
                 
-                ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction();
-                m_mainActions.add(changeTypicalProteinJmsAction);
+//                ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction();
+//                m_mainActions.add(changeTypicalProteinJmsAction);
                 
                 GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
                 m_mainActions.add(generateSpectrumMatchesAction);
@@ -677,9 +677,12 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 ExportRSMAction exportRSMAction = new ExportRSMAction();
                 m_mainActions.add(exportRSMAction);                        
                 
-                ExportRSMJMSAction exportJmsRSMAction = new ExportRSMJMSAction();
-                m_mainActions.add(exportJmsRSMAction);                        
+//                ExportRSMJMSAction exportJmsRSMAction = new ExportRSMJMSAction();
+//                m_mainActions.add(exportJmsRSMAction);                        
 
+//                ExportRSM2PrideAction exportRSM2PrideAction = new ExportRSM2PrideAction();
+//                m_mainActions.add(exportRSM2PrideAction);   
+                
                 GenerateMSDiagReportAction msDiagReportAction = new GenerateMSDiagReportAction();
                 m_mainActions.add(msDiagReportAction);                        
                 

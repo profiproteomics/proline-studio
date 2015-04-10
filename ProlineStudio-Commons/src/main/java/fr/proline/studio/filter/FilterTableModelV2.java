@@ -157,8 +157,6 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     public void initFilters() {
         if (m_filters == null) {
             m_filters = new LinkedHashMap<>();
-        } else {
-            m_filters.clear();
         }
         m_tableModelSource.addFilters(m_filters);
     }

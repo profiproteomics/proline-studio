@@ -144,6 +144,7 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>fr.proline.studio.dpm.*</publicPackage>
+                        <publicPackage>javax.jms.*</publicPackage>                        
                     </publicPackages>
                 </configuration>
             </plugin>

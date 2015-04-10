@@ -17,6 +17,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    
+    <repositories>
+        <repository>
+            <id>ebi-repo</id>
+            <name>The EBI Maven2 repository</name>
+            <url>http://www.ebi.ac.uk/~maven/m2repo</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <!-- NetBeans dependencies -->
@@ -301,6 +309,17 @@
             <version>2.0.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>no.uib</groupId>
+            <artifactId>ols-dialog</artifactId>
+            <version>3.4.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jfree</groupId>
+                    <artifactId>jfreechart</artifactId>
+                </exclusion>            
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>

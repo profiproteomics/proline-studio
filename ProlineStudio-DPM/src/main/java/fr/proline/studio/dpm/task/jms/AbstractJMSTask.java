@@ -101,10 +101,17 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     }
     
     /**
-     * Called when the task must be started.
+     * Called when the task must be started. The implementation should call
+     * setTaskInfoRequest to register request informations
+     * 
      * @throws JMSException 
      */
     public abstract void taskRun() throws JMSException;
+    
+    public void setTaskInfoRequest(String content) throws JMSException{
+        m_taskInfo.setRequestURL(m_producer.getDestination().toString());
+        m_taskInfo.setRequestContent(content);
+    }
     
     /**
      * Called when the task is done

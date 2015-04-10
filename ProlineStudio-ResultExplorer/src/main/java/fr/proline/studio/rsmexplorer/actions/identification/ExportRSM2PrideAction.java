@@ -1,37 +1,40 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.DownloadFileTask;
-import fr.proline.studio.dpm.task.jms.ExportRSMTask;
-import fr.proline.studio.export.ExportDialog;
+import fr.proline.studio.dpm.task.jms.ExportRSM2PrideTask;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import fr.proline.studio.rsmexplorer.gui.dialog.pride.ExportPrideDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Export a Identification Summary Action
- * 
+ *
  * @author VD225637
  */
-public class ExportRSMJMSAction extends AbstractRSMAction {
-     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-     
-    public ExportRSMJMSAction(){
-        super("Export...(JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);    
+public class ExportRSM2PrideAction extends AbstractRSMAction {
+   
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+ 
+    public ExportRSM2PrideAction(){
+        super("Export to Pride... ", AbstractTree.TreeType.TREE_IDENTIFICATION);    
     }
     
-    @Override
+     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
+        final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];        
 
-        final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
-        
-
-        final ExportDialog dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), true);
+        final ExportPrideDialog  dialog = new ExportPrideDialog(WindowManager.getDefault().getMainWindow());
         
         DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
 
@@ -86,8 +89,8 @@ public class ExportRSMJMSAction extends AbstractRSMAction {
                         if (success) {
 
                             String fileName = dialog.getFileName();
-                            if (!fileName.endsWith(".xlsx")) {
-                                fileName += ".xlsx";
+                            if (!fileName.endsWith(".xml") && !fileName.endsWith(".XML")) {
+                                fileName += ".xml";
                             }
                             DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath[0], _JMSNodeId[0]);
                             AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
@@ -100,8 +103,7 @@ public class ExportRSMJMSAction extends AbstractRSMAction {
                     }
                 };
 
-                Boolean isExportAllPSMs = dialog.exportAllPSMs();
-                ExportRSMTask task = new ExportRSMTask(exportCallback, dataSetNode.getDataset(),isExportAllPSMs, _filePath, _JMSNodeId);
+                ExportRSM2PrideTask task = new ExportRSM2PrideTask(exportCallback, dataSetNode.getDataset(), dialog.getExportParams(), _filePath, _JMSNodeId);
                 AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
                 return null;
@@ -113,12 +115,10 @@ public class ExportRSMJMSAction extends AbstractRSMAction {
         dialog.setLocation(x, y);
         dialog.setVisible(true);
 
-
     }
-     
+    
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
-
         int nbSelectedNodes = selectedNodes.length;
 
         // Only one at the time
@@ -144,4 +144,6 @@ public class ExportRSMJMSAction extends AbstractRSMAction {
         setEnabled(true);
     }
     
+    
+   
 }

@@ -2,21 +2,14 @@ package fr.proline.studio.dpm.task.jms;
 
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
-import fr.proline.studio.dpm.task.*;
-import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConstants;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.util.Date;
 import java.util.HashMap;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;

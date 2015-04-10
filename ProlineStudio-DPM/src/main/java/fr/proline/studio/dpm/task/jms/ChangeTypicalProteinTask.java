@@ -46,6 +46,10 @@ public class ChangeTypicalProteinTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConstants.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ChangeTypicalProteinMatch");
 	
+        setTaskInfoRequest(message.getText());
+//        m_taskInfo.setRequestURL(m_producer.getDestination().toString());
+//        m_taskInfo.setRequestContent(message.getText());
+        
         //  Send the Message
         m_producer.send(message);
         m_loggerProline.info("Message [{}] sent", message.getJMSMessageID());

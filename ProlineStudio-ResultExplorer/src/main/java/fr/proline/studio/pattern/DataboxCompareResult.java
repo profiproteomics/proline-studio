@@ -1,7 +1,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.rsmexplorer.gui.ResultComparePanel;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -12,6 +12,8 @@ import fr.proline.studio.table.GlobalTableModelInterface;
  */
 public class DataboxCompareResult extends AbstractDataBox {
 
+    private GlobalTableModelInterface m_entryModel = null;
+    
     public DataboxCompareResult() {
         super(DataboxType.DataboxCompareResult);
         
@@ -47,10 +49,21 @@ public class DataboxCompareResult extends AbstractDataBox {
         p.setDataBox(this);
         m_panel = p;
     }
+    
+    @Override
+    public void setEntryData(Object data) {
+        if (data instanceof GlobalTableModelInterface) {
+            m_entryModel = (GlobalTableModelInterface) data;
+        }
+         dataChanged();
+    }
 
     @Override
     public void dataChanged() {
-        GlobalTableModelInterface dataInterface = (GlobalTableModelInterface) m_previousDataBox.getData(false, GlobalTableModelInterface.class);
+        GlobalTableModelInterface dataInterface = m_entryModel;
+        if (dataInterface == null) {
+            dataInterface = (GlobalTableModelInterface) m_previousDataBox.getData(false, GlobalTableModelInterface.class);
+        }
 
         ((ResultComparePanel) m_panel).setData(dataInterface);
 
@@ -60,10 +73,10 @@ public class DataboxCompareResult extends AbstractDataBox {
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((CompareDataProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);

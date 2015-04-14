@@ -4,7 +4,7 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.rsmexplorer.gui.RsetProteinsPanel;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
@@ -117,10 +117,10 @@ public class DataBoxRsetAllProteinMatch extends AbstractDataBox {
                 }
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return  ((CompareDataProviderInterface)m_panel).getCrossSelectionInterface();
+                return  ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);

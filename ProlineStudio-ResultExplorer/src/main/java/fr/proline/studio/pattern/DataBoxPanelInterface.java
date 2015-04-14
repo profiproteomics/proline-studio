@@ -2,6 +2,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.table.GlobalTableModelInterface;
 
 /**
  * All panels which are linked to a databox must implement this interface
@@ -16,4 +17,5 @@ public interface DataBoxPanelInterface extends SplittedPanelContainer.UserAction
     public void setLoading(int id, boolean calculating);
     
     public void setLoaded(int id);
+
 }

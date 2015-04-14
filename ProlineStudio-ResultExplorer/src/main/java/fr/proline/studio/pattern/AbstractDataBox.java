@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
@@ -11,13 +12,17 @@ import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.jdesktop.swingx.JXTable;
 
 /**
  *
@@ -54,6 +59,9 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     protected AbstractDataBox m_previousDataBox = null;
     
     private int m_loadingId = 0;
+    
+    private int m_id = -1;
+    private static int m_idCount = 0;
     
     protected DataboxType m_type;
     
@@ -196,6 +204,13 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     public DataboxType getType() {
         return m_type;
+    }
+    
+    public int getId() {
+        if (m_id == -1) {
+            m_id = ++m_idCount;
+        }
+        return m_id;
     }
     
     protected void deleteThis() {
@@ -452,6 +467,26 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
 
         return true;
     }
+
+
+    public void retrieveTableModels(ArrayList<TableInfo> list) {
+ 
+        if (m_panel instanceof GlobalTabelModelProviderInterface) {
+            JXTable table = ((GlobalTabelModelProviderInterface) m_panel).getGlobalAssociatedTable();
+            if (table != null) {
+                String name = ((JPanel)m_panel).getName();
+                TableInfo info = new TableInfo(getId(), name, table);
+                list.add(info);
+            }
+        }
+        
+        if (m_nextDataBoxArray != null) {
+            for (AbstractDataBox nextDataBox : m_nextDataBoxArray) {
+                nextDataBox.retrieveTableModels(list);
+            }
+        }
+    }
+    
 
     
 

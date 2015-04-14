@@ -6,7 +6,7 @@ import fr.proline.core.orm.lcms.Peakel.Peak;
 import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
@@ -222,10 +222,10 @@ public class DataboxChildFeature extends AbstractDataBox {
                 return ((XicFeaturePanel) m_panel).getSelectedFeature();
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((CompareDataProviderInterface) m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface) m_panel).getCrossSelectionInterface();
             }
             if (parameterType.equals(MzScopeInterface.class)) {
                 return ((XicFeaturePanel) m_panel).getMzScopeInterface();
@@ -256,7 +256,7 @@ public class DataboxChildFeature extends AbstractDataBox {
         List<CompareDataInterface> listCDI = new ArrayList();
         List<XicPeakPanel> listPeakPanel = getPeakTableModelList();
         for (XicPeakPanel peakPanel : listPeakPanel) {
-            listCDI.add(peakPanel.getCompareDataInterface());
+            listCDI.add(peakPanel.getGlobalTableModelInterface());
         }
         return listCDI;
     }

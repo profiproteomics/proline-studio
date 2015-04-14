@@ -122,7 +122,11 @@ public class IconManager {
         CALCULATOR,
         CHART_PIE,
         EXECUTE,
-        STOP;
+        STOP,
+        TABLES,
+        TABLE,
+        COLUMN,
+        CHALKBOARD;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -429,6 +433,14 @@ public class IconManager {
                return "fr/proline/studio/images/execute.png";
            case STOP:
                return "fr/proline/studio/images/stop.png";
+           case TABLES:
+               return "fr/proline/studio/images/tables.png";
+           case TABLE:
+               return "fr/proline/studio/images/table.png";
+           case COLUMN:
+               return "fr/proline/studio/images/table-column.png";
+           case CHALKBOARD:
+               return "fr/proline/studio/images/chalkboard-text.png";
         }
 
 

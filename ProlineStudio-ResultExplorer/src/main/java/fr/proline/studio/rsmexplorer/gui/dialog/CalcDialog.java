@@ -1,17 +1,21 @@
-package fr.proline.studio.calc;
+package fr.proline.studio.rsmexplorer.gui.dialog;
 
 
+
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.Table;
+import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.python.interpreter.CalcCallback;
 import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.python.interpreter.ResultVariable;
-import fr.proline.studio.table.DecoratedTable;
-import fr.proline.studio.table.DecoratedTableModel;
-import fr.proline.studio.table.TablePopupMenu;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -19,18 +23,29 @@ import java.awt.GridBagLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.prefs.Preferences;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -44,17 +59,27 @@ import javax.swing.JTextField;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
+import javax.swing.JTree;
+import javax.swing.KeyStroke;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.TableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.util.NbPreferences;
+import org.openide.windows.TopComponent;
+import org.python.core.PyObject;
+
 
 
 /**
@@ -72,10 +97,11 @@ public class CalcDialog extends JDialog {
     private JButton m_loadButton = null;
     private JButton m_saveButton = null;
     private JButton m_clearButton = null;
-    private ColumnTableModel m_columnTableModel = null;
     private DefaultListModel m_resultsListModel = null;
     private DefaultListModel m_functionsListModel = null;
     private JTabbedPane m_tabbedPane = null;
+    private JTree m_dataTree = null;
+    private RootDataNode m_rootNode = null;
     
     private JFileChooser m_fileChooser;
 
@@ -90,11 +116,11 @@ public class CalcDialog extends JDialog {
         if (m_calcDialog == null) {
             m_calcDialog = new CalcDialog(parent);
         }
+        
+        m_calcDialog.retrieveAvailableTableModels();
                 
-        Table.setCurrentTable(t);
-        
-        m_calcDialog.fillColumns();
-        
+
+
         return m_calcDialog;
     }
     
@@ -105,6 +131,28 @@ public class CalcDialog extends JDialog {
         
         add(createInternalPanel());
         
+        // Action when the user press on the dialog cross
+        addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosing(WindowEvent we) {
+                cleanupOnClose();
+            }
+        });
+
+        // Escape Key Action
+        KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+        Action actionListener = new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                cleanupOnClose();
+                setVisible(false);
+            }
+        };
+        InputMap inputMap = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(stroke, "ESCAPE");
+        getRootPane().getActionMap().put("ESCAPE", actionListener);
         
         setResizable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -168,12 +216,8 @@ public class CalcDialog extends JDialog {
         };
 
 
-        m_columnTableModel = new ColumnTableModel();
-        ColumnTable columnsTable = new ColumnTable();
-        columnsTable.setModel(m_columnTableModel);
-        JScrollPane columnsScrollPane = new JScrollPane();
-        columnsScrollPane.setViewportView(columnsTable);
-        m_tabbedPane.add("Columns", columnsScrollPane);
+
+        m_tabbedPane.add("Data", createDataPanel());
         
         m_functionsListModel = new DefaultListModel();
         fillFunctions();
@@ -199,7 +243,18 @@ public class CalcDialog extends JDialog {
                     if (resultVariable == null) {
                         return;
                     }
-                    resultVariable.action();
+                    PyObject o = resultVariable.getValue();
+                    if (o instanceof ColData) {
+                        ColData col = (ColData) o;
+                        Table t = col.getTable();
+                        t.addColumn(col);
+                    } else if (o instanceof Table) {
+                        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(resultVariable.getName());
+                        windowBox.setEntryData(-1, ((Table)o).getModel() );
+                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
+                        win.open();
+                        win.requestActive();
+                    }
 
                     results.clearSelection();
                 }
@@ -243,6 +298,60 @@ public class CalcDialog extends JDialog {
         });
         
         return m_tabbedPane;
+    }
+    
+    private JPanel createDataPanel() {
+        JPanel dataPanel = new JPanel(new GridBagLayout());
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        JPanel tablePanel = new JPanel(new GridBagLayout());
+        tablePanel.setBorder(BorderFactory.createTitledBorder("Tables"));
+        JScrollPane treeScrollPane = new JScrollPane();
+        m_rootNode = new RootDataNode();
+        m_dataTree = new JTree(m_rootNode);
+        m_dataTree.setToggleClickCount(0); // avoid expanding when double clicking
+        m_dataTree.setCellRenderer(new CalcTreeRenderer()); 
+        m_dataTree.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+
+                     TreePath path = m_dataTree.getSelectionPath();
+                     if (path == null) {
+                         return;
+                     }
+                     DataNode node = (DataNode) path.getLastPathComponent();
+                     node.action();
+
+                     m_dataTree.clearSelection();
+                }
+
+            }
+        });
+        treeScrollPane.setViewportView(m_dataTree);
+        
+        GridBagConstraints c1 = new GridBagConstraints();
+        c1.anchor = GridBagConstraints.NORTHWEST;
+        c1.fill = GridBagConstraints.BOTH;
+        c1.insets = new java.awt.Insets(5, 5, 5, 5);
+        c1.gridx = 0;
+        c1.gridy = 0;
+        c1.weightx = 1;
+        c1.weighty = 1;
+        tablePanel.add(treeScrollPane, c1);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
+        c.weighty = 1;
+        dataPanel.add(tablePanel, c);
+
+
+        return dataPanel;
     }
     
     private JComponent createCodeArea() {
@@ -399,6 +508,13 @@ public class CalcDialog extends JDialog {
         return toolbar;
     }
 
+
+    public void cleanupOnClose() {
+        
+        Table.setTables(null);
+
+    }
+    
     private JFileChooser getPyhtonScriptChooser() {
         if (m_fileChooser == null) {
             Preferences preferences = NbPreferences.root();
@@ -415,28 +531,14 @@ public class CalcDialog extends JDialog {
         
         return m_fileChooser;
     }
-    
-    private void fillColumns() {
 
-        
-        
-        JXTable table = Table.getCurrentTable();
-        TableModel model = table.getModel();
-        int nbColumns = table.getColumnCount();
-        ArrayList<Column> columnList = new ArrayList<>(nbColumns);
-        for (int i=0;i<nbColumns;i++) {
-            String colName = model.getColumnName(table.convertColumnIndexToModel(i));
-            columnList.add(new Column(colName, i));
-        }
-        m_columnTableModel.setValues(columnList);
-        
-        
-    }
     
     private void fillFunctions() {
-        m_functionsListModel.addElement(new Function("bbinomial", "bbinomial = Stats.bbinomial( (,) , (,) )", "bbinomial = Stats.bbinomial( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
-        m_functionsListModel.addElement(new Function("pvalue", "pvalue = Stats.pvalue( (,) , (,) )", "pvalue = Stats.pvalue( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
-        m_functionsListModel.addElement(new Function("ttd", "ttd = Stats.ttd( (,) , (,) )", "ttd = Stats.ttd( (Table.col(5),Table.col(7)), (Table.col(9),Table.col(11)) )"));
+        m_functionsListModel.addElement(new Function("bbinomial", "bbinomial = Stats.bbinomial( (,) , (,) )", "bbinomial = Stats.bbinomial( (Table.get(1)[5],Table.get(1)[7]), (Table.get(1)[9],Table.get(1)[11]) )"));
+        m_functionsListModel.addElement(new Function("diff", "diffTable = Table.diff(,)", "diffTable = Table.diff(Table.get(1),Table.get(2))"));
+        m_functionsListModel.addElement(new Function("join", "joinTable = Table.join(,)", "joinTable = Table.join(Table.get(1),Table.get(2))"));
+        m_functionsListModel.addElement(new Function("pvalue", "pvalue = Stats.pvalue( (,) , (,) )", "pvalue = Stats.pvalue( (Table.get(1)[5],Table.get(1)[7]), (Table.get(1)[9],Table.get(1)[11]) )"));
+        m_functionsListModel.addElement(new Function("ttd", "ttd = Stats.ttd( (,) , (,) )", "ttd = Stats.ttd( (Table.get(1)[5],Table.get(1)[7]), (Table.get(1)[9],Table.get(1)[11]) )"));
         
     }
     
@@ -555,9 +657,209 @@ public class CalcDialog extends JDialog {
 
     }
     
+    private void retrieveAvailableTableModels() {
+        
+        m_rootNode.removeAllChildren();
+
+        HashMap<Integer, JXTable> tableMap = new HashMap<>();
+        
+        ArrayList<TableInfo> list = new ArrayList<>();
+        
+        Set<TopComponent> tcs = TopComponent.getRegistry().getOpened();
+        Iterator<TopComponent> itTop = tcs.iterator();
+        while (itTop.hasNext()) {
+            TopComponent topComponent = itTop.next();
+            if (topComponent instanceof DataBoxViewerTopComponent) {
+                list.clear();
+                DataBoxViewerTopComponent databoxViewerTopComponent = (DataBoxViewerTopComponent) topComponent;
+                databoxViewerTopComponent.retrieveTableModels(list);
+                int nb = list.size();
+                if (nb > 0) {
+                    WindowDataNode parentNode = new WindowDataNode(list.get(0));
+                    m_rootNode.add(parentNode);
+                    for (int i = 0; i < nb; i++) {
+                        TableInfo tableInfo = list.get(i);
+                        ViewDataNode viewNode = new ViewDataNode(tableInfo);
+                        parentNode.add(viewNode);
+                        viewNode.fillColumns();
+                        tableMap.put(tableInfo.getId(), tableInfo.getTable());
+                    }
+                }
+
+            }
+        }
+
+        Table.setTables(tableMap);
+        
+        DefaultTreeModel model = (DefaultTreeModel) m_dataTree.getModel();
+        model.nodeStructureChanged(m_rootNode);
+
+        m_dataTree.expandRow(0);
+        
+    }
+
+    private abstract class DataNode extends DefaultMutableTreeNode {
+
+        public DataNode() {
+        }
+        
+         public DataNode(TableInfo tableInfo) {
+            setUserObject(tableInfo) ;
+        }
+        
+        public TableInfo getTableInfo() {
+            return ((TableInfo) getUserObject());
+        }
+
+        public void action() {
+            
+        }
+        
+        public boolean isVisible() {
+            return true;
+        }
+        
+        public abstract ImageIcon getIcon();
+    }
+    
+    private class RootDataNode extends DataNode {
+
+        @Override
+        public ImageIcon getIcon() {
+            return IconManager.getIcon(IconManager.IconType.TABLES);
+        }
+
+        @Override
+        public String toString() {
+            return "Data Windows";
+        }
+    }
+    
+    private class WindowDataNode extends DataNode {
+
+        public WindowDataNode(TableInfo tableInfo) {
+            super(tableInfo);
+        }
+        
+        @Override
+        public ImageIcon getIcon() {
+            TableInfo tableInfo = getTableInfo();
+            return tableInfo.getIcon();
+        }
+
+        @Override
+        public String toString() {
+            TableInfo tableInfo = getTableInfo();
+            return tableInfo.getFullName();
+        }
+    }
+    
+    private class ViewDataNode extends DataNode {
+
+        public ViewDataNode(TableInfo tableInfo) {
+            super(tableInfo);
+        }
+        
+        public void fillColumns() {
+            TableInfo tableInfo = getTableInfo();
+            
+            JXTable table = tableInfo.getTable();
+            List<TableColumn> tableColumnList = table.getColumns(true);
+            for (TableColumn c : tableColumnList) {
+                TableColumnExt tableColumn = (TableColumnExt) c;
+                boolean visible = tableColumn.isVisible();
+                int modelIndex = tableColumn.getModelIndex();
+                ColumnDataNode colNode = new ColumnDataNode(tableInfo, modelIndex+1, visible);
+                add(colNode);
+
+            }
+            
+
+        }
+        
+        public int getTableIndex() {
+            TableInfo tableInfo = getTableInfo();
+            return tableInfo.getId();
+        }
+        
+        @Override
+        public void action() {
+            int pos = m_codeArea.getCaretPosition();
+            int index = getTableIndex();
+            try {
+ 
+                String textToAdd = "Table.get(" + index + ")";
+                m_codeArea.getDocument().insertString(pos, textToAdd, null);
+                m_codeArea.setCaretPosition(pos + textToAdd.length());
+                m_codeArea.getCaret().setVisible(true);
+                m_codeArea.requestFocusInWindow();
+            } catch (BadLocationException e) {
+
+            }
+        }
+        
+        @Override
+        public ImageIcon getIcon() {
+            return IconManager.getIcon(IconManager.IconType.TABLE);
+        }
+
+        @Override
+        public String toString() {
+            TableInfo tableInfo = getTableInfo();
+            return tableInfo.getNameWithId();
+        }
+    }
+    
+    private class ColumnDataNode extends DataNode {
+
+        private final int m_columnIndex;
+        private final boolean m_visible;
+        
+        public ColumnDataNode(TableInfo tableInfo, int columnIndex, boolean visible) {
+            super(tableInfo);
+            m_columnIndex = columnIndex;
+            m_visible = visible;
+        }
+
+        @Override
+        public void action() {
+            int pos = m_codeArea.getCaretPosition();
+            int index = m_columnIndex;
+            try {
+                ViewDataNode viewNode = (ViewDataNode) getParent();
+                
+                String textToAdd = "Table.get("+viewNode.getTableIndex()+")[" + index + "]";
+                m_codeArea.getDocument().insertString(pos, textToAdd, null);
+                m_codeArea.setCaretPosition(pos + textToAdd.length());
+                m_codeArea.getCaret().setVisible(true);
+                m_codeArea.requestFocusInWindow();
+            } catch (BadLocationException e) {
+
+            }
+        }
+        
+        @Override
+        public boolean isVisible() {
+            return m_visible;
+        }
+        
+        @Override
+        public ImageIcon getIcon() {
+            return IconManager.getIcon(IconManager.IconType.COLUMN);
+        }
+
+        @Override
+        public String toString() {
+            TableInfo tableInfo = getTableInfo();
+            GlobalTableModelInterface model = tableInfo.getModel();
+            return m_columnIndex+": "+model.getExportColumnName(m_columnIndex-1);
+        }
+    }
+    
 
     
-    public class Column {
+    
+    /*public class Column {
         
         private final String m_name;
         private final int m_index;
@@ -608,7 +910,7 @@ public class CalcDialog extends JDialog {
                 
             }
         }
-    }
+    }*/
     
     public class Function {
         private final String m_name;
@@ -645,63 +947,9 @@ public class CalcDialog extends JDialog {
         
     }
 
-    
-       public static class ColumnTable extends DecoratedTable implements MouseListener {
 
-        public ColumnTable() {
 
-            setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            addMouseListener(this);
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            if (e.getClickCount() == 2) {
-                int row = getSelectedRow();
-                if (row == -1) {
-                    return;
-                }
-                row = convertRowIndexToModel(row);
-                Column c = ((ColumnTableModel) getModel()).getColumn(row);
-
-                if (c == null) {
-                    return;
-                }
-                c.action();
-
-                clearSelection();
-            }
-
-        }
-
-        @Override
-        public TablePopupMenu initPopupMenu() {
-            return null;
-        }
-
-        @Override
-        public void prepostPopupMenu() {
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-        }
-
-    }
-
-    public static class ColumnTableModel extends DecoratedTableModel {
+    /*public static class ColumnTableModel extends DecoratedTableModel {
 
         public static final int COLTYPE_COLUMN_ID = 0;
         public static final int COLTYPE_COLUMN_NAME = 1;
@@ -770,6 +1018,33 @@ public class CalcDialog extends JDialog {
             return null;
         }
 
+    }*/
+    
+    private class CalcTreeRenderer extends DefaultTreeCellRenderer {
+
+        public CalcTreeRenderer() {
+        }
+
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+
+            DataNode node = ((DataNode) value);
+           
+            boolean visible = node.isVisible();
+            if (!visible) {
+                setForeground(Color.gray);
+            } else {
+                setForeground(Color.black);
+            }
+            
+            ImageIcon icon = node.getIcon();
+            if (icon != null) {
+                setIcon(icon);
+            }
+
+            return this;
+        }
     }
 
 }

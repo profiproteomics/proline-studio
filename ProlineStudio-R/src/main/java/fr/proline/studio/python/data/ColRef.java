@@ -17,7 +17,8 @@ public class ColRef extends Col {
     private final int m_modelCol;
     private final GlobalTableModelInterface m_tableModel;
     
-    public ColRef(int col, CompoundTableModel model) {
+    public ColRef(Table table, int col, CompoundTableModel model) {
+        super(table);
         m_modelCol = col;
         m_tableModel = model.getLastNonFilterModel();
     }
@@ -34,7 +35,7 @@ public class ColRef extends Col {
                  resultArray.add(v.doubleValue());
             }
         }
-        return new ColData(resultArray, getColumnName());
+        return new ColData(m_table, resultArray, getColumnName());
     }
     
     @Override

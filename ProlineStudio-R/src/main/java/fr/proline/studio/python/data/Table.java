@@ -1,70 +1,121 @@
 package fr.proline.studio.python.data;
 
+
+import fr.proline.studio.comparedata.DiffDataModel;
+import fr.proline.studio.comparedata.JoinDataModel;
 import fr.proline.studio.table.CompoundTableModel;
-import java.awt.EventQueue;
+import fr.proline.studio.table.GlobalTableModelInterface;
+
+import java.util.HashMap;
 import java.util.List;
-import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.python.core.Py;
+import org.python.core.PyInteger;
 import org.python.core.PyObject;
-import org.python.core.PyTuple;
 
 /**
  *
  * @author JM235353
  */
-public class Table {
+public class Table extends PyObject {
     
-    private static JXTable m_currentTable = null;
+    private static HashMap<Integer,JXTable> m_tableMap = null;
     
-    public static void setCurrentTable(JXTable t) {
-        m_currentTable = t;
+    private HashMap<Integer, ColRef> m_colums = null;
+    
+    
+    private int m_index = -1;
+    private GlobalTableModelInterface m_model = null;
+    
+    public Table(int index) {
+        m_index = index;
     }
     
-    public static JXTable getCurrentTable() {
-        return m_currentTable;
+    public Table(GlobalTableModelInterface model) {
+        m_model = model;
     }
     
-    public static ColRef col(String colName) {
-        if (m_currentTable == null) {
-            return null;
+    public static Table get(int index) {
+        return new Table(index);
+    }
+    
+    public JXTable getGraphicalTable() {
+        return m_tableMap.get(m_index);
+    }
+    
+    public GlobalTableModelInterface getModel() {
+        JXTable table = getGraphicalTable();
+        if (table != null) {
+            return (GlobalTableModelInterface) table.getModel();
         }
         
-        int nbCol = m_currentTable.getColumnCount();
-        for (int i=0;i<nbCol;i++) {
-            String name = m_currentTable.getColumnName(i);
-            if (colName.compareToIgnoreCase(name) == 0) {
-                int modelCol = m_currentTable.convertColumnIndexToModel(i);
-                return new ColRef(modelCol, (CompoundTableModel) m_currentTable.getModel());
+        return m_model;
+    }
+    
+    public ColRef getCol(int colIndex) {
+        if (m_colums == null) {
+            m_colums = new HashMap<>();
+        } 
+        ColRef col = m_colums.get(colIndex);
+        if (col == null) {
+            JXTable t = m_tableMap.get(m_index);
+            CompoundTableModel model = (CompoundTableModel) t.getModel();
+            if (model.getColumnCount()<=colIndex) {
+                String error = "ColRef.getCol("+colIndex+") : Out of bound error";
+                throw Py.IndexError(error);
             }
+            col = new ColRef(this, colIndex, model);
+            m_colums.put(colIndex, col);
         }
-        throw new RuntimeException("Column not found "+colName);
+
+        return col;
+
     }
     
-    public static ColRef col(int colIndex) {
- 
-        int nbCol = m_currentTable.getColumnCount();
-        if ((colIndex<1) || (colIndex>nbCol)) {
-            throw new IndexOutOfBoundsException("No Column at index "+colIndex);
+    /**
+     * __finditem__ is useful for [] call
+     *
+     * @param key
+     * @return
+     */
+    @Override
+    public PyObject __finditem__(PyObject key) {
+        if (key instanceof PyInteger) {
+            ColRef col = getCol(((PyInteger) key).getValue());
+            return col;
         }
-        return new ColRef(m_currentTable.convertColumnIndexToModel(colIndex-1), (CompoundTableModel) m_currentTable.getModel());
+        throw Py.TypeError("Unexpected Type Found " + key.getClass().getName());
     }
     
-    public static PyTuple col(int colIndex1, int colIndex2) {
-        PyObject[] objects = new PyObject[colIndex2-colIndex1+1];
-        for (int i=colIndex1;i<=colIndex2;i++) {
-            ColRef c = col(i);
-            objects[i-colIndex1] = c;
-        }
-        return new PyTuple(objects);
+    @Override
+    public void __setitem__(PyObject key, PyObject value) {
+        throw Py.TypeError("Unexpected Type Found " + key.getClass().getName());
     }
     
-    public static void addColumn(Col col) {
+    @Override
+    public int __len__() {
+        JXTable t = m_tableMap.get(m_index);
+        return t.getColumnCount(true);
+    }
+    
+    
+    public static void setTables(HashMap<Integer,JXTable> tableMap) {
+        m_tableMap = tableMap;
+    }
+    
+    public static JXTable getTable(int index) {
+        return m_tableMap.get(index);
+    }
+    
+
+    
+    public void addColumn(Col col) {
 
         
-        final JXTable table = Table.getCurrentTable();
+        JXTable table = m_tableMap.get(m_index);
         
         List<TableColumn> columns = table.getColumns(true);
         final int nbColumns = columns.size();
@@ -75,26 +126,29 @@ public class Table {
 
         
         
-        TableModel model = Table.getCurrentTable().getModel();
+        TableModel model = table.getModel();
         if (model instanceof CompoundTableModel) {
             ((CompoundTableModel) model).addModel(new ExprTableModel(col, ((CompoundTableModel) model).getLastNonFilterModel()));
         }
-        
-        /*EventQueue.invokeLater(new Runnable() {
 
-            @Override
-            public void run() {*/
-                columns = table.getColumns(true);
-                for (int i = 0; i < nbColumns; i++) {
-                    if (!visibilityArray[i]) {
-                        ((TableColumnExt) columns.get(i)).setVisible(false);
-                    }
-                }
-            /*}
-            
-        });*/
-        
+        columns = table.getColumns(true);
+        for (int i = 0; i < nbColumns; i++) {
+            if (!visibilityArray[i]) {
+                ((TableColumnExt) columns.get(i)).setVisible(false);
+            }
+        }
 
-        
+    }
+    
+    public static Table join(Table t1, Table t2) {
+        JoinDataModel joinDataModel = new JoinDataModel();
+        joinDataModel.setData(t1.getModel(), t2.getModel());
+        return new Table(joinDataModel);
+    }
+    
+    public static Table diff(Table t1, Table t2) {
+        DiffDataModel diffDataModel = new DiffDataModel();
+        diffDataModel.setData(t1.getModel(), t2.getModel());
+        return new Table(diffDataModel);
     }
 }

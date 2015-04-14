@@ -2,6 +2,7 @@ package fr.proline.studio.python.math;
 
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
+import fr.proline.studio.python.data.Table;
 import fr.proline.studio.rserver.RServerManager;
 import fr.proline.studio.table.LazyData;
 import java.io.File;
@@ -25,7 +26,7 @@ public class Stats {
     public static ColData bbinomial(PyTuple p1, PyTuple p2) throws Exception {
         
         RServerManager serverR = RServerManager.getRServerManager();
-        boolean RStarted = serverR.startRProcess();
+        boolean RStarted = serverR.startRProcessWithRetry();
         if (!RStarted) {
             throw Py.RuntimeError("Server R not found");
         }
@@ -47,6 +48,8 @@ public class Stats {
         for (int i = 0; i < nb2; i++) {
             cols[nb1+i] = ((ColRef) objArray2[i]);
         }
+        
+        Table t = cols[0].getTable();
         
         File tempFile = File.createTempFile("binomial", "csv");
         tempFile.deleteOnExit();
@@ -80,14 +83,14 @@ public class Stats {
         
         fw.close();
         
-        ColData c = _bbinomialR(tempFile, nb1, nb2);
+        ColData c = _bbinomialR(t, tempFile, nb1, nb2);
         
         tempFile.delete();
         
         return c;
     }
     
-    private static ColData _bbinomialR(File f, int nbCols1, int nbCols2) throws Exception {
+    private static ColData _bbinomialR(Table t, File f, int nbCols1, int nbCols2) throws Exception {
                 
         int nbCols = nbCols1+nbCols2;
         
@@ -115,7 +118,7 @@ public class Stats {
             resArray.add(values[i]);
         }
         
-        return new ColData(resArray, null);
+        return new ColData(t, resArray, null);
 
     }
     
@@ -126,6 +129,7 @@ public class Stats {
     public static ColData ttd(PyTuple p1, PyTuple p2) throws MathException {
         
         
+        Table t = ((ColRef) p1.get(0)).getTable();
         
         int nbRow = ((ColRef) p1.get(0)).getRowCount();
         
@@ -145,11 +149,13 @@ public class Stats {
             ttdArray.add(ttd);
         }
         
-        return new ColData(ttdArray, null);
+        return new ColData(t, ttdArray, null);
     }
     
     public static ColData pvalue(PyTuple p1, PyTuple p2) throws MathException {
 
+        Table t = ((ColRef) p1.get(0)).getTable();
+        
         int nbRow = ((ColRef) p1.get(0)).getRowCount();
 
         ArrayList<Double> resArray = new ArrayList(nbRow);
@@ -176,7 +182,7 @@ public class Stats {
             resArray.add(pvalue);
         }
 
-        return new ColData(resArray, null);
+        return new ColData(t, resArray, null);
     }
     
     private static DescriptiveStatistics _toDescriptiveStatistics(PyTuple p, int row) {

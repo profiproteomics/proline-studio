@@ -1,6 +1,7 @@
 package fr.proline.studio.python.interpreter;
 
 import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.Table;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.SwingUtilities;
@@ -94,7 +95,7 @@ public class CalcInterpreterThread extends Thread {
                                 col.setColumnName(key.toString());
                             }
                         }
-                        if ((value instanceof ColData) || (value instanceof PyInteger) || (value instanceof PyFloat)) {
+                        if ((value instanceof ColData) || (value instanceof PyInteger) || (value instanceof PyFloat) || (value instanceof Table)) {
 
                             resultVariableArray.add(new ResultVariable(key.toString(), value));
                         }

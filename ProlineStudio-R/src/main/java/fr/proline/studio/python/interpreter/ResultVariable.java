@@ -17,10 +17,13 @@ public class ResultVariable {
         m_value = v;
     }
 
+
     @Override
     public String toString() {
         if (m_value instanceof ColData) {
             return m_name;
+        } else if (m_value instanceof Table) {
+          return m_name;  
         } else if (m_value instanceof PyFloat) {
             return m_name + "=" + ((PyFloat) m_value).getValue();
         } else if (m_value instanceof PyInteger) {
@@ -29,13 +32,16 @@ public class ResultVariable {
         return null; // should not happen
     }
 
-    public void action() {
-        if (m_actionDone) {
-            return;
-        }
-        if (m_value instanceof ColData) {
-            m_actionDone = true;
-            Table.addColumn((ColData) m_value);
-        }
+    public PyObject getValue() {
+        return m_value;
     }
+    
+    public String getName() {
+        return m_name;
+    }
+    
+
+    
+    
+    
 }

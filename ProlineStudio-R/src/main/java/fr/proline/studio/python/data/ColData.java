@@ -13,12 +13,14 @@ public class ColData extends Col {
     
     private final ArrayList<Double> m_data;
     
-    public ColData(ArrayList<Double> data, String name) {
+    public ColData(Table table, ArrayList<Double> data, String name) {
+        super(table);
         m_data = data;
         m_columnName = name;
     }
 
-    ColData() {
+    private ColData() {
+        super(null);
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

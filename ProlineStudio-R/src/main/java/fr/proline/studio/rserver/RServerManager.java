@@ -49,6 +49,41 @@ public class RServerManager {
         return m_rServerManager;
 
     }
+    
+    
+    public boolean startRProcessWithRetry() throws Exception {
+        
+        boolean RStarted = false;
+        
+        try {
+            RStarted = startRProcess();
+        } catch (Exception e) {
+            
+        }
+        
+        if (!RStarted) {
+            RStarted = startRProcess();
+        }
+        
+        if (RStarted) {
+            try {
+                connect(false);
+            } catch (Exception e) {
+
+            }
+        }
+        
+        if (RStarted && !isConnected()) {
+            // R has started, but we can not connect correctly
+            stopRProcess();
+            Thread.sleep(5000);
+            RStarted = startRProcess();
+             Thread.sleep(2000);
+            connect(true);
+        } 
+        
+        return RStarted;
+    }
 
     /**
      * Démarrage de R

@@ -6,7 +6,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
@@ -43,6 +43,7 @@ import java.util.HashSet;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
+import org.jdesktop.swingx.JXTable;
 import org.openide.windows.TopComponent;
 
 /**
@@ -51,7 +52,7 @@ import org.openide.windows.TopComponent;
  * 
  * @author JM235353
  */
-public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
+public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
     
@@ -147,8 +148,13 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
     
     @Override
-    public GlobalTableModelInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_proteinSetTable.getModel();
+    }
+    
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return m_proteinSetTable;
     }
     
     @Override

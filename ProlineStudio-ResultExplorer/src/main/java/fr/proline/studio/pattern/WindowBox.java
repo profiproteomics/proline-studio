@@ -1,8 +1,12 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
+import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.Image;
+import java.util.ArrayList;
 import java.util.HashSet;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 
@@ -62,6 +66,14 @@ public class WindowBox {
         m_entryBox.windowOpened();
     }
     
+    public void retrieveTableModels(ArrayList<TableInfo> list) {
+
+        m_entryBox.retrieveTableModels(list);
+        if (!list.isEmpty()) {
+            list.get(0).setIcon(new ImageIcon(getIcon()));
+            list.get(0).setFullName(m_name);
+        }
+    }
 
 
     

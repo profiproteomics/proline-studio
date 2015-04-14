@@ -4,7 +4,7 @@ import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.Peakel.Peak;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
@@ -45,13 +45,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
+import org.jdesktop.swingx.JXTable;
 import org.openide.windows.WindowManager;
 
 /**
  *
  * @author JM235353
  */
-public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
+public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -239,8 +240,12 @@ public class XicPeakPanel  extends HourglassPanel implements DataBoxPanelInterfa
     }
     
     @Override
-    public GlobalTableModelInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_peakTable.getModel();
+    }
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return m_peakTable;
     }
 
     @Override

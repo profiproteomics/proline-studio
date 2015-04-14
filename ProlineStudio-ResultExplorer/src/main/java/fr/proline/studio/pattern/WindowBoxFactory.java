@@ -8,6 +8,7 @@ import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 
 import javax.swing.JComponent;
@@ -267,6 +268,14 @@ public class WindowBoxFactory {
         return winBox;
     }
 
+    
+    public static WindowBox getModelWindowBox(String windowName) {
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataboxCompareResult();
+        WindowBox winBox = new WindowBox(windowName, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.CHALKBOARD));
+        
+        return winBox;
+    }
     
     
     public static WindowBox getFromBoxesWindowBox(String title, AbstractDataBox[] boxes, boolean isDecoy, boolean isRSM) {

@@ -1,14 +1,16 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.studio.calc.CalcDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.CalcDialog;
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dpm.data.SpectralCountResultData;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
+import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.JCheckBoxList;
@@ -25,6 +27,7 @@ import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
@@ -42,13 +45,14 @@ import org.openide.windows.WindowManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.JXTable;
 
 /**
  * Panel for Protein Matches
  *
  * @author JM235353
  */
-public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterface {
+public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
     private SpectralCountResultData m_weightedSCResult = null;
@@ -282,6 +286,21 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         toolbar.add(m_testButton);
         
         return toolbar;
+    }
+
+    @Override
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
+        return (GlobalTableModelInterface) m_proteinTable.getModel();
+    }
+    
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return m_proteinTable;
+    }
+
+    @Override
+    public CrossSelectionInterface getCrossSelectionInterface() {
+        return m_proteinTable;
     }
 
     private class ProteinTable extends LazyTable implements ExportModelInterface {

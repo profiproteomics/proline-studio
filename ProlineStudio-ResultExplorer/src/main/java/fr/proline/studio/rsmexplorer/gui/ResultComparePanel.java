@@ -1,7 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.comparedata.CompareTableModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButtonV2;
@@ -23,12 +23,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.TableModelListener;
+import org.jdesktop.swingx.JXTable;
 
 /**
  *
  * @author JM235353
  */
-public class ResultComparePanel extends JPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
+public class ResultComparePanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -160,8 +161,13 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
     public void setLoaded(int id) {}
 
     @Override
-    public GlobalTableModelInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
         return ((CompoundTableModel) m_dataTable.getModel()).getBaseModel();
+    }
+    
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return m_dataTable;
     }
 
     @Override

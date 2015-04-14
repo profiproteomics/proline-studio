@@ -6,7 +6,7 @@ import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
@@ -35,6 +35,7 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.JXTable;
 
 /**
  * In : Window which display Protein Sets of a Result Summary - Panel used to display Proteins of a Protein Set (at the
@@ -42,7 +43,7 @@ import javax.swing.table.TableColumn;
  *
  * @author JM235353
  */
-public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
+public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
     private DProteinSet m_proteinSetCur = null;
@@ -261,8 +262,13 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     }
     
     @Override
-    public GlobalTableModelInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_proteinTable.getModel();
+    }
+    
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return m_proteinTable;
     }
     
     @Override

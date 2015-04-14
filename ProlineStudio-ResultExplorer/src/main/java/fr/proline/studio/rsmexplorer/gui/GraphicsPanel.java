@@ -4,6 +4,7 @@ import fr.proline.studio.graphics.BaseGraphicsPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.event.ActionListener;
 
 /**
@@ -43,5 +44,5 @@ public class GraphicsPanel extends BaseGraphicsPanel implements DataBoxPanelInte
         return m_dataBox.getSaveAction(splittedPanel);
     }
 
-    
+
 }

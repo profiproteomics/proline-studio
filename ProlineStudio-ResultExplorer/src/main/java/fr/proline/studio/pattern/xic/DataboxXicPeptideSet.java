@@ -9,7 +9,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
@@ -170,10 +170,10 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                 return m_quantChannelInfo;
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((CompareDataProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);
@@ -201,7 +201,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         List<CompareDataInterface> listCDI = new ArrayList();
         List<PeptidePanel> listPeptidePanel = getPeptideTableModelList();
         for (PeptidePanel peptidePanel : listPeptidePanel) {
-            listCDI.add(peptidePanel.getCompareDataInterface());
+            listCDI.add(peptidePanel.getGlobalTableModelInterface());
         }
         return listCDI;
     }

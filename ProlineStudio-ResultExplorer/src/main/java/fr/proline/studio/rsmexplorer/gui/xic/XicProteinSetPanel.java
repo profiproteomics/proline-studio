@@ -3,10 +3,10 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.calc.CalcDialog;
+import fr.proline.studio.rsmexplorer.gui.dialog.CalcDialog;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchProteinSetsTask;
@@ -66,6 +66,7 @@ import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
 
@@ -73,7 +74,7 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
+public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -88,7 +89,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     private JButton m_columnVisibilityButton;
     private AddCompareDataButton m_addCompareDataButton;
     
-    private JButton m_testButton;
+    private JButton m_calcButton;
     
 
     private SearchFloatingPanel m_searchPanel;
@@ -212,8 +213,8 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         };
         toolbar.add(m_addCompareDataButton);
         
-        m_testButton = new JButton(IconManager.getIcon(IconManager.IconType.CALCULATOR));
-        m_testButton.addActionListener(new ActionListener() {
+        m_calcButton = new JButton(IconManager.getIcon(IconManager.IconType.CALCULATOR));
+        m_calcButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -224,7 +225,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             }
 
         });
-        toolbar.add(m_testButton);
+        toolbar.add(m_calcButton);
         
         return toolbar;
     }
@@ -330,8 +331,12 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     }
     
     @Override
-    public GlobalTableModelInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_quantProteinSetTable.getModel();
+    }
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return m_quantProteinSetTable;
     }
 
     @Override

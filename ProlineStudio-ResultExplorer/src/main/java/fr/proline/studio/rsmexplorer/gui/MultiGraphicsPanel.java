@@ -16,6 +16,7 @@ import fr.proline.studio.parameter.DefaultParameterDialog;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;

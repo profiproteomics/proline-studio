@@ -4,7 +4,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
@@ -68,6 +68,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.WindowManager;
 
@@ -75,7 +76,7 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
+public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -353,8 +354,12 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     }
     
     @Override
-    public GlobalTableModelInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_quantPeptideTable.getModel();
+    }
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return m_quantPeptideTable;
     }
 
     @Override

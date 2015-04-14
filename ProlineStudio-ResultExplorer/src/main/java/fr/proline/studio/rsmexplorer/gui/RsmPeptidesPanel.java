@@ -5,7 +5,7 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
@@ -20,6 +20,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.*;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.gui.dialog.CalcDialog;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideInstanceTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
@@ -42,14 +43,16 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
+import org.jdesktop.swingx.JXTable;
 import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /**
  * Panel for Peptides Instances
  *
  * @author JM235353
  */
-public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
+public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
     private PeptideInstanceTable m_peptideInstanceTable;
@@ -62,6 +65,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private AddCompareDataButton m_addCompareDataButton;
+    private JButton m_calcButton;
     
     public RsmPeptidesPanel() {
         initComponents();
@@ -180,11 +184,25 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             }
         };
         
+        m_calcButton = new JButton(IconManager.getIcon(IconManager.IconType.CALCULATOR));
+        m_calcButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CalcDialog dialog = CalcDialog.getCalcDialog(WindowManager.getDefault().getMainWindow(), m_peptideInstanceTable);
+                dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+                dialog.setVisible(true);
+
+            }
+
+        });
+
         toolbar.add(m_decoyButton);
         toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
         toolbar.add(m_addCompareDataButton);
+        toolbar.add(m_calcButton);
         
         return toolbar;
     }
@@ -259,8 +277,13 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     }
     
     @Override
-    public GlobalTableModelInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_peptideInstanceTable.getModel();
+    }
+    
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return m_peptideInstanceTable;
     }
     
     @Override

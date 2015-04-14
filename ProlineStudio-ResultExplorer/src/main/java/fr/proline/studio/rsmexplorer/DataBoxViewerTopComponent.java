@@ -1,9 +1,12 @@
 package fr.proline.studio.rsmexplorer;
 
 import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.python.data.TableInfo;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.util.ArrayList;
 import org.openide.windows.TopComponent;
 
 /**
@@ -33,6 +36,10 @@ public class DataBoxViewerTopComponent extends TopComponent {
 
     }
 
+    public void retrieveTableModels(ArrayList<TableInfo> list) {
+        m_windowBox.retrieveTableModels(list);
+    }
+    
     @Override
     protected void componentOpened() {
         m_windowBox.windowOpened();

@@ -4,7 +4,7 @@ package fr.proline.studio.pattern;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
@@ -127,10 +127,10 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
                 }
             }
             if (parameterType.equals(CompareDataInterface.class)) {
-                return ((CompareDataProviderInterface) m_panel).getCompareDataInterface();
+                return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((CompareDataProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
             }
         }
         return super.getData(getArray, parameterType);
@@ -147,4 +147,6 @@ public class DataBoxRsmAllProteinSet extends AbstractDataBox {
         m_dataToBeSelected = data;
     }
     private HashSet m_dataToBeSelected = null;
+
+
 }

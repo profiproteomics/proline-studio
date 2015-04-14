@@ -8,7 +8,7 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.studio.comparedata.AddCompareDataButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
@@ -37,12 +37,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
+import org.jdesktop.swingx.JXTable;
 
 /**
  * Panel for Peptides of a Protein 
  * @author JM235353
  */
-public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
+public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
     
@@ -196,8 +197,13 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     }
     
     @Override
-    public GlobalTableModelInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_peptidesTable.getModel();
+    }
+    
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return m_peptidesTable;
     }
     
     

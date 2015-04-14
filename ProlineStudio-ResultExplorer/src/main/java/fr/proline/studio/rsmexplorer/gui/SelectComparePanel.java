@@ -8,7 +8,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.comparedata.JoinDataModel;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -25,12 +25,13 @@ import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import org.jdesktop.swingx.JXTable;
 
 /**
  *
  * @author JM235353
  */
-public class SelectComparePanel extends JPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
+public class SelectComparePanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -191,8 +192,13 @@ public class SelectComparePanel extends JPanel implements DataBoxPanelInterface,
     }
            
     @Override
-    public GlobalTableModelInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
         return m_result;
+    }
+    
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return null;
     }
 
     @Override

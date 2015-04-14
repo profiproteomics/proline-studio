@@ -4,7 +4,7 @@ import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareDataProviderInterface;
+import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
@@ -44,12 +44,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
+import org.jdesktop.swingx.JXTable;
 
 /**
  *
  * @author MB243701
  */
-public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanelInterface, CompareDataProviderInterface {
+public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
@@ -215,8 +216,12 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
     }
 
     @Override
-    public GlobalTableModelInterface getCompareDataInterface() {
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
         return (GlobalTableModelInterface) m_psmTable.getModel();
+    }
+    @Override
+    public JXTable getGlobalAssociatedTable() {
+        return m_psmTable;
     }
 
     @Override

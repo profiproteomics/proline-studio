@@ -67,7 +67,7 @@ public class Table extends PyObject {
                 String error = "ColRef.getCol("+colIndex+") : Out of bound error";
                 throw Py.IndexError(error);
             }
-            col = new ColRef(this, colIndex, model);
+            col = new ColRef(this, colIndex-1, model);
             m_colums.put(colIndex, col);
         }
 

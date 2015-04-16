@@ -6,7 +6,6 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
 import org.python.core.Py;
-import org.python.core.PyObject;
 
 /**
  *

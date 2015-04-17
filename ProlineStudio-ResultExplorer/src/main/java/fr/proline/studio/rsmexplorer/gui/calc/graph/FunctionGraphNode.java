@@ -2,7 +2,10 @@ package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
+import static fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode.HEIGHT;
 import java.awt.Color;
+import java.awt.LinearGradientPaint;
+import java.awt.geom.Point2D;
 import java.util.LinkedList;
 
 /**
@@ -40,8 +43,12 @@ public class FunctionGraphNode extends GraphNode {
     }
 
     @Override
-    public Color getBackgroundColor() {
-        return BACKGROUND_COLOR;
+    public LinearGradientPaint getBackgroundGradient() {
+        Point2D start = new Point2D.Float(m_x, m_y);
+        Point2D end = new Point2D.Float(m_x, m_y+HEIGHT);
+        float[] dist = {0.0f, 0.5f, 0.501f, 1.0f};
+        Color[] colors = {Color.white, FRAME_COLOR.brighter(),FRAME_COLOR, FRAME_COLOR.brighter()};
+        return new LinearGradientPaint(start, end, dist, colors);
     }
 
 

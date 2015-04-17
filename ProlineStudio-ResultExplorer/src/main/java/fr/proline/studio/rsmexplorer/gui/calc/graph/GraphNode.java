@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.LinearGradientPaint;
 import java.awt.Stroke;
 import java.util.LinkedList;
 
@@ -15,15 +16,15 @@ import java.util.LinkedList;
  */
 public abstract class GraphNode extends AbstractGraphObject {
     
-    private static final int WIDTH = 60;
-    private static final int HEIGHT = 60;
+    protected static final int WIDTH = 60;
+    protected static final int HEIGHT = 60;
     
     protected LinkedList<GraphConnector> m_inConnectors = null;
     protected GraphConnector m_outConnector = null;
     
    
-    private int m_x = 0;
-    private int m_y = 0;
+    protected int m_x = 0;
+    protected int m_y = 0;
 
     protected static Font m_font = null;
     protected static Font m_fontBold = null;
@@ -59,7 +60,8 @@ public abstract class GraphNode extends AbstractGraphObject {
 
         String name = getName();
 
-        g.setColor(getBackgroundColor());
+        LinearGradientPaint gradient = getBackgroundGradient();
+        g2.setPaint(gradient);
         g.fillRoundRect(m_x, m_y, WIDTH, HEIGHT, 8, 8);
         
         g.setColor(getFrameColor());
@@ -92,7 +94,7 @@ public abstract class GraphNode extends AbstractGraphObject {
     
     public abstract String getName();
     public abstract Color getFrameColor();
-    public abstract Color getBackgroundColor();
+    public abstract LinearGradientPaint getBackgroundGradient();
 
     protected void initFonts(Graphics g) {
         if (m_font != null) {

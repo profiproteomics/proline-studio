@@ -1,10 +1,7 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 
-import fr.proline.core.orm.uds.Dataset;
-import fr.proline.core.orm.uds.QuantitationMethod;
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;

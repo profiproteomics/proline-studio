@@ -107,6 +107,8 @@ public class SpectralCountResultData {
          * Load data relative to experimental design : RSM and DS from wich SC was run
          * This should be done if SpectralCountResultData is not created from a 
          * compute SC action but a read back SC data action.
+         * @param refDatasetId : ID of the dataset to load
+         * @param callback : method to call back after data is loaded
          */
         public void loadData(Long refDatasetId, final AbstractDatabaseCallback callback){
             final ArrayList<DDataset> readDatasetList = new ArrayList<>();
@@ -177,7 +179,6 @@ public class SpectralCountResultData {
          * @return Map of spectralCounts for each Protein Matches
          */
         private Map<String, SpectralCountsStruct> parseRsmSC(Long rsmId, String rsmsSCResult) {
-            m_loggerProline.debug(" parseRsmSC :   " + rsmsSCResult);
 
             //"proteins_spectral_counts":[{"protein_accession"=MyProt,"bsc"=123.6,"ssc"=45.6,"wsc"=55.5}, {"protein_accession"=OtherProt,"bsc"=17.2,"ssc"=2.6,"wsc"=1.5} ]
             Map<String, SpectralCountsStruct> scByProtAcc = new HashMap<>();
@@ -187,11 +188,10 @@ public class SpectralCountResultData {
             protEntries = protEntries.substring(0, protEntries.indexOf("]"));
 
             if (protEntries.isEmpty()) { // case proteins_spectral_counts":[]
-                m_loggerProline.debug(" no accession values for RSM :   " + rsmId+" ("+rsmsSCResult+")");
+                m_loggerProline.warn(" Spectral Count result, no accession values for RSM :   " + rsmId+" ("+rsmsSCResult+")");
                 return scByProtAcc;
             }
             String[] protAccEntries = protEntries.split("}"); //Each ProtAcc entry
-            int protIndex = 0;
             for (String protAcc : protAccEntries) {
                 //For each protein ...            
                 String[] protAccPropertiesEntries = protAcc.split(","); //Get properties list : Acc / bsc / ssc / wsc 
@@ -221,7 +221,6 @@ public class SpectralCountResultData {
                     throw new IllegalArgumentException("Invalid Spectral Count result. Value missing : " + protAcc);
                 }
                 scByProtAcc.put(protAccStr, new SpectralCountsStruct(bsc, ssc, wsc,protMatchStatus, peptideNumber));
-                protIndex++;
             }
 
             return scByProtAcc;

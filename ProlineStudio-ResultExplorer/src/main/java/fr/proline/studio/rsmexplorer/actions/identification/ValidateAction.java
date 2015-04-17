@@ -1,9 +1,12 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
+import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.core.orm.uds.dto.DDataset.MergeInformation;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
@@ -281,6 +284,17 @@ public class ValidateAction extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
+            
+            // if merge DS : forbidden (re)validation on RSM merge
+            DataSetData datasetData = (DataSetData) dataSetNode.getData();
+            Dataset.DatasetType datasetType = datasetData.getDatasetType();
+            if ( Dataset.DatasetType.AGGREGATE.equals(datasetType) && dataSetNode.hasResultSummary()) {
+                MergeInformation mergeInfo = datasetData.getDataset().getMergeInformation();
+                if (mergeInfo.compareTo(MergeInformation.MERGE_IDENTIFICATION_SUMMARY) == 0) {
+                    setEnabled(false);
+                    return;
+                }
+            } 
             
             // parent node
             AbstractNode parentNode = (AbstractNode) dataSetNode.getParent();

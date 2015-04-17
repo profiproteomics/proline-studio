@@ -258,10 +258,19 @@ public class WindowBoxFactory {
         return winBox;
     }
     
-    public static WindowBox getDataMixerWindowBox() {
+    /*public static WindowBox getDataMixerWindowBox() {
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataboxSelectCompareData();
         boxes[1] = new DataboxCompareResult();
+
+        WindowBox winBox = new WindowBox("Data Mixer", generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.DATA_MIXER));
+
+        return winBox;
+    }*/
+    
+    public static WindowBox getDataMixerWindowBoxV2() {
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataboxDataMixer();
 
         WindowBox winBox = new WindowBox("Data Mixer", generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.DATA_MIXER));
 

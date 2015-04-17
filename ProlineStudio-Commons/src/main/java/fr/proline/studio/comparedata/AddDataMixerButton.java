@@ -12,16 +12,13 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public abstract class AddCompareDataButton  extends JButton implements ActionListener {
-    
-    CompareDataInterface m_compareDataInterface = null;
+public abstract class AddDataMixerButton  extends JButton implements ActionListener {
+
     private ProgressInterface m_progressInterface = null;
     
-    public AddCompareDataButton(ProgressInterface progressInterface, CompareDataInterface compareDataInterface) {
+    public AddDataMixerButton(ProgressInterface progressInterface) {
 
         m_progressInterface = progressInterface;
-
-        m_compareDataInterface = compareDataInterface;
 
         setIcon(IconManager.getIcon(IconManager.IconType.ADD_DATA_MIXER));
         setToolTipText("Add Data to Data Mixer...");
@@ -44,10 +41,10 @@ public abstract class AddCompareDataButton  extends JButton implements ActionLis
             }
         }
 
-        actionPerformed(m_compareDataInterface);
+        actionPerformed();
 
     }
     
-    public abstract void actionPerformed(CompareDataInterface compareDataInterface);
+    public abstract void actionPerformed();
     
 }

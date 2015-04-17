@@ -54,6 +54,10 @@ public class TableInfo {
         return m_id+": "+m_name;
     }
     
+    public String getName() {
+        return m_name;
+    }
+    
     public int getId() {
         return m_id;
     }

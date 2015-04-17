@@ -97,7 +97,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataboxXicChildFeature(28),
         DataboxMultiGraphics(29),
         DataboxPSMOfMasterQuantPeptide(30),
-        DataBoxMzScope(31);
+        DataBoxMzScope(31),
+        DataboxDataMixer(32);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;

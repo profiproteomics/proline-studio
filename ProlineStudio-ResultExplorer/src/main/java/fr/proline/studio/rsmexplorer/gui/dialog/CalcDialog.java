@@ -6,16 +6,14 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.Table;
-import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.python.interpreter.CalcCallback;
 import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.rsmexplorer.gui.calc.DataTree;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -59,7 +57,6 @@ import javax.swing.JTextField;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
-import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
@@ -71,9 +68,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.util.NbPreferences;
@@ -100,9 +95,8 @@ public class CalcDialog extends JDialog {
     private DefaultListModel m_resultsListModel = null;
     private DefaultListModel m_functionsListModel = null;
     private JTabbedPane m_tabbedPane = null;
-    private JTree m_dataTree = null;
-    private RootDataNode m_rootNode = null;
-    
+    private DataCalcTree m_dataTree = null;
+
     private JFileChooser m_fileChooser;
 
     
@@ -117,7 +111,7 @@ public class CalcDialog extends JDialog {
             m_calcDialog = new CalcDialog(parent);
         }
         
-        m_calcDialog.retrieveAvailableTableModels();
+        m_calcDialog.m_dataTree.updataDataNodes();
                 
 
 
@@ -311,27 +305,7 @@ public class CalcDialog extends JDialog {
         JPanel tablePanel = new JPanel(new GridBagLayout());
         tablePanel.setBorder(BorderFactory.createTitledBorder("Tables"));
         JScrollPane treeScrollPane = new JScrollPane();
-        m_rootNode = new RootDataNode();
-        m_dataTree = new JTree(m_rootNode);
-        m_dataTree.setToggleClickCount(0); // avoid expanding when double clicking
-        m_dataTree.setCellRenderer(new CalcTreeRenderer()); 
-        m_dataTree.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-
-                     TreePath path = m_dataTree.getSelectionPath();
-                     if (path == null) {
-                         return;
-                     }
-                     DataNode node = (DataNode) path.getLastPathComponent();
-                     node.action();
-
-                     m_dataTree.clearSelection();
-                }
-
-            }
-        });
+        m_dataTree = new DataCalcTree();
         treeScrollPane.setViewportView(m_dataTree);
         
         GridBagConstraints c1 = new GridBagConstraints();
@@ -657,261 +631,6 @@ public class CalcDialog extends JDialog {
 
     }
     
-    private void retrieveAvailableTableModels() {
-        
-        m_rootNode.removeAllChildren();
-
-        HashMap<Integer, JXTable> tableMap = new HashMap<>();
-        
-        ArrayList<TableInfo> list = new ArrayList<>();
-        
-        Set<TopComponent> tcs = TopComponent.getRegistry().getOpened();
-        Iterator<TopComponent> itTop = tcs.iterator();
-        while (itTop.hasNext()) {
-            TopComponent topComponent = itTop.next();
-            if (topComponent instanceof DataBoxViewerTopComponent) {
-                list.clear();
-                DataBoxViewerTopComponent databoxViewerTopComponent = (DataBoxViewerTopComponent) topComponent;
-                databoxViewerTopComponent.retrieveTableModels(list);
-                int nb = list.size();
-                if (nb > 0) {
-                    WindowDataNode parentNode = new WindowDataNode(list.get(0));
-                    m_rootNode.add(parentNode);
-                    for (int i = 0; i < nb; i++) {
-                        TableInfo tableInfo = list.get(i);
-                        ViewDataNode viewNode = new ViewDataNode(tableInfo);
-                        parentNode.add(viewNode);
-                        viewNode.fillColumns();
-                        tableMap.put(tableInfo.getId(), tableInfo.getTable());
-                    }
-                }
-
-            }
-        }
-
-        Table.setTables(tableMap);
-        
-        DefaultTreeModel model = (DefaultTreeModel) m_dataTree.getModel();
-        model.nodeStructureChanged(m_rootNode);
-
-        m_dataTree.expandRow(0);
-        
-    }
-
-    private abstract class DataNode extends DefaultMutableTreeNode {
-
-        public DataNode() {
-        }
-        
-         public DataNode(TableInfo tableInfo) {
-            setUserObject(tableInfo) ;
-        }
-        
-        public TableInfo getTableInfo() {
-            return ((TableInfo) getUserObject());
-        }
-
-        public void action() {
-            
-        }
-        
-        public boolean isVisible() {
-            return true;
-        }
-        
-        public abstract ImageIcon getIcon();
-    }
-    
-    private class RootDataNode extends DataNode {
-
-        @Override
-        public ImageIcon getIcon() {
-            return IconManager.getIcon(IconManager.IconType.TABLES);
-        }
-
-        @Override
-        public String toString() {
-            return "Data Windows";
-        }
-    }
-    
-    private class WindowDataNode extends DataNode {
-
-        public WindowDataNode(TableInfo tableInfo) {
-            super(tableInfo);
-        }
-        
-        @Override
-        public ImageIcon getIcon() {
-            TableInfo tableInfo = getTableInfo();
-            return tableInfo.getIcon();
-        }
-
-        @Override
-        public String toString() {
-            TableInfo tableInfo = getTableInfo();
-            return tableInfo.getFullName();
-        }
-    }
-    
-    private class ViewDataNode extends DataNode {
-
-        public ViewDataNode(TableInfo tableInfo) {
-            super(tableInfo);
-        }
-        
-        public void fillColumns() {
-            TableInfo tableInfo = getTableInfo();
-            
-            JXTable table = tableInfo.getTable();
-            List<TableColumn> tableColumnList = table.getColumns(true);
-            for (TableColumn c : tableColumnList) {
-                TableColumnExt tableColumn = (TableColumnExt) c;
-                boolean visible = tableColumn.isVisible();
-                int modelIndex = tableColumn.getModelIndex();
-                ColumnDataNode colNode = new ColumnDataNode(tableInfo, modelIndex+1, visible);
-                add(colNode);
-
-            }
-            
-
-        }
-        
-        public int getTableIndex() {
-            TableInfo tableInfo = getTableInfo();
-            return tableInfo.getId();
-        }
-        
-        @Override
-        public void action() {
-            int pos = m_codeArea.getCaretPosition();
-            int index = getTableIndex();
-            try {
- 
-                String textToAdd = "Table.get(" + index + ")";
-                m_codeArea.getDocument().insertString(pos, textToAdd, null);
-                m_codeArea.setCaretPosition(pos + textToAdd.length());
-                m_codeArea.getCaret().setVisible(true);
-                m_codeArea.requestFocusInWindow();
-            } catch (BadLocationException e) {
-
-            }
-        }
-        
-        @Override
-        public ImageIcon getIcon() {
-            return IconManager.getIcon(IconManager.IconType.TABLE);
-        }
-
-        @Override
-        public String toString() {
-            TableInfo tableInfo = getTableInfo();
-            return tableInfo.getNameWithId();
-        }
-    }
-    
-    private class ColumnDataNode extends DataNode {
-
-        private final int m_columnIndex;
-        private final boolean m_visible;
-        
-        public ColumnDataNode(TableInfo tableInfo, int columnIndex, boolean visible) {
-            super(tableInfo);
-            m_columnIndex = columnIndex;
-            m_visible = visible;
-        }
-
-        @Override
-        public void action() {
-            int pos = m_codeArea.getCaretPosition();
-            int index = m_columnIndex;
-            try {
-                ViewDataNode viewNode = (ViewDataNode) getParent();
-                
-                String textToAdd = "Table.get("+viewNode.getTableIndex()+")[" + index + "]";
-                m_codeArea.getDocument().insertString(pos, textToAdd, null);
-                m_codeArea.setCaretPosition(pos + textToAdd.length());
-                m_codeArea.getCaret().setVisible(true);
-                m_codeArea.requestFocusInWindow();
-            } catch (BadLocationException e) {
-
-            }
-        }
-        
-        @Override
-        public boolean isVisible() {
-            return m_visible;
-        }
-        
-        @Override
-        public ImageIcon getIcon() {
-            return IconManager.getIcon(IconManager.IconType.COLUMN);
-        }
-
-        @Override
-        public String toString() {
-            TableInfo tableInfo = getTableInfo();
-            GlobalTableModelInterface model = tableInfo.getModel();
-            return m_columnIndex+": "+model.getExportColumnName(m_columnIndex-1);
-        }
-    }
-    
-
-    
-    
-    /*public class Column {
-        
-        private final String m_name;
-        private final int m_index;
-        
-        public Column(String name, int index) {
-            
-            String uname = name.toUpperCase();
-            
-            String BR = "<BR/>";
-            int iBR = uname.indexOf(BR);
-            while (iBR != -1) {
-                name = name.substring(0, iBR)+" "+name.substring(iBR+BR.length(), name.length());
-                uname = name.toUpperCase();
-                iBR = uname.indexOf(BR);
-            }
-            
-            BR = "<BR>";
-            iBR = uname.indexOf(BR);
-            while (iBR != -1) {
-                name = name.substring(0, iBR)+" "+name.substring(iBR+BR.length(), name.length());
-                uname = name.toUpperCase();
-                iBR = uname.indexOf(BR);
-            }
-            
-            m_name = name;
-            m_index = index;
-        }
-        
-        @Override
-        public String toString() {
-            return m_name;
-        }
-        
-        public Integer getIndex() {
-            return Integer.valueOf( m_index+1);
-        }
-        
-        public void action() {
-            int pos = m_codeArea.getCaretPosition();
-            int index = m_index+1;
-            try {
-                String textToAdd = "Table.col("+index+")";
-                m_codeArea.getDocument().insertString(pos, textToAdd, null);
-                m_codeArea.setCaretPosition(pos+textToAdd.length());
-                m_codeArea.getCaret().setVisible(true);
-                m_codeArea.requestFocusInWindow();
-            } catch(BadLocationException e) {
-                
-            }
-        }
-    }*/
-    
     public class Function {
         private final String m_name;
         private final String m_insertText;
@@ -947,104 +666,51 @@ public class CalcDialog extends JDialog {
         
     }
 
+    public class DataCalcTree extends DataTree {
 
-
-    /*public static class ColumnTableModel extends DecoratedTableModel {
-
-        public static final int COLTYPE_COLUMN_ID = 0;
-        public static final int COLTYPE_COLUMN_NAME = 1;
-
-        private static final String[] m_columnNames = {"Index", "Column"};
-        private static final String[] m_columnTooltips = {"Column Index", "Column Name"};
-
-        ArrayList<Column> m_columns = null;
-
-        public void setValues(ArrayList<Column> columns) {
-            m_columns = columns;
-            fireTableDataChanged();
+        public DataCalcTree() {
+            super(new DataTree.ParentDataNode(), true);
         }
 
         @Override
-        public int getRowCount() {
-            if (m_columns == null) {
-                return 0;
+        public void action(DataTree.DataNode node) {
+            switch (node.getType()) {
+                case COLUMN_DATA: {
+                    int pos = m_codeArea.getCaretPosition();
+                    int index = ((ColumnDataNode) node).getColumnIndex();
+                    try {
+                        ViewDataNode viewNode = (ViewDataNode) node.getParent();
+
+                        String textToAdd = "Table.get(" + viewNode.getTableIndex() + ")[" + index + "]";
+                        m_codeArea.getDocument().insertString(pos, textToAdd, null);
+                        m_codeArea.setCaretPosition(pos + textToAdd.length());
+                        m_codeArea.getCaret().setVisible(true);
+                        m_codeArea.requestFocusInWindow();
+                    } catch (BadLocationException e) {
+
+                    }
+                }
+                    break;
+                case VIEW_DATA: {
+                    int pos = m_codeArea.getCaretPosition();
+                    int index = ((ViewDataNode) node).getTableIndex();
+                    try {
+
+                        String textToAdd = "Table.get(" + index + ")";
+                        m_codeArea.getDocument().insertString(pos, textToAdd, null);
+                        m_codeArea.setCaretPosition(pos + textToAdd.length());
+                        m_codeArea.getCaret().setVisible(true);
+                        m_codeArea.requestFocusInWindow();
+                    } catch (BadLocationException e) {
+
+                    }
+                }
+                    
             }
-            return m_columns.size();
         }
 
-        @Override
-        public int getColumnCount() {
-            return m_columnNames.length;
-        }
-
-        @Override
-        public Class getColumnClass(int col) {
-            switch (col) {
-                case COLTYPE_COLUMN_ID:
-                    return Integer.class;
-                case COLTYPE_COLUMN_NAME:
-                    return String.class;
-            }
-            return null;
-        }
-
-        @Override
-        public String getColumnName(int col) {
-            return m_columnNames[col];
-        }
-        
-        @Override
-        public Object getValueAt(int row, int col) {
-            switch (col) {
-                case COLTYPE_COLUMN_ID:
-                    return m_columns.get(row).getIndex();
-                case COLTYPE_COLUMN_NAME:
-                    return m_columns.get(row).toString();
-            }
-            return null;
-        }
-
-        public Column getColumn(int row) {
-            return m_columns.get(row);
-        }
-
-        @Override
-        public String getToolTipForHeader(int col) {
-            return m_columnTooltips[col];
-        }
-
-        @Override
-        public String getTootlTipValue(int row, int col) {
-            return null;
-        }
-
-    }*/
-    
-    private class CalcTreeRenderer extends DefaultTreeCellRenderer {
-
-        public CalcTreeRenderer() {
-        }
-
-        @Override
-        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-            super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-
-            DataNode node = ((DataNode) value);
-           
-            boolean visible = node.isVisible();
-            if (!visible) {
-                setForeground(Color.gray);
-            } else {
-                setForeground(Color.black);
-            }
-            
-            ImageIcon icon = node.getIcon();
-            if (icon != null) {
-                setIcon(icon);
-            }
-
-            return this;
-        }
     }
+    
+
 
 }

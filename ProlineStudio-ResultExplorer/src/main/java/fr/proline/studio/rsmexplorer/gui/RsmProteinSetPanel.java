@@ -4,7 +4,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinSet;
-import fr.proline.studio.comparedata.AddCompareDataButton;
+import fr.proline.studio.comparedata.AddDataMixerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -19,6 +19,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.BookmarkMarker;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.*;
+import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
@@ -70,7 +71,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
-    private AddCompareDataButton m_addCompareDataButton;
+    private AddDataMixerButton m_addCompareDataButton;
     
     /**
      * Creates new form RsmProteinSetPanel
@@ -308,12 +309,14 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
 
-        m_addCompareDataButton = new AddCompareDataButton(((CompoundTableModel) m_proteinSetTable.getModel()), (CompareDataInterface) m_proteinSetTable.getModel()) {
-
+        m_addCompareDataButton = new AddDataMixerButton(((CompoundTableModel) m_proteinSetTable.getModel())) {
+           
             @Override
-            public void actionPerformed(CompareDataInterface compareDataInterface) {
-                compareDataInterface.setName(m_dataBox.getFullName());
-                DataMixerWindowBoxManager.addCompareTableModel(compareDataInterface);
+            public void actionPerformed() {
+                JXTable table = getGlobalAssociatedTable();
+                String name = ((JPanel)m_dataBox.getPanel()).getName();
+                TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
+                DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
         toolbar.add(m_addCompareDataButton);

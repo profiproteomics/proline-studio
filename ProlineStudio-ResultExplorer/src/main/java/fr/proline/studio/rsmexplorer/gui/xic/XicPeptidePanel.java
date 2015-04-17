@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.AddCompareDataButton;
+import fr.proline.studio.comparedata.AddDataMixerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -26,6 +26,7 @@ import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
+import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
@@ -92,7 +93,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
     private JButton m_graphicsButton;
-    private AddCompareDataButton m_addCompareDataButton;
+    private AddDataMixerButton m_addCompareDataButton;
     
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
@@ -239,12 +240,14 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             toolbar.add(m_graphicsButton);
         }
         
-        m_addCompareDataButton = new AddCompareDataButton(((CompoundTableModel) m_quantPeptideTable.getModel()), (CompareDataInterface)  m_quantPeptideTable.getModel()) {
+        m_addCompareDataButton = new AddDataMixerButton(((CompoundTableModel) m_quantPeptideTable.getModel())) {
             
             @Override
-            public void actionPerformed(CompareDataInterface compareDataInterface) {
-                compareDataInterface.setName(m_dataBox.getFullName());
-                DataMixerWindowBoxManager.addCompareTableModel(compareDataInterface);
+            public void actionPerformed() {
+                JXTable table = getGlobalAssociatedTable();
+                String name = ((JPanel)m_dataBox.getPanel()).getName();
+                TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
+                DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
         toolbar.add(m_addCompareDataButton);

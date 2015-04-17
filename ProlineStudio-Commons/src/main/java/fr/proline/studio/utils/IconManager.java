@@ -126,7 +126,8 @@ public class IconManager {
         TABLES,
         TABLE,
         COLUMN,
-        CHALKBOARD;
+        CHALKBOARD,
+        FUNCTION;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -441,6 +442,8 @@ public class IconManager {
                return "fr/proline/studio/images/table-column.png";
            case CHALKBOARD:
                return "fr/proline/studio/images/chalkboard-text.png";
+           case FUNCTION:
+               return "fr/proline/studio/images/function.png";
         }
 
 

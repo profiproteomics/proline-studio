@@ -1,7 +1,6 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.comparedata.CompareTableModel;
+
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 
@@ -34,11 +33,7 @@ public class DataMixerWindowBoxManager {
                 m_win = new DataBoxViewerTopComponent(m_windowBox);
                 m_win.open();
                 m_win.requestActive();
-            }
-            m_windowBox = null;
-            m_win = null;
-            
-            
+            } 
         }
     }
     

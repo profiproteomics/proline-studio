@@ -23,11 +23,18 @@ public class GraphConnector extends AbstractGraphObject {
     
     private final boolean m_out;
     
+    private final GraphNode m_graphNode;
+    
     private final LinkedList<GraphConnector> m_connections = new LinkedList(); 
     
-    public GraphConnector(boolean out) {
+    public GraphConnector(GraphNode graphNode, boolean out) {
         super(TypeGraphObject.CONNECTOR);
         m_out = out;
+        m_graphNode = graphNode;
+    }
+    
+    public boolean canBeLinked(GraphConnector connector) {
+        return (m_out ^ connector.m_out) && (m_graphNode != connector.m_graphNode);
     }
     
     public void addConnection(GraphConnector connector) {

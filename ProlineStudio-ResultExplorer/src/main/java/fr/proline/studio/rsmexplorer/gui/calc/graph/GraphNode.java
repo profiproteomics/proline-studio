@@ -8,6 +8,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.LinearGradientPaint;
 import java.awt.Stroke;
+import java.awt.geom.Point2D;
 import java.util.LinkedList;
 
 /**
@@ -94,7 +95,27 @@ public abstract class GraphNode extends AbstractGraphObject {
     
     public abstract String getName();
     public abstract Color getFrameColor();
-    public abstract LinearGradientPaint getBackgroundGradient();
+
+
+    public LinearGradientPaint getBackgroundGradient() {
+        
+        if ((m_gradient == null) || (m_gradientStartY != m_y)) {
+
+            Color frameColor = getFrameColor();
+
+            Point2D start = new Point2D.Float(m_x, m_y);
+            Point2D end = new Point2D.Float(m_x, m_y + HEIGHT);
+            float[] dist = {0.0f, 0.5f, 0.501f, 1.0f};
+            Color[] colors = {Color.white, frameColor.brighter(), frameColor, frameColor.brighter()};
+            m_gradient =  new LinearGradientPaint(start, end, dist, colors);
+            m_gradientStartY = m_y;
+        }
+        
+        return m_gradient;
+            
+    }
+    private LinearGradientPaint m_gradient = null;
+    private int m_gradientStartY = -1;
 
     protected void initFonts(Graphics g) {
         if (m_font != null) {

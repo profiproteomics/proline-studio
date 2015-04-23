@@ -137,8 +137,10 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 if (overObject != null) {
                     if (overObject.getType() == AbstractGraphObject.TypeGraphObject.CONNECTOR) {
                         GraphConnector connector = (GraphConnector) overObject;
-                        m_selectedConnector.addConnection(connector);
-                        connector.addConnection(m_selectedConnector);
+                        if (m_selectedConnector.canBeLinked(connector)) {
+                            m_selectedConnector.addConnection(connector);
+                            connector.addConnection(m_selectedConnector);
+                        }
                     }
                     break;
                 }

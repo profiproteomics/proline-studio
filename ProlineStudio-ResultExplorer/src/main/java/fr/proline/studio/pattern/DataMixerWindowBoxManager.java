@@ -19,14 +19,18 @@ public class DataMixerWindowBoxManager {
 
         if (m_windowBox == null) {
             m_windowBox = WindowBoxFactory.getDataMixerWindowBoxV2();
-            m_windowBox.setEntryData(-1, tableInfo);
+            if (tableInfo != null) {
+                m_windowBox.setEntryData(-1, tableInfo);
+            }
             
             // open a window to display the window box
             m_win = new DataBoxViewerTopComponent(m_windowBox);
             m_win.open();
             m_win.requestActive();
         } else {
-            m_windowBox.setEntryData(-1, tableInfo);
+            if (tableInfo != null) {
+                m_windowBox.setEntryData(-1, tableInfo);
+            }
             if (m_win.isOpened()) {
                 m_win.requestActive();
             } else {
@@ -35,6 +39,10 @@ public class DataMixerWindowBoxManager {
                 m_win.requestActive();
             } 
         }
+    }
+    
+    public static void openDataMixer() {
+        addTableInfo(null);
     }
     
 }

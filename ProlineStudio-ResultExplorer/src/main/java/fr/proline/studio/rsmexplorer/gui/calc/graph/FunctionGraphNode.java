@@ -3,6 +3,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.graph;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import java.awt.Color;
 import java.util.LinkedList;
+import javax.swing.ImageIcon;
 
 /**
  *
@@ -38,7 +39,10 @@ public class FunctionGraphNode extends GraphNode {
     }
 
 
-
+    @Override
+    public ImageIcon getIcon() {
+        return m_function.getIcon();
+    }
 
 
     

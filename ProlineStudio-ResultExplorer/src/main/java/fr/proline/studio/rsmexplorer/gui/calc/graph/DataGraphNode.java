@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.python.data.TableInfo;
 import java.awt.Color;
+import javax.swing.ImageIcon;
 
 
 /**
@@ -31,6 +32,11 @@ public class DataGraphNode extends GraphNode {
     @Override
     public Color getFrameColor() {
         return FRAME_COLOR;
+    }
+    
+    @Override
+    public ImageIcon getIcon() {
+        return m_tableInfo.getIcon();
     }
 
     

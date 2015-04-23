@@ -10,6 +10,7 @@ import java.awt.LinearGradientPaint;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
+import javax.swing.ImageIcon;
 
 /**
  *
@@ -19,6 +20,7 @@ public abstract class GraphNode extends AbstractGraphObject {
     
     protected static final int WIDTH = 60;
     protected static final int HEIGHT = 60;
+    private static final int MARGIN = 5;
     
     protected LinkedList<GraphConnector> m_inConnectors = null;
     protected GraphConnector m_outConnector = null;
@@ -79,9 +81,16 @@ public abstract class GraphNode extends AbstractGraphObject {
         int xText = m_x+(WIDTH-stringWidth)/2;
         int yText = m_y-m_hgtBold;
         
+        ImageIcon icon = getIcon();
+        if (icon != null) {
+            g.drawImage(icon.getImage(), m_x+MARGIN, m_y+MARGIN, null);
+        }
+        
         g.setFont(m_fontBold);
         g.setColor(Color.black);
         g.drawString(name, xText, yText);
+        
+        
         
         if (m_inConnectors != null) {
             for (GraphConnector connector : m_inConnectors) {
@@ -91,10 +100,13 @@ public abstract class GraphNode extends AbstractGraphObject {
         if (m_outConnector != null) {
             m_outConnector.draw(g);
         }
+        
+        
     }
     
     public abstract String getName();
     public abstract Color getFrameColor();
+    public abstract ImageIcon getIcon();
 
 
     public LinearGradientPaint getBackgroundGradient() {

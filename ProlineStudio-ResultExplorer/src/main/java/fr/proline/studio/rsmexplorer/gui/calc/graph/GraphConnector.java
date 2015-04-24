@@ -2,13 +2,12 @@ package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import static fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject.STROKE_SELECTED;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
 import java.util.LinkedList;
 import javax.swing.JPopupMenu;
 
@@ -38,6 +37,26 @@ public class GraphConnector extends AbstractGraphObject {
         m_graphNode = graphNode;
     }
     
+    public boolean isConnected() {
+        if (m_connections.isEmpty()) {
+            return false;
+        }
+        GraphNode node = getLinkedSourceGraphNode();
+        return (node.isConnected());
+    }
+    
+    public GraphNode getGraphNode() {
+        return m_graphNode;
+    }
+    
+    public GraphNode getLinkedSourceGraphNode() {
+        if ((m_out) || (m_connections.isEmpty())) {
+            return null;
+        }
+        GraphConnector connector = m_connections.getFirst();
+        return connector.getGraphNode();
+    }
+    
     public boolean canBeLinked(GraphConnector connector) {
         return (m_out ^ connector.m_out) && (m_graphNode != connector.m_graphNode);
     }
@@ -50,6 +69,7 @@ public class GraphConnector extends AbstractGraphObject {
             m_connections.clear();
         }
         m_connections.add(connector);
+        resetState();
     }
     
     public void removeConnection(GraphConnector connector) {
@@ -57,6 +77,7 @@ public class GraphConnector extends AbstractGraphObject {
         if (m_connections.isEmpty()) {
             m_link = null; 
         }
+        resetState();
     }
     
     public int getXConnection() {
@@ -145,6 +166,7 @@ public class GraphConnector extends AbstractGraphObject {
     
     @Override
     public void delete() {
+        resetState();
         for (GraphConnector connector : m_connections) {
             connector.removeConnection(this);
         }
@@ -153,7 +175,7 @@ public class GraphConnector extends AbstractGraphObject {
     }
     
     public void deleteInLink() {
-        // when called, we have a in connecter
+        // when called, we have an in-connecter
         for (GraphConnector connector : m_connections) {
             connector.removeConnection(this);
         }
@@ -164,6 +186,22 @@ public class GraphConnector extends AbstractGraphObject {
     @Override
     public JPopupMenu createPopup(final GraphPanel panel) {
         return null;
+    }
+
+    @Override
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
+        return null;
+    }
+
+    @Override
+    public void resetState() {
+        if (m_out) {
+            for (GraphConnector connector : m_connections) {
+                connector.resetState();
+            }
+        } else {
+            m_graphNode.resetState();
+        }
     }
     
 }

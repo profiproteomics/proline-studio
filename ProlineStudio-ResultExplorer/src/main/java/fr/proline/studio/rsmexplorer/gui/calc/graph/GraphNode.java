@@ -24,6 +24,16 @@ import javax.swing.event.PopupMenuListener;
  */
 public abstract class GraphNode extends AbstractGraphObject {
     
+    public enum NodeState {
+        UNSET,
+        NOT_CONNECTED,
+        CONNECTED,
+        PARAMETERS_SET,
+        DATA_LOADING,
+        READY_TO_CALCULATE,
+        READY
+    }
+    
     protected static final int WIDTH = 60;
     protected static final int HEIGHT = 60;
     private static final int MARGIN = 5;
@@ -42,6 +52,8 @@ public abstract class GraphNode extends AbstractGraphObject {
     protected static int m_hgtPlain;
     protected static int m_ascentBold;
     
+    protected NodeState m_state = NodeState.UNSET;
+
     public GraphNode() {
         super(TypeGraphObject.GRAPH_NODE);
     }
@@ -113,6 +125,11 @@ public abstract class GraphNode extends AbstractGraphObject {
     public abstract String getName();
     public abstract Color getFrameColor();
     public abstract ImageIcon getIcon();
+    
+    public abstract boolean isConnected();
+    public abstract NodeState getState();
+    public abstract void process();
+    public abstract void display();
 
 
     public LinearGradientPaint getBackgroundGradient() {
@@ -216,6 +233,8 @@ public abstract class GraphNode extends AbstractGraphObject {
     @Override
     public JPopupMenu createPopup(final GraphPanel panel) {
         JPopupMenu popup = new JPopupMenu();
+        popup.add(new DisplayAction(this));
+        popup.addSeparator();
         popup.add(new DeleteAction(panel, this));
         popup.addPopupMenuListener(new PopupMenuListener() {
 
@@ -253,6 +272,26 @@ public abstract class GraphNode extends AbstractGraphObject {
             m_graphPanel.removeGraphNode(m_graphObject);
             m_graphPanel.repaint();
         }
+    }
+    
+    public class DisplayAction extends AbstractAction {
+
+        private GraphNode m_graphNode = null;
+
+        public DisplayAction(GraphNode graphNode) {
+            super("Display");
+            m_graphNode = graphNode;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            m_graphNode.display();
+        }
+    }
+    
+    @Override
+    public void resetState() {
+        m_state = NodeState.UNSET;
     }
     
 }

@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import javax.swing.JPopupMenu;
@@ -39,9 +40,13 @@ public abstract class AbstractGraphObject {
     
     public abstract void delete();
     
+    public abstract void resetState();
+    
     public void setSelected(boolean s) {
         m_selected = s;
     }
     
     public abstract JPopupMenu createPopup(final GraphPanel panel);
+    
+    public abstract GlobalTableModelInterface getGlobalTableModelInterface();
 }

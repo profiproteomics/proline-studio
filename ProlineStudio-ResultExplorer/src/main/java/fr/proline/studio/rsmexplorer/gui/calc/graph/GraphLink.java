@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -185,11 +186,6 @@ public class GraphLink extends AbstractGraphObject {
             t += deltaT;
         }
 
-        /*m_path.moveTo();
-        m_path.lineTo(m_x1 + xdelta, m_y1);
-        m_path.quadTo(m_x1 + xdelta * 1.5, m_y1, m_x1 + xdelta * 1.5, m_y1 + ydelta);
-        m_path.quadTo(m_x1 + xdelta * 1.5, m_y2, m_x1 + xdelta * 2, m_y2);
-        m_path.lineTo(m_x2, m_y2);*/
         
         return null;
  
@@ -236,6 +232,16 @@ public class GraphLink extends AbstractGraphObject {
             }
         });
         return popup;
+    }
+
+    @Override
+    public void resetState() {
+        // nothing to do
+    }
+
+    @Override
+    public GlobalTableModelInterface getGlobalTableModelInterface() {
+        return null;
     }
  
     public class DeleteAction  extends AbstractAction {

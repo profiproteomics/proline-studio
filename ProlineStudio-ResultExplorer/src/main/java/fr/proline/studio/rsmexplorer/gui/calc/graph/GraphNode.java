@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
+import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -8,9 +9,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.LinearGradientPaint;
 import java.awt.Stroke;
+import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JPopupMenu;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 /**
  *
@@ -195,6 +201,58 @@ public abstract class GraphNode extends AbstractGraphObject {
         }
     }
     
+    @Override
+    public void delete() {
+        if (m_inConnectors != null) {
+            for (GraphConnector connector : m_inConnectors) {
+                connector.delete();
+            }
+        }
+        if (m_outConnector != null) {
+            m_outConnector.delete();
+        }
+    }
     
+    @Override
+    public JPopupMenu createPopup(final GraphPanel panel) {
+        JPopupMenu popup = new JPopupMenu();
+        popup.add(new DeleteAction(panel, this));
+        popup.addPopupMenuListener(new PopupMenuListener() {
+
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent popupMenuEvent) {
+            }
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent popupMenuEvent) {
+                setSelected(false); 
+                panel.repaint();
+            }
+
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent popupMenuEvent) {
+            }
+        });
+        return popup;
+    }
+ 
+    public class DeleteAction  extends AbstractAction {
+        
+        private AbstractGraphObject m_graphObject = null;
+        private GraphPanel m_graphPanel = null;
+        
+        public DeleteAction(GraphPanel panel, AbstractGraphObject graphObject) {
+            super("Delete");
+            m_graphPanel = panel;
+            m_graphObject = graphObject;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            m_graphObject.delete();
+            m_graphPanel.removeGraphNode(m_graphObject);
+            m_graphPanel.repaint();
+        }
+    }
     
 }

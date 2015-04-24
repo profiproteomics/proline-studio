@@ -1,7 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
+import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import java.awt.BasicStroke;
 import java.awt.Graphics;
+import javax.swing.JPopupMenu;
 
 /**
  *
@@ -18,7 +20,8 @@ public abstract class AbstractGraphObject {
     
     public enum TypeGraphObject {
         GRAPH_NODE,
-        CONNECTOR
+        CONNECTOR,
+        LINK
     };
     
     public AbstractGraphObject(TypeGraphObject type) {
@@ -34,8 +37,11 @@ public abstract class AbstractGraphObject {
     public abstract AbstractGraphObject inside(int x, int y);
     public abstract void move(int dx, int dy);
     
+    public abstract void delete();
+    
     public void setSelected(boolean s) {
         m_selected = s;
     }
     
+    public abstract JPopupMenu createPopup(final GraphPanel panel);
 }

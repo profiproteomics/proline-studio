@@ -1,12 +1,16 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
+import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import static fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject.STROKE_SELECTED;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.util.LinkedList;
+import javax.swing.JPopupMenu;
 
 /**
  *
@@ -24,6 +28,7 @@ public class GraphConnector extends AbstractGraphObject {
     private final boolean m_out;
     
     private final GraphNode m_graphNode;
+    private GraphLink m_link = null;
     
     private final LinkedList<GraphConnector> m_connections = new LinkedList(); 
     
@@ -49,6 +54,9 @@ public class GraphConnector extends AbstractGraphObject {
     
     public void removeConnection(GraphConnector connector) {
         m_connections.remove(connector);
+        if (m_connections.isEmpty()) {
+            m_link = null; 
+        }
     }
     
     public int getXConnection() {
@@ -95,26 +103,25 @@ public class GraphConnector extends AbstractGraphObject {
         
         g2.setStroke(previousStroke);
         
-        // draw connection for out
-        if (m_out) {
-            for (GraphConnector connector : m_connections) {
-                int x1 = getXConnection();
-                int y1 = getYConnection();
-                
-                int x2 = connector.getXConnection();
-                int y2 = connector.getYConnection();
-
-                g.drawLine(x1, y1, x2, y2);
+        // draw connection for in
+        if ((!m_out) && (!m_connections.isEmpty())) {
+            GraphConnector connector = m_connections.getFirst();
+            if (m_link == null) {
+                m_link = new GraphLink(this);
             }
+            m_link.setLink(getXConnection(), getYConnection(), connector.getXConnection(), connector.getYConnection());
+
+            m_link.draw(g);
         }
         
-        
-        
-        
-        
-        
+ 
     }
 
+
+     
+     
+     
+    
     @Override
     public AbstractGraphObject inside(int x, int y) {
         // triangle is taken as a square
@@ -122,6 +129,11 @@ public class GraphConnector extends AbstractGraphObject {
         if ((x+DELTA>=m_x) && (y+DELTA>=m_y) && (x-DELTA<=m_x+WIDTH) && (y-DELTA<=m_y+HEIGHT)) {
             return this;
         }
+        
+        if (m_link != null) {
+            return (m_link.inside(x,y));
+        }
+        
         return null;
     }
 
@@ -129,6 +141,29 @@ public class GraphConnector extends AbstractGraphObject {
     public void move(int dx, int dy) {
         m_x += dx;
         m_y += dy;
+    }
+    
+    @Override
+    public void delete() {
+        for (GraphConnector connector : m_connections) {
+            connector.removeConnection(this);
+        }
+        m_connections.clear();
+        m_link = null;
+    }
+    
+    public void deleteInLink() {
+        // when called, we have a in connecter
+        for (GraphConnector connector : m_connections) {
+            connector.removeConnection(this);
+        }
+        m_connections.clear();
+        m_link = null;
+    }
+    
+    @Override
+    public JPopupMenu createPopup(final GraphPanel panel) {
+        return null;
     }
     
 }

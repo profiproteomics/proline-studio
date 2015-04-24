@@ -15,7 +15,7 @@ import javax.swing.ImageIcon;
  */
 public class DataGraphNode extends GraphNode {
     
-    private static final Color FRAME_COLOR = new Color(45,114,178);
+    private static final Color FRAME_COLOR = new Color(51,128,200);
 
     
     private TableInfo m_tableInfo = null;

@@ -1,6 +1,8 @@
 package fr.proline.studio.rsmexplorer.gui.calc;
 
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphConnector;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphLink;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
@@ -24,7 +26,7 @@ import javax.swing.JPopupMenu;
  */
 public class GraphPanel extends JPanel implements MouseListener, MouseMotionListener {
     
-    private final LinkedList<AbstractGraphObject> m_graphNodeArray = new LinkedList<>();
+    private final LinkedList<GraphNode> m_graphNodeArray = new LinkedList<>();
     
     private int m_mouseDragX;
     private int m_mouseDragY;
@@ -40,17 +42,39 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     }
     
     public void addGraphNode(GraphNode graphNode) {
-       int width = getWidth();
-       int height = getHeight();
-       addGraphNode(graphNode, width/2, height/2);
+       int posX = 0;
+       int posY = 0;
+       if (!m_graphNodeArray.isEmpty()) {
+           
+           GraphNode lastGraphNode = m_graphNodeArray.getLast();
+           posX = lastGraphNode.getCenterX();
+           posY = lastGraphNode.getCenterY() + GraphNode.HEIGHT*2;
+           int height = getHeight();
+           if (height > 60) {
+               // could be ==0 when the panel has just been created
+               if (posY > height - GraphNode.HEIGHT) {
+                   posY = height - GraphNode.HEIGHT;
+               }
+           }
+           
+           if ((lastGraphNode instanceof DataGraphNode) && (graphNode instanceof FunctionGraphNode)) {
+               posX += GraphNode.WIDTH*2.2;
+               posY = lastGraphNode.getCenterY();
+               
+           }
+           
+       }
+
+       addGraphNode(graphNode, posX, posY);
     }
     public void addGraphNode(GraphNode graphNode, int x, int y) {
         graphNode.setCenter(x, y);
         m_graphNodeArray.add(graphNode);
         repaint();
     }
+ 
     
-    public void bringToFront(AbstractGraphObject graphObject) {
+    public void bringToFront(GraphNode graphObject) {
         m_graphNodeArray.remove(graphObject);
         m_graphNodeArray.add(graphObject);
     }
@@ -94,7 +118,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         int x = e.getX();
         int y = e.getY();
 
-        Iterator<AbstractGraphObject> it = m_graphNodeArray.descendingIterator();
+        Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
         while (it.hasNext()) {
             AbstractGraphObject graphNode = it.next();
             
@@ -106,7 +130,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                     case GRAPH_NODE: {
                         m_selectedObject = overObject;
                         m_selectedObject.setSelected(true);
-                        bringToFront(overObject);
+                        bringToFront((GraphNode)overObject);
                         m_mouseDragX = x;
                         m_mouseDragY = y;
                         setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
@@ -115,7 +139,6 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                     }
                     case CONNECTOR: {
                         m_selectedConnector = (GraphConnector) overObject;
-                        bringToFront(graphNode);
                         m_mouseDragX = x;
                         m_mouseDragY = y;
                         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -124,7 +147,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                     }
                     case LINK: {
                         m_selectedLink = (GraphLink) overObject;
-                        bringToFront(graphNode);
+                        m_selectedLink.setSelected(true);
                         m_mouseDragX = x;
                         m_mouseDragY = y;
                         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -174,7 +197,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                 int x = e.getX();
                 int y = e.getY();
                 AbstractGraphObject overObject = null;
-                Iterator<AbstractGraphObject> it = m_graphNodeArray.descendingIterator();
+                Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
                 while (it.hasNext()) {
                     AbstractGraphObject graphNode = it.next();
 
@@ -236,7 +259,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
         int x = e.getX();
         int y = e.getY();
         int newCursor = Cursor.DEFAULT_CURSOR;
-        Iterator<AbstractGraphObject> it = m_graphNodeArray.descendingIterator();
+        Iterator<GraphNode> it = m_graphNodeArray.descendingIterator();
         while (it.hasNext()) {
             AbstractGraphObject graphNode = it.next();
             if (graphNode.inside(x, y) != null) {

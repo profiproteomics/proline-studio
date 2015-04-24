@@ -34,8 +34,8 @@ public abstract class GraphNode extends AbstractGraphObject {
         READY
     }
     
-    protected static final int WIDTH = 60;
-    protected static final int HEIGHT = 60;
+    public static final int WIDTH = 60;
+    public static final int HEIGHT = 60;
     private static final int MARGIN = 5;
     
     protected LinkedList<GraphConnector> m_inConnectors = null;
@@ -70,6 +70,16 @@ public abstract class GraphNode extends AbstractGraphObject {
         }
         setConnectorsPosition();
     }
+    
+    public int getCenterX() {
+        return m_x+WIDTH/2;
+    }
+    
+    public int getCenterY() {
+        return m_y+HEIGHT/2;
+    }
+    
+
     
     @Override
     public void draw(Graphics g) {

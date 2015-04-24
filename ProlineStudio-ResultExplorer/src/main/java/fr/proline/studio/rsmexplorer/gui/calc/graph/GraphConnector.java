@@ -181,6 +181,7 @@ public class GraphConnector extends AbstractGraphObject {
         }
         m_connections.clear();
         m_link = null;
+        resetState();
     }
     
     @Override

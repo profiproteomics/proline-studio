@@ -12,6 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -65,6 +66,7 @@ public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
         JScrollPane treeScrollPane = new JScrollPane();
         DataMixerTree dataMixerTree = new DataMixerTree();
         treeScrollPane.setViewportView(dataMixerTree);
+        treeScrollPane.setMinimumSize(new Dimension(180,50));
         
         
         // create graph objects

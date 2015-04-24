@@ -1,11 +1,14 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
+import static fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject.STROKE_SELECTED;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.geom.GeneralPath;
 import javax.swing.AbstractAction;
@@ -118,7 +121,12 @@ public class GraphLink extends AbstractGraphObject {
     public void draw(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(Color.black);
+        
+        Stroke previousStroke = g2.getStroke();
+        BasicStroke stroke = m_selected ? STROKE_SELECTED : STROKE_NOT_SELECTED;
+        g2.setStroke(stroke);
         g2.draw(m_path);
+        g2.setStroke(previousStroke);
     }
 
     @Override

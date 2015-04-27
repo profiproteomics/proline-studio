@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.dialog.spectralcount;
 
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -19,11 +20,14 @@ public class SpectralCountDialog extends DefaultDialog {
 
     private static final int STEP_PANEL_DEFINE_NAME = 0;
     private static final int STEP_PANEL_SELECT_IDENTIFICATION_SUMMARIES = 1;
+    private static final int STEP_PANEL_SELECT_WEIGHT_REF_IDENT_SUMMARIES = 2;
     private int m_step = STEP_PANEL_DEFINE_NAME;
 
     private IdentificationTree m_tree = null;
+    private ArrayList<DataSetNode> m_identRSMs = null;
+    private ArrayList<DataSetNode> m_weightRefIdentRSMs = null;
 
-
+    
     public SpectralCountDialog(Window parent, IdentificationTree childTree) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
@@ -55,7 +59,11 @@ public class SpectralCountDialog extends DefaultDialog {
     }
     
     public ArrayList<DataSetNode> getSelectedRSMDSNodeList() {
-        return TreeSelectionPanel.getTreeSelectionPanel().getSelectedRSMDSNodeList();
+        return m_identRSMs;
+    }
+
+    public ArrayList<DataSetNode> getSelectedWeightRSMDSNodeList() {
+        return m_weightRefIdentRSMs;
     }
     
     @Override
@@ -74,7 +82,7 @@ public class SpectralCountDialog extends DefaultDialog {
 
             }
             
-            String description = spectralCountNamePanel.getSpectralCountDescription();
+//            String description = spectralCountNamePanel.getSpectralCountDescription();
             /**if (description.length() == 0) {
 
                 setStatus(true, "You must fill the Spectral Count Description");
@@ -83,12 +91,9 @@ public class SpectralCountDialog extends DefaultDialog {
 
             }*/ // no check on description
 
-            // change to ok button
-            setButtonName(DefaultDialog.BUTTON_OK, "OK");
-            setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
 
             JScrollPane scrollPane = new JScrollPane();
-            TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree);
+            TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree, "<html><b>Step 2:</b> Select Identification Summaries.</html>");
             scrollPane.setViewportView(treeSelectionPanel);
 
             replaceInternaleComponent(scrollPane);
@@ -102,7 +107,7 @@ public class SpectralCountDialog extends DefaultDialog {
             
             
             return false;
-        } else { // m_step == STEP_PANEL_SELECT_IDENTIFICATION_SUMMARIES)
+        } else if(m_step == STEP_PANEL_SELECT_IDENTIFICATION_SUMMARIES) { // m_step == STEP_PANEL_SELECT_IDENTIFICATION_SUMMARIES)
 
             // check values
             TreePath[] paths = TreeSelectionPanel.getTreeSelectionPanel().getSelectionPaths();
@@ -113,8 +118,40 @@ public class SpectralCountDialog extends DefaultDialog {
                 return false;
             }
 
+            m_identRSMs = TreeSelectionPanel.getTreeSelectionPanel().getSelectedRSMDSNodeList();          
+                      
+            // change to ok button
+            setButtonName(DefaultDialog.BUTTON_OK, "OK");
+            setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
+
+            //Reinit tree selection for Ref RSM weight computation    
+            m_tree.setSelection(new ArrayList<ResultSummary>());
+            JScrollPane scrollPane = new JScrollPane();
+            TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree, "<html><b>Step 3:</b> Select Weight Computation Identification Summaries.</html>");
+            scrollPane.setViewportView(treeSelectionPanel);
+
+            replaceInternaleComponent(scrollPane);
 
 
+            revalidate();
+            repaint();
+
+            m_step = STEP_PANEL_SELECT_WEIGHT_REF_IDENT_SUMMARIES;
+
+            return false;
+        } else { // m_step == STEP_PANEL_SELECT_WEIGHT_REF_IDENT_SUMMARIES)
+            
+            // check values
+            TreePath[] paths = TreeSelectionPanel.getTreeSelectionPanel().getSelectionPaths();
+
+            if (paths == null || paths.length == 0) {
+                setStatus(true, "You must at least select one Identification Summary for weight computation");
+                highlight(TreeSelectionPanel.getTreeSelectionPanel().getTree());
+                return false;
+            }
+
+            m_weightRefIdentRSMs = TreeSelectionPanel.getTreeSelectionPanel().getSelectedRSMDSNodeList();  
+            
             return true;
         }
 

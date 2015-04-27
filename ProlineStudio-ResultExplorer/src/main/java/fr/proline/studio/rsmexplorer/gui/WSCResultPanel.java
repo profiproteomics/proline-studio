@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.dto.DProteinMatch;
+import fr.proline.studio.comparedata.AddDataMixerButton;
 import fr.proline.studio.rsmexplorer.gui.dialog.CalcDialog;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -18,6 +19,8 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
+import fr.proline.studio.pattern.DataMixerWindowBoxManager;
+import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.model.WSCProteinTableModel;
 import fr.proline.studio.rsmexplorer.gui.renderer.BooleanRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
@@ -55,7 +58,9 @@ import org.jdesktop.swingx.JXTable;
 public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
+    
     private SpectralCountResultData m_weightedSCResult = null;
+    
     private ProteinTable m_proteinTable;
     private JScrollPane m_scrollPane;
     private SearchFloatingPanel m_searchPanel;
@@ -64,6 +69,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;    
     private JButton m_columnVisibilityButton;
+    private AddDataMixerButton m_addCompareDataButton;
     private JButton m_testButton;
     
     private MarkerContainerPanel m_markerContainerPanel;
@@ -266,6 +272,19 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             }
         });
         
+        m_addCompareDataButton = new AddDataMixerButton(((CompoundTableModel) m_proteinTable.getModel())) {
+
+            @Override
+            public void actionPerformed() {
+                JXTable table = getGlobalAssociatedTable();
+                String name = ((JPanel) m_dataBox.getPanel()).getName();
+                TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
+                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                DataMixerWindowBoxManager.addTableInfo(tableInfo);
+            }
+        };
+        
+        
         m_testButton = new JButton(IconManager.getIcon(IconManager.IconType.CALCULATOR));
         m_testButton.addActionListener(new ActionListener() {
 
@@ -283,6 +302,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
         toolbar.add(m_columnVisibilityButton);
+        toolbar.add(m_addCompareDataButton);
         toolbar.add(m_testButton);
         
         return toolbar;

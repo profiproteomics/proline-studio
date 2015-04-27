@@ -17,16 +17,16 @@ import javax.swing.JPanel;
 public class WindowBox {
     
     
-    private String m_name;
-    private SplittedPanelContainer m_windowPanel;
-    private AbstractDataBox m_entryBox;
-    private Image m_icon;
+    private final String m_name;
+    private final SplittedPanelContainer m_windowPanel;
+    private final AbstractDataBox m_entryBox;
+
     
     public WindowBox(String name, SplittedPanelContainer windowPanel, AbstractDataBox entryBox, Image icon) {
         m_name = name;
         m_windowPanel = windowPanel;
         m_entryBox = entryBox;
-        m_icon = icon;
+        m_entryBox.setIcon(icon);
     }
   
     public String getName(){
@@ -34,7 +34,7 @@ public class WindowBox {
     }
     
     public Image getIcon() {
-        return m_icon;
+        return m_entryBox.getIcon();
     }
     
     public JPanel getPanel() {

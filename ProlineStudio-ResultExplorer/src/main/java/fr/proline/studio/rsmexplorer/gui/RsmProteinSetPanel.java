@@ -316,6 +316,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
+                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };

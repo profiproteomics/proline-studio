@@ -34,6 +34,7 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
@@ -136,6 +137,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
                 JXTable table = getGlobalAssociatedTable();
                String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
+                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };

@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -247,6 +248,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
+                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };

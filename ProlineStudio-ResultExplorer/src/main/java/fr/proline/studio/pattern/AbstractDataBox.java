@@ -14,6 +14,7 @@ import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +63,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     private int m_id = -1;
     private static int m_idCount = 0;
+    
+    private Image m_icon;
     
     protected DataboxType m_type;
     
@@ -212,6 +215,14 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
             m_id = ++m_idCount;
         }
         return m_id;
+    }
+    
+    public void setIcon(Image icon) {
+        m_icon = icon;
+    }
+    
+    public Image getIcon() {
+        return m_icon;
     }
     
     protected void deleteThis() {

@@ -21,6 +21,7 @@ public class TreeSelectionPanel extends JPanel {
     
    
     private IdentificationTree m_tree = null;
+    private String m_wizardLabel = "";
     /*private ArrayList<DDataset> m_selectedDatasetList = null;
     private ArrayList<RSMDataSetNode> m_selectedRSMDSNodeList = null;*/
 
@@ -30,13 +31,13 @@ public class TreeSelectionPanel extends JPanel {
         return m_treeSelectionPanel;
     }
     
-    public static TreeSelectionPanel getTreeSelectionPanel(IdentificationTree tree) {
-        m_treeSelectionPanel =  new TreeSelectionPanel(tree);
+    public static TreeSelectionPanel getTreeSelectionPanel(IdentificationTree tree, String wizardLabel) {
+        m_treeSelectionPanel =  new TreeSelectionPanel(tree, wizardLabel);
         return m_treeSelectionPanel;
     }
     
-    private TreeSelectionPanel(IdentificationTree tree) {
-
+    private TreeSelectionPanel(IdentificationTree tree, String wizardLabel) {
+        m_wizardLabel = wizardLabel;
         m_tree = tree;
 
         setLayout(new GridBagLayout());
@@ -71,7 +72,7 @@ public class TreeSelectionPanel extends JPanel {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
-        JLabel wizardLabel = new JLabel("<html><b>Step 2:</b> Select Identification Summaries.</html>");
+        JLabel wizardLabel = new JLabel(m_wizardLabel);
         wizardLabel.setIcon(IconManager.getIcon(IconManager.IconType.WAND_HAT));
         
         c.gridx = 0;

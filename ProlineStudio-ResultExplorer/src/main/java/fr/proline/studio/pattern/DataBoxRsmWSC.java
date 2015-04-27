@@ -36,6 +36,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
 
     private DDataset m_refDataset = null;
     private ArrayList<DDataset> m_datasetRsms = null;
+    private ArrayList<DDataset> m_datasetWeightRsms = null;
     private String m_qttDSName = null;
     private String m_qttDSDescr = null;
     private boolean m_readData;
@@ -191,7 +192,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
 
             
         } else {
-            task = new SpectralCountTask(callback,  m_refDataset, m_datasetRsms, m_qttDSName, m_qttDSDescr, _quantiDatasetId, _spCountJSON);
+            task = new SpectralCountTask(callback,  m_refDataset, m_datasetRsms, m_datasetWeightRsms, m_qttDSName, m_qttDSDescr, _quantiDatasetId, _spCountJSON);
             
                         
             // add node for the quantitation dataset which will be created
@@ -232,6 +233,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
             m_qttDSName = (String) ((Map) data).get(SpectralCountAction.DS_NAME_PROPERTIES);
             m_qttDSDescr = (String) ((Map) data).get(SpectralCountAction.DS_DESCRIPTION_PROPERTIES);            
         }
+        m_datasetWeightRsms = (ArrayList) ((Map) data).get(SpectralCountAction.DS_WEIGHT_LIST_PROPERTIES);
         dataChanged();
     }
     

@@ -18,17 +18,19 @@ public class SpectralCountTask extends AbstractServiceTask {
 
     private DDataset m_refDataset = null;
     private List<DDataset> m_rsmDataset = null;
+    private List<DDataset> m_rsmWeightDataset = null;
     private Long[] m_quantiDatasetId = null;
     private String[] m_spCountJSONResult = null;
     private String m_dsName = null;
     private String m_dsDescr = null;
 
-    public SpectralCountTask(AbstractServiceCallback callback, DDataset refDataset, List<DDataset> rsmDataset, String dsName, String dsDescr, Long[] quantiDatasetId, String[] spectralCountResultList) {
+    public SpectralCountTask(AbstractServiceCallback callback, DDataset refDataset, List<DDataset> rsmDataset,List<DDataset> rsmWeightDataset, String dsName, String dsDescr, Long[] quantiDatasetId, String[] spectralCountResultList) {
         super(callback, false /*
                  * asynchronous
                  */, new TaskInfo("Spectral Count on " + refDataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_refDataset = refDataset;
         m_rsmDataset = rsmDataset;
+        m_rsmWeightDataset = rsmWeightDataset;
         m_quantiDatasetId = quantiDatasetId;
         m_spCountJSONResult = spectralCountResultList;
         m_dsName = dsName; 
@@ -40,7 +42,7 @@ public class SpectralCountTask extends AbstractServiceTask {
         if(m_dsDescr == null  || m_dsDescr.isEmpty()) {
             m_dsDescr = m_dsName;
         }
-       
+       setWsVersion("0.2");
     }
 
     @Override
@@ -59,6 +61,11 @@ public class SpectralCountTask extends AbstractServiceTask {
             params.put("project_id", m_refDataset.getProject().getId());
             params.put("ref_rsm_id", m_refDataset.getResultSummaryId());
             params.put("ref_ds_id", m_refDataset.getId());
+            List<Long> weightRefRSMIds = new ArrayList<>();
+            for(DDataset ddset : m_rsmWeightDataset){
+                weightRefRSMIds.add(ddset.getResultSummaryId());
+            }
+            params.put("peptide_ref_rsm_ids", weightRefRSMIds);
 
             // experimental_design
             Map<String, Object> experimentalDesignParams = new HashMap<>();
@@ -114,7 +121,7 @@ public class SpectralCountTask extends AbstractServiceTask {
 
             request.setParameters(params);
             //m_loggerProline.debug("Will postRequest with params  project_id "+m_refDataset.getProject().getId()+" ; ref_result_summary_id "+m_refDataset.getResultSummaryId()+" ; compute_result_summary_ids "+m_resultSummaryIds);
-            HttpResponse response = postRequest("dps.msq/quantifysc/" + request.getMethod() + getIdString(), request);
+            HttpResponse response = postRequest("dps.msq/quantifysc/" + request.getMethod() + getIdString()+getWSVersionString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 
@@ -240,7 +247,7 @@ public class SpectralCountTask extends AbstractServiceTask {
 //                    ArrayMap returnedValuesMap = (ArrayMap) returnedValues.get(0);
 
                     // retrieve Quanti Dataset ID
-                    BigDecimal quantiDatasetIdBD = (BigDecimal) returnedValues.get("dataset_quanti_id");
+                    BigDecimal quantiDatasetIdBD = (BigDecimal) returnedValues.get("quant_dataset_id");
                     if (quantiDatasetIdBD == null) {
                         m_loggerProline.error(getClass().getSimpleName() + " failed : No returned Quanti Dataset Id");
                         return ServiceState.STATE_FAILED;

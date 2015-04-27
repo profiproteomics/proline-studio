@@ -49,8 +49,9 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
     private static final String OMSSA_PARSER = "Omssa Parser";
     private static final String MASCOT_PARSER = "Mascot";
+    private static final String XTANDEM_PARSER = "X!Tandem Parser";
     
-    private final static String[] PARSER_NAMES = {MASCOT_PARSER, OMSSA_PARSER};
+    private final static String[] PARSER_NAMES = {MASCOT_PARSER, OMSSA_PARSER, XTANDEM_PARSER};
     // ABU : added a map to consider the case when a parser handles more than one extensions
     // the key is the extension, the value is the id of the parser in the other arrays
     private static final Map<String, Integer> EXTENSION_TO_PARSER = new HashMap<>();
@@ -58,10 +59,11 @@ public class ImportIdentificationDialog extends DefaultDialog {
     	EXTENSION_TO_PARSER.put("dat", 0);
     	EXTENSION_TO_PARSER.put("omx", 1);
     	EXTENSION_TO_PARSER.put("omx.bz2", 1);
+    	EXTENSION_TO_PARSER.put("xml", 2);
     }
 //    private final static String[] FILE_EXTENSIONS = {"dat", "omx"};
-    private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Omssa Identification Result"};
-    private final static String[] PARSER_IDS = { "mascot.dat", "omssa.omx" };
+    private final static String[] FILE_EXTENSIONS_DESCRIPTION = {"Mascot Identification Result", "Omssa Identification Result", "X!Tandem Identification Result"};
+    private final static String[] PARSER_IDS = { "mascot.dat", "omssa.omx", "xtandem.xml" };
     
     private final static String[] DECOY_VALUES = {null, "No Decoy", "Software Engine Decoy", "Concatenated Decoy"};
     private final static String[] DECOY_VALUES_ASSOCIATED_KEYS = DECOY_VALUES;
@@ -108,7 +110,6 @@ public class ImportIdentificationDialog extends DefaultDialog {
 
     private ImportIdentificationDialog(Window parent) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-
 
         setTitle("Import Search Results");
        
@@ -964,9 +965,10 @@ public class ImportIdentificationDialog extends DefaultDialog {
     
     
     private ParameterList[] createParameters() {
-        ParameterList[] plArray = new ParameterList[2];
+        ParameterList[] plArray = new ParameterList[3];
         plArray[0] = createMascotParser();
         plArray[1] = createOmssaParser();
+        plArray[2] = createXtandemParser();
         return plArray;
     }
     
@@ -991,6 +993,19 @@ public class ImportIdentificationDialog extends DefaultDialog {
         
         return parameterList;
     }
+    
+    private ParameterList createXtandemParser() {
+        ParameterList parameterList = new ParameterList(XTANDEM_PARSER);
+        
+//        Preferences preferences = NbPreferences.root();
+//        parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "usermod.xml.file", "Usermods file path", JTextField.class, preferences.get("Omssa_Parser.Usermods_file_path", ""), "Usermods XML File", "xml"));
+//        parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "ptm.composition.file", "PTM composition file path", JTextField.class, preferences.get("Omssa_Parser.PTM_composition_file_path", ""), "PTM composition File", "txt"));
+
+        
+        return parameterList;
+    }
+    
+    
     
     private ParameterList createSourceParameters() {
         
@@ -1220,7 +1235,6 @@ public class ImportIdentificationDialog extends DefaultDialog {
             for (int i=0;i<size;i++) {
                 m_regexArrayList.add(model.elementAt(i));
             }
-
             return true;
         }
         

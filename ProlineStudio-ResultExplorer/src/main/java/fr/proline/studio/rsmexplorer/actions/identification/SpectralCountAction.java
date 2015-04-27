@@ -8,8 +8,6 @@ import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.gui.InfoDialog;
-import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
@@ -39,6 +37,7 @@ public class SpectralCountAction extends AbstractRSMAction {
     final static public String DS_NAME_PROPERTIES="dsName";
     final static public String DS_DESCRIPTION_PROPERTIES="dsDescription";
     final static public String DS_LIST_PROPERTIES="dsList";
+    final static public String DS_WEIGHT_LIST_PROPERTIES="dsWeightList";
     
     public SpectralCountAction() {
         super(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
@@ -105,13 +104,17 @@ public class SpectralCountAction extends AbstractRSMAction {
                             error = " Spectral Count is not possible while import or validation is on going. (Search result "+ dsNode.getDataset().getName() +")";
                             break;  
                         }
-                        datasetList.add(dsNode.getDataset());
-                        params.put(DS_LIST_PROPERTIES,datasetList);
-
- 
+                        datasetList.add(dsNode.getDataset());                       
                    }
+                    params.put(DS_LIST_PROPERTIES,datasetList); 
                    
-
+                   ArrayList<DDataset> weightDatasetList = new ArrayList<>();
+                   ArrayList<DataSetNode> selectedWeightDSNodes = spectralCountDialog.getSelectedWeightRSMDSNodeList();
+                   for (DataSetNode dsNode : selectedWeightDSNodes) {
+                       weightDatasetList.add(dsNode.getDataset());  
+                   }
+                    params.put(DS_WEIGHT_LIST_PROPERTIES,weightDatasetList);
+                    
                     params.put(DS_NAME_PROPERTIES, spectralCountDialog.getSpectralCountName());
                     params.put(DS_DESCRIPTION_PROPERTIES, spectralCountDialog.getSpectralCountDescription());
 

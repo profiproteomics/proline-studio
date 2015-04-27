@@ -16,6 +16,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Iterator;
 import java.util.LinkedList;
+import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -39,6 +40,7 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     public GraphPanel() {
         addMouseListener(this);
         addMouseMotionListener(this);
+        setTransferHandler(new DataTreeTransferHandler());
     }
     
     public void addGraphNode(GraphNode graphNode) {
@@ -133,7 +135,10 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
                         bringToFront((GraphNode)overObject);
                         m_mouseDragX = x;
                         m_mouseDragY = y;
-                        setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                        if (e.getButton() == MouseEvent.BUTTON1) {
+                            // starting moving action
+                            setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                        }
                         repaint();
                         break;
                     }
@@ -216,6 +221,11 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
 
                 //JPM.TODO
                 m_selectedConnector = null;
+                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                repaint();
+            } else if (m_selectedLink != null) {
+                m_selectedLink.setSelected(false);
+                m_selectedLink = null;
                 setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 repaint();
             }

@@ -67,6 +67,9 @@ public abstract class DataTree extends JTree {
 
             DefaultTreeModel model = (DefaultTreeModel) getModel();
             model.nodeStructureChanged(root);
+            
+            setDragEnabled(true);
+            setTransferHandler(new DataTreeTransferHandler());
         }
         
         setToggleClickCount(0); // avoid expanding when double clicking
@@ -144,6 +147,20 @@ public abstract class DataTree extends JTree {
         model.nodeStructureChanged(parentFunctionNode);
     }
 
+    public DataNode[] getSelectedNodes() {
+        TreePath[] paths = getSelectionModel().getSelectionPaths();
+
+        int nbPath = paths.length;
+
+        DataNode[] nodes = new DataNode[nbPath];
+
+        for (int i = 0; i < nbPath; i++) {
+            nodes[i] = (DataNode) paths[i].getLastPathComponent();
+        }
+
+        return nodes;
+    }
+    
     public static abstract class DataNode extends DefaultMutableTreeNode {
 
         public enum DataNodeType {

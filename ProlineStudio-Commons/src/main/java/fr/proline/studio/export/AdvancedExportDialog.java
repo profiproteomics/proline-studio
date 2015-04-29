@@ -171,7 +171,8 @@ public class AdvancedExportDialog extends DefaultDialog  {
         setInternalComponent(createAdvancedExportPanel());
         loadDefaultExportConfig();
 		loadExportConfig();
-		fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+		if(m_exportDefaultConfig!=null )
+			fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
 		
        
         
@@ -276,8 +277,10 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		
 		List<String> defaultSheetIdsList = new ArrayList<String>();
 		List<String> sheetIdsList = new ArrayList<String>();
-		for(int i=0; i<param.sheets.length;i++) {
-			sheetIdsList.add(param.sheets[i].id);
+		if(param!=null) {
+			for(int i=0; i<param.sheets.length;i++) {
+				sheetIdsList.add(param.sheets[i].id);
+			}
 		}
 		for(int i=0; i<defaultParam.sheets.length;i++) {
 			defaultSheetIdsList.add(defaultParam.sheets[i].id);
@@ -325,18 +328,20 @@ public class AdvancedExportDialog extends DefaultDialog  {
 			
 			scrollPane.setViewportView(table);
 
-			// convert [] into iterable:
-			List<ExportExcelSheet> paramSheets_list = new ArrayList<ExportExcelSheet>(Arrays.asList(param.sheets));
-			
-			// find the corresponding sheet in custom param file
 			ExportExcelSheet paramSheet = null; 
-			for(int k=0; k<paramSheets_list.size();k++) {
-				//if(defaultSheetIdsList.contains(sheets_list.get(k).id)) {
-				if(param.sheets[k].id.equals(defaultParam.sheets[i].id)) {
-					paramSheet = param.sheets[k];
+			if(param!=null) {
+				// convert [] into iterable:
+				List<ExportExcelSheet> paramSheets_list = new ArrayList<ExportExcelSheet>(Arrays.asList(param.sheets));
+				
+				// find the corresponding sheet in custom param file
+				paramSheet = null; 
+				for(int k=0; k<paramSheets_list.size();k++) {
+					//if(defaultSheetIdsList.contains(sheets_list.get(k).id)) {
+					if(param.sheets[k].id.equals(defaultParam.sheets[i].id)) {
+						paramSheet = param.sheets[k];
+					}
 				}
 			}
-			
 			
 			for(int j=0; j< defaultParam.sheets[i].fields.length ; j++) {
 				
@@ -538,7 +543,10 @@ public class AdvancedExportDialog extends DefaultDialog  {
 //	                   }
 	                   m_configFile.setText(absolutePath);
 	                   loadExportConfig();
-	                   
+	                 
+	           		if(m_exportDefaultConfig!=null )
+	           			fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+	           		
 	                   
 	               }
 			

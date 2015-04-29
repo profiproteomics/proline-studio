@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 import java.util.prefs.Preferences;
@@ -267,10 +268,21 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		
 	}
 
-	
+
 	private void fillExportFormatTable(ExportConfig defaultParam, ExportConfig param) {
 		//reset panes:
+		
 		tabbedPane.removeAll();	
+		
+		List<String> defaultSheetIdsList = new ArrayList<String>();
+		List<String> sheetIdsList = new ArrayList<String>();
+		for(int i=0; i<param.sheets.length;i++) {
+			sheetIdsList.add(param.sheets[i].id);
+		}
+		for(int i=0; i<defaultParam.sheets.length;i++) {
+			defaultSheetIdsList.add(defaultParam.sheets[i].id);
+		}
+		
 		
 		// create tab panes
 		for(int i = 0; i<defaultParam.sheets.length;i++) {
@@ -312,25 +324,53 @@ public class AdvancedExportDialog extends DefaultDialog  {
 			};
 			
 			scrollPane.setViewportView(table);
-			// add the data into the model
+
+			// convert [] into iterable:
+			List<ExportExcelSheet> paramSheets_list = new ArrayList<ExportExcelSheet>(Arrays.asList(param.sheets));
+			
+			// find the corresponding sheet in custom param file
+			ExportExcelSheet paramSheet = null; 
+			for(int k=0; k<paramSheets_list.size();k++) {
+				//if(defaultSheetIdsList.contains(sheets_list.get(k).id)) {
+				if(param.sheets[k].id.equals(defaultParam.sheets[i].id)) {
+					paramSheet = param.sheets[k];
+				}
+			}
 			
 			
 			for(int j=0; j< defaultParam.sheets[i].fields.length ; j++) {
+				
 				Vector v = new Vector();
 				v.add(defaultParam.sheets[i].fields[j].id);
 				v.add(defaultParam.sheets[i].fields[j].title);
-				// TODO: check if field is to be shown or not (if present both in defaultParam and in param)
-				v.add(true);
-				tableModel.addRow(v);
 				
+				if(paramSheet!=null) { // if the sheet is present in both files
+					if( isDefaultParamFieldContainedInCustomParamFieldsList(defaultParam.sheets[i].fields[j] , paramSheet.fields ) ) {
+						v.add(true);
+					} else {
+						v.add(false);	
+					}
+				} else {
+					v.add(false); 
+				}
+				tableModel.addRow(v);
 			}
-			//
+
 			table.setModel(tableModel);
 			//table.getColumnModel().getColumn(0).setPreferredWidth(141);
-			
-			
-			
+
 		}
+	}
+	
+	private boolean isDefaultParamFieldContainedInCustomParamFieldsList (ExportExcelSheetField sheetFieldToCompare,  ExportExcelSheetField[] fields) {
+		// this method checks if sheetFieldToCompare is contained in the fields list of elements. It compares by the id only.
+		
+		for(int i=0; i<fields.length; i++) {
+			if(fields[i].id.equals(sheetFieldToCompare.id)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 
@@ -341,19 +381,17 @@ public class AdvancedExportDialog extends DefaultDialog  {
     	//exportPanel.setLayout(null);
     	exportPanel.setSize(new Dimension(800, 700));
    		
-        // added by AW:-----------------------------------------
+        // added 
            
-    	setSize(new Dimension(1000, 300));
+    	setSize(new Dimension(800, 300));
     	//setSize(new Dimension(858, 450));
         
    		final JPanel insidePanel = new JPanel(null);
    		exportPanel.add(insidePanel);
-   		insidePanel.setSize(new Dimension(750, 600));
+   		insidePanel.setSize(new Dimension(800, 600));
    		insidePanel.setPreferredSize(new Dimension(750, 600));
 		
 
-   		
-   	
 		final JPanel optionPane = new JPanel();
 		optionPane.setVisible(false);
 		optionPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));

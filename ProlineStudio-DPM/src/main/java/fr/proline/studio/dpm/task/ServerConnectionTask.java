@@ -7,6 +7,8 @@ import com.google.api.client.util.ArrayMap;
 import fr.proline.repository.AbstractDatabaseConnector;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,8 +39,6 @@ public class ServerConnectionTask extends AbstractServiceTask {
     @Override
     public boolean askService() {
 
-        
-        
 
         try {
             // create the request
@@ -94,7 +94,9 @@ public class ServerConnectionTask extends AbstractServiceTask {
             String databaseUser = (String) result.get("javax.persistence.jdbc.user");
             String databaseDriver = (String) result.get("javax.persistence.jdbc.driver");
             String databaseURL = (String) result.get("javax.persistence.jdbc.url");
-      
+            String jmsHost =  (String) result.get(JMSConnectionManager.JMS_SERVER_HOST_PARAM_KEY);
+            BigDecimal jmsPort = (BigDecimal) result.get(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY);
+             
             if ((databaseUser == null) || (databaseDriver == null) || (databaseURL == null)) {
                  m_taskError = new TaskError("Internal Error : Dabasase Parameters uncomplete");
                 return false;
@@ -104,6 +106,11 @@ public class ServerConnectionTask extends AbstractServiceTask {
             m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_PASSWORD_KEY, m_password);
             m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_DRIVER_KEY, databaseDriver);
             m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, databaseURL);
+            m_databaseProperties.put(AbstractDatabaseConnector.PERSISTENCE_JDBC_URL_KEY, databaseURL);
+            if(jmsHost != null)
+                m_databaseProperties.put(JMSConnectionManager.JMS_SERVER_HOST_PARAM_KEY, jmsHost);
+            if(jmsPort != null)
+                m_databaseProperties.put(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY, jmsPort.intValue());
 
    
             

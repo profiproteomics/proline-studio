@@ -4,7 +4,7 @@ package fr.proline.studio.installer;
 
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.ServerConnectionManager;
-import fr.proline.studio.dpm.task.util.JMSConstants;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rserver.RServerManager;
@@ -54,7 +54,7 @@ public class Installer extends ModuleInstall {
         RServerManager.getRServerManager().stopRProcess();
         
         //Close connection to JMS Server if needed
-        JMSConstants.closeConnection();
+        JMSConnectionManager.getJMSConnectionManager().closeConnection();
         
         return true;
     }

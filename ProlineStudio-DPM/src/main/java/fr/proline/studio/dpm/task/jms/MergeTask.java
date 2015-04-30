@@ -8,7 +8,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
-import fr.proline.studio.dpm.task.util.JMSConstants;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.HashMap;
 import java.util.List;
 import javax.jms.JMSException;
@@ -67,7 +67,7 @@ public class MergeTask extends AbstractJMSTask {
 
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
-        message.setStringProperty(JMSConstants.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/MergeResults");
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/MergeResults");
 
         //  Send the Message
         m_producer.send(message);

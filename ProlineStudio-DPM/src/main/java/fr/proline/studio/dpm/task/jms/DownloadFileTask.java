@@ -5,7 +5,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
-import fr.proline.studio.dpm.task.util.JMSConstants;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -39,15 +39,15 @@ public class DownloadFileTask extends AbstractJMSTask {
     public void taskRun() throws JMSException {
         
         
-        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConstants.PROLINE_GET_RSC_METHOD_NAME, Integer.valueOf(m_id));
+        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_GET_RSC_METHOD_NAME, Integer.valueOf(m_id));
         jsonRequest.setNamedParams(createParams());
            
         final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
 
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
-        message.setStringProperty(JMSConstants.PROLINE_SERVICE_NAME_KEY, "proline/misc/ResourceService");
-        message.setStringProperty(JMSConstants.PROLINE_NODE_ID_KEY, m_serverNodeId);
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/misc/ResourceService");
+        message.setStringProperty(JMSConnectionManager.PROLINE_NODE_ID_KEY, m_serverNodeId);
 	
         //  Send the Message
         m_producer.send(message);
@@ -76,7 +76,7 @@ public class DownloadFileTask extends AbstractJMSTask {
                 m_loggerProline.debug("Saving stream to File [" + m_userFilePath + ']');
 
                 /* Block until all BytesMessage content is streamed into File OutputStream */
-                jmsMessage.setObjectProperty(JMSConstants.HORNET_Q_SAVE_STREAM_KEY, bos);
+                jmsMessage.setObjectProperty(JMSConnectionManager.HORNET_Q_SAVE_STREAM_KEY, bos);
                 success = true;
             } catch (FileNotFoundException | JMSException ex) {
                 m_loggerProline.error("Error handling JMS_HQ_SaveStream OutputStream [" + m_userFilePath + ']', ex);

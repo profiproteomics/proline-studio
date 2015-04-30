@@ -7,7 +7,7 @@ import fr.proline.studio.dam.taskinfo.AbstractLongTask;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.util.JMSConstants;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
@@ -65,11 +65,10 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
     }
     
     /**
-     * Method called by the AccessJMSManagerThread to ask for the service to be done
-     * @param connection
+     * Method called by the AccessJMSManagerThread to ask for the service to be done     
      * @throws javax.jms.JMSException
      */
-    public void askJMS(Connection connection) throws JMSException {
+    public void askJMS() throws JMSException {
         m_startRun = System.currentTimeMillis();
         try {
            // VDS : already in constructor ?
@@ -82,7 +81,7 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
             Session m_session  = AccessJMSManagerThread.getAccessJMSManagerThread().getSession();
 
             // Step 6. Create a JMS Message Producer (Producer MUST be confined in current Thread)
-            m_producer = m_session.createProducer(JMSConstants.getServiceQueue());
+            m_producer = m_session.createProducer(JMSConnectionManager.getJMSConnectionManager().getServiceQueue());
             m_replyQueue = m_session.createTemporaryQueue();
             m_responseConsumer = m_session.createConsumer(m_replyQueue);
 

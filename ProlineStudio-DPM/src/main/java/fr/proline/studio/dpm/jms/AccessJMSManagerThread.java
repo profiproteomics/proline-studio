@@ -2,7 +2,7 @@ package fr.proline.studio.dpm.jms;
 
 import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.task.jms.AbstractJMSTask;
-import fr.proline.studio.dpm.task.util.JMSConstants;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.LinkedList;
 import javax.jms.*;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class AccessJMSManagerThread extends Thread {
         super("AccessJMSManagerThread"); // useful for debugging
         try {
             // Get JMS Connection
-            m_connection = JMSConstants.getJMSConnection();
+            m_connection = JMSConnectionManager.getJMSConnectionManager().getJMSConnection();
             m_connection.start(); // Explicitely start connection to begin Consumer reception 
             m_session = m_connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
         } catch (JMSException e) {
@@ -69,7 +69,7 @@ public class AccessJMSManagerThread extends Thread {
                 //System.out.println("Action : "+action.getClass().toString()+" "+System.currentTimeMillis());
 
                 // fetch data
-                task.askJMS(JMSConstants.getJMSConnection());
+                task.askJMS();
 
             }
 

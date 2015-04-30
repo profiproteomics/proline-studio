@@ -9,7 +9,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
-import fr.proline.studio.dpm.task.util.JMSConstants;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,14 +40,14 @@ public class ExportRSMTask extends AbstractJMSTask {
     @Override
     public void taskRun() throws JMSException {
         
-        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConstants.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_id));
+        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_id));
         jsonRequest.setNamedParams(createParams());
            
         final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
 
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
-        message.setStringProperty(JMSConstants.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ExportResultSummary");
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ExportResultSummary");
 	
         //  Send the Message
         m_producer.send(message);
@@ -122,7 +122,7 @@ public class ExportRSMTask extends AbstractJMSTask {
             
             HashMap returnedValues = (HashMap) result;                    
             m_filePathResult[0] = (String) ((ArrayList)returnedValues.get("file_paths")).get(0);
-            m_JMSNodeID[0] = (String) returnedValues.get(JMSConstants.PROLINE_NODE_ID_KEY);
+            m_JMSNodeID[0] = (String) returnedValues.get(JMSConnectionManager.PROLINE_NODE_ID_KEY);
         }
                
         m_currentState = JMSState.STATE_DONE;

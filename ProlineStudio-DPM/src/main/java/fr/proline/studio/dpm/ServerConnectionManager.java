@@ -8,6 +8,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.ServerConnectionTask;
 import fr.proline.studio.dpm.task.UserAccountTask;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.util.HashMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -181,6 +182,9 @@ public class ServerConnectionManager {
            @Override
            public void run(boolean success) {
                if (success) {
+                    JMSConnectionManager.getJMSConnectionManager().setJMSServerHost((String)databaseProperties.get(JMSConnectionManager.JMS_SERVER_HOST_PARAM_KEY));
+                    if(databaseProperties.containsKey(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY))
+                        JMSConnectionManager.getJMSConnectionManager().setJMSServerPort((Integer)databaseProperties.get(JMSConnectionManager.JMS_SERVER_PORT_PARAM_KEY));
                    // we now ask for the database connection
                    tryDatabaseConnection(connectionCallback, databaseProperties, projectUser, false);
                } else {

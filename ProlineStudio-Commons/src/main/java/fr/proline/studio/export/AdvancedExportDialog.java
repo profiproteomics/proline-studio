@@ -86,9 +86,10 @@ public class AdvancedExportDialog extends DefaultDialog  {
 	private JComboBox comboBox_Orientation;
 	//private JButton addFileButton;
 	private JLabel lblExportToFile;
-	private JButton btnExportOptions;
+	private JCheckBox chk_ExportOptions;
 	private ExportConfig m_exportConfig;
 	private ExportConfig m_exportDefaultConfig;
+	private JLabel lbl_exportType;
     
     public static AdvancedExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
@@ -204,6 +205,8 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		   m_exportDefaultConfig = new ExportConfig();
 			String jsonString = "";
 			try {
+				//GetExportInformationTask
+				
 				jsonString = new String(Files.readAllBytes(Paths.get("D:\\Proline\\export perso\\allFieldsIdent.json")));
 			} catch (IOException e) {
 				
@@ -291,11 +294,12 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		for(int i = 0; i<defaultParam.sheets.length;i++) {
 			panel = new JPanel();
 			tabbedPane.addTab(defaultParam.sheets[i].title, null, panel, null);
-			panel.setLayout(null);
+			panel.setLayout(new BorderLayout(0, 0));
+			//panel.setLayout(null);
 			// read fields to fill in jtable into this tabbed pane
 			
 			scrollPane = new JScrollPane();
-			scrollPane.setBounds(0, 0, 698, 290);
+			//scrollPane.setBounds(0, 0, 699, 290);
 			panel.add(scrollPane);
 			
 			table = new JTable();
@@ -327,7 +331,7 @@ public class AdvancedExportDialog extends DefaultDialog  {
 			};
 			
 			scrollPane.setViewportView(table);
-
+			// we want to find which field is at the same time default field and custom field. (to mark it).
 			ExportExcelSheet paramSheet = null; 
 			if(param!=null) {
 				// convert [] into iterable:
@@ -384,13 +388,14 @@ public class AdvancedExportDialog extends DefaultDialog  {
     	// JPanel exportPanel = new JPanel(new GridBagLayout());
     	final JPanel exportPanel = new JPanel();
     	//exportPanel.setLayout(null);
-    	exportPanel.setSize(new Dimension(800, 700));
+    	exportPanel.setSize(new Dimension(800, 250));
    		
         // added 
            
-    	setSize(new Dimension(800, 300));
+    	setSize(new Dimension(600, 400));
     	//setSize(new Dimension(858, 450));
-        
+    	setBounds(100, 100, 772, 600);
+    	
    		final JPanel insidePanel = new JPanel(null);
    		exportPanel.add(insidePanel);
    		insidePanel.setSize(new Dimension(800, 600));
@@ -400,21 +405,25 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		final JPanel optionPane = new JPanel();
 		optionPane.setVisible(false);
 		optionPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+//		optionPane.setSize(new Dimension(600, 650));
+//		optionPane.setPreferredSize(new Dimension(600, 650));
+//		optionPane.setBounds(new Rectangle(20, 53, 636, 446));
 		optionPane.setSize(new Dimension(600, 650));
-		optionPane.setPreferredSize(new Dimension(600, 650));
-		optionPane.setBounds(new Rectangle(20, 53, 736, 446));
+		optionPane.setPreferredSize(new Dimension(800, 500));
+		optionPane.setBounds(new Rectangle(10, 105, 736, 446));
+		
 		//optionPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		//setContentPane(insidePanel); // ? ou exportPane? setContentPane(insidePanel);
 		insidePanel.setLayout(null);
 		insidePanel.add(optionPane);
 		optionPane.setLayout(null);
 		//
-		setSize(new Dimension(1000, 300));
-		
+		setSize(new Dimension(800, 250));
+		setPreferredSize(new Dimension(800, 250));
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		tabbedPane.setBounds(10, 125, 704, 318);
+		tabbedPane.setBounds(10, 125, 600, 318);
 		optionPane.add(tabbedPane);
 		
 		
@@ -510,7 +519,8 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		optionPane.add(comboBox_ProteinSets);
 		
 		btnNewButton = new JButton("Save");
-		btnNewButton.setIcon(new ImageIcon(ExportDialog.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
+		//btnNewButton.setIcon(new ImageIcon(ExportDialog.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
+		btnNewButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
 		btnNewButton.setBounds(468, 11, 89, 23);
 		optionPane.add(btnNewButton);
 		
@@ -554,7 +564,8 @@ public class AdvancedExportDialog extends DefaultDialog  {
 			//---
 			}
 		});
-		btnLoad.setIcon(new ImageIcon(ExportDialog.class.getResource("/javax/swing/plaf/metal/icons/ocean/directory.gif")));
+		btnLoad.setIcon(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
+		//btnLoad.setIcon(new ImageIcon(ExportDialog.class.getResource("/javax/swing/plaf/metal/icons/ocean/directory.gif")));
 		btnLoad.setBounds(365, 11, 89, 23);
 		optionPane.add(btnLoad);
 		
@@ -577,17 +588,28 @@ public class AdvancedExportDialog extends DefaultDialog  {
 			}
 		});
 		
-		addFileButton.setIcon(new ImageIcon(ExportDialog.class.getResource("/com/sun/java/swing/plaf/windows/icons/TreeOpen.gif")));
+		//addFileButton.setIcon(new ImageIcon(ExportDialog.class.getResource("/com/sun/java/swing/plaf/windows/icons/TreeOpen.gif")));
+		addFileButton.setIcon(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
 		
-		btnExportOptions = new JButton("Options");
-		btnExportOptions.setBounds(641, 15, 105, 27);
-		insidePanel.add(btnExportOptions);
-		btnExportOptions.addActionListener(new ActionListener() {
+		chk_ExportOptions = new JCheckBox("Custom export");
+		chk_ExportOptions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				optionPane.setVisible(!optionPane.isVisible());
-				setSize(new Dimension(optionPane.getWidth(), 300 + 400 *(optionPane.isVisible()?1:0))); // elongate the window if option is selected
+				optionPane.setVisible(chk_ExportOptions.isSelected());
+				setSize(new Dimension(exportPanel.getWidth()+6 /* drift? */, 250 + 400 *(chk_ExportOptions.isSelected()?1:0))); // elongate the window if option is selected
 			}
 		});
+		chk_ExportOptions.setBounds(626, 71, 124, 27);
+		insidePanel.add(chk_ExportOptions);
+		
+//		btnExportOptions = new JButton("Options");
+//		btnExportOptions.setBounds(641, 15, 105, 27);
+//		insidePanel.add(btnExportOptions);
+//		btnExportOptions.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				optionPane.setVisible(!optionPane.isVisible());
+//				setSize(new Dimension(optionPane.getWidth(), 300 + 400 *(optionPane.isVisible()?1:0))); // elongate the window if option is selected
+//			}
+//		});
 		
        //final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
        //addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
@@ -645,17 +667,21 @@ public class AdvancedExportDialog extends DefaultDialog  {
 	
 	       m_exportAllPSMsChB = new JCheckBox(" Export all PSMs");
 	       insidePanel.add(m_exportAllPSMsChB);
+	       m_exportAllPSMsChB.setBounds(6, 78, 114, 20);
 	   }
 	   
+	   lbl_exportType = new JLabel("Export Type:");
+       lbl_exportType.setBounds(10, 44, 93, 27);
+       insidePanel.add(lbl_exportType);
 	   
 	   m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
 	   m_exporTypeCombobox.setSelectedIndex(0);
-	
+	   m_exporTypeCombobox.setBounds(86, 47, 206, 20);
 	   insidePanel.add(new JSeparator(SwingConstants.HORIZONTAL));
 	   insidePanel.add(new JLabel("Export Type:"));
-	       insidePanel.add(m_exporTypeCombobox);
+	   insidePanel.add(m_exporTypeCombobox);
 	   
-	       setSize(new Dimension(optionPane.getWidth(), 300 + 400 *(optionPane.isVisible()?1:0))); // elongate the window if option is selected
+	   setSize(new Dimension(exportPanel.getWidth(), 250 + 400 *(!chk_ExportOptions.isSelected()?1:0))); // elongate the window if option is selected
 	   //----
 		return exportPanel;
            

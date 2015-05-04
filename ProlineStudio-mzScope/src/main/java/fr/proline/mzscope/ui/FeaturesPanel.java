@@ -118,7 +118,15 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
                 if (featureTable.getSelectedRow() == -1) {
                     return;
                 }
-                Feature f = features.get(featureTable.convertRowIndexToModel(featureTable.getSelectedRow()));
+                // Retrieve Selected Row
+                int selectedRow = featureTable.getSelectedRow();
+                CompoundTableModel compoundTableModel = (CompoundTableModel) featureTable.getModel();
+                if (compoundTableModel.getRowCount() != 0) {
+                    // convert according to the sorting
+                    selectedRow = featureTable.convertRowIndexToModel(selectedRow);
+                    selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
+                }
+                Feature f = features.get(selectedRow);
                 fireDisplayFeature(f, rawFile);
             }
         });
@@ -126,7 +134,15 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
         menuItemViewSelectedRawFile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Feature f = features.get(featureTable.convertRowIndexToModel(featureTable.getSelectedRow()));
+                // Retrieve Selected Row
+                int selectedRow = featureTable.getSelectedRow();
+                CompoundTableModel compoundTableModel = (CompoundTableModel) featureTable.getModel();
+                if (compoundTableModel.getRowCount() != 0) {
+                    // convert according to the sorting
+                    selectedRow = featureTable.convertRowIndexToModel(selectedRow);
+                    selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
+                }
+                Feature f = features.get(selectedRow);
                 fireDisplayFeatureInCurrentRawFile(f);
             }
         });
@@ -172,7 +188,15 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
     private void featureTableMouseClicked(MouseEvent evt) {
         if ((features != null) && (!features.isEmpty()) && (rawFile != null)
                 && (evt.getClickCount() == 2) && (featureTable.getSelectedRow() != -1)) {
-            Feature f = features.get(featureTable.convertRowIndexToModel(featureTable.getSelectedRow()));
+            // Retrieve Selected Row
+            int selectedRow = featureTable.getSelectedRow();
+            CompoundTableModel compoundTableModel = (CompoundTableModel) featureTable.getModel();
+            if (compoundTableModel.getRowCount() != 0) {
+                // convert according to the sorting
+                selectedRow = featureTable.convertRowIndexToModel(selectedRow);
+                selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
+            }
+            Feature f = features.get(selectedRow);
             fireDisplayFeature(f, rawFile);
         }
     }
@@ -261,7 +285,15 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
             if (featureTable.getSelectedRow() == -1) {
                 return;
             }
-            featureTable.displayInRawFile(featureTable.convertRowIndexToModel(featureTable.getSelectedRow()));
+            // Retrieve Selected Row
+                int selectedRow = featureTable.getSelectedRow();
+                CompoundTableModel compoundTableModel = (CompoundTableModel) featureTable.getModel();
+                if (compoundTableModel.getRowCount() != 0) {
+                    // convert according to the sorting
+                    selectedRow = featureTable.convertRowIndexToModel(selectedRow);
+                    selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
+                }
+            featureTable.displayInRawFile(selectedRow);
         }
 
         @Override
@@ -282,7 +314,14 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
             if (featureTable.getSelectedRow() == -1) {
                 return;
             }
-            featureTable.displayInCurrentRawFile(featureTable.convertRowIndexToModel(featureTable.getSelectedRow()));
+            int selectedRow = featureTable.getSelectedRow();
+                CompoundTableModel compoundTableModel = (CompoundTableModel) featureTable.getModel();
+                if (compoundTableModel.getRowCount() != 0) {
+                    // convert according to the sorting
+                    selectedRow = featureTable.convertRowIndexToModel(selectedRow);
+                    selectedRow = compoundTableModel.convertCompoundRowToBaseModelRow(selectedRow);
+                }
+            featureTable.displayInCurrentRawFile(selectedRow);
         }
 
         @Override

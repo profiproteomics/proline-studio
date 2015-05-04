@@ -207,9 +207,24 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
             return;
         }
         if (e.getType() == RowSorterEvent.Type.SORT_ORDER_CHANGED) {
-            modelSelectedIdxBeforeSort = featureTable.convertRowIndexToModel(featureTable.getSelectedRow());
+            // Retrieve Selected Row
+            modelSelectedIdxBeforeSort = featureTable.getSelectedRow();
+            CompoundTableModel compoundTableModel = (CompoundTableModel) featureTable.getModel();
+            if (compoundTableModel.getRowCount() != 0) {
+                // convert according to the sorting
+                modelSelectedIdxBeforeSort = featureTable.convertRowIndexToModel(modelSelectedIdxBeforeSort);
+                modelSelectedIdxBeforeSort = compoundTableModel.convertCompoundRowToBaseModelRow(modelSelectedIdxBeforeSort);
+            }
+            //modelSelectedIdxBeforeSort = featureTable.convertRowIndexToModel(featureTable.getSelectedRow());
         } else if (modelSelectedIdxBeforeSort != -1) {
-            int idx = featureTable.convertRowIndexToView(modelSelectedIdxBeforeSort);
+            int idx =modelSelectedIdxBeforeSort;
+            CompoundTableModel compoundTableModel = (CompoundTableModel) featureTable.getModel();
+            if (compoundTableModel.getRowCount() != 0) {
+                // convert according to the sorting
+                idx = featureTable.convertRowIndexToModel(idx);
+                idx = compoundTableModel.convertCompoundRowToBaseModelRow(idx);
+            }
+            //int idx = featureTable.convertRowIndexToView(modelSelectedIdxBeforeSort);
             featureTable.scrollRectToVisible(new Rectangle(featureTable.getCellRect(idx, 0, true)));
         }
     }

@@ -132,6 +132,7 @@ public class IconManager {
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
     private final static HashMap<IconType, ImageIcon> m_iconHourGlassMap = new HashMap<>();
+    private final static HashMap<IconType, ImageIcon> m_grayedIconMap = new HashMap<>();
     private final static HashMap<IconType, String> m_iconURLMap = new HashMap<>(); 
     
     
@@ -152,6 +153,45 @@ public class IconManager {
         return icon;
     }
 
+    public static ImageIcon getGrayedIcon(IconType iconType) {
+        
+        ImageIcon grayedIcon = m_grayedIconMap.get(iconType);
+        if (grayedIcon == null) {
+            String path = getIconFilePath(iconType);
+            Image imSource = ImageUtilities.loadImage(path, false);
+            int sourceWidth = imSource.getWidth(null);
+            int sourceHeight = imSource.getHeight(null);
+
+            BufferedImage im = new BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB);
+
+            im.getGraphics().drawImage(imSource, 0, 0, null);
+
+            // grey out the image
+            for (int x = 0; x < sourceWidth; x++) {
+                for (int y = 0; y < sourceHeight; y++) {
+                    int color = im.getRGB(x, y);
+                    int alpha = (color & 0xFF000000);
+                    int red = (color & 0x00FF0000) >> 16;
+                    int green = (color & 0x0000FF00) >> 8;
+                    int blue = color & 0x000000FF;
+                    int greyLevel = (int) Math.round(((double) (red + green + blue)) / 3.0);
+                    // lighter grey
+                    greyLevel  += (int) 100;
+                    if (greyLevel>255) greyLevel = 255;
+                    int grey = alpha + (greyLevel << 16) + (greyLevel << 8) + greyLevel;
+                    im.setRGB(x, y, grey);
+                }
+            }
+
+ 
+
+            grayedIcon = new ImageIcon(im);
+            m_grayedIconMap.put(iconType, grayedIcon);
+        }
+
+        return grayedIcon;
+    }
+    
     public static ImageIcon getIconWithHourGlass(IconType iconType) {
 
         ImageIcon iconWithHourGlass = m_iconHourGlassMap.get(iconType);

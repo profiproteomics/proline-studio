@@ -125,13 +125,14 @@ public class SpectralCountDialog extends DefaultDialog {
             setButtonIcon(DefaultDialog.BUTTON_OK, IconManager.getIcon(IconManager.IconType.OK));
 
             //Reinit tree selection for Ref RSM weight computation    
+            m_tree.revertSelectionSetDisabled(true);
             m_tree.setSelection(new ArrayList<ResultSummary>());
             JScrollPane scrollPane = new JScrollPane();
             TreeSelectionPanel treeSelectionPanel = TreeSelectionPanel.getTreeSelectionPanel(m_tree, "<html><b>Step 3:</b> Select Weight Computation Identification Summaries.</html>");
             scrollPane.setViewportView(treeSelectionPanel);
 
             replaceInternaleComponent(scrollPane);
-
+        
 
             revalidate();
             repaint();
@@ -151,7 +152,8 @@ public class SpectralCountDialog extends DefaultDialog {
             }
 
             m_weightRefIdentRSMs = TreeSelectionPanel.getTreeSelectionPanel().getSelectedRSMDSNodeList();  
-            
+            m_tree.setSelection(new ArrayList<ResultSummary>());
+            m_tree.revertSelectionSetDisabled(false);
             return true;
         }
 
@@ -159,6 +161,10 @@ public class SpectralCountDialog extends DefaultDialog {
 
     @Override
     protected boolean cancelCalled() {
+        //Reset previous tree selection/disabled data if needed
+        m_tree.setSelection(new ArrayList<ResultSummary>());
+        m_tree.revertSelectionSetDisabled(false);
+
         return true;
     }
 

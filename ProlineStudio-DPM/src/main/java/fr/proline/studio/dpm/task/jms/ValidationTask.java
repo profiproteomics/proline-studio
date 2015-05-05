@@ -72,6 +72,8 @@ public class ValidationTask extends AbstractJMSTask  {
             message.setJMSReplyTo(m_replyQueue);
             message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ValidateResultSet");
 	
+            setTaskInfoRequest(message.getText());
+            
             // Step 8. Send the Message
             m_producer.send(message);
             m_loggerProline.info("Message [{}] sent", message.getJMSMessageID());

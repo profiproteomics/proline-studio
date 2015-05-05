@@ -55,6 +55,8 @@ public class CertifyIdentificationTask extends AbstractJMSTask {
         message.setJMSReplyTo(m_replyQueue);
         message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/CertifyResultFiles");
 
+        setTaskInfoRequest(message.getText());
+        
         // Send the Message
         m_producer.send(message);
         m_loggerProline.info("Message [{}] sent", message.getJMSMessageID());

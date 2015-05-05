@@ -14,8 +14,7 @@ import org.hornetq.core.remoting.impl.netty.TransportConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * TO TRANSFORM TO JMSMANAGER ... 
+/** 
  * @author VD225637
  */
 public class JMSConnectionManager {
@@ -25,7 +24,7 @@ public class JMSConnectionManager {
     
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
 
-    public static final String SERVICE_REQUEST_QUEUE_NAME = "ProlineServiceRequestQueueVDS";
+    public static final String SERVICE_REQUEST_QUEUE_NAME = "ProlineServiceRequestQueue";
 
     public static final String SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME = "ProlineServiceMonitoringNotificationTopic";
 

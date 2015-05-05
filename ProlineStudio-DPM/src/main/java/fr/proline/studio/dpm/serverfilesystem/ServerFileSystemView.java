@@ -1,9 +1,10 @@
 package fr.proline.studio.dpm.serverfilesystem;
 
 import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.FileSystemBrowseTask;
-import fr.proline.studio.dpm.task.FileSystemRootsTask;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,25 +43,46 @@ public class ServerFileSystemView extends FileSystemView {
                     boolean[] fileLoaded = new boolean[1];
                     fileLoaded[0] = false;
 
-                    AbstractServiceCallback callback = new AbstractServiceCallback() {
+                    if(JMSConnectionManager.getJMSConnectionManager().isJMSDefined()){
+                         AbstractJMSCallback callback = new AbstractJMSCallback() {
 
-                        @Override
-                        public boolean mustBeCalledInAWT() {
-                            return false;
-                        }
-
-                        @Override
-                        public void run(boolean success) {
-                            synchronized (mutexRootsLoaded) {
-                                mutexRootsLoaded.notifyAll();
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return false;
                             }
-                        }
-                    };
+
+                            @Override
+                            public void run(boolean success) {
+
+                                synchronized (mutexRootsLoaded) {
+                                    mutexRootsLoaded.notifyAll();
+                                }
+                            }
+                        };
+
+                        fr.proline.studio.dpm.task.jms.FileSystemRootsTask task = new fr.proline.studio.dpm.task.jms.FileSystemRootsTask(callback, rootInfoArray);
+                        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                        
+                    } else {
+                        AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return false;
+                            }
+
+                            @Override
+                            public void run(boolean success) {
+                                synchronized (mutexRootsLoaded) {
+                                    mutexRootsLoaded.notifyAll();
+                                }
+                            }
+                        };
 
 
-                    FileSystemRootsTask task = new FileSystemRootsTask(callback, rootInfoArray);
-                    AccessServiceThread.getAccessServiceThread().addTask(task);
-
+                        fr.proline.studio.dpm.task.FileSystemRootsTask task = new fr.proline.studio.dpm.task.FileSystemRootsTask(callback, rootInfoArray);
+                        AccessServiceThread.getAccessServiceThread().addTask(task);
+                    }
                     // wait untill the files are loaded
                     mutexRootsLoaded.wait();
                 }
@@ -150,29 +172,48 @@ public class ServerFileSystemView extends FileSystemView {
                 boolean[] fileLoaded = new boolean[1];
                 fileLoaded[0] = false;
 
+                if(JMSConnectionManager.getJMSConnectionManager().isJMSDefined()){
+                     AbstractJMSCallback callback = new AbstractJMSCallback() {
+
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return false;
+                            }
+
+                            @Override
+                            public void run(boolean success) {
+
+                                synchronized (mutexFileLoaded) {
+                                    mutexFileLoaded.notifyAll();
+                                }
+                            }
+                        };
+
+                        fr.proline.studio.dpm.task.jms.FileSystemBrowseTask task = new fr.proline.studio.dpm.task.jms.FileSystemBrowseTask(callback, dir.getPath(), files);
+                        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                } else {
 
 
+                    AbstractServiceCallback callback = new AbstractServiceCallback() {
 
-                AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return false;
-                    }
-
-                    @Override
-                    public void run(boolean success) {
-                        synchronized (mutexFileLoaded) {
-                            mutexFileLoaded.notifyAll();
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return false;
                         }
-                    }
-                };
+
+                        @Override
+                        public void run(boolean success) {
+                            synchronized (mutexFileLoaded) {
+                                mutexFileLoaded.notifyAll();
+                            }
+                        }
+                    };
 
 
-                FileSystemBrowseTask task = new FileSystemBrowseTask(callback, dir.getPath(), files);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
+                    fr.proline.studio.dpm.task.FileSystemBrowseTask task = new fr.proline.studio.dpm.task.FileSystemBrowseTask(callback, dir.getPath(), files);
+                    AccessServiceThread.getAccessServiceThread().addTask(task);
 
-                // wait untill the files are loaded
+                }                // wait untill the files are loaded
                 mutexFileLoaded.wait();
             }
         

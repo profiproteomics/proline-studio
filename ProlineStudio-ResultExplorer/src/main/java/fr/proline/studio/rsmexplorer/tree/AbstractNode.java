@@ -35,6 +35,8 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
     protected NodeTypes m_type;
 
     protected boolean m_isChanging = false;
+    
+    protected boolean m_isDisabled = false;
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     
@@ -56,6 +58,9 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
     public ImageIcon getIcon(IconManager.IconType iconType) {
         if (m_isChanging) {
             return IconManager.getIconWithHourGlass(iconType);
+        }
+        if(m_isDisabled) {
+            return IconManager.getGrayedIcon(iconType);
         }
         return IconManager.getIcon(iconType);
     }
@@ -101,6 +106,14 @@ public abstract class AbstractNode extends DefaultMutableTreeNode implements Clo
     
     public boolean isChanging() {
         return m_isChanging;
+    }
+    
+    public void setIsDisabled(boolean isDisabled) {
+        m_isDisabled = isDisabled;
+    }
+    
+    public boolean isDisabled() {
+        return m_isDisabled;
     }
     
     public String getToolTipText() {

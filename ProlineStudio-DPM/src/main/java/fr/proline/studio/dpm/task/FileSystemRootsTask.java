@@ -5,7 +5,6 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import fr.proline.studio.dam.taskinfo.TaskError;

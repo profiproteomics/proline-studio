@@ -14,6 +14,7 @@ import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.*;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -31,13 +32,16 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     
     
     protected RSMTreeModel m_model;
-    
+    protected RSMTreeSelectionModel m_selectionModel;
     protected HashMap<AbstractData, AbstractNode> loadingMap = new HashMap<>();
     
     protected void initTree(AbstractNode top) {
         m_model = new RSMTreeModel(this, top);
         setModel(m_model);
 
+        m_selectionModel = new RSMTreeSelectionModel();
+        setSelectionModel(m_selectionModel);
+        
         // rendering of the tree
         putClientProperty("JTree.lineStyle", "Horizontal");
         setRowHeight(18);
@@ -225,6 +229,45 @@ public abstract class AbstractTree extends JTree implements MouseListener {
     }
     
     
+    /**
+     * Set all nodes that don't belong to selectionPath to specified status (disabled or not)
+     * 
+     * @param disabled : true if none selection should be set to disable otherwise true
+     */
+    public void revertSelectionSetDisabled(boolean disabled) {
+        TreePath[] selectedPaths = getSelectionPaths();
+        List<AbstractNode> availableNodes = new ArrayList<>();
+        if(selectedPaths != null) {
+            for(TreePath selectedPath : selectedPaths){
+                Object[] pathElements = selectedPath.getPath();
+                for(Object nextElem :pathElements){
+                    AbstractNode nextNode = (AbstractNode)nextElem;
+                    if(!availableNodes.contains(nextNode))
+                        availableNodes.add(nextNode);
+                }        
+            }
+        }
+        
+        AbstractNode rootNode = ( AbstractNode) m_model.getRoot();
+        if(!availableNodes.contains(rootNode)){
+            rootNode.setIsDisabled(disabled);
+            m_model.nodeChanged(rootNode);
+        }
+        childRevertSelectionSetDisabled(rootNode,availableNodes,disabled);
+    }
+
+    private void childRevertSelectionSetDisabled(AbstractNode parent, List<AbstractNode> enabledNodes,boolean disabled ){
+        int nbrChild = m_model.getChildCount(parent);
+        for(int i= 0; i<nbrChild; i++){
+            AbstractNode childNode = (AbstractNode) m_model.getChild(parent, i);
+            if(!enabledNodes.contains(childNode)){
+                childNode.setIsDisabled(disabled);
+                m_model.nodeChanged(childNode);
+            }
+            childRevertSelectionSetDisabled(childNode,enabledNodes,disabled);
+        }
+    }
+    
     public void setSelection(ArrayList<ResultSummary> rsmArray) {
 
         if (!loadingMap.isEmpty()) {
@@ -252,7 +295,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         Enumeration en = parentNode.children();
         while (en.hasMoreElements()) {
             AbstractNode node = (AbstractNode) en.nextElement();
-            if (node.getType() == AbstractNode.NodeTypes.DATA_SET) {
+            if (node.getType() == AbstractNode.NodeTypes.DATA_SET && !node.isDisabled()) {
 
                 DataSetNode dataSetNode = (DataSetNode) node;
                 Long rsmId = dataSetNode.getResultSummaryId();
@@ -272,7 +315,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
                     }
                 }
             }
-            if (!node.isLeaf()) {
+            if (!node.isLeaf() && !node.isDisabled()) {
                 nodePath.add(node);
                 setSelectionImpl(node, nodePath, rsmArray, selectedPathArray);
             }
@@ -350,6 +393,27 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         }
     }
     
+    public static class RSMTreeSelectionModel extends DefaultTreeSelectionModel {
+
+        public RSMTreeSelectionModel() {
+            super();
+        }
+
+        @Override
+        public void setSelectionPaths(TreePath[] pPaths) {
+            List<TreePath> newSelectionList = new ArrayList<TreePath>();
+            for(TreePath path : pPaths){
+                AbstractNode node = (AbstractNode) path.getLastPathComponent();
+                if(!node.isDisabled())
+                newSelectionList.add(path);
+            }
+            super.setSelectionPaths(newSelectionList.toArray(new TreePath[newSelectionList.size()])); //To change body of generated methods, choose Tools | Templates.
+        }
+
+  
+        
+        
+    }
     public static class RSMTreeCellEditor extends DefaultTreeCellEditor {
 
         public RSMTreeCellEditor(JTree tree, DefaultTreeCellRenderer renderer) {

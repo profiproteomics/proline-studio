@@ -19,6 +19,12 @@ import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProtein
 import fr.proline.studio.rsmexplorer.actions.identification.EmptyTrashAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateMSDiagReportAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProteinJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ExportRSM2PrideAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ExportRSMJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsRsetJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.MergeJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ValidateJMSAction;
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
@@ -28,8 +34,8 @@ import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DatasetAction;
-import fr.proline.studio.rsmexplorer.actions.identification.*;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
@@ -37,6 +43,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.HourGlassNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.ActionRegistry;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -47,55 +54,54 @@ import javax.swing.tree.*;
 
 /**
  * Tree of projects and datasets
+ *
  * @author JM235353
  */
 public class IdentificationTree extends AbstractTree implements TreeWillExpandListener {
 
-    
     private boolean m_isMainTree;
 
     private static HashMap<ProjectIdentificationData, IdentificationTree> m_treeMap = new HashMap<>();
     private static IdentificationTree m_currentTree = null;
-    
+
     private boolean m_loadingDone = false;
-    
+
     public static IdentificationTree getTree(ProjectIdentificationData projectData) {
-        
+
         IdentificationTree tree = m_treeMap.get(projectData);
         if (tree == null) {
             tree = new IdentificationTree(projectData);
             m_treeMap.put(projectData, tree);
         }
-        
+
         m_currentTree = tree;
-        
+
         return tree;
     }
-    
+
     public static IdentificationTree getCurrentTree() {
         return m_currentTree;
     }
-    
 
     private IdentificationTree(ProjectIdentificationData projectData) {
 
         setEditable(true);
-        
+
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        
+
         IdTransferHandler handler = new IdTransferHandler();
         setTransferHandler(handler);
 
         setDragEnabled(true);
         setDropMode(DropMode.ON_OR_INSERT);
-        
+
         m_isMainTree = true;
 
         // Model of the tree
         AbstractNode top = ChildFactory.createNode(projectData);
 
         initTree(top);
-        
+
         startLoading(top, true);
 
     }
@@ -113,43 +119,41 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
     @Override
     protected final void initTree(AbstractNode top) {
         super.initTree(top);
-        
+
         addTreeWillExpandListener(this);
     }
 
-    
-    
     public static void clearAll() {
         m_treeMap.clear();
     }
-    
+
     public void removeRootChildren() {
 
         m_loadingDone = false;
-        
+
         AbstractNode root = ((AbstractNode) m_model.getRoot());
-        
+
         root.removeAllChildren();
-        
+
         m_model.nodeStructureChanged(root);
 
     }
-    
+
     @Override
     public boolean isPathEditable(TreePath path) {
-        
+
         Project selectedProject = ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject();
         if (!DatabaseDataManager.getDatabaseDataManager().ownProject(selectedProject)) {
             return false;
         }
-        
+
         if (isEditable()) {
-            
+
             if (path.getPathCount() == 1) {
                 // root is not editable
                 return false;
             }
-            
+
             AbstractNode node = (AbstractNode) path.getLastPathComponent();
             AbstractNode.NodeTypes nodeType = node.getType();
             if (nodeType == AbstractNode.NodeTypes.DATA_SET) {
@@ -178,8 +182,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         return new IdentificationTree(rsetNode);
 
     }
-    
-    
+
     public IdentificationTree copyDataSetRootSubTree(DDataset dset, long projectId) {
 
         long dsetId = dset.getId();
@@ -196,10 +199,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
     public AbstractNode copyRootNodeForSelection() {
         AbstractNode node = (AbstractNode) m_model.getRoot();
         return node.copyNode();
-        
+
     }
-    
-    
+
     private DataSetNode findDataSetNode(AbstractNode node, long dsetId, long projectId) {
 
         int nbChildren = node.getChildCount();
@@ -266,56 +268,47 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         return null;
     }
 
-
-
-
-
-    
     @Override
     public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
 
         TreePath path = event.getPath();
         AbstractNode nodeExpanded = (AbstractNode) path.getLastPathComponent();
-        
+
         // check if the node contains a GlassHourNode (ie : children are not loaded)
         if (nodeExpanded.getChildCount() > 0) {
             AbstractNode childNode = (AbstractNode) nodeExpanded.getChildAt(0);
             if (childNode.getType() == AbstractNode.NodeTypes.HOUR_GLASS) {
-                
+
                 startLoading(nodeExpanded, true);
             }
         }
-        
+
     }
-    
 
     public void startLoading() {
-        
+
         if (m_loadingDone) {
             return;
         }
-        
+
         m_loadingDone = true;
-        
+
         // add hourglass node
-        AbstractNode root = (AbstractNode) m_model.getRoot(); 
+        AbstractNode root = (AbstractNode) m_model.getRoot();
         m_model.insertNodeInto(new HourGlassNode(null), root, 0);
-        
-        
-        
+
         // show loading and start the loading
         expandRow(0);
-        
 
     }
 
-    
-    
     /**
-     * Load a node if needed. The node will not be expanded, but the data will be used
-     * @param nodeToLoad 
+     * Load a node if needed. The node will not be expanded, but the data will
+     * be used
+     *
+     * @param nodeToLoad
      */
-    public void loadInBackground(final AbstractNode nodeToLoad, final AbstractDatabaseCallback parentCallback ) {
+    public void loadInBackground(final AbstractNode nodeToLoad, final AbstractDatabaseCallback parentCallback) {
 
         // check if the loading is necessary :
         // it is necessary only if we have an hour glass child
@@ -336,7 +329,6 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         final ArrayList<AbstractData> childrenList = new ArrayList<>();
         final AbstractData parentData = nodeToLoad.getData();
 
-
         // Callback used only for the synchronization with the AccessDatabaseThread
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -352,63 +344,58 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                     @Override
                     public void run() {
-                        
+
                         dataLoaded(parentData, childrenList);
-                        
+
                         // use of childrenList / parentData
-                       parentCallback.run(true, 0, null, true);
+                        parentCallback.run(true, 0, null, true);
                     }
                 });
 
             }
         };
 
-        
-
         parentData.load(callback, childrenList, true);
     }
-    
+
     public void moveToTrash(AbstractNode[] selectedNodes) {
 
         int nbSelectedNode = selectedNodes.length;
-        if (nbSelectedNode==0) {
+        if (nbSelectedNode == 0) {
             return; // should not happen
         }
-        
 
             // we must keep only parent nodes
-            // if a child and its parent are selected, we keep only the parent
-            ArrayList<AbstractNode> keptNodes = new ArrayList<>(nbSelectedNode);
-            keptNodes.add(selectedNodes[0]);
-            mainloop:
-            for (int i=1;i<nbSelectedNode;i++) {
-                AbstractNode curNode = selectedNodes[i];
-                
-                // look for an ancestor
-                int nbKeptNodes = keptNodes.size();
-                for (int j=0;j<nbKeptNodes;j++) {
-                    
-                    AbstractNode curKeptNode = keptNodes.get(j);
-                    if (curNode.isNodeAncestor(curKeptNode)) {
-                        // ancestor is already in kept node
-                        continue mainloop;
-                    }
-                }
-                // look for children and remove them
-                for (int j=nbKeptNodes-1;j>=0;j--) {
-                    
-                    AbstractNode curKeptNode = keptNodes.get(j);
-                    if (curKeptNode.isNodeAncestor(curNode)) {
-                        // we have found a children
-                        keptNodes.remove(j);
-                    }
-                }
-                keptNodes.add(curNode);
- 
-            }
+        // if a child and its parent are selected, we keep only the parent
+        ArrayList<AbstractNode> keptNodes = new ArrayList<>(nbSelectedNode);
+        keptNodes.add(selectedNodes[0]);
+        mainloop:
+        for (int i = 1; i < nbSelectedNode; i++) {
+            AbstractNode curNode = selectedNodes[i];
 
-        
-        
+            // look for an ancestor
+            int nbKeptNodes = keptNodes.size();
+            for (int j = 0; j < nbKeptNodes; j++) {
+
+                AbstractNode curKeptNode = keptNodes.get(j);
+                if (curNode.isNodeAncestor(curKeptNode)) {
+                    // ancestor is already in kept node
+                    continue mainloop;
+                }
+            }
+            // look for children and remove them
+            for (int j = nbKeptNodes - 1; j >= 0; j--) {
+
+                AbstractNode curKeptNode = keptNodes.get(j);
+                if (curKeptNode.isNodeAncestor(curNode)) {
+                    // we have found a children
+                    keptNodes.remove(j);
+                }
+            }
+            keptNodes.add(curNode);
+
+        }
+
         // search Project Node
         IdProjectIdentificationNode projectNode = null;
         AbstractNode parentNodeCur = (AbstractNode) keptNodes.get(0).getParent();
@@ -444,9 +431,8 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         // move node to Trash
         LinkedHashSet<AbstractNode> allParentNodeModified = new LinkedHashSet<>();
 
-
         int nbKeptNodes = keptNodes.size();
-        for (int i=0;i<nbKeptNodes;i++) {
+        for (int i = 0; i < nbKeptNodes; i++) {
             AbstractNode nodeCur = keptNodes.get(i);
             allParentNodeModified.add((AbstractNode) nodeCur.getParent());
             m_model.removeNodeFromParent(nodeCur);
@@ -459,7 +445,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
         LinkedHashMap<Object, ArrayList<DDataset>> databaseObjectsToModify = new LinkedHashMap<>();
         //HashSet<RSMDataSetNode> nodeToBeChanged = new HashSet<>();
-        
+
         Iterator<AbstractNode> it = allParentNodeModified.iterator();
         while (it.hasNext()) {
 
@@ -477,8 +463,6 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 databaseParentObject = projectNodeS.getProject();
             }
 
-
-
             // get new Dataset children
             int nb = parentNode.getChildCount();
             ArrayList<DDataset> datasetList = new ArrayList<>(nb);
@@ -486,7 +470,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // we are sure that it is a Dataset
                 AbstractNode childNode = ((AbstractNode) parentNode.getChildAt(i));
                 if (childNode instanceof DataSetNode) {
-                    DDataset dataset = ((DataSetNode)childNode).getDataset();
+                    DDataset dataset = ((DataSetNode) childNode).getDataset();
                     datasetList.add(dataset);
                     //nodeToBeChanged.add((DataSetNode)childNode);
                 } else if (childNode instanceof HourGlassNode) {
@@ -502,10 +486,8 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         // ask the modification to the database at once (intricate to put in a thread in Dnd context)
         DatabaseDataSetTask.updateDatasetAndProjectsTree(databaseObjectsToModify, true);
 
-
-        
     }
-        
+
     @Override
     public void rename(AbstractNode rsmNode, String newName) {
         if (rsmNode.getType() == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
@@ -517,12 +499,8 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         }
     }
 
-
-    
-
-    
     private void triggerPopup(MouseEvent e) {
-        
+
         // retrieve selected nodes
         AbstractNode[] selectedNodes = getSelectedNodes();
 
@@ -532,11 +510,11 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         //boolean rootNodeSelected = false;
         boolean trashNodeSelected = false;
         boolean allImportedNodeSelected = false;
-        for (int i=0;i<nbNodes;i++) {
+        for (int i = 0; i < nbNodes; i++) {
             AbstractNode n = selectedNodes[i];
             /*if (n.isRoot()) {
-                rootNodeSelected = true;
-            }*/
+             rootNodeSelected = true;
+             }*/
 
             if (n instanceof DataSetNode) {
                 DataSetNode datasetNode = (DataSetNode) n;
@@ -550,10 +528,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 allImportedNodeSelected = true;
             }
         }
-        
-                
+
         // check if nodes are changing
-        if ((nbNodes!=1) || (!allImportedNodeSelected)) {
+        if ((nbNodes != 1) || (!allImportedNodeSelected)) {
             for (int i = 0; i < nbNodes; i++) {
                 if (selectedNodes[i].isChanging()) {
                     // do not show a popup on a node which is changing
@@ -562,51 +539,50 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 }
             }
         }
-        
-        
+
         JPopupMenu popup;
         ArrayList<AbstractRSMAction> actions;
 
         if (trashNodeSelected && (nbNodes == 1)) {
-            
+
             // creation of the popup if needed
             if (m_trashPopup == null) {
-                 // create the actions
+                // create the actions
                 m_trashActions = new ArrayList<>(1);  // <--- get in sync
-                
+
                 EmptyTrashAction emtpyTrashAction = new EmptyTrashAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_trashActions.add(emtpyTrashAction);
-                
+
                 m_trashPopup = new JPopupMenu();
-                
+
                 m_trashPopup.add(emtpyTrashAction.getPopupPresenter());
             }
-            
+
             popup = m_trashPopup;
             actions = m_trashActions;
-            
+
         } else if (allImportedNodeSelected && (nbNodes == 1)) {
-            
+
             // creation of the popup if needed
             if (m_allImportedPopup == null) {
-                 // create the actions
-                m_allImportedActions = new ArrayList<>(4);  // <--- get in sync
-   
+                // create the actions
+                m_allImportedActions = new ArrayList<>(3);  // <--- get in sync
 
-                
                 DisplayAllRsetAction allRsetAction = new DisplayAllRsetAction();
                 m_allImportedActions.add(allRsetAction);
 
                 m_allImportedActions.add(null);
-                
-                ImportSearchResultAsRsetAction importAction = new ImportSearchResultAsRsetAction();
-                m_allImportedActions.add(importAction);
-                
-//                ImportSearchResultAsRsetJMSAction importJmsAction = new ImportSearchResultAsRsetJMSAction();
-//                m_allImportedActions.add(importJmsAction);
+
+                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                    ImportSearchResultAsRsetJMSAction importJmsAction = new ImportSearchResultAsRsetJMSAction();
+                    m_allImportedActions.add(importJmsAction);
+                } else {
+                    ImportSearchResultAsRsetAction importAction = new ImportSearchResultAsRsetAction();
+                    m_allImportedActions.add(importAction);
+                }
 
                 m_allImportedPopup = new JPopupMenu();
-                
+
                 for (int i = 0; i < m_allImportedActions.size(); i++) {
                     AbstractRSMAction action = m_allImportedActions.get(i);
                     if (action == null) {
@@ -616,88 +592,92 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     }
                 }
             }
- 
+
             popup = m_allImportedPopup;
             actions = m_allImportedActions;
-            
+
         } else {
-
-
+            
             // creation of the popup if needed
             if (m_mainPopup == null) {
 
                 // create the actions
-                m_mainActions = new ArrayList<>(22);  // <--- get in sync
+                m_mainActions = new ArrayList<>(18);  // <--- get in sync
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction();
                 m_mainActions.add(displayRsetAction);
-                
+
                 DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(displayRsmAction);
-
 
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(propertiesAction);
 
-                
                 m_mainActions.add(null);  // separator
 
                 AddAction addAction = new AddAction();
                 m_mainActions.add(addAction);
-                
-                MergeAction mergeAction = new MergeAction();
-                m_mainActions.add(mergeAction);
-                
-//                MergeJMSAction mergeJmsAction = new MergeJMSAction();
-//                m_mainActions.add(mergeJmsAction);
 
-                ValidateAction validateAction = new ValidateAction();
-                m_mainActions.add(validateAction);
-                
-//                ValidateJMSAction validateJMSAction = new ValidateJMSAction();
-//                m_mainActions.add(validateJMSAction);
-                
-                ChangeTypicalProteinAction changeTypicalProteinAction = new ChangeTypicalProteinAction();
-                m_mainActions.add(changeTypicalProteinAction);
-                
-//                ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction();
-//                m_mainActions.add(changeTypicalProteinJmsAction);
-                
+                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                    MergeJMSAction mergeJmsAction = new MergeJMSAction();
+                    m_mainActions.add(mergeJmsAction);
+                } else {
+                    MergeAction mergeAction = new MergeAction();
+                    m_mainActions.add(mergeAction);
+                }
+
+                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                    ValidateJMSAction validateJMSAction = new ValidateJMSAction();
+                    m_mainActions.add(validateJMSAction);
+                } else {
+                    ValidateAction validateAction = new ValidateAction();
+                    m_mainActions.add(validateAction);
+                }
+
+                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                    ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction();
+                    m_mainActions.add(changeTypicalProteinJmsAction);
+                } else {
+                    ChangeTypicalProteinAction changeTypicalProteinAction = new ChangeTypicalProteinAction();
+                    m_mainActions.add(changeTypicalProteinAction);
+                }
+
                 GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
                 m_mainActions.add(generateSpectrumMatchesAction);
-                
+
                 SpectralCountAction spectralCountAction = new SpectralCountAction();
-                m_mainActions.add(spectralCountAction); 
-                  
+                m_mainActions.add(spectralCountAction);
+
                 //RetrieveSCDataAction getSCAction = new RetrieveSCDataAction();
                 //m_mainActions.add(getSCAction); 
-                
                 m_mainActions.add(null);  // separator
-                
-                ExportRSMAction exportRSMAction = new ExportRSMAction();
-                m_mainActions.add(exportRSMAction);                        
-                
-//                ExportRSMJMSAction exportJmsRSMAction = new ExportRSMJMSAction();
-//                m_mainActions.add(exportJmsRSMAction);                        
 
-//                ExportRSM2PrideAction exportRSM2PrideAction = new ExportRSM2PrideAction();
-//                m_mainActions.add(exportRSM2PrideAction);   
-                
+                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                    ExportRSMJMSAction exportJmsRSMAction = new ExportRSMJMSAction();
+                    m_mainActions.add(exportJmsRSMAction);
+                } else {
+                    ExportRSMAction exportRSMAction = new ExportRSMAction();
+                    m_mainActions.add(exportRSMAction);
+                }
+
+                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                    ExportRSM2PrideAction exportRSM2PrideAction = new ExportRSM2PrideAction();
+                    m_mainActions.add(exportRSM2PrideAction);
+                }
+
                 GenerateMSDiagReportAction msDiagReportAction = new GenerateMSDiagReportAction();
-                m_mainActions.add(msDiagReportAction);                        
-                
+                m_mainActions.add(msDiagReportAction);
+
                 m_mainActions.add(null);  // separator
-                
+
                 ChangeDescriptionAction changeDescriptionAction = new ChangeDescriptionAction();
                 m_mainActions.add(changeDescriptionAction);
-                
+
                 RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(renameAction);
 
-                
                 DeleteAction deleteAction = new DeleteAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(deleteAction);
-
 
                 // add actions to popup
                 m_mainPopup = new JPopupMenu();
@@ -711,33 +691,34 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 }
                 //mainPopup.add(new DoItAction());
                 List<Action> additionalActions = ActionRegistry.getInstance().getActions(DDataset.class);
-                if(additionalActions != null) {
-                    for (Action action : additionalActions)
-                        m_mainPopup.add(new DatasetWrapperAction(((DatasetAction)action)));
-                }                
-                
+                if (additionalActions != null) {
+                    for (Action action : additionalActions) {
+                        m_mainPopup.add(new DatasetWrapperAction(((DatasetAction) action)));
+                    }
+                }
+
             }
-            
+
             popup = m_mainPopup;
             actions = m_mainActions;
         }
 
-        
         // update of the enable/disable state
-        for (int i=0;i<actions.size();i++) {
+        for (int i = 0; i < actions.size(); i++) {
             AbstractRSMAction action = actions.get(i);
-            
+
             if (action == null) {
                 continue;
             }
-            
+
             action.updateEnabled(selectedNodes);
         }
-        
-        popup.show( (JComponent)e.getSource(), e.getX(), e.getY() );
+
+        popup.show((JComponent) e.getSource(), e.getX(), e.getY());
     }
+
     public static void reinitMainPopup() {
-        
+
         Iterator<ProjectIdentificationData> it = m_treeMap.keySet().iterator();
         while (it.hasNext()) {
             IdentificationTree tree = m_treeMap.get(it.next());
@@ -752,7 +733,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
     private ArrayList<AbstractRSMAction> m_trashActions;
     private JPopupMenu m_allImportedPopup;
     private ArrayList<AbstractRSMAction> m_allImportedActions;
-    
+
     @Override
     public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {
         // nothing to do
@@ -778,9 +759,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             } else if (nbSelectedRows == 1) {
                 // one row is selected
                 int row = getRowForLocation(e.getX(), e.getY());
-                 if ((row!=-1) && (e.isShiftDown() || e.isControlDown())) {
-                     addSelectionRow(row);
-                 } else if ((row!=-1) && (row != selectedRows[0])) {
+                if ((row != -1) && (e.isShiftDown() || e.isControlDown())) {
+                    addSelectionRow(row);
+                } else if ((row != -1) && (row != selectedRows[0])) {
                     // we change the selection
                     setSelectionRow(row);
                 }
@@ -789,14 +770,14 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // if ctrl or shift is down, we add the row to the selection
                 if (e.isShiftDown() || e.isControlDown()) {
                     int row = getRowForLocation(e.getX(), e.getY());
-                    if (row !=-1) {
+                    if (row != -1) {
                         addSelectionRow(row);
                     }
                 }
             }
 
         } else if (e.getClickCount() == 2) {
-            
+
             // display All imported rset on double click
             AbstractNode[] selectedNodes = getSelectedNodes();
             int nbNodes = selectedNodes.length;
@@ -808,9 +789,6 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             }
         }
 
-
-
-
     }
 
     @Override
@@ -821,11 +799,12 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {
+    }
 
     @Override
-    public void mouseExited(MouseEvent e) {}
-
+    public void mouseExited(MouseEvent e) {
+    }
 
     public static class RSMTreeRenderer extends DefaultTreeCellRenderer {
 
@@ -834,8 +813,16 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
         @Override
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-            super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-
+            JLabel l = (JLabel) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+            if ( ((AbstractNode) value).isDisabled()){
+                l.setForeground(Color.LIGHT_GRAY);
+            } else {
+                if (sel) {
+                    l.setForeground(Color.WHITE);
+                } else {
+                    l.setForeground(Color.BLACK);
+                }
+            }
             ImageIcon icon = ((AbstractNode) value).getIcon();
             if (icon != null) {
                 setIcon(icon);
@@ -844,13 +831,11 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             return this;
         }
     }
-    
-
 
     private DataSetNode getTrashNode() {
         // search Project Node
         IdProjectIdentificationNode projectNode = null;
-        TreeNode root = (TreeNode)m_model.getRoot();
+        TreeNode root = (TreeNode) m_model.getRoot();
         if (root instanceof IdProjectIdentificationNode) {
             projectNode = (IdProjectIdentificationNode) root;
         }
@@ -875,14 +860,14 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         if (trash == null) {
             return null; // should not happen
         }
-        return trash ;
+        return trash;
     }
 
     public void loadTrash() {
-        DataSetNode trashNode = getTrashNode() ;
+        DataSetNode trashNode = getTrashNode();
         if (trashNode != null) {
             // Callback used only for the synchronization with the AccessDatabaseThread
-             AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
                 @Override
                 public boolean mustBeCalledInAWT() {
@@ -891,7 +876,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                
+
                 }
             };
             IdentificationTree.getCurrentTree().loadInBackground(trashNode, callback);

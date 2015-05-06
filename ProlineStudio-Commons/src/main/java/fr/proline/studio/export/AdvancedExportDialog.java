@@ -6,13 +6,18 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +35,7 @@ import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 
 /**
@@ -171,9 +177,11 @@ public class AdvancedExportDialog extends DefaultDialog  {
 	
         setInternalComponent(createAdvancedExportPanel());
         loadDefaultExportConfig();
-		loadExportConfig();
+		//loadExportConfig();// is loaded upon request
 		if(m_exportDefaultConfig!=null )
+		{
 			fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+		}
 		
        
         
@@ -264,7 +272,7 @@ public class AdvancedExportDialog extends DefaultDialog  {
 				comboBox_NumberSeparator.setModel(new DefaultComboBoxModel(param.decimal_separator_values));
 			}
 			
-			comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[] {"Validated", "Not validated"}));
+			comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[] { "all", "validated only"}));
 
 		}
 		
@@ -331,6 +339,27 @@ public class AdvancedExportDialog extends DefaultDialog  {
 			};
 			
 			scrollPane.setViewportView(table);
+			
+			// ---add ability to enable/disable individual tabs
+			tabbedPane.setEnabledAt(i, true); // true by default
+			tabbedPane.setToolTipTextAt(i, "Right click to Enable/Disable");
+			tabbedPane.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					
+					if (SwingUtilities.isRightMouseButton(arg0) ) {
+						boolean tabEnabled=  tabbedPane.isEnabledAt(tabbedPane.indexAtLocation(arg0.getX(), arg0.getY()));
+						int tabIndex = tabbedPane.indexAtLocation(arg0.getX(),arg0.getY());
+						tabbedPane.setEnabledAt(tabIndex, !tabEnabled);
+						arg0.consume();
+					} 
+						
+				}
+			});
+			
+			
+			
+			
 			// we want to find which field is at the same time default field and custom field. (to mark it).
 			ExportExcelSheet paramSheet = null; 
 			if(param!=null) {
@@ -343,6 +372,7 @@ public class AdvancedExportDialog extends DefaultDialog  {
 					//if(defaultSheetIdsList.contains(sheets_list.get(k).id)) {
 					if(param.sheets[k].id.equals(defaultParam.sheets[i].id)) {
 						paramSheet = param.sheets[k];
+						tabbedPane.setEnabledAt(i, true);
 					}
 				}
 			}
@@ -359,10 +389,10 @@ public class AdvancedExportDialog extends DefaultDialog  {
 					} else {
 						v.add(false);	
 					}
-				} else {
-					v.add(false); 
+				} else { // if only default then display isDefault value
+					v.add(defaultParam.sheets[i].fields[j].default_displayed);
 				}
-				tableModel.addRow(v);
+					tableModel.addRow(v);
 			}
 
 			table.setModel(tableModel);
@@ -519,6 +549,11 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		optionPane.add(comboBox_ProteinSets);
 		
 		btnNewButton = new JButton("Save");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveConfigFile();
+			}
+		});
 		//btnNewButton.setIcon(new ImageIcon(ExportDialog.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
 		btnNewButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
 		btnNewButton.setBounds(468, 11, 89, 23);
@@ -527,41 +562,7 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		btnLoad = new JButton("Load");
 		btnLoad.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
-//---
-		
-	               String configFile = m_configFile.getText().trim();
-
-	               if (configFile.length()>0) {
-	                   File currentFile = new File(configFile);
-	                   if (currentFile.isDirectory()) {
-	                       m_fchooser.setCurrentDirectory(currentFile);
-	                   } else {
-	                       m_fchooser.setSelectedFile(currentFile);
-	                   }
-	               }
-
-	               
-	               int result = m_fchooser.showOpenDialog(btnLoad);
-	               if (result == JFileChooser.APPROVE_OPTION) {
-	                   File file = m_fchooser.getSelectedFile();
-	                   
-	                   String absolutePath = file.getAbsolutePath();
-	                   file.getName();
-//	                   if (fileName.indexOf('.') == -1) {
-//	                    //   absolutePath += "."+exporterInfo.getFileExtension();
-//	                   }
-	                   m_configFile.setText(absolutePath);
-	                   loadExportConfig();
-	                 
-	           		if(m_exportDefaultConfig!=null )
-	           			fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
-	           		
-	                   
-	               }
-			
-
-			//---
+				loadConfigFile();
 			}
 		});
 		btnLoad.setIcon(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
@@ -580,8 +581,8 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		
 	
 		// ---// copier à partir de là
-		final JButton addFileButton = new JButton("Browse file");
-		addFileButton.setBounds(470, 15, 114, 27);
+		final JButton addFileButton = new JButton("");
+		addFileButton.setBounds(470, 14, 27, 30); //addFileButton.setBounds(470, 15, 114, 27);
 		insidePanel.add(addFileButton);
 		addFileButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -600,20 +601,8 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		});
 		chk_ExportOptions.setBounds(626, 71, 124, 27);
 		insidePanel.add(chk_ExportOptions);
-		
-//		btnExportOptions = new JButton("Options");
-//		btnExportOptions.setBounds(641, 15, 105, 27);
-//		insidePanel.add(btnExportOptions);
-//		btnExportOptions.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				optionPane.setVisible(!optionPane.isVisible());
-//				setSize(new Dimension(optionPane.getWidth(), 300 + 400 *(optionPane.isVisible()?1:0))); // elongate the window if option is selected
-//			}
-//		});
-		
-       //final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-       //addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-       addFileButton.addActionListener(new ActionListener() {
+
+        addFileButton.addActionListener(new ActionListener() {
 
            @Override
            public void actionPerformed(ActionEvent e) {
@@ -690,7 +679,98 @@ public class AdvancedExportDialog extends DefaultDialog  {
     }
     
     
-    public final JPanel createExportPanel() {
+    protected void loadConfigFile() {
+
+        String configFile = m_configFile.getText().trim();
+
+        if (configFile.length()>0) {
+            File currentFile = new File(configFile);
+            if (currentFile.isDirectory()) {
+                m_fchooser.setCurrentDirectory(currentFile);
+            } else {
+                m_fchooser.setSelectedFile(currentFile);
+            }
+        }
+
+        
+        int result = m_fchooser.showOpenDialog(btnLoad);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = m_fchooser.getSelectedFile();
+            
+            String absolutePath = file.getAbsolutePath();
+            file.getName();
+            m_configFile.setText(absolutePath);
+            loadExportConfig();
+            if(m_exportDefaultConfig!=null )
+            {
+         	   fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+            }
+    		
+        }    
+		
+	}
+
+
+
+	protected void saveConfigFile() {
+        String configFile = m_configFile.getText().trim();
+
+        JFileChooser m_fchooser = new JFileChooser();
+		   if (configFile.length()>0) {
+            File currentFile = new File(configFile);
+            if (currentFile.isDirectory()) {
+                m_fchooser.setCurrentDirectory(currentFile);
+            } else {
+                m_fchooser.setSelectedFile(currentFile);
+            }
+            
+        }
+
+        
+        int result = m_fchooser.showSaveDialog(btnLoad);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = m_fchooser.getSelectedFile();
+            
+            String absolutePath = file.getAbsolutePath();
+            file.getName();
+            m_configFile.setText(absolutePath);
+            File f = new File(absolutePath);
+            
+            if (f.exists()) {
+                String message = "The file already exists. Do you want to overwrite it ?";
+                String title = "Overwrite ?";
+                String[] options = {"Yes","No"};
+                int reply = JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, "Yes");
+                if (reply != JOptionPane.YES_OPTION) {
+                	System.out.println("save cancelled");
+                	return; // cancel save
+                }
+            }
+            
+           
+            final Path path = Paths.get(absolutePath);
+    
+                BufferedWriter writer = null;
+				try {
+					writer = Files.newBufferedWriter(path,
+					    StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+					
+					Gson gson = new GsonBuilder().setPrettyPrinting().create();
+					String jsonString = gson.toJson(m_exportConfig);
+					writer.write(jsonString);
+					writer.flush();
+				} catch (IOException e1) {
+				
+				//	e1.printStackTrace();
+				}
+    		
+        }
+        
+		
+	}
+
+
+	public final JPanel createExportPanel() {
 	
         JPanel exportPanel = new JPanel(new GridBagLayout());
 

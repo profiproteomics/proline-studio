@@ -7,6 +7,8 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.filter.FilterButtonV2;
+import fr.proline.studio.filter.actions.ClearRestrainAction;
+import fr.proline.studio.filter.actions.RestrainAction;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -625,10 +627,25 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
 //        }
 
 
-        
+        // called by super.DecoratedTable
         @Override
         public TablePopupMenu initPopupMenu() {
-            return null;
+            TablePopupMenu popupMenu = new TablePopupMenu();
+
+            popupMenu.addAction(new RestrainAction() {
+                @Override
+                public void filteringDone() {
+                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                }
+            });
+            popupMenu.addAction(new ClearRestrainAction() {
+                @Override
+                public void filteringDone() {
+                    m_dataBox.propagateDataChanged(CompareDataInterface.class);
+                }
+            });
+
+            return popupMenu;
         }
 
         // set as abstract

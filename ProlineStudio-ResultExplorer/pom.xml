@@ -341,8 +341,38 @@
                         <publicPackage>fr.proline.studio.rsmexplorer</publicPackage>
                     </publicPackages>
                 </configuration>
-            </plugin>
+            </plugin>   
+            
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <!-- Version inherited from ProFI-Pom -->
 
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                  <file>${basedir}/src/main/resources/fr/proline/studio/installer/VersionInstaller.java.template</file>
+                  <outputFile>${basedir}/src/main/java/fr/proline/studio/installer/VersionInstaller.java</outputFile>
+                  <replacements>
+                    <replacement>
+                      <token>@build.date@</token>
+                      <value>${maven.build.timestamp}_${user.name}</value>
+                    </replacement>         
+                    <replacement>
+                      <token>@version@</token>
+                      <value>${project.version}</value>
+                    </replacement>                               
+                  </replacements>
+                </configuration>
+
+            </plugin>
         </plugins>
     </build>
 </project>

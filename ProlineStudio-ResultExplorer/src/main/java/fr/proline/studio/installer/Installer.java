@@ -18,17 +18,18 @@ import org.openide.windows.WindowManager;
  * 
  * @author jm235353
  */
-public class Installer extends ModuleInstall {
+public class Installer extends VersionInstaller {
 
     @Override
     public void restored() {
 
+        String buildnumber = "1.0.1  alpha ("+moduleBuildDate+")"; //specify if alpha (or nothing = release)
+        
         // set the proline version for the application title
-        System.setProperty("netbeans.buildnumber", "1.0.1 (alpha : build 20150507 )"); 
+        System.setProperty("netbeans.buildnumber", buildnumber);  //"1.0.1 (alpha : build date @build.date@)"
         
         // initialize the connection to the server as soon as possible
         ServerConnectionManager.getServerConnectionManager();
-
         
     }
     

@@ -96,6 +96,12 @@ public class AdvancedExportDialog extends DefaultDialog  {
 	private ExportConfig m_exportConfig;
 	private ExportConfig m_exportDefaultConfig;
 	private JLabel lbl_exportType;
+	
+	private String[] m_presentation; // to complete information not displayed in jtable nor tabpane.
+	private String[] m_sheetId;  // to complete information not displayed in jtable nor tabpane.
+	private String[] m_sheetTitle;  // to complete information not displayed in jtable nor tabpane.
+
+	
     
     public static AdvancedExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
@@ -453,7 +459,7 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		tabbedPane.setBounds(10, 125, 600, 318);
+		tabbedPane.setBounds(111, 127, 571, 298);
 		optionPane.add(tabbedPane);
 		
 		
@@ -462,7 +468,7 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		optionPane.add(lblExportExcelTabs);
 		
 		scrollPane = new JScrollPane();
-		scrollPane.setBounds(0, 0, 699, 290);
+		scrollPane.setBounds(0, 0, 400, 190);
 		
 		table = new JTable();
 		scrollPane.setViewportView(table);
@@ -499,11 +505,11 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		comboBox_Orientation = new JComboBox();
 		comboBox_Orientation.setModel(new DefaultComboBoxModel(new String[] {"Rows", "Columns"}));
 		comboBox_Orientation.setName("");
-		comboBox_Orientation.setBounds(10, 94, 91, 20);
+		comboBox_Orientation.setBounds(10, 180, 91, 20);
 		optionPane.add(comboBox_Orientation);
 		
 		lblOrientation = new JLabel("Orientation:");
-		lblOrientation.setBounds(10, 69, 91, 14);
+		lblOrientation.setBounds(10, 155, 91, 14);
 		optionPane.add(lblOrientation);
 		
 		m_configFile = new JTextField();
@@ -513,39 +519,39 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		m_configFile.setColumns(10);
 		
 		lblFormat = new JLabel("Format:");
-		lblFormat.setBounds(152, 70, 55, 14);
+		lblFormat.setBounds(10, 44, 55, 14);
 		optionPane.add(lblFormat);
 		
 		comboBox_Format = new JComboBox();
 		comboBox_Format.setModel(new DefaultComboBoxModel(new String[] {"xlsx", "xls", "csv"}));
-		comboBox_Format.setBounds(152, 94, 55, 20);
+		comboBox_Format.setBounds(10, 68, 55, 20);
 		optionPane.add(comboBox_Format);
 		
 		comboBox_DateFormat = new JComboBox();
 		comboBox_DateFormat.setModel(new DefaultComboBoxModel(new String[] {"YYYYMMDD HH:mm:ss", "DDMMYYYY HH:mm:ss", "MMDDYYYY HH:mm:ss"}));
-		comboBox_DateFormat.setBounds(243, 94, 161, 20);
+		comboBox_DateFormat.setBounds(101, 68, 161, 20);
 		optionPane.add(comboBox_DateFormat);
 		
 		lblDateFormat = new JLabel("Date format:");
-		lblDateFormat.setBounds(243, 69, 68, 14);
+		lblDateFormat.setBounds(101, 43, 68, 14);
 		optionPane.add(lblDateFormat);
 		
 		comboBox_NumberSeparator = new JComboBox();
 		comboBox_NumberSeparator.setModel(new DefaultComboBoxModel(new String[] {".", ","}));
-		comboBox_NumberSeparator.setBounds(447, 94, 49, 20);
+		comboBox_NumberSeparator.setBounds(305, 68, 49, 20);
 		optionPane.add(comboBox_NumberSeparator);
 		
 		lblNumberSeparator = new JLabel("Number separator:");
-		lblNumberSeparator.setBounds(447, 70, 110, 14);
+		lblNumberSeparator.setBounds(305, 44, 110, 14);
 		optionPane.add(lblNumberSeparator);
 		
 		lblProteinSets = new JLabel("Protein sets:");
-		lblProteinSets.setBounds(593, 70, 89, 14);
+		lblProteinSets.setBounds(451, 44, 89, 14);
 		optionPane.add(lblProteinSets);
 		
 		comboBox_ProteinSets = new JComboBox();
 		comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[] {"Validated", "Not validated"}));
-		comboBox_ProteinSets.setBounds(593, 94, 121, 20);
+		comboBox_ProteinSets.setBounds(451, 68, 121, 20);
 		optionPane.add(comboBox_ProteinSets);
 		
 		btnNewButton = new JButton("Save");
@@ -745,6 +751,7 @@ public class AdvancedExportDialog extends DefaultDialog  {
                 	System.out.println("save cancelled");
                 	return; // cancel save
                 }
+                f.delete(); // TODO: fix bug here...
             }
             
            
@@ -753,7 +760,7 @@ public class AdvancedExportDialog extends DefaultDialog  {
                 BufferedWriter writer = null;
 				try {
 					writer = Files.newBufferedWriter(path,
-					    StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+					    StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
 					
 					Gson gson = new GsonBuilder().setPrettyPrinting().create();
 					String jsonString = gson.toJson(m_exportConfig);
@@ -770,6 +777,88 @@ public class AdvancedExportDialog extends DefaultDialog  {
 	}
 
 
+	protected ExportConfig generateConfigFileFromGUI () {
+		System.out.print("scanning table...");
+		// this method creates an ExportConfig structure to export.
+		ExportConfig ec = new ExportConfig();
+		
+		ec.format = "xlsx";
+		ec.decimal_eparator = ".";
+		ec.date_format = "YYYY:MM:DD HH:mm:ss";
+		ec.data_export = new ExportDataExport();
+		ec.data_export.all_protein_set = comboBox_ProteinSets.getSelectedItem().equals("all"); 
+		
+//		ExportExcelSheet[] sheets;
+//		
+//		// extra infos for default options (sent from server only)
+		ec.format_values= null  ; //["xlsx","tsv"],
+	    ec.decimal_separator_values= null; //": [".",","],
+	    ec.date_format_values= null ; //": ["YYYY:MM:DD HH:mm:ss","YYYY:MM:DD"],
+	    ec.sheet_presentation_values= null; //": ["rows","columns"]
+	    
+	    
+		
+		
+	
+		int nbActiveTabs=0;
+		for(int i = 0; i< tabbedPane.getTabCount() ;i++) { // go through tab panes and jtables
+			if( tabbedPane.isEnabledAt(i)) { 
+				nbActiveTabs++;
+			}
+		}
+		ec.sheets = new ExportExcelSheet[nbActiveTabs];
+		
+		int usedTabNumber =0; // the tab location for the new structure (smaller than the full table - disabled tabs)
+		for(int i = 0; i< tabbedPane.getTabCount() ;i++) { // go through tab panes and jtables
+			if( tabbedPane.isEnabledAt(i)) { // save only enabled panes (hence excel sheets)
+					
+					// get the jtable out of the jpane...
+					JPanel panelTemp = (JPanel) tabbedPane.getComponentAt(i);
+					JScrollPane jsp = (JScrollPane) panelTemp.getComponent(0);
+					JTable tableRef = (JTable) jsp.getViewport().getComponents()[0];
+					
+					int nbRows = tableRef.getRowCount();
+					int nbSelectedRows =0;
+					for(int row = 0 ; row < nbRows  ; row++) { // count selected rows to be exported
+						System.out.println(" row " + row + " with id=" + tableRef.getValueAt(row, 0));
+						if(tableRef.getValueAt(row, 2).equals(true)){
+							nbSelectedRows++;
+						}
+					}
+					ec.sheets[usedTabNumber] = new ExportExcelSheet();
+					
+					ec.sheets[usedTabNumber].id = m_sheetId[i];
+					ec.sheets[usedTabNumber].title = m_sheetTitle[i];
+					ec.sheets[usedTabNumber].presentation = m_presentation[i];
+					
+					
+					ec.sheets[usedTabNumber].fields= new ExportExcelSheetField[nbSelectedRows];
+
+					// copy all selected sheet fields into new structure
+					int newStructRow=0; // position in new sheet structure 
+					for(int currentRow = 0 ; currentRow<nbRows ; currentRow++) {
+						System.out.print("current row:" + currentRow );
+						if(tableRef.getValueAt(currentRow, 2).equals(true)){ // if selected row then add it
+							ec.sheets[usedTabNumber].fields[newStructRow] = new ExportExcelSheetField();
+							
+							ec.sheets[usedTabNumber].fields[newStructRow].id = tableRef.getValueAt(currentRow, 0).toString();
+							ec.sheets[usedTabNumber].fields[newStructRow].title = tableRef.getValueAt(currentRow, 1).toString();
+							newStructRow++;
+						}
+					}
+					
+			
+				usedTabNumber++;
+			}
+		}
+
+		return ec;
+		
+	}
+	
+	
+	
+	
 	public final JPanel createExportPanel() {
 	
         JPanel exportPanel = new JPanel(new GridBagLayout());

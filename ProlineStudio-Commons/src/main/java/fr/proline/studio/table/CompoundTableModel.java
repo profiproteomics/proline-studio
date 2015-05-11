@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -331,6 +332,11 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     @Override
     public GlobalTableModelInterface getTableModelSource() {
         return null;
+    }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+        return m_lastModel.getRenderer(col);
     }
 
 

@@ -10,6 +10,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 
 
@@ -225,6 +226,11 @@ public class CompareTableModel extends DecoratedTableModel implements GlobalTabl
     @Override
     public String getExportColumnName(int col) {
         return getDataColumnIdentifier(col);
+    }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+        return m_dataInterface.getRenderer(col);
     }
 
 

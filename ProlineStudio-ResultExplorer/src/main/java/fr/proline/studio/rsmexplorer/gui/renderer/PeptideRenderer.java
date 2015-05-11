@@ -20,7 +20,6 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
     private String m_basicTextForExport = "";
     
     public void PeptideRenderer() {
-        System.out.println("");
     }
     
     @Override
@@ -124,8 +123,8 @@ public class PeptideRenderer extends DefaultTableCellRenderer implements ExportT
 
 
     }
-    private StringBuilder m_displaySB = new StringBuilder();
-    private StringBuilder m_exportSB = new StringBuilder();
+    private final StringBuilder m_displaySB = new StringBuilder();
+    private final StringBuilder m_exportSB = new StringBuilder();
 
     @Override
     public String getExportText() {

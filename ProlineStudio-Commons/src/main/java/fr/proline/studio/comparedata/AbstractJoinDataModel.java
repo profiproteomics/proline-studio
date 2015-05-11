@@ -77,7 +77,7 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
             for (int j = 0; j < keys2.length; j++) {
                 int col2 = keys2[i];
                 Class c2 = m_data2.getDataColumnClass(col2);
-                String id2 = m_data2.getDataColumnIdentifier(col1);
+                String id2 = m_data2.getDataColumnIdentifier(col2);
                 if (!c1.equals(c2)) {
                     continue;
                 }

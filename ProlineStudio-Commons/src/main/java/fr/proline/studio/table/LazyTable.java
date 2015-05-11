@@ -8,8 +8,11 @@ import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 import org.openide.windows.WindowManager;
 
 /**
@@ -157,4 +160,32 @@ public abstract class LazyTable extends DecoratedMarkerTable implements Adjustme
             m_lastAction = keepAction;
         }
     }
+    
+    @Override
+    public TableCellRenderer getCellRenderer(int row, int column) {
+
+        TableModel model = getModel();
+        if (model instanceof GlobalTableModelInterface) {
+            int columnInModel = convertColumnIndexToModel(column);
+
+            TableCellRenderer renderer = ((GlobalTableModelInterface) model).getRenderer(columnInModel);
+            if (renderer != null) {
+                Class columnClass = model.getColumnClass(columnInModel);
+                if (columnClass.equals(LazyData.class)) {
+                    TableCellRenderer registeredRenderer = m_rendererMap.get(column);
+                    if (registeredRenderer != null) {
+                        return registeredRenderer;
+                    }
+                    renderer = new LazyTableCellRenderer(renderer);
+                    m_rendererMap.put(column, renderer);
+                    return renderer;
+                } else {
+                    return renderer;
+                }
+            }
+        }
+
+        return super.getCellRenderer(row, column);
+    }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 }

@@ -32,7 +32,7 @@ public class LazyTableCellRenderer extends DefaultTableCellRenderer {
 
         Object data = ((LazyData) value).getData();
         
-        if (m_childRenderer != null) {
+        if ((m_childRenderer != null) && (data != null)) {
             return m_childRenderer.getTableCellRendererComponent(table, data, isSelected, hasFocus, row, column);
         }
         

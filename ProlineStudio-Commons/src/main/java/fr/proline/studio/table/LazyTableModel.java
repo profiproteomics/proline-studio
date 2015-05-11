@@ -2,6 +2,7 @@ package fr.proline.studio.table;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.filter.FilterTableModel;
+import javax.swing.table.TableCellRenderer;
 
 
 /**
@@ -90,5 +91,7 @@ public abstract class LazyTableModel extends DecoratedTableModel implements Lazy
      * @return 
      */
     public abstract int getSubTaskId(int col);
+    
+
     
 }

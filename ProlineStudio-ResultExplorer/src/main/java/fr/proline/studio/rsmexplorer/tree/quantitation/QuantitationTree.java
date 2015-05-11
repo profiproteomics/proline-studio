@@ -14,6 +14,7 @@ import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ExportAbundancesAction;
@@ -223,6 +224,9 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 m_mainActions.add(displayRsmAction);
                 
                 m_mainActions.add(null);  // separator*
+                
+                ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                m_mainActions.add(exportDatasetAction);       
                 
                 ExportAbundancesAction exportXICAction = new ExportAbundancesAction();
                 m_mainActions.add(exportXICAction);

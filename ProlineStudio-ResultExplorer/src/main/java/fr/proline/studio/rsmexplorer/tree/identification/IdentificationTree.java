@@ -36,6 +36,7 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DatasetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
@@ -659,6 +660,10 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     ExportRSMAction exportRSMAction = new ExportRSMAction();
                     m_mainActions.add(exportRSMAction);
                 }
+                
+                ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                m_mainActions.add(exportDatasetAction);
+                
 
                 if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
                     ExportRSM2PrideAction exportRSM2PrideAction = new ExportRSM2PrideAction();

@@ -11,6 +11,7 @@ import fr.proline.studio.table.LazyData;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.TableCellRenderer;
 
 
 /**
@@ -245,6 +246,12 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         fireTableDataChanged();
     }
 
-
-    
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+        if (col >= m_parentModel.getColumnCount()) {
+            return null;
+        }
+        return m_parentModel.getRenderer(col);   
+    }
+ 
 }

@@ -16,6 +16,7 @@ import java.util.TreeMap;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableCellRenderer;
 
 
 
@@ -375,6 +376,11 @@ public class DataBoxChooserDialog extends DefaultDialog {
         
         @Override
         public String getTootlTipValue(int row, int col) {
+            return null;
+        }
+
+        @Override
+        public TableCellRenderer getRenderer(int col) {
             return null;
         }
     }

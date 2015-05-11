@@ -161,7 +161,7 @@ public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
                     break;
                 }
                 case FUNCTION: {
-                    AbstractFunction function = ((FunctionNode) node).getFunction();
+                    AbstractFunction function = ((FunctionNode) node).getFunction().cloneFunction();
                     addFunctionToGraph(function);
                     break;
                 }

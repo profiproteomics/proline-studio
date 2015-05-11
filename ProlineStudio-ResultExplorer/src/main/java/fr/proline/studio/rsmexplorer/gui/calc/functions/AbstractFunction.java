@@ -35,6 +35,8 @@ public abstract class AbstractFunction {
     public abstract void generateDefaultParameters(AbstractGraphObject[] graphObjects);
     public abstract ParameterError checkParameters();
     public abstract void userParametersChanged();
+    public abstract AbstractFunction cloneFunction();
+    
     
     public void resetState() {
         m_parameters = null;

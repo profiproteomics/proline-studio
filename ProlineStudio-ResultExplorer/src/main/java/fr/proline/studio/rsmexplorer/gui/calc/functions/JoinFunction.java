@@ -40,7 +40,10 @@ public class JoinFunction extends AbstractFunction {
         return m_state;
     }
 
-    
+    @Override
+    public AbstractFunction cloneFunction() {
+        return new JoinFunction();
+    }
     
     @Override
     public void process(AbstractGraphObject[] graphObjects) {

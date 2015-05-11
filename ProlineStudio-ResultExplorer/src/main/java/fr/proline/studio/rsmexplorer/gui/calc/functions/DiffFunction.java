@@ -27,6 +27,11 @@ public class DiffFunction extends AbstractFunction {
     }
 
     @Override
+    public AbstractFunction cloneFunction() {
+        return new DiffFunction();
+    }
+    
+    @Override
     public void process(AbstractGraphObject[] graphObjects) {
         if (m_state == GraphNode.NodeState.READY) {
             return;

@@ -174,7 +174,7 @@ public class DataTreeTransferHandler extends TransferHandler {
                             break;
                         }
                         case FUNCTION: {
-                            AbstractFunction function = ((DataTree.FunctionNode) node).getFunction();
+                            AbstractFunction function = ((DataTree.FunctionNode) node).getFunction().cloneFunction();
                             FunctionGraphNode graphNode = new FunctionGraphNode(function);
                             graphPanel.addGraphNode(graphNode, x, y);
                             break;

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  * table model for features / peaks
@@ -224,6 +225,11 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
     @Override
     public String getExportColumnName(int col) {
         return getColumnName(col);
+    }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+        return null;
     }
     
     

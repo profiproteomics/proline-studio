@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 
 /**
  * Model use to filter data and/or restrain rows of another model
@@ -367,5 +368,10 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     @Override
     public String getColumnName(int column) {
         return m_tableModelSource.getColumnName(column);
+    }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+        return m_tableModelSource.getRenderer(col);
     }
 }

@@ -11,18 +11,26 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.mzscope.MzdbInfo;
+import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FontRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -738,6 +746,54 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         
         return mzdbInfos;
     }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
+
+        TableCellRenderer renderer = null;
+        
+        switch (col) {
+            case COLTYPE_FEATURE_MAP_NAME: {
+                renderer = new FontRenderer( TableDefaultRendererManager.getDefaultRenderer(String.class) );
+                break;
+            }
+            case COLTYPE_FEATURE_QC:
+            case COLTYPE_FEATURE_IS_OVERLAPPING: {
+                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                break;
+            }
+            case COLTYPE_FEATURE_MOZ: {
+                renderer = new DoubleRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4 );
+                break;
+            }
+            case COLTYPE_FEATURE_APEX_INTENSITY:
+            case COLTYPE_FEATURE_INTENSITY:
+            case COLTYPE_FEATURE_DURATION: {
+                renderer = new BigFloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
+                break;
+            }
+            case COLTYPE_FEATURE_ELUTION_TIME:
+            case COLTYPE_FEATURE_PREDICTED_ELUTION_TIME: {
+                renderer = new TimeRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                break;
+            }
+            case COLTYPE_FEATURE_CHARGE:
+            case COLTYPE_FEATURE_PEAKELS_COUNT: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                break;
+            }
+        }
+        
+        m_rendererMap.put(col, renderer);
+        return renderer;
+    }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+    
+
 
 
 }

@@ -298,7 +298,10 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
-                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
                
             }
@@ -385,10 +388,9 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         PeptideMatchTableModel peptideMatchTableModel = new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !(m_startingPanel || m_proteinMatchUnknown));
         CompoundTableModel compoundTableModel = new CompoundTableModel(peptideMatchTableModel, true);
         m_peptideMatchTable.setModel(compoundTableModel);
-        m_peptideMatchTable.setTableRenderer();
         m_peptideMatchTable.displayColumnAsPercentage(peptideMatchTableModel.convertColToColUsed(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE));
 
-        m_peptideMatchTable.getColumnExt(PeptideMatchTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
+        m_peptideMatchTable.getColumnExt(m_peptideMatchTable.convertColumnIndexToView(PeptideMatchTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         
         m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_peptideMatchTable);
         
@@ -561,15 +563,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
             
         }
 
-        public void setTableRenderer(){
-            PeptideMatchTableModel tableModel = ((PeptideMatchTableModel) ((CompoundTableModel)getModel()).getBaseModel());
-            getColumnModel().getColumn(tableModel.convertColToColUsed(convertColumnIndexToView(PeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ))).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
-            getColumnModel().getColumn(tableModel.convertColToColUsed(convertColumnIndexToView(PeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS))).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
-            setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());
-            setDefaultRenderer(DMsQuery.class, new MsQueryRenderer());
-            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
-            setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class))  );
-        }
+
 
         /**
          * Called whenever the value of the selection changes.

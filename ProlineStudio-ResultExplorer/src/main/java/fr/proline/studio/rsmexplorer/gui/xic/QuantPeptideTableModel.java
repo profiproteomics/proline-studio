@@ -11,20 +11,25 @@ import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.StringUtils;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -854,4 +859,50 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     public int getBestYAxisColIndex(PlotType plotType) {
         return -1; //JPM.TODO
     }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
+
+        TableCellRenderer renderer = null;
+
+        switch (col) {
+            case COLTYPE_PEPTIDE_NAME:
+            case COLTYPE_PEPTIDE_CLUSTER: {
+                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                break;
+            }
+            case COLTYPE_OVERVIEW: {
+                renderer = new CompareValueRenderer();
+                break;
+            }
+            default: {
+                int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                switch (id) {
+                    case COLTYPE_SELECTION_LEVEL:
+                    case COLTYPE_PSM:
+                    case COLTYPE_IDENT_PSM: {
+                        renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                        break;
+                    }
+                    case COLTYPE_ABUNDANCE:
+                    case COLTYPE_RAW_ABUNDANCE: {
+                        renderer = new BigFloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0);
+                        break;
+                    }
+
+                }
+
+            }
+        }
+        
+        m_rendererMap.put(col, renderer);
+        return renderer;
+    }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+
 }

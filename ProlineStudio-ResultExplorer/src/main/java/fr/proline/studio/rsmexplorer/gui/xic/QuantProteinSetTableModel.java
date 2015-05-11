@@ -11,7 +11,10 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -19,13 +22,16 @@ import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.StringUtils;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -58,9 +64,6 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
     private int m_overviewType = COLTYPE_ABUNDANCE;
 
-    private boolean m_isFiltering = false;
-    private boolean m_filteringAsked = false;
-    
     private String m_modelName;
     
     
@@ -780,5 +783,57 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     public int getBestYAxisColIndex(PlotType plotType) {
         return -1; //JPM.TODO
     }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
+
+        TableCellRenderer renderer = null;
+
+        switch (col) {
+            case COLTYPE_PROTEIN_SET_ID: {
+                break;
+            }
+            case COLTYPE_PROTEIN_SET_NAME: {
+                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                break;
+            }
+            case COLTYPE_OVERVIEW: {
+                renderer = new CompareValueRenderer();
+                break;
+            }
+            case COLTYPE_NB_PEPTIDE:
+            case COLTYPE_NB_QUANT_PEPTIDE: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                break;
+            }
+            default: {
+                int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                switch (id) {
+                    case COLTYPE_SELECTION_LEVEL:
+                    case COLTYPE_PSM: {
+                        renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                        break;
+                    }
+                    case COLTYPE_ABUNDANCE:
+                    case COLTYPE_RAW_ABUNDANCE: {
+                        renderer = new BigFloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
+                        break;
+                    }
+                }
+
+            }
+        }
+        
+        
+        m_rendererMap.put(col, renderer);
+        return renderer;
+    }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+
     
 }

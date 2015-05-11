@@ -6,22 +6,25 @@ import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.SamesetRenderer;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.URLCellRenderer;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  * Table Model for Proteins
  * @author JM235353
  */
 public class ProteinTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
-
-
-
-
 
 
     public enum Column {
@@ -353,4 +356,48 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
             }
         }
     }
+    
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
+        
+        TableCellRenderer renderer = null;
+        
+        switch (Column.values()[col]) {
+
+            case PROTEIN_NAME: {
+                renderer =  new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", ProteinTableModel.Column.PROTEIN_NAME.ordinal());
+                break;
+            }
+            case PROTEIN_DESCRIPTION: {
+                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                break;
+            }
+            case SAMESET_SUBSET: {
+                renderer = new SamesetRenderer();
+                break;
+            }
+            case PROTEIN_SCORE:
+            case PROTEIN_MASS: {
+                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                break;
+            }
+            case PROTEIN_PEPTIDES_COUNT:
+            case PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                break;
+            }
+
+        }
+
+        m_rendererMap.put(col, renderer);
+        return renderer;
+        
+
+    }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+
 }

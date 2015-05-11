@@ -9,13 +9,19 @@ import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.ProteinCountRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  * Table Model for Protein Sets
@@ -504,6 +510,37 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     public String getExportColumnName(int col) {
         return getColumnName(col);
     }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+        
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
+        
+        TableCellRenderer renderer = null;
+        switch (col) {
+            case COLTYPE_PROTEIN_SET_NAME:
+            case COLTYPE_PROTEIN_SET_DESCRIPTION: {
+                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                break;
+            }
+            case COLTYPE_PROTEIN_SCORE: {
+                renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                break;
+            }
+            case COLTYPE_PROTEINS_COUNT: {
+                renderer = new ProteinCountRenderer();
+                break;
+            }
+            // COLTYPE_PEPTIDES_COUNT COLTYPE_SPECTRAL_COUNT COLTYPE_SPECIFIC_SPECTRAL_COUNT COLTYPE_UNIQUE_SEQUENCES_COUNT
+           
+        }
+        m_rendererMap.put(col, renderer);
+        return renderer;
+ 
+    }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
     public class ProteinCount implements Comparable {
 

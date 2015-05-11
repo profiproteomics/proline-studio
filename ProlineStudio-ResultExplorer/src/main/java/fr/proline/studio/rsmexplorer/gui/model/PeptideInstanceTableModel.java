@@ -17,13 +17,19 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  * Table Model for PeptideInstance of a Rsm
@@ -510,6 +516,49 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
     public String getExportColumnName(int col) {
         return getColumnName(col);
     }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
+        
+        TableCellRenderer renderer = null;
+        switch (col) {
+            case COLTYPE_PEPTIDE_NAME: {
+                renderer = new PeptideRenderer();
+                break;
+            }
+            case COLTYPE_PEPTIDE_CALCULATED_MASS:
+            case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: {
+                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
+                break;
+            } 
+            case COLTYPE_PEPTIDE_SCORE:
+            case COLTYPE_PEPTIDE_PPM:
+            case COLTYPE_PEPTIDE_RETENTION_TIME: {
+                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                break;
+            }
+            case COLTYPE_PEPTIDE_CHARGE:
+            case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
+            case COLTYPE_PEPTIDE_NB_PROTEIN_SETS: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                break;
+            } 
+            case COLTYPE_PEPTIDE_PTM:{
+                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                break;
+            }
+  
+        }
+        m_rendererMap.put(col, renderer);
+        return renderer;
+        
+
+    }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
     
     
 }

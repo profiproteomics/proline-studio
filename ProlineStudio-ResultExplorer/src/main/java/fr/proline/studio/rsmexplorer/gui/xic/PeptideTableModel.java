@@ -12,6 +12,7 @@ import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  * data for one masterQuantPeptide : for the different conditions (quant channels), abundances values
@@ -243,6 +244,11 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
     @Override
     public String getExportColumnName(int col) {
         return getColumnName(col);
+    }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+        return null;
     }
     
 }

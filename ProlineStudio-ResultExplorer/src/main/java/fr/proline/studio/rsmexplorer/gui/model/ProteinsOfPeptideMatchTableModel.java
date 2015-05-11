@@ -13,14 +13,20 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.RelativePainterHighlighter;
+import fr.proline.studio.utils.URLCellRenderer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.HashMap;
+import javax.swing.table.TableCellRenderer;
 
 /**
  * Table Model for Peptide Matches
@@ -338,6 +344,36 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     public String getExportColumnName(int col) {
         return getColumnName(col);
     }
+
+ @Override
+    public TableCellRenderer getRenderer(int col) {
+
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
+        
+        TableCellRenderer renderer = null;
+        switch (col) {
+            case COLTYPE_PROTEIN_NAME: {
+                renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", COLTYPE_PROTEIN_NAME);
+                break;
+            }
+            case COLTYPE_PROTEIN_SCORE:
+            case COLTYPE_PROTEIN_MASS: {
+                renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
+                break;
+            }
+            case COLTYPE_PROTEIN_PEPTIDES_COUNT: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                break;
+            }
+
+        }
+        m_rendererMap.put(col, renderer);
+        return renderer;
+    }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+
 
  
 }

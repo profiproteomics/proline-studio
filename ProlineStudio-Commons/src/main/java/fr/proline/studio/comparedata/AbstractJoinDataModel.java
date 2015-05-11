@@ -40,6 +40,8 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
         }
     }
     
+
+    
     protected void join() {
         if (!joinPossible()) {
             return;
@@ -119,6 +121,18 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
     public int getSelectedKey2() {
         return m_selectedKey2;
     }
+    
+    public boolean checkKeys(int key1, int key2) {
+        Class c1 = m_data1.getDataColumnClass(key1);
+        Class c2 = m_data2.getDataColumnClass(key2);
+        return (c1.equals(c2));
+    } 
+    
+    public void setKeys(int key1, int key2) {
+        m_selectedKey1 = key1;
+        m_selectedKey2 = key2;
+    }
+    
     
     public boolean joinPossible() {
         return (m_selectedKey1 != -1);

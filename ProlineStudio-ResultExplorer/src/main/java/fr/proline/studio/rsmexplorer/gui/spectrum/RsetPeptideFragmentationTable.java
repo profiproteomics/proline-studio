@@ -20,6 +20,7 @@ import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
 import java.util.List;
+import javax.swing.table.TableCellRenderer;
 
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
@@ -370,6 +371,11 @@ public class RsetPeptideFragmentationTable extends DecoratedTable {
 
         }
 
+        @Override
+        public TableCellRenderer getRenderer(int col) {
+            return null;
+        }
+        
     }
 
     public static class FragTableCustomRenderer extends org.jdesktop.swingx.renderer.DefaultTableRenderer {

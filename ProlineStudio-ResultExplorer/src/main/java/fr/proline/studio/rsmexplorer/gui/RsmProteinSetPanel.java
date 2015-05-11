@@ -316,7 +316,10 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
-                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
@@ -341,7 +344,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         m_proteinSetTable = new ProteinSetTable();
         m_proteinSetTable.setModel(new CompoundTableModel(new ProteinSetTableModel((LazyTable)m_proteinSetTable), true));
         // hide the id column
-        m_proteinSetTable.getColumnExt(ProteinSetTableModel.COLTYPE_PROTEIN_SET_ID).setVisible(false);
+        m_proteinSetTable.getColumnExt(m_proteinSetTable.convertColumnIndexToView(ProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
         
 
         m_markerContainerPanel = new MarkerContainerPanel(m_proteinSetScrollPane, (ProteinSetTable) m_proteinSetTable);
@@ -376,12 +379,6 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         
         public ProteinSetTable() {
             super(m_proteinSetScrollPane.getVerticalScrollBar() );
-            
-            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
-            
-            setDefaultRenderer(ProteinSetTableModel.ProteinCount.class, new ProteinCountRenderer());
-
-
 
         }
         

@@ -13,9 +13,6 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinsOfPeptideMatchTableModel;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.BorderLayout;
@@ -25,7 +22,6 @@ import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.TableColumn;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButtonV2;
@@ -194,7 +190,10 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
-                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
@@ -372,18 +371,15 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         m_proteinScrollPane = new JScrollPane();
 
         m_proteinTable = new ProteinTable();
-        m_proteinTable.setModel(new CompoundTableModel(new ProteinsOfPeptideMatchTableModel(m_proteinTable), true));
-        
-        
-        
-        TableColumn accColumn = m_proteinTable.getColumnModel().getColumn(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
-        URLCellRenderer renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
-        accColumn.setCellRenderer(renderer);
+        CompoundTableModel model = new CompoundTableModel(new ProteinsOfPeptideMatchTableModel(m_proteinTable), true);
+        m_proteinTable.setModel(model);
+
+        URLCellRenderer renderer = (URLCellRenderer) model.getRenderer(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_NAME);
         m_proteinTable.addMouseListener(renderer);
         m_proteinTable.addMouseMotionListener(renderer);
 
         // hide the id column (must be done after the URLCellRenderer is set)
-        m_proteinTable.getColumnExt(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_ID).setVisible(false);
+        m_proteinTable.getColumnExt(m_proteinTable.convertColumnIndexToView(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_ID)).setVisible(false);
 
         m_markerContainerPanel = new MarkerContainerPanel(m_proteinScrollPane, (ProteinTable) m_proteinTable);
 
@@ -391,15 +387,6 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         m_proteinTable.setFillsViewportHeight(true);
         m_proteinTable.setViewport(m_proteinScrollPane.getViewport());
 
-        /*
-         * if (m_startingPanel) { m_searchButton = new SearchButton();
-         *
-         *
-         * m_searchTextField = new JTextField(16) {
-         *
-         * @Override public Dimension getMinimumSize() { return
-         * super.getPreferredSize(); } }; }
-         */
 
         c.gridx = 0;
         c.gridy = 0;
@@ -423,11 +410,8 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         public ProteinTable() {
             super(m_proteinScrollPane.getVerticalScrollBar());
 
-
-
             displayColumnAsPercentage(ProteinsOfPeptideMatchTableModel.COLTYPE_PROTEIN_SCORE);
-            setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))));
-            setDefaultRenderer(Double.class, new DoubleRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))));
+
         }
 
         @Override

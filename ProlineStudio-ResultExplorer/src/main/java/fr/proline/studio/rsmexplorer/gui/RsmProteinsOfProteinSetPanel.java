@@ -20,9 +20,6 @@ import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinTableModel;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.SamesetRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -32,6 +29,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -106,19 +104,21 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
         
         m_scrollPane = new javax.swing.JScrollPane();
         m_proteinTable = new ProteinTable();
-        m_proteinTable.setModel(new CompoundTableModel(new ProteinTableModel((ProgressInterface) m_proteinTable), true));
+        CompoundTableModel model = new CompoundTableModel(new ProteinTableModel((ProgressInterface) m_proteinTable), true);
+        m_proteinTable.setModel(model);
         m_scrollPane.setViewportView(m_proteinTable);
 
         
         
         m_proteinTable.displayColumnAsPercentage(ProteinTableModel.Column.PROTEIN_SCORE.ordinal());
-        TableColumn accColumn = m_proteinTable.getColumnModel().getColumn(ProteinTableModel.Column.PROTEIN_NAME.ordinal());
-        URLCellRenderer renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", ProteinTableModel.Column.PROTEIN_NAME.ordinal());
-        accColumn.setCellRenderer(renderer);
-        m_proteinTable.addMouseListener(renderer);
+
+        
+        URLCellRenderer urlRenderer = (URLCellRenderer) model.getRenderer(ProteinTableModel.Column.PROTEIN_NAME.ordinal());
+        m_proteinTable.addMouseListener(urlRenderer);
+        m_proteinTable.addMouseMotionListener(urlRenderer);
         
         // hide the id column  (must be done after the URLCellRenderer is set)
-        m_proteinTable.getColumnExt(ProteinTableModel.Column.PROTEIN_ID.ordinal()).setVisible(false);
+        m_proteinTable.getColumnExt(m_proteinTable.convertColumnIndexToView(ProteinTableModel.Column.PROTEIN_ID.ordinal())).setVisible(false);
         
         c.gridx = 0;
         c.gridy = 0;
@@ -159,7 +159,10 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
-                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
@@ -302,10 +305,7 @@ public class RsmProteinsOfProteinSetPanel extends HourglassPanel implements Data
     private class ProteinTable extends DecoratedTable implements ProgressInterface {
 
         public ProteinTable() {
-            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(Float.class)) ) );
-            setDefaultRenderer(ProteinTableModel.Sameset.class, new SamesetRenderer());
-            
-        
+
         }
         
         /**

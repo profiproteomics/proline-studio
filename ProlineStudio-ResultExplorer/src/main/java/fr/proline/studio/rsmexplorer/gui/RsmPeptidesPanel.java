@@ -183,7 +183,10 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
-                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
@@ -245,8 +248,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
         m_peptideInstanceTable = new PeptideInstanceTable();
         m_peptideInstanceTable.setModel(new CompoundTableModel(new PeptideInstanceTableModel((LazyTable) m_peptideInstanceTable), true));
-        m_peptideInstanceTable.setTableRenderer();
-        m_peptideInstanceTable.getColumnExt(PeptideInstanceTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
+        m_peptideInstanceTable.getColumnExt(m_peptideInstanceTable.convertColumnIndexToView(PeptideInstanceTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         
         
         m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, (PeptideInstanceTable) m_peptideInstanceTable);
@@ -375,16 +377,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
             displayColumnAsPercentage(PeptideInstanceTableModel.COLTYPE_PEPTIDE_SCORE);
 
         }
-        
-        
-        public void setTableRenderer(){
-            getColumnModel().getColumn(convertColumnIndexToView(PeptideInstanceTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ)).setCellRenderer(new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 ) );
-            getColumnModel().getColumn(convertColumnIndexToView(PeptideInstanceTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS)).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
-            
-            setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());
-            setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))));
-            setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class)));
-        }
+
 
         @Override
         public void addTableModelListener(TableModelListener l) {

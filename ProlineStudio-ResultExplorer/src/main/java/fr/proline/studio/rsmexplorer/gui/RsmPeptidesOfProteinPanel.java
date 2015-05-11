@@ -22,10 +22,6 @@ import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideTableModel;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -33,6 +29,7 @@ import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -100,8 +97,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
 
         m_peptidesTable = new PeptideTable();
         m_peptidesTable.setModel(new CompoundTableModel(new PeptideTableModel(), true));
-        m_peptidesTable.setTableRenderer();
-        m_peptidesTable.getColumnExt(PeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
+        m_peptidesTable.getColumnExt(m_peptidesTable.convertColumnIndexToView(PeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         m_peptidesTable.displayColumnAsPercentage(PeptideTableModel.COLTYPE_PEPTIDE_SCORE);
 
 
@@ -137,7 +133,10 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
                 JXTable table = getGlobalAssociatedTable();
                String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
-                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
@@ -238,15 +237,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
         public PeptideTable() {
             
         } 
-        
-        public void setTableRenderer() {
-            getColumnModel().getColumn(convertColumnIndexToView(PeptideTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ)).setCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 ) );
-            getColumnModel().getColumn(convertColumnIndexToView(PeptideTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS)).setCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 ) );
-            setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());
-            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
-            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
-            
-        }
+
         
         /** 
          * Called whenever the value of the selection changes.

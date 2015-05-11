@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableCellRenderer;
 import org.openide.nodes.Sheet;
 import org.openide.util.NbBundle;
 
@@ -498,6 +499,11 @@ public class RsetAllPanel extends HourglassPanel implements DataBoxPanelInterfac
         
         @Override
         public String getTootlTipValue(int row, int col) {
+            return null;
+        }
+
+        @Override
+        public TableCellRenderer getRenderer(int col) {
             return null;
         }
         

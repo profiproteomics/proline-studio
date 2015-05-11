@@ -331,7 +331,7 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		            		java.lang.String.class,java.lang.String.class,java.lang.Boolean.class
 		            };
 		            boolean[] canEdit = new boolean [] {
-		                false,false, false
+		                false,true, true
 		            };
 				@Override
 				public Class getColumnClass(int columnIndex) {
@@ -387,18 +387,25 @@ public class AdvancedExportDialog extends DefaultDialog  {
 				
 				Vector v = new Vector();
 				v.add(defaultParam.sheets[i].fields[j].id);
-				v.add(defaultParam.sheets[i].fields[j].title);
 				
 				if(paramSheet!=null) { // if the sheet is present in both files
-					if( isDefaultParamFieldContainedInCustomParamFieldsList(defaultParam.sheets[i].fields[j] , paramSheet.fields ) ) {
+					String customField = getCustomFieldIfDefaultParamFieldContainedInCustomParamFieldsList(defaultParam.sheets[i].fields[j] , paramSheet.fields );
+					if(customField!=null)  {
+						v.add(customField);
 						v.add(true);
 					} else {
+						v.add(defaultParam.sheets[i].fields[j].title);
 						v.add(false);	
 					}
 				} else { // if only default then display isDefault value
+					v.add(defaultParam.sheets[i].fields[j].title);
 					v.add(defaultParam.sheets[i].fields[j].default_displayed);
 				}
-					tableModel.addRow(v);
+				
+		
+				
+				tableModel.addRow(v);
+				
 			}
 
 			table.setModel(tableModel);
@@ -407,15 +414,15 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		}
 	}
 	
-	private boolean isDefaultParamFieldContainedInCustomParamFieldsList (ExportExcelSheetField sheetFieldToCompare,  ExportExcelSheetField[] fields) {
+	private String getCustomFieldIfDefaultParamFieldContainedInCustomParamFieldsList (ExportExcelSheetField sheetFieldToCompare,  ExportExcelSheetField[] fields) {
 		// this method checks if sheetFieldToCompare is contained in the fields list of elements. It compares by the id only.
 		
 		for(int i=0; i<fields.length; i++) {
 			if(fields[i].id.equals(sheetFieldToCompare.id)) {
-				return true;
+				return fields[i].title; // return the custom title field
 			}
 		}
-		return false;
+		return null;
 	}
 	
 

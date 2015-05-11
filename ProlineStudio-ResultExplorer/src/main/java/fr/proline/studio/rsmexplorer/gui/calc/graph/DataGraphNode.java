@@ -53,6 +53,11 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
+    public void settings() {
+        // nothing to do
+    }
+    
+    @Override
     public NodeState getState() {
         if (m_state != NodeState.UNSET) {
             return m_state;

@@ -83,7 +83,7 @@ public class JoinFunction extends AbstractFunction {
             associatedObjectArray1[i] = i;
         }
 
-        GlobalTableModelInterface model2 = graphObjects[0].getGlobalTableModelInterface();
+        GlobalTableModelInterface model2 = graphObjects[1].getGlobalTableModelInterface();
         nbColumns = model2.getColumnCount();
         Object[] objectArray2 = new Object[nbColumns];
         Object[] associatedObjectArray2 = new Object[nbColumns];

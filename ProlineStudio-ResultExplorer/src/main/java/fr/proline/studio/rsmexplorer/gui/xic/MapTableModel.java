@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -257,6 +258,11 @@ public class MapTableModel extends LazyTableModel implements GlobalTableModelInt
     @Override
     public String getExportRowCell(int row, int col) {
         return null; // no specific export
+    }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+        return null;
     }
 
 

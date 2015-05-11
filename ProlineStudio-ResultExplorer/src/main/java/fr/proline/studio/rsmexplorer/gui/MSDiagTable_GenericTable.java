@@ -10,6 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData.Theor
 import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
+import javax.swing.table.TableCellRenderer;
  
 
 	/**
@@ -154,6 +155,11 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 	        	
 
 	        }
+
+        @Override
+        public TableCellRenderer getRenderer(int col) {
+            return null;
+        }
 
 	    }
 

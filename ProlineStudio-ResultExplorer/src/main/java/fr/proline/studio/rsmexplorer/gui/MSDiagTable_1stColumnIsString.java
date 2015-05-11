@@ -15,6 +15,7 @@ import fr.proline.studio.table.DecoratedTable;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.TablePopupMenu;
 import java.util.List;
+import javax.swing.table.TableCellRenderer;
 
 import javax.swing.table.TableColumn;
 import org.jdesktop.swingx.table.TableColumnExt;
@@ -172,6 +173,11 @@ public class MSDiagTable_1stColumnIsString extends DecoratedTable {
 	        	return m_matrixValues[rowIndex][columnIndex];
 	        
 	        }
+
+        @Override
+        public TableCellRenderer getRenderer(int col) {
+            return null;
+        }
 
 
 	    }

@@ -34,7 +34,7 @@ public class FunctionGraphNode extends GraphNode {
 
     @Override
     public String getName() {
-        return "Join";
+        return m_function.getName();
     }
 
     @Override
@@ -106,12 +106,30 @@ public class FunctionGraphNode extends GraphNode {
             win.requestActive();
         }
     }
+    
+    @Override
+    public void settings() {
+        
+        AbstractGraphObject[] graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
+        int i = 0;
+        for (GraphConnector connector : m_inConnectors) {
+            GraphNode graphNode = connector.getLinkedSourceGraphNode();
+            graphNode.process();  // need to process previous nodes to be able to do settings
+            graphObjectArray[i++] = graphNode;
+        }
+        
+        m_function.settings(graphObjectArray);
+    }
 
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return m_function.getGlobalTableModelInterface();
     }
 
-
+    @Override
+    public void resetState() {
+        super.resetState();
+        m_function.resetState();
+    }
     
 }

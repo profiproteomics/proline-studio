@@ -11,7 +11,7 @@ import javax.swing.table.TableCellRenderer;
  */
 public class FloatRenderer implements TableCellRenderer {
     
-    private TableCellRenderer m_defaultRenderer;
+    private final TableCellRenderer m_defaultRenderer;
     
     private int m_digits = 2;
     

@@ -7,9 +7,11 @@ import com.google.api.client.util.ArrayMap;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import fr.proline.studio.dpm.data.CVParam;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,15 +22,31 @@ public class ExportRSMTask extends AbstractServiceTask {
 
     private DDataset m_dataset;
     private String[] m_filePathResult;
+    HashMap<String,Object> m_exportParams;
     private boolean m_exportAllPSMs;
+    private boolean m_export2Pride;
     
     public ExportRSMTask(AbstractServiceCallback callback, DDataset dataset, boolean exportAllPSMs, String[] filePathInfo) {
         super(callback, false /** asynchronous */, new TaskInfo("Export Identification Summary " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
         m_exportAllPSMs =  exportAllPSMs;
         m_filePathResult = filePathInfo;
+        m_export2Pride = false;
+        m_exportParams = null;
     }
     
+    public ExportRSMTask(AbstractServiceCallback callback, DDataset dataset, boolean exportAllPSMs,HashMap<String,Object> exportParams, boolean prideFormat, String[] filePathInfo) {
+        super(callback, false /** asynchronous */, null);
+        m_dataset = dataset;
+        m_exportAllPSMs =  exportAllPSMs;
+        m_filePathResult = filePathInfo;
+        m_export2Pride = prideFormat;
+        m_exportParams = exportParams;
+        if(m_export2Pride)
+            super.setTaskInfo( new TaskInfo("Export Ident. Summary " + dataset.getName()+" to Pride format", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        else
+            super.setTaskInfo( new TaskInfo("Export Identification Summary " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+    }
     
     @Override
     public boolean askService() {
@@ -40,7 +58,39 @@ public class ExportRSMTask extends AbstractServiceTask {
             request.setMethod("run_job");
 
         Map<String, Object> params = new HashMap<>();
-        params.put("file_format", "TEMPLATED"); //Ou MZIDENTML ...
+        if(m_export2Pride) {
+            params.put("file_format", "PRIDE"); //Ou MZIDENTML ...
+            HashMap<String,Object> finalExportParams = new HashMap<>();
+            finalExportParams.putAll(m_exportParams);
+            if(m_exportParams.containsKey("sample_additional")){            
+                finalExportParams.remove("sample_additional");
+                List<CVParam> additionals =  (List<CVParam>) m_exportParams.get("sample_additional");
+                List<String> additionalsXmlString = new ArrayList<>(additionals.size());
+                for(CVParam nextCVParam : additionals){
+                    additionalsXmlString.add(nextCVParam.toXMLString());
+                }
+                finalExportParams.put("sample_additional", additionalsXmlString);           
+            }
+            params.put("extra_params", finalExportParams); //Ou MZIDENTML ...
+        } else {
+
+            params.put("file_format", "TEMPLATED"); //Ou MZIDENTML ...
+            /*
+            * "ALL_PEP_MATCHES_XLSX" -> AllPSMViewSetTemplateAsXLSX,
+            * "IRMA_LIKE_TSV" -> IRMaLikeViewSetTemplateAsTSV,
+            * "IRMA_LIKE_XLSX" -> IRMaLikeViewSetTemplateAsXLSX,
+            * "IRMA_LIKE_FULL_XLSX" -> IRMaLikeFullViewSetTemplateAsXLSX
+            */
+
+            Map<String, Object> finalExportParams = new HashMap<>();
+            if(m_exportAllPSMs){
+                finalExportParams.put("template_name", "IRMA_LIKE_FULL_XLSX"); //************ TODO Liste des templates possibles ?! 
+            } else {
+                finalExportParams.put("template_name", "IRMA_LIKE_XLSX"); //************ TODO Liste des templates possibles ?! 
+            }
+            params.put("extra_params", finalExportParams);
+
+        }
         // **** Pour la version FILE :"file_name" & "file_directory" 
         params.put("output_mode", "STREAM"); // *** ou STREAM
             
@@ -51,20 +101,6 @@ public class ExportRSMTask extends AbstractServiceTask {
         rsmIdents.add(rsmIdent);
         params.put("rsm_identifiers",rsmIdents);
 
-        /*
-         * "ALL_PEP_MATCHES_XLSX" -> AllPSMViewSetTemplateAsXLSX,
-         * "IRMA_LIKE_TSV" -> IRMaLikeViewSetTemplateAsTSV,
-         * "IRMA_LIKE_XLSX" -> IRMaLikeViewSetTemplateAsXLSX,
-         * "IRMA_LIKE_FULL_XLSX" -> IRMaLikeFullViewSetTemplateAsXLSX
-         */
-        
-        Map<String, Object> extraParams = new HashMap<>();
-        if(m_exportAllPSMs){
-            extraParams.put("template_name", "IRMA_LIKE_FULL_XLSX"); //************ TODO Liste des templates possibles ?! 
-        } else {
-            extraParams.put("template_name", "IRMA_LIKE_XLSX"); //************ TODO Liste des templates possibles ?! 
-        }
-        params.put("extra_params", extraParams);
         
         request.setParameters(params);
 

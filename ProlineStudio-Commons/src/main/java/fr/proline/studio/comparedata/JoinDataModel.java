@@ -10,6 +10,7 @@ import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -154,9 +155,57 @@ public class JoinDataModel extends AbstractJoinDataModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        return getDataValueAt(rowIndex, columnIndex);
+        if (!joinPossible()) {
+            return null;
+        }
+
+        Object key = m_allKeys.get(rowIndex);
+        if (columnIndex == 0) {
+            Integer row = m_keyToRow1.get(key);
+            if (row == null) {
+                return null;
+            }
+            return m_data1.getValueAt(row, m_selectedKey1);
+        }
+        columnIndex--;
+        if (columnIndex < m_allColumns1.size()) {
+            Integer row = m_keyToRow1.get(key);
+            if (row == null) {
+                return null;
+            }
+            return m_data1.getValueAt(row, m_allColumns1.get(columnIndex));
+        }
+        columnIndex -= m_allColumns1.size();
+        if (columnIndex < m_allColumns2.size()) {
+            Integer row = m_keyToRow2.get(key);
+            if (row == null) {
+                return null;
+            }
+            return m_data2.getValueAt(row, m_allColumns2.get(columnIndex));
+        }
+        return null;
     }
 
+    @Override
+    public Class getColumnClass(int columnIndex) {
+        if (!joinPossible()) {
+            return null;
+        }
+
+        if (columnIndex == 0) { 
+            return m_data1.getColumnClass(m_selectedKey1);
+        }
+        columnIndex--;
+        if (columnIndex < m_allColumns1.size()) {
+            return m_data1.getColumnClass(m_allColumns1.get(columnIndex));
+        }
+        columnIndex -= m_allColumns1.size();
+        if (columnIndex < m_allColumns2.size()) {
+            return m_data2.getColumnClass(m_allColumns2.get(columnIndex));
+        }
+        return null;
+    }
+    
     @Override
     public Long getTaskId() {
         return -1l; // not used
@@ -265,6 +314,28 @@ public class JoinDataModel extends AbstractJoinDataModel {
     @Override
     public String getExportColumnName(int col) {
         return getColumnName(col);
+    }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+         if (!joinPossible()) {
+            return null;
+        }
+        
+         if (col == 0) {
+             return m_data1.getRenderer(m_selectedKey1);
+         }
+
+        col--;
+        if (col<m_allColumns1.size()) {
+
+            return m_data1.getRenderer(m_allColumns1.get(col));
+        }
+        col-=m_allColumns1.size();
+        if (col<m_allColumns2.size()) {
+            return m_data2.getRenderer(m_allColumns2.get(col));
+        }
+        return null;
     }
     
     

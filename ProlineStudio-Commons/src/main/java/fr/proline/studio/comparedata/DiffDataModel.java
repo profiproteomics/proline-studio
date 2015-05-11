@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -114,7 +115,12 @@ public class DiffDataModel extends AbstractJoinDataModel {
         return String.class;
         
     }
-
+    
+        @Override
+    public Class getColumnClass(int columnIndex) {
+        return getDataColumnClass(columnIndex);
+    }
+    
     @Override
     public Object getDataValueAt(int rowIndex, int columnIndex) {
         if (!joinPossible()) {
@@ -273,6 +279,12 @@ public class DiffDataModel extends AbstractJoinDataModel {
     @Override
     public String getExportColumnName(int col) {
         return getColumnName(col);
+    }
+    
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+        //JPM.TODO
+        return null;
     }
     
 }

@@ -54,7 +54,7 @@ public class JoinDataModel extends AbstractJoinDataModel {
             return 0;
         }
         
-        return m_allColumns1.size()+m_allColumns1.size()+1;
+        return m_allColumns1.size()+m_allColumns2.size()+1;
     }
 
     @Override

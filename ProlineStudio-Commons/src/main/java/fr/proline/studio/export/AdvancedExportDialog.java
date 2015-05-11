@@ -33,7 +33,7 @@ import javax.swing.table.DefaultTableModel;
 import org.jdesktop.swingx.JXTable;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
-
+import org.slf4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -45,6 +45,7 @@ import com.google.gson.GsonBuilder;
  */
 public class AdvancedExportDialog extends DefaultDialog  {
 
+    private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.Commons");
 
     private static AdvancedExportDialog m_singletonImageDialog = null;
     private static AdvancedExportDialog m_singletonImage2Dialog = null;
@@ -175,14 +176,14 @@ public class AdvancedExportDialog extends DefaultDialog  {
         m_showExportAllPSMsChB = showExportAllPSMsOption;
         m_exportType = type;
         
-//        setTitle("Export");
+        setTitle("Export");
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
 
     
 	
         setInternalComponent(createAdvancedExportPanel());
-        loadDefaultExportConfig();
+        /*loadDefaultExportConfig();
 		//loadExportConfig();// is loaded upon request
 		if(m_exportDefaultConfig!=null )
 		{
@@ -190,7 +191,7 @@ public class AdvancedExportDialog extends DefaultDialog  {
 		}
 		
        
-        
+        */
         setButtonName(BUTTON_OK, ((m_exportType == ExporterFactory.EXPORT_IMAGE)
         					   || (m_exportType == ExporterFactory.EXPORT_IMAGE2)) ? "Export Image" : "Export");
 
@@ -1133,6 +1134,26 @@ public class AdvancedExportDialog extends DefaultDialog  {
 
     }
     
-
+    /**
+     * returns the JSON String corresponding to the export configuration
+     * @return 
+     */
+    public String getExportConfig(){
+        logger.debug("getExportConfig");
+        return m_exportConfig == null ? null : new GsonBuilder().create().toJson(m_exportConfig);
+    }
+    
+    /**
+     * set the defaultConfiguration 
+     * @param configStr the JSON string 
+     */
+    public void setDefaultExportConfig(String configStr){
+        logger.debug("setDefaultExportConfig");
+        m_exportDefaultConfig = new Gson().fromJson(configStr, ExportConfig.class);
+	fillExportPossibleValues(m_exportDefaultConfig);
+        if(m_exportDefaultConfig!=null ){
+            fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+        }
+    }
 	
 }

@@ -140,6 +140,7 @@ public abstract class GraphNode extends AbstractGraphObject {
     public abstract NodeState getState();
     public abstract void process();
     public abstract void display();
+    public abstract void settings();
 
 
     public LinearGradientPaint getBackgroundGradient() {
@@ -244,6 +245,7 @@ public abstract class GraphNode extends AbstractGraphObject {
     public JPopupMenu createPopup(final GraphPanel panel) {
         JPopupMenu popup = new JPopupMenu();
         popup.add(new DisplayAction(this));
+        popup.add(new SettingsAction(this));
         popup.addSeparator();
         popup.add(new DeleteAction(panel, this));
         popup.addPopupMenuListener(new PopupMenuListener() {
@@ -296,6 +298,21 @@ public abstract class GraphNode extends AbstractGraphObject {
         @Override
         public void actionPerformed(ActionEvent e) {
             m_graphNode.display();
+        }
+    }
+    
+    public class SettingsAction extends AbstractAction {
+
+        private GraphNode m_graphNode = null;
+
+        public SettingsAction(GraphNode graphNode) {
+            super("Settings");
+            m_graphNode = graphNode;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            m_graphNode.settings();
         }
     }
     

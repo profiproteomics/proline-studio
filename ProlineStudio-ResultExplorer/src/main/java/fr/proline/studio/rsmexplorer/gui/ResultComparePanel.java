@@ -14,6 +14,7 @@ import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -23,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableCellRenderer;
 import org.jdesktop.swingx.JXTable;
 
 /**
@@ -176,10 +178,10 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
     }
 
     
-    private class DataTable extends DecoratedMarkerTable {
+    private class DataTable extends LazyTable {
 
         public DataTable() {
-
+            super(m_dataScrollPane.getVerticalScrollBar());
         }
 
         @Override
@@ -200,6 +202,16 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
         @Override
         public void prepostPopupMenu() {
             // nothing to do
+        }
+
+        @Override
+        public boolean isLoaded() {
+            return ((CompoundTableModel) getModel()).isLoaded();
+        }
+
+        @Override
+        public int getLoadingPercentage() {
+            return ((CompoundTableModel) getModel()).getLoadingPercentage();
         }
 
     }

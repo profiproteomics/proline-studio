@@ -40,6 +40,17 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
         }
     }
     
+    public void setData(GlobalTableModelInterface data1, GlobalTableModelInterface data2, Integer key1, Integer key2) {
+        m_data1 = data1;
+        m_data2 = data2;
+        m_selectedKey1 = key1;
+        m_selectedKey2 = key2;
+
+        if (joinPossible()) {
+            join();
+        }
+    }
+    
 
     
     protected void join() {

@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import fr.proline.studio.comparedata.JoinDataModel;
-import fr.proline.studio.gui.JCheckBoxList;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -9,7 +8,6 @@ import fr.proline.studio.python.data.Table;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
-import java.util.ArrayList;
 import javax.swing.JComboBox;
 
 /**
@@ -42,15 +40,23 @@ public class JoinFunction extends AbstractFunction {
         return m_state;
     }
 
+    
+    
     @Override
     public void process(AbstractGraphObject[] graphObjects) {
-        if (m_state == GraphNode.NodeState.READY) {
-            return;
-        }
-        
+
         Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
         Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
-        Table joinedTable = Table.join(t1, t2);
+        
+        Table joinedTable;
+        if ((m_paramColumn1 != null) && (m_paramColumn2 != null)) {
+            Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
+            Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
+            joinedTable = Table.join(t1, t2, key1, key2);
+        } else {
+            joinedTable = Table.join(t1, t2);
+        }
+
         m_globalTableModelInterface = joinedTable.getModel();
         m_state = GraphNode.NodeState.READY;
     }
@@ -111,7 +117,8 @@ public class JoinFunction extends AbstractFunction {
     public void userParametersChanged() {
         Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
         Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
-         ((JoinDataModel)m_globalTableModelInterface).setKeys(key1, key2);
+        ((JoinDataModel)m_globalTableModelInterface).setKeys(key1, key2);
+        m_state = GraphNode.NodeState.UNSET;
     }
     
 }

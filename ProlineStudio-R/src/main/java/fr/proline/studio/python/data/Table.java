@@ -146,9 +146,21 @@ public class Table extends PyObject {
         return new Table(joinDataModel);
     }
     
+    public static Table join(Table t1, Table t2, Integer key1, Integer key2) {
+        JoinDataModel joinDataModel = new JoinDataModel();
+        joinDataModel.setData(t1.getModel(), t2.getModel(), key1, key2);
+        return new Table(joinDataModel);
+    }
+    
     public static Table diff(Table t1, Table t2) {
         DiffDataModel diffDataModel = new DiffDataModel();
         diffDataModel.setData(t1.getModel(), t2.getModel());
+        return new Table(diffDataModel);
+    }
+    
+    public static Table diff(Table t1, Table t2, Integer key1, Integer key2) {
+        DiffDataModel diffDataModel = new DiffDataModel();
+        diffDataModel.setData(t1.getModel(), t2.getModel(), key1, key2);
         return new Table(diffDataModel);
     }
 }

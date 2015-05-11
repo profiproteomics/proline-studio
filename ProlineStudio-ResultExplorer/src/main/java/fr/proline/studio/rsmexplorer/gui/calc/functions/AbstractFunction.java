@@ -38,6 +38,7 @@ public abstract class AbstractFunction {
     
     public void resetState() {
         m_parameters = null;
+        m_globalTableModelInterface = null;
     }
     
     public void settings(AbstractGraphObject[] graphObjects) {

@@ -23,7 +23,7 @@ public class JoinDataModel extends AbstractJoinDataModel {
 
     
     public JoinDataModel() {
-        
+        int toto = 1;
     }
     
     @Override

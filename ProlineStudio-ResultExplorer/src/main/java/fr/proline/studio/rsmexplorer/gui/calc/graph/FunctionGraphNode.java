@@ -17,7 +17,7 @@ public class FunctionGraphNode extends GraphNode {
     
     private static final Color FRAME_COLOR = new Color(149,195,95);
 
-    private AbstractFunction m_function;
+    private final AbstractFunction m_function;
     
     public FunctionGraphNode(AbstractFunction function) {
         m_function = function;
@@ -97,6 +97,7 @@ public class FunctionGraphNode extends GraphNode {
 
     @Override
     public void display() {
+        m_state = NodeState.UNSET;
         NodeState state = getState();
         if (state ==  NodeState.READY) {
             WindowBox windowBox = WindowBoxFactory.getModelWindowBox(getName());
@@ -104,6 +105,9 @@ public class FunctionGraphNode extends GraphNode {
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
             win.open();
             win.requestActive();
+            
+            
+
         }
     }
     

@@ -24,10 +24,6 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.python.data.TableInfo;
-import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -35,13 +31,13 @@ import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
-import fr.proline.studio.table.LazyTableCellRenderer;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -203,7 +199,10 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
-                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
@@ -255,7 +254,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_quantChannels = quantChannels;
         
        ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptideIons);
-        m_quantPeptideIonTable.setTableRenderer();
+
         m_titleLabel.setText(TABLE_TITLE +" ("+peptideIons.size()+")");
         // select the first row
         if ((peptideIons != null) && (peptideIons.size() > 0)) {
@@ -285,14 +284,14 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         List<TableColumn> columns = m_quantPeptideIonTable.getColumns(true);
         for (Integer id : listIdsToHide) {
             boolean columnVisible = ((TableColumnExt) columns.get(id)).isVisible();
-            if(columnVisible) {
-                m_quantPeptideIonTable.getColumnExt(id.intValue()).setVisible(false);
+            if (columnVisible) {
+                m_quantPeptideIonTable.getColumnExt(m_quantPeptideIonTable.convertColumnIndexToView(id)).setVisible(false);
             }
         }
         // hide the id column
         boolean columnVisible = ((TableColumnExt) columns.get(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID)).isVisible();
-        if(columnVisible) {
-            m_quantPeptideIonTable.getColumnExt(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID).setVisible(false);
+        if (columnVisible) {
+            m_quantPeptideIonTable.getColumnExt(m_quantPeptideIonTable.convertColumnIndexToView(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ID)).setVisible(false);
         }
     }
     
@@ -346,15 +345,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
             super(m_peptideIonScrollPane.getVerticalScrollBar() );
             
         }
-        
-        public void setTableRenderer() {
-            getColumnModel().getColumn(convertColumnIndexToView(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_ELUTION_TIME)).setCellRenderer(new LazyTableCellRenderer(new TimeRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)))));
-            getColumnModel().getColumn(convertColumnIndexToView(QuantPeptideIonTableModel.COLTYPE_PEPTIDE_ION_MOZ)).setCellRenderer(new LazyTableCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
-            
-            setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
-            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
-            
-        }
+
         
         @Override
         public void addTableModelListener(TableModelListener l) {

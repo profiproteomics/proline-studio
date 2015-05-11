@@ -1,6 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
-import fr.proline.core.orm.msi.dto.DMsQuery;
+
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
@@ -17,14 +17,9 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
-import fr.proline.studio.table.LazyTableCellRenderer;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -63,7 +58,7 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
     private ExportButton m_exportButton;
 
     private JLabel m_titleLabel;
-    private String TABLE_TITLE = "PSM ";
+    private static final String TABLE_TITLE = "PSM ";
 
     public XicPeptideMatchPanel() {
         initComponents();
@@ -158,10 +153,9 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
 
         m_psmTable = new XicPeptideMatchTable();
         m_psmTable.setModel(new CompoundTableModel(new XicPeptideMatchTableModel((LazyTable) m_psmTable), true));
-        m_psmTable.setTableRenderer();
 
         // hide the id column
-        m_psmTable.getColumnExt(XicPeptideMatchTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
+        m_psmTable.getColumnExt(m_psmTable.convertColumnIndexToView(XicPeptideMatchTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
 
         m_psmTable.setSortable(false);
 
@@ -250,22 +244,12 @@ public class XicPeptideMatchPanel extends HourglassPanel implements DataBoxPanel
 
     private class XicPeptideMatchTable extends LazyTable implements ExportModelInterface {
 
-        private DPeptideMatch m_psmSelected = null;
-
+        
         public XicPeptideMatchTable() {
             super(m_psmScrollPane.getVerticalScrollBar());
 
         }
 
-        public void setTableRenderer() {
-            getColumnModel().getColumn(convertColumnIndexToView(XicPeptideMatchTableModel.COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ)).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 4)));
-            getColumnModel().getColumn(convertColumnIndexToView(XicPeptideMatchTableModel.COLTYPE_PEPTIDE_CALCULATED_MASS)).setCellRenderer(new LazyTableCellRenderer(new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 4)));
-            setDefaultRenderer(DPeptideMatch.class, new PeptideRenderer());
-            setDefaultRenderer(DMsQuery.class, new MsQueryRenderer());
-            setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class))));
-            setDefaultRenderer(Integer.class, new DefaultRightAlignRenderer(getDefaultRenderer(Integer.class)));
-
-        }
         
         @Override
         public void addTableModelListener(TableModelListener l) {

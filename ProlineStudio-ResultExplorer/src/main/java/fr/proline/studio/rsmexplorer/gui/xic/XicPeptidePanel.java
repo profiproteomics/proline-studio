@@ -28,9 +28,6 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -45,6 +42,7 @@ import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -101,9 +99,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private XICPeptideSearch m_search = null;
     
     private JLabel m_titleLabel;
-    private String TABLE_TITLE = "Peptides";
+    private static final String TABLE_TITLE = "Peptides";
     
-    private boolean m_canGraph ;
+    private final boolean m_canGraph ;
 
     public XicPeptidePanel(boolean canGraph) {
         this.m_canGraph = canGraph ;
@@ -248,7 +246,10 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
-                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
@@ -274,7 +275,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         m_quantPeptideTable.setModel(new CompoundTableModel(new QuantPeptideTableModel((LazyTable)m_quantPeptideTable), true));
         
         // hide the id column
-        m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
+        m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         
         m_quantPeptideTable.setSortable(false);
 
@@ -330,21 +331,21 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         List<TableColumn> columns = m_quantPeptideTable.getColumns(true);
         for (Integer id : listIdsToHide) {
             boolean columnVisible = ((TableColumnExt) columns.get(id)).isVisible();
-            if(columnVisible) {
-                m_quantPeptideTable.getColumnExt(id.intValue()).setVisible(false);
+            if (columnVisible) {
+                m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(id)).setVisible(false);
             }
         }
         if (!m_displayForProteinSet) {
             // hide the cluster column
             boolean columnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_PEPTIDE_CLUSTER)).isVisible();
             if(columnVisible) {
-                m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_CLUSTER).setVisible(false);
+                m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_PEPTIDE_CLUSTER)).setVisible(false);
             }
         }
         // hide the id column
         boolean columnVisible = ((TableColumnExt) columns.get(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID)).isVisible();
         if(columnVisible) {
-            m_quantPeptideTable.getColumnExt(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID).setVisible(false);
+            m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         }
     }
 
@@ -395,10 +396,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
 
         public QuantPeptideTable() {
             super(m_peptideScrollPane.getVerticalScrollBar() );
-            
-            setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
-            //setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
-            setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
+
         }
         
         @Override

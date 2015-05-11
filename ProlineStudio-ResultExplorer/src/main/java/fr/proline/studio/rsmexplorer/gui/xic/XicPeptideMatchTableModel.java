@@ -12,16 +12,23 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -433,21 +440,20 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
                 return Long.class;
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_QC_NAME:
-                return String.class;
             case COLTYPE_PEPTIDE_PTM:
+                return String.class;
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_RETENTION_TIME:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
             case COLTYPE_PEPTIDE_PPM:
+            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
                 return Float.class;
             case COLTYPE_PEPTIDE_MSQUERY:
             case COLTYPE_PEPTIDE_RANK:
             case COLTYPE_PEPTIDE_CHARGE:
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
                 return Integer.class;
-            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
-                return Object.class; // Float or String... JPM.TODO
         }
         return null; // should not happen
     }
@@ -525,6 +531,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
     }
     
     
+    @Override
     public String getTootlTipValue(int row, int col) {
         return "";
     }
@@ -664,6 +671,56 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
                 return "";
         }
     }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
+
+        TableCellRenderer renderer = null;
+
+        switch (col){
+
+            case COLTYPE_PEPTIDE_NAME: {
+                renderer = new PeptideRenderer();
+                break;
+            }
+            case COLTYPE_PEPTIDE_QC_NAME:
+            case COLTYPE_PEPTIDE_PTM: {
+                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                break;
+            }
+            case COLTYPE_PEPTIDE_SCORE:
+            case COLTYPE_PEPTIDE_RETENTION_TIME:
+            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
+            case COLTYPE_PEPTIDE_PPM: {
+                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                break;
+            }
+            case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
+            case COLTYPE_PEPTIDE_CALCULATED_MASS: {
+                renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 4);
+                break;
+            }
+            case COLTYPE_PEPTIDE_MSQUERY: {
+                renderer = new MsQueryRenderer();
+                break;
+            }
+            case COLTYPE_PEPTIDE_RANK:
+            case COLTYPE_PEPTIDE_CHARGE:
+            case COLTYPE_PEPTIDE_MISSED_CLIVAGE: {
+                renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                break;
+            }
+
+        }
+        
+        m_rendererMap.put(col, renderer);
+        return renderer;
+    }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
     
 }

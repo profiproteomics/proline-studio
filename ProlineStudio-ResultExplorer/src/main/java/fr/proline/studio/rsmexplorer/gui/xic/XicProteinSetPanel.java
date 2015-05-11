@@ -27,9 +27,6 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayIdentificationProteinSetsAction;
-import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -45,6 +42,7 @@ import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -212,7 +210,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel)m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
-                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
@@ -252,7 +253,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         m_quantProteinSetTable.setModel(new CompoundTableModel(new QuantProteinSetTableModel((LazyTable)m_quantProteinSetTable), true));
         
         // hide the id column
-        m_quantProteinSetTable.getColumnExt(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID).setVisible(false);
+        m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
         
         m_quantProteinSetTable.setSortable(false);
 
@@ -283,37 +284,39 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         if ((proteinSets != null) && (proteinSets.size() > 0)) {
             m_quantProteinSetTable.getSelectionModel().setSelectionInterval(0, 0);
             m_markerContainerPanel.setMaxLineNumber(proteinSets.size());
-        }
-        
-        if (finished) {
 
-            // allow to change column visibility
-            m_columnVisibilityButton.setEnabled(true);
-            m_quantProteinSetTable.setSortable(true);
-            // hide the rawAbundance  and selectionLevel columns
-            List<Integer> listIdsToHide = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
-            for (Integer id : listIdsToHide) {
-                m_quantProteinSetTable.getColumnExt(id.intValue()).setVisible(false);
+            if (m_hideFirstTime) {
+                // allow to change column visibility
+                m_columnVisibilityButton.setEnabled(true);
+                m_quantProteinSetTable.setSortable(true);
+                // hide the rawAbundance  and selectionLevel columns
+                List<Integer> listIdsToHide = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
+                for (Integer id : listIdsToHide) {
+                    m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(id)).setVisible(false);
+                }
+                // hide Id column
+                m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
+                m_hideFirstTime = false;
             }
-            // hide Id column
-            m_quantProteinSetTable.getColumnExt(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID).setVisible(false);
-            
         }
+
     }
+    private boolean m_hideFirstTime = true;
     
     public void dataUpdated(SubTask subTask, boolean finished) {
         m_quantProteinSetTable.dataUpdated(subTask, finished);
-        if (finished) {
+        if (m_hideFirstTime) {
             // allow to change column visibility
             m_columnVisibilityButton.setEnabled(true);
             m_quantProteinSetTable.setSortable(true);
             // hide the rawAbundance  and selectionLevel columns
             List<Integer> listIdsToHide = ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
             for (Integer id : listIdsToHide) {
-                m_quantProteinSetTable.getColumnExt(id.intValue()).setVisible(false);
+                m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(id)).setVisible(false);
             }
             // hide Id column
-            m_quantProteinSetTable.getColumnExt(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID).setVisible(false);
+            m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
+            m_hideFirstTime = false;
         }
     }
     
@@ -371,10 +374,6 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         
         public QuantProteinSetTable() {
             super(m_proteinSetScrollPane.getVerticalScrollBar() );
-            setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
-            //setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
-            setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
-            
         }
         
         @Override

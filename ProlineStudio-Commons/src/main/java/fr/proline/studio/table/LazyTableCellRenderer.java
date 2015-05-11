@@ -30,6 +30,10 @@ public class LazyTableCellRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
+        if (value == null) {
+            return m_childRenderer.getTableCellRendererComponent(table, "", isSelected, hasFocus, row, column);
+        }
+        
         Object data = ((LazyData) value).getData();
         
         if ((m_childRenderer != null) && (data != null)) {

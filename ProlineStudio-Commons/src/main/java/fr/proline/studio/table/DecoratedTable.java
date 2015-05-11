@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTableHeader;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
@@ -155,5 +157,19 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
     public abstract void prepostPopupMenu();
     
+    @Override
+    public TableCellRenderer getCellRenderer(int row, int column) {
+
+        TableModel model = getModel();
+        if (model instanceof GlobalTableModelInterface) {
+            int columnInModel = convertColumnIndexToModel(column);
+            TableCellRenderer renderer = ((GlobalTableModelInterface) model).getRenderer(columnInModel);
+            if (renderer != null) {
+                return renderer;
+            }
+        }
+
+        return super.getCellRenderer(row, column);
+    }
     
 }

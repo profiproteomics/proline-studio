@@ -22,15 +22,9 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FontRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
-import fr.proline.studio.table.LazyTableCellRenderer;
 import fr.proline.studio.table.TablePopupMenu;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
@@ -66,22 +60,22 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     private FeatureTable m_featureTable;
 
     private MarkerContainerPanel m_markerContainerPanel;
-    
+
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_graphicsButton;
     private JButton m_graphicsTypeButton;
     private AddMzScopeButton m_mzscopeButton;
-    
-   public static final int VIEW_ALL_GRAPH_PEAKS = 0;
-   public static final int VIEW_ALL_ISOTOPES_FOR_FEATURE = 1;
-   
-   private int m_viewType = 0;
-    
-    private boolean m_canGraph ;
-    
+
+    public static final int VIEW_ALL_GRAPH_PEAKS = 0;
+    public static final int VIEW_ALL_ISOTOPES_FOR_FEATURE = 1;
+
+    private int m_viewType = 0;
+
+    private final boolean m_canGraph;
+
     private JLabel m_titleLabel;
-    private String TABLE_TITLE = "Features";
+    private final static String TABLE_TITLE = "Features";
     
     public XicFeaturePanel(boolean canGraph) {
         this.m_canGraph = canGraph ;
@@ -272,16 +266,15 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         
         m_featureTable = new FeatureTable();
         m_featureTable.setModel(new CompoundTableModel(new FeatureTableModel((LazyTable)m_featureTable), true));
-        m_featureTable.setTableRenderer();
         
         
         // hide the columns
         List<Integer> listIdsToHide = ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).getDefaultColumnsToHide();
         for (Integer id : listIdsToHide) {
-            m_featureTable.getColumnExt(id.intValue()).setVisible(false);
+            m_featureTable.getColumnExt(m_featureTable.convertColumnIndexToView(id.intValue())).setVisible(false);
         }
         // hide the id column
-        m_featureTable.getColumnExt(FeatureTableModel.COLTYPE_FEATURE_ID).setVisible(false);
+        m_featureTable.getColumnExt(m_featureTable.convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_ID)).setVisible(false);
         
         m_featureTable.setSortable(false);
 
@@ -385,16 +378,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
             super(m_featureScrollPane.getVerticalScrollBar() );
             
         }
-        
-        public void setTableRenderer() {
-            getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_ELUTION_TIME)).setCellRenderer(new LazyTableCellRenderer(new TimeRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)))));
-            getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_MOZ)).setCellRenderer(new LazyTableCellRenderer(new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)),4 )) );
-            getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_MAP_NAME)).setCellRenderer(new LazyTableCellRenderer(new FontRenderer( getDefaultRenderer(String.class) )) );
-            getColumnModel().getColumn(convertColumnIndexToView(FeatureTableModel.COLTYPE_FEATURE_PREDICTED_ELUTION_TIME)).setCellRenderer(new LazyTableCellRenderer(new TimeRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(String.class)))));
-            setDefaultRenderer(Float.class, new BigFloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)), 0 ) ); 
-            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) );
-             
-        }
+
         
         @Override
         public void addTableModelListener(TableModelListener l) {

@@ -22,10 +22,6 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.model.WSCProteinTableModel;
-import fr.proline.studio.rsmexplorer.gui.renderer.BooleanRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -61,7 +57,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     
     private SpectralCountResultData m_weightedSCResult = null;
     
-    private ProteinTable m_proteinTable;
+    private WSCProteinTable m_WSCProteinTable;
     private JScrollPane m_scrollPane;
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
@@ -80,14 +76,15 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
     public WSCResultPanel() {
         initComponents();
 
-        TableColumn accColumn = m_proteinTable.getColumnModel().getColumn(WSCProteinTableModel.COLTYPE_PROTEIN_NAME);
-        URLCellRenderer renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", WSCProteinTableModel.COLTYPE_PROTEIN_NAME);
-        accColumn.setCellRenderer(renderer);
-        m_proteinTable.addMouseListener(renderer);
+        CompoundTableModel model = (CompoundTableModel) m_WSCProteinTable.getModel();
+        
+         URLCellRenderer renderer = (URLCellRenderer) model.getRenderer(WSCProteinTableModel.COLTYPE_PROTEIN_NAME);
+        m_WSCProteinTable.addMouseListener(renderer);
+        m_WSCProteinTable.addMouseMotionListener(renderer);
 
 
         //TODO
-        List<TableColumn> columns = m_proteinTable.getColumns(true);
+        List<TableColumn> columns = m_WSCProteinTable.getColumns(true);
         ((TableColumnExt) columns.get(0)).setVisible(false);
 
         
@@ -106,21 +103,21 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         }
 
         // Modify the Model
-        ((WSCProteinTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel()).setData(scResult);
+        ((WSCProteinTableModel) ((CompoundTableModel) m_WSCProteinTable.getModel()).getBaseModel()).setData(scResult);
 
         // allow to change column visibility
         m_columnVisibilityButton.setEnabled(true);
         
         // update the number of lines
-        m_markerContainerPanel.setMaxLineNumber(((CompoundTableModel) m_proteinTable.getModel()).getRowCount());
+        m_markerContainerPanel.setMaxLineNumber(((CompoundTableModel) m_WSCProteinTable.getModel()).getRowCount());
         
         // table is sortable
-        m_proteinTable.setSortable(true);
+        m_WSCProteinTable.setSortable(true);
 
     }
 
     private void clearData() {
-        ((WSCProteinTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel()).setData(null);
+        ((WSCProteinTableModel) ((CompoundTableModel) m_WSCProteinTable.getModel()).getBaseModel()).setData(null);
 
     }
 
@@ -220,13 +217,13 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
 
         m_scrollPane = new javax.swing.JScrollPane();
-        m_proteinTable = new ProteinTable();
+        m_WSCProteinTable = new WSCProteinTable();
 
-        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane,  m_proteinTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane,  m_WSCProteinTable);
         
-        m_proteinTable.setModel(new CompoundTableModel(new WSCProteinTableModel(m_proteinTable), true));
-        m_scrollPane.setViewportView(m_proteinTable);
-        m_proteinTable.setViewport(m_scrollPane.getViewport());
+        m_WSCProteinTable.setModel(new CompoundTableModel(new WSCProteinTableModel(m_WSCProteinTable), true));
+        m_scrollPane.setViewportView(m_WSCProteinTable);
+        m_WSCProteinTable.setViewport(m_scrollPane.getViewport());
 
 
         c.gridx = 0;
@@ -246,7 +243,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         m_searchToggleButton = new SearchToggleButton(m_searchPanel);
         toolbar.add(m_searchToggleButton);
 
-        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_proteinTable.getModel())) {
+        m_filterButton = new FilterButtonV2(((CompoundTableModel) m_WSCProteinTable.getModel())) {
 
             @Override
             protected void filteringDone() {
@@ -255,7 +252,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
             
         };
 
-        m_exportButton = new ExportButton(((CompoundTableModel) m_proteinTable.getModel()), "Spectral Counts", m_proteinTable);
+        m_exportButton = new ExportButton(((CompoundTableModel) m_WSCProteinTable.getModel()), "Spectral Counts", m_WSCProteinTable);
 
         
         m_columnVisibilityButton = new JButton();
@@ -266,20 +263,23 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                ColumnsVisibilityDialog dialog = new ColumnsVisibilityDialog(WindowManager.getDefault().getMainWindow(), m_proteinTable, (WSCProteinTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel() );
+                ColumnsVisibilityDialog dialog = new ColumnsVisibilityDialog(WindowManager.getDefault().getMainWindow(), m_WSCProteinTable, (WSCProteinTableModel) ((CompoundTableModel) m_WSCProteinTable.getModel()).getBaseModel() );
                 dialog.setLocation(m_columnVisibilityButton.getLocationOnScreen().x +m_columnVisibilityButton.getWidth(), m_columnVisibilityButton.getLocationOnScreen().y + m_columnVisibilityButton.getHeight());
                 dialog.setVisible(true);
             }
         });
         
-        m_addCompareDataButton = new AddDataMixerButton(((CompoundTableModel) m_proteinTable.getModel())) {
+        m_addCompareDataButton = new AddDataMixerButton(((CompoundTableModel) m_WSCProteinTable.getModel())) {
 
             @Override
             public void actionPerformed() {
                 JXTable table = getGlobalAssociatedTable();
                 String name = ((JPanel) m_dataBox.getPanel()).getName();
                 TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
-                tableInfo.setIcon(new ImageIcon(m_dataBox.getIcon()));
+                Image i = m_dataBox.getIcon();
+                if (i!=null) {
+                    tableInfo.setIcon(new ImageIcon(i));
+                }
                 DataMixerWindowBoxManager.addTableInfo(tableInfo);
             }
         };
@@ -290,7 +290,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                CalcDialog dialog = CalcDialog.getCalcDialog(WindowManager.getDefault().getMainWindow(), m_proteinTable);
+                CalcDialog dialog = CalcDialog.getCalcDialog(WindowManager.getDefault().getMainWindow(), m_WSCProteinTable);
                 dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
                 dialog.setVisible(true);
 
@@ -310,26 +310,23 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {
-        return (GlobalTableModelInterface) m_proteinTable.getModel();
+        return (GlobalTableModelInterface) m_WSCProteinTable.getModel();
     }
     
     @Override
     public JXTable getGlobalAssociatedTable() {
-        return m_proteinTable;
+        return m_WSCProteinTable;
     }
 
     @Override
     public CrossSelectionInterface getCrossSelectionInterface() {
-        return m_proteinTable;
+        return m_WSCProteinTable;
     }
 
-    private class ProteinTable extends LazyTable implements ExportModelInterface {
+    private class WSCProteinTable extends LazyTable implements ExportModelInterface {
 
-        public ProteinTable() {
+        public WSCProteinTable() {
             super(m_scrollPane.getVerticalScrollBar());
-            setDefaultRenderer(Float.class, new FloatRenderer(new DefaultRightAlignRenderer(getDefaultRenderer(Float.class))));
-            setDefaultRenderer(Boolean.class, new BooleanRenderer());
-            setDefaultRenderer(CompareValueRenderer.CompareValue.class, new CompareValueRenderer());
         }
 
         @Override
@@ -383,12 +380,12 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
         @Override
         public String getExportColumnName(int col) {
-            return ((CompoundTableModel) m_proteinTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
+            return ((CompoundTableModel) m_WSCProteinTable.getModel()).getExportColumnName(convertColumnIndexToModel(col));
         }
 
         @Override
         public String getExportRowCell(int row, int col) {
-            return ((CompoundTableModel) m_proteinTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
+            return ((CompoundTableModel) m_WSCProteinTable.getModel()).getExportRowCell(convertRowIndexToModel(row),  convertColumnIndexToModel(col));
         }
         
         @Override
@@ -431,7 +428,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
                 return;
             }
             searchIndex = -1;
-            ((WSCProteinTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel()).sortAccordingToModel(proteinNamesRow, (CompoundTableModel) m_proteinTable.getModel());
+            ((WSCProteinTableModel) ((CompoundTableModel) m_WSCProteinTable.getModel()).getBaseModel()).sortAccordingToModel(proteinNamesRow, (CompoundTableModel) m_WSCProteinTable.getModel());
         }
 
         @Override
@@ -453,7 +450,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
                     }
 
                     if (!proteinNamesRow.isEmpty()) {
-                        boolean found = m_proteinTable.selectProtein(proteinNamesRow.get(searchIndex));
+                        boolean found = m_WSCProteinTable.selectProtein(proteinNamesRow.get(searchIndex));
                         if (found) {
                             break;
                         }
@@ -471,7 +468,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
                 String regex = wildcardToRegex(searchText);
 
-                WSCProteinTableModel model = (WSCProteinTableModel) (((CompoundTableModel) m_proteinTable.getModel())).getBaseModel();
+                WSCProteinTableModel model = (WSCProteinTableModel) (((CompoundTableModel) m_WSCProteinTable.getModel())).getBaseModel();
 
                 proteinNamesRow.clear();
                 for (int i = 0; i < model.getRowCount(); i++) {
@@ -483,7 +480,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
 
                 if (!proteinNamesRow.isEmpty()) {
 
-                    ((WSCProteinTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel()).sortAccordingToModel(proteinNamesRow, (CompoundTableModel) m_proteinTable.getModel());
+                    ((WSCProteinTableModel) ((CompoundTableModel) m_WSCProteinTable.getModel()).getBaseModel()).sortAccordingToModel(proteinNamesRow, (CompoundTableModel) m_WSCProteinTable.getModel());
 
                     int checkLoopIndex = -1;
                     while (true) {
@@ -498,7 +495,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
                         }
 
                         if (!proteinNamesRow.isEmpty()) {
-                            boolean found = m_proteinTable.selectProtein(proteinNamesRow.get(searchIndex));
+                            boolean found = m_WSCProteinTable.selectProtein(proteinNamesRow.get(searchIndex));
                             if (found) {
                                 break;
                             }
@@ -528,7 +525,7 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         private JRadioButton m_specificSCOverviewRB;
         private JRadioButton m_weightedSCOverviewRB;
 
-        public ColumnsVisibilityDialog(Window parent, ProteinTable table, WSCProteinTableModel proteinTableModel) {
+        public ColumnsVisibilityDialog(Window parent, WSCProteinTable table, WSCProteinTableModel proteinTableModel) {
             super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
             // hide default and help buttons
@@ -746,10 +743,10 @@ public class WSCResultPanel extends HourglassPanel implements DataBoxPanelInterf
         @Override
         protected boolean okCalled() {
 
-            WSCProteinTableModel model = (WSCProteinTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel();
+            WSCProteinTableModel model = (WSCProteinTableModel) ((CompoundTableModel) m_WSCProteinTable.getModel()).getBaseModel();
             
             int nbColumnsModel = model.getColumnCount();
-            List<TableColumn> columns = m_proteinTable.getColumns(true);
+            List<TableColumn> columns = m_WSCProteinTable.getColumns(true);
             for (int i=WSCProteinTableModel.COLTYPE_STATUS;i<nbColumnsModel;i++) {
                 int rsmCur = model.getRsmNumber(i);
                 int type = model.getTypeNumber(i);

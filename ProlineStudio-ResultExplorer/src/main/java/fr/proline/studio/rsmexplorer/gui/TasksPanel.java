@@ -587,6 +587,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             return getColumnName(col);
         }
 
+        @Override
+        public TableCellRenderer getRenderer(int col) {
+            return null;
+        }
+
     }
 
     public class TaskInfoStepRenderer extends DefaultTableCellRenderer {

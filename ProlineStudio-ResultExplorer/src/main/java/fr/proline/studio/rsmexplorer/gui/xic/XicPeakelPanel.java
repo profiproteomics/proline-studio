@@ -20,9 +20,6 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
@@ -190,7 +187,7 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
         m_peakelTable.setModel(new CompoundTableModel(new PeakelTableModel((LazyTable)m_peakelTable), true));
         
         // hide the id column
-        m_peakelTable.getColumnExt(PeakelTableModel.COLTYPE_PEAKEL_ID).setVisible(false);
+        m_peakelTable.getColumnExt(m_peakelTable.convertColumnIndexToView(PeakelTableModel.COLTYPE_PEAKEL_ID)).setVisible(false);
         
         m_peakelTable.setSortable(false);
 
@@ -290,9 +287,6 @@ public class XicPeakelPanel  extends HourglassPanel implements DataBoxPanelInter
 
         public PeakelTable() {
             super(m_peakelScrollPane.getVerticalScrollBar() );
-            
-            setDefaultRenderer(Float.class, new FloatRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
-            setDefaultRenderer(Double.class, new DoubleRenderer( new DefaultRightAlignRenderer(getDefaultRenderer(String.class)) ) ); 
         }
         
         @Override

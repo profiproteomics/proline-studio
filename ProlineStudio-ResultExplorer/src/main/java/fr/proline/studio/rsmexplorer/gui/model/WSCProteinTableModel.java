@@ -6,13 +6,19 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer.CompareValue;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.CyclicColorPalette;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
+import fr.proline.studio.table.TableDefaultRendererManager;
+import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.Color;
 import java.util.*;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 /**
  * Table Model for Spectral Count
@@ -523,4 +529,47 @@ public class WSCProteinTableModel extends LazyTableModel implements GlobalTableM
     public int getBestYAxisColIndex(PlotType plotType) {
         return -1; //JPM.TODO
     }
+
+    @Override
+    public TableCellRenderer getRenderer(int col) {
+        if (m_rendererMap.containsKey(col)) {
+            return m_rendererMap.get(col);
+        }
+        
+        TableCellRenderer renderer = null;
+        switch (col) {
+            case COLTYPE_PROTEIN_NAME: {
+                renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", COLTYPE_PROTEIN_NAME);
+                break;
+            }
+            case COLTYPE_OVERVIEW: {
+                renderer = new CompareValueRenderer();
+                break;
+            }
+            default: {
+                int colSuffixIndex = getTypeNumber(col) + 2;
+                switch (colSuffixIndex) {
+                    //private static final Class[] m_columnTypes = {String.class, Integer.class, Float.class, Float.class, Float.class};
+                    case COLTYPE_STATUS: {
+                        renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                        break;
+                    }
+                    case COLTYPE_PEPTIDE_NUMBER: {
+                        renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
+                        break;
+                    }
+                    case COLTYPE_BSC:
+                    case COLTYPE_SSC:
+                    case COLTYPE_WSC: {
+                        renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                    }
+                }
+
+            }
+
+        }
+        m_rendererMap.put(col, renderer);
+        return renderer;
+    }
+    private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 }

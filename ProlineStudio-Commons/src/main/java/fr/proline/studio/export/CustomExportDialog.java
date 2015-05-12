@@ -717,10 +717,10 @@ public class CustomExportDialog extends DefaultDialog {
             BufferedWriter writer = null;
             try {
                 writer = Files.newBufferedWriter(path,
-                        StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
+                        StandardCharsets.UTF_8, StandardOpenOption.CREATE);
 
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                String jsonString = gson.toJson(m_exportConfig);
+                String jsonString = gson.toJson(generateConfigFileFromGUI());
                 writer.write(jsonString);
                 writer.flush();
             } catch (IOException e1) {

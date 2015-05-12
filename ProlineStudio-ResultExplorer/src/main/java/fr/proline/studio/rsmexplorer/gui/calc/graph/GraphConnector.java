@@ -37,6 +37,11 @@ public class GraphConnector extends AbstractGraphObject {
         m_graphNode = graphNode;
     }
     
+    @Override
+    public String getName() {
+        return null;
+    }
+    
     public boolean isConnected() {
         if (m_connections.isEmpty()) {
             return false;

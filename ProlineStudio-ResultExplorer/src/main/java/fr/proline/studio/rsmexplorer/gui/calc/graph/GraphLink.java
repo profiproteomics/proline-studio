@@ -36,6 +36,11 @@ public class GraphLink extends AbstractGraphObject {
         m_connector = connector;
     }
     
+    @Override
+    public String getName() {
+        return null;
+    }
+    
     public void setLink(int x1, int y1, int x2, int y2) {
 
         

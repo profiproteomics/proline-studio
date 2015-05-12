@@ -4,7 +4,7 @@ import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.DownloadFileTask;
 import fr.proline.studio.dpm.task.ExportRSMTask;
-import fr.proline.studio.export.ExportDialog;
+import fr.proline.studio.export.CustomExportDialog;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -31,7 +31,7 @@ public class ExportRSMAction extends AbstractRSMAction {
         final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
         
 
-        final ExportDialog dialog = ExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), true);
+        final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), true);
         
         DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
 

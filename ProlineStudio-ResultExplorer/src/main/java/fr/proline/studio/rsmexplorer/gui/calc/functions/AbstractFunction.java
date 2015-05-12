@@ -51,13 +51,14 @@ public abstract class AbstractFunction {
             return;
         }
 
-        FunctionParametersDialog dialog = new FunctionParametersDialog(WindowManager.getDefault().getMainWindow(), m_parameters, this);
+        FunctionParametersDialog dialog = new FunctionParametersDialog(getName(), WindowManager.getDefault().getMainWindow(), m_parameters, this);
         dialog.centerToWindow(WindowManager.getDefault().getMainWindow());
         dialog.setVisible(true);
         if (dialog.getButtonClicked() == FunctionParametersDialog.BUTTON_OK) {
             userParametersChanged();
         }
     }
+
     
     public ImageIcon getIcon() {
         return IconManager.getIcon(IconManager.IconType.FUNCTION);

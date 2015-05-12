@@ -33,6 +33,9 @@ public abstract class AbstractGraphObject {
         return m_type;
     }
     
+        
+    public abstract String getName();
+    
     public abstract void draw(Graphics g);
     
     public abstract AbstractGraphObject inside(int x, int y);

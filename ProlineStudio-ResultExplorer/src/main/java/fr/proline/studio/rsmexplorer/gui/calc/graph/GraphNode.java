@@ -131,8 +131,7 @@ public abstract class GraphNode extends AbstractGraphObject {
         
         
     }
-    
-    public abstract String getName();
+
     public abstract Color getFrameColor();
     public abstract ImageIcon getIcon();
     
@@ -243,9 +242,12 @@ public abstract class GraphNode extends AbstractGraphObject {
     
     @Override
     public JPopupMenu createPopup(final GraphPanel panel) {
+        
+        int nbConnections = (m_inConnectors == null) ? 0 : m_inConnectors.size();
+        
         JPopupMenu popup = new JPopupMenu();
-        popup.add(new DisplayAction(this));
-        popup.add(new SettingsAction(this));
+        popup.add(new DisplayAction(this, nbConnections));
+        popup.add(new SettingsAction(this, nbConnections));
         popup.addSeparator();
         popup.add(new DeleteAction(panel, this));
         popup.addPopupMenuListener(new PopupMenuListener() {
@@ -290,9 +292,17 @@ public abstract class GraphNode extends AbstractGraphObject {
 
         private GraphNode m_graphNode = null;
 
-        public DisplayAction(GraphNode graphNode) {
+        public DisplayAction(GraphNode graphNode, int nbInConnections) {
             super("Display");
             m_graphNode = graphNode;
+            
+             if (graphNode instanceof FunctionGraphNode) {
+                setEnabled(((FunctionGraphNode) graphNode).isConnected());
+            } else if (graphNode instanceof DataGraphNode) {
+                setEnabled(true);
+            } else {
+                setEnabled(false);
+            }
         }
 
         @Override
@@ -305,9 +315,15 @@ public abstract class GraphNode extends AbstractGraphObject {
 
         private GraphNode m_graphNode = null;
 
-        public SettingsAction(GraphNode graphNode) {
+        public SettingsAction(GraphNode graphNode, int nbInConnections) {
             super("Settings");
-            m_graphNode = graphNode;
+            
+            if (graphNode instanceof FunctionGraphNode) {
+                m_graphNode = graphNode;
+                setEnabled(((FunctionGraphNode) graphNode).isConnected());
+            } else {
+                setEnabled(false);
+            }
         }
 
         @Override

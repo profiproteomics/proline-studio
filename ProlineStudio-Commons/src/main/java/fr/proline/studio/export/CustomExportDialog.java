@@ -27,6 +27,9 @@ import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
@@ -34,6 +37,7 @@ import org.jdesktop.swingx.JXTable;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -70,7 +74,7 @@ public class CustomExportDialog extends DefaultDialog {
     private String m_exportName = null;
 
     // created by AW:
-    private JTabbedPane tabbedPane;
+    private JTabbedPane m_tabbedPane;
     private JPanel panel;
     private JLabel lblExportExcelTabs;
     private JTable table;
@@ -99,6 +103,10 @@ public class CustomExportDialog extends DefaultDialog {
     private String[] m_presentation; // to complete information not displayed in jtable nor tabpane.
     private String[] m_sheetId;  // to complete information not displayed in jtable nor tabpane.
     private String[] m_sheetTitle;  // to complete information not displayed in jtable nor tabpane.
+    protected boolean m_updateInProgress = true; // indicate when the table is built (to avoid calling event handler on every table update)
+
+	private JPanel panel_1;
+    
 
     public static CustomExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
@@ -265,125 +273,164 @@ public class CustomExportDialog extends DefaultDialog {
 
     }
 
+
     private void fillExportFormatTable(ExportConfig defaultParam, ExportConfig param) {
 		//reset panes:
+		
+		m_updateInProgress = true;
+		m_tabbedPane.removeAll();	
+		m_presentation = new String[defaultParam.sheets.length]; 
+		m_sheetId = new String[defaultParam.sheets.length];
+		m_sheetTitle = new String[defaultParam.sheets.length];
+		
+		
+		List<String> defaultSheetIdsList = new ArrayList<String>();
+		List<String> sheetIdsList = new ArrayList<String>();
+		if(param!=null) {
+			for(int i=0; i<param.sheets.length;i++) {
+				sheetIdsList.add(param.sheets[i].id);
+			}
+		}
+		for(int i=0; i<defaultParam.sheets.length;i++) {
+			defaultSheetIdsList.add(defaultParam.sheets[i].id);
+		}
+		
+		
+		// create tab panes
+		for(int i = 0; i<defaultParam.sheets.length;i++) {
+			panel = new JPanel();
+			m_tabbedPane.addTab(defaultParam.sheets[i].title, null, panel, null);
+			m_presentation[i]=defaultParam.sheets[i].presentation;
+			m_sheetId[i]=defaultParam.sheets[i].id;
+			m_sheetTitle[i]=defaultParam.sheets[i].title;
+			
+			
+			panel.setLayout(new BorderLayout(0, 0));
+			// read fields to fill in jtable into this tabbed pane
+			
+			scrollPane = new JScrollPane();
+			scrollPane.setBounds(0, 0, 600, 290);
+			panel.add(scrollPane);
+			
+			table = new JTable();
+			
+			DefaultTableModel tableModel = new javax.swing.table.DefaultTableModel(
+					
+					new Object [][] {
 
-        tabbedPane.removeAll();
+		            }, 
+		            new String[] {
+							"Internal field name", "Displayed field name", "Shown"
+						}
+		        ) {
+		            Class[] types = new Class [] {
+		            		java.lang.String.class,java.lang.String.class,java.lang.Boolean.class
+		            };
+		            boolean[] canEdit = new boolean [] {
+		                false,true, true
+		            };
+				@Override
+				public Class getColumnClass(int columnIndex) {
+					return types[columnIndex];
+				}
 
-        List<String> defaultSheetIdsList = new ArrayList<String>();
-        List<String> sheetIdsList = new ArrayList<String>();
-        if (param != null) {
-            for (int i = 0; i < param.sheets.length; i++) {
-                sheetIdsList.add(param.sheets[i].id);
-            }
-        }
-        for (int i = 0; i < defaultParam.sheets.length; i++) {
-            defaultSheetIdsList.add(defaultParam.sheets[i].id);
-        }
-
-        // create tab panes
-        for (int i = 0; i < defaultParam.sheets.length; i++) {
-            panel = new JPanel();
-            tabbedPane.addTab(defaultParam.sheets[i].title, null, panel, null);
-            panel.setLayout(new BorderLayout(0, 0));
-			//panel.setLayout(null);
-            // read fields to fill in jtable into this tabbed pane
-
-            scrollPane = new JScrollPane();
-            //scrollPane.setBounds(0, 0, 699, 290);
-            panel.add(scrollPane);
-
-            table = new JTable();
-
-            DefaultTableModel tableModel = new javax.swing.table.DefaultTableModel(
-                    new Object[][]{},
-                    new String[]{
-                        "Internal field name", "Displayed field name", "Shown"
-                    }
-            ) {
-                Class[] types = new Class[]{
-                    java.lang.String.class, java.lang.String.class, java.lang.Boolean.class
-                };
-                boolean[] canEdit = new boolean[]{
-                    false, true, true
-                };
-
-                @Override
-                public Class getColumnClass(int columnIndex) {
-                    return types[columnIndex];
-                }
-
-                @Override
-                public boolean isCellEditable(int rowIndex, int columnIndex) {
-                    return canEdit[columnIndex];
-                }
-            };
-
-            scrollPane.setViewportView(table);
-
-            // ---add ability to enable/disable individual tabs
-            tabbedPane.setEnabledAt(i, true); // true by default
-            tabbedPane.setToolTipTextAt(i, "Right click to Enable/Disable");
-            tabbedPane.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent arg0) {
-
-                    if (SwingUtilities.isRightMouseButton(arg0)) {
-                        boolean tabEnabled = tabbedPane.isEnabledAt(tabbedPane.indexAtLocation(arg0.getX(), arg0.getY()));
-                        int tabIndex = tabbedPane.indexAtLocation(arg0.getX(), arg0.getY());
-                        tabbedPane.setEnabledAt(tabIndex, !tabEnabled);
-                        arg0.consume();
-                    }
-
-                }
-            });
-
-            // we want to find which field is at the same time default field and custom field. (to mark it).
-            ExportExcelSheet paramSheet = null;
-            if (param != null) {
-                // convert [] into iterable:
-                List<ExportExcelSheet> paramSheets_list = new ArrayList<ExportExcelSheet>(Arrays.asList(param.sheets));
-
-                // find the corresponding sheet in custom param file
-                paramSheet = null;
-                for (int k = 0; k < paramSheets_list.size(); k++) {
-                    //if(defaultSheetIdsList.contains(sheets_list.get(k).id)) {
-                    if (param.sheets[k].id.equals(defaultParam.sheets[i].id)) {
-                        paramSheet = param.sheets[k];
-                        tabbedPane.setEnabledAt(i, true);
-                    }
-                }
-            }
-
-            for (int j = 0; j < defaultParam.sheets[i].fields.length; j++) {
-
-                Vector v = new Vector();
-                v.add(defaultParam.sheets[i].fields[j].id);
-
-                if (paramSheet != null) { // if the sheet is present in both files
-                    String customField = getCustomFieldIfDefaultParamFieldContainedInCustomParamFieldsList(defaultParam.sheets[i].fields[j], paramSheet.fields);
-                    if (customField != null) {
-                        v.add(customField);
-                        v.add(true);
-                    } else {
-                        v.add(defaultParam.sheets[i].fields[j].title);
-                        v.add(false);
-                    }
-                } else { // if only default then display isDefault value
-                    v.add(defaultParam.sheets[i].fields[j].title);
-                    v.add(defaultParam.sheets[i].fields[j].default_displayed);
-                }
-
-                tableModel.addRow(v);
-
-            }
-
-            table.setModel(tableModel);
-            //table.getColumnModel().getColumn(0).setPreferredWidth(141);
-
-        }
-    }
-
+				@Override
+				public boolean isCellEditable(int rowIndex, int columnIndex) {
+					return canEdit[columnIndex];
+				}
+			};
+			
+			scrollPane.setViewportView(table);
+			// add the data into the model
+			
+			// ---add ability to enable/disable individual tabs
+			m_tabbedPane.setEnabledAt(i, true); // true by default
+			m_tabbedPane.setToolTipTextAt(i, "Right click to Enable/Disable");
+			m_tabbedPane.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					
+					if (SwingUtilities.isRightMouseButton(arg0) ) {
+						boolean tabEnabled=  m_tabbedPane.isEnabledAt(m_tabbedPane.indexAtLocation(arg0.getX(), arg0.getY()));
+						int tabIndex = m_tabbedPane.indexAtLocation(arg0.getX(),arg0.getY());
+						m_tabbedPane.setEnabledAt(tabIndex, !tabEnabled);
+						arg0.consume();
+					} 
+						
+				}
+			});
+			
+			// perform specific code if custom file loaded on top of defaulto one:
+			ExportExcelSheet paramSheet = null; 
+			if(param!=null) { // if we loaded a param file (if not then do nothing here).
+				// convert [] into iterable:
+				List<ExportExcelSheet> paramSheets_list = new ArrayList<ExportExcelSheet>(Arrays.asList(param.sheets));
+				// find the corresponding sheet in custom param file
+				paramSheet = null; 
+				// first, mark it as disabled, if in the loop we find it, then enable the tab sheet.
+				m_tabbedPane.setEnabledAt(i, false);
+				
+				for(int k=0; k<paramSheets_list.size();k++) {
+					
+					if(param.sheets[k].id.equals(defaultParam.sheets[i].id)) {
+						paramSheet = param.sheets[k];
+						m_tabbedPane.setEnabledAt(i, true);
+						
+						
+					}
+				}
+			
+				// adjust presentation according to custom parameter:
+				if(param.sheets[i].presentation.equals("rows")) {
+					m_presentation[i] = "rows";
+				}
+				else {
+					m_presentation[i] = "columns";
+				}
+			}
+			// compare sheet fields and mark them or not (if or not present in both default and configuration file).
+			for(int j=0; j< defaultParam.sheets[i].fields.length ; j++) {
+				
+				Vector v = new Vector();
+				v.add(defaultParam.sheets[i].fields[j].id);
+				
+				if(paramSheet!=null) { // if the sheet is present in both files
+					String customField = getCustomFieldIfDefaultParamFieldContainedInCustomParamFieldsList(defaultParam.sheets[i].fields[j] , paramSheet.fields );
+					if(customField!=null)  {
+						v.add(customField);
+						v.add(true);
+					} else {
+						v.add(defaultParam.sheets[i].fields[j].title);
+						v.add(false);	
+					}
+				} else { // if only default then display isDefault value
+					v.add(defaultParam.sheets[i].fields[j].title);
+					v.add(defaultParam.sheets[i].fields[j].default_displayed);
+				}
+				
+		
+				
+				tableModel.addRow(v);
+				
+			}
+			
+		
+			//
+			table.setModel(tableModel);
+			//table.getColumnModel().getColumn(0).setPreferredWidth(20);
+			
+			
+			
+			
+			
+		}
+		// adjust current displayed tab with correct presentation mode:
+		updatePresentationModeForNewlySelectedTab();
+		
+		m_updateInProgress = false;
+		
+	}
+    
     private String getCustomFieldIfDefaultParamFieldContainedInCustomParamFieldsList(ExportExcelSheetField sheetFieldToCompare, ExportExcelSheetField[] fields) {
 		// this method checks if sheetFieldToCompare is contained in the fields list of elements. It compares by the id only.
 
@@ -400,7 +447,7 @@ public class CustomExportDialog extends DefaultDialog {
         // JPanel exportPanel = new JPanel(new GridBagLayout());
         final JPanel exportPanel = new JPanel();
         //exportPanel.setLayout(null);
-        exportPanel.setSize(new Dimension(800, 250));
+        exportPanel.setSize(new Dimension(700, 250));
 
         // added 
         setSize(new Dimension(600, 400));
@@ -409,33 +456,31 @@ public class CustomExportDialog extends DefaultDialog {
 
         final JPanel insidePanel = new JPanel(null);
         exportPanel.add(insidePanel);
-        insidePanel.setSize(new Dimension(800, 600));
-        insidePanel.setPreferredSize(new Dimension(750, 600));
+        insidePanel.setSize(new Dimension(700, 600));
+        insidePanel.setPreferredSize(new Dimension(700, 600));
 
         final JPanel optionPane = new JPanel();
         optionPane.setVisible(false);
         optionPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-//		optionPane.setSize(new Dimension(600, 650));
-//		optionPane.setPreferredSize(new Dimension(600, 650));
-//		optionPane.setBounds(new Rectangle(20, 53, 636, 446));
         optionPane.setSize(new Dimension(600, 650));
-        optionPane.setPreferredSize(new Dimension(800, 500));
-        optionPane.setBounds(new Rectangle(10, 105, 736, 446));
+        optionPane.setPreferredSize(new Dimension(700, 500));
+        optionPane.setBounds(new Rectangle(10, 105, 590, 446));
 
-		//optionPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        //setContentPane(insidePanel); // ? ou exportPane? setContentPane(insidePanel);
-        insidePanel.setLayout(null);
+		insidePanel.setLayout(null);
         insidePanel.add(optionPane);
         optionPane.setLayout(null);
         //
         setSize(new Dimension(800, 250));
         setPreferredSize(new Dimension(800, 250));
 
-        tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
-        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        tabbedPane.setBounds(111, 127, 571, 298);
-        optionPane.add(tabbedPane);
-
+		panel_1 = new JPanel();
+		panel_1.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		panel_1.setBounds(10, 99, 570, 336);
+		optionPane.add(panel_1);
+		panel_1.setLayout(null);
+		
+		
+		
         lblExportExcelTabs = new JLabel("Configuration file:");
         lblExportExcelTabs.setBounds(10, 15, 110, 14);
         optionPane.add(lblExportExcelTabs);
@@ -474,15 +519,23 @@ public class CustomExportDialog extends DefaultDialog {
         table.setTransferHandler(new TableRowTransferHandler(table));
 
         comboBox_Orientation = new JComboBox();
-        comboBox_Orientation.setModel(new DefaultComboBoxModel(new String[]{"Rows", "Columns"}));
-        comboBox_Orientation.setName("");
-        comboBox_Orientation.setBounds(10, 180, 91, 20);
-        optionPane.add(comboBox_Orientation);
+		comboBox_Orientation.setBounds(79, 8, 91, 20);
+		panel_1.add(comboBox_Orientation);
+		comboBox_Orientation.setModel(new DefaultComboBoxModel(new String[] {"rows", "columns"}));
+		comboBox_Orientation.setName("");
+		comboBox_Orientation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(!m_updateInProgress) {
+					presentationModeChanged();
+				}
+			}
+		});
+		
 
         lblOrientation = new JLabel("Orientation:");
-        lblOrientation.setBounds(10, 155, 91, 14);
-        optionPane.add(lblOrientation);
-
+		lblOrientation.setBounds(10, 11, 91, 14);
+		panel_1.add(lblOrientation);
+		
         m_configFile = new JTextField();
         m_configFile.setText(""); // m_configFile.setText("d:\\Proline\\export\\testExport.txt");
         m_configFile.setBounds(123, 12, 232, 20);
@@ -547,6 +600,22 @@ public class CustomExportDialog extends DefaultDialog {
         btnLoad.setBounds(365, 11, 89, 23);
         optionPane.add(btnLoad);
 
+		
+        m_tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+		m_tabbedPane.addChangeListener(new ChangeListener() {
+	        public void stateChanged(ChangeEvent e) {
+	        	if(!m_updateInProgress ) { // update only when no update in progress
+	        		updatePresentationModeForNewlySelectedTab();
+	        	}
+	        }
+	    });
+
+		m_tabbedPane.setBounds(10, 36, 550, 289);
+		
+		panel_1.add(m_tabbedPane);
+		m_tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		
+		
         lblExportToFile = new JLabel("Export to file:");
         lblExportToFile.setBounds(10, 15, 77, 27);
         insidePanel.add(lblExportToFile);
@@ -575,7 +644,7 @@ public class CustomExportDialog extends DefaultDialog {
                 setSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 250 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
             }
         });
-        chk_ExportOptions.setBounds(626, 71, 124, 27);
+        chk_ExportOptions.setBounds(476, 71, 124, 27);
         insidePanel.add(chk_ExportOptions);
 
         addFileButton.addActionListener(new ActionListener() {
@@ -739,19 +808,71 @@ public class CustomExportDialog extends DefaultDialog {
 
     }
 
+    
+    
+    protected void updatePresentationModeForNewlySelectedTab() {
+		//if( m_presentation!=null && m_tabbedPane!=null) {
+		m_updateInProgress = true;
+		if(m_presentation[m_tabbedPane.getSelectedIndex()].equals("rows")) {
+			comboBox_Orientation.setSelectedIndex(0);
+		} else {
+			comboBox_Orientation.setSelectedIndex(1);
+		}
+		m_updateInProgress = false;
+		//}
+	}
+
+
+
+	protected void presentationModeChanged() {
+		// update the m_presentation attribute when changed for a specific ExportConfigSheet
+		//System.out.println("presentation mode changed to " + comboBox_Orientation.getSelectedItem());
+		int selectedTab = m_tabbedPane.getSelectedIndex();
+		if(comboBox_Orientation.getSelectedIndex()==0)
+		{
+			m_presentation[selectedTab] = "rows";
+		}
+		else if(comboBox_Orientation.getSelectedIndex()==1)
+		{
+			m_presentation[selectedTab] = "columns";
+		}
+		System.out.println("presentation mode changed for tab " + selectedTab + " to " + m_presentation[selectedTab] ); 
+		
+		
+	}
+	
+	
     protected ExportConfig generateConfigFileFromGUI() {
         
         // this method creates an ExportConfig structure to export.
         ExportConfig ec = new ExportConfig();
 
-        ec.format = "xlsx";
-        ec.decimal_eparator = ".";
-        ec.date_format = "YYYY:MM:DD HH:mm:ss";
+		// global parameters 
+		if(comboBox_Format.getSelectedIndex()==0) 
+		{
+			ec.format = "xlsx";
+		} else if(comboBox_Format.getSelectedIndex()==1){
+			ec.format = "tsv";
+		}
+		if(comboBox_NumberSeparator.getSelectedIndex()==0) 
+		{
+			ec.decimal_eparator = ".";
+		} else if(comboBox_NumberSeparator.getSelectedIndex()==1) 
+		{
+			ec.decimal_eparator = ",";
+		}
+		if(comboBox_DateFormat.getSelectedIndex()==0) 
+		{
+			ec.date_format = "YYYY:MM:DD HH:mm:ss";
+		}
+		else if(comboBox_DateFormat.getSelectedIndex()==1) 
+		{
+			ec.date_format = "YYYY:MM:DD";
+		}
+		
         ec.data_export = new ExportDataExport();
         ec.data_export.all_protein_set = comboBox_ProteinSets.getSelectedItem().equals("all");
 
-//		ExportExcelSheet[] sheets;
-//		
 //		// extra infos for default options (sent from server only)
         ec.format_values = null; //["xlsx","tsv"],
         ec.decimal_separator_values = null; //": [".",","],
@@ -759,19 +880,19 @@ public class CustomExportDialog extends DefaultDialog {
         ec.sheet_presentation_values = null; //": ["rows","columns"]
 
         int nbActiveTabs = 0;
-        for (int i = 0; i < tabbedPane.getTabCount(); i++) { // go through tab panes and jtables
-            if (tabbedPane.isEnabledAt(i)) {
+        for (int i = 0; i < m_tabbedPane.getTabCount(); i++) { // go through tab panes and jtables
+            if (m_tabbedPane.isEnabledAt(i)) {
                 nbActiveTabs++;
             }
         }
         ec.sheets = new ExportExcelSheet[nbActiveTabs];
 
         int usedTabNumber = 0; // the tab location for the new structure (smaller than the full table - disabled tabs)
-        for (int i = 0; i < tabbedPane.getTabCount(); i++) { // go through tab panes and jtables
-            if (tabbedPane.isEnabledAt(i)) { // save only enabled panes (hence excel sheets)
+        for (int i = 0; i < m_tabbedPane.getTabCount(); i++) { // go through tab panes and jtables
+            if (m_tabbedPane.isEnabledAt(i)) { // save only enabled panes (hence excel sheets)
 
                 // get the jtable out of the jpane...
-                JPanel panelTemp = (JPanel) tabbedPane.getComponentAt(i);
+                JPanel panelTemp = (JPanel) m_tabbedPane.getComponentAt(i);
                 JScrollPane jsp = (JScrollPane) panelTemp.getComponent(0);
                 JTable tableRef = (JTable) jsp.getViewport().getComponents()[0];
 

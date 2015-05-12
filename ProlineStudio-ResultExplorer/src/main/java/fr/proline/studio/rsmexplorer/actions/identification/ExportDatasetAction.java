@@ -10,7 +10,7 @@ import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.DownloadFileTask;
 import fr.proline.studio.dpm.task.ExportDatasetTask;
 import fr.proline.studio.dpm.task.GetExportInformationTask;
-import fr.proline.studio.export.AdvancedExportDialog;
+import fr.proline.studio.export.CustomExportDialog;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.LoadWaitingDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
@@ -65,7 +65,7 @@ public class ExportDatasetAction extends AbstractRSMAction {
 
                     @Override
                     public void run(boolean success) {
-                        final AdvancedExportDialog dialog = AdvancedExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false);
+                        final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false);
                         String conf = "";
                         loadWaitingDialog.setVisible(false);
                         if (success) {

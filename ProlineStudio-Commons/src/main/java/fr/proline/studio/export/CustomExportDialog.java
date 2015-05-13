@@ -360,34 +360,31 @@ public class CustomExportDialog extends DefaultDialog {
 				}
 			});
 			
-			// perform specific code if custom file loaded on top of defaulto one:
+			// perform specific code if custom file loaded on top of default one:
 			ExportExcelSheet paramSheet = null; 
 			if(param!=null) { // if we loaded a param file (if not then do nothing here).
-				// convert [] into iterable:
-				List<ExportExcelSheet> paramSheets_list = new ArrayList<ExportExcelSheet>(Arrays.asList(param.sheets));
 				// find the corresponding sheet in custom param file
-				paramSheet = null; 
 				// first, mark it as disabled, if in the loop we find it, then enable the tab sheet.
 				m_tabbedPane.setEnabledAt(i, false);
 				
-				for(int k=0; k<paramSheets_list.size();k++) {
+				for(int k=0; k<param.sheets.length/*paramSheets_list.size()*/;k++) {
 					
 					if(param.sheets[k].id.equals(defaultParam.sheets[i].id)) {
 						paramSheet = param.sheets[k];
 						m_tabbedPane.setEnabledAt(i, true);
+						if(param.sheets[k].presentation.equals("rows")) {
+							m_presentation[i] = "rows";
+						}
+						else {
+							m_presentation[i] = "columns";
+						}
 						
 						
 					}
 				}
-			
-				// adjust presentation according to custom parameter:
-				if(param.sheets[i].presentation.equals("rows")) {
-					m_presentation[i] = "rows";
-				}
-				else {
-					m_presentation[i] = "columns";
-				}
+				
 			}
+			
 			// compare sheet fields and mark them or not (if or not present in both default and configuration file).
 			for(int j=0; j< defaultParam.sheets[i].fields.length ; j++) {
 				

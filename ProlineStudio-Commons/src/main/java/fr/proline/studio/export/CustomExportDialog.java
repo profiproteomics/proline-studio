@@ -48,12 +48,7 @@ import com.google.gson.GsonBuilder;
  */
 public class CustomExportDialog extends DefaultDialog {
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.Commons");
+    private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.Commons");
 
     private static CustomExportDialog m_singletonImageDialog = null;
     private static CustomExportDialog m_singletonImage2Dialog = null;
@@ -186,7 +181,15 @@ public class CustomExportDialog extends DefaultDialog {
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
 
         setInternalComponent(createAdvancedExportPanel());
-        
+        /*loadDefaultExportConfig();
+         //loadExportConfig();// is loaded upon request
+         if(m_exportDefaultConfig!=null )
+         {
+         fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+         }
+		
+       
+         */
         setButtonName(BUTTON_OK, ((m_exportType == ExporterFactory.EXPORT_IMAGE)
                 || (m_exportType == ExporterFactory.EXPORT_IMAGE2)) ? "Export Image" : "Export");
 
@@ -206,10 +209,27 @@ public class CustomExportDialog extends DefaultDialog {
 
     }
 
-   
+    private void loadDefaultExportConfig() {
+        m_exportDefaultConfig = new ExportConfig();
+        String jsonString = "";
+        try {
+				//GetExportInformationTask
+
+            jsonString = new String(Files.readAllBytes(Paths.get("D:\\Proline\\export perso\\allFieldsIdent.json")));
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+
+        Gson gson = new Gson();
+        String messageHashMapJsonString = jsonString;
+        m_exportDefaultConfig = gson.fromJson(messageHashMapJsonString, m_exportDefaultConfig.getClass());
+
+        fillExportPossibleValues(m_exportDefaultConfig);
+    }
 
     private void loadExportConfig() {
-        // decode json into ExportConfig
+        // decode json 
         m_exportConfig = new ExportConfig();
         String jsonString = "";
         Path filePath = Paths.get(m_configFile.getText());
@@ -234,7 +254,7 @@ public class CustomExportDialog extends DefaultDialog {
 
             if (param.sheet_presentation_values != null) {
                 comboBox_Orientation.setModel(new DefaultComboBoxModel(param.sheet_presentation_values));
-               
+                // TODO: add the right selection to this list of choices (also for the following 3 sections)
             }
             if (param.format_values != null) {
                 comboBox_Format.setModel(new DefaultComboBoxModel(param.format_values));
@@ -586,7 +606,20 @@ public class CustomExportDialog extends DefaultDialog {
 	        	}
 	        }
 	    });
-
+		m_tabbedPane.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if (SwingUtilities.isRightMouseButton(arg0) ) {
+					boolean tabEnabled=  m_tabbedPane.isEnabledAt(m_tabbedPane.indexAtLocation(arg0.getX(), arg0.getY()));
+					int tabIndex = m_tabbedPane.indexAtLocation(arg0.getX(),arg0.getY());
+					m_tabbedPane.setEnabledAt(tabIndex, !tabEnabled);
+					repaint();
+					arg0.consume();
+				} 
+					
+			} 
+		});
+		
 		m_tabbedPane.setBounds(10, 36, 550, 289);
 		
 		panel_1.add(m_tabbedPane);
@@ -788,7 +821,7 @@ public class CustomExportDialog extends DefaultDialog {
     
     
     protected void updatePresentationModeForNewlySelectedTab() {
-		
+		//if( m_presentation!=null && m_tabbedPane!=null) {
 		m_updateInProgress = true;
 		if(m_presentation[m_tabbedPane.getSelectedIndex()].equals("rows")) {
 			comboBox_Orientation.setSelectedIndex(0);
@@ -796,13 +829,14 @@ public class CustomExportDialog extends DefaultDialog {
 			comboBox_Orientation.setSelectedIndex(1);
 		}
 		m_updateInProgress = false;
-		
+		//}
 	}
 
 
 
 	protected void presentationModeChanged() {
 		// update the m_presentation attribute when changed for a specific ExportConfigSheet
+		//System.out.println("presentation mode changed to " + comboBox_Orientation.getSelectedItem());
 		int selectedTab = m_tabbedPane.getSelectedIndex();
 		if(comboBox_Orientation.getSelectedIndex()==0)
 		{
@@ -832,10 +866,10 @@ public class CustomExportDialog extends DefaultDialog {
 		}
 		if(comboBox_NumberSeparator.getSelectedIndex()==0) 
 		{
-			ec.decimal_eparator = ".";
+			ec.decimal_separator = ".";
 		} else if(comboBox_NumberSeparator.getSelectedIndex()==1) 
 		{
-			ec.decimal_eparator = ",";
+			ec.decimal_separator = ",";
 		}
 		if(comboBox_DateFormat.getSelectedIndex()==0) 
 		{

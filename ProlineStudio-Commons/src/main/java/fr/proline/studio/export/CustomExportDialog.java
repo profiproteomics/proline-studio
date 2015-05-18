@@ -346,19 +346,6 @@ public class CustomExportDialog extends DefaultDialog {
 			// ---add ability to enable/disable individual tabs
 			m_tabbedPane.setEnabledAt(i, true); // true by default
 			m_tabbedPane.setToolTipTextAt(i, "Right click to Enable/Disable");
-			m_tabbedPane.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					
-					if (SwingUtilities.isRightMouseButton(arg0) ) {
-						boolean tabEnabled=  m_tabbedPane.isEnabledAt(m_tabbedPane.indexAtLocation(arg0.getX(), arg0.getY()));
-						int tabIndex = m_tabbedPane.indexAtLocation(arg0.getX(),arg0.getY());
-						m_tabbedPane.setEnabledAt(tabIndex, !tabEnabled);
-						arg0.consume();
-					} 
-						
-				}
-			});
 			
 			// perform specific code if custom file loaded on top of default one:
 			ExportExcelSheet paramSheet = null; 

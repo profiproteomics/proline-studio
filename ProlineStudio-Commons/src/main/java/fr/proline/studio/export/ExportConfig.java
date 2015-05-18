@@ -2,7 +2,7 @@ package fr.proline.studio.export;
 
 public class ExportConfig {
 	String format = "xlsx";
-	String decimal_eparator = ".";
+	String decimal_separator = ".";
 	String date_format = "YYYY:MM:DD HH:mm:ss";
 	ExportDataExport data_export;
 	ExportExcelSheet[] sheets;

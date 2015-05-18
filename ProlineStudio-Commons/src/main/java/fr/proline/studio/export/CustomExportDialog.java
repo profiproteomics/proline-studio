@@ -1203,9 +1203,9 @@ public class CustomExportDialog extends DefaultDialog {
      * @param configStr the JSON string
      */
     public void setDefaultExportConfig(String configStr) {
+    	 
         logger.debug("setDefaultExportConfig");
-        //m_exportDefaultConfig = new Gson().fromJson(configStr, ExportConfig.class);
-        loadDefaultExportConfig();
+        m_exportDefaultConfig = new Gson().fromJson(configStr, ExportConfig.class);
         fillExportPossibleValues(m_exportDefaultConfig);
         if (m_exportDefaultConfig != null) {
             fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);

@@ -89,6 +89,8 @@ public class ExporterFactory {
 
 
             m_listServer.add(new ExporterInfo(ExporterType.EXCEL_XML, "Excel (.xlsx)", "xlsx"));
+           // m_listServer.add(new ExporterInfo(ExporterType.CSV, "CSV (.txt)", "csv"));
+            
 
 
             return m_listServer;

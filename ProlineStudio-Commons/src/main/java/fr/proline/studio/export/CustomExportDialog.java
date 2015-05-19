@@ -266,8 +266,8 @@ public class CustomExportDialog extends DefaultDialog {
             		}
 				} 
             	// TODO: fix that to better show possibled output file formats.
-            	//m_exporTypeCombobox.setModel(new DefaultComboBoxModel(reformatedParamValues));
-            	m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
+            	m_exporTypeCombobox.setModel(new DefaultComboBoxModel(reformatedParamValues));
+            	//m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
                 
             }
             if (param.date_format_values != null) {
@@ -542,7 +542,7 @@ public class CustomExportDialog extends DefaultDialog {
 //        optionPane.add(lblFormat);
 
         m_exporTypeCombobox = new JComboBox();
-        m_exporTypeCombobox.setModel(new DefaultComboBoxModel(new String[]{"xlsx", "xls", "csv"}));
+        m_exporTypeCombobox.setModel(new DefaultComboBoxModel(new String[]{"xlsx", "xls", "csv", "tsv"}));
         //m_exporTypeCombobox.setBounds(10, 68, 55, 20);
         //optionPane.add(comboBox_Format);
 
@@ -639,6 +639,11 @@ public class CustomExportDialog extends DefaultDialog {
         chk_ExportOptions.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 optionPane.setVisible(chk_ExportOptions.isSelected());
+                if(!chk_ExportOptions.isSelected()) {
+                	//disable custom parameters and restore default ones
+                	m_exportConfig = m_exportDefaultConfig;
+                	fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+                }
                 setSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 250 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
             }
         });
@@ -657,19 +662,22 @@ public class CustomExportDialog extends DefaultDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
+                //ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
 
-                if (exporterInfo != null) {
-                    FileNameExtensionFilter filter = new FileNameExtensionFilter(exporterInfo.getName(), exporterInfo.getFileExtension());
-                    FileNameExtensionFilter existFilter = getFilterWithSameExtensions(filter);
-
-                    if (existFilter == null) {
-                        m_fchooser.addChoosableFileFilter(filter);
-                        m_filterList.add(filter);
-                        m_fchooser.setFileFilter(filter);
-                    } else {
-                        m_fchooser.setFileFilter(existFilter);
-                    }
+                if (m_exporTypeCombobox.getSelectedItem() != null) {
+                	FileNameExtensionFilter filter = null;
+                	if(m_exporTypeCombobox.getSelectedItem().toString().contains("xls")) 
+                	{
+                		filter = new FileNameExtensionFilter("xlsx", "xlsx");
+                	} else if(m_exporTypeCombobox.getSelectedItem().toString().contains("tsv")) {
+                		filter = new FileNameExtensionFilter("tsv","tsv");
+                	
+                	}
+                    m_fchooser.addChoosableFileFilter(filter);
+                    m_filterList.add(filter);
+                    m_fchooser.setFileFilter(filter);
+                	
+                    
                 }
 
                 String textFile = m_fileTextField.getText().trim();
@@ -690,7 +698,7 @@ public class CustomExportDialog extends DefaultDialog {
                     String absolutePath = file.getAbsolutePath();
                     String fileName = file.getName();
                     if (fileName.indexOf('.') == -1) {
-                        absolutePath += "." + exporterInfo.getFileExtension();
+                        absolutePath += "."  + "xlsx"; //+ exporterInfo.getFileExtension();
                     }
                     m_fileTextField.setText(absolutePath);
                 }
@@ -707,8 +715,9 @@ public class CustomExportDialog extends DefaultDialog {
         lbl_exportType.setBounds(10, 44, 93, 27);
         insidePanel.add(lbl_exportType);
 
-        m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
-        m_exporTypeCombobox.setSelectedIndex(0);
+        //m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
+        m_exporTypeCombobox = new JComboBox();
+       // m_exporTypeCombobox.setSelectedIndex(0);
         m_exporTypeCombobox.setBounds(86, 47, 206, 20);
         insidePanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         insidePanel.add(new JLabel("Export Type:"));
@@ -725,7 +734,7 @@ public class CustomExportDialog extends DefaultDialog {
     	 //ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
 
         
-             FileNameExtensionFilter filter = new FileNameExtensionFilter("*.json", "*.json");
+             FileNameExtensionFilter filter = new FileNameExtensionFilter("json", "json");
              FileNameExtensionFilter existFilter = getFilterWithSameExtensions(filter);
 
              if (existFilter == null) {

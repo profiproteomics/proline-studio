@@ -782,20 +782,29 @@ public class CustomExportDialog extends DefaultDialog {
     protected void saveConfigFile() {
         String configFile = m_configFile.getText().trim();
 
-        JFileChooser m_fchooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Custom Export Config (.json)", "json");
+        FileNameExtensionFilter existFilter = getFilterWithSameExtensions(filter);
+
+        if (existFilter == null) {
+            m_exportFchooser.addChoosableFileFilter(filter);
+            m_exportFchooser.setFileFilter(filter);
+        } else {
+       	 m_exportFchooser.setFileFilter(existFilter);
+        }
+        
         if (configFile.length() > 0) {
             File currentFile = new File(configFile);
             if (currentFile.isDirectory()) {
-                m_fchooser.setCurrentDirectory(currentFile);
+            	m_exportFchooser.setCurrentDirectory(currentFile);
             } else {
-                m_fchooser.setSelectedFile(currentFile);
+            	m_exportFchooser.setSelectedFile(currentFile);
             }
 
         }
 
-        int result = m_fchooser.showSaveDialog(btnLoad);
+        int result = m_exportFchooser.showSaveDialog(btnLoad);
         if (result == JFileChooser.APPROVE_OPTION) {
-            File file = m_fchooser.getSelectedFile();
+            File file = m_exportFchooser.getSelectedFile();
 
             String absolutePath = file.getAbsolutePath();
             file.getName();

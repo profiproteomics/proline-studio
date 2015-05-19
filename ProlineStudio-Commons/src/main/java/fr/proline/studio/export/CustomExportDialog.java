@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 import java.util.prefs.Preferences;
@@ -622,7 +621,7 @@ public class CustomExportDialog extends DefaultDialog {
         insidePanel.add(m_fileTextField);
         m_fileTextField.setColumns(50);
 
-        // ---// copier à partir de là
+        // ---// copier Ã  partir de lÃ 
         final JButton addFileButton = new JButton("");
         addFileButton.setBounds(470, 14, 27, 30); //addFileButton.setBounds(470, 15, 114, 27);
         insidePanel.add(addFileButton);
@@ -1195,6 +1194,11 @@ public class CustomExportDialog extends DefaultDialog {
         logger.debug("getExportConfig");
         m_exportConfig = generateConfigFileFromGUI();
         return m_exportConfig == null ? null : new GsonBuilder().create().toJson(m_exportConfig);
+    }
+    
+    public String getFileExtension(){
+        m_exportConfig = generateConfigFileFromGUI();
+        return m_exportConfig == null ? null : m_exportConfig.format;
     }
 
     /**

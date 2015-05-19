@@ -13,8 +13,6 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dpm.data.CVParam;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.AbstractServiceTask;
 import static fr.proline.studio.dpm.task.AbstractServiceTask.TASK_LIST_INFO;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -33,13 +31,13 @@ public class ExportDatasetTask extends AbstractServiceTask {
     private static final String m_request = "dps.msi/export_result_summaries/";
     private static final String m_version = "0.3";
     private DDataset m_dataset;
-    private String[] m_filePathResult;
+    private List<String> m_filePathResult;
     private HashMap<String,Object> m_exportParams;
     private boolean m_export2Pride;
     private String m_configStr;
     
     /* export dataset constructor*/
-    public ExportDatasetTask(AbstractServiceCallback callback, DDataset dataset,  String configStr, String[] filePathInfo) {
+    public ExportDatasetTask(AbstractServiceCallback callback, DDataset dataset,  String configStr, List<String> filePathInfo) {
         super(callback, false /** asynchronous */, new TaskInfo("Export Dataset " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
         m_filePathResult = filePathInfo;
@@ -49,7 +47,7 @@ public class ExportDatasetTask extends AbstractServiceTask {
     }
     
     /* export to Pride constructor*/
-    public ExportDatasetTask(AbstractServiceCallback callback, DDataset dataset, HashMap<String,Object> exportParams, boolean prideFormat, String[] filePathInfo) {
+    public ExportDatasetTask(AbstractServiceCallback callback, DDataset dataset, HashMap<String,Object> exportParams, boolean prideFormat, List<String> filePathInfo) {
         super(callback, false /** asynchronous */, null);
         m_dataset = dataset;
         m_filePathResult = filePathInfo;
@@ -238,8 +236,11 @@ public class ExportDatasetTask extends AbstractServiceTask {
                         m_loggerProline.error(getClass().getSimpleName() + " failed : No file path returned.");
                         return AbstractServiceTask.ServiceState.STATE_FAILED;
                     }
-
-                    m_filePathResult[0] = (String) exportedFilePathList.get(0);
+                    // in case of TSV format, we have different files to download
+                    for (Object exportedFilePathList1 : exportedFilePathList) {
+                        m_filePathResult.add((String) exportedFilePathList1);
+                    }
+                    //m_filePathResult[0] = (String) exportedFilePathList.get(0);
 
                     
                     return AbstractServiceTask.ServiceState.STATE_DONE;

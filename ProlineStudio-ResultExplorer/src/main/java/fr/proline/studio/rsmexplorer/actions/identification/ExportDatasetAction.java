@@ -66,11 +66,10 @@ public class ExportDatasetAction extends AbstractRSMAction {
                     @Override
                     public void run(boolean success) {
                         final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false);
-                        String conf = "";
                         loadWaitingDialog.setVisible(false);
                         if (success) {
                             if (!m_config.isEmpty()) {
-                                conf = m_config.get(0);
+                                String conf = m_config.get(0);
                                 dialog.setDefaultExportConfig(conf);
                             }
                         } else {
@@ -115,7 +114,7 @@ public class ExportDatasetAction extends AbstractRSMAction {
                                 };
 
                                 // used as out parameter for the service
-                                final String[] _filePath = new String[1];
+                                final List<String> _filePath = new ArrayList();
 
                                 AbstractServiceCallback exportCallback = new AbstractServiceCallback() {
 
@@ -129,11 +128,26 @@ public class ExportDatasetAction extends AbstractRSMAction {
                                         if (success) {
 
                                             String fileName = dialog.getFileName();
-                                            if (!fileName.endsWith(".xlsx")) {
-                                                fileName += ".xlsx";
+                                            String extension = dialog.getFileExtension();
+                                            if (extension != null && !fileName.endsWith("."+extension)) {
+                                                fileName += "."+extension;
                                             }
-                                            DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath[0]);
-                                            AccessServiceThread.getAccessServiceThread().addTask(task);
+                                            if (_filePath.size() == 1){
+                                                DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0));
+                                                AccessServiceThread.getAccessServiceThread().addTask(task);
+                                            }else {
+                                                for (String _filePath1 : _filePath) {
+                                                    int id = _filePath1.lastIndexOf("\\");
+                                                    int idUnderscore = _filePath1.lastIndexOf("_");
+                                                    int idExtC = fileName.lastIndexOf(".");
+                                                    String fn = fileName;
+                                                    if (id != -1 && idUnderscore != -1 && idExtC != -1 ){
+                                                        fn = fileName.substring(0, idExtC) +"_"+_filePath1.substring(id+1, idUnderscore)+"."+extension;
+                                                    }
+                                                    DownloadFileTask task = new DownloadFileTask(downloadCallback, fn, _filePath1);
+                                                    AccessServiceThread.getAccessServiceThread().addTask(task);
+                                                }
+                                            }
 
                                         } else {
                                             // nothing to do

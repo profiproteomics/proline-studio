@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+
 /**
  *
  * @author AW
@@ -66,6 +67,7 @@ public class CustomExportDialog extends DefaultDialog {
     private ImageExporterInterface m_imageExporter = null;
 
     private JFileChooser m_fchooser;
+    private JFileChooser m_exportFchooser;
     private List<FileNameExtensionFilter> m_filterList = new ArrayList<>();
 
     private DefaultDialog.ProgressTask m_task = null;
@@ -89,7 +91,7 @@ public class CustomExportDialog extends DefaultDialog {
     //---
     private JComboBox comboBox_ProteinSets;
     private JComboBox comboBox_DateFormat;
-    private JComboBox comboBox_Format;
+    //private JComboBox comboBox_Format;
     private JComboBox comboBox_NumberSeparator;
     private JComboBox comboBox_Orientation;
     //private JButton addFileButton;
@@ -179,16 +181,8 @@ public class CustomExportDialog extends DefaultDialog {
 
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
 
-        setInternalComponent(createAdvancedExportPanel());
-        /*loadDefaultExportConfig();
-         //loadExportConfig();// is loaded upon request
-         if(m_exportDefaultConfig!=null )
-         {
-         fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
-         }
-		
+        setInternalComponent(createCustomExportPanel());
        
-         */
         setButtonName(BUTTON_OK, ((m_exportType == ExporterFactory.EXPORT_IMAGE)
                 || (m_exportType == ExporterFactory.EXPORT_IMAGE2)) ? "Export Image" : "Export");
 
@@ -201,10 +195,13 @@ public class CustomExportDialog extends DefaultDialog {
         }
         if (defaultExportPath.length() > 0) {
             m_fchooser = new JFileChooser(new File(defaultExportPath));
+            m_exportFchooser = new JFileChooser(new File(defaultExportPath));
         } else {
             m_fchooser = new JFileChooser();
+            m_exportFchooser = new JFileChooser();
         }
         m_fchooser.setMultiSelectionEnabled(false);
+        m_exportFchooser.setMultiSelectionEnabled(false);
 
     }
 
@@ -256,7 +253,22 @@ public class CustomExportDialog extends DefaultDialog {
                 // TODO: add the right selection to this list of choices (also for the following 3 sections)
             }
             if (param.format_values != null) {
-                comboBox_Format.setModel(new DefaultComboBoxModel(param.format_values));
+            	String[] reformatedParamValues = new String[param.format_values.length];
+            	for (int i = 0; i < param.format_values.length; i++) {
+            		if(param.format_values[i].contains("xls")) {
+            			reformatedParamValues[i] = "Excel (." + param.format_values[i].toString() + ")";
+            		}
+            		else if (param.format_values[i].contains("tsv") ) {
+            			reformatedParamValues[i] = "Tabulation separated values (." + param.format_values[i].toString() + ")";
+            		}
+            		else if (param.format_values[i].contains("csv") )  {
+            			reformatedParamValues[i] = "Comma separated values (." + param.format_values[i].toString() + ")";
+            		}
+				} 
+            	// TODO: fix that to better show possibled output file formats.
+            	//m_exporTypeCombobox.setModel(new DefaultComboBoxModel(reformatedParamValues));
+            	m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
+                
             }
             if (param.date_format_values != null) {
                 comboBox_DateFormat.setModel(new DefaultComboBoxModel(param.date_format_values));
@@ -425,7 +437,7 @@ public class CustomExportDialog extends DefaultDialog {
         return null;
     }
 
-    public final JPanel createAdvancedExportPanel() {
+    public final JPanel createCustomExportPanel() {
 
         // JPanel exportPanel = new JPanel(new GridBagLayout());
         final JPanel exportPanel = new JPanel();
@@ -525,31 +537,31 @@ public class CustomExportDialog extends DefaultDialog {
         optionPane.add(m_configFile);
         m_configFile.setColumns(10);
 
-        lblFormat = new JLabel("Format:");
-        lblFormat.setBounds(10, 44, 55, 14);
-        optionPane.add(lblFormat);
+//        lblFormat = new JLabel("Format:");
+//        lblFormat.setBounds(10, 44, 55, 14);
+//        optionPane.add(lblFormat);
 
-        comboBox_Format = new JComboBox();
-        comboBox_Format.setModel(new DefaultComboBoxModel(new String[]{"xlsx", "xls", "csv"}));
-        comboBox_Format.setBounds(10, 68, 55, 20);
-        optionPane.add(comboBox_Format);
+        m_exporTypeCombobox = new JComboBox();
+        m_exporTypeCombobox.setModel(new DefaultComboBoxModel(new String[]{"xlsx", "xls", "csv"}));
+        //m_exporTypeCombobox.setBounds(10, 68, 55, 20);
+        //optionPane.add(comboBox_Format);
 
         comboBox_DateFormat = new JComboBox();
         comboBox_DateFormat.setModel(new DefaultComboBoxModel(new String[]{"YYYYMMDD HH:mm:ss", "DDMMYYYY HH:mm:ss", "MMDDYYYY HH:mm:ss"}));
-        comboBox_DateFormat.setBounds(101, 68, 161, 20);
+        comboBox_DateFormat.setBounds(10, 65, 161, 20);
         optionPane.add(comboBox_DateFormat);
 
         lblDateFormat = new JLabel("Date format:");
-        lblDateFormat.setBounds(101, 43, 68, 14);
+        lblDateFormat.setBounds(10, 44, 68, 14);
         optionPane.add(lblDateFormat);
 
         comboBox_NumberSeparator = new JComboBox();
         comboBox_NumberSeparator.setModel(new DefaultComboBoxModel(new String[]{".", ","}));
-        comboBox_NumberSeparator.setBounds(305, 68, 49, 20);
+        comboBox_NumberSeparator.setBounds(192, 65, 49, 20);
         optionPane.add(comboBox_NumberSeparator);
 
         lblNumberSeparator = new JLabel("Number separator:");
-        lblNumberSeparator.setBounds(305, 44, 110, 14);
+        lblNumberSeparator.setBounds(193, 43, 110, 14);
         optionPane.add(lblNumberSeparator);
 
         lblProteinSets = new JLabel("Protein sets:");
@@ -622,17 +634,7 @@ public class CustomExportDialog extends DefaultDialog {
         m_fileTextField.setColumns(50);
 
         // ---// copier Ã  partir de lÃ 
-        final JButton addFileButton = new JButton("");
-        addFileButton.setBounds(470, 14, 27, 30); //addFileButton.setBounds(470, 15, 114, 27);
-        insidePanel.add(addFileButton);
-        addFileButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-            }
-        });
-
-        //addFileButton.setIcon(new ImageIcon(ExportDialog.class.getResource("/com/sun/java/swing/plaf/windows/icons/TreeOpen.gif")));
-        addFileButton.setIcon(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-
+       
         chk_ExportOptions = new JCheckBox("Custom export");
         chk_ExportOptions.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -642,6 +644,13 @@ public class CustomExportDialog extends DefaultDialog {
         });
         chk_ExportOptions.setBounds(476, 71, 124, 27);
         insidePanel.add(chk_ExportOptions);
+        
+        final JButton addFileButton = new JButton("");
+        addFileButton.setBounds(470, 14, 27, 30); //addFileButton.setBounds(470, 15, 114, 27);
+        insidePanel.add(addFileButton);
+        
+
+        addFileButton.setIcon(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
 
         addFileButton.addActionListener(new ActionListener() {
 
@@ -689,10 +698,9 @@ public class CustomExportDialog extends DefaultDialog {
         });
 
         if ((m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) && m_showExportAllPSMsChB) {
-
             m_exportAllPSMsChB = new JCheckBox(" Export all PSMs");
-            insidePanel.add(m_exportAllPSMsChB);
             m_exportAllPSMsChB.setBounds(6, 78, 114, 20);
+            insidePanel.add(m_exportAllPSMsChB);
         }
 
         lbl_exportType = new JLabel("Export Type:");
@@ -714,23 +722,44 @@ public class CustomExportDialog extends DefaultDialog {
 
     protected void loadConfigFile() {
 
+    	 //ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
+
+        
+             FileNameExtensionFilter filter = new FileNameExtensionFilter("*.json", "*.json");
+             FileNameExtensionFilter existFilter = getFilterWithSameExtensions(filter);
+
+             if (existFilter == null) {
+                 m_exportFchooser.addChoosableFileFilter(filter);
+                 //m_filterList.add(filter);
+                 m_exportFchooser.setFileFilter(filter);
+             } else {
+            	 m_exportFchooser.setFileFilter(existFilter);
+             }
+
+         
+//             if (fileName.indexOf('.') == -1) {
+//                 absolutePath += "." + exporterInfo.getFileExtension();
+//             }
+         
+         //-------
+    	
         String configFile = m_configFile.getText().trim();
 
         if (configFile.length() > 0) {
             File currentFile = new File(configFile);
             if (currentFile.isDirectory()) {
-                m_fchooser.setCurrentDirectory(currentFile);
+            	m_exportFchooser.setCurrentDirectory(currentFile);
             } else {
-                m_fchooser.setSelectedFile(currentFile);
+            	m_exportFchooser.setSelectedFile(currentFile);
             }
         }
 
-        int result = m_fchooser.showOpenDialog(btnLoad);
+        int result = m_exportFchooser.showOpenDialog(btnLoad);
         if (result == JFileChooser.APPROVE_OPTION) {
-            File file = m_fchooser.getSelectedFile();
+            File file = m_exportFchooser.getSelectedFile();
 
             String absolutePath = file.getAbsolutePath();
-            file.getName();
+            
             m_configFile.setText(absolutePath);
             loadExportConfig();
             if (m_exportDefaultConfig != null) {
@@ -844,10 +873,10 @@ public class CustomExportDialog extends DefaultDialog {
         ExportConfig ec = new ExportConfig();
 
 		// global parameters 
-		if(comboBox_Format.getSelectedIndex()==0) 
+		if(m_exporTypeCombobox.getSelectedIndex()==0) 
 		{
 			ec.format = "xlsx";
-		} else if(comboBox_Format.getSelectedIndex()==1){
+		} else if(m_exporTypeCombobox.getSelectedIndex()==1){
 			ec.format = "tsv";
 		}
 		if(comboBox_NumberSeparator.getSelectedIndex()==0) 
@@ -1000,8 +1029,11 @@ public class CustomExportDialog extends DefaultDialog {
             c.gridy++;
             c.gridx = 0;
             c.gridwidth = 2;
-            m_exportAllPSMsChB = new JCheckBox(" Export all PSMs");
-            exportPanel.add(m_exportAllPSMsChB, c);
+            //m_exportAllPSMsChB = new JCheckBox(" Export all PSMs");
+            //m_exportAllPSMsChB.setBounds(6, 78, 114, 20);
+    	    //insidePanel.add(m_exportAllPSMsChB);
+    	    
+            //exportPanel.add(m_exportAllPSMsChB, c);
         }
 
         m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());

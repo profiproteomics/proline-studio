@@ -668,9 +668,9 @@ public class CustomExportDialog extends DefaultDialog {
                 	FileNameExtensionFilter filter = null;
                 	if(m_exporTypeCombobox.getSelectedItem().toString().contains("xls")) 
                 	{
-                		filter = new FileNameExtensionFilter("xlsx", "xlsx");
+                		filter = new FileNameExtensionFilter("Excel File (.xlsx)", "xlsx");
                 	} else if(m_exporTypeCombobox.getSelectedItem().toString().contains("tsv")) {
-                		filter = new FileNameExtensionFilter("tsv","tsv");
+                		filter = new FileNameExtensionFilter("Tabulation Separated Values (.tsv)","tsv");
                 	
                 	}
                     m_fchooser.addChoosableFileFilter(filter);
@@ -734,7 +734,7 @@ public class CustomExportDialog extends DefaultDialog {
     	 //ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
 
         
-             FileNameExtensionFilter filter = new FileNameExtensionFilter("json", "json");
+             FileNameExtensionFilter filter = new FileNameExtensionFilter("Custom Export Config (.json)", "json");
              FileNameExtensionFilter existFilter = getFilterWithSameExtensions(filter);
 
              if (existFilter == null) {

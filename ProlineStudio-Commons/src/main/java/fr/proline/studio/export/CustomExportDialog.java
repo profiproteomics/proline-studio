@@ -107,6 +107,10 @@ public class CustomExportDialog extends DefaultDialog {
     protected boolean m_updateInProgress = true; // indicate when the table is built (to avoid calling event handler on every table update)
 
 	private JPanel panel_1;
+
+	private JLabel lblExportProfile;
+
+	private JComboBox comboBox_exportProfile;
     
 
     public static CustomExportDialog getDialog(Window parent, JXTable table, String exportName) {
@@ -205,24 +209,24 @@ public class CustomExportDialog extends DefaultDialog {
 
     }
 
-    private void loadDefaultExportConfig() {
-        m_exportDefaultConfig = new ExportConfig();
-        String jsonString = "";
-        try {
-				//GetExportInformationTask
-
-            jsonString = new String(Files.readAllBytes(Paths.get("D:\\Proline\\export perso\\allFieldsIdent.json")));
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
-
-        Gson gson = new Gson();
-        String messageHashMapJsonString = jsonString;
-        m_exportDefaultConfig = gson.fromJson(messageHashMapJsonString, m_exportDefaultConfig.getClass());
-
-        fillExportPossibleValues(m_exportDefaultConfig);
-    }
+//    private void loadDefaultExportConfig() {
+//        m_exportDefaultConfig = new ExportConfig();
+//        String jsonString = "";
+//        try {
+//				//GetExportInformationTask
+//
+//            jsonString = new String(Files.readAllBytes(Paths.get("D:\\Proline\\export perso\\allFieldsIdent.json")));
+//        } catch (IOException e) {
+//
+//            e.printStackTrace();
+//        }
+//
+//        Gson gson = new Gson();
+//        String messageHashMapJsonString = jsonString;
+//        m_exportDefaultConfig = gson.fromJson(messageHashMapJsonString, m_exportDefaultConfig.getClass());
+//
+//        fillExportPossibleValues(m_exportDefaultConfig);
+//    }
 
     private void loadExportConfig() {
         // decode json 
@@ -245,14 +249,15 @@ public class CustomExportDialog extends DefaultDialog {
 
     }
 
-    private void fillExportPossibleValues(ExportConfig param) {
-        if (param != null) {
+	private void fillExportPossibleValues(ExportConfig param) {
+		if(param!=null) {
+		
+			
+			if(param.sheet_presentation_values!=null) {
+				comboBox_Orientation.setModel(new DefaultComboBoxModel(param.sheet_presentation_values));
+			}
 
-            if (param.sheet_presentation_values != null) {
-                comboBox_Orientation.setModel(new DefaultComboBoxModel(param.sheet_presentation_values));
-                // TODO: add the right selection to this list of choices (also for the following 3 sections)
-            }
-            if (param.format_values != null) {
+			if (param.format_values != null) {
             	String[] reformatedParamValues = new String[param.format_values.length];
             	for (int i = 0; i < param.format_values.length; i++) {
             		if(param.format_values[i].contains("xls")) {
@@ -265,26 +270,55 @@ public class CustomExportDialog extends DefaultDialog {
             			reformatedParamValues[i] = "Comma separated values (." + param.format_values[i].toString() + ")";
             		}
 				} 
-            	// TODO: fix that to better show possibled output file formats.
             	m_exporTypeCombobox.setModel(new DefaultComboBoxModel(reformatedParamValues));
-            	//m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
-                
             }
-            if (param.date_format_values != null) {
-                comboBox_DateFormat.setModel(new DefaultComboBoxModel(param.date_format_values));
-            }
+			
+			if(param.date_format_values!=null) {
+				comboBox_DateFormat.setModel(new DefaultComboBoxModel(param.date_format_values));
+			}
 
-            if (param.decimal_separator_values != null) {
-                comboBox_NumberSeparator.setModel(new DefaultComboBoxModel(param.decimal_separator_values));
-            }
+			if(param.decimal_separator_values!=null) {
+				comboBox_NumberSeparator.setModel(new DefaultComboBoxModel(param.decimal_separator_values));
+			}
+			
+			comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[] {"All","Validated only"}));
+			
+			comboBox_exportProfile.setModel(new DefaultComboBoxModel(new String[] {"Best", "All"}));
+			
+		}
+	}
 
-            comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[]{"all", "validated only"}));
+    
+	private void selectLoadedExportValues(ExportConfig param) {
+		if(param!=null) {
+		
+			if(param.date_format!=null) {
+				comboBox_DateFormat.setSelectedItem(param.date_format);
+			}
 
-        }
-
-    }
-
-
+			if(param.decimal_separator!=null) {
+				comboBox_NumberSeparator.setSelectedItem(param.decimal_separator);
+			}
+			
+			if(param.data_export.all_protein_set)
+			{
+				comboBox_ProteinSets.setSelectedIndex(0);
+			} else {
+				comboBox_ProteinSets.setSelectedIndex(1);
+			}
+			if(param.data_export.best_profile) 
+			{
+				comboBox_exportProfile.setSelectedIndex(0);	
+			} 	else {
+				comboBox_exportProfile.setSelectedIndex(1);
+			}
+			
+			
+		}
+		
+	}
+	
+	
     private void fillExportFormatTable(ExportConfig defaultParam, ExportConfig param) {
 		//reset panes:
 		
@@ -557,20 +591,20 @@ public class CustomExportDialog extends DefaultDialog {
 
         comboBox_NumberSeparator = new JComboBox();
         comboBox_NumberSeparator.setModel(new DefaultComboBoxModel(new String[]{".", ","}));
-        comboBox_NumberSeparator.setBounds(192, 65, 49, 20);
+        comboBox_NumberSeparator.setBounds(180, 65, 49, 20);
         optionPane.add(comboBox_NumberSeparator);
 
         lblNumberSeparator = new JLabel("Number separator:");
-        lblNumberSeparator.setBounds(193, 43, 110, 14);
+        lblNumberSeparator.setBounds(180, 43, 110, 14);
         optionPane.add(lblNumberSeparator);
 
         lblProteinSets = new JLabel("Protein sets:");
-        lblProteinSets.setBounds(451, 44, 89, 14);
+        lblProteinSets.setBounds(304, 44, 89, 14);
         optionPane.add(lblProteinSets);
 
         comboBox_ProteinSets = new JComboBox();
-        comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[]{"Validated", "Not validated"}));
-        comboBox_ProteinSets.setBounds(451, 68, 121, 20);
+        comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[]{"All", "Validated only"}));
+        comboBox_ProteinSets.setBounds(304, 65, 121, 20);
         optionPane.add(comboBox_ProteinSets);
 
         btnNewButton = new JButton("Save");
@@ -623,6 +657,14 @@ public class CustomExportDialog extends DefaultDialog {
 		panel_1.add(m_tabbedPane);
 		m_tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		
+		comboBox_exportProfile = new JComboBox();
+		comboBox_exportProfile.setModel(new DefaultComboBoxModel(new String[] {"Best", "All"}));
+		comboBox_exportProfile.setBounds(448, 65, 109, 20);
+		optionPane.add(comboBox_exportProfile);
+		
+		lblExportProfile = new JLabel("Export profile:");
+		lblExportProfile.setBounds(448, 44, 89, 14);
+		optionPane.add(lblExportProfile);
 		
         lblExportToFile = new JLabel("Export to file:");
         lblExportToFile.setBounds(10, 15, 77, 27);
@@ -773,12 +815,26 @@ public class CustomExportDialog extends DefaultDialog {
             loadExportConfig();
             if (m_exportDefaultConfig != null) {
                 fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+                selectAppropriatePresentationMode();
+           	    selectLoadedExportValues(m_exportConfig);
             }
 
         }
 
     }
 
+
+	private void selectAppropriatePresentationMode() {
+		// select the right presentation mode based on the currently selected tab.
+		int selectedTab = m_tabbedPane.getSelectedIndex();
+		if(m_presentation[selectedTab].equals("rows")) {
+			comboBox_Orientation.setSelectedIndex(0);
+		} else {
+			comboBox_Orientation.setSelectedIndex(1);
+		}
+		
+	}
+	
     protected void saveConfigFile() {
         String configFile = m_configFile.getText().trim();
 
@@ -914,8 +970,10 @@ public class CustomExportDialog extends DefaultDialog {
 		}
 		
         ec.data_export = new ExportDataExport();
-        ec.data_export.all_protein_set = comboBox_ProteinSets.getSelectedItem().equals("all");
+        ec.data_export.all_protein_set = comboBox_ProteinSets.getSelectedItem().equals("All");
 
+        ec.data_export.best_profile = comboBox_exportProfile.getSelectedItem().equals("Best");
+        
 //		// extra infos for default options (sent from server only)
         ec.format_values = null; //["xlsx","tsv"],
         ec.decimal_separator_values = null; //": [".",","],

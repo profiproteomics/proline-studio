@@ -30,15 +30,15 @@ public class LoadWaitingDialog extends DefaultDialog{
 
         setTitle("Load data");
 
-        setSize(new Dimension(500,340));
+        setPreferredSize(new Dimension(300,150));
         setResizable(true);
 
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new BorderLayout());
-        internalPanel.add(new JLabel("Please wait while loading template to configure export"), BorderLayout.CENTER);
+        internalPanel.add(new JLabel("Please wait while loading template to configure export"), BorderLayout.NORTH);
         setInternalComponent(internalPanel);
 
-        // hide default and ol button
+        // hide default  button
         setButtonVisible(BUTTON_HELP, false);
         setButtonVisible(BUTTON_CANCEL, false);
         setButtonName(BUTTON_OK, "Close");

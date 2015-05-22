@@ -1,6 +1,6 @@
 package fr.proline.studio.graphics.marker;
 
-import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import fr.proline.studio.utils.CyclicColorPalette;
@@ -18,7 +18,7 @@ public class TextMarker extends AbstractMarker {
     
     private static final Font MARKER_FONT = new Font("Arial", Font.BOLD, 16);
     
-    public TextMarker(PlotPanel plotPanel, double percentageX, double percentageY, String valueLabel) {
+    public TextMarker(BasePlotPanel plotPanel, double percentageX, double percentageY, String valueLabel) {
         super(plotPanel);
 
         m_valueLabel = valueLabel;

@@ -81,7 +81,7 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
             this.mainRightSplitPane = new JSplitPane();
             this.mainRightSplitPane.setDividerLocation(320);
             this.mainRightSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-
+            this.mainRightSplitPane.setOneTouchExpandable(true);
             this.mainRightSplitPane.setRightComponent(getFeaturesTabPane());
             this.mainRightSplitPane.setLeftComponent(getViewersTabPane());
         }

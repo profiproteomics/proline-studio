@@ -33,9 +33,12 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
     public static final int COLTYPE_FEATURE_APEX_INT_COL = 3;
     public static final int COLTYPE_FEATURE_AREA_COL = 4;
     public static final int COLTYPE_FEATURE_SCAN_COUNT_COL = 5;
+    public static final int COLTYPE_FEATURE_CHARGE_COL = 6;
+    public static final int COLTYPE_FEATURE_PEAKELS_COUNT_COL = 7;
     
-   private static final String[] m_columnNames = {"m/z", "Elution","Duration", "Apex Int.", "Area", "MS Count"};
-   private static final String[] m_columnTooltips = {"m/z", "Elution Time in min","Duration in min", "Apex Intensity", "Area", "MS Count"};
+    
+   private static final String[] m_columnNames = {"m/z", "Elution","Duration", "Apex Int.", "Area", "MS Count", "charge", "peakels"};
+   private static final String[] m_columnTooltips = {"m/z", "Elution Time in min","Duration in min", "Apex Intensity", "Area", "MS Count", "Charge state", "Isotope peakels count"};
     
 
     private List<Feature> features = new ArrayList<Feature>();
@@ -72,6 +75,10 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
                 return features.get(rowIndex).getArea();
             case COLTYPE_FEATURE_SCAN_COUNT_COL:
                 return features.get(rowIndex).getMs1Count();
+            case COLTYPE_FEATURE_CHARGE_COL:
+               return features.get(rowIndex).charge();
+            case COLTYPE_FEATURE_PEAKELS_COUNT_COL:
+               return features.get(rowIndex).getPeakelsCount();
         }
         return null; // should not happen
     }
@@ -92,6 +99,8 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
             case COLTYPE_FEATURE_AREA_COL:
                 return Float.class;
             case COLTYPE_FEATURE_SCAN_COUNT_COL:
+            case COLTYPE_FEATURE_CHARGE_COL:
+            case COLTYPE_FEATURE_PEAKELS_COUNT_COL:
                 return Integer.class;
         }
         return null; // should not happen
@@ -188,6 +197,8 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
         filtersMap.put(COLTYPE_FEATURE_APEX_INT_COL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_APEX_INT_COL), null));
         filtersMap.put(COLTYPE_FEATURE_AREA_COL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_AREA_COL), null));
         filtersMap.put(COLTYPE_FEATURE_SCAN_COUNT_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_SCAN_COUNT_COL), null));
+        filtersMap.put(COLTYPE_FEATURE_PEAKELS_COUNT_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_PEAKELS_COUNT_COL), null));
+        filtersMap.put(COLTYPE_FEATURE_CHARGE_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_CHARGE_COL), null));
         
         
     }
@@ -231,6 +242,7 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
     public TableCellRenderer getRenderer(int col) {
         return null;
     }
+    
     
     
 }

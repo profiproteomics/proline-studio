@@ -17,6 +17,14 @@ public abstract class AbstractParameter {
     protected boolean m_compulsory = true;
     protected Object m_associatedData = null;
 
+    public enum LabelVisibility {
+        NO_VISIBLE,
+        VISIBLE,
+        AS_BORDER_TITLE
+        
+        
+    }
+    
     protected AbstractParameter(String key, String name, Class type, Class graphicalType) {
         m_key = key;
         m_name = name;
@@ -62,8 +70,8 @@ public abstract class AbstractParameter {
      * Returns if the parameter wants its name to be displayed in the panel
      * @return 
      */
-    public boolean showLabel() {
-        return true;
+    public LabelVisibility showLabel() {
+        return LabelVisibility.VISIBLE;
     }
     
     /**

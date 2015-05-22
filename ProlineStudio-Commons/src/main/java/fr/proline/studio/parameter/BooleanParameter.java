@@ -98,8 +98,8 @@ public class BooleanParameter extends AbstractParameter {
     }
  
     @Override
-    public boolean showLabel() {
-        return false;
+    public LabelVisibility showLabel() {
+        return LabelVisibility.NO_VISIBLE;
     }
     
     

@@ -62,12 +62,17 @@ public class Table extends PyObject {
         ColRef col = m_colums.get(colIndex);
         if (col == null) {
             JXTable t = m_tableMap.get(m_index);
-            CompoundTableModel model = (CompoundTableModel) t.getModel();
-            if (model.getColumnCount()<=colIndex) {
-                String error = "ColRef.getCol("+colIndex+") : Out of bound error";
-                throw Py.IndexError(error);
+            if (t != null) {
+                CompoundTableModel model = (CompoundTableModel) t.getModel();
+                if (model.getColumnCount() <= colIndex) {
+                    String error = "ColRef.getCol(" + colIndex + ") : Out of bound error";
+                    throw Py.IndexError(error);
+                }
+                col = new ColRef(this, colIndex-1, model);
+            } else {
+                col = new ColRef(this, colIndex-1, m_model);
             }
-            col = new ColRef(this, colIndex-1, model);
+            
             m_colums.put(colIndex, col);
         }
 
@@ -117,25 +122,29 @@ public class Table extends PyObject {
         
         JXTable table = m_tableMap.get(m_index);
         
-        List<TableColumn> columns = table.getColumns(true);
-        final int nbColumns = columns.size();
-        final boolean[] visibilityArray = new boolean[nbColumns];
-        for (int i=0;i<nbColumns;i++) {
-            visibilityArray[i] = ((TableColumnExt) columns.get(i)).isVisible();
-        }
+        if (table != null) {
 
-        
-        
-        TableModel model = table.getModel();
-        if (model instanceof CompoundTableModel) {
-            ((CompoundTableModel) model).addModel(new ExprTableModel(col, ((CompoundTableModel) model).getLastNonFilterModel()));
-        }
-
-        columns = table.getColumns(true);
-        for (int i = 0; i < nbColumns; i++) {
-            if (!visibilityArray[i]) {
-                ((TableColumnExt) columns.get(i)).setVisible(false);
+            List<TableColumn> columns = table.getColumns(true);
+            final int nbColumns = columns.size();
+            final boolean[] visibilityArray = new boolean[nbColumns];
+            for (int i = 0; i < nbColumns; i++) {
+                visibilityArray[i] = ((TableColumnExt) columns.get(i)).isVisible();
             }
+
+            TableModel model = table.getModel();
+            if (model instanceof CompoundTableModel) {
+                ((CompoundTableModel) model).addModel(new ExprTableModel(col, ((CompoundTableModel) model).getLastNonFilterModel()));
+            }
+
+            columns = table.getColumns(true);
+            for (int i = 0; i < nbColumns; i++) {
+                if (!visibilityArray[i]) {
+                    ((TableColumnExt) columns.get(i)).setVisible(false);
+                }
+            }
+        } else {
+            // we have only the model
+            m_model = new ExprTableModel(col, m_model);
         }
 
     }

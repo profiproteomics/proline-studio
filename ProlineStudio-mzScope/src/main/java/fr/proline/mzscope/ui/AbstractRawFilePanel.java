@@ -14,6 +14,7 @@ import fr.proline.mzscope.util.KeyEventDispatcherDecorator;
 import fr.proline.mzscope.util.MzScopeConstants;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.PlotLinear;
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotPanelListener;
 import fr.proline.studio.graphics.marker.IntervalMarker;
@@ -36,6 +37,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 import org.slf4j.Logger;
@@ -61,7 +63,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     private JPanel chromatogramContainerPanel;
     private SpectrumPanel spectrumContainerPanel;
     
-    protected PlotPanel chromatogramPlotPanel;
+    protected BasePlotPanel chromatogramPlotPanel;
     protected JToolBar chromatogramToolbar;
     protected List<PlotLinear> chromatogramPlots;
     protected Chromatogram currentChromatogram;
@@ -72,7 +74,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     
     protected List<LineMarker> listMsMsMarkers;
     protected LineMarker currentScanMarker; 
-    protected JCheckBox displayMS2btn;
+    protected JToggleButton displayMS2btn;
     
     
     public AbstractRawFilePanel() {
@@ -151,66 +153,16 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     
     private void initChartPanels(){
         // create ChromatogramPanelPlot
-        chromatogramPlotPanel  = new PlotPanel();
+        PlotPanel plotPanel = new PlotPanel();
+        chromatogramPlotPanel  = plotPanel.getBasePlotPanel();
         chromatogramPlotPanel.addListener(this);
         chromatogramPlotPanel.setDrawCursor(true);
         chromatogramPlotPanel.repaint();
         currentScanMarker = new LineMarker(chromatogramPlotPanel, 0.0, LineMarker.ORIENTATION_VERTICAL, Color.BLUE, false);
         chromatogramPlots = new ArrayList();
-        chromatogramContainerPanel.add(chromatogramPlotPanel, BorderLayout.CENTER);
+        chromatogramContainerPanel.add(plotPanel, BorderLayout.CENTER);
         chromatogramContainerPanel.add(getChromatogramToolbar(), BorderLayout.WEST);
-        
-        /*
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        JFreeChart chromatogramChart = ChartFactory.createXYLineChart("", null, null, dataset, PlotOrientation.VERTICAL, false, true, false);
-        chromatogramPanel = new ChartPanel(chromatogramChart);
-        chromatogramPanel.addChartMouseListener(new ChartMouseListener() {
-
-            @Override
-            public void chartMouseMoved(ChartMouseEvent event) {
-                int deviceX = event.getTrigger().getX();
-                JFreeChart jfreechart = event.getChart();
-                if ((jfreechart != null) && (currentChromatogram != null)) {
-                    XYPlot xyplot = event.getChart().getXYPlot();
-                    double domain = xyplot.getDomainAxis().java2DToValue(deviceX, chromatogramPanel.getScreenDataArea(), xyplot.getDomainAxisEdge());
-                    int result = Arrays.binarySearch(currentChromatogram.time, domain);
-                    if (~result < currentChromatogram.time.length) {
-                        xyplot.clearAnnotations();
-                        double x = currentChromatogram.time[~result];
-                        double y = currentChromatogram.intensities[~result];
-                        final Rectangle2D area = chromatogramPanel.getChartRenderingInfo().getPlotInfo().getDataArea();
-                        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(xyplot.getRangeAxisLocation(), PlotOrientation.VERTICAL);
-                        double pY = xyplot.getRangeAxis().valueToJava2D(y, area, rangeEdge);
-                        double angle = (pY < 60.0) ? -5.0 * Math.PI / 4.0 : -Math.PI / 2.0;
-                        xyplot.addAnnotation(new XYPointerAnnotation(xFormatter.format(x), x, y, angle));
-                    }
-                }
-            }
-
-            @Override
-            public void chartMouseClicked(ChartMouseEvent event) {
-                JFreeChart jfreechart = event.getChart();
-                if ((jfreechart != null) && (currentChromatogram != null)) {
-                    chromatogramMouseClicked(event);
-                }
-            }
-        });
-
-        chromatogramContainerPanel.removeAll();
-        chromatogramContainerPanel.add(getChromatogramToolbar(), BorderLayout.WEST);
-        chromatogramContainerPanel.add(chromatogramPanel, BorderLayout.CENTER);
-        chromatogramPanel.setMouseWheelEnabled(true);
-        XYPlot xyplot = chromatogramPanel.getChart().getXYPlot();
-        xyplot.getDomainAxis().setTickLabelFont(tickLabelFont);
-        xyplot.getRangeAxis().setTickLabelFont(tickLabelFont);
-        xyplot.setDomainCrosshairVisible(true);
-        xyplot.setDomainCrosshairLockedOnData(false);
-        xyplot.setRangeCrosshairVisible(false);
-        xyplot.setDomainPannable(true);
-        xyplot.setBackgroundPaint(CyclicColorPalette.GRAY_BACKGROUND);
-        xyplot.setRangeGridlinePaint(CyclicColorPalette.GRAY_GRID);
-*/
-        
+             
         // Create Scan Charts
         spectrumContainerPanel.initChart();
     }
@@ -242,8 +194,8 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         chromatogramToolbar.add(displayBPIbtn);
         
         // MS/MS events
-        displayMS2btn = new JCheckBox("MS/MS", false);
-        displayMS2btn.setToolTipText("Show/Hide MS/MS Events");
+        displayMS2btn = new JToggleButton("MS2", false);
+        displayMS2btn.setToolTipText("Show/Hide MS2 Events");
         displayMS2btn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -252,7 +204,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         });
         chromatogramToolbar.add(displayMS2btn);
         setMsMsEventButtonEnabled(false);
-
+        
         chromatogramToolbar.setFloatable(false);
         chromatogramToolbar.setRollover(true);
 
@@ -380,25 +332,14 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         this.currentChromatogram = chromato;
         listChromatogram = new ArrayList();
         listChromatogram.add(currentChromatogram);
-       /* XYSeries series = new XYSeries(chromato.rawFile.getName());
-        for (int k = 0; k < chromato.intensities.length; k++) {
-            series.add(chromato.time[k], chromato.intensities[k]);
-        }
-
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        dataset.addSeries(series);*/
         StringBuilder builder = new StringBuilder("Mass range: ");
         builder.append(xFormatter.format(chromato.minMz)).append("-").append(xFormatter.format(chromato.maxMz));
-        //chromatogramPanel.getChart().setTitle(new TextTitle(builder.toString(), titleFont));
         chromatogramPlotPanel.setPlotTitle(builder.toString());
         chromatogramPlotPanel.clearPlots();
-
-        //XYPlot xyplot = chromatogramPanel.getChart().getXYPlot();
         PlotLinear chromatogramPlot= chromatogramPlots.isEmpty()?null:chromatogramPlots.get(0);
         if (chromatogramPlot != null){
             chromatogramPlot.clearMarkers();
         }
-        //xyplot.clearDomainMarkers();
         chromatogramPlots = new ArrayList();
         Color plotColor = CyclicColorPalette.getColor(1);
         ChromatogramXICModel chromatoModel = new ChromatogramXICModel(currentChromatogram);
@@ -412,12 +353,10 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
             currentScanMarker.setValue(currentScan.getRetentionTime()/60.0);
         }
         chromatogramPlotPanel.setPlot(chromatogramPlot);
+        chromatogramPlotPanel.lockMinXValue();
+        chromatogramPlotPanel.lockMinYValue();
         chromatogramPlotPanel.repaintUpdateDoubleBuffer();
         chromatogramPlots.add(chromatogramPlot);
-        //xyplot.setDataset(dataset);
-       // xyplot.getRangeAxis().setUpperMargin(0.3);
-        //XYItemRenderer renderer = xyplot.getRenderer();
-        //renderer.setSeriesPaint(0, plotColor);
         displayMsMsEvents(displayMS2btn.isSelected());
         return plotColor;
     }
@@ -476,6 +415,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         worker.execute();
     }
 
+    
     @Override
     public void displayFeature(final Feature f) {
         double ppm = MzScopePreferences.getInstance().getMzPPMTolerance();

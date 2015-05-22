@@ -1294,6 +1294,7 @@ public class CustomExportDialog extends DefaultDialog {
     public void setDefaultExportConfig(String configStr) {
     	 
         logger.debug("setDefaultExportConfig");
+        m_configFile.setText(""); 
         m_exportDefaultConfig = new Gson().fromJson(configStr, ExportConfig.class);
         fillExportPossibleValues(m_exportDefaultConfig);
         if (m_exportDefaultConfig != null) {

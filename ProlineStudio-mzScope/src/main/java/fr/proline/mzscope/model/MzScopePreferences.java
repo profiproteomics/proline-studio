@@ -21,7 +21,7 @@ public class MzScopePreferences {
    private float mzPPMTolerance; 
    
    private MzScopePreferences() {
-      mzPPMTolerance = 10.0f;
+      mzPPMTolerance = 5.0f;
    }
 
    public float getMzPPMTolerance() {

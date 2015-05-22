@@ -7,7 +7,7 @@ package fr.proline.mzscope.ui;
 
 import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.algo.IsotopicPatternScorer;
-import fr.proline.mzscope.model.IsotopePattern;
+//import fr.proline.mzscope.model.IsotopePattern;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
@@ -31,9 +31,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.TreeMap;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
@@ -123,15 +121,15 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
          logger.info("Pattern : " + key + " " + pattern.charge() + " mz = " + pattern.monoMz());
       }      
 
-      logger.info("Local estimation : ");
-      TreeMap<Double, TheoreticalIsotopePattern> putativePatterns2 = IsotopePattern.getOrderedIPHypothesis(currentScan.getScanData(), positionMarker.getValue());
-      logger.info("scanId=" + currentScan.getIndex() + ", mz = " + positionMarker.getValue() + ", ppm = " + ppmTol);
-      Iterator itj = putativePatterns2.keySet().iterator();
-      while (itj.hasNext()) {
-         Object key = itj.next();
-         TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns2.get(key);
-         logger.info("Pattern : " + key + " " + pattern.charge() + " mz = " + pattern.monoMz());
-      }      
+//      logger.info("Local estimation : ");
+//      TreeMap<Double, TheoreticalIsotopePattern> putativePatterns2 = IsotopePattern.getOrderedIPHypothesis(currentScan.getScanData(), positionMarker.getValue());
+//      logger.info("scanId=" + currentScan.getIndex() + ", mz = " + positionMarker.getValue() + ", ppm = " + ppmTol);
+//      Iterator itj = putativePatterns2.keySet().iterator();
+//      while (itj.hasNext()) {
+//         Object key = itj.next();
+//         TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns2.get(key);
+//         logger.info("Pattern : " + key + " " + pattern.charge() + " mz = " + pattern.monoMz());
+//      }      
 
       TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns.get(putativePatterns.firstKey()).get();
       int refIdx = 0;

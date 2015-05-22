@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.demo;
 
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.PlotScatter;
 import fr.proline.studio.sampledata.Sample;
@@ -25,8 +26,11 @@ public class ScatterPlotDemo extends JFrame {
       super("ScatterPlot demo");
       plotPanel = new PlotPanel();
       Sample sample = new Sample(3000);
-      PlotScatter scatter = new PlotScatter(plotPanel, sample, null, 0, 3);
-      plotPanel.setPlot(scatter);
+      BasePlotPanel basePlot = plotPanel.getBasePlotPanel();
+      PlotScatter scatter = new PlotScatter(basePlot, sample, null, 0, 3);
+      basePlot.setPlot(scatter);
+      basePlot.setDrawCursor(true);
+      basePlot.getXAxis().setRange(-4, 4);
       getContentPane().setLayout(new BorderLayout());
       getContentPane().add(plotPanel, BorderLayout.CENTER);
       pack();

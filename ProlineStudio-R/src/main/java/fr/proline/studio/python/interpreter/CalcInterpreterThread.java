@@ -21,7 +21,7 @@ public class CalcInterpreterThread extends Thread {
 
     private static CalcInterpreterThread m_instance;
 
-    private LinkedList<CalcInterpreterTask> m_actions;
+    private final LinkedList<CalcInterpreterTask> m_actions;
 
     private CalcInterpreterThread() {
         super("CalcInterpreterThread"); // useful for debugging
@@ -74,10 +74,17 @@ public class CalcInterpreterThread extends Thread {
 
                 try {
                     String code = task.getCode();
+                    ResultVariable[] parameters = task.getParameters();
+                    
                     interpreter.exec("from fr.proline.studio.python.data import Col");
                     interpreter.exec("from fr.proline.studio.python.data import Table");
                     interpreter.exec("from fr.proline.studio.python.math import Stats");
                     interpreter.exec("import math");
+                    if (parameters != null) {
+                        for (ResultVariable parameter : parameters) {
+                            interpreter.set(parameter.getName(), parameter.getValue());
+                        }
+                    }
                     interpreter.exec(code);
 
                     ArrayList<ResultVariable> resultVariableArray = new ArrayList<>();

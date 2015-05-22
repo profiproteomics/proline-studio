@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
@@ -79,6 +80,47 @@ public class JCheckBoxList<E> extends JList {
             item.setSelected(!item.isSelected());
             repaint(getCellBounds(index, index));
         }
+    }
+    
+    public List<E> getSelectedItems() {
+        
+        ArrayList list = new ArrayList();
+        
+        int size = getListSize();
+        for (int i=0;i<size;i++) {
+            CheckListItem item = (CheckListItem) getModel().getElementAt(i);
+            if (item.isSelected()) {
+                list.add(item.getItem());
+            }
+        }
+        
+        return list;
+    }
+
+    @Override
+    public int[] getSelectedIndices() {
+        
+        int nbSelected = 0;
+        int size = getListSize();
+        for (int i = 0; i < size; i++) {
+            CheckListItem item = (CheckListItem) getModel().getElementAt(i);
+            if (item.isSelected()) {
+                nbSelected++;
+            }
+        }
+        
+
+        int[] rv = new int[nbSelected];
+        int j = 0;
+        for (int i = 0; i < size; i++) {
+            CheckListItem item = (CheckListItem) getModel().getElementAt(i);
+            if (item.isSelected()) {
+                rv[j] = i;
+                j++;
+            }
+        }
+        
+        return rv;
     }
 
     private static class CheckListItem<E> {

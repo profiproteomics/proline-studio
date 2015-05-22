@@ -5,7 +5,7 @@
  */
 package fr.proline.mzscope.model;
 
-import fr.profi.ms.algo.IsotopePatternEstimator;
+import fr.profi.ms.algo.IsotopePatternInterpolator;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.model.ScanData;
 import fr.proline.mzscope.util.ScanUtils;
@@ -27,7 +27,7 @@ public class IsotopePattern {
       for (int charge = 1; charge <= 5; charge++) {
          Pair<Double, TheoreticalIsotopePattern> p = getIPHypothese(currentScan, mz, charge);
          for (int j = 1; j <= p.getRight().theoreticalMaxPeakelIndex()+1; j++) {
-            double alternativeMoz = mz - j * IsotopePatternEstimator.avgIsoMassDiff() / charge;
+            double alternativeMoz = mz - j * IsotopePatternInterpolator.avgIsoMassDiff() / charge;
 //            Pair<Double, TheoreticalIsotopePattern> alternativeP = getIPHypothese(currentScan, alternativeMoz, charge, matchingPeakIdx, j);
             Pair<Double, TheoreticalIsotopePattern> alternativeP = getIPHypothese(currentScan, alternativeMoz, charge);
             result.put(alternativeP.getLeft(), alternativeP.getRight());
@@ -42,12 +42,12 @@ public class IsotopePattern {
       float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
 //      System.out.println("Hypotheses = " + mz + ", " + charge + "+");
       double score = 0.0;
-      TheoreticalIsotopePattern pattern = IsotopePatternEstimator.getTheoreticalPattern(mz, charge);
+      TheoreticalIsotopePattern pattern = IsotopePatternInterpolator.getTheoreticalPattern(mz, charge);
       double normalisationRatio = -1.0;
       Double ipMoz = mz;
       int matchingPeaksCount = 0;
       for (int rank = 0; rank < pattern.mzAbundancePairs().length; rank++) {
-         ipMoz = (rank == 0) ? ipMoz : ipMoz + IsotopePatternEstimator.avgIsoMassDiff()/charge;
+         ipMoz = (rank == 0) ? ipMoz : ipMoz + IsotopePatternInterpolator.avgIsoMassDiff()/charge;
          int nearestPeakIdx =  ScanUtils.getNearestPeakIndex(currentScan.getMzList(), ipMoz);
          if (normalisationRatio < 0) {
             normalisationRatio = currentScan.getIntensityList()[nearestPeakIdx]/(Float) pattern.mzAbundancePairs()[0]._2;
@@ -73,12 +73,12 @@ public class IsotopePattern {
       float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
 //      System.out.println("Hypotheses = " + mz + ", " + charge + "+");
       double score = 0.0;
-      TheoreticalIsotopePattern pattern = IsotopePatternEstimator.getTheoreticalPattern(mz, charge);
+      TheoreticalIsotopePattern pattern = IsotopePatternInterpolator.getTheoreticalPattern(mz, charge);
       double normalisationRatio = (matchingPeakIdx != -1) ? currentScan.getIntensityList()[matchingPeakIdx]/(Float) pattern.mzAbundancePairs()[matchingIsotopeIdx]._2 : -1.0;
       Double ipMoz = pattern.monoMz();
       int matchingPeaksCount = 0;
       for (int rank = 0; rank < pattern.mzAbundancePairs().length; rank++) {
-         ipMoz = (rank == 0) ? ipMoz : ipMoz + IsotopePatternEstimator.avgIsoMassDiff()/charge;
+         ipMoz = (rank == 0) ? ipMoz : ipMoz + IsotopePatternInterpolator.avgIsoMassDiff()/charge;
          int nearestPeakIdx =  ScanUtils.getNearestPeakIndex(currentScan.getMzList(), ipMoz);
          if (normalisationRatio < 0) {
             normalisationRatio = currentScan.getIntensityList()[nearestPeakIdx]/(Float) pattern.mzAbundancePairs()[0]._2;

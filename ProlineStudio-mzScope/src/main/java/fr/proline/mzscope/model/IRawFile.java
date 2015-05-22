@@ -14,7 +14,7 @@ import java.util.List;
  */
 public interface IRawFile {
 
-   public enum ExtractionType { EXTRACT_MS2_FEATURES, DETECT_PEAKELS};
+   public enum ExtractionType { EXTRACT_MS2_FEATURES, DETECT_PEAKELS, DETECT_FEATURES};
    
    public String getName();
 

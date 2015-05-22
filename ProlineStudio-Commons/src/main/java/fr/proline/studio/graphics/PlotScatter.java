@@ -56,7 +56,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     
     private ArrayList<ParameterList> m_parameterListArray = null;
     
-    public PlotScatter(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
+    public PlotScatter(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         update(colX, colY, null); 
         
@@ -242,7 +242,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
 
         double rangeX = m_xMax - m_xMin;
         double rangeY = m_yMax - m_yMin;
-
+        
         double distanceMin = Double.MAX_VALUE;
         int nearestDataIndex = -1;
         int size = m_dataX.length;
@@ -616,10 +616,10 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         YAxis yAxis = m_plotPanel.getYAxis(); 
         
         // set clipping area
-        int clipX = xAxis.valueToPixel(xAxis.getMinTick());
-        int clipWidth = xAxis.valueToPixel(xAxis.getMaxTick())-clipX;
-        int clipY = yAxis.valueToPixel(yAxis.getMaxTick());
-        int clipHeight = yAxis.valueToPixel(yAxis.getMinTick())-clipY;
+        int clipX = xAxis.valueToPixel(xAxis.getMinValue());
+        int clipWidth = xAxis.valueToPixel(xAxis.getMaxValue())-clipX;
+        int clipY = yAxis.valueToPixel(yAxis.getMaxValue());
+        int clipHeight = yAxis.valueToPixel(yAxis.getMinValue())-clipY;
         g.setClip(clipX, clipY, clipWidth, clipHeight);
 
         ColorOrGradient colorOrGradient = m_colorParameter.getColor();

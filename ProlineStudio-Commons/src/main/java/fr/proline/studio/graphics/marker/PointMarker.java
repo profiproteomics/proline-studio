@@ -1,6 +1,6 @@
 package fr.proline.studio.graphics.marker;
 
-import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import java.awt.Color;
@@ -18,7 +18,7 @@ public class PointMarker extends AbstractMarker{
     
     private static final int width = 6;
 
-    public PointMarker(PlotPanel plotPanel, double x, double y, Color color) {
+    public PointMarker(BasePlotPanel plotPanel, double x, double y, Color color) {
         super(plotPanel);
         this.m_x = x;
         this.m_y = y;

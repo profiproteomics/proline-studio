@@ -80,10 +80,11 @@ public class AxisTicks {
             m_nbFractionalDigits = 0;
             m_nbIntegerDigits = Math.max((int) Math.round(Math.floor(Math.log10(Math.abs(m_calculatedMax)))), (int) Math.round(Math.floor(Math.log10(Math.abs(m_calculatedMin)))));
         } else {
+
             m_calculatedRange = niceNum(m_max - m_min, false);
             m_tickSpacing = niceNum(m_calculatedRange / (m_maxTicks - 1), true);
             m_nbFractionalDigits = -(int) Math.round(Math.floor(Math.log10(m_calculatedRange / (m_maxTicks - 1))));
-            m_calculatedMin = Math.floor(m_min / m_tickSpacing) * m_tickSpacing;
+            m_calculatedMin = Math.ceil(m_min / m_tickSpacing) * m_tickSpacing;
             m_calculatedMax = Math.ceil(m_max / m_tickSpacing) * m_tickSpacing;
             m_nbIntegerDigits = Math.max((int) Math.round(Math.floor(Math.log10(Math.abs(Math.ceil(m_calculatedMax))))), (int) Math.round(Math.floor(Math.log10(Math.abs(Math.ceil(m_calculatedMin))))));
         }

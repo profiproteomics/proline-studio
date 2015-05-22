@@ -22,7 +22,7 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     protected int m_colY;
     protected String m_parameterZ;
         
-    protected PlotPanel m_plotPanel;
+    protected BasePlotPanel m_plotPanel;
     
     private ArrayList<AbstractMarker> m_markersList = null;
 
@@ -43,7 +43,7 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     
     public abstract void paint(Graphics2D g);
 
-    public PlotAbstract(PlotPanel plotPanel, PlotType plotType, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
+    public PlotAbstract(BasePlotPanel plotPanel, PlotType plotType, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface) {
         m_plotPanel = plotPanel;
         m_plotType = plotType;
         m_compareDataInterface = (m_locked) ? new LockedDataModel(compareDataInterface) : compareDataInterface;
@@ -126,10 +126,10 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
         
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();
-        int x1 = xAxis.valueToPixel(xAxis.getMinTick());
-        int x2 = xAxis.valueToPixel(xAxis.getMaxTick());
-        int y1 = yAxis.valueToPixel(yAxis.getMaxTick());
-        int y2 = yAxis.valueToPixel(yAxis.getMinTick());
+        int x1 = xAxis.valueToPixel(xAxis.getMinValue());
+        int x2 = xAxis.valueToPixel(xAxis.getMaxValue());
+        int y1 = yAxis.valueToPixel(yAxis.getMaxValue());
+        int y2 = yAxis.valueToPixel(yAxis.getMinValue());
         return (x>=x1) && (x<=x2) && (y>=y1) && (y<=y2);
     }
     

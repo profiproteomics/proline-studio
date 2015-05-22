@@ -49,7 +49,7 @@ public class PlotHistogram extends PlotAbstract {
     
     private boolean m_asPercentage = false;
     
-    public PlotHistogram(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, String paramZ) {
+    public PlotHistogram(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, String paramZ) {
         super(plotPanel, PlotType.HISTOGRAM_PLOT, compareDataInterface, crossSelectionInterface);
         update(colX, -1, paramZ); 
         
@@ -370,10 +370,10 @@ public class PlotHistogram extends PlotAbstract {
         YAxis yAxis = m_plotPanel.getYAxis(); 
         
         // set clipping area
-        int clipX = xAxis.valueToPixel(xAxis.getMinTick());
-        int clipWidth = xAxis.valueToPixel(xAxis.getMaxTick())-clipX;
-        int clipY = yAxis.valueToPixel(yAxis.getMaxTick());
-        int clipHeight = yAxis.valueToPixel(yAxis.getMinTick())-clipY;
+        int clipX = xAxis.valueToPixel(xAxis.getMinValue());
+        int clipWidth = xAxis.valueToPixel(xAxis.getMaxValue())-clipX;
+        int clipY = yAxis.valueToPixel(yAxis.getMaxValue());
+        int clipHeight = yAxis.valueToPixel(yAxis.getMinValue())-clipY;
         g.setClip(clipX, clipY, clipWidth, clipHeight);
         
         int y2 = yAxis.valueToPixel(0);

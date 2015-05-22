@@ -75,7 +75,7 @@ public class PlotLinear extends PlotAbstract {
     private boolean displayAntiAliasing = true;
     
 
-    public PlotLinear(PlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
+    public PlotLinear(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         update(colX, colY, null);
 
@@ -617,10 +617,10 @@ public class PlotLinear extends PlotAbstract {
         YAxis yAxis = m_plotPanel.getYAxis();
 
         // set clipping area
-        int clipX = xAxis.valueToPixel(xAxis.getMinTick());
-        int clipWidth = xAxis.valueToPixel(xAxis.getMaxTick()) - clipX;
-        int clipY = yAxis.valueToPixel(yAxis.getMaxTick());
-        int clipHeight = yAxis.valueToPixel(yAxis.getMinTick()) - clipY;
+        int clipX = xAxis.valueToPixel(xAxis.getMinValue());
+        int clipWidth = xAxis.valueToPixel(xAxis.getMaxValue()) - clipX;
+        int clipY = yAxis.valueToPixel(yAxis.getMaxValue());
+        int clipHeight = yAxis.valueToPixel(yAxis.getMinValue()) - clipY +1;
         g.setClip(clipX, clipY, clipWidth, clipHeight);
 
         ColorOrGradient colorOrGradient = m_colorParameter.getColor();
@@ -720,6 +720,10 @@ public class PlotLinear extends PlotAbstract {
             setDrawPoints(plotInformation.isDrawPoints());
             setDrawGap(plotInformation.isDrawGap());
         }
+    }
+    
+    public PlotInformation getPlotInformation() {
+        return this.m_plotInformation;
     }
 
     @Override

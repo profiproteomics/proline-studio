@@ -6,6 +6,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.JoinFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.TtdFunction;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
@@ -146,6 +147,9 @@ public abstract class DataTree extends JTree {
         
         FunctionNode joinFunction = new FunctionNode(new JoinFunction());
         parentFunctionNode.add(joinFunction);
+        
+        FunctionNode ttdFunction = new FunctionNode(new TtdFunction());
+        parentFunctionNode.add(ttdFunction);
 
         DefaultTreeModel model = (DefaultTreeModel) getModel();
         model.nodeStructureChanged(parentFunctionNode);

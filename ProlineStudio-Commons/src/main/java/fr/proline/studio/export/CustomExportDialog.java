@@ -69,6 +69,7 @@ public class CustomExportDialog extends DefaultDialog {
     private JFileChooser m_fchooser;
     private JFileChooser m_exportFchooser;
     private List<FileNameExtensionFilter> m_filterList = new ArrayList<>();
+    private static final String jsonExtension = "json";
 
     private DefaultDialog.ProgressTask m_task = null;
 
@@ -206,6 +207,8 @@ public class CustomExportDialog extends DefaultDialog {
         }
         m_fchooser.setMultiSelectionEnabled(false);
         m_exportFchooser.setMultiSelectionEnabled(false);
+        FileNameExtensionFilter filterJson = new FileNameExtensionFilter("Custom Export Config (."+jsonExtension+")", jsonExtension);
+        m_exportFchooser.setFileFilter(filterJson);
 
     }
 
@@ -237,10 +240,10 @@ public class CustomExportDialog extends DefaultDialog {
             jsonString = new String(Files.readAllBytes(filePath));
         } catch (IOException e) {
 
-            e.printStackTrace();
+            logger.error("Error while loading config "+e);
         }
 
-        if (!filePath.equals("")) {
+        if (!filePath.toString().equals("")) {
             Gson gson = new Gson();
             String messageHashMapJsonString = jsonString;
             m_exportConfig = gson.fromJson(messageHashMapJsonString, m_exportConfig.getClass());
@@ -675,7 +678,7 @@ public class CustomExportDialog extends DefaultDialog {
         insidePanel.add(m_fileTextField);
         m_fileTextField.setColumns(50);
 
-        // ---// copier Ã  partir de lÃ 
+        // ---// copier ÃƒÂ  partir de lÃƒÂ 
        
         chk_ExportOptions = new JCheckBox("Custom export");
         chk_ExportOptions.addActionListener(new ActionListener() {
@@ -773,25 +776,6 @@ public class CustomExportDialog extends DefaultDialog {
 
     protected void loadConfigFile() {
 
-    	 //ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
-
-        
-             FileNameExtensionFilter filter = new FileNameExtensionFilter("Custom Export Config (.json)", "json");
-             FileNameExtensionFilter existFilter = getFilterWithSameExtensions(filter);
-
-             if (existFilter == null) {
-                 m_exportFchooser.addChoosableFileFilter(filter);
-                 //m_filterList.add(filter);
-                 m_exportFchooser.setFileFilter(filter);
-             } else {
-            	 m_exportFchooser.setFileFilter(existFilter);
-             }
-
-         
-//             if (fileName.indexOf('.') == -1) {
-//                 absolutePath += "." + exporterInfo.getFileExtension();
-//             }
-         
          //-------
     	
         String configFile = m_configFile.getText().trim();
@@ -837,16 +821,6 @@ public class CustomExportDialog extends DefaultDialog {
 	
     protected void saveConfigFile() {
         String configFile = m_configFile.getText().trim();
-
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Custom Export Config (.json)", "json");
-        FileNameExtensionFilter existFilter = getFilterWithSameExtensions(filter);
-
-        if (existFilter == null) {
-            m_exportFchooser.addChoosableFileFilter(filter);
-            m_exportFchooser.setFileFilter(filter);
-        } else {
-       	 m_exportFchooser.setFileFilter(existFilter);
-        }
         
         if (configFile.length() > 0) {
             File currentFile = new File(configFile);
@@ -863,7 +837,10 @@ public class CustomExportDialog extends DefaultDialog {
             File file = m_exportFchooser.getSelectedFile();
 
             String absolutePath = file.getAbsolutePath();
-            file.getName();
+            // add json if needed
+            if (!absolutePath.endsWith("."+jsonExtension)){
+                absolutePath += "."+jsonExtension;
+            }
             m_configFile.setText(absolutePath);
             File f = new File(absolutePath);
 

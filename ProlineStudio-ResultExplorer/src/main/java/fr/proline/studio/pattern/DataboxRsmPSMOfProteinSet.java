@@ -60,6 +60,10 @@ public class DataboxRsmPSMOfProteinSet extends AbstractDataBox {
         ResultSummary _rsm = (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
         final DProteinSet proteinSet = (DProteinSet) m_previousDataBox.getData(false, DProteinSet.class);
 
+        if (proteinSet == null) {
+            ((PeptideMatchPanel) m_panel).setData(-1, null, null, true);
+            return;
+        }
         
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
             

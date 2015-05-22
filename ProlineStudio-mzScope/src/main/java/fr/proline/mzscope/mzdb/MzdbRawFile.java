@@ -13,7 +13,7 @@ import fr.profi.mzdb.FeatureDetectorConfig;
 import fr.profi.mzdb.MzDbFeatureDetector;
 import fr.profi.mzdb.MzDbFeatureExtractor;
 import fr.profi.mzdb.MzDbReader;
-import fr.profi.mzdb.algo.IsotopicPatternScorer;
+//import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
 import fr.profi.mzdb.io.reader.RunSliceDataProvider;
 import fr.profi.mzdb.model.Feature;
@@ -28,6 +28,7 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.ExtractionParams;
 import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.model.IRawFile;
+import fr.proline.mzscope.model.IsotopePattern;
 import fr.proline.mzscope.util.ScanUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,6 +40,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -46,7 +48,6 @@ import org.slf4j.LoggerFactory;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
-import scala.collection.immutable.SortedMap;
 
 /**
  *
@@ -308,8 +309,9 @@ public class MzdbRawFile implements IRawFile {
                 i++;
                }
                ScanData data = slices[i].getData();
-               SortedMap putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
-               TheoreticalIsotopePattern bestPattern = (TheoreticalIsotopePattern) putativePatterns.get(putativePatterns.firstKey()).get();
+               //SortedMap putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
+               TreeMap<Double, TheoreticalIsotopePattern> putativePatterns = IsotopePattern.getOrderedIPHypothesis(data, peakels[k].getMz());
+               TheoreticalIsotopePattern bestPattern = (TheoreticalIsotopePattern) putativePatterns.get(putativePatterns.firstKey());
                List<Peakel> l = new ArrayList<>(bestPattern.isotopeCount()+1);
                for (Tuple2 t : bestPattern.mzAbundancePairs()) {
                   int idx = findPeakIndex(peakels, peakelIndexesByMz, (double)t._1, peakels[k], mzTolPPM);

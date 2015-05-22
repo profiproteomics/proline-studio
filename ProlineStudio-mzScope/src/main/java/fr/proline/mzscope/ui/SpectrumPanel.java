@@ -6,8 +6,8 @@
 package fr.proline.mzscope.ui;
 
 import fr.profi.ms.model.TheoreticalIsotopePattern;
-import fr.profi.mzdb.algo.IsotopicPatternScorer;
-//import fr.proline.mzscope.model.IsotopePattern;
+//import fr.profi.mzdb.algo.IsotopicPatternScorer;
+import fr.proline.mzscope.model.IsotopePattern;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
@@ -31,7 +31,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeMap;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
@@ -39,7 +41,6 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
-import scala.collection.immutable.SortedMap;
 
 /**
  * contains the scan panel
@@ -111,27 +112,27 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    private void displayIsotopicPatterns() {
       float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
 
-      SortedMap putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(currentScan.getScanData(), positionMarker.getValue(), ppmTol);
-      
-      logger.info("scanId=" + currentScan.getIndex() + ", mz = " + positionMarker.getValue() + ", ppm = " + ppmTol);
-      scala.collection.Iterator it = putativePatterns.keySet().iterator();
-      while (it.hasNext()) {
-         Object key = it.next();
-         TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns.get(key).get();
-         logger.info("Pattern : " + key + " " + pattern.charge() + " mz = " + pattern.monoMz());
-      }      
-
-//      logger.info("Local estimation : ");
-//      TreeMap<Double, TheoreticalIsotopePattern> putativePatterns2 = IsotopePattern.getOrderedIPHypothesis(currentScan.getScanData(), positionMarker.getValue());
+//      SortedMap putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(currentScan.getScanData(), positionMarker.getValue(), ppmTol);
+//      
 //      logger.info("scanId=" + currentScan.getIndex() + ", mz = " + positionMarker.getValue() + ", ppm = " + ppmTol);
-//      Iterator itj = putativePatterns2.keySet().iterator();
-//      while (itj.hasNext()) {
-//         Object key = itj.next();
-//         TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns2.get(key);
+//      scala.collection.Iterator it = putativePatterns.keySet().iterator();
+//      while (it.hasNext()) {
+//         Object key = it.next();
+//         TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns.get(key).get();
 //         logger.info("Pattern : " + key + " " + pattern.charge() + " mz = " + pattern.monoMz());
 //      }      
 
-      TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns.get(putativePatterns.firstKey()).get();
+//      logger.info("Local estimation : ");
+      TreeMap<Double, TheoreticalIsotopePattern> putativePatterns2 = IsotopePattern.getOrderedIPHypothesis(currentScan.getScanData(), positionMarker.getValue());
+      logger.info("scanId=" + currentScan.getIndex() + ", mz = " + positionMarker.getValue() + ", ppm = " + ppmTol);
+      Iterator itj = putativePatterns2.keySet().iterator();
+      while (itj.hasNext()) {
+         Object key = itj.next();
+         TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns2.get(key);
+         logger.info("Pattern : " + key + " " + pattern.charge() + " mz = " + pattern.monoMz());
+      }      
+
+      TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns2.get(putativePatterns2.firstKey());
       int refIdx = 0;
       int idx = ScanUtils.getNearestPeakIndex(currentScan.getScanData().getMzList(), positionMarker.getValue());
       for (Tuple2 t : pattern.mzAbundancePairs()) {

@@ -1235,6 +1235,14 @@ public class CustomExportDialog extends DefaultDialog {
             }
         }
 
+        // check config
+        ExportConfig config  = generateConfigFileFromGUI();
+        String msgError = checkTitles(config);
+        if (!msgError.isEmpty()){
+            JOptionPane.showMessageDialog(this, msgError);
+            return false;
+        }
+        
         if (m_exportType == ExporterFactory.EXPORT_TABLE) {
 
             final ExporterFactory.ExporterInfo exporterInfo = getExporterInfo();
@@ -1342,10 +1350,9 @@ public class CustomExportDialog extends DefaultDialog {
 
     }
 
-    /**
+    /***
      * returns the JSON String corresponding to the export configuration
-     *
-     * @return
+     * @return 
      */
     public String getExportConfig() {
         logger.debug("getExportConfig");
@@ -1373,5 +1380,29 @@ public class CustomExportDialog extends DefaultDialog {
             fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
         }
     }
-
+    
+    /* return true if the configuration is ok regarding the titles (should not be empty and 1 sheet can not contain 2 same title) */
+    private String checkTitles(ExportConfig config){
+        String errorsOnConfig = "";
+        ExportExcelSheet[] allSheets =  config.sheets;
+        int s = 1;
+        for (ExportExcelSheet sheet : allSheets) {
+            if (sheet.title == null || sheet.title.trim().isEmpty()){
+                errorsOnConfig +="The sheet at position "+(s)+" has no title! \n";
+            }
+            ExportExcelSheetField[] allFields = sheet.fields;
+            int f = 0;
+            for(ExportExcelSheetField field : allFields){
+                if (field.title == null || field.title.trim().isEmpty()){
+                    errorsOnConfig += "The field in the sheet "+sheet.title+" at position "+(f+1)+" has no title! \n";
+                }else if (sheet.containsFieldTitle(field.title, f)){
+                    errorsOnConfig += "The field "+field.title+" in the sheet "+sheet.title+" (at position "+(f+1)+") is already defined. \n";
+                }
+                f++;
+            }
+            s++;
+        }
+        return errorsOnConfig;
+    }
+    
 }

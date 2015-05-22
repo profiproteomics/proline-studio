@@ -8,10 +8,12 @@ package fr.proline.mzscope.mzdb;
 import com.almworks.sqlite4java.SQLiteException;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
+import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.FeatureDetectorConfig;
 import fr.profi.mzdb.MzDbFeatureDetector;
 import fr.profi.mzdb.MzDbFeatureExtractor;
 import fr.profi.mzdb.MzDbReader;
+import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
 import fr.profi.mzdb.io.reader.RunSliceDataProvider;
 import fr.profi.mzdb.model.Feature;
@@ -21,6 +23,7 @@ import fr.profi.mzdb.model.PutativeFeature;
 import fr.profi.mzdb.model.RunSlice;
 import fr.profi.mzdb.model.ScanData;
 import fr.profi.mzdb.model.ScanHeader;
+import fr.profi.mzdb.model.ScanSlice;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.ExtractionParams;
 import fr.proline.mzscope.model.Scan;
@@ -36,10 +39,14 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Option;
+import scala.Tuple2;
 import scala.collection.JavaConverters;
+import scala.collection.immutable.SortedMap;
 
 /**
  *
@@ -73,15 +80,15 @@ public class MzdbRawFile implements IRawFile {
          logger.error("cannot read file " + mzDbFile.getAbsolutePath(), e);
       }
    }
-   
+
    private void sortScanHeader(ScanHeader[] scans) {
-       ms2ScanHeaders = ScanUtils.sortScanHeader(scans);
-       ms2ScanHeaderByMz = new double[ms2ScanHeaders.length];
-       int i=0;
-       for (ScanHeader scan : ms2ScanHeaders) {
-           ms2ScanHeaderByMz[i] = scan.getPrecursorMz();
-           i++;
-       }
+      ms2ScanHeaders = ScanUtils.sortScanHeader(scans);
+      ms2ScanHeaderByMz = new double[ms2ScanHeaders.length];
+      int i = 0;
+      for (ScanHeader scan : ms2ScanHeaders) {
+         ms2ScanHeaderByMz[i] = scan.getPrecursorMz();
+         i++;
+      }
    }
 
    @Override
@@ -138,10 +145,11 @@ public class MzdbRawFile implements IRawFile {
          public int compare(ScanHeader sh1, ScanHeader sh2) {
             return sh1.getScanId() - sh2.getScanId();
          }
-      
+
       });
       return headers;
    }
+
    @Override
    public Chromatogram getBPI() {
       logger.info("mzdb extract BPI Chromatogram");
@@ -171,7 +179,7 @@ public class MzdbRawFile implements IRawFile {
       Chromatogram chromatogram = null;
       try {
          logger.info("mzdb extract Chromato : {} - {} in time range {} - {}", minMz, maxMz, minRT, maxRT);
-         Peak[] peaks = reader.getXIC(minMz, maxMz, minRT, maxRT, 1, MzDbReader.XicMethod.SUM);
+         Peak[] peaks = reader.getXIC(minMz, maxMz, minRT, maxRT, 1, MzDbReader.XicMethod.MAX);
          chromatogram = createChromatoFromPeak(peaks);
          chromatogram.minMz = minMz;
          chromatogram.maxMz = maxMz;
@@ -189,8 +197,8 @@ public class MzdbRawFile implements IRawFile {
    public Chromatogram getXIC(double min, double max) {
       Chromatogram chromatogram = null;
       try {
-         logger.info("mzdb extract Chromato : {} - {}", min, max);
-         Peak[] peaks = reader.getXIC(min, max, 1, MzDbReader.XicMethod.SUM);
+         logger.info("mzdb extract Chromato : {} - {} (MAX)", min, max);
+         Peak[] peaks = reader.getXIC(min, max, 1, MzDbReader.XicMethod.MAX);
          chromatogram = createChromatoFromPeak(peaks);
          chromatogram.minMz = min;
          chromatogram.maxMz = max;
@@ -236,55 +244,142 @@ public class MzdbRawFile implements IRawFile {
    public List<Feature> extractFeatures(ExtractionType type, ExtractionParams params) {
       switch (type) {
          case EXTRACT_MS2_FEATURES:
-            return extractFeatures(params.mzTolPPM);
+            return extractFeaturesFromMs2(params.mzTolPPM);
+         case DETECT_FEATURES:
+            return detectFeatures(params.mzTolPPM, params.minMz, params.maxMz);
          case DETECT_PEAKELS:
             return detectPeakels(params.mzTolPPM, params.minMz, params.maxMz);
       }
       return null;
    }
 
-    private List<Feature> detectPeakels(float mzTolPPM, double minMz, double maxMz) {
-        List<Feature> result = new ArrayList<>();
-        // Instantiates a Run Slice Data provider
-        int msLevel = 1;
-        FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(msLevel, mzTolPPM, 5);
-        MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
-        try {
-            Iterator<RunSlice> runSlices;
-            if (minMz == 0 && maxMz == 0){
-                runSlices = getMzDbReader().getLcMsRunSliceIterator();
-            }else {
-                runSlices = getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
+   private List<Feature> detectFeatures(float mzTolPPM, double minMz, double maxMz) {
+      List<Feature> result = new ArrayList<>();
+      FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(1, mzTolPPM, 5);
+      MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
+      try {
+         Iterator<RunSlice> runSlices;
+         if (minMz == 0 && maxMz == 0) {
+            runSlices = getMzDbReader().getLcMsRunSliceIterator();
+         } else {
+            runSlices = getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
+         }
+         Peakel[] peakels = detector.detectPeakels(runSlices);
+         
+         Iterator<RunSlice> tmpRunSlices = (minMz == 0 && maxMz == 0) ? getMzDbReader().getLcMsRunSliceIterator() : getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
+         double min = Double.MAX_VALUE;
+         double max = Double.MIN_VALUE;
+         for ( ; tmpRunSlices.hasNext(); ) {
+            RunSlice rs = tmpRunSlices.next();
+            min = Math.min(min, rs.getHeader().getBeginMz());
+            max = Math.max(max, rs.getHeader().getEndMz());
+         }
+         logger.info("Real bounds : "+min+" - "+max);
+         Arrays.sort(peakels, new Comparator<Peakel>() {
+            @Override
+            public int compare(Peakel p1, Peakel p2) {
+               return Double.compare(p2.getApexIntensity(), p1.getApexIntensity());
             }
-            Peakel[] peakels = detector.detectPeakels(runSlices);
-            for (Peakel peakel : peakels) {
-                ArrayList<Peakel> l = new ArrayList<>();
-                l.add(peakel);
-                Peakel[] a = {peakel};
-                //creates a Feature associated to this peakel
-                Feature feature = new Feature(peakel.getMz(), 0, JavaConverters.asScalaBufferConverter(l).asScala(), false);
-                if (minMz == 0 && maxMz == 0){
-                    result.add(feature);
-                }else{
-                    //check that the feature is in the mass range
-                    if (feature.getMz()>= minMz && feature.getMz() <= maxMz){
-                        result.add(feature);
-                    }
-                }
+         });
+         logger.info("Peakels detected : "+peakels.length);
+         boolean[] assigned = new boolean[peakels.length];
+         Arrays.fill(assigned, false);
+         Pair<Double, Integer> peakelIndexesByMz[] = new Pair[peakels.length];
+         for (int k = 0; k < peakels.length; k++) {
+            peakelIndexesByMz[k] = new ImmutablePair<>(peakels[k].getMz(), k);
+         }
+         
+         Arrays.sort(peakelIndexesByMz, new Comparator<Pair<Double, Integer>>() {
+            @Override
+            public int compare(Pair<Double, Integer> p1, Pair<Double, Integer> p2) {
+               return Double.compare(p1.getLeft(), p2.getLeft());
             }
-        } catch (SQLiteException | StreamCorruptedException ex) {
-            logger.error("Error while getting LcMs RunSlice Iterator: "+ ex);
-        }
+         });
+         
+         
+         for (int k = 0; k < peakels.length; k++) {
+            if ((k % 10000) == 0) {
+               logger.info("processing peakel "+k);
+            }
+            if (!assigned[k]) {
+               ScanSlice[] slices = reader.getScanSlices(peakels[k].getApexMz()-5.0, peakels[k].getApexMz()+5.0, peakels[k].getApexElutionTime()-0.1, peakels[k].getApexElutionTime()+0.1, 1);
+               int i = 0; 
+               while((i < slices.length) && (slices[i].getHeader().getScanId() != peakels[k].getApexScanId())) {
+                i++;
+               }
+               ScanData data = slices[i].getData();
+               SortedMap putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
+               TheoreticalIsotopePattern bestPattern = (TheoreticalIsotopePattern) putativePatterns.get(putativePatterns.firstKey()).get();
+               List<Peakel> l = new ArrayList<>(bestPattern.isotopeCount()+1);
+               for (Tuple2 t : bestPattern.mzAbundancePairs()) {
+                  int idx = findPeakIndex(peakels, peakelIndexesByMz, (double)t._1, peakels[k], mzTolPPM);
+                  if (idx != -1) {
+                     assigned[idx] = true;
+                     l.add(peakels[idx]);
+                  } //else if ( ((double)t._1 > min) && ((double)t._1 < max)) {
+//                     logger.info("Isotope at "+(double)t._1+" not found");
+//                  }
+               }
+               if (l.isEmpty()) {
+                  logger.warn("Strange situation : peakel not found within isotopic pattern .... "+peakels[k].getMz());
+                  l.add(peakels[k]);
+               }
+//               logger.info("Creates feature with "+l.size()+" peakels at mz="+l.get(0).getMz()+ " from peakel "+peakels[k].getMz()+ " at "+peakels[k].getApexElutionTime()/60.0);
+               Feature feature = new Feature(l.get(0).getMz(), bestPattern.charge(), JavaConverters.asScalaBufferConverter(l).asScala(), true);
+               result.add(feature);
+            }
+         }
+         
+      } catch (SQLiteException | StreamCorruptedException ex) {
+         logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
+      }
 
-        return result;
-    }
+      logger.info("Features detected : "+result.size());
+      return result;
 
-   private List<Feature> extractFeatures(float tolPPM) {
+   }
+
+   private List<Feature> detectPeakels(float mzTolPPM, double minMz, double maxMz) {
+      List<Feature> result = new ArrayList<>();
+      // Instantiates a Run Slice Data provider
+      int msLevel = 1;
+      FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(msLevel, mzTolPPM, 5);
+      MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
+      try {
+         Iterator<RunSlice> runSlices;
+         if (minMz == 0 && maxMz == 0) {
+            runSlices = getMzDbReader().getLcMsRunSliceIterator();
+         } else {
+            runSlices = getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
+         }
+         Peakel[] peakels = detector.detectPeakels(runSlices);
+         for (Peakel peakel : peakels) {
+            ArrayList<Peakel> l = new ArrayList<>();
+            l.add(peakel);
+            //creates a fake Feature associated to this peakel in order to always display Features
+            Feature feature = new Feature(peakel.getMz(), 0, JavaConverters.asScalaBufferConverter(l).asScala(), false);
+            if (minMz == 0 && maxMz == 0) {
+               result.add(feature);
+            } else {
+               //check that the feature is in the mass range
+               if (feature.getMz() >= minMz && feature.getMz() <= maxMz) {
+                  result.add(feature);
+               }
+            }
+         }
+      } catch (SQLiteException | StreamCorruptedException ex) {
+         logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
+      }
+
+      return result;
+   }
+
+   private List<Feature> extractFeaturesFromMs2(float tolPPM) {
       List<Feature> result = null;
       try {
          logger.info("retrieve scan headers...");
          ScanHeader[] ms2ScanHeaders = reader.getMs2ScanHeaders();
-         
+
          List<PutativeFeature> pfs = new ArrayList<PutativeFeature>();
          logger.info("building putative features list from MS2 scan events...");
          for (ScanHeader scanH : ms2ScanHeaders) {
@@ -313,9 +408,9 @@ public class MzdbRawFile implements IRawFile {
          MzDbFeatureExtractor extractor = new MzDbFeatureExtractor(reader, 5, 5, extractorConfig);
          // Extract features
          result = scala.collection.JavaConversions.seqAsJavaList(extractor.extractFeatures(rsdProv, scala.collection.JavaConversions.asScalaBuffer(pfs), tolPPM));
-      } catch (SQLiteException|StreamCorruptedException ex) {
+      } catch (SQLiteException | StreamCorruptedException ex) {
          logger.error("error while extracting features", ex);
-      } 
+      }
       return result;
    }
 
@@ -387,7 +482,7 @@ public class MzdbRawFile implements IRawFile {
             builder.append(rawScan.getHeader().getPrecursorCharge()).append("+) - ");
             scan.setPrecursorMz(rawScan.getHeader().getPrecursorMz());
             scan.setPrecursorCharge(rawScan.getHeader().getPrecursorCharge());
-         }else{
+         } else {
             scan.setPrecursorMz(null);
             scan.setPrecursorCharge(null);
          }
@@ -395,10 +490,9 @@ public class MzdbRawFile implements IRawFile {
          builder.append(", ms").append(scan.getMsLevel());
          //scan.setTitle(builder.toString());
          scan.setTitle("");
-         scan.setPeaksMz(mzList);
-         scan.setPeaksIntensities(intensityList);
+         scan.setScanData(data);
          //logger.debug("mzdb Scan length {} rebuilded in Scan length {} ", mzList.length, xAxisData.size());
-      } catch (SQLiteException|StreamCorruptedException ex) {
+      } catch (SQLiteException | StreamCorruptedException ex) {
          logger.error("enable to retrieve Scan data", ex);
       }
       return scan;
@@ -451,34 +545,62 @@ public class MzdbRawFile implements IRawFile {
       }
    }
 
-    @Override
-    public List<Float> getMsMsEvent(double minMz, double maxMz) {
-        Long startTime = System.currentTimeMillis();
-        logger.debug("retrieve MS/MS events");
-        List<Float> listMsMsEventTime = new ArrayList();
-        if (ms2ScanHeaders == null) {
-            try {
-                logger.debug("retrieve Ms2 ScanHeader");
-                sortScanHeader(reader.getMs2ScanHeaders());
-            } catch (SQLiteException ex) {
-                logger.error("Exception while retrieving ScanHeader "+ex);
+   @Override
+   public List<Float> getMsMsEvent(double minMz, double maxMz) {
+      Long startTime = System.currentTimeMillis();
+      logger.debug("retrieve MS/MS events");
+      List<Float> listMsMsEventTime = new ArrayList();
+      if (ms2ScanHeaders == null) {
+         try {
+            logger.debug("retrieve Ms2 ScanHeader");
+            sortScanHeader(reader.getMs2ScanHeaders());
+         } catch (SQLiteException ex) {
+            logger.error("Exception while retrieving ScanHeader " + ex);
+         }
+      }
+      if (ms2ScanHeaders != null) {
+         logger.debug("retrieve Ms2 ScanHeader in [" + minMz + ", " + maxMz + "] ");
+         int minId = ~Arrays.binarySearch(ms2ScanHeaderByMz, minMz);
+         int maxId = ~Arrays.binarySearch(ms2ScanHeaderByMz, maxMz);
+         if (minId != -1 && maxId != -1) {
+            for (int i = minId; i <= maxId; i++) {
+               ScanHeader scanHeader = ms2ScanHeaders[i];
+               double mz = scanHeader.getPrecursorMz();
+               if (mz >= minMz && mz <= maxMz) {
+                  listMsMsEventTime.add(scanHeader.getElutionTime());
+               }
             }
-        }
-        if (ms2ScanHeaders != null) {
-            logger.debug("retrieve Ms2 ScanHeader in ["+minMz+", "+maxMz+"] ");
-            int minId = ~Arrays.binarySearch(ms2ScanHeaderByMz, minMz);
-            int maxId = ~Arrays.binarySearch(ms2ScanHeaderByMz, maxMz);
-            if (minId != -1 && maxId != -1) {
-                for (int i = minId; i <= maxId; i++) {
-                    ScanHeader scanHeader = ms2ScanHeaders[i];
-                    double mz = scanHeader.getPrecursorMz();
-                    if (mz >= minMz && mz <= maxMz) {
-                        listMsMsEventTime.add(scanHeader.getElutionTime());
-                    }
-                }
-            }
-        }
-        logger.debug("retrieve MS/MS events finished in "+(System.currentTimeMillis() - startTime)+"+ ms");
-        return listMsMsEventTime;
-    }
+         }
+      }
+      logger.debug("retrieve MS/MS events finished in " + (System.currentTimeMillis() - startTime) + "+ ms");
+      return listMsMsEventTime;
+   }
+
+   private int findPeakIndex(Peakel[] peakels, Pair<Double, Integer>[] peakelIndexesByMz, double moz, Peakel referencePeakel, float mzTolPPM) {
+      double min = Double.MAX_VALUE;
+      int resultIdx = -1;
+      Comparator<Pair<Double, Integer>> c = new Comparator<Pair<Double, Integer>>() {
+
+         @Override
+         public int compare(Pair<Double, Integer> o1, Pair<Double, Integer> o2) {
+            return Double.compare(o1.getLeft(), o2.getLeft());
+         }
+      };
+      int lowerIdx = Arrays.binarySearch(peakelIndexesByMz,new ImmutablePair<Double, Integer>(moz - (moz*mzTolPPM/1e6), 0), c);
+      lowerIdx = (lowerIdx < 0) ? Math.max(0,~lowerIdx-1) : Math.max(0,lowerIdx-1);
+      int upperIdx = Arrays.binarySearch(peakelIndexesByMz, new ImmutablePair<Double, Integer>(moz + (moz*mzTolPPM/1e6),0), c);
+      upperIdx = (upperIdx < 0) ? Math.min(peakelIndexesByMz.length - 1,~upperIdx) : Math.min(peakelIndexesByMz.length - 1,upperIdx+1);
+
+      for (int i = lowerIdx; i <= upperIdx; i++) {
+         int k = peakelIndexesByMz[i].getRight();
+         if ( (1e6*Math.abs(peakels[k].getMz() - moz)/moz < mzTolPPM) 
+                 && ((Math.abs(peakels[k].getApexElutionTime()-referencePeakel.getApexElutionTime())/referencePeakel.calcDuration()) < 0.25)
+                 && (Math.abs(peakels[k].getMz() - moz) < min)) {
+            min = Math.abs(peakels[k].getMz() - moz);
+            resultIdx = k;
+         }
+      }
+      return resultIdx;
+   }
+
 }

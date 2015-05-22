@@ -50,7 +50,6 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
 
     private EventListenerList listenerList = new EventListenerList();
 
-    private Map<IRawFile, FeaturesPanel> mapFeaturePanelRawFile;
     private Map<IRawFile, List<AbstractRawFilePanel>> mapRawFilePanelRawFile;
 
 
@@ -60,7 +59,6 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
     }
 
     private void initComponents() {
-        mapFeaturePanelRawFile = new HashMap<>();
         mapRawFilePanelRawFile = new HashMap<>();
         setLayout(new BorderLayout());
         this.add(getExtractionPanel(), BorderLayout.NORTH);
@@ -205,17 +203,7 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
                 int index = tabPane.indexOfTabComponent(tabComponent);
                 if (index != -1) {
                     tabPane.remove(index);
-                    if (c instanceof FeaturesPanel) {
-                        FeaturesPanel p = (FeaturesPanel) c;
-                        for (Map.Entry<IRawFile, FeaturesPanel> entrySet : mapFeaturePanelRawFile.entrySet()) {
-                            IRawFile rf = entrySet.getKey();
-                            FeaturesPanel fp = entrySet.getValue();
-                            if (fp.equals(p)) {
-                                mapFeaturePanelRawFile.remove(rf);
-                                break;
-                            }
-                        }
-                    } else if (c instanceof SingleRawFilePanel) {
+                    if (c instanceof SingleRawFilePanel) {
                         SingleRawFilePanel p = (SingleRawFilePanel) c;
                         for (Map.Entry<IRawFile, List<AbstractRawFilePanel>> entrySet : mapRawFilePanelRawFile.entrySet()) {
                             IRawFile rf = entrySet.getKey();
@@ -270,16 +258,6 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
                 list.add(plotPanel);
                 mapRawFilePanelRawFile.put(rawfile, list);
             }
-        }
-        //features panel: check if already exists
-        FeaturesPanel panel = mapFeaturePanelRawFile.get(rawfile);
-        if (panel != null) {
-            featuresTabPane.setSelectedComponent(panel);
-        } else {
-            FeaturesPanel featuresPanel = new FeaturesPanel(rawfile);
-            featuresPanel.addDisplayFeatureListener(this);
-            addFeatureTab(rawfile.getName(), featuresPanel);
-            mapFeaturePanelRawFile.put(rawfile, featuresPanel);
         }
     }
 
@@ -336,48 +314,43 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
         }
     }
 
-    public void extractFeatures(final IRawFile rawFile, final IRawFile.ExtractionType type, final ExtractionParams params) {
-        if ((selectedRawFilePanel != null) && (viewersTabPane.getSelectedIndex() >= 0)) {
-            FeaturesPanel fp = mapFeaturePanelRawFile.get(rawFile);
-            if (fp == null){
-                fp = new FeaturesPanel(rawFile);
-                fp.addDisplayFeatureListener(this);
-                addFeatureTab(rawFile.getName(), fp);
-                mapFeaturePanelRawFile.put(rawFile, fp);
+   public void extractFeatures(final IRawFile rawFile, final IRawFile.ExtractionType type, final ExtractionParams params) {
+      if ((selectedRawFilePanel != null) && (viewersTabPane.getSelectedIndex() >= 0)) {
+         final FeaturesPanel featurePanel = new FeaturesPanel(rawFile);
+         featurePanel.addDisplayFeatureListener(this);
+         addFeatureTab(rawFile.getName(), featurePanel);
+
+         fireExtractFeature(false, false);
+         final long start = System.currentTimeMillis();
+         SwingWorker worker = new SwingWorker<List<Feature>, Void>() {
+            @Override
+            protected List<Feature> doInBackground() throws Exception {
+               return rawFile.extractFeatures(type, params);
             }
-            final FeaturesPanel featurePanel = fp;
-            //           final IRawFile rawFile = selectedRawFilePanel.getCurrentRawfile();
-//            extractFeaturesMI.setEnabled(false);
-//            detectPeakelsMI.setEnabled(false);
-            fireExtractFeature(false, false);
-            final long start = System.currentTimeMillis();
-            SwingWorker worker = new SwingWorker<List<Feature>, Void>() {
-                @Override
-                protected List<Feature> doInBackground() throws Exception {
-                    return rawFile.extractFeatures(type, params);
-                }
 
-                @Override
-                protected void done() {
-                    try {
-                        List<Feature> features = get();
-                        logger.info("{} features/peakels extracted in {}", features.size(), (System.currentTimeMillis() - start) / 1000.0);
-                        featurePanel.setFeatures(features);
-                        featuresTabPane.setSelectedComponent(featurePanel);
-//                        extractFeaturesMI.setEnabled(true);
-//                        detectPeakelsMI.setEnabled(true);
-                        fireExtractFeature(true, true);
-                    } catch (Exception e) {
-                        logger.error("Error while reading chromatogram");
-                    }
-                }
-            };
-            worker.execute();
-            logger.debug("Feature extraction running ... ");
-        }
+            @Override
+            protected void done() {
+               try {
+                  List<Feature> features = get();
+                  logger.info("{} features/peakels extracted in {}", features.size(), (System.currentTimeMillis() - start) / 1000.0);
+                  featurePanel.setFeatures(features);
+                  featuresTabPane.setSelectedComponent(featurePanel);
+                  fireExtractFeature(true, true);
+               } catch (Exception e) {
+                  logger.error("Error while reading chromatogram");
+               }
+            }
+         };
+         worker.execute();
+         logger.debug("Feature extraction running ... ");
+      }
+   }
+
+
+    public void detectFeaturesMI() {
+        detectFeaturesMI(selectedRawFilePanel.getCurrentRawfile());
     }
-
-
+     
     public void detectPeakelsMI() {
         if (selectedRawFilePanel != null){
             detectPeakelsMI(selectedRawFilePanel.getCurrentRawfile());
@@ -421,6 +394,16 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
         }
     }
 
+   public void detectFeaturesMI(IRawFile rawfile) {
+        ExtractionParamsDialog dialog = new ExtractionParamsDialog(this.parentFrame, true);
+        dialog.setExtractionParamsTitle("Detect Features Parameters");
+        dialog.setLocationRelativeTo(this);
+        dialog.showExtractionParamsDialog();
+        if (dialog.getExtractionParams() != null) {
+            extractFeatures(rawfile, IRawFile.ExtractionType.DETECT_FEATURES, dialog.getExtractionParams());
+        }
+    }
+
     public void addExtractFeatureListener(ExtractFeatureListener listener) {
         listenerList.add(ExtractFeatureListener.class, listener);
     }
@@ -444,8 +427,6 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
         if (reply == JOptionPane.YES_OPTION) {
             viewersTabPane.removeAll();
             featuresTabPane.removeAll();
-            //rawFilePanel.removeAllFiles();
-            mapFeaturePanelRawFile = new HashMap<>();
             mapRawFilePanelRawFile = new HashMap<>();
             return true;
         }
@@ -455,12 +436,14 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
 
     
     public void closeRawFile(IRawFile rawfile) {
-        //feature panel
-        FeaturesPanel featurePanel = mapFeaturePanelRawFile.get(rawfile);
-        if (featurePanel != null) {
-            featuresTabPane.remove(featurePanel);
-            mapFeaturePanelRawFile.remove(rawfile);
-        }
+       // TODO : if we still need to be able to close raw file, a list of features panel 
+       // must be maintained and closed at this stage
+//        //feature panel
+//        FeaturesPanel featurePanel = mapFeaturePanelRawFile.get(rawfile);
+//        if (featurePanel != null) {
+//            featuresTabPane.remove(featurePanel);
+//            mapFeaturePanelRawFile.remove(rawfile);
+//        }
         // raw file panel
         List<AbstractRawFilePanel> tabPanels = mapRawFilePanelRawFile.get(rawfile);
         if (tabPanels != null) {
@@ -544,6 +527,5 @@ public class MzScopePanel extends JPanel implements  DisplayFeatureListener , Ex
             }
         }
     }
-    
 
 }

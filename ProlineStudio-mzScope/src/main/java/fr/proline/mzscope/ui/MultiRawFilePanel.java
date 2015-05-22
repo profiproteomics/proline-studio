@@ -344,6 +344,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
                 popupMenu.show(currentChromatoBtn, 0, currentChromatoBtn.getHeight());
             }
         });
+        chromatogramToolbar.addSeparator();
         chromatogramToolbar.add(currentChromatoBtn);
         return chromatogramToolbar;
     }

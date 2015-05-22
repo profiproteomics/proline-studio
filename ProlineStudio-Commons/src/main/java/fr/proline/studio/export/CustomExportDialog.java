@@ -466,17 +466,8 @@ public class CustomExportDialog extends DefaultDialog {
 						Vector v = new Vector();
 						//v.add(defaultParam.sheets[i].fields[j].id);
 						v.add(paramSheet.fields[j].id);
-					
-						// if custom field then show its properties.
-						String customField = getCustomFieldIfFieldContainedInFieldsList(paramSheet.fields[j] , defaultParam.sheets[i].fields );
-						if(customField!=null)  {
-							v.add(customField);
-							v.add(true);
-						}else {
-							v.add(defaultParam.sheets[i].fields[j].title);
-							v.add(false);	// because the tab exists in custom param, we do not care about if it is defaultIsDisplayed or not.
-						}
-
+						v.add(paramSheet.fields[j].title);
+						v.add(true);
 						
 						tableModel.addRow(v);
 						

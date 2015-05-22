@@ -6,6 +6,7 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
+import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
@@ -14,7 +15,6 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -489,11 +489,31 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-
         filtersMap.put(COLTYPE_PROTEIN_SET_NAME, new StringFilter(getColumnNameForFilter(COLTYPE_PROTEIN_SET_NAME), null));
         filtersMap.put(COLTYPE_NB_PEPTIDE, new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_PEPTIDE), null));
         filtersMap.put(COLTYPE_NB_QUANT_PEPTIDE, new IntegerFilter(getColumnNameForFilter(COLTYPE_NB_QUANT_PEPTIDE), null));
-
+        int nbCol = getColumnCount();
+        for (int i=LAST_STATIC_COLUMN+1; i< nbCol; i++){
+            int nbQc = (i - m_columnNames.length) / m_columnNamesQC.length;
+            int id = i - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+            switch (id) {
+                case COLTYPE_SELECTION_LEVEL:
+                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null));
+                    break;
+                case COLTYPE_ABUNDANCE:
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    break;
+                case COLTYPE_RAW_ABUNDANCE:
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    break;
+                case COLTYPE_PSM:
+                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null));
+                    break;
+                default:
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    break;
+            }
+        }
     }
 
     @Override
@@ -549,7 +569,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     
     
     public Long getResultSummaryId() {
-        if ((m_proteinSets == null) || (m_proteinSets.size() == 0)) {
+        if ((m_proteinSets == null) || (m_proteinSets.isEmpty())) {
             return null;
         }
         

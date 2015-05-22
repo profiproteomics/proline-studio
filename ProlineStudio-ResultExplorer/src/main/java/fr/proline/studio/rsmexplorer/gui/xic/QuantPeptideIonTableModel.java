@@ -401,6 +401,28 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
         };
         filtersMap.put(COLTYPE_PEPTIDE_ION_ELUTION_TIME, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_ELUTION_TIME), minuteConverter));
+        int nbCol = getColumnCount();
+        for (int i=LAST_STATIC_COLUMN+1; i< nbCol; i++){
+            int nbQc = (i - m_columnNames.length) / m_columnNamesQC.length;
+            int id = i - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+            switch (id) {
+                case COLTYPE_SELECTION_LEVEL:
+                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null));
+                    break;
+                case COLTYPE_ABUNDANCE:
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    break;
+                case COLTYPE_RAW_ABUNDANCE:
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    break;
+                case COLTYPE_PSM:
+                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null));
+                    break;
+                default:
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    break;
+            }
+        }
 
     }
 

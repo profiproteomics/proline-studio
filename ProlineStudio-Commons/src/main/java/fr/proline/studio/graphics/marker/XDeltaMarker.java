@@ -1,6 +1,6 @@
 package fr.proline.studio.graphics.marker;
 
-import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import java.awt.Color;
@@ -18,7 +18,7 @@ public class XDeltaMarker extends AbstractMarker {
     private double m_x2;
     private double m_y;
     
-    public XDeltaMarker(PlotPanel plotPanel, double x1, double x2, double y) {
+    public XDeltaMarker(BasePlotPanel plotPanel, double x1, double x2, double y) {
         super(plotPanel);
         
         m_x1 = x1;

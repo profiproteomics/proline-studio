@@ -20,7 +20,7 @@ public class XAxis extends Axis {
     
     private AxisTicks m_ticks;
     
-    public XAxis(PlotPanel p) {
+    public XAxis(BasePlotPanel p) {
         super(p);
     }
 
@@ -61,7 +61,7 @@ public class XAxis extends Axis {
             }
             int titleWidth = m_titleFontMetrics.stringWidth(m_title);
             int bottom = m_y + m_height;
-            int top = m_y + m_height - PlotPanel.GAP_AXIS_TITLE - PlotPanel.GAP_AXIS_LINE;
+            int top = m_y + m_height - BasePlotPanel.GAP_AXIS_TITLE - BasePlotPanel.GAP_AXIS_LINE;
             int ascent = m_titleFontMetrics.getAscent();
             int descent = m_titleFontMetrics.getDescent();
             int baseline = top + ((bottom + 1 - top) / 2) - ((ascent + descent) / 2) + ascent;
@@ -239,9 +239,9 @@ public class XAxis extends Axis {
  
     private void paintLinear(Graphics2D g, AxisTicks ticks) {
 
-        int pixelStart = valueToPixel(m_minTick);
-        int pixelStop = valueToPixel(m_maxTick);
-        g.drawLine(pixelStart, m_y+PlotPanel.GAP_AXIS_LINE, pixelStop, m_y+PlotPanel.GAP_AXIS_LINE);
+        int pixelStart = valueToPixel(m_minValue);
+        int pixelStop = valueToPixel(m_maxValue);
+        g.drawLine(pixelStart, m_y+BasePlotPanel.GAP_AXIS_LINE, pixelStop, m_y+BasePlotPanel.GAP_AXIS_LINE);
 
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
@@ -263,9 +263,13 @@ public class XAxis extends Axis {
         double multForRounding = Math.pow(10, fractionalDigits);
 
         double x = m_minTick;
-        int pX = pixelStart;
+        if (valueToPixel(x) < pixelStart) {
+            x += m_tickSpacing;
+        }
+        int pX = valueToPixel(x);
         int previousEndX = -Integer.MAX_VALUE;
         m_lastWidth = -1;
+       
         while (true) {
 
             String label;
@@ -297,9 +301,8 @@ public class XAxis extends Axis {
 
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
                 
-                g.drawLine(pX, m_y+PlotPanel.GAP_AXIS_LINE, pX, m_y + 4+PlotPanel.GAP_AXIS_LINE);
-                g.drawString(label, posX, m_y + height + 4+PlotPanel.GAP_AXIS_LINE);
-
+                g.drawLine(pX, m_y+BasePlotPanel.GAP_AXIS_LINE, pX, m_y + 4+BasePlotPanel.GAP_AXIS_LINE);
+                g.drawString(label, posX, m_y + height + 4+BasePlotPanel.GAP_AXIS_LINE);
                 
                 previousEndX = posX + m_labelMinWidth;
             }
@@ -325,9 +328,9 @@ public class XAxis extends Axis {
             m_dfPlot = selectLogDecimalFormat();
         }
 
-        int pixelStart = valueToPixel(Math.pow(10, m_minTick));
-        int pixelStop = valueToPixel(Math.pow(10, m_maxTick));
-        g.drawLine(pixelStart, m_y+PlotPanel.GAP_AXIS_LINE, pixelStop, m_y+PlotPanel.GAP_AXIS_LINE);
+        int pixelStart = valueToPixel(Math.pow(10, m_minValue));
+        int pixelStop = valueToPixel(Math.pow(10, m_maxValue));
+        g.drawLine(pixelStart, m_y+BasePlotPanel.GAP_AXIS_LINE, pixelStop, m_y+BasePlotPanel.GAP_AXIS_LINE);
 
         if (pixelStart >= pixelStop) { // avoid infinite loop 
             return;
@@ -348,7 +351,7 @@ public class XAxis extends Axis {
                 g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
             }
             
-            g.drawLine(pX, m_y+PlotPanel.GAP_AXIS_LINE, pX, m_y + 4+PlotPanel.GAP_AXIS_LINE);
+            g.drawLine(pX, m_y+BasePlotPanel.GAP_AXIS_LINE, pX, m_y + 4+BasePlotPanel.GAP_AXIS_LINE);
 
             // round x
             double xDisplay = x;
@@ -358,7 +361,7 @@ public class XAxis extends Axis {
 
             int posX = pX - stringWidth / 2;
             if (posX > previousEndX + 2) { // check to avoid to overlap labels
-                g.drawString(s, posX, m_y + height + 4+PlotPanel.GAP_AXIS_LINE);
+                g.drawString(s, posX, m_y + height + 4+BasePlotPanel.GAP_AXIS_LINE);
                 previousEndX = posX + stringWidth;
             }
 
@@ -378,7 +381,7 @@ public class XAxis extends Axis {
             for (int i=2;i<=9;i++) {
                 double xMinTick = Math.pow(10, x)*(((double)i)*0.1d);
                 int pMinTick = valueToPixel(xMinTick);
-                 g.drawLine(pMinTick, m_y+PlotPanel.GAP_AXIS_LINE, pMinTick, m_y + 4+PlotPanel.GAP_AXIS_LINE);                
+                 g.drawLine(pMinTick, m_y+BasePlotPanel.GAP_AXIS_LINE, pMinTick, m_y + 4+BasePlotPanel.GAP_AXIS_LINE);                
             }
 
         }
@@ -468,12 +471,12 @@ public class XAxis extends Axis {
         if (m_log) {
             v = Math.log10(v);
         }
-        return m_x + (int) Math.round(((v - m_minTick) / (m_maxTick - m_minTick)) * m_width);
+        return m_x + (int) Math.round(((v - m_minValue) / (m_maxValue - m_minValue)) * m_width);
     }
 
     @Override
     public double pixelToValue(int pixel) {
-        double v = m_minTick + ((((double) pixel) - m_x) / ((double) m_width)) * (m_maxTick - m_minTick);
+        double v = m_minValue + ((((double) pixel) - m_x) / ((double) m_width)) * (m_maxValue - m_minValue);
         if (m_log) {
             v = Math.pow(10, v);
         }

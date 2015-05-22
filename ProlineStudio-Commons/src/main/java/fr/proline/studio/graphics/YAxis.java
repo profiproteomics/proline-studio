@@ -16,7 +16,7 @@ public class YAxis extends Axis {
 
     private int m_lastHeight;
     
-    public YAxis(PlotPanel p) {
+    public YAxis(BasePlotPanel p) {
         super(p);
     }
 
@@ -67,7 +67,7 @@ public class YAxis extends Axis {
             }
             int titleWidth = m_titleFontMetrics.stringWidth(m_title);
             int bottom = m_x;
-            int top = m_x + PlotPanel.GAP_AXIS_TITLE;
+            int top = m_x + BasePlotPanel.GAP_AXIS_TITLE;
             int ascent = m_titleFontMetrics.getAscent();
             int descent = m_titleFontMetrics.getDescent();
             int baseline = top + ((bottom + 1 - top) / 2) - ((ascent + descent) / 2) + ascent;
@@ -105,9 +105,10 @@ public class YAxis extends Axis {
 
         int halfAscent = m_valuesFontMetrics.getAscent() / 2;
 
-        int pixelStart = valueToPixel(m_minTick);
-        int pixelStop = valueToPixel(m_maxTick);
-        g.drawLine(m_x+m_width-PlotPanel.GAP_AXIS_LINE, pixelStart, m_x+m_width-PlotPanel.GAP_AXIS_LINE, pixelStop);
+        int pixelStart = valueToPixel(m_minValue);
+        int pixelStop = valueToPixel(m_maxValue);
+        
+        g.drawLine(m_x+m_width-BasePlotPanel.GAP_AXIS_LINE, pixelStart, m_x+m_width-BasePlotPanel.GAP_AXIS_LINE, pixelStop);
 
         if (pixelStart <= pixelStop) { // avoid infinite loop when histogram is flat
             return;
@@ -117,17 +118,17 @@ public class YAxis extends Axis {
 
         m_lastHeight = -1;
         double y = m_minTick;
-        int pY = pixelStart;
+        if (valueToPixel(y) > pixelStart ) {
+           y += m_tickSpacing;
+        }
+        int pY = valueToPixel(y);
         int previousEndY = Integer.MAX_VALUE;
+        
         while (true) {
-
-
 
             String label;
             int stringWidth;
-            
-            
-            
+                        
             if (m_isEnum) {
                 label = m_plotPanel.getEnumValueY((int) Math.round(y), false); //JPM.WART
                 stringWidth = m_valuesFontMetrics.stringWidth(label);
@@ -151,8 +152,8 @@ public class YAxis extends Axis {
 
             
             if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to overlap labels
-                g.drawString(label, m_x + m_width - stringWidth - 6-PlotPanel.GAP_AXIS_LINE, pY + halfAscent);
-                g.drawLine(m_x + m_width-PlotPanel.GAP_AXIS_LINE, pY, m_x + m_width - 4-PlotPanel.GAP_AXIS_LINE, pY);
+                g.drawString(label, m_x + m_width - stringWidth - 6-BasePlotPanel.GAP_AXIS_LINE, pY + halfAscent);
+                g.drawLine(m_x + m_width-BasePlotPanel.GAP_AXIS_LINE, pY, m_x + m_width - 4-BasePlotPanel.GAP_AXIS_LINE, pY);
                 previousEndY = pY;
             }
             
@@ -190,9 +191,9 @@ public class YAxis extends Axis {
 
         int halfAscent = m_valuesFontMetrics.getAscent() / 2;
 
-        int pixelStart = valueToPixel(Math.pow(10, m_minTick));
-        int pixelStop = valueToPixel(Math.pow(10, m_maxTick));
-        g.drawLine(m_x+m_width-PlotPanel.GAP_AXIS_LINE, pixelStart, m_x+m_width-PlotPanel.GAP_AXIS_LINE, pixelStop);
+        int pixelStart = valueToPixel(Math.pow(10, m_minValue));
+        int pixelStop = valueToPixel(Math.pow(10, m_maxValue));
+        g.drawLine(m_x+m_width-BasePlotPanel.GAP_AXIS_LINE, pixelStart, m_x+m_width-BasePlotPanel.GAP_AXIS_LINE, pixelStop);
 
         if (pixelStart <= pixelStop) { // avoid infinite loop when histogram is flat
             return;
@@ -216,9 +217,9 @@ public class YAxis extends Axis {
                 g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
             }
             
-            g.drawString(s, m_x+m_width - stringWidth - 6-PlotPanel.GAP_AXIS_LINE, pY + halfAscent);
+            g.drawString(s, m_x+m_width - stringWidth - 6-BasePlotPanel.GAP_AXIS_LINE, pY + halfAscent);
 
-            g.drawLine(m_x+m_width-PlotPanel.GAP_AXIS_LINE, pY, m_x+m_width-PlotPanel.GAP_AXIS_LINE - 4, pY);
+            g.drawLine(m_x+m_width-BasePlotPanel.GAP_AXIS_LINE, pY, m_x+m_width-BasePlotPanel.GAP_AXIS_LINE - 4, pY);
 
             y += m_tickSpacing;
             pY = valueToPixel(Math.pow(10,y));
@@ -239,7 +240,7 @@ public class YAxis extends Axis {
             for (int i=2;i<=9;i++) {
                 double yMinTick = Math.pow(10, y)*(((double)i)*0.1d);
                 int pMinTick = valueToPixel(yMinTick);
-                g.drawLine(m_x+m_width-PlotPanel.GAP_AXIS_LINE, pMinTick, m_x+m_width - 3-PlotPanel.GAP_AXIS_LINE, pMinTick);
+                g.drawLine(m_x+m_width-BasePlotPanel.GAP_AXIS_LINE, pMinTick, m_x+m_width - 3-BasePlotPanel.GAP_AXIS_LINE, pMinTick);
                 
             }
             
@@ -336,12 +337,12 @@ public class YAxis extends Axis {
         if (m_log) {
             v = Math.log10(v);
         }
-        return (m_y+m_height)-(int) Math.round(((v - m_minTick)/(m_maxTick-m_minTick)) * m_height);
+        return (m_y+m_height)-(int) Math.round(((v - m_minValue)/(m_maxValue-m_minValue)) * m_height);
     }
 
     @Override
     public double pixelToValue(int pixel) {
-        double v = m_minTick+(((double)((m_y+m_height)-pixel))/((double)m_height))*(m_maxTick-m_minTick);
+        double v = m_minValue+(((double)((m_y+m_height)-pixel))/((double)m_height))*(m_maxValue-m_minValue);
         if (m_log) {
             v = Math.pow(10,v);
         }

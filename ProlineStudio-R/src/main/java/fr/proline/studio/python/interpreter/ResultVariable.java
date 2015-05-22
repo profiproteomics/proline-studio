@@ -10,8 +10,15 @@ public class ResultVariable {
 
     private final String m_name;
     private final PyObject m_value;
-    private boolean m_actionDone = false;
-
+ 
+    private static int m_incIndix = 0;
+    
+    public ResultVariable(PyObject v) {
+        int i = m_incIndix++;
+        m_name = "_ivar_" + i;
+        m_value = v;
+    }
+    
     public ResultVariable(String name, PyObject v) {
         m_name = name;
         m_value = v;

@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -321,8 +322,9 @@ public class CustomExportDialog extends DefaultDialog {
 		
 	}
 	
+
 	
-    private void fillExportFormatTable(ExportConfig defaultParam, ExportConfig param) {
+	private void fillExportFormatTable(ExportConfig defaultParam, ExportConfig param) {
 		//reset panes:
 		
 		m_updateInProgress = true;
@@ -334,6 +336,7 @@ public class CustomExportDialog extends DefaultDialog {
 		
 		List<String> defaultSheetIdsList = new ArrayList<String>();
 		List<String> sheetIdsList = new ArrayList<String>();
+		
 		if(param!=null) {
 			for(int i=0; i<param.sheets.length;i++) {
 				sheetIdsList.add(param.sheets[i].id);
@@ -344,8 +347,15 @@ public class CustomExportDialog extends DefaultDialog {
 		}
 		
 		
+		// strategy: we first loop through default param tabs.
+		// --------   then if we find that there is a corresponding tab in custom param file,
+		// we add it and fill fields from custom file first, then if some fields are missing, 
+		// we add them from default file.
+		// if some tabs are missing, we add the tabs too but disable them.
+		// 
 		// create tab panes
 		for(int i = 0; i<defaultParam.sheets.length;i++) {
+			
 			panel = new JPanel();
 			m_tabbedPane.addTab(defaultParam.sheets[i].title, null, panel, null);
 			m_presentation[i]=defaultParam.sheets[i].presentation;
@@ -361,7 +371,26 @@ public class CustomExportDialog extends DefaultDialog {
 			panel.add(scrollPane);
 			
 			table = new JTable();
+
+			table.setDragEnabled(true);
+			table.setDropMode(DropMode.INSERT_ROWS);
+			table.setSelectionMode(0); // Allow only 1 item to be selected TODO: add possibility to select blocks or multiple independent rows to move (with drag n drop)
+			table.setTransferHandler(new TableRowTransferHandler(table));
 			
+			// drag n drop handling:
+			table.addMouseMotionListener(new MouseMotionListener() {
+			    public void mouseDragged(MouseEvent e) {
+			    	e.consume();
+			    	JComponent c = (JComponent) e.getSource();
+			        TransferHandler handler = c.getTransferHandler();
+			        handler.exportAsDrag(c, e, TransferHandler.MOVE);
+			    }
+
+			    public void mouseMoved(MouseEvent e) {
+			    }
+			});
+			
+
 			DefaultTableModel tableModel = new javax.swing.table.DefaultTableModel(
 					
 					new Object [][] {
@@ -395,17 +424,23 @@ public class CustomExportDialog extends DefaultDialog {
 			m_tabbedPane.setEnabledAt(i, true); // true by default
 			m_tabbedPane.setToolTipTextAt(i, "Right click to Enable/Disable");
 			
+			
+			
 			// perform specific code if custom file loaded on top of default one:
-			ExportExcelSheet paramSheet = null; 
+			ExportExcelSheet paramSheet = null;  // the currently processed param sheet
+			
 			if(param!=null) { // if we loaded a param file (if not then do nothing here).
-				// find the corresponding sheet in custom param file
+				// find the corresponding sheet in custom param file compared to the defaultConfig file being looped
+				
 				// first, mark it as disabled, if in the loop we find it, then enable the tab sheet.
 				m_tabbedPane.setEnabledAt(i, false);
+				boolean sheetHasBeenFoundInCustomParam = false;
 				
 				for(int k=0; k<param.sheets.length/*paramSheets_list.size()*/;k++) {
 					
 					if(param.sheets[k].id.equals(defaultParam.sheets[i].id)) {
 						paramSheet = param.sheets[k];
+						sheetHasBeenFoundInCustomParam = true;
 						m_tabbedPane.setEnabledAt(i, true);
 						if(param.sheets[k].presentation.equals("rows")) {
 							m_presentation[i] = "rows";
@@ -418,39 +453,86 @@ public class CustomExportDialog extends DefaultDialog {
 					}
 				}
 				
-			}
 			
-			// compare sheet fields and mark them or not (if or not present in both default and configuration file).
-			for(int j=0; j< defaultParam.sheets[i].fields.length ; j++) {
+				// if tab sheet is present:
 				
-				Vector v = new Vector();
-				v.add(defaultParam.sheets[i].fields[j].id);
-				
-				if(paramSheet!=null) { // if the sheet is present in both files
-					String customField = getCustomFieldIfDefaultParamFieldContainedInCustomParamFieldsList(defaultParam.sheets[i].fields[j] , paramSheet.fields );
-					if(customField!=null)  {
-						v.add(customField);
-						v.add(true);
-					} else {
-						v.add(defaultParam.sheets[i].fields[j].title);
-						v.add(false);	
+				if(sheetHasBeenFoundInCustomParam/*sheetContainedInCustomParamConfig(defaultParam.sheets[i],param, index)*/) {
+					// as we found the paramSheet, we now scan through it to check if fields are present or not.
+
+					
+				    // add custom fields first 
+					for(int j=0; j< paramSheet.fields.length ; j++) {
+								
+						Vector v = new Vector();
+						//v.add(defaultParam.sheets[i].fields[j].id);
+						v.add(paramSheet.fields[j].id);
+					
+						// if custom field then show its properties.
+						String customField = getCustomFieldIfFieldContainedInFieldsList(paramSheet.fields[j] , defaultParam.sheets[i].fields );
+						if(customField!=null)  {
+							v.add(customField);
+							v.add(true);
+						}else {
+							v.add(defaultParam.sheets[i].fields[j].title);
+							v.add(false);	// because the tab exists in custom param, we do not care about if it is defaultIsDisplayed or not.
+						}
+
+						
+						tableModel.addRow(v);
+						
 					}
-				} else { // if only default then display isDefault value
-					v.add(defaultParam.sheets[i].fields[j].title);
-					v.add(defaultParam.sheets[i].fields[j].default_displayed);
+				} else { // param sheet has not been found, we add anyway the fields from defaut tab sheet.
+					
+
+					for(int j=0; j< defaultParam.sheets[i].fields.length ; j++) {
+						
+						Vector v = new Vector();
+					
+						v.add(defaultParam.sheets[i].fields[j].id);
+						v.add(defaultParam.sheets[i].fields[j].title);
+						v.add(defaultParam.sheets[i].fields[j].default_displayed);
+						tableModel.addRow(v);
+						
+						
+					}
 				}
 				
-		
-				
-				tableModel.addRow(v);
+				// now add remaining non already added default fields at the end of custom fields list (for current sheet)
+				for(int j=0; j< defaultParam.sheets[i].fields.length ; j++) {
+					
+					Vector v = new Vector();
+					if(paramSheet!=null) { // check If Default Field Present In paramSheet
+						
+						String customField = getCustomFieldIfFieldContainedInFieldsList(defaultParam.sheets[i].fields[j], paramSheet.fields);
+						if(customField==null) {
+							v.add(defaultParam.sheets[i].fields[j].id);
+							v.add(defaultParam.sheets[i].fields[j].title);
+							v.add(false);
+							tableModel.addRow(v);
+						}
+					} 
+					
+					
+					
+				}
 				
 			}
-			
-		
+			if(param==null) { // add default fields anyway (before any custom config is loaded)
+				for(int j=0; j< defaultParam.sheets[i].fields.length ; j++) {
+					
+					Vector v = new Vector();
+					 // add default field 
+					v.add(defaultParam.sheets[i].fields[j].id);
+					v.add(defaultParam.sheets[i].fields[j].title);
+					v.add(defaultParam.sheets[i].fields[j].default_displayed);
+					tableModel.addRow(v);
+				}
+				
+			}
 			//
 			table.setModel(tableModel);
 			//table.getColumnModel().getColumn(0).setPreferredWidth(20);
-			
+				
 			
 			
 			
@@ -462,18 +544,20 @@ public class CustomExportDialog extends DefaultDialog {
 		m_updateInProgress = false;
 		
 	}
-    
-    private String getCustomFieldIfDefaultParamFieldContainedInCustomParamFieldsList(ExportExcelSheetField sheetFieldToCompare, ExportExcelSheetField[] fields) {
-		// this method checks if sheetFieldToCompare is contained in the fields list of elements. It compares by the id only.
+	
 
-        for (int i = 0; i < fields.length; i++) {
-            if (fields[i].id.equals(sheetFieldToCompare.id)) {
-                return fields[i].title; // return the custom title field
-            }
-        }
-        return null;
-    }
 
+	private String getCustomFieldIfFieldContainedInFieldsList (ExportExcelSheetField sheetFieldToCompare,  ExportExcelSheetField[] fields) {
+		// this method checks if sheetFieldToCompare is contained in the fields list of elements. It compares by the id only and return 
+		
+		for(int i=0; i<fields.length; i++) {
+			if(fields[i].id.equals(sheetFieldToCompare.id)) {
+				return fields[i].title; // return the custom title field
+			}
+		}
+		return null;
+	}
+	
     public final JPanel createCustomExportPanel() {
 
         // JPanel exportPanel = new JPanel(new GridBagLayout());
@@ -546,9 +630,7 @@ public class CustomExportDialog extends DefaultDialog {
         table.getColumnModel().getColumn(0).setPreferredWidth(141);
 
         // *-*-*-
-        table.setDragEnabled(true);
-        table.setDropMode(DropMode.INSERT_ROWS);
-        table.setTransferHandler(new TableRowTransferHandler(table));
+
 
         comboBox_Orientation = new JComboBox();
 		comboBox_Orientation.setBounds(79, 8, 91, 20);
@@ -902,7 +984,7 @@ public class CustomExportDialog extends DefaultDialog {
 
 	protected void presentationModeChanged() {
 		// update the m_presentation attribute when changed for a specific ExportConfigSheet
-		//System.out.println("presentation mode changed to " + comboBox_Orientation.getSelectedItem());
+
 		int selectedTab = m_tabbedPane.getSelectedIndex();
 		if(comboBox_Orientation.getSelectedIndex()==0)
 		{
@@ -912,7 +994,6 @@ public class CustomExportDialog extends DefaultDialog {
 		{
 			m_presentation[selectedTab] = "columns";
 		}
-		System.out.println("presentation mode changed for tab " + selectedTab + " to " + m_presentation[selectedTab] ); 
 		
 		
 	}

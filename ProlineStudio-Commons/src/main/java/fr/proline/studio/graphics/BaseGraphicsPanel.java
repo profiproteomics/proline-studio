@@ -3,7 +3,7 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.graphics.PlotPanel.GridListener;
+import fr.proline.studio.graphics.BasePlotPanel.GridListener;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.parameter.DefaultParameterDialog;
 import fr.proline.studio.parameter.ParameterList;
@@ -31,7 +31,7 @@ import org.openide.windows.WindowManager;
  */
 public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
 
-    private PlotPanel m_plotPanel;
+    private BasePlotPanel m_plotPanel;
     
     private JComboBox<PlotType> m_allPlotsComboBox;
     private JComboBox<String> m_valueXComboBox;
@@ -76,7 +76,8 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(0, 5, 0, 5);
 
-        m_plotPanel = new PlotPanel();
+        PlotPanel panel = new PlotPanel();
+        m_plotPanel = panel.getBasePlotPanel();
         m_plotPanel.setGridListener(this);
         JPanel selectPanel = createSelectPanel();
         
@@ -87,7 +88,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         c.gridy++;
         c.weightx = 1;
         c.weighty = 1;
-        internalPanel.add(m_plotPanel, c);
+        internalPanel.add(panel, c);
 
         return internalPanel;
     }

@@ -6,8 +6,6 @@
 package fr.proline.studio.demo;
 
 import fr.proline.studio.graphics.BaseGraphicsPanel;
-import fr.proline.studio.graphics.PlotPanel;
-import fr.proline.studio.graphics.PlotScatter;
 import fr.proline.studio.sampledata.Sample;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;

@@ -6,7 +6,7 @@
 package fr.proline.studio.demo;
 
 import fr.proline.studio.graphics.PlotHistogram;
-import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.sampledata.Sample;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
@@ -18,11 +18,11 @@ import javax.swing.WindowConstants;
  * @author MB243701
  */
 public class HistogramPlotDemo extends JFrame {
-    private PlotPanel plotPanel;
+    private BasePlotPanel plotPanel;
    
    public HistogramPlotDemo() {
       super("HistogramPlot demo");
-      plotPanel = new PlotPanel();
+      plotPanel = new BasePlotPanel();
       Sample sample = new Sample(3000);
       PlotHistogram histo = new PlotHistogram(plotPanel, sample, null, 0, "test");
       plotPanel.setPlot(histo);

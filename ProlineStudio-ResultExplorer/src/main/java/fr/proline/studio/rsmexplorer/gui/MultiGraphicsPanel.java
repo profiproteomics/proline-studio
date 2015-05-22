@@ -5,10 +5,10 @@ import fr.proline.studio.comparedata.LockedDataModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.BestGraphicsInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
-import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotAbstract;
 import fr.proline.studio.graphics.PlotLinear;
-import fr.proline.studio.graphics.PlotPanel.GridListener;
+import fr.proline.studio.graphics.BasePlotPanel.GridListener;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -45,7 +45,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
     
     private AbstractDataBox m_dataBox;
 
-    private PlotPanel m_plotPanel;
+    private BasePlotPanel m_plotPanel;
     
     private boolean m_canChooseColor = false;
     
@@ -93,7 +93,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(0, 5, 0, 5);
 
-        m_plotPanel = new PlotPanel();
+        m_plotPanel = new BasePlotPanel();
         m_plotPanel.setGridListener(this);
         JPanel selectPanel = createSelectPanel();
         

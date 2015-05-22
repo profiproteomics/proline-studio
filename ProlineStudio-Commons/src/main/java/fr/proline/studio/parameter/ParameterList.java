@@ -5,6 +5,7 @@ import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.openide.util.NbPreferences;
@@ -60,7 +61,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             
             c.gridx = 0;
             c.weightx = 0;
-            if (parameter.showLabel()) {
+            if (parameter.showLabel() == AbstractParameter.LabelVisibility.VISIBLE) {
                 JLabel l = new JLabel(parameter.getName() + " :");
 
                 l.setHorizontalAlignment(JLabel.RIGHT);
@@ -70,10 +71,27 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             
             String parameterValue = preferences.get(prefixKey+suffixKey, null);
             
-            if(parameter.hasComponent()){
-                c.gridx = 1;
-                c.weightx = 1;
-                m_parametersPanel.add(parameter.getComponent(parameterValue), c);
+            if (parameter.hasComponent()) {
+                
+                if (parameter.showLabel() == AbstractParameter.LabelVisibility.AS_BORDER_TITLE) {
+                    c.gridx = 0;
+                    c.gridwidth = 2;
+                    c.weightx = 1;
+                    JPanel framedPanel = new JPanel(new GridBagLayout());
+                    framedPanel.setBorder(BorderFactory.createTitledBorder(" " + parameter.getName() + " "));
+                    GridBagConstraints cFrame = new GridBagConstraints();
+                    cFrame.anchor = GridBagConstraints.NORTHWEST;
+                    cFrame.fill = GridBagConstraints.BOTH;
+                    cFrame.insets = new java.awt.Insets(5, 5, 5, 5);
+                    cFrame.weightx = 1;
+                    framedPanel.add(parameter.getComponent(parameterValue), cFrame);
+                    m_parametersPanel.add(framedPanel, c);
+                    c.gridwidth = 1;
+                } else {
+                    c.gridx = 1;
+                    c.weightx = 1;
+                    m_parametersPanel.add(parameter.getComponent(parameterValue), c);
+                }
             }
 
             c.gridy++;

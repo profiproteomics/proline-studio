@@ -1,27 +1,34 @@
 package fr.proline.mzscope.model;
 
+import fr.profi.mzdb.model.ScanData;
+import java.util.Arrays;
+
 public class Scan {
-   
-   public static enum ScanType { CENTROID, PROFILE }
+
+   public static enum ScanType {
+
+      CENTROID, PROFILE
+   }
    private String title;
    private Integer index;
    private int msLevel;
-   private ScanType dataType; 
+   private ScanType dataType;
    private float retentionTime;
    private double[] masses;
    private float[] intensities;
-   private double[] peaksMz = null;
-   private float[] peaksIntensities = null;
-   
+   private ScanData scanData;
+//   private double[] peaksMz = null;
+//   private float[] peaksIntensities = null;
+
    // msLevel2 only
    private Double precursorMz;
    private Integer precursorCharge;
-   
+
    public Scan(Integer index, float rt, double[] masses, float[] intensities, int msLevel) {
       this(index, rt, masses, intensities, msLevel, (msLevel == 2) ? ScanType.CENTROID : ScanType.PROFILE);
    }
-   
-     public Scan(Integer index, float rt, double[] masses, float[] intensities, int msLevel, ScanType type) {
+
+   public Scan(Integer index, float rt, double[] masses, float[] intensities, int msLevel, ScanType type) {
       this.index = index;
       this.masses = masses;
       this.intensities = intensities;
@@ -46,34 +53,6 @@ public class Scan {
       return retentionTime;
    }
 
-   /**
-    * @return the peaksMz
-    */
-   public double[] getPeaksMz() {
-      return peaksMz;
-   }
-
-   /**
-    * @param peaksMz the peaksMz to set
-    */
-   public void setPeaksMz(double[] peaksMz) {
-      this.peaksMz = peaksMz;
-   }
-
-   /**
-    * @return the peaksIntensities
-    */
-   public float[] getPeaksIntensities() {
-      return peaksIntensities;
-   }
-
-   /**
-    * @param peaksIntensities the peaksIntensities to set
-    */
-   public void setPeaksIntensities(float[] peaksIntensities) {
-      this.peaksIntensities = peaksIntensities;
-   }
-   
    public String getTitle() {
       return title;
    }
@@ -85,31 +64,37 @@ public class Scan {
    public int getMsLevel() {
       return msLevel;
    }
+
+   public ScanData getScanData() {
+      return scanData;
+   }
+
+   public void setScanData(ScanData scanData) {
+      this.scanData = scanData;
+   }
    
    /**
     * Returns the data type : CENTROID or PROFILE
-    * 
-    * @return 
+    *
+    * @return
     */
    public ScanType getDataType() {
       return dataType;
    }
 
-    public Double getPrecursorMz() {
-        return precursorMz;
-    }
+   public Double getPrecursorMz() {
+      return precursorMz;
+   }
 
-    public void setPrecursorMz(Double precursorMz) {
-        this.precursorMz = precursorMz;
-    }
+   public void setPrecursorMz(Double precursorMz) {
+      this.precursorMz = precursorMz;
+   }
 
-    public Integer getPrecursorCharge() {
-        return precursorCharge;
-    }
+   public Integer getPrecursorCharge() {
+      return precursorCharge;
+   }
 
-    public void setPrecursorCharge(Integer precursorCharge) {
-        this.precursorCharge = precursorCharge;
-    }
-
-
+   public void setPrecursorCharge(Integer precursorCharge) {
+      this.precursorCharge = precursorCharge;
+   }
 }

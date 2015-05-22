@@ -1,6 +1,6 @@
 package fr.proline.studio.graphics.marker;
 
-import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import java.awt.*;
@@ -29,7 +29,7 @@ public class LabelMarker extends AbstractMarker {
     // show a color point in the marker
     private Color m_labelColor = null;
 
-    public LabelMarker(PlotPanel plotPanel, double x, double y, String valueLabel, int orientationX, int orientationY) {
+    public LabelMarker(BasePlotPanel plotPanel, double x, double y, String valueLabel, int orientationX, int orientationY) {
         super(plotPanel);
 
         m_valueLabel = valueLabel;
@@ -39,7 +39,7 @@ public class LabelMarker extends AbstractMarker {
         m_orientationY = orientationY;
     }
 
-    public LabelMarker(PlotPanel plotPanel, double x, double y, String valueLabel, int orientationX, int orientationY, Color labelColor) {
+    public LabelMarker(BasePlotPanel plotPanel, double x, double y, String valueLabel, int orientationX, int orientationY, Color labelColor) {
         super(plotPanel);
 
         m_valueLabel = valueLabel;

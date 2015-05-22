@@ -1,6 +1,6 @@
 package fr.proline.studio.graphics.marker;
 
-import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import java.awt.AlphaComposite;
@@ -19,7 +19,7 @@ public class IntervalMarker extends AbstractMarker{
     private Color m_colorArea;
     private Color m_lineColor;
     
-    public IntervalMarker(PlotPanel plotPanel, Color colorArea, Color lineColor, double startValue, double endValue) {
+    public IntervalMarker(BasePlotPanel plotPanel, Color colorArea, Color lineColor, double startValue, double endValue) {
         super(plotPanel);
         this.m_colorArea = colorArea;
         this.m_lineColor = lineColor;

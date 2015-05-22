@@ -1,6 +1,6 @@
 package fr.proline.studio.graphics.marker;
 
-import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 import java.awt.*;
@@ -18,11 +18,11 @@ public class LineMarker extends AbstractMarker {
     private int m_orientation;
     private Color m_markerColor;
     
-    public LineMarker(PlotPanel plotPanel, double value, int orientation) {
+    public LineMarker(BasePlotPanel plotPanel, double value, int orientation) {
        this(plotPanel, value, orientation, Color.black, true);
     }
     
-    public LineMarker(PlotPanel plotPanel, double value, int orientation, Color markerColor, boolean visible) {
+    public LineMarker(BasePlotPanel plotPanel, double value, int orientation, Color markerColor, boolean visible) {
         super(plotPanel);
         m_value = value;
         m_orientation = orientation;
@@ -31,7 +31,7 @@ public class LineMarker extends AbstractMarker {
     }
     
     // create a lineMarker Vertical with the specified color
-    public LineMarker(PlotPanel plotPanel, double value, Color markerColor) {
+    public LineMarker(BasePlotPanel plotPanel, double value, Color markerColor) {
         this(plotPanel, value, ORIENTATION_VERTICAL, markerColor, true);
     }
 
@@ -56,8 +56,8 @@ public class LineMarker extends AbstractMarker {
         
         if (m_orientation == ORIENTATION_HORIZONTAL) {
             int y = yAxis.valueToPixel(m_value);
-            int x1 = xAxis.valueToPixel(xAxis.getMinTick());
-            int x2 = xAxis.valueToPixel(xAxis.getMaxTick());
+            int x1 = xAxis.valueToPixel(xAxis.getMinValue());
+            int x2 = xAxis.valueToPixel(xAxis.getMaxValue());
 
             g.setColor(m_markerColor);
             g.drawLine(x1, y, x2, y);
@@ -65,8 +65,8 @@ public class LineMarker extends AbstractMarker {
 
         } else if (m_orientation == ORIENTATION_VERTICAL) {
             int x = xAxis.valueToPixel(m_value);
-            int y1 = yAxis.valueToPixel(yAxis.getMinTick());
-            int y2 = yAxis.valueToPixel(yAxis.getMaxTick());
+            int y1 = yAxis.valueToPixel(yAxis.getMinValue());
+            int y2 = yAxis.valueToPixel(yAxis.getMaxValue());
             
             g.setColor(m_markerColor);
             g.drawLine(x, y1, x, y2);

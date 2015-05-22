@@ -1,18 +1,18 @@
 package fr.proline.studio.graphics.marker;
 
-import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.BasePlotPanel;
 import java.awt.Graphics2D;
 
 /**
- * Base class for all markers which can be plot in a PlotPanel
+ * Base class for all markers which can be plot in a BasePlotPanel
  * @author JM235353
  */
 public abstract class AbstractMarker {
     
-    protected PlotPanel m_plotPanel;
+    protected BasePlotPanel m_plotPanel;
     protected boolean m_isVisible;
     
-    public AbstractMarker(PlotPanel plotPanel) {
+    public AbstractMarker(BasePlotPanel plotPanel) {
         m_plotPanel = plotPanel;
     }
 

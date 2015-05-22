@@ -22,6 +22,12 @@ public class ColRef extends Col {
         m_tableModel = model.getLastNonFilterModel();
     }
     
+    public ColRef(Table table, int col, GlobalTableModelInterface model) {
+        super(table);
+        m_modelCol = col;
+        m_tableModel = model;
+    }
+    
     @Override
     public Col mutable() {
         int nb = __len__();

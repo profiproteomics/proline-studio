@@ -744,7 +744,7 @@ public class CustomExportDialog extends DefaultDialog {
                 optionPane.setVisible(chk_ExportOptions.isSelected());
                 if(!chk_ExportOptions.isSelected()) {
                 	//disable custom parameters and restore default ones
-                	m_exportConfig = m_exportDefaultConfig;
+                	m_exportConfig = null; //m_exportDefaultConfig;
                 	fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
                 }
                 setSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 250 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected

@@ -12,6 +12,6 @@ public class ExportConfig {
     String[] decimal_separator_values; //": [".",","],
     String[] date_format_values ; //": ["YYYY:MM:DD HH:mm:ss","YYYY:MM:DD"],
     String[] sheet_presentation_values; //": ["rows","columns"]
-
+    
 	
 }

@@ -12,6 +12,7 @@ public class ExportExcelSheet {
     public String title;
     public String presentation;
     public ExportExcelSheetField[] fields;
+    public boolean default_displayed;
 
     public ExportExcelSheet() {
     }

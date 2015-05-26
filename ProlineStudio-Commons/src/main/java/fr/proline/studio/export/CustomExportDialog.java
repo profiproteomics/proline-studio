@@ -213,25 +213,6 @@ public class CustomExportDialog extends DefaultDialog {
 
     }
 
-//    private void loadDefaultExportConfig() {
-//        m_exportDefaultConfig = new ExportConfig();
-//        String jsonString = "";
-//        try {
-//				//GetExportInformationTask
-//
-//            jsonString = new String(Files.readAllBytes(Paths.get("D:\\Proline\\export perso\\allFieldsIdent.json")));
-//        } catch (IOException e) {
-//
-//            e.printStackTrace();
-//        }
-//
-//        Gson gson = new Gson();
-//        String messageHashMapJsonString = jsonString;
-//        m_exportDefaultConfig = gson.fromJson(messageHashMapJsonString, m_exportDefaultConfig.getClass());
-//
-//        fillExportPossibleValues(m_exportDefaultConfig);
-//    }
-
     private void loadExportConfig() {
         // decode json 
         m_exportConfig = new ExportConfig();
@@ -250,7 +231,6 @@ public class CustomExportDialog extends DefaultDialog {
             m_exportConfig = gson.fromJson(messageHashMapJsonString, m_exportConfig.getClass());
 
         }
-
     }
 
 	private void fillExportPossibleValues(ExportConfig param) {
@@ -421,7 +401,12 @@ public class CustomExportDialog extends DefaultDialog {
 			// add the data into the model
 			
 			// ---add ability to enable/disable individual tabs
-			m_tabbedPane.setEnabledAt(i, true); // true by default
+			if(defaultParam.sheets[i].default_displayed) 
+			{ 
+				m_tabbedPane.setEnabledAt(i, true); 
+			} else {
+				m_tabbedPane.setEnabledAt(i, false); 
+			}
 			m_tabbedPane.setToolTipTextAt(i, "Right click to Enable/Disable");
 			
 			

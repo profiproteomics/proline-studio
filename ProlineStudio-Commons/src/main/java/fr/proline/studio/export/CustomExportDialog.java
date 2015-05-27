@@ -338,6 +338,8 @@ public class CustomExportDialog extends DefaultDialog {
 			
 			panel = new JPanel();
 			m_tabbedPane.addTab(defaultParam.sheets[i].title, null, panel, null);
+			
+	        
 			m_presentation[i]=defaultParam.sheets[i].presentation;
 			m_sheetId[i]=defaultParam.sheets[i].id;
 			m_sheetTitle[i]=defaultParam.sheets[i].title;
@@ -427,6 +429,8 @@ public class CustomExportDialog extends DefaultDialog {
 						paramSheet = param.sheets[k];
 						sheetHasBeenFoundInCustomParam = true;
 						m_tabbedPane.setEnabledAt(i, true);
+						m_tabbedPane.setTitleAt(i, paramSheet.title);
+						m_sheetTitle[i] = paramSheet.title;
 						if(param.sheets[k].presentation.equals("rows")) {
 							m_presentation[i] = "rows";
 						}
@@ -714,7 +718,10 @@ public class CustomExportDialog extends DefaultDialog {
 		});
 		
 		m_tabbedPane.setBounds(10, 36, 550, 289);
-		
+		// add listener to allow tab rename:
+		TabTitleEditListener l = new TabTitleEditListener(m_tabbedPane);
+        m_tabbedPane.addMouseListener(l);
+			        
 		panel_1.add(m_tabbedPane);
 		m_tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		
@@ -832,6 +839,49 @@ public class CustomExportDialog extends DefaultDialog {
 
     }
 
+    
+    
+    private Component tabComponent = null;
+    private int editing_idx = -1;
+    private int len = -1;
+    private Dimension dim;
+    JTextField editor;
+    
+    private void startEditing() {
+      
+      editing_idx  = m_tabbedPane.getSelectedIndex();
+      tabComponent = m_tabbedPane.getTabComponentAt(editing_idx);
+      JTextField editor = new JTextField();
+      m_tabbedPane.setTabComponentAt(editing_idx, editor);
+      editor.setVisible(true);
+      editor.setText(m_tabbedPane.getTitleAt(editing_idx));
+      editor.selectAll();
+      editor.requestFocusInWindow();
+      len = editor.getText().length();
+      dim = editor.getPreferredSize();
+      editor.setMinimumSize(dim);
+    }
+    private void cancelEditing() {
+      
+      if(editing_idx>=0) {
+        m_tabbedPane.setTabComponentAt(editing_idx, tabComponent);
+        editor.setVisible(false);
+        editing_idx = -1;
+        len = -1;
+        tabComponent = null;
+        editor.setPreferredSize(null);
+      }
+    }
+    private void renameTabTitle() {
+      
+      String title = editor.getText().trim();
+      if(editing_idx>=0 && !title.isEmpty()) {
+        m_tabbedPane.setTitleAt(editing_idx, title);
+      }
+      cancelEditing();
+    }
+    
+    
     protected void loadConfigFile() {
 
          //-------
@@ -1042,6 +1092,8 @@ public class CustomExportDialog extends DefaultDialog {
                 ec.sheets[usedTabNumber] = new ExportExcelSheet();
 
                 ec.sheets[usedTabNumber].id = m_sheetId[i];
+                m_sheetTitle[i] = m_tabbedPane.getTitleAt(i); // when tabs are renamed we retrieve the new name
+                
                 ec.sheets[usedTabNumber].title = m_sheetTitle[i];
                 ec.sheets[usedTabNumber].presentation = m_presentation[i];
 

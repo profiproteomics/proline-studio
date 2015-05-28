@@ -511,7 +511,6 @@ public class CustomExportDialog extends DefaultDialog {
 			}
 			//
 			table.setModel(tableModel);
-			//table.getColumnModel().getColumn(0).setPreferredWidth(20);
 				
 			
 			
@@ -546,22 +545,16 @@ public class CustomExportDialog extends DefaultDialog {
         //exportPanel.setSize(new Dimension(400, 250));
 
         // added 
-        //setSize(new Dimension(600, 300));
-        //setSize(new Dimension(258, 450));
-        setBounds(100, 100, 600, 600); // gives absolute position in x, relative to the main ProlineStudio window...
+         setBounds(100, 100, 600, 600); // gives absolute position in x, relative to the main ProlineStudio window...
         setPreferredSize(new Dimension(580, 250)); // size of the main CustomExportDialog window.
 
         final JPanel insidePanel = new JPanel(null);
         exportPanel.add(insidePanel);
-        //insidePanel.setSize(new Dimension(500, 700)); // size of the inside panel that contains all parameters to set
         insidePanel.setPreferredSize(new Dimension(580, 600)); //size of the inside panel that contains all parameters to set
 
         final JPanel optionPane = new JPanel();
         optionPane.setVisible(false);
         optionPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-//        optionPane.setSize(new Dimension(600, 650));
-//        optionPane.setPreferredSize(new Dimension(700, 500));
-//        optionPane.setBounds(new Rectangle(10, 105, 590, 446));
         optionPane.setSize(new Dimension(600, 650));
         optionPane.setSize(new Dimension(600, 650));
         optionPane.setPreferredSize(new Dimension(710, 500));
@@ -584,9 +577,7 @@ public class CustomExportDialog extends DefaultDialog {
         optionPane.add(lblExportExcelTabs);
 
         scrollPane = new JScrollPane();
-        //scrollPane.setBounds(0, 0, 400, 190);
-       // scrollPane.setBounds(0, 0, 300, 150);
-		
+
 
         table = new JTable();
         scrollPane.setViewportView(table);
@@ -635,19 +626,13 @@ public class CustomExportDialog extends DefaultDialog {
 		panel_1.add(lblOrientation);
 		
         m_configFile = new JTextField();
-        m_configFile.setText(""); // m_configFile.setText("d:\\Proline\\export\\testExport.txt");
+        m_configFile.setText(""); 
         m_configFile.setBounds(123, 12, 232, 20);
         optionPane.add(m_configFile);
         m_configFile.setColumns(10);
 
-//        lblFormat = new JLabel("Format:");
-//        lblFormat.setBounds(10, 44, 55, 14);
-//        optionPane.add(lblFormat);
-
         m_exporTypeCombobox = new JComboBox();
         m_exporTypeCombobox.setModel(new DefaultComboBoxModel(new String[]{"xlsx", "xls", "csv", "tsv"}));
-        //m_exporTypeCombobox.setBounds(10, 68, 55, 20);
-        //optionPane.add(comboBox_Format);
 
         comboBox_DateFormat = new JComboBox();
         comboBox_DateFormat.setModel(new DefaultComboBoxModel(new String[]{"YYYYMMDD HH:mm:ss", "DDMMYYYY HH:mm:ss", "MMDDYYYY HH:mm:ss"}));
@@ -682,8 +667,7 @@ public class CustomExportDialog extends DefaultDialog {
                 saveConfigFile();
             }
         });
-        //btnNewButton.setIcon(new ImageIcon(ExportDialog.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
-        btnNewButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
+         btnNewButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
         btnNewButton.setBounds(468, 11, 89, 23);
         optionPane.add(btnNewButton);
 
@@ -694,7 +678,6 @@ public class CustomExportDialog extends DefaultDialog {
             }
         });
         btnLoad.setIcon(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-        //btnLoad.setIcon(new ImageIcon(ExportDialog.class.getResource("/javax/swing/plaf/metal/icons/ocean/directory.gif")));
         btnLoad.setBounds(365, 11, 89, 23);
         optionPane.add(btnLoad);
 
@@ -747,7 +730,7 @@ public class CustomExportDialog extends DefaultDialog {
         insidePanel.add(m_fileTextField);
         m_fileTextField.setColumns(50);
 
-        // ---// copier ÃƒÂ  partir de lÃƒÂ 
+        // ---
        
         chk_ExportOptions = new JCheckBox("Custom export");
         chk_ExportOptions.addActionListener(new ActionListener() {
@@ -766,7 +749,7 @@ public class CustomExportDialog extends DefaultDialog {
         insidePanel.add(chk_ExportOptions);
         
         final JButton addFileButton = new JButton("");
-        addFileButton.setBounds(470, 14, 27, 30); //addFileButton.setBounds(470, 15, 114, 27);
+        addFileButton.setBounds(470, 14, 27, 30); 
         insidePanel.add(addFileButton);
         
 
@@ -837,10 +820,7 @@ public class CustomExportDialog extends DefaultDialog {
         insidePanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         insidePanel.add(new JLabel("Export Type:"));
         insidePanel.add(m_exporTypeCombobox);
-//        setSize(new Dimension(600/*exportPanel.getWidth()*/ + 6 /* drift? */, 200 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0) )); // elongate the window if option is selected
-//        setPreferredSize(new Dimension(600 + 6 /* drift? */, 200 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0) )); // elongate the window if option is selected
         setPreferredSize(new Dimension(580, 200)); // size of the main CustomExportDialog window.
-        //setSize(new Dimension(exportPanel.getWidth(), 50 + 600 * (!chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
         //----
         return exportPanel;
 

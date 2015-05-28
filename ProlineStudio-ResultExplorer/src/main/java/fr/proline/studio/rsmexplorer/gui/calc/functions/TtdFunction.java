@@ -7,7 +7,6 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
-import fr.proline.studio.python.data.ExprTableModel;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcCallback;
 import fr.proline.studio.python.interpreter.ResultVariable;
@@ -64,22 +63,17 @@ public class TtdFunction extends AbstractFunction {
             final Table sourceTable = new Table(srcModel);
 
             ResultVariable[] parameters = new ResultVariable[colList1.size()+colList2.size()];
-            
-            
-            //PyObject[] params1 = new PyObject[colList1.size()];
+
             for (int i = 0; i < colList1.size(); i++) {
                 Integer colIndex = (Integer) colList1.get(i);
                 ColRef col = sourceTable.getCol(colIndex);
                 parameters[i] = new ResultVariable(col);
-                //params1[i] = col;
             }
-            
-            //PyObject[] params2 = new PyObject[colList2.size()];
+
             for (int i = 0; i < colList2.size(); i++) {
                 Integer colIndex = (Integer) colList2.get(i);
                 ColRef col = sourceTable.getCol(colIndex);
                 parameters[i+colList1.size()] = new ResultVariable(col);
-                //params2[i] = col;
             }
 
             StringBuilder codeSB = new StringBuilder();
@@ -120,7 +114,7 @@ public class TtdFunction extends AbstractFunction {
                         }
                     } else if (error != null) {
                         //JPM.TODO
-                        System.out.println(error); 
+                        
                     }
                 }
                 
@@ -129,17 +123,7 @@ public class TtdFunction extends AbstractFunction {
             CalcInterpreterTask task = new CalcInterpreterTask(codeSB.toString(), parameters, callback);
             
             CalcInterpreterThread.getCalcInterpreterThread().addTask(task);
-            
-            //PyTuple tuple1 = new PyTuple(params1);
-            //PyTuple tuple2 = new PyTuple(params2);
 
-
-            //ColData col = Stats.ttd(tuple1, tuple2);
-            
-            //m_globalTableModelInterface = new ExprTableModel(col, srcModel);
-
-            //m_state = GraphNode.NodeState.READY;
-            
         } catch (Exception e) {
             m_state = GraphNode.NodeState.UNSET;
         }
@@ -196,7 +180,6 @@ public class TtdFunction extends AbstractFunction {
 
     @Override
     public void userParametersChanged() {
-        //m_columnsParameter1.getObjectValue();
     }
 
     @Override

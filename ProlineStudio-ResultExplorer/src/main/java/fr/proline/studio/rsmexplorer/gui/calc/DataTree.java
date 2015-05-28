@@ -4,8 +4,10 @@ import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.BBinomialFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.JoinFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.PValueFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.TtdFunction;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -147,6 +149,12 @@ public abstract class DataTree extends JTree {
         
         FunctionNode joinFunction = new FunctionNode(new JoinFunction());
         parentFunctionNode.add(joinFunction);
+        
+        FunctionNode bbinomialFunction = new FunctionNode(new BBinomialFunction());
+        parentFunctionNode.add(bbinomialFunction);
+        
+        FunctionNode pvalueFunction = new FunctionNode(new PValueFunction());
+        parentFunctionNode.add(pvalueFunction);
         
         FunctionNode ttdFunction = new FunctionNode(new TtdFunction());
         parentFunctionNode.add(ttdFunction);

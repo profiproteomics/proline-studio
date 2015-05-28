@@ -627,7 +627,7 @@ public class CustomExportDialog extends DefaultDialog {
 		
         m_configFile = new JTextField();
         m_configFile.setText(""); 
-        m_configFile.setBounds(123, 12, 232, 20);
+        m_configFile.setBounds(100, 12, 255, 20);
         optionPane.add(m_configFile);
         m_configFile.setColumns(10);
 

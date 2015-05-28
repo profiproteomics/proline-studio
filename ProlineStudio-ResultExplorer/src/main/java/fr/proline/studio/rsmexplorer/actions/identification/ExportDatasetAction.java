@@ -33,7 +33,7 @@ public class ExportDatasetAction extends AbstractRSMAction {
     private List<String> m_config;
 
     public ExportDatasetAction(AbstractTree.TreeType treeType) {
-        super("Export...(customizable)", treeType);
+        super("Export...", treeType);
     }
 
     @Override

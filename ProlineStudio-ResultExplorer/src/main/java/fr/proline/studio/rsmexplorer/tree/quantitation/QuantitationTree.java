@@ -228,8 +228,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(exportDatasetAction);       
                 
-                ExportAbundancesAction exportXICAction = new ExportAbundancesAction();
-                m_mainActions.add(exportXICAction);
+               // ExportAbundancesAction exportXICAction = new ExportAbundancesAction();
+               // m_mainActions.add(exportXICAction);
                 
                 /*DisplayXICProteinSetAction displayXICProteinSetAction = new DisplayXICProteinSetAction();
                 m_mainActions.add(displayXICProteinSetAction);

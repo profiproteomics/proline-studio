@@ -652,14 +652,14 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 //RetrieveSCDataAction getSCAction = new RetrieveSCDataAction();
                 //m_mainActions.add(getSCAction); 
                 m_mainActions.add(null);  // separator
-
+/*
                 if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
                     ExportRSMJMSAction exportJmsRSMAction = new ExportRSMJMSAction();
                     m_mainActions.add(exportJmsRSMAction);
                 } else {
                     ExportRSMAction exportRSMAction = new ExportRSMAction();
                     m_mainActions.add(exportRSMAction);
-                }
+                }*/
                 
                 ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(exportDatasetAction);

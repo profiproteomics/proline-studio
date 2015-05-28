@@ -349,7 +349,7 @@ public class CustomExportDialog extends DefaultDialog {
 			// read fields to fill in jtable into this tabbed pane
 			
 			scrollPane = new JScrollPane();
-			scrollPane.setBounds(0, 0, 600, 290);
+			scrollPane.setBounds(0, 0, 450, 290);
 			panel.add(scrollPane);
 			
 			table = new JTable();
@@ -543,35 +543,37 @@ public class CustomExportDialog extends DefaultDialog {
         // JPanel exportPanel = new JPanel(new GridBagLayout());
         final JPanel exportPanel = new JPanel();
         //exportPanel.setLayout(null);
-        exportPanel.setSize(new Dimension(700, 250));
+        //exportPanel.setSize(new Dimension(400, 250));
 
         // added 
-        setSize(new Dimension(600, 400));
-        //setSize(new Dimension(858, 450));
-        setBounds(100, 100, 772, 600);
+        //setSize(new Dimension(600, 300));
+        //setSize(new Dimension(258, 450));
+        setBounds(100, 100, 600, 600); // gives absolute position in x, relative to the main ProlineStudio window...
+        setPreferredSize(new Dimension(580, 250)); // size of the main CustomExportDialog window.
 
         final JPanel insidePanel = new JPanel(null);
         exportPanel.add(insidePanel);
-        insidePanel.setSize(new Dimension(700, 600));
-        insidePanel.setPreferredSize(new Dimension(700, 600));
+        //insidePanel.setSize(new Dimension(500, 700)); // size of the inside panel that contains all parameters to set
+        insidePanel.setPreferredSize(new Dimension(580, 600)); //size of the inside panel that contains all parameters to set
 
         final JPanel optionPane = new JPanel();
         optionPane.setVisible(false);
         optionPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+//        optionPane.setSize(new Dimension(600, 650));
+//        optionPane.setPreferredSize(new Dimension(700, 500));
+//        optionPane.setBounds(new Rectangle(10, 105, 590, 446));
         optionPane.setSize(new Dimension(600, 650));
-        optionPane.setPreferredSize(new Dimension(700, 500));
-        optionPane.setBounds(new Rectangle(10, 105, 590, 446));
-
+        optionPane.setSize(new Dimension(600, 650));
+        optionPane.setPreferredSize(new Dimension(710, 500));
+        optionPane.setBounds(new Rectangle(10, 105, 560, 446));// position du panneau dans la boite.
+		
 		insidePanel.setLayout(null);
         insidePanel.add(optionPane);
         optionPane.setLayout(null);
-        //
-        setSize(new Dimension(800, 250));
-        setPreferredSize(new Dimension(800, 250));
 
 		panel_1 = new JPanel();
 		panel_1.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_1.setBounds(10, 99, 570, 336);
+		panel_1.setBounds(10, 149, 540, 250);
 		optionPane.add(panel_1);
 		panel_1.setLayout(null);
 		
@@ -582,7 +584,9 @@ public class CustomExportDialog extends DefaultDialog {
         optionPane.add(lblExportExcelTabs);
 
         scrollPane = new JScrollPane();
-        scrollPane.setBounds(0, 0, 400, 190);
+        //scrollPane.setBounds(0, 0, 400, 190);
+       // scrollPane.setBounds(0, 0, 300, 150);
+		
 
         table = new JTable();
         scrollPane.setViewportView(table);
@@ -664,12 +668,12 @@ public class CustomExportDialog extends DefaultDialog {
         optionPane.add(lblNumberSeparator);
 
         lblProteinSets = new JLabel("Protein sets:");
-        lblProteinSets.setBounds(304, 44, 89, 14);
+        lblProteinSets.setBounds(10, 93, 89, 14);
         optionPane.add(lblProteinSets);
 
         comboBox_ProteinSets = new JComboBox();
         comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[]{"All", "Validated only"}));
-        comboBox_ProteinSets.setBounds(304, 65, 121, 20);
+        comboBox_ProteinSets.setBounds(10, 114, 121, 20);
         optionPane.add(comboBox_ProteinSets);
 
         btnNewButton = new JButton("Save");
@@ -717,7 +721,7 @@ public class CustomExportDialog extends DefaultDialog {
 			} 
 		});
 		
-		m_tabbedPane.setBounds(10, 36, 550, 289);
+		m_tabbedPane.setBounds(10, 36, 520, 200);
 		// add listener to allow tab rename:
 		TabTitleEditListener l = new TabTitleEditListener(m_tabbedPane);
         m_tabbedPane.addMouseListener(l);
@@ -727,11 +731,11 @@ public class CustomExportDialog extends DefaultDialog {
 		
 		comboBox_exportProfile = new JComboBox();
 		comboBox_exportProfile.setModel(new DefaultComboBoxModel(new String[] {"Best", "All"}));
-		comboBox_exportProfile.setBounds(448, 65, 109, 20);
+		comboBox_exportProfile.setBounds(154, 114, 109, 20);
 		optionPane.add(comboBox_exportProfile);
 		
 		lblExportProfile = new JLabel("Export profile:");
-		lblExportProfile.setBounds(448, 44, 89, 14);
+		lblExportProfile.setBounds(154, 93, 89, 14);
 		optionPane.add(lblExportProfile);
 		
         lblExportToFile = new JLabel("Export to file:");
@@ -754,7 +758,8 @@ public class CustomExportDialog extends DefaultDialog {
                 	m_exportConfig = null; //m_exportDefaultConfig;
                 	fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
                 }
-                setSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 250 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
+                setSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 200 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
+                setPreferredSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 200 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
             }
         });
         chk_ExportOptions.setBounds(476, 71, 124, 27);
@@ -832,8 +837,10 @@ public class CustomExportDialog extends DefaultDialog {
         insidePanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         insidePanel.add(new JLabel("Export Type:"));
         insidePanel.add(m_exporTypeCombobox);
-
-        setSize(new Dimension(exportPanel.getWidth(), 250 + 400 * (!chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
+//        setSize(new Dimension(600/*exportPanel.getWidth()*/ + 6 /* drift? */, 200 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0) )); // elongate the window if option is selected
+//        setPreferredSize(new Dimension(600 + 6 /* drift? */, 200 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0) )); // elongate the window if option is selected
+        setPreferredSize(new Dimension(580, 200)); // size of the main CustomExportDialog window.
+        //setSize(new Dimension(exportPanel.getWidth(), 50 + 600 * (!chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
         //----
         return exportPanel;
 

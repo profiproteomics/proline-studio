@@ -566,7 +566,7 @@ public class CustomExportDialog extends DefaultDialog {
 
 		panel_1 = new JPanel();
 		panel_1.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_1.setBounds(10, 149, 540, 250);
+		panel_1.setBounds(10, 102, 540, 300);
 		optionPane.add(panel_1);
 		panel_1.setLayout(null);
 		
@@ -636,7 +636,7 @@ public class CustomExportDialog extends DefaultDialog {
 
         comboBox_DateFormat = new JComboBox();
         comboBox_DateFormat.setModel(new DefaultComboBoxModel(new String[]{"YYYYMMDD HH:mm:ss", "DDMMYYYY HH:mm:ss", "MMDDYYYY HH:mm:ss"}));
-        comboBox_DateFormat.setBounds(10, 65, 161, 20);
+        comboBox_DateFormat.setBounds(88, 41, 161, 20);
         optionPane.add(comboBox_DateFormat);
 
         lblDateFormat = new JLabel("Date format:");
@@ -645,20 +645,20 @@ public class CustomExportDialog extends DefaultDialog {
 
         comboBox_NumberSeparator = new JComboBox();
         comboBox_NumberSeparator.setModel(new DefaultComboBoxModel(new String[]{".", ","}));
-        comboBox_NumberSeparator.setBounds(180, 65, 49, 20);
+        comboBox_NumberSeparator.setBounds(109, 69, 49, 20);
         optionPane.add(comboBox_NumberSeparator);
 
         lblNumberSeparator = new JLabel("Number separator:");
-        lblNumberSeparator.setBounds(180, 43, 110, 14);
+        lblNumberSeparator.setBounds(10, 72, 110, 14);
         optionPane.add(lblNumberSeparator);
 
         lblProteinSets = new JLabel("Protein sets:");
-        lblProteinSets.setBounds(10, 93, 89, 14);
+        lblProteinSets.setBounds(349, 44, 89, 14);
         optionPane.add(lblProteinSets);
 
         comboBox_ProteinSets = new JComboBox();
         comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[]{"All", "Validated only"}));
-        comboBox_ProteinSets.setBounds(10, 114, 121, 20);
+        comboBox_ProteinSets.setBounds(429, 43, 121, 20);
         optionPane.add(comboBox_ProteinSets);
 
         btnNewButton = new JButton("Save");
@@ -668,7 +668,7 @@ public class CustomExportDialog extends DefaultDialog {
             }
         });
          btnNewButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
-        btnNewButton.setBounds(468, 11, 89, 23);
+         btnNewButton.setBounds(468, 11, 82, 23);
         optionPane.add(btnNewButton);
 
         btnLoad = new JButton("Load");
@@ -704,7 +704,7 @@ public class CustomExportDialog extends DefaultDialog {
 			} 
 		});
 		
-		m_tabbedPane.setBounds(10, 36, 520, 200);
+		m_tabbedPane.setBounds(10, 36, 520, 248);
 		// add listener to allow tab rename:
 		TabTitleEditListener l = new TabTitleEditListener(m_tabbedPane);
         m_tabbedPane.addMouseListener(l);
@@ -714,11 +714,11 @@ public class CustomExportDialog extends DefaultDialog {
 		
 		comboBox_exportProfile = new JComboBox();
 		comboBox_exportProfile.setModel(new DefaultComboBoxModel(new String[] {"Best", "All"}));
-		comboBox_exportProfile.setBounds(154, 114, 109, 20);
+		comboBox_exportProfile.setBounds(448, 69, 102, 20);
 		optionPane.add(comboBox_exportProfile);
 		
 		lblExportProfile = new JLabel("Export profile:");
-		lblExportProfile.setBounds(154, 93, 89, 14);
+		lblExportProfile.setBounds(349, 72, 89, 14);
 		optionPane.add(lblExportProfile);
 		
         lblExportToFile = new JLabel("Export to file:");

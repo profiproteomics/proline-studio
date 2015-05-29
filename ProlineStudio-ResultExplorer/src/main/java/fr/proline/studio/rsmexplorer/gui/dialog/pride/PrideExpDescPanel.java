@@ -113,7 +113,7 @@ public class PrideExpDescPanel extends PrideWizardPanel {
         mainPanel.add(m_projectNameTextField, c);
 
         
-        JLabel experimentNameLabel = new JLabel("Experiment Title *:");
+        JLabel experimentNameLabel = new JLabel("Experiment Title* :");
         m_expNameTextField  = new JTextField(30);
         c.gridx = 0;
         c.gridy++;
@@ -123,7 +123,7 @@ public class PrideExpDescPanel extends PrideWizardPanel {
         c.weightx = 1;
         mainPanel.add(m_expNameTextField, c);
         
-        JLabel expShortNameLabel = new JLabel("Experiment Short Label *:");
+        JLabel expShortNameLabel = new JLabel("Experiment Short Label* :");
         m_expShortLabelTextField  = new JTextField(30);
         c.gridx = 0;
         c.gridy++;
@@ -133,7 +133,7 @@ public class PrideExpDescPanel extends PrideWizardPanel {
         c.weightx =1;
         mainPanel.add(m_expShortLabelTextField, c);
         
-        JLabel contactNameLabel = new JLabel("Contact Name *:");
+        JLabel contactNameLabel = new JLabel("Contact Name* :");
         m_contactNameTextField  = new JTextField(30);
         c.gridx = 0;
         c.gridy++;
@@ -143,7 +143,7 @@ public class PrideExpDescPanel extends PrideWizardPanel {
         c.weightx = 1;
         mainPanel.add(m_contactNameTextField, c);
         
-        JLabel contactInstitutionLabel = new JLabel("Contact Institution *:");
+        JLabel contactInstitutionLabel = new JLabel("Contact Institution* :");
         m_contactInstitutionTextField  = new JTextField(30);
         c.gridx = 0;
         c.weightx = 0;

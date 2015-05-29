@@ -28,10 +28,15 @@ public abstract class AbstractGraphObject {
     public AbstractGraphObject(TypeGraphObject type) {
         m_type = type;
     }
-    
+   
     public TypeGraphObject getType() {
         return m_type;
     }
+   
+    public abstract boolean isConnected();
+    public abstract boolean canSetSettings();
+    public abstract boolean settingsDone();
+    public abstract boolean calculationDone();
     
         
     public abstract String getName();
@@ -43,7 +48,7 @@ public abstract class AbstractGraphObject {
     
     public abstract void delete();
     
-    public abstract void resetState();
+    //public abstract void resetState();
     
     public void setSelected(boolean s) {
         m_selected = s;

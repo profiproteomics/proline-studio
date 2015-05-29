@@ -53,13 +53,58 @@ public class FunctionGraphNode extends GraphNode {
         int countUnlinkedConnectors = m_function.getNumberOfInParameters();
         for (GraphConnector connector : m_inConnectors) {
             if (connector.isConnected()) {
+                
+                GraphNode graphNode = connector.getLinkedSourceGraphNode();
                 countUnlinkedConnectors--;
             }
         }
         return (countUnlinkedConnectors == 0);
     }
-
+    
     @Override
+    public boolean canSetSettings() {
+        if (!isConnected()) {
+            return false;
+        }
+        int countSettingsDone = m_function.getNumberOfInParameters();
+        for (GraphConnector connector : m_inConnectors) {
+            if (connector.isConnected()) {
+                
+                GraphNode graphNode = connector.getLinkedSourceGraphNode();
+                if (graphNode.settingsDone() && graphNode.calculationDone()) {
+                    countSettingsDone--;
+                }
+            }
+        }
+        return (countSettingsDone == 0);
+    }
+    
+    @Override
+    public boolean settingsDone() {
+        return m_function.settingsDone();
+    }
+    
+    @Override
+    public boolean calculationDone() {
+        if (!isConnected()) {
+            return false;
+        }
+        
+        if (!settingsDone()) {
+            return false;
+        }
+        
+        if (m_function.calculationDone()) {
+            return true;
+        }
+        
+        // we try to process
+        process(false);
+        
+        return m_function.calculationDone();
+    }
+
+    /*@Override
     public NodeState getState() {
         if (m_state != NodeState.UNSET) {
             return m_state;
@@ -74,11 +119,11 @@ public class FunctionGraphNode extends GraphNode {
         m_state = m_function.getState();
         
         return m_state;
-    }
+    }*/
     
 
     @Override
-    public void process() {
+    public void process(boolean display) {
         if (!isConnected()) {
             return;
         }
@@ -87,29 +132,19 @@ public class FunctionGraphNode extends GraphNode {
         int i = 0;
         for (GraphConnector connector : m_inConnectors) {
             GraphNode graphNode = connector.getLinkedSourceGraphNode();
-            graphNode.process();
+            graphNode.process(false);
             graphObjectArray[i++] = graphNode;
         }
         
-        m_function.process(graphObjectArray);
+        m_function.process(graphObjectArray, display);
         
     }
 
     @Override
-    public void display() {
-        m_state = NodeState.UNSET;
-        NodeState state = getState();
-        if (state ==  NodeState.READY) {
-            WindowBox windowBox = WindowBoxFactory.getModelWindowBox(getName());
-            windowBox.setEntryData(-1, m_function.getGlobalTableModelInterface());
-            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
-            win.open();
-            win.requestActive();
-            
-            
-
-        }
+    public void askDisplay() {
+        process(true);
     }
+
     
     @Override
     public void settings() {
@@ -118,9 +153,11 @@ public class FunctionGraphNode extends GraphNode {
         int i = 0;
         for (GraphConnector connector : m_inConnectors) {
             GraphNode graphNode = connector.getLinkedSourceGraphNode();
-            graphNode.process();  // need to process previous nodes to be able to do settings
+            graphNode.process(false);  // need to process previous nodes to be able to do settings
             graphObjectArray[i++] = graphNode;
         }
+        
+        
         
         m_function.settings(graphObjectArray);
     }
@@ -130,10 +167,10 @@ public class FunctionGraphNode extends GraphNode {
         return m_function.getGlobalTableModelInterface();
     }
 
-    @Override
+    /*@Override
     public void resetState() {
         super.resetState();
         m_function.resetState();
-    }
+    }*/
     
 }

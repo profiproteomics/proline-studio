@@ -2,8 +2,10 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.pattern.WindowBox;
+import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -16,7 +18,7 @@ import org.openide.windows.WindowManager;
  */
 public abstract class AbstractFunction {
     
-    protected GraphNode.NodeState m_state = GraphNode.NodeState.UNSET;
+    //protected GraphNode.NodeState m_state = GraphNode.NodeState.UNSET;
     protected GlobalTableModelInterface m_globalTableModelInterface;
     
     protected ParameterList[] m_parameters = null;
@@ -24,13 +26,13 @@ public abstract class AbstractFunction {
     public abstract String getName();
     public abstract int getNumberOfInParameters();
     
-    public abstract void process(AbstractGraphObject[] graphObjects);
+    public abstract void process(AbstractGraphObject[] graphObjects, boolean display);
     
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return m_globalTableModelInterface;
     }
 
-    public abstract GraphNode.NodeState getState();
+    //public abstract GraphNode.NodeState getState();
 
     public abstract void generateDefaultParameters(AbstractGraphObject[] graphObjects);
     public abstract ParameterError checkParameters();
@@ -38,10 +40,22 @@ public abstract class AbstractFunction {
     public abstract AbstractFunction cloneFunction();
     
     
-    public void resetState() {
+    /*public void resetState() {
         m_parameters = null;
         m_globalTableModelInterface = null;
+    }*/
+
+        
+    protected void display(String name) {
+        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(name);
+        windowBox.setEntryData(-1, m_globalTableModelInterface);
+        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
+        win.open();
+        win.requestActive();
     }
+    
+    public abstract boolean calculationDone();
+    public abstract boolean settingsDone();
     
     public void settings(AbstractGraphObject[] graphObjects) {
         if (m_parameters == null) {

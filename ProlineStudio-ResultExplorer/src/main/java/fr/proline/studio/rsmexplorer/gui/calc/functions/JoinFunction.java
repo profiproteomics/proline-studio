@@ -6,7 +6,6 @@ import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import javax.swing.JComboBox;
 
@@ -35,10 +34,25 @@ public class JoinFunction extends AbstractFunction {
         return 2;
     }
     
-    @Override
+    /*@Override
     public GraphNode.NodeState getState() {
         return m_state;
+    }*/
+    
+    
+    @Override
+    public boolean settingsDone() {
+        return true;
     }
+    
+    @Override
+    public boolean calculationDone() {
+        if (m_globalTableModelInterface != null) {
+            return true;
+        }
+        return false;
+    }
+    
 
     @Override
     public AbstractFunction cloneFunction() {
@@ -46,7 +60,7 @@ public class JoinFunction extends AbstractFunction {
     }
     
     @Override
-    public void process(AbstractGraphObject[] graphObjects) {
+    public void process(AbstractGraphObject[] graphObjects, boolean display) {
 
         Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
         Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
@@ -61,7 +75,10 @@ public class JoinFunction extends AbstractFunction {
         }
 
         m_globalTableModelInterface = joinedTable.getModel();
-        m_state = GraphNode.NodeState.READY;
+        
+        if (display) {
+            display(getName());
+        }
     }
     
 
@@ -147,7 +164,7 @@ public class JoinFunction extends AbstractFunction {
         Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
         Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
         ((AbstractJoinDataModel)m_globalTableModelInterface).setKeys(key1, key2);
-        m_state = GraphNode.NodeState.UNSET;
+        //m_state = GraphNode.NodeState.UNSET;
     }
     
 }

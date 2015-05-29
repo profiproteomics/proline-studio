@@ -42,6 +42,8 @@ public class GraphConnector extends AbstractGraphObject {
         return null;
     }
     
+    
+    @Override
     public boolean isConnected() {
         if (m_connections.isEmpty()) {
             return false;
@@ -49,6 +51,25 @@ public class GraphConnector extends AbstractGraphObject {
         GraphNode node = getLinkedSourceGraphNode();
         return (node.isConnected());
     }
+    
+    @Override
+    public boolean canSetSettings() {
+        return false;
+    }
+    
+    @Override
+    public boolean settingsDone() {
+        return true;
+    }
+    @Override
+    public boolean calculationDone() {
+        if (!isConnected()) {
+            return false;
+        }
+        GraphNode node = getLinkedSourceGraphNode();
+        return (node.calculationDone());
+    }
+
     
     public GraphNode getGraphNode() {
         return m_graphNode;
@@ -74,7 +95,7 @@ public class GraphConnector extends AbstractGraphObject {
             m_connections.clear();
         }
         m_connections.add(connector);
-        resetState();
+        //resetState();
     }
     
     public void removeConnection(GraphConnector connector) {
@@ -82,7 +103,7 @@ public class GraphConnector extends AbstractGraphObject {
         if (m_connections.isEmpty()) {
             m_link = null; 
         }
-        resetState();
+        //resetState();
     }
     
     public int getXConnection() {
@@ -171,7 +192,7 @@ public class GraphConnector extends AbstractGraphObject {
     
     @Override
     public void delete() {
-        resetState();
+        //resetState();
         for (GraphConnector connector : m_connections) {
             connector.removeConnection(this);
         }
@@ -186,7 +207,7 @@ public class GraphConnector extends AbstractGraphObject {
         }
         m_connections.clear();
         m_link = null;
-        resetState();
+        //resetState();
     }
     
     @Override
@@ -199,7 +220,7 @@ public class GraphConnector extends AbstractGraphObject {
         return null;
     }
 
-    @Override
+    /*@Override
     public void resetState() {
         if (m_out) {
             for (GraphConnector connector : m_connections) {
@@ -208,6 +229,6 @@ public class GraphConnector extends AbstractGraphObject {
         } else {
             m_graphNode.resetState();
         }
-    }
+    }*/
     
 }

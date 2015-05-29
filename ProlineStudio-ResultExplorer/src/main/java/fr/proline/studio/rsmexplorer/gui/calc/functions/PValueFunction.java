@@ -42,18 +42,18 @@ public class PValueFunction extends AbstractFunction {
     }
 
     @Override
-    public void process(AbstractGraphObject[] graphObjects) {
+    public void process(AbstractGraphObject[] graphObjects, final boolean display) {
         
         
         if (m_columnsParameter1 == null) {
-            m_state = GraphNode.NodeState.UNSET;
+            //m_state = GraphNode.NodeState.UNSET;
             return;
         }
         
         List colList1 =(List) m_columnsParameter1.getAssociatedSelectedObjectValue();
         List colList2 =(List) m_columnsParameter2.getAssociatedSelectedObjectValue();
         if ((colList1 == null) || (colList1.isEmpty()) || (colList2 == null) || (colList2.isEmpty())) {
-            m_state = GraphNode.NodeState.UNSET;
+            //m_state = GraphNode.NodeState.UNSET;
             return;
         }
 
@@ -105,11 +105,11 @@ public class PValueFunction extends AbstractFunction {
                                 // we have found the result
                                 ColData col = (ColData) var.getValue();
                                 sourceTable.addColumn(col);
-                                WindowBox windowBox = WindowBoxFactory.getModelWindowBox(var.getName());
-                                windowBox.setEntryData(-1, sourceTable.getModel());
-                                DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
-                                win.open();
-                                win.requestActive();
+                                m_globalTableModelInterface = sourceTable.getModel();
+                                
+                                if (display) {
+                                    display(var.getName());
+                                }
                             }
                         }
                     } else if (error != null) {
@@ -125,15 +125,38 @@ public class PValueFunction extends AbstractFunction {
             CalcInterpreterThread.getCalcInterpreterThread().addTask(task);
 
         } catch (Exception e) {
-            m_state = GraphNode.NodeState.UNSET;
+            //m_state = GraphNode.NodeState.UNSET;
         }
         
         
     }
 
-    @Override
+    /*@Override
     public GraphNode.NodeState getState() {
         return m_state;
+    }*/
+    
+    @Override
+    public boolean settingsDone() {
+        if (m_columnsParameter1 == null) {
+            return false;
+        }
+
+        List colList1 = (List) m_columnsParameter1.getAssociatedSelectedObjectValue();
+        List colList2 = (List) m_columnsParameter2.getAssociatedSelectedObjectValue();
+        if ((colList1 == null) || (colList1.isEmpty()) || (colList2 == null) || (colList2.isEmpty())) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public boolean calculationDone() {
+        if (m_globalTableModelInterface != null) {
+            return true;
+        }
+        return false;
     }
 
     @Override

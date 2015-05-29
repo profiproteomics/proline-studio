@@ -28,6 +28,25 @@ public class DataGraphNode extends GraphNode {
         m_outConnector = new GraphConnector(this, true);
     }
 
+    
+    @Override
+    public boolean isConnected() {
+        return true;
+    }
+    @Override
+    public boolean canSetSettings() {
+        return false;
+    }
+    @Override
+    public boolean settingsDone() {
+        return true;
+    }
+    @Override
+    public boolean calculationDone() {
+        return true;
+    }
+    
+    
     @Override
     public String getName() {
         return m_tableInfo.getName();
@@ -44,7 +63,7 @@ public class DataGraphNode extends GraphNode {
     }
 
     @Override
-    public void display() {
+    public void askDisplay() {
         WindowBox windowBox = WindowBoxFactory.getModelWindowBox(getName());
         windowBox.setEntryData(-1, m_tableInfo.getModel());
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
@@ -57,7 +76,7 @@ public class DataGraphNode extends GraphNode {
         // nothing to do
     }
     
-    @Override
+    /*@Override
     public NodeState getState() {
         if (m_state != NodeState.UNSET) {
             return m_state;
@@ -70,16 +89,16 @@ public class DataGraphNode extends GraphNode {
         }
         
         return m_state;
-    }
+    }*/
     
-    @Override
+    /*@Override
     public boolean isConnected() {
         return true;
-    }
+    }*/
 
 
     @Override
-    public void process() {
+    public void process(boolean display) {
         // nothing to do
     }
 

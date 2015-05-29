@@ -24,7 +24,7 @@ import javax.swing.event.PopupMenuListener;
  */
 public abstract class GraphNode extends AbstractGraphObject {
     
-    public enum NodeState {
+    /*public enum NodeState {
         UNSET,
         NOT_CONNECTED,
         CONNECTED,
@@ -32,7 +32,7 @@ public abstract class GraphNode extends AbstractGraphObject {
         DATA_LOADING,
         READY_TO_CALCULATE,
         READY
-    }
+    }*/
     
     public static final int WIDTH = 60;
     public static final int HEIGHT = 60;
@@ -52,7 +52,7 @@ public abstract class GraphNode extends AbstractGraphObject {
     protected static int m_hgtPlain;
     protected static int m_ascentBold;
     
-    protected NodeState m_state = NodeState.UNSET;
+    //protected NodeState m_state = NodeState.UNSET;
 
     public GraphNode() {
         super(TypeGraphObject.GRAPH_NODE);
@@ -136,9 +136,9 @@ public abstract class GraphNode extends AbstractGraphObject {
     public abstract ImageIcon getIcon();
     
     public abstract boolean isConnected();
-    public abstract NodeState getState();
-    public abstract void process();
-    public abstract void display();
+    //public abstract NodeState getState();
+    public abstract void process(boolean display);
+    public abstract void askDisplay();
     public abstract void settings();
 
 
@@ -296,18 +296,13 @@ public abstract class GraphNode extends AbstractGraphObject {
             super("Display");
             m_graphNode = graphNode;
             
-             if (graphNode instanceof FunctionGraphNode) {
-                setEnabled(((FunctionGraphNode) graphNode).isConnected());
-            } else if (graphNode instanceof DataGraphNode) {
-                setEnabled(true);
-            } else {
-                setEnabled(false);
-            }
+            setEnabled(graphNode.settingsDone());
+
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            m_graphNode.display();
+            m_graphNode.askDisplay();
         }
     }
     
@@ -317,13 +312,10 @@ public abstract class GraphNode extends AbstractGraphObject {
 
         public SettingsAction(GraphNode graphNode, int nbInConnections) {
             super("Settings");
-            
-            if (graphNode instanceof FunctionGraphNode) {
-                m_graphNode = graphNode;
-                setEnabled(((FunctionGraphNode) graphNode).isConnected());
-            } else {
-                setEnabled(false);
-            }
+
+            m_graphNode = graphNode;
+            setEnabled(graphNode.canSetSettings());
+
         }
 
         @Override
@@ -331,10 +323,6 @@ public abstract class GraphNode extends AbstractGraphObject {
             m_graphNode.settings();
         }
     }
-    
-    @Override
-    public void resetState() {
-        m_state = NodeState.UNSET;
-    }
+
     
 }

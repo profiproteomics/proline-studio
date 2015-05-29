@@ -37,6 +37,34 @@ public class GraphLink extends AbstractGraphObject {
     }
     
     @Override
+    public boolean isConnected() {
+        if (m_connector == null) {
+            return false;
+        }
+        return m_connector.isConnected();
+    }
+
+    @Override
+    public boolean canSetSettings() {
+        return false;
+    }
+    
+    @Override
+    public boolean settingsDone() {
+        return true;
+    }
+
+    @Override
+    public boolean calculationDone() {
+        if (m_connector == null) {
+            return false;
+        }
+        return m_connector.calculationDone();
+    }
+
+    
+    
+    @Override
     public String getName() {
         return null;
     }
@@ -247,10 +275,10 @@ public class GraphLink extends AbstractGraphObject {
         return popup;
     }
 
-    @Override
+    /*@Override
     public void resetState() {
         // nothing to do
-    }
+    }*/
 
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {

@@ -7,6 +7,7 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.utils.IconManager;
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class TreeSelectionPanel extends JPanel {
    
     private IdentificationTree m_tree = null;
     private String m_wizardLabel = "";
+    private String m_wizardHelp = null;
     /*private ArrayList<DDataset> m_selectedDatasetList = null;
     private ArrayList<RSMDataSetNode> m_selectedRSMDSNodeList = null;*/
 
@@ -31,13 +33,14 @@ public class TreeSelectionPanel extends JPanel {
         return m_treeSelectionPanel;
     }
     
-    public static TreeSelectionPanel getTreeSelectionPanel(IdentificationTree tree, String wizardLabel) {
-        m_treeSelectionPanel =  new TreeSelectionPanel(tree, wizardLabel);
+    public static TreeSelectionPanel getTreeSelectionPanel(IdentificationTree tree, String wizardLabel, String wizardHelp) {
+        m_treeSelectionPanel =  new TreeSelectionPanel(tree, wizardLabel,wizardHelp );
         return m_treeSelectionPanel;
     }
     
-    private TreeSelectionPanel(IdentificationTree tree, String wizardLabel) {
+    private TreeSelectionPanel(IdentificationTree tree, String wizardLabel, String wizardHelp) {
         m_wizardLabel = wizardLabel;
+        m_wizardHelp = wizardHelp;
         m_tree = tree;
 
         setLayout(new GridBagLayout());
@@ -80,6 +83,16 @@ public class TreeSelectionPanel extends JPanel {
         c.weightx = 1;
         c.weighty = 1;
         wizardPanel.add(wizardLabel, c);
+        
+        if(m_wizardHelp != null && !m_wizardHelp.isEmpty()){
+            JTextArea helpArea = new JTextArea(m_wizardHelp);        
+            helpArea.setBackground(Color.LIGHT_GRAY);
+            helpArea.setForeground(Color.WHITE);
+            helpArea.setLineWrap(true);
+            helpArea.setWrapStyleWord(true);
+            c.gridy++;
+            wizardPanel.add(helpArea, c);
+        }
         
         return wizardPanel;
     }

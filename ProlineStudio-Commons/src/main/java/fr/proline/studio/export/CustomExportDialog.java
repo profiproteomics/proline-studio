@@ -379,7 +379,7 @@ public class CustomExportDialog extends DefaultDialog {
 
 		            }, 
 		            new String[] {
-							"Internal field name", "Displayed field name", "Shown"
+							"Internal field name", "Displayed field name", "Exported"
 						}
 		        ) {
 		            Class[] types = new Class [] {

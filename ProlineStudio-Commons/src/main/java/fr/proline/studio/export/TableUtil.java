@@ -41,14 +41,13 @@ public class TableUtil {
 		for(int col=0;col<table.getColumnCount();col++) {
 			colNames[col] = table.getColumnName(col);
 		}
-		System.out.println("dest:" + i);
 		DefaultTableModel model = new javax.swing.table.DefaultTableModel(
 				
 				new Object [][] {
 
 	            }, 
 	            new String[] {
-						"Internal field name", "Displayed field name", "Shown"
+						"Internal field name", "Displayed field name", "Exported"
 					}
 	        ) {
 	            Class[] types = new Class [] {

@@ -9,7 +9,6 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Component;
 import java.awt.Dialog;
-import java.awt.Dimension;
 import java.awt.Window;
 import java.util.HashMap;
 
@@ -72,10 +71,10 @@ public class ExportPrideDialog extends DefaultDialog {
             replaceInternaleComponent(PrideProtocolDescPanel.getPrideProtocolDescPanel());
             setButtonVisible(BUTTON_BACK, true);
             revalidate();
-            repaint();
-
+            repaint();          
+            
             m_step = STEP_PANEL_PROTOCOL_DEF;
-
+            
             return false;
 
         } else if (m_step == STEP_PANEL_PROTOCOL_DEF) { // m_step == STEP_PANEL_PROTOCOL_DEF)

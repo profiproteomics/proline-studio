@@ -1,13 +1,18 @@
 package fr.proline.studio.rsmexplorer.tree.xic;
 
+import fr.proline.core.orm.uds.Aggregation;
+import fr.proline.core.orm.uds.BiologicalGroup;
+import fr.proline.core.orm.uds.BiologicalSample;
+import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.RawFile;
+import fr.proline.core.orm.uds.GroupSetup;
+import fr.proline.core.orm.uds.SampleAnalysis;
+import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
-import fr.proline.studio.dpm.serverfilesystem.RootInfo;
-import fr.proline.studio.dpm.serverfilesystem.ServerFile;
-import fr.proline.studio.dpm.serverfilesystem.ServerFileSystemView;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DeleteAction;
@@ -17,14 +22,14 @@ import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.SelectRawFileDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import org.slf4j.LoggerFactory;
 
 /**
  * XICDesignTree represents a XIC design
@@ -41,13 +46,18 @@ public class XICDesignTree extends AbstractTree {
     }
 
     public static XICDesignTree getDesignTree(AbstractNode top) {
-        m_designTree = new XICDesignTree(top);
+        m_designTree = new XICDesignTree(top, true);
+        return m_designTree;
+    }
+    
+    public static XICDesignTree getDesignTree(AbstractNode top, boolean editable) {
+        m_designTree = new XICDesignTree(top, editable);
         return m_designTree;
     }
 
-    private XICDesignTree(AbstractNode top) {
+    private XICDesignTree(AbstractNode top, boolean editable) {
 
-        setEditable(true);
+        setEditable(editable);
         
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
@@ -201,7 +211,7 @@ public class XICDesignTree extends AbstractTree {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
+        if (isEditable() && SwingUtilities.isRightMouseButton(e)) {
             triggerPopup(e);
         }
     }
@@ -281,5 +291,66 @@ public class XICDesignTree extends AbstractTree {
     private ArrayList<AbstractRSMAction> m_mainActions;
 
     
+    public void setExpDesign(DDataset dataset){
+        GroupSetup groupSetup = dataset.getGroupSetup();
+        List<DQuantitationChannel> listQuantChannels = dataset.getMasterQuantitationChannels().isEmpty() ? new ArrayList() : dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
+        
+        AbstractNode rootNode = (AbstractNode) m_model.getRoot();
+        List<BiologicalGroup> listBiologicalGroups = groupSetup.getBiologicalGroups();
+        int childIndex  = 0;
+        for (BiologicalGroup bioGroup : listBiologicalGroups) {
+            XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(bioGroup.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+            m_model.insertNodeInto(biologicalGroupNode, rootNode, childIndex);
+            List<BiologicalSample> listSample = bioGroup.getBiologicalSamples();
+            int childSampleIndex = 0;
+            for (BiologicalSample sample : listSample) {
+                String sampleName = sample.getName();
+                // split the name because in Studio the sampleName is saved as groupName+sampleName see Issue#12628
+                if (sampleName.startsWith(bioGroup.getName())){
+                    sampleName = sampleName.substring(bioGroup.getName().length());
+                }
+                XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
+                m_model.insertNodeInto(biologicalSampleNode, biologicalGroupNode, childSampleIndex);
+                List<SampleAnalysis> listSampleAnalysis = sample.getSampleReplicates();
+                int childSampleAnalysisIndex = 0;
+                for (SampleAnalysis sampleAnalysis : listSampleAnalysis) {
+                    DQuantitationChannel qCh = getQuantChannelSampleAnalysis(sampleAnalysis, listQuantChannels);
+                    if (qCh != null){
+                        String name = qCh.getResultFileName();
+                        // fake dataset
+                        DDataset dds = new DDataset(-1,dataset.getProject() , name, Dataset.DatasetType.IDENTIFICATION, 0, dataset.getResultSetId(), dataset.getResultSummaryId(), 1);
+                        DataSetData dsData = new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS ); 
+                        dsData.setDataset(dds);
+                        XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
+                        RunInfoData runInfoData = new RunInfoData();
+                        RunInfoData.RawFileSource rawFileSource = new RunInfoData.RawFileSource();
+                        RawFile rawFile = new RawFile();
+                        rawFile.setRawFileName(qCh.getMzdbFileName());
+                        rawFileSource.setLinkedRawFile(rawFile);
+                        runInfoData.setRawFileSource(rawFileSource);
+                        XICRunNode runNode = new XICRunNode(runInfoData);
+                        sampleAnalysisNode.add(runNode);
+                        sampleAnalysisNode.m_hasError = false;
+                        m_model.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childSampleAnalysisIndex);
+                        expandPath( new TreePath(sampleAnalysisNode.getPath()));
+                        childSampleAnalysisIndex++;
+                    }
+                }
+                childSampleIndex++;
+            }
+           // expandPath( new TreePath(biologicalGroupNode.getPath()));
+            childIndex++;
+        }
+    }
+    
+    private DQuantitationChannel getQuantChannelSampleAnalysis(SampleAnalysis sampleAnalysis, List<DQuantitationChannel> listQuantChannels){
+        for (DQuantitationChannel qCh : listQuantChannels) {
+            SampleAnalysis sampleReplicate = qCh.getSampleReplicate();
+            if (sampleReplicate != null && sampleReplicate.getId() == sampleAnalysis.getId()){
+                return qCh;
+            }
+        }
+        return null;
+    }
     
 }

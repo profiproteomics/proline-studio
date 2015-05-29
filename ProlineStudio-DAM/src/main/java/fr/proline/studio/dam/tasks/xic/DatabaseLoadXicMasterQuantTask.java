@@ -19,12 +19,15 @@ import fr.proline.core.orm.msi.dto.DQuantPeptideIon;
 import fr.proline.core.orm.msi.dto.DQuantProteinSet;
 import fr.proline.core.orm.msi.dto.MasterQuantProteinSetProperties;
 import fr.proline.core.orm.msi.dto.MasterQuantProteinSetProperties.MasterQuantProteinSetProfile;
+import fr.proline.core.orm.uds.BiologicalGroup;
 import fr.proline.core.orm.uds.BiologicalSample;
 import fr.proline.core.orm.uds.Dataset;
+import fr.proline.core.orm.uds.GroupSetup;
 import fr.proline.core.orm.uds.MasterQuantitationChannel;
 import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.core.orm.uds.QuantitationMethod;
+import fr.proline.core.orm.uds.SampleAnalysis;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
@@ -408,19 +411,20 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         dqc.setResultFileName(resultFileName);
                         dqc.setRawFilePath(rawPath);
                         // search for run_identification rawFileName (mzdb fileName) in UDS
-                        String queryUDS  = "SELECT ri.rawFile.rawFileName "
+                        String queryUDS  = "SELECT ri.rawFile.rawFileName, ri.rawFile.extension "
                                 + "FROM fr.proline.core.orm.uds.IdentificationDataset ri, fr.proline.core.orm.uds.Dataset ds "
                                 + "WHERE ri.id = ds.id AND "
                                 + "ds.resultSummaryId =:rsmId AND "
                                 + "ds.resultSetId =:rsId ";
-                        TypedQuery<String> queryMzdb = entityManagerUDS.createQuery(queryUDS, String.class);
+                        Query queryMzdb = entityManagerUDS.createQuery(queryUDS);
                         queryMzdb.setParameter("rsmId", qc.getIdentResultSummaryId());
                         queryMzdb.setParameter("rsId", rsId);
                         String mzdbFile = "";
                         try{
-                            mzdbFile = queryMzdb.getSingleResult();
-                        }catch(NonUniqueResultException | NoResultException e) {
-                            
+                            Object[] res = (Object[]) queryMzdb.getSingleResult();
+                            mzdbFile = res[0]+(res[1] == null ?"" :"."+(res[1].toString().toLowerCase()));
+                        }catch( Exception e) {
+                            m_logger.error("Error while retrieving mzdb file "+e);
                         }
                         dqc.setMzdbFileName(mzdbFile);
                         // search for raw map in LCMS database
@@ -481,6 +485,22 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
 
             }
             dataset.setMasterQuantitationChannels(masterQuantitationChannels);
+            // load groupSetup
+            Set<GroupSetup> groupSetupSet = datasetDB.getGroupSetups();
+            if (groupSetupSet != null && !groupSetupSet.isEmpty()){
+                GroupSetup groupSetup = groupSetupSet.iterator().next();
+                List<BiologicalGroup> listBiolGroup = groupSetup.getBiologicalGroups();
+                for (BiologicalGroup biolGroup : listBiolGroup) {
+                    List<BiologicalSample> listBiologicalSamples = biolGroup.getBiologicalSamples();
+                    for (BiologicalSample sample : listBiologicalSamples) {
+                        List<SampleAnalysis> listSampleAnalyis = sample.getSampleReplicates();
+                        for (SampleAnalysis sampleAnalysis : listSampleAnalyis) {
+                            sampleAnalysis.getDataset();
+                        }
+                    }
+                }
+                dataset.setGroupSetup(groupSetup);
+            }
 
             entityManagerMSI.getTransaction().commit();
             entityManagerUDS.getTransaction().commit();

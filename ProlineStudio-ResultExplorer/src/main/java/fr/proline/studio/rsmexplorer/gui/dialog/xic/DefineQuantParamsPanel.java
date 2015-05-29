@@ -277,6 +277,99 @@ public class DefineQuantParamsPanel extends JPanel{
 		"normalization_method": "MEDIAN_RATIO"
 	}*/
     
+    /**
+     * set the quanti params
+     * @param quantParams 
+     */
+    
+    /*
+    public void setQuantParams(Map<String,Object>  quantParams){
+        Map<String,Object> extRactParams = (Map<String,Object>) quantParams.get("extraction_params");
+        m_extractionMoZTolTF.setText((String) (extRactParams.get("moz_tol")));
+        
+        Map<String,Object> clusterParams = (Map<String,Object>) quantParams.get("clustering_params");
+        m_clusteringMoZTolTF.setText((String) clusterParams.get("moz_tol"));
+        m_clusteringTimeTolTF.setText((String) clusterParams.get("time_tol"));
+        for(int i=0; i<CLUSTERING_TIME_COMPUTATION_KEYS.length; i++){
+            if (CLUSTERING_TIME_COMPUTATION_KEYS[i].equals((String) clusterParams.get("time_computation"))){
+                m_clusteringTimeComputationCB.setSelectedIndex(i);
+                break;
+            }
+        }
+        for(int i=0; i<CLUSTERING_INTENSITY_COMPUTATION_KEYS.length; i++){
+            if (CLUSTERING_INTENSITY_COMPUTATION_KEYS[i].equals((String) clusterParams.get("intensity_computation"))){
+                m_clusteringIntensityComputationCB.setSelectedIndex(i);
+                break;
+            }
+        }
+        for(int i=0; i<ALIGNMENT_METHOD_KEYS.length; i++){
+            if (ALIGNMENT_METHOD_KEYS[i].equals((String) quantParams.get("aln_method_name"))){
+                m_alignmentMethodCB.setSelectedIndex(i);
+                break;
+            }
+        }
+        
+        Map<String,Object> alnParams =(Map<String,Object>) quantParams.get("aln_params");
+        m_alignmentMassIntervalTF.setText((String) alnParams.get("mass_interval"));
+        m_alignmentMaxIterationTF.setText((String) alnParams.get("max_iterations"));
+        for(int i=0; i<ALIGNMENT_SMOOTHING_METHOD_KEYS.length; i++){
+            if (ALIGNMENT_SMOOTHING_METHOD_KEYS[i].equals((String) alnParams.get("smoothing_method_name"))){
+                m_alignmentSmoothingMethodCB.setSelectedIndex(i);
+                break;
+            }
+        }
+        Map<String,Object> smootingParams =(Map<String,Object>) alnParams.get("smoothing_params");
+        m_alignmentSmoothingWinSizeTF.setText((String) smootingParams.get("window_size"));
+        m_alignmentSmoothingWinOverlapTF.setText((String) smootingParams.get("window_overlap"));
+        m_alignmentSmoothingMinWinlandmarksTF.setText((String) smootingParams.get("min_window_landmarks"));
+        Map<String,Object> alnFtParams = (Map<String,Object>) alnParams.get("ft_mapping_params");
+        m_alignmentFeatureMappingMoZTolTF.setText((String) alnFtParams.get("moz_tol"));
+        m_alignmentFeatureMappingTimeToleranceTF.setText((String) alnFtParams.get("time_tol"));
+        
+        Map<String,Object> ftParams =(Map<String,Object>) quantParams.get("ft_filter");
+        for(int i=0; i<FEATURE_FILTER_NAME_KEYS.length; i++){
+            if (FEATURE_FILTER_NAME_KEYS[i].equals((String) ftParams.get("name"))){
+                m_featureFilterNameCB.setSelectedIndex(i);
+                break;
+            }
+        }
+        for(int i=0; i<FEATURE_FILTER_OPERATOR_KEYS.length; i++){
+            if (FEATURE_FILTER_OPERATOR_KEYS[i].equals((String) ftParams.get("operator"))){
+                m_featureFilterOperatorCB.setSelectedIndex(i);
+                break;
+            }
+        }
+        m_featureFilterValueTF.setText((String) ftParams.get("value"));
+        
+        Map<String,Object> ftMappingParams =(Map<String,Object>) quantParams.get("ft_mapping_params");
+        m_featureMappingMoZTolTF.setText((String) ftMappingParams.get("moz_tol"));
+        m_featureMappingTimeTolTF.setText((String) ftMappingParams.get("time_tol"));
+        
+        if (quantParams.containsKey("normalization_method")){
+            for(int i=0; i<FEATURE_NORMALIZATION_KEYS.length; i++){
+                if (FEATURE_NORMALIZATION_KEYS[i].equals((String) quantParams.get("normalization_method"))){
+                    m_normalizationCB.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }else{
+            m_normalizationParameter.setValue(FEATURE_NORMALIZATION_VALUES[0]);
+        }
+        if ((Boolean)quantParams.get("detect_features")){
+            m_extractedXICFromParameter.setValue(FEATURE_EXTRACTED_XIC_VALUES[0]);
+            m_detectPeakelChB.setSelected(false);
+        }else{
+            if ((Boolean)quantParams.get("start_from_validated_peptides")){
+                m_extractedXICFromParameter.setValue(FEATURE_EXTRACTED_XIC_VALUES[1]);
+                m_detectPeakelChB.setSelected(false);
+            }else{
+                m_extractedXICFromParameter.setValue(FEATURE_EXTRACTED_XIC_VALUES[2]);
+                m_detectPeakelChB.setSelected(true);
+            }
+        }
+    }
+    */
+    
     public Map<String,Object> getQuantParams(){
         Map<String,Object> params = new HashMap<>();
         

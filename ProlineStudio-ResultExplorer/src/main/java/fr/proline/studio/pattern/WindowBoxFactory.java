@@ -5,10 +5,10 @@ import java.util.HashMap;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
+import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
-import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 
 import javax.swing.JComponent;
@@ -246,6 +246,16 @@ public class WindowBoxFactory {
         WindowBox winBox = new WindowBox("MzScope", generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.WAVE));
 
         return winBox;
+    }
+    
+    public static WindowBox getExperimentalDesignWindowBox(String name) {
+
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataboxExperimentalDesign();
+
+        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
+        return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
     public static WindowBox getTaskListWindowBox() {

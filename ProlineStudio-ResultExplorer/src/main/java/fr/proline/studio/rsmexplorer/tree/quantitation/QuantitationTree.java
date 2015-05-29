@@ -16,6 +16,7 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
+import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ExportAbundancesAction;
 import fr.proline.studio.rsmexplorer.tree.*;
@@ -202,11 +203,15 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         } else {
             if (m_mainPopup == null) {
                 // create the actions
-                m_mainActions = new ArrayList<>(11);  // <--- get in sync
+                m_mainActions = new ArrayList<>(12);  // <--- get in sync
                 
+                DisplayExperimentalDesignAction expDesignAction = new DisplayExperimentalDesignAction();
+                m_mainActions.add(expDesignAction);
+
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(propertiesAction);
-
+                
+                
                 m_mainActions.add(null);  // separator
 
                 ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
@@ -713,5 +718,14 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             }
         }
         getCurrentTree().updateUI();
+    }
+    
+    public AbstractNode copyCurrentNodeForSelection() {
+        AbstractNode[] nodes = getSelectedNodes();
+        if (nodes != null && nodes.length > 0){
+            return nodes[0].copyNode();
+        }
+        return null;
+
     }
 }

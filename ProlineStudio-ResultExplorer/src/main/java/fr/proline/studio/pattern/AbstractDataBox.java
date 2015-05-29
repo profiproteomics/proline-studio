@@ -1,19 +1,18 @@
 package fr.proline.studio.pattern;
 
-import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
+import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
 import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
 import fr.proline.studio.pattern.xic.DataboxXicProteinSet;
 import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.python.data.TableInfo;
-import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -101,7 +100,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataboxMultiGraphics(29),
         DataboxPSMOfMasterQuantPeptide(30),
         DataBoxMzScope(31),
-        DataboxDataMixer(32);
+        DataboxDataMixer(32),
+        DataboxExperimentalDesign(33);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -176,8 +176,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxMultiGraphics();
                 case DataboxPSMOfMasterQuantPeptide:
                     return new DataboxPSMOfMasterQuantPeptide();
-                 case DataBoxMzScope:
+                case DataBoxMzScope:
                     return new DataBoxMzScope();
+                case DataboxExperimentalDesign:
+                    return new DataboxExperimentalDesign();
             }
             return null; // should not happen
         }

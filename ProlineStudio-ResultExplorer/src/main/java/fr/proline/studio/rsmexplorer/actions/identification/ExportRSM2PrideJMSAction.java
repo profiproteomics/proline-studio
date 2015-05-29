@@ -1,35 +1,38 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.studio.dpm.AccessServiceThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.DownloadFileTask;
-import fr.proline.studio.dpm.task.ExportRSMTask;
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.DownloadFileTask;
+import fr.proline.studio.dpm.task.jms.ExportRSM2PrideTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.pride.ExportPrideDialog;
-import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Export a Identification Summary Action
- * 
+ *
  * @author VD225637
  */
-public class ExportRSM2PrideAction extends AbstractRSMAction {
-     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
-     
-    public ExportRSM2PrideAction(){
-        super("Export to Pride...", AbstractTree.TreeType.TREE_IDENTIFICATION);    
+public class ExportRSM2PrideJMSAction extends AbstractRSMAction {
+   
+    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+ 
+    public ExportRSM2PrideJMSAction(){
+        super("Export to Pride (JMS)... ", AbstractTree.TreeType.TREE_IDENTIFICATION);    
     }
     
-        @Override
+     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-
-        final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
-        
+        final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];        
 
         final ExportPrideDialog  dialog = new ExportPrideDialog(WindowManager.getDefault().getMainWindow());
         
@@ -49,7 +52,7 @@ public class ExportRSM2PrideAction extends AbstractRSMAction {
             protected Object doInBackground() throws Exception {
 
 
-                final AbstractServiceCallback downloadCallback = new AbstractServiceCallback() {
+                final AbstractJMSCallback downloadCallback = new AbstractJMSCallback() {
 
                     @Override
                     public boolean mustBeCalledInAWT() {
@@ -72,8 +75,9 @@ public class ExportRSM2PrideAction extends AbstractRSMAction {
 
                 // used as out parameter for the service
                 final String[] _filePath = new String[1];
+                final String[] _JMSNodeId = new String[1];
 
-                AbstractServiceCallback exportCallback = new AbstractServiceCallback() {
+                AbstractJMSCallback exportCallback = new AbstractJMSCallback() {
 
                     @Override
                     public boolean mustBeCalledInAWT() {
@@ -88,8 +92,8 @@ public class ExportRSM2PrideAction extends AbstractRSMAction {
                             if (!fileName.endsWith(".xml") && !fileName.endsWith(".XML")) {
                                 fileName += ".xml";
                             }
-                            DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath[0]);
-                            AccessServiceThread.getAccessServiceThread().addTask(task);
+                            DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath[0], _JMSNodeId[0]);
+                            AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
                         } else {
                             // nothing to do
@@ -98,11 +102,9 @@ public class ExportRSM2PrideAction extends AbstractRSMAction {
                         }
                     }
                 };
-                
-                ExportRSMTask task = new ExportRSMTask(exportCallback, dataSetNode.getDataset(), false, dialog.getExportParams(), true, _filePath);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
 
-                
+                ExportRSM2PrideTask task = new ExportRSM2PrideTask(exportCallback, dataSetNode.getDataset(), dialog.getExportParams(), _filePath, _JMSNodeId);
+                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
                 return null;
             }
@@ -113,12 +115,10 @@ public class ExportRSM2PrideAction extends AbstractRSMAction {
         dialog.setLocation(x, y);
         dialog.setVisible(true);
 
-
     }
-     
+    
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
-
         int nbSelectedNodes = selectedNodes.length;
 
         // Only one at the time
@@ -144,4 +144,6 @@ public class ExportRSM2PrideAction extends AbstractRSMAction {
         setEnabled(true);
     }
     
+    
+   
 }

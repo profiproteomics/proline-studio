@@ -10,8 +10,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -80,7 +78,11 @@ public class PrideProtocolDescPanel extends PrideWizardPanel {
         c.weightx=1;
         c.weighty=1;
         m_protocolDescriptionTextArea  = new JTextArea();
-        m_protocolDescriptionTextArea.setText("<Protocol>\n<ProtocolName>TO BE REPLACED !!!! </ProtocolName>\n<ProtocolSteps></ProtocolSteps>\n</Protocol>");
+        m_protocolDescriptionTextArea.setText("<Protocol>\n\t<ProtocolName>In Gel Protein Digestion</ProtocolName>\n\t<ProtocolSteps>\n"
+                + "\t\t<StepDescription>\n\t\t\t<cvParam cvLabel=\"PRIDE\" accession=\"PRIDE:0000025\" name=\"Reduction\" value=\"DTT\" />\n\t\t</StepDescription>\n"
+                + "\t\t<StepDescription>\n\t\t\t<cvParam cvLabel=\"PRIDE\" accession=\"PRIDE:0000026\" name=\"Alkylation\" value=\"iodoacetamide\" />\n\t\t</StepDescription>\n"
+                + "\t\t<StepDescription>\n\t\t\t<cvParam cvLabel=\"PRIDE\" accession=\"PRIDE:0000160\" name=\"Enzyme\" value=\"Trypsin\" />\n\t\t</StepDescription>\n"
+                + "\t</ProtocolSteps>\n</Protocol>");
         JScrollPane protocolSP = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         protocolSP.setViewportView(m_protocolDescriptionTextArea);
         mainPanel.add(protocolSP, c);

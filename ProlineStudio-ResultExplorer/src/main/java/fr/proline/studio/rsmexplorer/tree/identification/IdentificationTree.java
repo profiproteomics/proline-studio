@@ -20,7 +20,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.EmptyTrashAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateMSDiagReportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProteinJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ExportRSM2PrideAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ExportRSM2PrideJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportRSMJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsRsetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.MergeJMSAction;
@@ -37,6 +37,8 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ExportRSM2PrideAction;
+import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
@@ -603,7 +605,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             if (m_mainPopup == null) {
 
                 // create the actions
-                m_mainActions = new ArrayList<>(18);  // <--- get in sync
+                m_mainActions = new ArrayList<>(19);  // <--- get in sync
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction();
                 m_mainActions.add(displayRsetAction);
@@ -635,6 +637,14 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(validateAction);
                 }
 
+//                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+//                    ValidateJMSAction validateJMSAction = new ValidateJMSAction();
+//                    m_mainActions.add(validateJMSAction);
+//                } else {
+                    FilterRSMProteinSetsAction filterProtSetAction = new FilterRSMProteinSetsAction();
+                    m_mainActions.add(filterProtSetAction);
+//                }
+                
                 if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
                     ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction();
                     m_mainActions.add(changeTypicalProteinJmsAction);
@@ -666,6 +676,9 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 
 
                 if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                    ExportRSM2PrideJMSAction exportRSM2PrideAction = new ExportRSM2PrideJMSAction();
+                    m_mainActions.add(exportRSM2PrideAction);
+                } else {
                     ExportRSM2PrideAction exportRSM2PrideAction = new ExportRSM2PrideAction();
                     m_mainActions.add(exportRSM2PrideAction);
                 }

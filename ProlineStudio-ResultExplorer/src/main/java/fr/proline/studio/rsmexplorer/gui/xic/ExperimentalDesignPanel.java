@@ -19,6 +19,7 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -38,8 +39,9 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private JPanel m_expDesignPanel;
     private XICDesignTree m_expDesignTree;
     private ExportButton m_exportButton;
-    //private DefineQuantParamsPanel m_xicParamPanel;
-    //private JSplitPane m_splitPane;
+    private DefineQuantParamsPanel m_xicParamPanel;
+    private JSplitPane m_splitPane;
+    private JPanel m_confPanel;
     
     private DDataset m_dataset;
 
@@ -84,10 +86,10 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
-        /*m_splitPane = new JSplitPane();
+        m_splitPane = new JSplitPane();
         m_splitPane.setDividerLocation(350);
         m_splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        m_splitPane.setOneTouchExpandable(true);*/
+        m_splitPane.setOneTouchExpandable(true);
         
         // create objects
         m_scrollPaneExpDesign = new JScrollPane();
@@ -97,20 +99,20 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         m_expDesignPanel.add(m_expDesignTree, BorderLayout.CENTER);
         m_scrollPaneExpDesign.setViewportView(m_expDesignPanel);
         
-        /*
-        m_xicParamPanel = new DefineQuantParamsPanel(false);
-        m_xicParamPanel.resetScrollbar();
+        m_confPanel = new JPanel();
+        m_confPanel.setLayout(new BorderLayout());
         
-        m_splitPane.setRightComponent(m_xicParamPanel);
-        m_splitPane.setLeftComponent(m_scrollPaneExpDesign);*/
+        
+        m_splitPane.setRightComponent(m_confPanel);
+        m_splitPane.setLeftComponent(m_scrollPaneExpDesign);
         
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
-        //internalPanel.add(m_splitPane, c);
-        internalPanel.add(m_scrollPaneExpDesign, c);
+        internalPanel.add(m_splitPane, c);
+        //internalPanel.add(m_scrollPaneExpDesign, c);
         return internalPanel;
     }
 
@@ -142,23 +144,30 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     
     public void setData(Long taskId, DDataset dataset, boolean finished) {
         m_dataset = dataset;
-        m_expDesignTree.setExpDesign(m_dataset);
-       /* try {
-            if (dataset.getQuantProcessingConfig() != null) {
-                m_xicParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());
-            }
-        } catch (Exception ex) {
-            m_logger.error("error while settings quanti params "+ex);
-        }*/
+        updateData();
     }
     
     public void dataUpdated(SubTask subTask, boolean finished) {
+        updateData();
+    }
+    
+    private void updateData(){
         m_expDesignTree.setExpDesign(m_dataset);
-        /*try {
-            m_xicParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());
+        try {
+            if (m_dataset.getQuantProcessingConfig() != null){
+                m_confPanel.removeAll();
+                m_xicParamPanel = new DefineQuantParamsPanel(true);
+                m_xicParamPanel.resetScrollbar();
+                m_confPanel.add(m_xicParamPanel, BorderLayout.CENTER);
+                m_xicParamPanel.setQuantParams(m_dataset.getQuantProcessingConfigAsMap());
+            }else{
+                m_confPanel.removeAll();
+                m_confPanel.add(new JLabel("no configuration available"), BorderLayout.CENTER);
+            }
         } catch (Exception ex) {
             m_logger.error("error while settings quanti params "+ex);
-        }*/
+        }
+        m_splitPane.revalidate();
     }
 
 

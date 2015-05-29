@@ -21,7 +21,7 @@ import org.openide.util.NbPreferences;
 public class DefineQuantParamsPanel extends JPanel{
     
     private static DefineQuantParamsPanel m_singleton = null;
-    
+    private boolean m_readOnly;
     private ParameterList m_parameterList;
     
     private final static String[] CLUSTERING_TIME_COMPUTATION_VALUES = {"Most Intense", "Median"};
@@ -93,8 +93,8 @@ public class DefineQuantParamsPanel extends JPanel{
     
     private JTabbedPane m_tabbedPane;
     
-    private DefineQuantParamsPanel() {
-       
+    public DefineQuantParamsPanel(boolean readOnly) {
+       m_readOnly = readOnly;
         m_parameterList = new ParameterList("XicParameters");
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());
@@ -104,8 +104,9 @@ public class DefineQuantParamsPanel extends JPanel{
         }
         
         setLayout(new BorderLayout());
-        
-        add(createWizardPanel(), BorderLayout.PAGE_START);
+        if (!m_readOnly){
+            add(createWizardPanel(), BorderLayout.PAGE_START);
+        }
 
 
         JPanel mainPanel = createMainPanel();
@@ -118,7 +119,7 @@ public class DefineQuantParamsPanel extends JPanel{
    
     public static DefineQuantParamsPanel getDefineQuantPanel() {
          if (m_singleton == null) {
-            m_singleton = new DefineQuantParamsPanel();
+            m_singleton = new DefineQuantParamsPanel(false);
         }
 
         return m_singleton;
@@ -131,85 +132,104 @@ public class DefineQuantParamsPanel extends JPanel{
     public final void createParameters() {
         
         m_extractionMoZTolTF = new JTextField();
+        m_extractionMoZTolTF.setEnabled(!m_readOnly);
         DoubleParameter extractionMoZTolParameter = new DoubleParameter("extractionMoZTol", "Extraction moz tolerance", m_extractionMoZTolTF, new Double(5), new Double(0), null);
         m_parameterList.add(extractionMoZTolParameter);
         
         m_clusteringMoZTolTF = new JTextField();
+        m_clusteringMoZTolTF.setEnabled(!m_readOnly);
         DoubleParameter m_clusteringMoZTolParameter = new DoubleParameter("clusteringMoZTol", "Clustering moz tolerance", m_clusteringMoZTolTF, new Double(5), new Double(0), null);
         m_parameterList.add(m_clusteringMoZTolParameter);
         
         m_clusteringTimeTolTF = new JTextField();
+        m_clusteringTimeTolTF.setEnabled(!m_readOnly);
         DoubleParameter m_clusteringTimeTolParameter = new DoubleParameter("clusteringTimeTol", "Clustering time tolerance", m_clusteringTimeTolTF, new Double(15), new Double(0), null);
         m_parameterList.add(m_clusteringTimeTolParameter);
 
         m_clusteringTimeComputationCB = new JComboBox(CLUSTERING_TIME_COMPUTATION_VALUES);
+        m_clusteringTimeComputationCB.setEnabled(!m_readOnly);
         m_clusteringTimeComputationParameter = new ObjectParameter<>("clusteringTimeComputation", "Clustering time computation", m_clusteringTimeComputationCB, CLUSTERING_TIME_COMPUTATION_VALUES, CLUSTERING_TIME_COMPUTATION_KEYS,  0, null);
         m_parameterList.add(m_clusteringTimeComputationParameter);
         
 
         
         m_clusteringIntensityComputationCB = new JComboBox(CLUSTERING_INTENSITY_COMPUTATION_VALUES);
+        m_clusteringIntensityComputationCB.setEnabled(!m_readOnly);
         m_clusteringIntensityComputationParameter = new ObjectParameter<>("clusteringIntensityComputation", "Clustering intensity computation", m_clusteringIntensityComputationCB, CLUSTERING_INTENSITY_COMPUTATION_VALUES, CLUSTERING_INTENSITY_COMPUTATION_KEYS, 0, null);
         m_parameterList.add(m_clusteringIntensityComputationParameter);
 
         
         m_alignmentMethodCB = new JComboBox(ALIGNMENT_METHOD_VALUES);
+        m_alignmentMethodCB.setEnabled(!m_readOnly);
         m_alignmentMethodParameter = new ObjectParameter<>("alignmentMethod", "Alignment Method", m_alignmentMethodCB, ALIGNMENT_METHOD_VALUES, ALIGNMENT_METHOD_KEYS,  1, null);
         m_parameterList.add(m_alignmentMethodParameter);
 
         m_alignmentMaxIterationTF = new JTextField();
+        m_alignmentMaxIterationTF.setEnabled(!m_readOnly);
         IntegerParameter alignmentMaxIterationParameter = new IntegerParameter("alignmentMaxIteration", "Alignment max iteration", m_alignmentMaxIterationTF, new Integer(3), new Integer(1), null);
         m_parameterList.add(alignmentMaxIterationParameter);
         
         m_alignmentSmoothingMethodCB = new JComboBox(ALIGNMENT_SMOOTHING_METHOD_VALUES);
+        m_alignmentSmoothingMethodCB.setEnabled(!m_readOnly);
         m_alignmentSmoothingMethodParameter = new ObjectParameter<>("alignmentSmoothingMethod", "Alignment Smoothing Method", m_alignmentSmoothingMethodCB, ALIGNMENT_SMOOTHING_METHOD_VALUES, ALIGNMENT_SMOOTHING_METHOD_KEYS,  2, null);
         m_parameterList.add(m_alignmentSmoothingMethodParameter);
 
         
         m_alignmentSmoothingWinSizeTF = new JTextField();
+        m_alignmentSmoothingWinSizeTF.setEnabled(!m_readOnly);
         IntegerParameter alignmentSmoothingWinSizeParameter = new IntegerParameter("alignmentTimeInterval", "Alignment time interval", m_alignmentSmoothingWinSizeTF, new Integer(200), new Integer(1), null);
         m_parameterList.add(alignmentSmoothingWinSizeParameter);
         
         m_alignmentSmoothingWinOverlapTF = new JTextField();
+        m_alignmentSmoothingWinOverlapTF.setEnabled(!m_readOnly);
         IntegerParameter alignmentSmoothingWinOverlapParameter = new IntegerParameter("smoothingSlidingWindowOverlap", "Smoothing sliding window overlap", m_alignmentSmoothingWinOverlapTF, new Integer(20), new Integer(1), new Integer(100));
         m_parameterList.add(alignmentSmoothingWinOverlapParameter);
         
          m_alignmentSmoothingMinWinlandmarksTF = new JTextField();
+         m_alignmentSmoothingMinWinlandmarksTF.setEnabled(!m_readOnly);
         IntegerParameter alignmentSmoothingMinWinlandmarksParameter = new IntegerParameter("smoothingMinimumNumberOfLandmarks", "Smoothing minimum number of landmarks", m_alignmentSmoothingMinWinlandmarksTF, new Integer(50), new Integer(1), null);
         m_parameterList.add(alignmentSmoothingMinWinlandmarksParameter);
         
         m_alignmentFeatureMappingMoZTolTF = new JTextField();
+        m_alignmentFeatureMappingMoZTolTF.setEnabled(!m_readOnly);
         IntegerParameter alignmentFeatureMappingMoZTolParameter = new IntegerParameter("featureMappingMozTolerance", "Feature Mapping Moz Tolerance", m_alignmentFeatureMappingMoZTolTF, new Integer(5), new Integer(0), null);
         m_parameterList.add(alignmentFeatureMappingMoZTolParameter);
         
         m_alignmentFeatureMappingTimeToleranceTF = new JTextField();
+        m_alignmentFeatureMappingTimeToleranceTF.setEnabled(!m_readOnly);
         IntegerParameter alignmentFeatureMappingTimeToleranceParameter = new IntegerParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMappingTimeToleranceTF, new Integer(600), new Integer(1), null);
         m_parameterList.add(alignmentFeatureMappingTimeToleranceParameter);
         
         m_featureFilterNameCB  = new JComboBox(FEATURE_FILTER_NAME_VALUES);
+        m_featureFilterNameCB.setEnabled(!m_readOnly);
         m_featureFilterNameParameter = new ObjectParameter<>("featureFilterNameParameter ", "Feature Name Parameter", m_featureFilterNameCB, FEATURE_FILTER_NAME_VALUES, FEATURE_FILTER_NAME_KEYS,  0, null);
         m_parameterList.add(m_featureFilterNameParameter);
         
         m_featureFilterOperatorCB = new JComboBox(FEATURE_FILTER_OPERATOR_VALUES);
+        m_featureFilterOperatorCB.setEnabled(!m_readOnly);
         m_featureFilterOperatorParameter = new ObjectParameter<>("featureFilterOperator ", "Feature Filter Operator", m_featureFilterOperatorCB, FEATURE_FILTER_OPERATOR_VALUES, FEATURE_FILTER_OPERATOR_KEYS,  0, null);
         m_parameterList.add(m_featureFilterOperatorParameter);
         
 
         m_featureFilterValueTF = new JTextField();
+        m_featureFilterValueTF.setEnabled(!m_readOnly);
         DoubleParameter m_featureFilterValueParameter = new DoubleParameter("featureFilterValue", "Feature Filter Value", m_featureFilterValueTF, new Double(0), null, null);
         m_parameterList.add(m_featureFilterValueParameter);
         
         m_featureMappingMoZTolTF = new JTextField();
+        m_featureMappingMoZTolTF.setEnabled(!m_readOnly);
         DoubleParameter featureMappingMoZTolParameter = new DoubleParameter("featureMoZTol", "Feature moz tolerance", m_featureMappingMoZTolTF, new Double(10), new Double(0), null);
         m_parameterList.add(featureMappingMoZTolParameter);
         
         
         m_featureMappingTimeTolTF = new JTextField();
+        m_featureMappingTimeTolTF.setEnabled(!m_readOnly);
         IntegerParameter featureMappingTimeTolParameter = new IntegerParameter("featureTimeTol", "Feature time tolerance", m_featureMappingTimeTolTF, new Integer(120), new Integer(0), null);
         m_parameterList.add(featureMappingTimeTolParameter);
         
         
         m_normalizationCB = new JComboBox(FEATURE_NORMALIZATION_VALUES);
+        m_normalizationCB.setEnabled(!m_readOnly);
         m_normalizationParameter = new ObjectParameter<>("normalization", "Normalization", m_normalizationCB, FEATURE_NORMALIZATION_VALUES, FEATURE_NORMALIZATION_KEYS,  2, null);
         m_parameterList.add(m_normalizationParameter);
 
@@ -222,10 +242,12 @@ public class DefineQuantParamsPanel extends JPanel{
 //        m_parameterList.add(validatedPSMsParameter);
         
         m_extractedXICFromCB = new JComboBox(FEATURE_EXTRACTED_XIC_VALUES);
+        m_extractedXICFromCB.setEnabled(!m_readOnly);
         m_extractedXICFromParameter = new ObjectParameter<>("extractedXICFrom", "ExtractedXICFrom", m_extractedXICFromCB, FEATURE_EXTRACTED_XIC_VALUES, FEATURE_EXTRACTED_XIC_KEYS,  0, null);
         m_parameterList.add(m_extractedXICFromParameter);
         
         m_detectPeakelChB = new JCheckBox("Deisotoping Identification Based");
+        m_detectPeakelChB.setEnabled(!m_readOnly);
         m_detectPeakelsParameter = new BooleanParameter("detectPeakel", "Deisotoping Identification Based", m_detectPeakelChB, true);
         m_parameterList.add(m_detectPeakelsParameter);
  
@@ -281,23 +303,21 @@ public class DefineQuantParamsPanel extends JPanel{
      * set the quanti params
      * @param quantParams 
      */
-    
-    /*
     public void setQuantParams(Map<String,Object>  quantParams){
         Map<String,Object> extRactParams = (Map<String,Object>) quantParams.get("extraction_params");
-        m_extractionMoZTolTF.setText((String) (extRactParams.get("moz_tol")));
+        m_extractionMoZTolTF.setText(extRactParams.get("moz_tol").toString());
         
         Map<String,Object> clusterParams = (Map<String,Object>) quantParams.get("clustering_params");
-        m_clusteringMoZTolTF.setText((String) clusterParams.get("moz_tol"));
-        m_clusteringTimeTolTF.setText((String) clusterParams.get("time_tol"));
+        m_clusteringMoZTolTF.setText(clusterParams.get("moz_tol").toString());
+        m_clusteringTimeTolTF.setText(clusterParams.get("time_tol").toString());
         for(int i=0; i<CLUSTERING_TIME_COMPUTATION_KEYS.length; i++){
-            if (CLUSTERING_TIME_COMPUTATION_KEYS[i].equals((String) clusterParams.get("time_computation"))){
+            if (CLUSTERING_TIME_COMPUTATION_KEYS[i].equals(clusterParams.get("time_computation").toString())){
                 m_clusteringTimeComputationCB.setSelectedIndex(i);
                 break;
             }
         }
         for(int i=0; i<CLUSTERING_INTENSITY_COMPUTATION_KEYS.length; i++){
-            if (CLUSTERING_INTENSITY_COMPUTATION_KEYS[i].equals((String) clusterParams.get("intensity_computation"))){
+            if (CLUSTERING_INTENSITY_COMPUTATION_KEYS[i].equals(clusterParams.get("intensity_computation").toString())){
                 m_clusteringIntensityComputationCB.setSelectedIndex(i);
                 break;
             }
@@ -310,8 +330,8 @@ public class DefineQuantParamsPanel extends JPanel{
         }
         
         Map<String,Object> alnParams =(Map<String,Object>) quantParams.get("aln_params");
-        m_alignmentMassIntervalTF.setText((String) alnParams.get("mass_interval"));
-        m_alignmentMaxIterationTF.setText((String) alnParams.get("max_iterations"));
+        m_alignmentMassIntervalTF.setText(alnParams.get("mass_interval").toString());
+        m_alignmentMaxIterationTF.setText(alnParams.get("max_iterations").toString());
         for(int i=0; i<ALIGNMENT_SMOOTHING_METHOD_KEYS.length; i++){
             if (ALIGNMENT_SMOOTHING_METHOD_KEYS[i].equals((String) alnParams.get("smoothing_method_name"))){
                 m_alignmentSmoothingMethodCB.setSelectedIndex(i);
@@ -319,12 +339,12 @@ public class DefineQuantParamsPanel extends JPanel{
             }
         }
         Map<String,Object> smootingParams =(Map<String,Object>) alnParams.get("smoothing_params");
-        m_alignmentSmoothingWinSizeTF.setText((String) smootingParams.get("window_size"));
-        m_alignmentSmoothingWinOverlapTF.setText((String) smootingParams.get("window_overlap"));
-        m_alignmentSmoothingMinWinlandmarksTF.setText((String) smootingParams.get("min_window_landmarks"));
+        m_alignmentSmoothingWinSizeTF.setText(smootingParams.get("window_size").toString());
+        m_alignmentSmoothingWinOverlapTF.setText(smootingParams.get("window_overlap").toString());
+        m_alignmentSmoothingMinWinlandmarksTF.setText(smootingParams.get("min_window_landmarks").toString());
         Map<String,Object> alnFtParams = (Map<String,Object>) alnParams.get("ft_mapping_params");
-        m_alignmentFeatureMappingMoZTolTF.setText((String) alnFtParams.get("moz_tol"));
-        m_alignmentFeatureMappingTimeToleranceTF.setText((String) alnFtParams.get("time_tol"));
+        m_alignmentFeatureMappingMoZTolTF.setText(alnFtParams.get("moz_tol").toString());
+        m_alignmentFeatureMappingTimeToleranceTF.setText(alnFtParams.get("time_tol").toString());
         
         Map<String,Object> ftParams =(Map<String,Object>) quantParams.get("ft_filter");
         for(int i=0; i<FEATURE_FILTER_NAME_KEYS.length; i++){
@@ -339,11 +359,11 @@ public class DefineQuantParamsPanel extends JPanel{
                 break;
             }
         }
-        m_featureFilterValueTF.setText((String) ftParams.get("value"));
+        m_featureFilterValueTF.setText(ftParams.get("value").toString());
         
         Map<String,Object> ftMappingParams =(Map<String,Object>) quantParams.get("ft_mapping_params");
-        m_featureMappingMoZTolTF.setText((String) ftMappingParams.get("moz_tol"));
-        m_featureMappingTimeTolTF.setText((String) ftMappingParams.get("time_tol"));
+        m_featureMappingMoZTolTF.setText( ftMappingParams.get("moz_tol").toString());
+        m_featureMappingTimeTolTF.setText(ftMappingParams.get("time_tol").toString());
         
         if (quantParams.containsKey("normalization_method")){
             for(int i=0; i<FEATURE_NORMALIZATION_KEYS.length; i++){
@@ -356,19 +376,19 @@ public class DefineQuantParamsPanel extends JPanel{
             m_normalizationParameter.setValue(FEATURE_NORMALIZATION_VALUES[0]);
         }
         if ((Boolean)quantParams.get("detect_features")){
-            m_extractedXICFromParameter.setValue(FEATURE_EXTRACTED_XIC_VALUES[0]);
+            m_extractedXICFromCB.setSelectedIndex(0);
             m_detectPeakelChB.setSelected(false);
         }else{
             if ((Boolean)quantParams.get("start_from_validated_peptides")){
-                m_extractedXICFromParameter.setValue(FEATURE_EXTRACTED_XIC_VALUES[1]);
+                m_extractedXICFromCB.setSelectedIndex(1);
                 m_detectPeakelChB.setSelected(false);
             }else{
-                m_extractedXICFromParameter.setValue(FEATURE_EXTRACTED_XIC_VALUES[2]);
+                m_extractedXICFromCB.setSelectedIndex(2);
                 m_detectPeakelChB.setSelected(true);
             }
         }
     }
-    */
+    
     
     public Map<String,Object> getQuantParams(){
         Map<String,Object> params = new HashMap<>();
@@ -487,7 +507,7 @@ public class DefineQuantParamsPanel extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 boolean start_from_validated_peptides = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ALL_DETECTABLE_FEATURES")) ;
-                m_detectPeakelChB.setEnabled(start_from_validated_peptides);
+                m_detectPeakelChB.setEnabled(!m_readOnly && start_from_validated_peptides);
             }
         });
             
@@ -635,6 +655,7 @@ public class DefineQuantParamsPanel extends JPanel{
         m_alignmentMassIntervalTF = new JTextField();
         m_alignmentMassIntervalTF.setText("20000"); //VDS TODO : hide ? see DBO description
         m_alignmentMassIntervalTF.setEditable(false);//VDS - DBO info :  Mass Interval (hidden / non-editable)
+        m_alignmentMassIntervalTF.setEnabled(!m_readOnly);
         alignmentPanel.add(m_alignmentMassIntervalTF, c);
         c.weightx = 0;
         

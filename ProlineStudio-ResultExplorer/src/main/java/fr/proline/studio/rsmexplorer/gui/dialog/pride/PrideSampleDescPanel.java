@@ -279,13 +279,17 @@ public class PrideSampleDescPanel extends PrideWizardPanel implements OLSInputab
         if(field.equals(SPECIES_FIELD)){
             CVParam newParam = new CVParam(ontologyShort, accession ,selectedValue,"" );
             m_sampleSpeciesCBModel.addElement(newParam);
-            m_sampleSpeciesCBModel.setSelectedItem(newParam);            
+            m_sampleSpeciesCB.setSelectedItem(newParam);
         } else  if(field.equals(TISSUE_FIELD)){
             CVParam newParam = new CVParam(ontologyShort, accession ,selectedValue,"" );
-            m_sampleTissueCBList.addItem(m_sampleTissueCBList.getListSize(), newParam, Boolean.TRUE);
+            int newElemIndex = m_sampleTissueCBList.getListSize();
+            m_sampleTissueCBList.addItem(newElemIndex, newParam, Boolean.TRUE);
+            m_sampleTissueCBList.ensureIndexIsVisible(newElemIndex);
         }else {// if(field.equals(CELLTYPE_FIELD)){
-            CVParam newParam = new CVParam(ontologyShort, accession ,selectedValue,"" );
-            m_sampleCellCBList.addItem(m_sampleTissueCBList.getListSize(), newParam, Boolean.TRUE);
+            CVParam newParam = new CVParam(ontologyShort, accession ,selectedValue,"" );           
+            int newElemIndex = m_sampleCellCBList.getListSize();
+            m_sampleCellCBList.addItem(newElemIndex, newParam, Boolean.TRUE);
+            m_sampleCellCBList.ensureIndexIsVisible(newElemIndex);
         }
 }
 

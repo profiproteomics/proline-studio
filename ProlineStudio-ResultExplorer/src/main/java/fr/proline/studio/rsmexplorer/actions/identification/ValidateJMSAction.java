@@ -8,12 +8,10 @@ import fr.proline.studio.dam.taskinfo.TaskInfo;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.ChangeTypicalProteinTask;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.ChangeTypicalProteinTask;
 import fr.proline.studio.dpm.task.jms.ValidationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
@@ -88,8 +86,6 @@ public class ValidateJMSAction extends AbstractRSMAction {
         }
 
 
-
-
         ValidationDialog dialog = ValidationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setDatasetList(datasetList);
@@ -140,12 +136,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
                     // there is no result summary, we start validation at once
                     askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType);
                 }
-
-
-
             }
-
-
         }
     }
 
@@ -192,7 +183,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
         
                 final DDataset d = datasetNode.getDataset();
 
-                AbstractServiceCallback callback = new AbstractServiceCallback() {
+                 AbstractJMSCallback callback = new AbstractJMSCallback() {
 
                     @Override
                     public boolean mustBeCalledInAWT() {
@@ -213,7 +204,7 @@ public class ValidateJMSAction extends AbstractRSMAction {
                 };
 
                 ChangeTypicalProteinTask task = new ChangeTypicalProteinTask(callback, d, changeTypicalRules);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
+                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
     }
     
     private void updateDataset(final DataSetNode datasetNode, final DDataset d, long resultSummaryId, TaskInfo taskInfo, final List<ChangeTypicalRule> changeTypicalRules) {

@@ -141,10 +141,15 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         if ((nbNodes > 1) ){
             if (m_mainPopup == null) {
                 // create the actions
-                m_mainActions = new ArrayList<>(1);  // <--- get in sync
+                m_mainActions = new ArrayList<>(3);  // <--- get in sync
                 
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(propertiesAction);
+                
+                m_mainActions.add(null);  // separator
+                
+                ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                m_mainActions.add(exportDatasetAction);       
                 // add actions to popup
             }
             m_mainPopup = new JPopupMenu();

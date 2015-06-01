@@ -5,6 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.DownloadFileTask;
@@ -37,7 +38,7 @@ public class ExportDatasetAction extends AbstractRSMAction {
     }
 
     @Override
-    public void actionPerformed(AbstractNode[] selectedNodes, final int x, final int y) {
+    public void actionPerformed(final AbstractNode[] selectedNodes, final int x, final int y) {
 
         final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
         m_config = new ArrayList();
@@ -65,12 +66,13 @@ public class ExportDatasetAction extends AbstractRSMAction {
 
                     @Override
                     public void run(boolean success) {
-                        final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false);
+                        final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false, selectedNodes.length ==1 );
                         loadWaitingDialog.setVisible(false);
                         if (success) {
                             if (!m_config.isEmpty()) {
                                 String conf = m_config.get(0);
                                 dialog.setDefaultExportConfig(conf);
+                                dialog.updateFileExport();
                             }
                         } else {
                             // nothing to do
@@ -136,6 +138,7 @@ public class ExportDatasetAction extends AbstractRSMAction {
                                                 DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0));
                                                 AccessServiceThread.getAccessServiceThread().addTask(task);
                                             }else {
+                                                int nb = 1;
                                                 for (String _filePath1 : _filePath) {
                                                     int id = _filePath1.lastIndexOf("\\");
                                                     int idUnderscore = _filePath1.lastIndexOf("_");
@@ -144,6 +147,15 @@ public class ExportDatasetAction extends AbstractRSMAction {
                                                     if (id != -1 && idUnderscore != -1 && idExtC != -1 ){
                                                         fn = fileName.substring(0, idExtC) +"_"+_filePath1.substring(id+1, idUnderscore)+"."+extension;
                                                     }
+                                                    if (!dialog.isFileExportMode()){
+                                                        String dirName = dialog.getFileName();
+                                                        if (!dirName.endsWith("\\")){
+                                                            dirName += "\\";
+                                                        }
+                                                        String dsName = getDatasetName(_filePath1.substring(id+1), selectedNodes);
+                                                        fn = dirName+"_"+_filePath1.substring(id+1, idUnderscore)+dsName+nb+"."+extension;
+                                                    }
+                                                    nb++;
                                                     DownloadFileTask task = new DownloadFileTask(downloadCallback, fn, _filePath1);
                                                     AccessServiceThread.getAccessServiceThread().addTask(task);
                                                 }
@@ -158,7 +170,11 @@ public class ExportDatasetAction extends AbstractRSMAction {
                                 };
 
                                 String exportConfig = dialog.getExportConfig();
-                                ExportDatasetTask task = new ExportDatasetTask(exportCallback, dataSetNode.getDataset(), exportConfig, _filePath);
+                                List<DDataset> listDataset = new ArrayList();
+                                for (AbstractNode node : selectedNodes) {
+                                    listDataset.add(((DataSetNode)node).getDataset());
+                                }
+                                ExportDatasetTask task = new ExportDatasetTask(exportCallback, listDataset, exportConfig, _filePath);
                                 AccessServiceThread.getAccessServiceThread().addTask(task);
 
                                 return null;
@@ -181,36 +197,63 @@ public class ExportDatasetAction extends AbstractRSMAction {
         loadWaitingDialog.setVisible(true);
 
     }
+    
+    public String getDatasetName(String fileName, AbstractNode[] selectedNodes){
+        int id0 = fileName.indexOf("-");
+        int id1 = fileName.indexOf("_");
+        if (id0 > -1 && id1 > -1){
+            String dsIdStr = fileName.substring(id0+1, id1);
+            try{
+                Long dsId  = Long.parseLong(dsIdStr);
+                for (AbstractNode node : selectedNodes) {
+                    if (((DataSetNode)node).getDataset().getId() == dsId){
+                        return "_"+((DataSetNode)node).getDataset().getName()+"_";
+                    }
+                }
+            }catch(NumberFormatException e){
+                
+            }
+            
+        }
+        return "";
+    }
 
     @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
         int nbSelectedNodes = selectedNodes.length;
 
-        // Only one at the time
-        if (nbSelectedNodes != 1) {
+        if (nbSelectedNodes < 1) {
             setEnabled(false);
             return;
         }
 
-        AbstractNode node = selectedNodes[0];
+        int mode = ((DataSetNode)selectedNodes[0]).isQuantSC() ? 1 : (((DataSetNode)selectedNodes[0]).isQuantXIC()?2 : 0);
+        for (AbstractNode node : selectedNodes) {
+            if (node.isChanging()) {
+                setEnabled(false);
+                return;
+            }
 
-        if (node.isChanging()) {
-            setEnabled(false);
-            return;
-        }
+            AbstractNode.NodeTypes nodeType = node.getType();
+            if (nodeType != AbstractNode.NodeTypes.DATA_SET) {
+                setEnabled(false);
+                return;
+            }
 
-        AbstractNode.NodeTypes nodeType = node.getType();
-        if (nodeType != AbstractNode.NodeTypes.DATA_SET) {
-            setEnabled(false);
-            return;
-        }
-
-        // We can only export a RSM
-        DataSetNode datasetNode = (DataSetNode) node;
-        if (!datasetNode.hasResultSummary()) {
-            setEnabled(false);
-            return;
+            // We can only export a RSM
+            DataSetNode datasetNode = (DataSetNode) node;
+            if (!datasetNode.hasResultSummary()) {
+                setEnabled(false);
+                return;
+            }
+            
+            // node must have same nature (identification, xic or sc)
+            int currMode = (datasetNode.isQuantSC() ? 1 : (datasetNode.isQuantXIC()?2 : 0));
+            if (currMode != mode){
+                setEnabled(false);
+                return;
+            }
         }
 
         setEnabled(true);

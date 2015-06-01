@@ -31,7 +31,7 @@ public class ExportRSMAction extends AbstractRSMAction {
         final DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
         
 
-        final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), true);
+        final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), true, true);
         
         DefaultDialog.ProgressTask task = new DefaultDialog.ProgressTask() {
 

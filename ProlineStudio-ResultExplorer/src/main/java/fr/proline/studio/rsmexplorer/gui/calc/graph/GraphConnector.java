@@ -208,6 +208,19 @@ public class GraphConnector extends AbstractGraphObject {
         m_connections.clear();
         m_link = null;
         //resetState();
+        if (!m_out) {
+            m_graphNode.propagateSourceChanged();
+        }
+    }
+    
+    public void propagateSourceChanged() {
+        if (m_out) {
+            for (GraphConnector connector : m_connections) {
+                connector.propagateSourceChanged();
+            }
+        } else {
+            m_graphNode.propagateSourceChanged();
+        }
     }
     
     @Override

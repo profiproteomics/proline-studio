@@ -3,8 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
@@ -12,9 +10,8 @@ import fr.proline.studio.python.interpreter.CalcCallback;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +28,10 @@ public class BBinomialFunction extends AbstractFunction {
     private MultiObjectParameter m_columnsParameter1 = null;
     private MultiObjectParameter m_columnsParameter2 = null;
     
+    public BBinomialFunction(GraphPanel panel) {
+        super(panel);
+    }
+    
     @Override
     public String getName() {
         return "bbinomial";
@@ -44,6 +45,7 @@ public class BBinomialFunction extends AbstractFunction {
     @Override
     public void process(AbstractGraphObject[] graphObjects, final boolean display) {
         
+        setInError(false);
         
         if (m_columnsParameter1 == null) {
             //m_state = GraphNode.NodeState.UNSET;
@@ -57,6 +59,16 @@ public class BBinomialFunction extends AbstractFunction {
             return;
         }
 
+        // check if we have already processed
+        if (m_globalTableModelInterface != null) {
+            if (display) {
+                display(getName());
+            }
+            return;
+        }
+        
+        setCalculating(true);
+        
         try {
 
             GlobalTableModelInterface srcModel = graphObjects[0].getGlobalTableModelInterface();
@@ -114,8 +126,9 @@ public class BBinomialFunction extends AbstractFunction {
                         }
                     } else if (error != null) {
                         //JPM.TODO
-                        
+                        setInError(true);
                     }
+                    setCalculating(false);
                 }
                 
             };
@@ -203,11 +216,13 @@ public class BBinomialFunction extends AbstractFunction {
 
     @Override
     public void userParametersChanged() {
+        // need to recalculate model
+        m_globalTableModelInterface = null;
     }
 
     @Override
-    public AbstractFunction cloneFunction() {
-        return new BBinomialFunction();
+    public AbstractFunction cloneFunction(GraphPanel p) {
+        return new BBinomialFunction(p);
     }
 
 

@@ -4,6 +4,8 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.gui.calc.DataMixerPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.Color;
 import javax.swing.ImageIcon;
@@ -22,12 +24,18 @@ public class DataGraphNode extends GraphNode {
 
 
     
-    public DataGraphNode(TableInfo tableInfo) {
+    public DataGraphNode(TableInfo tableInfo, GraphPanel panel) {
+        super(panel);
         m_tableInfo = tableInfo;
         
         m_outConnector = new GraphConnector(this, true);
     }
 
+    
+    @Override
+    public void propagateSourceChanged() {
+        // nothing to do
+    }
     
     @Override
     public boolean isConnected() {
@@ -60,6 +68,11 @@ public class DataGraphNode extends GraphNode {
     @Override
     public ImageIcon getIcon() {
         return m_tableInfo.getIcon();
+    }
+    
+    @Override
+    public ImageIcon getStatusIcon() {
+        return null;
     }
 
     @Override

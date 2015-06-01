@@ -48,6 +48,7 @@ public class IconManager {
         OPEN_FILE,
         EXCLAMATION,
         INFORMATION,
+        WARNING,
         EMPTY,
         PLUS,
         CROSS_SMALL7,
@@ -127,7 +128,8 @@ public class IconManager {
         TABLE,
         COLUMN,
         CHALKBOARD,
-        FUNCTION;
+        FUNCTION,
+        TICK_CIRCLE;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -324,6 +326,8 @@ public class IconManager {
                 return "fr/proline/studio/images/exclamation-red.png";
             case INFORMATION:
                 return "fr/proline/studio/images/information.png";
+            case WARNING:
+                return "fr/proline/studio/images/exclamation.png";
             case EMPTY:
                 return "fr/proline/studio/images/empty.png";
             case PLUS:
@@ -484,6 +488,8 @@ public class IconManager {
                return "fr/proline/studio/images/chalkboard-text.png";
            case FUNCTION:
                return "fr/proline/studio/images/function.png";
+           case TICK_CIRCLE:
+               return "fr/proline/studio/images/tick-circle.png";
         }
 
 

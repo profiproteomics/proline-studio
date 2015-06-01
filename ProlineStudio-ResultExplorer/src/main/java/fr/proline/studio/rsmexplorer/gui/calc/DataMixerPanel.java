@@ -30,8 +30,7 @@ import javax.swing.JToolBar;
 public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
 
     private AbstractDataBox m_dataBox;
-    
-    private JScrollPane m_dataScrollPane;
+
     
     private GraphPanel m_graphPanel;
 
@@ -61,6 +60,7 @@ public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
 
+        m_graphPanel = new GraphPanel();
 
         // create tree objects
         JScrollPane treeScrollPane = new JScrollPane();
@@ -72,7 +72,6 @@ public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
         // create graph objects
         JScrollPane graphScrollPane = new JScrollPane();
         graphScrollPane.setBackground(Color.white);
-        m_graphPanel = new GraphPanel();
         graphScrollPane.setViewportView(m_graphPanel);
         
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, graphScrollPane);
@@ -99,12 +98,12 @@ public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
     }
 
     public void addTableInfoToGraph(TableInfo tableInfo) {
-        DataGraphNode graphNode = new DataGraphNode(tableInfo);
+        DataGraphNode graphNode = new DataGraphNode(tableInfo, m_graphPanel);
         m_graphPanel.addGraphNode(graphNode);
     }
     
     public void addFunctionToGraph(AbstractFunction function) {
-        FunctionGraphNode graphNode = new FunctionGraphNode(function);
+        FunctionGraphNode graphNode = new FunctionGraphNode(function, m_graphPanel);
         m_graphPanel.addGraphNode(graphNode);
     }
     
@@ -148,7 +147,7 @@ public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
     public class DataMixerTree extends DataTree {
 
         public DataMixerTree() {
-            super(new RootDataMixerNode(), false);
+            super(new RootDataMixerNode(), false, m_graphPanel);
         }
 
         @Override
@@ -161,7 +160,7 @@ public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
                     break;
                 }
                 case FUNCTION: {
-                    AbstractFunction function = ((FunctionNode) node).getFunction().cloneFunction();
+                    AbstractFunction function = ((FunctionNode) node).getFunction().cloneFunction(m_graphPanel);
                     addFunctionToGraph(function);
                     break;
                 }

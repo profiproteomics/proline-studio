@@ -36,11 +36,11 @@ public class GraphPanel extends JPanel implements MouseListener, MouseMotionList
     private GraphLink m_selectedLink = null;
     
     private int m_curMoveCursor = Cursor.DEFAULT_CURSOR;
-    
+
     public GraphPanel() {
         addMouseListener(this);
         addMouseMotionListener(this);
-        setTransferHandler(new DataTreeTransferHandler());
+        setTransferHandler(new DataTreeTransferHandler(this));
     }
     
     public void addGraphNode(GraphNode graphNode) {

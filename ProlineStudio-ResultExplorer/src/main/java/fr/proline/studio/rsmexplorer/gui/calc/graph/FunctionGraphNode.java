@@ -1,10 +1,11 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
-import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+
+import fr.proline.studio.rsmexplorer.gui.calc.DataMixerPanel;
+import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.util.LinkedList;
 import javax.swing.ImageIcon;
@@ -18,8 +19,10 @@ public class FunctionGraphNode extends GraphNode {
     private static final Color FRAME_COLOR = new Color(149,195,95);
 
     private final AbstractFunction m_function;
+
     
-    public FunctionGraphNode(AbstractFunction function) {
+    public FunctionGraphNode(AbstractFunction function, GraphPanel panel) {
+        super(panel);
         m_function = function;
         m_outConnector = new GraphConnector(this, true);
         
@@ -46,6 +49,36 @@ public class FunctionGraphNode extends GraphNode {
     @Override
     public ImageIcon getIcon() {
         return m_function.getIcon();
+    }
+    
+    @Override
+    public ImageIcon getStatusIcon() {
+        
+        if (!isConnected()) {
+            return IconManager.getIcon(IconManager.IconType.WARNING);
+        }
+        if (!settingsDone()) {
+            return IconManager.getIcon(IconManager.IconType.WARNING);
+        }
+        
+        if (m_function.isCalculating()) {
+            return IconManager.getIcon(IconManager.IconType.HOUR_GLASS);
+        }
+        if (m_function.inError()) {
+            return IconManager.getIcon(IconManager.IconType.EXCLAMATION);
+        }
+        if (m_function.calculationDone()) {
+            return IconManager.getIcon(IconManager.IconType.TICK_CIRCLE);
+        }
+        
+        return null;
+
+    }
+    
+    @Override
+    public void propagateSourceChanged() {
+        m_function.inLinkDeleted();
+        super.propagateSourceChanged();
     }
 
     @Override
@@ -104,24 +137,6 @@ public class FunctionGraphNode extends GraphNode {
         return m_function.calculationDone();
     }
 
-    /*@Override
-    public NodeState getState() {
-        if (m_state != NodeState.UNSET) {
-            return m_state;
-        }
-
-        if (!isConnected()) {
-            m_state = NodeState.NOT_CONNECTED;
-            return m_state;
-        }
-
-        process();
-        m_state = m_function.getState();
-        
-        return m_state;
-    }*/
-    
-
     @Override
     public void process(boolean display) {
         if (!isConnected()) {
@@ -159,7 +174,10 @@ public class FunctionGraphNode extends GraphNode {
         
         
         
-        m_function.settings(graphObjectArray);
+        boolean settingsChanged = m_function.settings(graphObjectArray);
+        if (settingsChanged) {
+            super.propagateSourceChanged();
+        }
     }
 
     @Override

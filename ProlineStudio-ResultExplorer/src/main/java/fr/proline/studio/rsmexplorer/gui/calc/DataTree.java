@@ -54,7 +54,7 @@ public abstract class DataTree extends JTree {
         return new DataTree(root, tableOnly);
     }*/
     
-    protected DataTree(DataNode root, boolean tableOnly) {
+    protected DataTree(DataNode root, boolean tableOnly, GraphPanel graphPanel) {
         super(root);
         
         if (tableOnly) {
@@ -73,7 +73,7 @@ public abstract class DataTree extends JTree {
             model.nodeStructureChanged(root);
             
             setDragEnabled(true);
-            setTransferHandler(new DataTreeTransferHandler());
+            setTransferHandler(new DataTreeTransferHandler(graphPanel));
         }
         
         setToggleClickCount(0); // avoid expanding when double clicking
@@ -144,19 +144,19 @@ public abstract class DataTree extends JTree {
     
     private void fillFunctionNodes(ParentFunctionNode parentFunctionNode) {
         
-        FunctionNode diffFunction = new FunctionNode(new DiffFunction());
+        FunctionNode diffFunction = new FunctionNode(new DiffFunction(null));
         parentFunctionNode.add(diffFunction);
         
-        FunctionNode joinFunction = new FunctionNode(new JoinFunction());
+        FunctionNode joinFunction = new FunctionNode(new JoinFunction(null));
         parentFunctionNode.add(joinFunction);
         
-        FunctionNode bbinomialFunction = new FunctionNode(new BBinomialFunction());
+        FunctionNode bbinomialFunction = new FunctionNode(new BBinomialFunction(null));
         parentFunctionNode.add(bbinomialFunction);
         
-        FunctionNode pvalueFunction = new FunctionNode(new PValueFunction());
+        FunctionNode pvalueFunction = new FunctionNode(new PValueFunction(null));
         parentFunctionNode.add(pvalueFunction);
         
-        FunctionNode ttdFunction = new FunctionNode(new TtdFunction());
+        FunctionNode ttdFunction = new FunctionNode(new TtdFunction(null));
         parentFunctionNode.add(ttdFunction);
 
         DefaultTreeModel model = (DefaultTreeModel) getModel();

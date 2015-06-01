@@ -19,6 +19,12 @@ import javax.swing.TransferHandler;
  */
 public class DataTreeTransferHandler extends TransferHandler {
 
+    private  GraphPanel m_graphPanel;
+    
+    public DataTreeTransferHandler(GraphPanel panel) {
+        m_graphPanel = panel;
+    }
+    
     @Override
     public int getSourceActions(JComponent c) {
         return TransferHandler.COPY;
@@ -169,13 +175,13 @@ public class DataTreeTransferHandler extends TransferHandler {
 
                         case VIEW_DATA: {
                             TableInfo tableInfo = ((DataTree.ViewDataNode) node).getTableInfo();
-                            DataGraphNode graphNode = new DataGraphNode(tableInfo);
+                            DataGraphNode graphNode = new DataGraphNode(tableInfo, m_graphPanel);
                             graphPanel.addGraphNode(graphNode, x, y);
                             break;
                         }
                         case FUNCTION: {
-                            AbstractFunction function = ((DataTree.FunctionNode) node).getFunction().cloneFunction();
-                            FunctionGraphNode graphNode = new FunctionGraphNode(function);
+                            AbstractFunction function = ((DataTree.FunctionNode) node).getFunction().cloneFunction(m_graphPanel);
+                            FunctionGraphNode graphNode = new FunctionGraphNode(function, m_graphPanel);
                             graphPanel.addGraphNode(graphNode, x, y);
                             break;
                         }

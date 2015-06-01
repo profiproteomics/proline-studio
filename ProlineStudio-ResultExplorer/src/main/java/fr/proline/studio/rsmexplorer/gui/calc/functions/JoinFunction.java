@@ -5,6 +5,7 @@ import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;
+import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import javax.swing.JComboBox;
@@ -23,6 +24,18 @@ public class JoinFunction extends AbstractFunction {
     private ParameterList m_parameterList;
     private ObjectParameter m_paramColumn1;
     private ObjectParameter m_paramColumn2;
+    
+    public JoinFunction(GraphPanel panel) {
+        super(panel);
+    }
+    
+    @Override
+    public void inLinkDeleted() {
+        super.inLinkDeleted();
+        m_parameterList = null;
+        m_paramColumn1 = null;
+        m_paramColumn2 = null;
+    }
     
     @Override
     public String getName() {
@@ -55,26 +68,44 @@ public class JoinFunction extends AbstractFunction {
     
 
     @Override
-    public AbstractFunction cloneFunction() {
-        return new JoinFunction();
+    public AbstractFunction cloneFunction(GraphPanel panel) {
+        return new JoinFunction(panel);
     }
     
     @Override
     public void process(AbstractGraphObject[] graphObjects, boolean display) {
 
-        Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
-        Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
-        
-        Table joinedTable;
-        if ((m_paramColumn1 != null) && (m_paramColumn2 != null)) {
-            Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
-            Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
-            joinedTable = Table.join(t1, t2, key1, key2);
-        } else {
-            joinedTable = Table.join(t1, t2);
+        // check if we have already processed
+        if (m_globalTableModelInterface != null) {
+            if (display) {
+                display(getName());
+            }
+            return;
         }
+        
+        setCalculating(true);
+        setInError(false);
+        
+        try {
+            Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
+            Table t2 = new Table(graphObjects[1].getGlobalTableModelInterface());
 
-        m_globalTableModelInterface = joinedTable.getModel();
+            Table joinedTable;
+            if ((m_paramColumn1 != null) && (m_paramColumn2 != null)) {
+                Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
+                Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
+                joinedTable = Table.join(t1, t2, key1, key2);
+            } else {
+                joinedTable = Table.join(t1, t2);
+            }
+
+            m_globalTableModelInterface = joinedTable.getModel();
+        } catch (Exception e) {
+            //JPM.TODO
+            setInError(true);
+        }
+        
+        setCalculating(false);
         
         if (display) {
             display(getName());

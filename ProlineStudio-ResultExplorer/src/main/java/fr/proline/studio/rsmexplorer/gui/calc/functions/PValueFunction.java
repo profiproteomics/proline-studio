@@ -13,6 +13,7 @@ import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
+import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -31,6 +32,17 @@ public class PValueFunction extends AbstractFunction {
     private MultiObjectParameter m_columnsParameter1 = null;
     private MultiObjectParameter m_columnsParameter2 = null;
     
+    public PValueFunction(GraphPanel panel) {
+        super(panel);
+    }
+    
+    @Override
+    public void inLinkDeleted() {
+        super.inLinkDeleted();
+        m_columnsParameter1 = null;
+        m_columnsParameter2 = null;
+    }
+    
     @Override
     public String getName() {
         return "pvalue";
@@ -44,6 +56,7 @@ public class PValueFunction extends AbstractFunction {
     @Override
     public void process(AbstractGraphObject[] graphObjects, final boolean display) {
         
+        setInError(false);
         
         if (m_columnsParameter1 == null) {
             //m_state = GraphNode.NodeState.UNSET;
@@ -56,6 +69,16 @@ public class PValueFunction extends AbstractFunction {
             //m_state = GraphNode.NodeState.UNSET;
             return;
         }
+        
+        // check if we have already processed
+        if (m_globalTableModelInterface != null) {
+            if (display) {
+                display(getName());
+            }
+            return;
+        }
+        
+        setCalculating(true);
 
         try {
 
@@ -114,8 +137,9 @@ public class PValueFunction extends AbstractFunction {
                         }
                     } else if (error != null) {
                         //JPM.TODO
-                        
+                        setInError(true);
                     }
+                    setCalculating(false);
                 }
                 
             };
@@ -203,11 +227,13 @@ public class PValueFunction extends AbstractFunction {
 
     @Override
     public void userParametersChanged() {
+        // need to recalculate model
+        m_globalTableModelInterface = null;
     }
 
     @Override
-    public AbstractFunction cloneFunction() {
-        return new PValueFunction();
+    public AbstractFunction cloneFunction(GraphPanel panel) {
+        return new PValueFunction(panel);
     }
 
 

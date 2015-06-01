@@ -669,7 +669,7 @@ public class CalcDialog extends JDialog {
     public class DataCalcTree extends DataTree {
 
         public DataCalcTree() {
-            super(new DataTree.ParentDataNode(), true);
+            super(new DataTree.ParentDataNode(), true, null);
         }
 
         @Override

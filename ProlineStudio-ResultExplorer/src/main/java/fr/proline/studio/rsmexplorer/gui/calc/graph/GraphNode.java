@@ -23,16 +23,7 @@ import javax.swing.event.PopupMenuListener;
  * @author JM235353
  */
 public abstract class GraphNode extends AbstractGraphObject {
-    
-    /*public enum NodeState {
-        UNSET,
-        NOT_CONNECTED,
-        CONNECTED,
-        PARAMETERS_SET,
-        DATA_LOADING,
-        READY_TO_CALCULATE,
-        READY
-    }*/
+
     
     public static final int WIDTH = 60;
     public static final int HEIGHT = 60;
@@ -52,12 +43,18 @@ public abstract class GraphNode extends AbstractGraphObject {
     protected static int m_hgtPlain;
     protected static int m_ascentBold;
     
-    //protected NodeState m_state = NodeState.UNSET;
+    protected GraphPanel m_graphPanel = null;
 
-    public GraphNode() {
+    public GraphNode(GraphPanel panel) {
         super(TypeGraphObject.GRAPH_NODE);
+        m_graphPanel = panel;
     }
 
+    public void propagateSourceChanged() {
+        if (m_outConnector != null) {
+            m_outConnector.propagateSourceChanged();
+        }
+    }
     
     public void setCenter(int x, int y) {
         m_x = x-WIDTH/2;
@@ -113,6 +110,10 @@ public abstract class GraphNode extends AbstractGraphObject {
         if (icon != null) {
             g.drawImage(icon.getImage(), m_x+MARGIN, m_y+MARGIN, null);
         }
+        ImageIcon statusIcon = getStatusIcon();
+        if (statusIcon != null) {
+            g.drawImage(statusIcon.getImage(), m_x+MARGIN, m_y+HEIGHT-MARGIN-statusIcon.getIconHeight(), null);
+        }
         
         g.setFont(m_fontBold);
         g.setColor(Color.black);
@@ -134,6 +135,7 @@ public abstract class GraphNode extends AbstractGraphObject {
 
     public abstract Color getFrameColor();
     public abstract ImageIcon getIcon();
+    public abstract ImageIcon getStatusIcon();
     
     public abstract boolean isConnected();
     //public abstract NodeState getState();
@@ -296,13 +298,14 @@ public abstract class GraphNode extends AbstractGraphObject {
             super("Display");
             m_graphNode = graphNode;
             
-            setEnabled(graphNode.settingsDone());
+            setEnabled(graphNode.isConnected() && graphNode.settingsDone());
 
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             m_graphNode.askDisplay();
+            m_graphPanel.repaint();
         }
     }
     
@@ -321,6 +324,14 @@ public abstract class GraphNode extends AbstractGraphObject {
         @Override
         public void actionPerformed(ActionEvent e) {
             m_graphNode.settings();
+            m_graphPanel.repaint();
+            
+            // JPM ??? ask for the calculation now if possible
+            // remove these lines if I change my mind
+            if (m_graphNode.settingsDone()) {
+                m_graphNode.process(false);
+            }
+            
         }
     }
 

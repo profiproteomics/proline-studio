@@ -1,6 +1,7 @@
 package fr.proline.studio.gui;
 
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.MiscellaneousUtils;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -434,7 +435,7 @@ public class DefaultDialog extends javax.swing.JDialog {
         if (Desktop.isDesktopSupported()) { // JDK 1.6.0
 
             try {
-                Desktop.getDesktop().browse(new URL(m_helpURL).toURI());
+                Desktop.getDesktop().browse(new URL(MiscellaneousUtils.convertURLToCurrentHelp(m_helpURL)).toURI());
             } catch (Exception ex) {
                 LoggerFactory.getLogger("ProlineStudio.Commons").error(getClass().getSimpleName() + " failed", ex);
             }

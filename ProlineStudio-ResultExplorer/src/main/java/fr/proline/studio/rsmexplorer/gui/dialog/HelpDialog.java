@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.utils.IconManager;
+import fr.proline.studio.utils.MiscellaneousUtils;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -203,7 +204,7 @@ public class HelpDialog extends DefaultDialog implements MouseListener, MouseMot
             if (Desktop.isDesktopSupported()) { // JDK 1.6.0
 
                 try {
-                    Desktop.getDesktop().browse(new URL(url).toURI());
+                    Desktop.getDesktop().browse(new URL(MiscellaneousUtils.convertURLToCurrentHelp(url)).toURI());
                 } catch (Exception ex) {
                     LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", ex);
                 }

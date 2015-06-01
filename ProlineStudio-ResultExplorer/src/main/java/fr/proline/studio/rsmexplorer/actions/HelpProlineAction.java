@@ -1,5 +1,6 @@
 package fr.proline.studio.rsmexplorer.actions;
 
+import fr.proline.studio.utils.MiscellaneousUtils;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,7 +30,7 @@ public final class HelpProlineAction implements ActionListener {
             String url = "http://biodev.extra.cea.fr/docs/proline/doku.php";
 
             try {
-                Desktop.getDesktop().browse(new URL(url).toURI());
+                Desktop.getDesktop().browse(new URL(MiscellaneousUtils.convertURLToCurrentHelp(url)).toURI());
             } catch (Exception ex) {
                 LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error(getClass().getSimpleName() + " failed", ex);
             }

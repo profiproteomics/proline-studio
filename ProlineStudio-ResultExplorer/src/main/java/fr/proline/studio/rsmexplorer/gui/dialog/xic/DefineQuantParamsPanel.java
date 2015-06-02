@@ -373,7 +373,7 @@ public class DefineQuantParamsPanel extends JPanel{
                 }
             }
         }else{
-            m_normalizationParameter.setValue(FEATURE_NORMALIZATION_VALUES[0]);
+            m_normalizationCB.setSelectedIndex(0);
         }
         if ((Boolean)quantParams.get("detect_features")){
             m_extractedXICFromCB.setSelectedIndex(0);

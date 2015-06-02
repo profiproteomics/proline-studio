@@ -36,23 +36,10 @@ import org.openide.windows.TopComponent;
  * @author JM235353
  */
 public abstract class DataTree extends JTree {
-  
-    //private DataNode m_root = null;
-    
+
     private ParentDataNode m_parentDataNode = null;
     private ParentFunctionNode m_parentFunctionNode = null;
-    
-    /*public static DataTree createDataTree(boolean tableOnly) {
-        
-        DataNode root = null;
-        
-        if (tableOnly) {
-            root = new ParentDataNode();
-        } else {
-            root = new RootDataMixerNode();
-        }
-        return new DataTree(root, tableOnly);
-    }*/
+
     
     protected DataTree(DataNode root, boolean tableOnly, GraphPanel graphPanel) {
         super(root);

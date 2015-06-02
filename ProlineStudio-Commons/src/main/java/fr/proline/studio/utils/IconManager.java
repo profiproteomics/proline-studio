@@ -129,7 +129,8 @@ public class IconManager {
         COLUMN,
         CHALKBOARD,
         FUNCTION,
-        TICK_CIRCLE;
+        TICK_CIRCLE,
+        REFRESH;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -490,6 +491,8 @@ public class IconManager {
                return "fr/proline/studio/images/function.png";
            case TICK_CIRCLE:
                return "fr/proline/studio/images/tick-circle.png";
+           case REFRESH:
+               return "fr/proline/studio/images/refresh.png";
         }
 
 

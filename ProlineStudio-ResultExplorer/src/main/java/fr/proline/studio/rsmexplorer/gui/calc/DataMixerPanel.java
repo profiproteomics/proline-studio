@@ -10,13 +10,17 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.Box;
+import javax.swing.JButton;
 
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -63,18 +67,51 @@ public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {
         m_graphPanel = new GraphPanel();
 
         // create tree objects
+        
+        JPanel treePanel = new JPanel(new GridBagLayout());
+        GridBagConstraints c2 = new GridBagConstraints();
+        c2.anchor = GridBagConstraints.NORTHWEST;
+        c2.fill = GridBagConstraints.BOTH;
+        c2.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        
+
+        
+        
         JScrollPane treeScrollPane = new JScrollPane();
-        DataMixerTree dataMixerTree = new DataMixerTree();
+        final DataMixerTree dataMixerTree = new DataMixerTree();
         treeScrollPane.setViewportView(dataMixerTree);
         treeScrollPane.setMinimumSize(new Dimension(180,50));
         
+        JButton refreshButton = new JButton("Refresh Data", IconManager.getIcon(IconManager.IconType.REFRESH));
+        refreshButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dataMixerTree.updataDataNodes();
+            }
+        });
+        
+        c2.gridx = 0;
+        c2.gridy = 0;
+        treePanel.add(refreshButton, c2);
+        c2.gridx++;
+        c.weightx = 1;
+        treePanel.add(Box.createHorizontalGlue(), c2);
+        
+        c2.gridx = 0;
+        c2.gridy++;
+        c2.gridwidth = 2;
+        c2.weightx = 1;
+        c2.weighty = 1;
+        treePanel.add(treeScrollPane, c2);
         
         // create graph objects
         JScrollPane graphScrollPane = new JScrollPane();
         graphScrollPane.setBackground(Color.white);
         graphScrollPane.setViewportView(m_graphPanel);
         
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, graphScrollPane);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, graphScrollPane);
 
         c.gridx = 0;
         c.gridy = 0;

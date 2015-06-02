@@ -6,11 +6,11 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.core.orm.uds.dto.DDataset;
-import fr.proline.studio.dpm.AccessServiceThread;
-import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.DownloadFileTask;
-import fr.proline.studio.dpm.task.ExportDatasetTask;
-import fr.proline.studio.dpm.task.GetExportInformationTask;
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
+import fr.proline.studio.dpm.task.jms.DownloadFileTask;
+import fr.proline.studio.dpm.task.jms.ExportDatasetTask;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.jms.GetExportInformationTask;
 import fr.proline.studio.export.CustomExportDialog;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.LoadWaitingDialog;
@@ -28,13 +28,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author MB243701
  */
-public class ExportDatasetAction extends AbstractRSMAction {
+public class ExportDatasetJMSAction extends AbstractRSMAction {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private List<String> m_config;
 
-    public ExportDatasetAction(AbstractTree.TreeType treeType) {
-        super("Export...", treeType);
+    public ExportDatasetJMSAction(AbstractTree.TreeType treeType) {
+        super("Export... (JMS)", treeType);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class ExportDatasetAction extends AbstractRSMAction {
 
             @Override
             protected Object doInBackground() throws Exception {
-                AbstractServiceCallback exportCallback = new AbstractServiceCallback() {
+                AbstractJMSCallback getExportCallback = new AbstractJMSCallback() {
 
                     @Override
                     public boolean mustBeCalledInAWT() {
@@ -94,7 +94,7 @@ public class ExportDatasetAction extends AbstractRSMAction {
                             @Override
                             protected Object doInBackground() throws Exception {
 
-                                final AbstractServiceCallback downloadCallback = new AbstractServiceCallback() {
+                                final AbstractJMSCallback downloadCallback = new AbstractJMSCallback() {
 
                                     @Override
                                     public boolean mustBeCalledInAWT() {
@@ -117,8 +117,9 @@ public class ExportDatasetAction extends AbstractRSMAction {
 
                                 // used as out parameter for the service
                                 final List<String> _filePath = new ArrayList();
+                                final List<String> _jmsNodeId = new ArrayList();
 
-                                AbstractServiceCallback exportCallback = new AbstractServiceCallback() {
+                                AbstractJMSCallback exportCallback = new AbstractJMSCallback() {
 
                                     @Override
                                     public boolean mustBeCalledInAWT() {
@@ -135,29 +136,29 @@ public class ExportDatasetAction extends AbstractRSMAction {
                                                 fileName += "."+extension;
                                             }
                                             if (_filePath.size() == 1){
-                                                DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0));
-                                                AccessServiceThread.getAccessServiceThread().addTask(task);
+                                                DownloadFileTask task = new DownloadFileTask(downloadCallback, fileName, _filePath.get(0), _jmsNodeId.get(0));
+                                                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                                             }else {
                                                 int nb = 1;
-                                                for (String _filePath1 : _filePath) {
-                                                    int id = _filePath1.lastIndexOf("\\");
-                                                    int idUnderscore = _filePath1.lastIndexOf("_");
+                                                for (String fp : _filePath) {
+                                                    int id = fp.lastIndexOf("\\");
+                                                    int idUnderscore = fp.lastIndexOf("_");
                                                     int idExtC = fileName.lastIndexOf(".");
                                                     String fn = fileName;
                                                     if (id != -1 && idUnderscore != -1 && idExtC != -1 ){
-                                                        fn = fileName.substring(0, idExtC) +"_"+_filePath1.substring(id+1, idUnderscore)+"."+extension;
+                                                        fn = fileName.substring(0, idExtC) +"_"+fp.substring(id+1, idUnderscore)+"."+extension;
                                                     }
                                                     if (!dialog.isFileExportMode()){
                                                         String dirName = dialog.getFileName();
                                                         if (!dirName.endsWith("\\")){
                                                             dirName += "\\";
                                                         }
-                                                        String dsName = getDatasetName(_filePath1.substring(id+1), selectedNodes);
-                                                        fn = dirName+_filePath1.substring(id+1, idUnderscore)+dsName+nb+"."+extension;
+                                                        String dsName = getDatasetName(fp.substring(id+1), selectedNodes);
+                                                        fn = dirName+fp.substring(id+1, idUnderscore)+dsName+nb+"."+extension;
                                                     }
                                                     nb++;
-                                                    DownloadFileTask task = new DownloadFileTask(downloadCallback, fn, _filePath1);
-                                                    AccessServiceThread.getAccessServiceThread().addTask(task);
+                                                    DownloadFileTask task = new DownloadFileTask(downloadCallback, fn, fp, _jmsNodeId.get(nb-2));
+                                                    AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                                                 }
                                             }
 
@@ -174,8 +175,8 @@ public class ExportDatasetAction extends AbstractRSMAction {
                                 for (AbstractNode node : selectedNodes) {
                                     listDataset.add(((DataSetNode)node).getDataset());
                                 }
-                                ExportDatasetTask task = new ExportDatasetTask(exportCallback, listDataset, exportConfig, _filePath);
-                                AccessServiceThread.getAccessServiceThread().addTask(task);
+                                ExportDatasetTask task = new ExportDatasetTask(exportCallback, listDataset, exportConfig, _filePath, _jmsNodeId);
+                                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
 
                                 return null;
                             }
@@ -186,8 +187,8 @@ public class ExportDatasetAction extends AbstractRSMAction {
                         dialog.setVisible(true);
                     }
                 };
-                GetExportInformationTask task = new GetExportInformationTask(exportCallback, dataSetNode.getDataset(), m_config);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
+                GetExportInformationTask task = new GetExportInformationTask(getExportCallback, dataSetNode.getDataset(), m_config);
+                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
                 return null;
             }
 

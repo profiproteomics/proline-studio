@@ -37,6 +37,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportRSM2PrideAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
@@ -671,8 +672,13 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(exportRSMAction);
                 }*/
                 
-                ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                m_mainActions.add(exportDatasetAction);
+                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                    ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                    m_mainActions.add(exportDatasetAction);
+                }else{
+                    ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                    m_mainActions.add(exportDatasetAction);
+                }
                 
 
                 if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {

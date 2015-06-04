@@ -55,7 +55,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
         super(DataboxType.DataBoxRsmWSC);
         
         // Name of this databox
-        m_name = "Weighted SC result";
+        m_typeName = "Weighted SC result";
         m_description = "Weighted Spectral Count result";
         
         m_readData = readData;
@@ -71,7 +71,7 @@ public class DataBoxRsmWSC extends AbstractDataBox {
     @Override
     public void createPanel() {
         WSCResultPanel p = new WSCResultPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

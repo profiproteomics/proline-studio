@@ -32,7 +32,7 @@ public class DataBoxMzScope extends AbstractDataBox{
         super(DataboxType.DataBoxMzScope);
 
         // Name of this databox
-        m_name = "MzScope";
+        m_typeName = "MzScope";
         m_description = "MzScope";
 
         // Register Possible in parameters
@@ -72,7 +72,7 @@ public class DataBoxMzScope extends AbstractDataBox{
     @Override
     public void createPanel() {
         StudioMzScopePanel p = new StudioMzScopePanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -95,7 +95,7 @@ public class DataBoxMzScope extends AbstractDataBox{
     
     @Override
     public String getFullName() {
-        return m_name;
+        return m_typeName;
     }
 
     @Override

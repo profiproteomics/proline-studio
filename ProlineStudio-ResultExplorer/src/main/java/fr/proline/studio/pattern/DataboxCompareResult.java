@@ -18,7 +18,7 @@ public class DataboxCompareResult extends AbstractDataBox {
         super(DataboxType.DataboxCompareResult);
         
         // Name of this databox
-        m_name = "Compare Data";
+        m_typeName = "Compare Data";
         m_description = "Compare Data Result";
         
         // Register Possible in parameters
@@ -45,7 +45,7 @@ public class DataboxCompareResult extends AbstractDataBox {
     @Override
     public void createPanel() {
         ResultComparePanel p = new ResultComparePanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

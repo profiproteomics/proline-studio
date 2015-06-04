@@ -24,7 +24,7 @@ public class DataboxGraphics extends AbstractDataBox  {
          m_defaultLocked = defaultLocked;
          
         // Name of this databox
-        m_name = "Graphic";
+        m_typeName = "Graphic";
         m_description = "Graphics : Histogram / Scatter Plot";
 
         // Register Possible in parameters
@@ -38,7 +38,7 @@ public class DataboxGraphics extends AbstractDataBox  {
     @Override
     public void createPanel() {
         GraphicsPanel p = new GraphicsPanel(m_defaultLocked);
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

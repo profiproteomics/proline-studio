@@ -14,7 +14,7 @@ public class DataBoxTaskDescription extends AbstractDataBox {
         super(DataboxType.DataBoxTaskDescription);
         
         // Name of this databox
-        m_name = "Task";
+        m_typeName = "Task";
         m_description = "Task Description";
         
         // Register Possible in parameters
@@ -27,7 +27,7 @@ public class DataBoxTaskDescription extends AbstractDataBox {
     @Override
     public void createPanel() {
         TaskDescriptionPanel p = new TaskDescriptionPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

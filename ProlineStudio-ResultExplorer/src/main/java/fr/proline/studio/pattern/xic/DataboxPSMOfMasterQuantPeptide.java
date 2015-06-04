@@ -43,7 +43,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
         super(DataboxType.DataboxPSMOfMasterQuantPeptide);
 
         // Name of this databox
-        m_name = "PSM / XIC Peptide";
+        m_typeName = "PSM / XIC Peptide";
         m_description = "All PSM of a XIC Peptide";
 
         // Register Possible in parameters
@@ -67,7 +67,7 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
     @Override
     public void createPanel() {
         XicPeptideMatchPanel p = new XicPeptideMatchPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

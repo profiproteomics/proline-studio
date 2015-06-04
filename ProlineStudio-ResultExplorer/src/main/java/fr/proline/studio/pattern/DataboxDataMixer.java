@@ -19,7 +19,7 @@ public class DataboxDataMixer extends AbstractDataBox {
         super(DataboxType.DataboxDataMixer);
 
         // Name of this databox
-        m_name = "Data Mixer";
+        m_typeName = "Data Mixer";
 
 
     }
@@ -27,7 +27,7 @@ public class DataboxDataMixer extends AbstractDataBox {
     @Override
     public void createPanel() {
         DataMixerPanel p = new DataMixerPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
 

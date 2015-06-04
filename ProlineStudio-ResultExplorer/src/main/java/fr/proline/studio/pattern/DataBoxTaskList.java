@@ -20,7 +20,7 @@ public class DataBoxTaskList extends AbstractDataBox {
         super(DataboxType.DataBoxTaskList);
         
         // Name of this databox
-        m_name = "Tasks Log";
+        m_typeName = "Tasks Log";
 
         // Register possible out parameters
         // One or Multiple PeptideMatch
@@ -33,7 +33,7 @@ public class DataBoxTaskList extends AbstractDataBox {
     @Override
     public void createPanel() {
         TasksPanel p = new TasksPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     

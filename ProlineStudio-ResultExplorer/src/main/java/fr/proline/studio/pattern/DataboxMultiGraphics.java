@@ -27,7 +27,7 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
          m_canChooseColor = canChooseColor ;
          
         // Name of this databox
-        m_name = "Graphic";
+        m_typeName = "Graphic";
         m_description = "Multi Graphics : Linear Plot";
 
         // Register Possible in parameters
@@ -43,7 +43,7 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
     @Override
     public void createPanel() {
         MultiGraphicsPanel p = new MultiGraphicsPanel(m_defaultLocked, m_canChooseColor);
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

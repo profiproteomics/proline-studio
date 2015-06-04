@@ -41,7 +41,7 @@ public class DataboxChildFeature extends AbstractDataBox {
         super(DataboxType.DataboxXicChildFeature);
 
         // Name of this databox
-        m_name = "XIC Features";
+        m_typeName = "XIC Features";
         m_description = "All  Features for a XIC Peptide Ion";
 
         // Register Possible in parameters
@@ -68,7 +68,7 @@ public class DataboxChildFeature extends AbstractDataBox {
     @Override
     public void createPanel() {
         XicFeaturePanel p = new XicFeaturePanel(true);
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -249,7 +249,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     @Override
     public String getFullName() {
-        return m_masterQuantPeptideIon.getCharge() + " " + getName();
+        return m_masterQuantPeptideIon.getCharge() + " " + getTypeName();
     }
 
     private List<CompareDataInterface> getCompareDataInterfaceList() {

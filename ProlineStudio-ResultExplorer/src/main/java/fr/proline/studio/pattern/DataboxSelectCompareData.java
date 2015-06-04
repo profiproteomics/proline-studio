@@ -20,7 +20,7 @@ public class DataboxSelectCompareData extends AbstractDataBox {
         super(DataboxType.DataboxSelectCompareData);
 
         // Name of this databox
-        m_name = "Compare Data";
+        m_typeName = "Compare Data";
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
@@ -32,7 +32,7 @@ public class DataboxSelectCompareData extends AbstractDataBox {
     @Override
     public void createPanel() {
         SelectComparePanel p = new SelectComparePanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
 

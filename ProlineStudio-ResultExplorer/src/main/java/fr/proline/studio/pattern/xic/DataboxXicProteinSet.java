@@ -33,7 +33,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         super(DataboxType.DataboxXicProteinSet);
         
         // Name of this databox
-        m_name = "XIC Protein Sets";
+        m_typeName = "XIC Protein Sets";
         m_description = "All Protein Sets of a XIC";
 
         // Register Possible in parameters
@@ -61,7 +61,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
      @Override
     public void createPanel() {
         XicProteinSetPanel p = new XicProteinSetPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -161,6 +161,6 @@ public class DataboxXicProteinSet extends AbstractDataBox {
    
     @Override
     public String getFullName() {
-        return m_dataset.getName()+" "+getName();
+        return m_dataset.getName()+" "+getTypeName();
     }
 }

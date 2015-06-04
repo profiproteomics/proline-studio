@@ -27,7 +27,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
         super(DataboxType.DataBoxRsetPSM);
 
         // Name of this databox
-        m_name = "PSM";
+        m_typeName = "PSM";
         m_description = "All PSM of a Search Result";
         
         // Register Possible in parameters
@@ -56,7 +56,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
     @Override
     public void createPanel() {
         PeptideMatchPanel p = new PeptideMatchPanel(false, true, true);
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

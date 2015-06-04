@@ -25,7 +25,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
         
         
         // Name of this databox
-        m_name = "Search Results";
+        m_typeName = "Search Results";
         
         // Register Possible in parameters
         // One ResultSummary
@@ -44,7 +44,7 @@ public class DataBoxRsetAll extends AbstractDataBox{
     @Override
     public void createPanel() {
         RsetAllPanel p = new RsetAllPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
         

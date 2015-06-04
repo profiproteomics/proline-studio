@@ -23,7 +23,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
         super(DataboxType.DataboxRsmPSMOfPeptide);
 
         // Name of this databox
-        m_name = "PSM";
+        m_typeName = "PSM";
         m_description = "All PSM of a Peptide";
         
         // Register Possible in parameters
@@ -48,7 +48,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
     @Override
     public void createPanel() {
         PeptideMatchPanel p = new PeptideMatchPanel(true, false, true);
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

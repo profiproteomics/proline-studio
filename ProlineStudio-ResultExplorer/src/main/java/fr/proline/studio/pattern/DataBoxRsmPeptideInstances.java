@@ -29,7 +29,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         super(DataboxType.DataBoxRsmPeptideInstances);
 
         // Name of this databox
-        m_name = "Peptides";
+        m_typeName = "Peptides";
         m_description = "All Peptides of an Identification Summary";
         
         // Register Possible in parameters
@@ -64,7 +64,7 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsmPeptidesPanel p = new RsmPeptidesPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

@@ -28,7 +28,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
         super(DataboxType.DataBoxRsmProteinSetOfPeptides);
 
          // Name of this databox
-        m_name = "Protein Set";
+        m_typeName = "Protein Set";
         m_description = "All Protein Sets coresponding to a Peptide Instance";
 
         // Register Possible in parameters
@@ -56,7 +56,7 @@ public class DataBoxRsmProteinSetOfPeptides extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsmProteinSetPanel p = new RsmProteinSetPanel(false);
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

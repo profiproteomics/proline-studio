@@ -23,7 +23,7 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
         super(DataboxType.DataboxExperimentalDesign);
         
         // Name of this databox
-        m_name = "Experimental Design";
+        m_typeName = "Experimental Design";
         m_description = "Experimental Design of the quantitation";
 
         // Register Possible in parameters
@@ -42,7 +42,7 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
     @Override
     public void createPanel() {
         ExperimentalDesignPanel p = new ExperimentalDesignPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -102,6 +102,6 @@ public class DataboxExperimentalDesign extends AbstractDataBox {
    
     @Override
     public String getFullName() {
-        return m_dataset.getName()+" "+getName();
+        return m_dataset.getName()+" "+getTypeName();
     }
 }

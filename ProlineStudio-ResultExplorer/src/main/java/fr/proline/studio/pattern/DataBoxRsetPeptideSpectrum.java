@@ -28,7 +28,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
         super(DataboxType.DataBoxRsetPeptideSpectrum);
 
         // Name of this databox
-        m_name = "Spectrum";
+        m_typeName = "Spectrum";
         m_description = "Spectrum of a Peptide";
 
         // Register in parameters
@@ -47,7 +47,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsetPeptideSpectrumPanel p = new RsetPeptideSpectrumPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

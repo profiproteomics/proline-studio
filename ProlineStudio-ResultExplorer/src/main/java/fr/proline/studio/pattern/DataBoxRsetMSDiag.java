@@ -39,10 +39,10 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
     public DataBoxRsetMSDiag(HashMap<String,String> resultMessageHashMap) {
         super(DataboxType.DataboxRsetMSDiag);
         
-        m_messages_back = new ArrayList<Object>(2); // will contain the return data for msdiag (0: settings: 1:results)
+        m_messages_back = new ArrayList<>(2); // will contain the return data for msdiag (0: settings: 1:results)
 
         // Name of this databox
-        m_name = "Statistical databox";
+        m_typeName = "Statistics";
         m_description = "Statistical results";
         
         m_messages_back.add(resultMessageHashMap); // first element is the settings (as hashmap type)
@@ -62,7 +62,7 @@ public class DataBoxRsetMSDiag extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsetMSDiagPanel p = new RsetMSDiagPanel("please wait, retreiving data from server...");
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

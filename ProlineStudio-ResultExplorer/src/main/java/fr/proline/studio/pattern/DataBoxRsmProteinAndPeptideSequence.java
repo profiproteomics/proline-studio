@@ -18,7 +18,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
         super(DataboxType.DataBoxRsmProteinAndPeptideSequence);
 
         // Name of this databox
-        m_name = "Protein Sequence";
+        m_typeName = "Protein Sequence";
         m_description = "Protein Sequence and its Peptides Sequences";
         
         // Register in parameters
@@ -36,7 +36,7 @@ public class DataBoxRsmProteinAndPeptideSequence extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsmProteinAndPeptideSequencePanel p = new RsmProteinAndPeptideSequencePanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

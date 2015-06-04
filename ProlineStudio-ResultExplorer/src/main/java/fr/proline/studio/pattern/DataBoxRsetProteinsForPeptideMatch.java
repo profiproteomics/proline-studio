@@ -24,7 +24,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
         super(DataboxType.DataBoxRsetProteinsForPeptideMatch);
 
          // Name of this databox
-        m_name = "Proteins";
+        m_typeName = "Proteins";
         m_description = "Proteins for a Peptide Match";
         
         // Register Possible in parameters
@@ -49,7 +49,7 @@ public class DataBoxRsetProteinsForPeptideMatch extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsetProteinsPanel p = new RsetProteinsPanel(false);
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

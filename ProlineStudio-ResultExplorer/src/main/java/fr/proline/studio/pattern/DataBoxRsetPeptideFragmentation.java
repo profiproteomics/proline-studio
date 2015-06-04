@@ -16,7 +16,7 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
         super(DataboxType.DataBoxRsetPeptideFragmentation);
         
         // Name of this databox
-        m_name = "Fragmentation Table";
+        m_typeName = "Fragmentation Table";
         m_description = "Fragmentation table of a Peptide";
 
         // Register in parameters
@@ -31,7 +31,7 @@ public class DataBoxRsetPeptideFragmentation extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsetPeptideFragmentationTablePanel p = new RsetPeptideFragmentationTablePanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

@@ -37,7 +37,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         super(DataboxType.DataboxXicPeptideIon);
         
         // Name of this databox
-        m_name = "XIC Peptides Ions";
+        m_typeName = "XIC Peptides Ions";
         m_description = "All Peptides Ions of a XIC Peptide";
 
         // Register Possible in parameters
@@ -62,7 +62,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
      @Override
     public void createPanel() {
         XicPeptideIonPanel p = new XicPeptideIonPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -168,6 +168,6 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
    
     @Override
     public String getFullName() {
-        return m_dataset.getName()+" "+getName();
+        return m_dataset.getName()+" "+getTypeName();
     }
 }

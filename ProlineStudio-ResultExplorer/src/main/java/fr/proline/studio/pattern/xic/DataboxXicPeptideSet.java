@@ -39,7 +39,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         super(DataboxType.DataboxXicPeptideSet);
         
         // Name of this databox
-        m_name = "XIC Peptides";
+        m_typeName = "XIC Peptides";
         m_description = "All XIC Peptides of a ProteinSet";
 
         // Register Possible in parameters
@@ -68,7 +68,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
      @Override
     public void createPanel() {
         XicPeptidePanel p = new XicPeptidePanel(false);
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }
@@ -194,7 +194,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
    
     @Override
     public String getFullName() {
-        return m_dataset.getName()+" "+getName();
+        return m_dataset.getName()+" "+getTypeName();
     }
     
     private List<CompareDataInterface> getCompareDataInterfaceList() {

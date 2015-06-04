@@ -358,7 +358,7 @@ public class DataBoxChooserDialog extends DefaultDialog {
             AbstractDataBox dataBox = m_databoxList.get(rowIndex);
             switch (columnIndex) {
                 case COLTYPE_NAME: {
-                    return dataBox.getName();
+                    return dataBox.getTypeName();
                 }
                 case COLTYPE_DESCRIPTION: {
                     return dataBox.getDescription();

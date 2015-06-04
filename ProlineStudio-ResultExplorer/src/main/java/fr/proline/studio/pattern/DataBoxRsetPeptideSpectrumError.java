@@ -17,7 +17,7 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
         super(DataboxType.DataBoxRsetPeptideSpectrumError);
         
         // Name of this databox
-        m_name = "Spectrum Error";
+        m_typeName = "Spectrum Error";
         m_description = "Spectrum Error of a Peptide";
 
         // Register in parameters
@@ -33,7 +33,7 @@ public class DataBoxRsetPeptideSpectrumError extends AbstractDataBox {
     @Override
     public void createPanel() {
         RsetPeptideSpectrumErrorPanel p = new RsetPeptideSpectrumErrorPanel();
-        p.setName(m_name);
+        p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
     }

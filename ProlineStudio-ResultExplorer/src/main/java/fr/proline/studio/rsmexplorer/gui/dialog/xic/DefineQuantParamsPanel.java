@@ -380,11 +380,11 @@ public class DefineQuantParamsPanel extends JPanel{
             m_detectPeakelChB.setSelected(false);
         }else{
             if ((Boolean)quantParams.get("start_from_validated_peptides")){
-                m_extractedXICFromCB.setSelectedIndex(1);
-                m_detectPeakelChB.setSelected(false);
-            }else{
                 m_extractedXICFromCB.setSelectedIndex(2);
                 m_detectPeakelChB.setSelected(true);
+            }else{
+                m_extractedXICFromCB.setSelectedIndex(1);
+                m_detectPeakelChB.setSelected(false);
             }
         }
     }

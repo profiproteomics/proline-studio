@@ -117,6 +117,8 @@ public class CustomExportDialog extends DefaultDialog {
 
     private JComboBox comboBox_exportProfile;
 
+	private JLabel lblMouseRightclickOn;
+
     public static CustomExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
             m_singletonExcelDialog = new CustomExportDialog(parent, ExporterFactory.EXPORT_TABLE, true);
@@ -187,7 +189,7 @@ public class CustomExportDialog extends DefaultDialog {
         m_fileExportMode = fileExportMode;
 
         setTitle("Export");
-
+        //setButtonVisible(BUTTON_HELP, true);
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
 
         setInternalComponent(createCustomExportPanel());
@@ -682,6 +684,10 @@ public class CustomExportDialog extends DefaultDialog {
         comboBox_exportProfile.setBounds(448, 69, 102, 20);
         optionPane.add(comboBox_exportProfile);
 
+        lblMouseRightclickOn = new JLabel("Mouse Right-Click on tab to enable/disable sheet");
+		lblMouseRightclickOn.setBounds(282, 11, 248, 14);
+		panel_1.add(lblMouseRightclickOn);
+		
         lblExportProfile = new JLabel("Export profile:");
         lblExportProfile.setBounds(349, 72, 89, 14);
         optionPane.add(lblExportProfile);

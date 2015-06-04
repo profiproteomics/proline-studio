@@ -37,8 +37,19 @@ public class GraphConnector extends AbstractGraphObject {
         m_graphNode = graphNode;
     }
     
+    
     @Override
-    public String getName() {
+    public String getFullName() {
+        return null;
+    }
+
+    @Override
+    public String getDataName() {
+        return null;
+    }
+
+    @Override
+    public String getTypeName() {
         return null;
     }
     

@@ -65,7 +65,17 @@ public class GraphLink extends AbstractGraphObject {
     
     
     @Override
-    public String getName() {
+    public String getFullName() {
+        return null;
+    }
+
+    @Override
+    public String getDataName() {
+        return null;
+    }
+
+    @Override
+    public String getTypeName() {
         return null;
     }
     

@@ -86,7 +86,8 @@ public abstract class GraphNode extends AbstractGraphObject {
         
         initFonts(g);
 
-        String name = getName();
+        String dataName = getDataName();
+        String typeName = getTypeName();
 
         LinearGradientPaint gradient = getBackgroundGradient();
         g2.setPaint(gradient);
@@ -101,7 +102,7 @@ public abstract class GraphNode extends AbstractGraphObject {
         g2.setStroke(previousStroke);
         
         FontMetrics metricsBold = g.getFontMetrics(m_fontBold);
-        int stringWidth = metricsBold.stringWidth(name);
+        int stringWidth = metricsBold.stringWidth(typeName);
         
         int xText = m_x+(WIDTH-stringWidth)/2;
         int yText = m_y-m_hgtBold;
@@ -117,9 +118,14 @@ public abstract class GraphNode extends AbstractGraphObject {
         
         g.setFont(m_fontBold);
         g.setColor(Color.black);
-        g.drawString(name, xText, yText);
+        g.drawString(typeName, xText, yText);
         
-        
+        if (dataName != null) {
+            stringWidth = metricsBold.stringWidth(dataName);
+            xText = m_x+(WIDTH-stringWidth)/2;
+            yText = yText - m_hgtBold;
+            g.drawString(dataName, xText, yText);
+        }
         
         if (m_inConnectors != null) {
             for (GraphConnector connector : m_inConnectors) {

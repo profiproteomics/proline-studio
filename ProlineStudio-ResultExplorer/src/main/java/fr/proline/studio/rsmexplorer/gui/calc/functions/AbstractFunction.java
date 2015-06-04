@@ -60,7 +60,6 @@ public abstract class AbstractFunction {
         return m_globalTableModelInterface;
     }
 
-    //public abstract GraphNode.NodeState getState();
 
     public abstract void generateDefaultParameters(AbstractGraphObject[] graphObjects);
     public abstract ParameterError checkParameters();

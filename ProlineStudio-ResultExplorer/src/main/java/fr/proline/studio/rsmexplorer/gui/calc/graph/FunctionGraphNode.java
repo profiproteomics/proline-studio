@@ -36,10 +36,21 @@ public class FunctionGraphNode extends GraphNode {
     }
 
     @Override
-    public String getName() {
+    public String getFullName() {
         return m_function.getName();
     }
 
+    @Override
+    public String getDataName() {
+        return null;
+    }
+
+    @Override
+    public String getTypeName() {
+        return m_function.getName();
+    }
+    
+    
     @Override
     public Color getFrameColor() {
         return FRAME_COLOR;

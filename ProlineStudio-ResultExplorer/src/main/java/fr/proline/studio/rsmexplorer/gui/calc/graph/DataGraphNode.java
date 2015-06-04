@@ -4,7 +4,6 @@ import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.gui.calc.DataMixerPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.awt.Color;
@@ -56,8 +55,18 @@ public class DataGraphNode extends GraphNode {
     
     
     @Override
-    public String getName() {
-        return m_tableInfo.getName();
+    public String getFullName() {
+        return m_tableInfo.getFullName();
+    }
+    
+    @Override
+    public String getDataName() {
+        return m_tableInfo.getDataName();
+    }
+
+    @Override
+    public String getTypeName() {
+        return m_tableInfo.getTypeName();
     }
 
     @Override
@@ -77,7 +86,7 @@ public class DataGraphNode extends GraphNode {
 
     @Override
     public void askDisplay() {
-        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(getName());
+        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(getFullName());
         windowBox.setEntryData(-1, m_tableInfo.getModel());
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
         win.open();
@@ -88,27 +97,6 @@ public class DataGraphNode extends GraphNode {
     public void settings() {
         // nothing to do
     }
-    
-    /*@Override
-    public NodeState getState() {
-        if (m_state != NodeState.UNSET) {
-            return m_state;
-        }
-        
-        if (m_tableInfo.getModel().isLoaded()) {
-            m_state = NodeState.READY;
-        } else {
-            m_state = NodeState.DATA_LOADING;
-        }
-        
-        return m_state;
-    }*/
-    
-    /*@Override
-    public boolean isConnected() {
-        return true;
-    }*/
-
 
     @Override
     public void process(boolean display) {
@@ -119,6 +107,8 @@ public class DataGraphNode extends GraphNode {
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return m_tableInfo.getModel();
     }
+
+
 
     
 }

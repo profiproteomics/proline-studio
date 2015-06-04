@@ -71,7 +71,6 @@ public class WindowBox {
         m_entryBox.retrieveTableModels(list);
         if (!list.isEmpty()) {
             list.get(0).setIcon(new ImageIcon(getIcon()));
-            list.get(0).setFullName(m_name);
         }
     }
 

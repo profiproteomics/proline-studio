@@ -16,6 +16,7 @@ import fr.proline.studio.dpm.task.AbstractServiceTask;
 import fr.proline.studio.dpm.task.RetrieveSpectralCountTask;
 import fr.proline.studio.dpm.task.SpectralCountTask;
 import fr.proline.studio.rsmexplorer.actions.identification.SpectralCountAction;
+import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.WSCResultPanel;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
@@ -155,9 +156,25 @@ public class DataBoxRsmWSC extends AbstractDataBox {
                             @Override
                             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                 if (success) {
-                                    ((DataSetData) _quantitationNode[0].getData()).setDataset(readDatasetList.get(0));
-                                    _quantitationNode[0].setIsChanging(false);
-                                    treeModel.nodeChanged(_quantitationNode[0]);
+                                    final DDataset ds= readDatasetList.get(0);
+                                    AbstractDatabaseCallback loadQCallback = new AbstractDatabaseCallback() {
+                                        @Override
+                                        public boolean mustBeCalledInAWT() {
+                                            return true;
+                                        }
+                                        
+                                        @Override
+                                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                            ((DataSetData) _quantitationNode[0].getData()).setDataset(ds);
+                                            _quantitationNode[0].setIsChanging(false);
+                                            treeModel.nodeChanged(_quantitationNode[0]);
+                                        }
+                                    };
+                                    DatabaseDataSetTask loadQTask = new DatabaseDataSetTask(loadQCallback);
+                                    loadQTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), ds);
+                                    AccessDatabaseThread.getAccessDatabaseThread().addTask(loadQTask);
+        
+                                    
                                 } else {
                                     treeModel.removeNodeFromParent(_quantitationNode[0]);
                                 }

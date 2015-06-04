@@ -49,7 +49,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
     
     private long m_projectId = -1;
     
-    protected String m_name;
+    protected String m_typeName;
+    protected String m_dataName;
     protected String m_fullName = null;
     protected String m_description = "";
     
@@ -101,7 +102,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataboxPSMOfMasterQuantPeptide(30),
         DataBoxMzScope(31),
         DataboxDataMixer(32),
-        DataboxExperimentalDesign(33);
+        DataboxExperimentalDesign(33),
+        DataBoxAdjacentMatrix(34);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -178,6 +180,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxPSMOfMasterQuantPeptide();
                 case DataBoxMzScope:
                     return new DataBoxMzScope();
+                case DataBoxAdjacentMatrix:
+                    return new DataBoxAdjacencyMatrix();
                 case DataboxExperimentalDesign:
                     return new DataboxExperimentalDesign();
             }
@@ -380,20 +384,49 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         return m_layout;
     }
     
-    public String getName() {
-        return m_name;
+    public String getTypeName() {
+        return m_typeName;
+    }
+    
+    public void setDataName(String dataName) {
+        m_dataName = dataName;
+    }
+    
+    public String getDataName() {
+        
+        if (m_dataName != null) {
+            return m_dataName;
+        }
+        
+        if (m_previousDataBox != null) {
+            return m_previousDataBox.getDataName();
+        }
+        /*if (m_fullName != null) {
+            int index = m_fullName.indexOf(m_typeName);
+            if (index != -1) {
+                return m_fullName.substring(0, index).trim();
+            }
+        }*/
+        return null;
     }
     
     public String getFullName() {
         if (m_fullName != null) {
             return m_fullName;
         }
-        return getName();
+        // try to construct a full name
+        String dataName = getDataName();
+        if (dataName != null) {
+            m_fullName = dataName+' '+m_typeName;
+            return m_fullName;
+        }
+
+        return getTypeName();
     }
     
-    public void setFullName(String fullName) {
+    /*public void setFullName(String fullName) {
         m_fullName = fullName;
-    }
+    }*/
     
     public String getDescription() {
         return m_description;
@@ -488,8 +521,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         if (m_panel instanceof GlobalTabelModelProviderInterface) {
             JXTable table = ((GlobalTabelModelProviderInterface) m_panel).getGlobalAssociatedTable();
             if (table != null) {
-                String name = ((JPanel)m_panel).getName();
-                TableInfo info = new TableInfo(getId(), name, table);
+                TableInfo info = new TableInfo(getId(), getDataName(), getTypeName(), table);
                 list.add(info);
             }
         }

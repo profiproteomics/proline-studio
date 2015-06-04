@@ -44,15 +44,10 @@ public class DiffFunction extends AbstractFunction {
     public int getNumberOfInParameters() {
         return 2;
     }
-    
-    /*@Override
-    public GraphNode.NodeState getState() {
-        return m_state;
-    }*/
 
     @Override
     public boolean settingsDone() {
-        return true;
+        return ((m_paramColumn1 != null) && (m_paramColumn2 != null));
     }
     
     @Override
@@ -160,8 +155,8 @@ public class DiffFunction extends AbstractFunction {
         
         
         
-        m_paramColumn1 = new ObjectParameter(JOIN_COL1, graphObjects[0].getName() +" Join Column Key", new JComboBox(objectArray1), objectArray1, associatedObjectArray1, ((AbstractJoinDataModel)m_globalTableModelInterface).getSelectedKey1(), null);
-        m_paramColumn2 = new ObjectParameter(JOIN_COL2, graphObjects[1].getName() +" Join Column Key", new JComboBox(objectArray2), objectArray2, associatedObjectArray2, ((AbstractJoinDataModel)m_globalTableModelInterface).getSelectedKey2(), null);
+        m_paramColumn1 = new ObjectParameter(JOIN_COL1, graphObjects[0].getFullName() +" Join Column Key", new JComboBox(objectArray1), objectArray1, associatedObjectArray1, ((AbstractJoinDataModel)m_globalTableModelInterface).getSelectedKey1(), null);
+        m_paramColumn2 = new ObjectParameter(JOIN_COL2, graphObjects[1].getFullName() +" Join Column Key", new JComboBox(objectArray2), objectArray2, associatedObjectArray2, ((AbstractJoinDataModel)m_globalTableModelInterface).getSelectedKey2(), null);
         m_parameterList = new ParameterList("Diff");
         m_parameters = new ParameterList[1];
         m_parameters[0] = m_parameterList;

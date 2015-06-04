@@ -24,7 +24,7 @@ public class DisplayExperimentalDesignAction extends AbstractRSMAction {
     
     
    public DisplayExperimentalDesignAction() {
-       super(NbBundle.getMessage(DisplayExperimentalDesignAction.class,"CTL_DisplayExperimentalActionAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+       super(NbBundle.getMessage(DisplayExperimentalDesignAction.class,"CTL_DisplayExperimentalAction"), AbstractTree.TreeType.TREE_QUANTITATION);
    }
    
    

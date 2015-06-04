@@ -27,7 +27,7 @@ public class RunXICTask extends AbstractServiceTask {
     private boolean useExistingJSON =false;
     
     public RunXICTask(AbstractServiceCallback callback, Long projectId,  String quantDSName,  Map<String,Object> quantParams, Map<String,Object> expDesignParams, Long[] retValue  ) {
-        super(callback, false /** asynchronous */, new   TaskInfo("Run XIC Quantitation for ", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH ));
+        super(callback, false /** asynchronous */, new   TaskInfo("Run XIC Quantitation for "+quantDSName, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH ));
         m_xicQuantiResult = retValue;     
         m_expDesignParams = expDesignParams;
         m_quantiDSName = quantDSName;
@@ -37,7 +37,7 @@ public class RunXICTask extends AbstractServiceTask {
     }
         
     public RunXICTask(AbstractServiceCallback callback, Long projectId,  String quantDSName,  Map<String,Object> quantParams, HashMap<String, ArrayList<String>> samplesByGroup, HashMap<String, ArrayList<String>> samplesAnalysisBySample,HashMap<String, Long> rsmIdBySampleAnalysis, Long[] retValue  ) {
-        super(callback, false /** asynchronous */, new TaskInfo("Run XIC Quantitation for ", true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH ));
+        super(callback, false /** asynchronous */, new TaskInfo("Run XIC Quantitation for "+quantDSName, true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH ));
         m_xicQuantiResult = retValue;     
         m_samplesByGroup = samplesByGroup;
         m_samplesAnalysisBySample = samplesAnalysisBySample;

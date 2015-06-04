@@ -38,7 +38,7 @@ public class RetrieveSCDataAction extends AbstractRSMAction {
         ArrayList<DDataset> datasetList = new ArrayList<>();        
         datasetList.add(refDatasetNode.getDataset()); //first and single entry is Reference Dataset in data box !
         params.put(SpectralCountAction.DS_LIST_PROPERTIES, datasetList);
-        WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox(refDatasetNode.getDataset().getName()+" WSC", true) ;
+        WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox(refDatasetNode.getDataset().getName(), refDatasetNode.getDataset().getName()+" WSC", true) ;
         wbox.setEntryData(refDatasetNode.getDataset().getProject().getId(), params);
 
         // open a window to display the window box

@@ -130,7 +130,7 @@ public class SpectralCountAction extends AbstractRSMAction {
                 
                 m_logger.debug(" Will Compute SC on "+(datasetList.size())+" RSMs : "+datasetList);
                 
-                WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox((String)params.get(DS_NAME_PROPERTIES), false) ;
+                WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox((String)params.get(DS_NAME_PROPERTIES), (String)params.get(DS_NAME_PROPERTIES)+" WSC", false) ;
                 wbox.setEntryData(refDatasetNode.getDataset().getProject().getId(), params);
 
                 // open a window to display the window box

@@ -11,15 +11,17 @@ import org.jdesktop.swingx.JXTable;
 public class TableInfo {
     
     private final int m_id;
-    private final String m_name;
-    private String m_fullName = null;
+    //private final String m_name;
+    private String m_dataName;
+    private String m_typeName = null;
     private final JXTable m_table;
     
     private ImageIcon m_icon = null;
 
-    public TableInfo(int id, String name, JXTable table) {
+    public TableInfo(int id, String dataName, String typeName, JXTable table) {
         m_id = id;
-        m_name = name;
+        m_dataName = dataName;
+        m_typeName = typeName;
         m_table = table;
     }
     
@@ -34,9 +36,28 @@ public class TableInfo {
         return m_table;
     }
     
-    public void setFullName(String fullName) {
+    /*public void setFullName(String fullName) {
         m_fullName = fullName;
+    }*/
+    
+    /*public String getDataName() {
+        if (m_dataName!=null) {
+            return m_dataName;
+        }
+        if (m_fullName == null) {
+            return null;
+        }
+        int index = m_fullName.lastIndexOf(m_name);
+        if (index != -1) {
+            String dataName = m_fullName.substring(0, index).trim();
+            return dataName;
+        }
+        return null;
     }
+    
+    public void setDataName(String dataName) {
+        m_dataName = dataName;
+    }*/
 
     public ImageIcon getIcon() {
         return m_icon;
@@ -45,17 +66,25 @@ public class TableInfo {
         m_icon = icon;
     }
     
-    public String getFullName() {
+    /*public String getFullName() {
         return m_fullName;
-    }
+    }*/
     
    
     public String getNameWithId() {
-        return m_id+": "+m_name;
+        return m_id+": "+getFullName();
     }
     
-    public String getName() {
-        return m_name;
+    public String getDataName() {
+        return m_dataName;
+    }
+    
+    public String getTypeName() {
+        return m_typeName;
+    }
+    
+    public String getFullName() {
+        return m_dataName+" "+m_typeName;
     }
     
     public int getId() {

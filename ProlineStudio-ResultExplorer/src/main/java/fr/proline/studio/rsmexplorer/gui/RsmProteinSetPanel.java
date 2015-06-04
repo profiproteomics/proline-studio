@@ -314,8 +314,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
             @Override
             public void actionPerformed() {
                 JXTable table = getGlobalAssociatedTable();
-                String name = ((JPanel)m_dataBox.getPanel()).getName();
-                TableInfo tableInfo = new TableInfo(m_dataBox.getId(), name, table);
+                TableInfo tableInfo = new TableInfo(m_dataBox.getId(), m_dataBox.getDataName(), m_dataBox.getTypeName(), table);
                 Image i = m_dataBox.getIcon();
                 if (i!=null) {
                     tableInfo.setIcon(new ImageIcon(i));

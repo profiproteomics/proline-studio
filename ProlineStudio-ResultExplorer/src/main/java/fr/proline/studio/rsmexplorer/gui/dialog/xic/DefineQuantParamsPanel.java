@@ -305,11 +305,11 @@ public class DefineQuantParamsPanel extends JPanel{
      */
     public void setQuantParams(Map<String,Object>  quantParams){
         Map<String,Object> extRactParams = (Map<String,Object>) quantParams.get("extraction_params");
-        m_extractionMoZTolTF.setText(extRactParams.get("moz_tol").toString());
+        m_extractionMoZTolTF.setText(""+Double.parseDouble(extRactParams.get("moz_tol").toString()));
         
         Map<String,Object> clusterParams = (Map<String,Object>) quantParams.get("clustering_params");
-        m_clusteringMoZTolTF.setText(clusterParams.get("moz_tol").toString());
-        m_clusteringTimeTolTF.setText(clusterParams.get("time_tol").toString());
+        m_clusteringMoZTolTF.setText(""+Double.parseDouble(clusterParams.get("moz_tol").toString()));
+        m_clusteringTimeTolTF.setText(""+Double.parseDouble(clusterParams.get("time_tol").toString()));
         for(int i=0; i<CLUSTERING_TIME_COMPUTATION_KEYS.length; i++){
             if (CLUSTERING_TIME_COMPUTATION_KEYS[i].equals(clusterParams.get("time_computation").toString())){
                 m_clusteringTimeComputationCB.setSelectedIndex(i);
@@ -330,8 +330,8 @@ public class DefineQuantParamsPanel extends JPanel{
         }
         
         Map<String,Object> alnParams =(Map<String,Object>) quantParams.get("aln_params");
-        m_alignmentMassIntervalTF.setText(alnParams.get("mass_interval").toString());
-        m_alignmentMaxIterationTF.setText(alnParams.get("max_iterations").toString());
+        m_alignmentMassIntervalTF.setText(""+Integer.parseInt(alnParams.get("mass_interval").toString()));
+        m_alignmentMaxIterationTF.setText(""+Integer.parseInt(alnParams.get("max_iterations").toString()));
         for(int i=0; i<ALIGNMENT_SMOOTHING_METHOD_KEYS.length; i++){
             if (ALIGNMENT_SMOOTHING_METHOD_KEYS[i].equals((String) alnParams.get("smoothing_method_name"))){
                 m_alignmentSmoothingMethodCB.setSelectedIndex(i);
@@ -339,12 +339,12 @@ public class DefineQuantParamsPanel extends JPanel{
             }
         }
         Map<String,Object> smootingParams =(Map<String,Object>) alnParams.get("smoothing_params");
-        m_alignmentSmoothingWinSizeTF.setText(smootingParams.get("window_size").toString());
-        m_alignmentSmoothingWinOverlapTF.setText(smootingParams.get("window_overlap").toString());
-        m_alignmentSmoothingMinWinlandmarksTF.setText(smootingParams.get("min_window_landmarks").toString());
+        m_alignmentSmoothingWinSizeTF.setText(""+Integer.parseInt(smootingParams.get("window_size").toString()));
+        m_alignmentSmoothingWinOverlapTF.setText(""+Integer.parseInt(smootingParams.get("window_overlap").toString()));
+        m_alignmentSmoothingMinWinlandmarksTF.setText(""+Integer.parseInt(smootingParams.get("min_window_landmarks").toString()));
         Map<String,Object> alnFtParams = (Map<String,Object>) alnParams.get("ft_mapping_params");
-        m_alignmentFeatureMappingMoZTolTF.setText(alnFtParams.get("moz_tol").toString());
-        m_alignmentFeatureMappingTimeToleranceTF.setText(alnFtParams.get("time_tol").toString());
+        m_alignmentFeatureMappingMoZTolTF.setText(""+Integer.parseInt(alnFtParams.get("moz_tol").toString()));
+        m_alignmentFeatureMappingTimeToleranceTF.setText(""+Integer.parseInt(alnFtParams.get("time_tol").toString()));
         
         Map<String,Object> ftParams =(Map<String,Object>) quantParams.get("ft_filter");
         for(int i=0; i<FEATURE_FILTER_NAME_KEYS.length; i++){
@@ -359,11 +359,11 @@ public class DefineQuantParamsPanel extends JPanel{
                 break;
             }
         }
-        m_featureFilterValueTF.setText(ftParams.get("value").toString());
+        m_featureFilterValueTF.setText(""+Double.parseDouble(ftParams.get("value").toString()));
         
         Map<String,Object> ftMappingParams =(Map<String,Object>) quantParams.get("ft_mapping_params");
-        m_featureMappingMoZTolTF.setText( ftMappingParams.get("moz_tol").toString());
-        m_featureMappingTimeTolTF.setText(ftMappingParams.get("time_tol").toString());
+        m_featureMappingMoZTolTF.setText(""+Double.parseDouble(ftMappingParams.get("moz_tol").toString()));
+        m_featureMappingTimeTolTF.setText(""+Integer.parseInt(ftMappingParams.get("time_tol").toString()));
         
         if (quantParams.containsKey("normalization_method")){
             for(int i=0; i<FEATURE_NORMALIZATION_KEYS.length; i++){

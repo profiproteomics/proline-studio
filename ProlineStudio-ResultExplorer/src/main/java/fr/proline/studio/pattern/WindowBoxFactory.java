@@ -23,9 +23,10 @@ import javax.swing.border.EmptyBorder;
  */
 public class WindowBoxFactory {
     
-    public static WindowBox getUserDefinedWindowBox(String name, AbstractDataBox databox, boolean isDecoy, boolean isRSM) {
+    public static WindowBox getUserDefinedWindowBox(String dataName, String windowName, AbstractDataBox databox, boolean isDecoy, boolean isRSM) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = databox;
+        boxes[0].setDataName(dataName);
 
         IconManager.IconType iconType;
         if (isRSM) {
@@ -35,22 +36,23 @@ public class WindowBoxFactory {
         }
 
         
-        WindowBox winBox = new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        WindowBox winBox = new WindowBox(windowName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
 
         return winBox;
     }
     
-    public static WindowBox getPeptidesWindowBox(String name, boolean isDecoy) {
-        return getPeptidesForRsetOnlyWindowBox(name, isDecoy);
+    public static WindowBox getPeptidesWindowBox(String dataName, boolean isDecoy) {
+        return getPeptidesForRsetOnlyWindowBox(dataName, isDecoy);
 
     }
     
-    public static WindowBox getPeptidesForRsetOnlyWindowBox(String name, boolean isDecoy) {
+    public static WindowBox getPeptidesForRsetOnlyWindowBox(String dataName, boolean isDecoy) {
         // AW: search results / PSM set of boxes.
     	// 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[5];
         boxes[0] = new DataBoxRsetPSM();
+        boxes[0].setDataName(dataName);
         boxes[1] = new DataBoxRsetPeptideSpectrum();
         boxes[2] = new DataBoxRsetPeptideSpectrumError();
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
@@ -59,58 +61,60 @@ public class WindowBoxFactory {
         boxes[4] = new DataBoxRsetProteinsForPeptideMatch();
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+        WindowBox winBox = new WindowBox( boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
 
         return winBox;
         
     }
     
-    public static WindowBox getMSDiagWindowBox(String name, HashMap<String,String> resultMessage) {
+    public static WindowBox getMSDiagWindowBox(String dataName, HashMap<String,String> resultMessage) {
         // MSDiag
     	// 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxRsetMSDiag(resultMessage);
+        boxes[0].setDataName(dataName);
                 
         IconManager.IconType iconType = IconManager.IconType.CHART_PIE; // TODO: change icon
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+        WindowBox winBox = new WindowBox( dataName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
 
         return winBox;
         
     }
     
-    public static WindowBox getGraphicsWindowBox(String name, AbstractDataBox srcDatabox) {
+    public static WindowBox getGraphicsWindowBox(String fullName, AbstractDataBox srcDatabox) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         //boxes[0] = new DataBoxStatisticsFrequencyResponse();
         boxes[0] = new DataboxGraphics(true);
         srcDatabox.addNextDataBox(boxes[0]);
         IconManager.IconType iconType = IconManager.IconType.CHART;
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+        WindowBox winBox = new WindowBox( fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
         boxes[0].dataChanged();
         return winBox;
     }
     
-    public static WindowBox getMultiGraphicsWindowBox(String name, AbstractDataBox srcDatabox, boolean canChooseColor) {
+    public static WindowBox getMultiGraphicsWindowBox(String fullName, AbstractDataBox srcDatabox, boolean canChooseColor) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxMultiGraphics(true, canChooseColor);
         srcDatabox.addNextDataBox(boxes[0]);
         IconManager.IconType iconType = IconManager.IconType.CHART;
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+        WindowBox winBox = new WindowBox( fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
         boxes[0].dataChanged();
         return winBox;
     }
     
-    public static WindowBox getProteinMatchesForRsetWindowBox(String name, boolean isDecoy) {
+    public static WindowBox getProteinMatchesForRsetWindowBox(String dataName, boolean isDecoy) {
         
         // create boxes
     	// AW: search results / proteins
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataBoxRsetAllProteinMatch();
+        boxes[0].setDataName(dataName);
         boxes[1] = new DataboxRsetPeptidesOfProtein();
 
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+        WindowBox winBox = new WindowBox( boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
 
         return winBox;
         
@@ -123,52 +127,54 @@ public class WindowBoxFactory {
      * or read back operation (true)
      * @return 
      */
-    public static WindowBox getRsmWSCWindowBox(String name, boolean readData) {
+    public static WindowBox getRsmWSCWindowBox(String dataName, String fullName, boolean readData) {
         
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxRsmWSC(readData);
+        boxes[0].setDataName(dataName);
 
-
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.QUANT_SC) );
+        WindowBox winBox = new WindowBox( fullName, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.QUANT_SC) );
 
         return winBox;
         
     }
     
-    public static WindowBox getRsmPSMWindowBox(String name, boolean isDecoy) {
+    public static WindowBox getRsmPSMWindowBox(String dataName, boolean isDecoy) {
         // create boxes
     	// AW: All PSM of an Identification Summary or corresponding to a Peptide Instance
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxRsmPSM();
+        boxes[0].setDataName(dataName);
 
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
-        return new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
+        return new WindowBox(  boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
     }  
     
-    public static WindowBox getRsmPeptidesWindowBox(String name, boolean isDecoy) {
+    public static WindowBox getRsmPeptidesWindowBox(String dataName, boolean isDecoy) {
         // create boxes
     	// AW: Identification Summary / Peptide Instances";
         AbstractDataBox[] boxes = new AbstractDataBox[4];
         boxes[0] = new DataBoxRsmPeptideInstances();
+        boxes[0].setDataName(dataName);
         boxes[1] = new DataBoxRsmProteinSetOfPeptides();
         boxes[2] = new DataBoxRsmProteinsOfProteinSet();
         boxes[3] = new DataBoxRsmPeptidesOfProtein();
         boxes[3].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
 
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        WindowBox winBox = new WindowBox( boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
 
         
         return winBox;
     }
     
-    public static WindowBox getProteinSetsWindowBox(String name, boolean isDecoy) {
+    public static WindowBox getProteinSetsWindowBox(String dataName, boolean isDecoy) {
         
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[7];
         boxes[0] = new DataBoxRsmAllProteinSet();
-        boxes[0].setFullName(name);
+        boxes[0].setDataName(dataName);
         boxes[1] = new DataBoxRsmProteinsOfProteinSet();
         boxes[2] = new DataBoxRsmPeptidesOfProtein();
         boxes[3] = new DataBoxRsmProteinAndPeptideSequence();
@@ -181,29 +187,48 @@ public class WindowBoxFactory {
         
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
         
-        WindowBox winBox = new WindowBox( name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        WindowBox winBox = new WindowBox( boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
 
         
         return winBox; 
     }
     
-    public static WindowBox getAllResultSetWindowBox(String name) {
+    
+    /*
+    KEEP IT; I will use it later
+    public static WindowBox getAdjacencyMatrixWindowBox(String dataName, boolean isDecoy) {
+
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataBoxAdjacencyMatrix();
+        boxes[0].setDataName(dataName);
+
+        IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
+
+        WindowBox winBox = new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+
+        return winBox;
+    }*/
+
+    public static WindowBox getAllResultSetWindowBox(String dataName) {
         
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxRsetAll();
+        boxes[0].setDataName(dataName);
 
-        WindowBox winBox = new WindowBox(name, generatePanel(boxes), boxes[0], null);
+        WindowBox winBox = new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], null);
 
         return winBox;
 
     }
     
-    public static WindowBox getXicQuantProteinSetWindowBox(String name) {
+    public static WindowBox getXicQuantProteinSetWindowBox(String dataName, String fullName) {
 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[6];
         boxes[0] = new DataboxXicProteinSet();
+        boxes[0].setDataName(dataName);
         boxes[1] = new DataboxXicPeptideSet();
         boxes[2] = new DataboxMultiGraphics(false, false);
         boxes[2].setLayout(SplittedPanelContainer.PanelLayout.TABBED);
@@ -215,28 +240,30 @@ public class WindowBoxFactory {
         boxes[5].setLayout(SplittedPanelContainer.PanelLayout.HORIZONTAL);
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-        return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
-    public static WindowBox getXicQuantPeptideSetWindowBox(String name) {
+    public static WindowBox getXicQuantPeptideSetWindowBox(String dataName, String fullName) {
 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[2];
         boxes[0] = new DataboxXicPeptideSet();
+        boxes[0].setDataName(dataName);
         boxes[1] = new DataboxXicPeptideIon();
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-        return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
-    public static WindowBox getXicQuantPeptideIonWindowBox(String name) {
+    public static WindowBox getXicQuantPeptideIonWindowBox(String dataName, String fullName) {
 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxXicPeptideIon();
+        boxes[0].setDataName(dataName);
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-        return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
     public static WindowBox getMzScopeWindowBox() {
@@ -248,14 +275,15 @@ public class WindowBoxFactory {
         return winBox;
     }
     
-    public static WindowBox getExperimentalDesignWindowBox(String name) {
+    public static WindowBox getExperimentalDesignWindowBox(String dataName, String fullName) {
 
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxExperimentalDesign();
+        boxes[0].setDataName(dataName);
 
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
-        return new WindowBox(name, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
 
     public static WindowBox getTaskListWindowBox() {
@@ -267,18 +295,8 @@ public class WindowBoxFactory {
 
         return winBox;
     }
-    
-    /*public static WindowBox getDataMixerWindowBox() {
-        AbstractDataBox[] boxes = new AbstractDataBox[2];
-        boxes[0] = new DataboxSelectCompareData();
-        boxes[1] = new DataboxCompareResult();
 
-        WindowBox winBox = new WindowBox("Data Mixer", generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.DATA_MIXER));
-
-        return winBox;
-    }*/
-    
-    public static WindowBox getDataMixerWindowBoxV2() {
+    public static WindowBox getDataMixerWindowBox() {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxDataMixer();
 
@@ -353,14 +371,14 @@ public class WindowBoxFactory {
             } else if (layout == SplittedPanelContainer.PanelLayout.TABBED) {
                 if (prevLayout == SplittedPanelContainer.PanelLayout.TABBED) {
                     JTabbedPane tb = (JTabbedPane) panels[panelIdx - 1];
-                    tb.addTab(boxes[i].getName(), (JPanel) boxes[i].getPanel());
-                    tb.setName(tb.getName() + " / " + boxes[i].getName());
+                    tb.addTab(boxes[i].getTypeName(), (JPanel) boxes[i].getPanel());
+                    tb.setName(tb.getName() + " / " + boxes[i].getTypeName());
                 } else {
                     SplittedPanelContainer.ReactiveTabbedPane tb = new SplittedPanelContainer.ReactiveTabbedPane();
                     tb.setBorder(new EmptyBorder(8, 8, 8, 8));
-                    tb.addTab(boxes[i - 1].getName(), panels[--panelIdx]);
-                    tb.addTab(boxes[i].getName(), (JPanel) boxes[i].getPanel());
-                    tb.setName(boxes[i - 1].getName() + " / " + boxes[i].getName());
+                    tb.addTab(boxes[i - 1].getTypeName(), panels[--panelIdx]);
+                    tb.addTab(boxes[i].getTypeName(), (JPanel) boxes[i].getPanel());
+                    tb.setName(boxes[i - 1].getTypeName() + " / " + boxes[i].getTypeName());
                     panels[panelIdx++] = tb;
 
                 }

@@ -44,7 +44,7 @@ public class DisplayExperimentalDesignAction extends AbstractRSMAction {
 
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
 
-        WindowBox wbox = WindowBoxFactory.getExperimentalDesignWindowBox(dataset.getName() + " Exp. Design");
+        WindowBox wbox = WindowBoxFactory.getExperimentalDesignWindowBox(dataset.getName(), dataset.getName() + " Exp. Design");
         wbox.setEntryData(dataset.getProject().getId(), dataset);
 
         // open a window to display the window box

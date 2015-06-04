@@ -54,7 +54,7 @@ public class DisplayRsmPSMAction extends AbstractRSMAction {
         if (rsm != null) {
         
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getRsmPSMWindowBox(dataSet.getName()+" PSM", false);
+            WindowBox wbox = WindowBoxFactory.getRsmPSMWindowBox(dataSet.getName(), false);
             wbox.setEntryData(dataSet.getProject().getId(), rsm);
 
             // open a window to display the window box
@@ -63,7 +63,7 @@ public class DisplayRsmPSMAction extends AbstractRSMAction {
             win.requestActive();
         } else {
             
-            final WindowBox wbox = WindowBoxFactory.getRsmPSMWindowBox(dataSet.getName()+" PSM", false);
+            final WindowBox wbox = WindowBoxFactory.getRsmPSMWindowBox(dataSet.getName(), false);
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();

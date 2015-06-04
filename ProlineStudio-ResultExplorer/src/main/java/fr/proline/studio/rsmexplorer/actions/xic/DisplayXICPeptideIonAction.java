@@ -38,7 +38,7 @@ public class DisplayXICPeptideIonAction extends AbstractRSMAction {
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
 
 
-        WindowBox wbox = WindowBoxFactory.getXicQuantPeptideIonWindowBox(dataset.getName()+" Peptides Ions");
+        WindowBox wbox = WindowBoxFactory.getXicQuantPeptideIonWindowBox(dataset.getName(), dataset.getName()+" Peptides Ions");
             wbox.setEntryData(dataset.getProject().getId(), dataset);
 
 

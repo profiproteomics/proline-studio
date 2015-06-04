@@ -53,7 +53,7 @@ public class DisplayRsmPeptidesAction extends AbstractRSMAction {
         if (rsm != null) {
         
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getRsmPeptidesWindowBox(dataSet.getName()+" Peptides", false);
+            WindowBox wbox = WindowBoxFactory.getRsmPeptidesWindowBox(dataSet.getName(), false);
             wbox.setEntryData(dataSet.getProject().getId(), rsm);
 
             // open a window to display the window box
@@ -62,7 +62,7 @@ public class DisplayRsmPeptidesAction extends AbstractRSMAction {
             win.requestActive();
         } else {
             
-            final WindowBox wbox = WindowBoxFactory.getRsmPeptidesWindowBox(dataSet.getName()+" Peptides", false);
+            final WindowBox wbox = WindowBoxFactory.getRsmPeptidesWindowBox(dataSet.getName(), false);
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();

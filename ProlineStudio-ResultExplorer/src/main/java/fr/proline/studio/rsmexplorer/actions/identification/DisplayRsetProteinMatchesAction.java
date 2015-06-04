@@ -54,7 +54,7 @@ public class DisplayRsetProteinMatchesAction extends AbstractRSMAction {
         if (rset != null) {
 
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName() + " Proteins", false);
+            WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName(), false);
             wbox.setEntryData(dataSet.getProject().getId(), rset);
 
 
@@ -65,7 +65,7 @@ public class DisplayRsetProteinMatchesAction extends AbstractRSMAction {
             win.requestActive();
         } else {
 
-            final WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName() + " Proteins", false);
+            final WindowBox wbox = WindowBoxFactory.getProteinMatchesForRsetWindowBox(dataSet.getName(), false);
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();

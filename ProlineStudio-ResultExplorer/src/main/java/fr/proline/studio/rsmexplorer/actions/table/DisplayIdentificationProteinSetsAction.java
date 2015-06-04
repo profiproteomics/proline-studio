@@ -37,7 +37,7 @@ public class DisplayIdentificationProteinSetsAction extends AbstractTableAction 
         ResultSummary rsm = (ResultSummary) m_box.getData(false, ResultSummary.class);
 
         // prepare window box
-        WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox(m_box.getFullName(), false);
+        WindowBox wbox = WindowBoxFactory.getProteinSetsWindowBox(m_box.getDataName(), false);
         HashSet selectedData = ((ExportTableSelectionInterface) table).exportSelection(selectedRows);
         wbox.selectDataWhenLoaded(selectedData);
         wbox.setEntryData(m_box.getProjectId(), rsm);

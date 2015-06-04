@@ -18,7 +18,7 @@ public class DataMixerWindowBoxManager {
         
 
         if (m_windowBox == null) {
-            m_windowBox = WindowBoxFactory.getDataMixerWindowBoxV2();
+            m_windowBox = WindowBoxFactory.getDataMixerWindowBox();
             if (tableInfo != null) {
                 m_windowBox.setEntryData(-1, tableInfo);
             }

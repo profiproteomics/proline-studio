@@ -138,16 +138,13 @@ public class BBinomialFunction extends AbstractFunction {
             CalcInterpreterThread.getCalcInterpreterThread().addTask(task);
 
         } catch (Exception e) {
-            //m_state = GraphNode.NodeState.UNSET;
+            setInError(true);
+            setCalculating(false);
         }
         
         
     }
 
-    /*@Override
-    public GraphNode.NodeState getState() {
-        return m_state;
-    }*/
     
     @Override
     public boolean settingsDone() {

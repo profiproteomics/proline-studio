@@ -1,5 +1,7 @@
 package fr.proline.studio.utils;
 
+import static fr.proline.studio.utils.GlobalValues.PUBLIC_RELEASE_VERSION;
+
 /**
  *
  * @author JM235353
@@ -21,7 +23,7 @@ public class MiscellaneousUtils {
         final String START_URL = "http://biodev.extra.cea.fr/docs/proline/doku.php";
         final String START_URL_WITH_PARAMETER = "http://biodev.extra.cea.fr/docs/proline/doku.php?id=";
         final String NEW_URL = "http://proline.profiproteomics.fr/doc/1.0/";
-        if (helpURL.startsWith(START_URL)) {
+        if (PUBLIC_RELEASE_VERSION && helpURL.startsWith(START_URL)) {
             if (helpURL.startsWith(START_URL_WITH_PARAMETER)) {
                 helpURL = NEW_URL+helpURL.substring(START_URL_WITH_PARAMETER.length()).replaceAll(" ", "_").replaceAll(":","/")+".html";
             } else {

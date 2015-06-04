@@ -19,6 +19,8 @@ import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProtein
 import fr.proline.studio.rsmexplorer.actions.identification.EmptyTrashAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.GenerateMSDiagReportAction;
+import fr.proline.studio.rsmexplorer.actions.identification.GetProjectidAndRsmJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.GetProjectidAndRsmAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProteinJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportRSM2PrideJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportRSMJMSAction;
@@ -606,7 +608,15 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             if (m_mainPopup == null) {
 
                 // create the actions
+
+
+                m_mainActions = new ArrayList<>(22);  // <--- get in sync
+
+                m_mainActions = new ArrayList<>(18);  // <--- get in sync
+
                 m_mainActions = new ArrayList<>(19);  // <--- get in sync
+
+
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction();
                 m_mainActions.add(displayRsetAction);
@@ -690,7 +700,16 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 }
 
                 GenerateMSDiagReportAction msDiagReportAction = new GenerateMSDiagReportAction();
-                m_mainActions.add(msDiagReportAction);
+
+                m_mainActions.add(msDiagReportAction);   
+              //
+                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                    GetProjectidAndRsmJMSAction getprojectidandrsmJmsAction = new GetProjectidAndRsmJMSAction();
+                    m_mainActions.add(getprojectidandrsmJmsAction);
+                } else {
+                	GetProjectidAndRsmAction getprojectidandrsmAction = new GetProjectidAndRsmAction();
+                   m_mainActions.add(getprojectidandrsmAction);
+                }
 
                 m_mainActions.add(null);  // separator
 

@@ -4,6 +4,7 @@ import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.data.RunInfoData;
@@ -660,5 +661,14 @@ public class CreateXICDialog extends DefaultDialog {
         return true;
     }
 
+    public void setDefaultDesignTree(DDataset dataset){
+        XICDesignTree.getDesignTree().setExpDesign(dataset);
+        XICDesignTree.getDesignTree().renameXicTitle(dataset.getName()+"-Copy");
+        try {
+            DefineQuantParamsPanel.getDefineQuantPanel().setQuantParams(dataset.getQuantProcessingConfigAsMap());
+        } catch (Exception ex) {
+            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error while setting Quant Param ", ex);
+        }
+    }
     
 }

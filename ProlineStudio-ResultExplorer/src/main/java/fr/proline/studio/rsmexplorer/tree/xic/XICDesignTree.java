@@ -292,7 +292,13 @@ public class XICDesignTree extends AbstractTree {
 
     
     public void setExpDesign(DDataset dataset){
+        if (dataset == null){
+            return;
+        }
         GroupSetup groupSetup = dataset.getGroupSetup();
+        if (groupSetup == null){
+            return;
+        }
         List<DQuantitationChannel> listQuantChannels = dataset.getMasterQuantitationChannels().isEmpty() ? new ArrayList() : dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
         
         AbstractNode rootNode = (AbstractNode) m_model.getRoot();
@@ -318,7 +324,7 @@ public class XICDesignTree extends AbstractTree {
                     if (qCh != null){
                         String name = qCh.getResultFileName();
                         // fake dataset
-                        DDataset dds = new DDataset(-1,dataset.getProject() , name, Dataset.DatasetType.IDENTIFICATION, 0, dataset.getResultSetId(), dataset.getResultSummaryId(), 1);
+                        DDataset dds = new DDataset(-1,dataset.getProject() , name, Dataset.DatasetType.IDENTIFICATION, 0, dataset.getResultSetId(), qCh.getIdentResultSummaryId(), 1);
                         DataSetData dsData = new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS ); 
                         dsData.setDataset(dds);
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);
@@ -351,6 +357,12 @@ public class XICDesignTree extends AbstractTree {
             }
         }
         return null;
+    }
+    
+    public void renameXicTitle(String newName){
+        AbstractNode rootNode = (AbstractNode) m_model.getRoot();
+        rename(rootNode, newName);
+        ((DefaultTreeModel) XICDesignTree.getDesignTree().getModel()).nodeChanged(rootNode);
     }
     
 }

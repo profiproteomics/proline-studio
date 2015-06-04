@@ -64,7 +64,7 @@ public class FilterProtSetDialog extends DefaultDialog {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
         setTitle("ProteinSet Filtering");
 
-        setHelpURL("https://bioproj.extra.cea.fr/docs/proline/doku.php?id=prolineconcepts:proteinsetsfilteringandvalidation");
+        setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=prolineconcepts:proteinsetsfilteringandvalidation");
 
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);

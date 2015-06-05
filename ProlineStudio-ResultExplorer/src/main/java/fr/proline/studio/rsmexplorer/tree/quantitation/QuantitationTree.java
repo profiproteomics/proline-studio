@@ -215,7 +215,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         } else {
             if (m_mainPopup == null) {
                 // create the actions
-                m_mainActions = new ArrayList<>(12);  // <--- get in sync
+                m_mainActions = new ArrayList<>(14);  // <--- get in sync
                 
                 DisplayExperimentalDesignAction expDesignAction = new DisplayExperimentalDesignAction();
                 m_mainActions.add(expDesignAction);
@@ -283,6 +283,11 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
                 DeleteAction deleteAction = new DeleteAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(deleteAction);
+                
+                m_mainActions.add(null);  // separator
+                
+                CreateXICAction createXICAction = new CreateXICAction(true);
+                m_mainActions.add(createXICAction);
 
 
                 // add actions to popup
@@ -307,9 +312,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
 
         // update of the enable/disable state
-        for (int i = 0; i < actions.size(); i++) {
-            AbstractRSMAction action = actions.get(i);
-
+        for (AbstractRSMAction action : actions) {
             if (action == null) {
                 continue;
             }

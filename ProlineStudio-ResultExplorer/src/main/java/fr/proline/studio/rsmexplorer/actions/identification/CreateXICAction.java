@@ -45,7 +45,7 @@ public class CreateXICAction extends AbstractRSMAction {
     }
 
     public CreateXICAction(boolean fromExistingXIC) {
-        super(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXICExpDesignAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+        super(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC"), AbstractTree.TreeType.TREE_QUANTITATION);
         m_fromExistingXIC = true;
     }
 

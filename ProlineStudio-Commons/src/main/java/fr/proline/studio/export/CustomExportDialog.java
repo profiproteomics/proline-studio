@@ -49,6 +49,10 @@ import com.google.gson.GsonBuilder;
 public class CustomExportDialog extends DefaultDialog {
 
     private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.Commons");
+    
+    private final static String EXPORT_PROTEIN_ALL = "All";
+    private final static String EXPORT_PROTEIN_VALIDATED = "Validated only";
+    private final static String[] EXPORT_PROTEIN_VALUES = new String[]{EXPORT_PROTEIN_VALIDATED, EXPORT_PROTEIN_ALL};
 
     private static CustomExportDialog m_singletonImageDialog = null;
     private static CustomExportDialog m_singletonImage2Dialog = null;
@@ -276,7 +280,7 @@ public class CustomExportDialog extends DefaultDialog {
                 comboBox_NumberSeparator.setModel(new DefaultComboBoxModel(param.decimal_separator_values));
             }
 
-            comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[]{"All", "Validated only"}));
+            comboBox_ProteinSets.setModel(new DefaultComboBoxModel(EXPORT_PROTEIN_VALUES));
 
             comboBox_exportProfile.setModel(new DefaultComboBoxModel(new String[]{"Best", "All"}));
 
@@ -295,9 +299,9 @@ public class CustomExportDialog extends DefaultDialog {
             }
 
             if (param.data_export.all_protein_set) {
-                comboBox_ProteinSets.setSelectedIndex(0);
+                comboBox_ProteinSets.setSelectedItem(EXPORT_PROTEIN_ALL);
             } else {
-                comboBox_ProteinSets.setSelectedIndex(1);
+                comboBox_ProteinSets.setSelectedItem(EXPORT_PROTEIN_VALIDATED);
             }
             if (param.data_export.best_profile) {
                 comboBox_exportProfile.setSelectedIndex(0);
@@ -622,7 +626,7 @@ public class CustomExportDialog extends DefaultDialog {
         optionPane.add(lblProteinSets);
 
         comboBox_ProteinSets = new JComboBox();
-        comboBox_ProteinSets.setModel(new DefaultComboBoxModel(new String[]{"All", "Validated only"}));
+        comboBox_ProteinSets.setModel(new DefaultComboBoxModel(EXPORT_PROTEIN_VALUES));
         comboBox_ProteinSets.setBounds(429, 43, 121, 20);
         optionPane.add(comboBox_ProteinSets);
 
@@ -1007,7 +1011,7 @@ public class CustomExportDialog extends DefaultDialog {
         }
 
         ec.data_export = new ExportDataExport();
-        ec.data_export.all_protein_set = comboBox_ProteinSets.getSelectedItem().equals("All");
+        ec.data_export.all_protein_set = comboBox_ProteinSets.getSelectedItem().equals(EXPORT_PROTEIN_ALL);
 
         ec.data_export.best_profile = comboBox_exportProfile.getSelectedItem().equals("Best");
 

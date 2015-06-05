@@ -229,7 +229,10 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
             return;
         }
 
-        int mode = ((DataSetNode)selectedNodes[0]).isQuantSC() ? 1 : (((DataSetNode)selectedNodes[0]).isQuantXIC()?2 : 0);
+        int mode = -1;
+        if (selectedNodes[0] instanceof DataSetNode){
+            mode = ((DataSetNode)selectedNodes[0]).isQuantSC() ? 1 : (((DataSetNode)selectedNodes[0]).isQuantXIC()?2 : 0);
+        }
         for (AbstractNode node : selectedNodes) {
             if (node.isChanging()) {
                 setEnabled(false);

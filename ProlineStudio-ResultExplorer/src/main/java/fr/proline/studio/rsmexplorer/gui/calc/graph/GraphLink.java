@@ -17,7 +17,8 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 /**
- *
+ * Used only to display a link between two connectors
+ * In reality, collectors are directly linked
  * @author JM235353
  */
 public class GraphLink extends AbstractGraphObject {

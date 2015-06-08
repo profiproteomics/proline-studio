@@ -11,7 +11,7 @@ import javax.swing.ImageIcon;
 
 
 /**
- *
+ * Graph Node representing Data
  * @author JM235353
  */
 public class DataGraphNode extends GraphNode {

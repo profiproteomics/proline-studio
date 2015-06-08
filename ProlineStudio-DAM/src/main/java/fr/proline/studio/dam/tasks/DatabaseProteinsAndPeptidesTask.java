@@ -1,7 +1,6 @@
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.dto.DProteinMatch;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -14,10 +13,9 @@ import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 
 /**
- *
+ * Loading of Protein Matches and corresponding Peptides for the Adjacency Matrix
  * @author JM235353
  */
 public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {

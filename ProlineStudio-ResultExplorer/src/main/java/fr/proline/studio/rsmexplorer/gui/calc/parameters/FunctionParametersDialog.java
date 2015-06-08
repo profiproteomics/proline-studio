@@ -9,11 +9,10 @@ import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 /**
- *
+ * Generic Dialog used to set the parameters for data mixer function
  * @author JM235353
  */
 public class FunctionParametersDialog extends DefaultDialog {

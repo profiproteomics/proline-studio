@@ -11,7 +11,6 @@ import java.awt.LinearGradientPaint;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
-import java.util.Iterator;
 import java.util.LinkedList;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -20,7 +19,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 /**
- *
+ * Parent Node for all graph nodes
  * @author JM235353
  */
 public abstract class GraphNode extends AbstractGraphObject {

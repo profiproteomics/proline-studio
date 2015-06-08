@@ -7,7 +7,7 @@ import java.awt.Graphics;
 import javax.swing.JPopupMenu;
 
 /**
- *
+ * Parent for all objects in a graph (nodes, connectors, links)
  * @author JM235353
  */
 public abstract class AbstractGraphObject {

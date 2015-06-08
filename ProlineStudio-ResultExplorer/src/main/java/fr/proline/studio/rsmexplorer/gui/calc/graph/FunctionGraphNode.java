@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
 
-import fr.proline.studio.rsmexplorer.gui.calc.DataMixerPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -11,7 +10,7 @@ import java.util.LinkedList;
 import javax.swing.ImageIcon;
 
 /**
- *
+ * Graph Node representing a Function
  * @author JM235353
  */
 public class FunctionGraphNode extends GraphNode {

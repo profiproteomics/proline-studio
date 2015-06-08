@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import javax.swing.JPopupMenu;
 
 /**
- *
+ * In or Out Connector of a Graph Node 
  * @author JM235353
  */
 public class GraphConnector extends AbstractGraphObject {

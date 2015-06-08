@@ -3,8 +3,6 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
-import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
@@ -12,17 +10,15 @@ import fr.proline.studio.python.interpreter.CalcCallback;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * PValue Function for the data mixer
  * @author JM235353
  */
 public class PValueFunction extends AbstractFunction {

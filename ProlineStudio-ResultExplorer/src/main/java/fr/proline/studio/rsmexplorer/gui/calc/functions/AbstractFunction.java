@@ -15,7 +15,7 @@ import javax.swing.ImageIcon;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Abstract Parent Function for all functions of the data mixer
  * @author JM235353
  */
 public abstract class AbstractFunction {

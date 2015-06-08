@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Beta Binomial Function for the data mixer
  * @author JM235353
  */
 public class BBinomialFunction extends AbstractFunction {

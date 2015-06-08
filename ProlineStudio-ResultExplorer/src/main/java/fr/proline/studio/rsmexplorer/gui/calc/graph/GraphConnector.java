@@ -45,7 +45,11 @@ public class GraphConnector extends AbstractGraphObject {
 
     @Override
     public String getDataName() {
-        return null;
+        GraphNode node = getLinkedSourceGraphNode();
+        if (node == null) {
+            return null;
+        }
+        return node.getDataName();
     }
 
     @Override
@@ -254,5 +258,10 @@ public class GraphConnector extends AbstractGraphObject {
             m_graphNode.resetState();
         }
     }*/
+
+    @Override
+    public String getPreviousDataName() {
+        return null;
+    }
     
 }

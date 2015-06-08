@@ -243,7 +243,7 @@ public class CalcDialog extends JDialog {
                         Table t = col.getTable();
                         t.addColumn(col);
                     } else if (o instanceof Table) {
-                        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(resultVariable.getName());
+                        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(null, resultVariable.getName());
                         windowBox.setEntryData(-1, ((Table)o).getModel() );
                         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
                         win.open();

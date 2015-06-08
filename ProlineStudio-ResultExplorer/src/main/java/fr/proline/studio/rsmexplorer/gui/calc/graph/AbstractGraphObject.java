@@ -39,6 +39,7 @@ public abstract class AbstractGraphObject {
     public abstract boolean calculationDone();
     
         
+    public abstract String getPreviousDataName();
     public abstract String getDataName();
     public abstract String getTypeName();
     public abstract String getFullName();

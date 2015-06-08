@@ -7,6 +7,7 @@ import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import javax.swing.JComboBox;
 
@@ -64,12 +65,12 @@ public class DiffFunction extends AbstractFunction {
     }
     
     @Override
-    public void process(AbstractGraphObject[] graphObjects, boolean display) {
+    public void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, boolean display) {
 
         // check if we have already processed
         if (m_globalTableModelInterface != null) {
             if (display) {
-                display(getName());
+                display(functionGraphNode.getPreviousDataName(), getName());
             }
             return;
         }
@@ -97,7 +98,7 @@ public class DiffFunction extends AbstractFunction {
         setCalculating(false);
         
         if (display) {
-            display(getName());
+            display(functionGraphNode.getPreviousDataName(), getName());
         }
     }
     

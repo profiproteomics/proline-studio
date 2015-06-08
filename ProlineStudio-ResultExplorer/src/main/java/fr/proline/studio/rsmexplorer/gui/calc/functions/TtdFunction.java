@@ -12,6 +12,7 @@ import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class TtdFunction extends AbstractFunction {
     }
 
     @Override
-    public void process(AbstractGraphObject[] graphObjects, final boolean display) {
+    public void process(AbstractGraphObject[] graphObjects, final FunctionGraphNode functionGraphNode, final boolean display) {
         
         setInError(false);
 
@@ -69,7 +70,7 @@ public class TtdFunction extends AbstractFunction {
         // check if we have already processed
         if (m_globalTableModelInterface != null) {
             if (display) {
-                display(getName());
+                display(functionGraphNode.getPreviousDataName(), getName());
             }
             return;
         }
@@ -126,7 +127,7 @@ public class TtdFunction extends AbstractFunction {
                                 sourceTable.addColumn(col);
                                 m_globalTableModelInterface = sourceTable.getModel();
                                 if (display) {
-                                    display(var.getName());
+                                    display(functionGraphNode.getPreviousDataName(), var.getName());
                                 }
                             }
                         }

@@ -11,6 +11,7 @@ import java.awt.LinearGradientPaint;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
+import java.util.Iterator;
 import java.util.LinkedList;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -149,6 +150,28 @@ public abstract class GraphNode extends AbstractGraphObject {
     public abstract void askDisplay();
     public abstract void settings();
 
+        
+    @Override
+    public String getPreviousDataName() {
+        if (m_inConnectors != null) {
+            StringBuilder sb = new StringBuilder();
+            for (GraphConnector connector : m_inConnectors) {
+                String dataName = connector.getDataName();
+                if (dataName != null) {
+                    if (sb.length()>0) {
+                        sb.append(' ');
+                    }
+                    sb.append(dataName);
+                }
+            }
+            if (sb.length()>0) {
+                return sb.toString();
+            }
+            return null;
+
+        }
+        return null;
+    }
 
     public LinearGradientPaint getBackgroundGradient() {
         

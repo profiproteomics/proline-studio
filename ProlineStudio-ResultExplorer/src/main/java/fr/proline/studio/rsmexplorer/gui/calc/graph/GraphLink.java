@@ -294,6 +294,11 @@ public class GraphLink extends AbstractGraphObject {
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return null;
     }
+
+    @Override
+    public String getPreviousDataName() {
+        return null;
+    }
  
     public class DeleteAction  extends AbstractAction {
         

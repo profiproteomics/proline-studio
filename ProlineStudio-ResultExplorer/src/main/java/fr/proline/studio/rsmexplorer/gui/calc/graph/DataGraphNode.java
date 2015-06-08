@@ -52,7 +52,7 @@ public class DataGraphNode extends GraphNode {
     public boolean calculationDone() {
         return true;
     }
-    
+
     
     @Override
     public String getFullName() {
@@ -86,7 +86,7 @@ public class DataGraphNode extends GraphNode {
 
     @Override
     public void askDisplay() {
-        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(getFullName());
+        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(m_tableInfo.getDataName(), m_tableInfo.getTypeName());
         windowBox.setEntryData(-1, m_tableInfo.getModel());
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
         win.open();
@@ -107,6 +107,8 @@ public class DataGraphNode extends GraphNode {
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return m_tableInfo.getModel();
     }
+
+
 
 
 

@@ -37,12 +37,16 @@ public class FunctionGraphNode extends GraphNode {
 
     @Override
     public String getFullName() {
-        return m_function.getName();
+        String dataName = getDataName();
+        if (dataName == null) {
+            return m_function.getName();
+        }
+        return dataName+' '+m_function.getName();
     }
 
     @Override
     public String getDataName() {
-        return null;
+        return getPreviousDataName();
     }
 
     @Override
@@ -162,7 +166,7 @@ public class FunctionGraphNode extends GraphNode {
             graphObjectArray[i++] = graphNode;
         }
         
-        m_function.process(graphObjectArray, display);
+        m_function.process(graphObjectArray, this, display);
         
     }
 

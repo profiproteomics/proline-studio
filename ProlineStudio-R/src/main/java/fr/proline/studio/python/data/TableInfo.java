@@ -84,6 +84,9 @@ public class TableInfo {
     }
     
     public String getFullName() {
+        if (m_dataName == null) {
+            return m_typeName;
+        }
         return m_dataName+" "+m_typeName;
     }
     

@@ -15,6 +15,7 @@ import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ public class PValueFunction extends AbstractFunction {
     }
 
     @Override
-    public void process(AbstractGraphObject[] graphObjects, final boolean display) {
+    public void process(AbstractGraphObject[] graphObjects, final FunctionGraphNode functionGraphNode, final boolean display) {
         
         setInError(false);
         
@@ -73,7 +74,7 @@ public class PValueFunction extends AbstractFunction {
         // check if we have already processed
         if (m_globalTableModelInterface != null) {
             if (display) {
-                display(getName());
+                display(functionGraphNode.getPreviousDataName(), getName());
             }
             return;
         }
@@ -131,7 +132,7 @@ public class PValueFunction extends AbstractFunction {
                                 m_globalTableModelInterface = sourceTable.getModel();
                                 
                                 if (display) {
-                                    display(var.getName());
+                                    display(functionGraphNode.getPreviousDataName(), var.getName());
                                 }
                             }
                         }

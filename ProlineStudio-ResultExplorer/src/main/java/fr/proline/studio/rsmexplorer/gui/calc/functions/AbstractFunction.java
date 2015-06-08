@@ -7,6 +7,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -54,7 +55,7 @@ public abstract class AbstractFunction {
     public abstract String getName();
     public abstract int getNumberOfInParameters();
     
-    public abstract void process(AbstractGraphObject[] graphObjects, boolean display);
+    public abstract void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, boolean display);
     
     public GlobalTableModelInterface getGlobalTableModelInterface() {
         return m_globalTableModelInterface;
@@ -68,8 +69,8 @@ public abstract class AbstractFunction {
     
 
         
-    protected void display(String name) {
-        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(name);
+    protected void display(String dataName, String functionName) {
+        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(dataName, functionName);
         windowBox.setEntryData(-1, m_globalTableModelInterface);
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
         win.open();

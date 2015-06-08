@@ -4,6 +4,9 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseProteinsAndPeptidesTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.gui.HourglassPanel;
+import fr.proline.studio.gui.SplittedPanelContainer;
+import java.awt.event.ActionListener;
 //import fr.proline.studio.rsmexplorer.adjacentmatrix.visualize.MatrixSelectionPanel;
 
 
@@ -36,10 +39,10 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
     public void createPanel() {
         
         //JPM.TODO
-        /*MatrixSelectionPanel p = new MatrixSelectionPanel();
+        MatrixSelectionPanel p = new MatrixSelectionPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
-        m_panel = p;*/
+        m_panel = p;
     }
     
     @Override
@@ -83,5 +86,40 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
             m_rsm = (ResultSummary) data;
             dataChanged();
         }
+    }
+    
+    
+    // Stub for the moment
+    public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanelInterface {
+
+        private AbstractDataBox m_dataBox;
+
+        @Override
+        public void setDataBox(AbstractDataBox dataBox) {
+            m_dataBox = dataBox;
+        }
+
+        @Override
+        public AbstractDataBox getDataBox() {
+            return m_dataBox;
+        }
+
+        @Override
+        public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+
+
     }
 }

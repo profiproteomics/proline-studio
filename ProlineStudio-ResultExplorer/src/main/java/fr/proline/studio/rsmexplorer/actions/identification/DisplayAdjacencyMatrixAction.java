@@ -39,11 +39,7 @@ public class DisplayAdjacencyMatrixAction extends AbstractRSMAction {
     }
 
     private void actionImpl(DataSetNode dataSetNode) {
-        
-        /*
-        
-        KEEP IT, put it back later
-        
+
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
 
         if (!dataSetNode.hasResultSummary()) {
@@ -99,7 +95,6 @@ public class DisplayAdjacencyMatrixAction extends AbstractRSMAction {
 
         }
 
-                */
 
     }
 

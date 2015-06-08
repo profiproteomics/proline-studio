@@ -10,16 +10,17 @@ import fr.proline.studio.table.GlobalTableModelInterface;
  *
  * @author JM235353
  */
-public class DataboxCompareResult extends AbstractDataBox {
+public class DataboxCalculationResult extends AbstractDataBox {
 
     private GlobalTableModelInterface m_entryModel = null;
     
-    public DataboxCompareResult() {
+    public DataboxCalculationResult(String dataName, String typeName) {
         super(DataboxType.DataboxCompareResult);
         
         // Name of this databox
-        m_typeName = "Compare Data";
-        m_description = "Compare Data Result";
+        m_dataName = dataName;
+        m_typeName = typeName;
+        m_description = typeName;
         
         // Register Possible in parameters
         // One ResultSummary

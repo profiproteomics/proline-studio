@@ -14,7 +14,7 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 
 /**
- *
+ * Used for Drag & Drop of the data mixer from DataTree to GraphPanel 
  * @author JM235353
  */
 public class DataTreeTransferHandler extends TransferHandler {

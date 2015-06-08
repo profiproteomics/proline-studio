@@ -28,7 +28,7 @@ import javax.swing.JToolBar;
 
 
 /**
- *
+ * Panel for the DataMixer (combine tree + graph panel)
  * @author JM235353
  */
 public class DataMixerPanel extends JPanel implements DataBoxPanelInterface {

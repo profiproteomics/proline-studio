@@ -32,7 +32,7 @@ import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.windows.TopComponent;
 
 /**
- *
+ * Tree Panel for the DataMixel with data and functions
  * @author JM235353
  */
 public abstract class DataTree extends JTree {

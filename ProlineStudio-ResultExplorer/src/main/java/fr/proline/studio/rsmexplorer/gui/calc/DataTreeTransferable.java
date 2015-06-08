@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 
-
+/**
+ * Data transfered by Drag And Drop from DataTree to GraphPanel
+ * @author JM235353
+ */
 public class DataTreeTransferable implements Transferable, Serializable {
     
     public final static DataFlavor DATANODE_FLAVOR = new DataFlavor(DataTree.DataNode.class, "Drag and drop Data TreePath list");

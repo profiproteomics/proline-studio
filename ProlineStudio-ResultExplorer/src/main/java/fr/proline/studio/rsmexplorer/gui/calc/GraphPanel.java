@@ -16,13 +16,12 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Iterator;
 import java.util.LinkedList;
-import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 /**
- *
+ * Panel to display the Graph for the Data Mixer
  * @author JM235353
  */
 public class GraphPanel extends JPanel implements MouseListener, MouseMotionListener {

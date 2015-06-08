@@ -193,9 +193,7 @@ public class WindowBoxFactory {
         return winBox; 
     }
     
-    
-    /*
-    KEEP IT; I will use it later
+
     public static WindowBox getAdjacencyMatrixWindowBox(String dataName, boolean isDecoy) {
 
         // create boxes
@@ -208,7 +206,7 @@ public class WindowBoxFactory {
         WindowBox winBox = new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
 
         return winBox;
-    }*/
+    }
 
     public static WindowBox getAllResultSetWindowBox(String dataName) {
         
@@ -306,9 +304,11 @@ public class WindowBoxFactory {
     }
 
     
-    public static WindowBox getModelWindowBox(String windowName) {
+    public static WindowBox getModelWindowBox(String dataName, String functionName) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataboxCompareResult();
+        boxes[0] = new DataboxCalculationResult(dataName, functionName);
+        
+        String windowName = (dataName==null) ? functionName : dataName+" "+functionName;
         WindowBox winBox = new WindowBox(windowName, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.CHALKBOARD));
         
         return winBox;

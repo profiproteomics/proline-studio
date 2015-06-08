@@ -17,7 +17,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private DisplayRsmPSMAction m_displayRsmPSMAction;
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
-    //private DisplayAdjacencyMatrixAction m_displayAdjacencyMatrixAction;
+    private DisplayAdjacencyMatrixAction m_displayAdjacencyMatrixAction;
     
     private DisplayUserWindowAction m_displayUserWindowAction;
     private ManageUserWindowsAction m_manageUserWindowsAction;
@@ -38,7 +38,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction = new DisplayRsmPSMAction(m_treeType);
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction(m_treeType);
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(m_treeType);
-        //m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(m_treeType);
+        m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(m_treeType);
         
         m_manageUserWindowsAction = new ManageUserWindowsAction(true, m_treeType);
         m_displayUserWindowAction = new DisplayUserWindowAction(true, m_treeType);
@@ -59,7 +59,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         JMenuItem displayRsmPSMItem = new JMenuItem(m_displayRsmPSMAction);
         JMenuItem displayRsmPeptidesItem = new JMenuItem(m_displayRsmPeptidesAction);
         JMenuItem displayRsmProteinSetsItem = new JMenuItem(m_displayRsmProteinSetsAction);
-        //JMenuItem displayAdjacencyMatrixItem = new JMenuItem(m_displayAdjacencyMatrixAction);
+        JMenuItem displayAdjacencyMatrixItem = new JMenuItem(m_displayAdjacencyMatrixAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
         JMenuItem manageUserWindowsItem = new JMenuItem(m_manageUserWindowsAction);
 
@@ -67,7 +67,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_menu.add(displayRsmPSMItem);
         m_menu.add(displayRsmPeptidesItem);
         m_menu.add(displayRsmProteinSetsItem);
-        //m_menu.add(displayAdjacencyMatrixItem);
+        //m_menu.add(displayAdjacencyMatrixItem); //JPM : remove comment to see adjacency matrix
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);
         m_menu.add(manageUserWindowsItem);
@@ -88,7 +88,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPSMAction.updateEnabled(selectedNodes);
         m_displayRsmPeptidesAction.updateEnabled(selectedNodes);
         m_displayRsmProteinSetsAction.updateEnabled(selectedNodes);
-        //m_displayAdjacencyMatrixAction.updateEnabled(selectedNodes);
+        m_displayAdjacencyMatrixAction.updateEnabled(selectedNodes);
         m_displayUserWindowAction.updateEnabled(selectedNodes);
         m_manageUserWindowsAction.updateEnabled(selectedNodes);
         

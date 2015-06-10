@@ -50,9 +50,7 @@ public abstract class AbstractGraphObject {
     public abstract void move(int dx, int dy);
     
     public abstract void delete();
-    
-    //public abstract void resetState();
-    
+
     public void setSelected(boolean s) {
         m_selected = s;
     }

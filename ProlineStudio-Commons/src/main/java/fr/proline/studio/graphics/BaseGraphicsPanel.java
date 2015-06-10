@@ -232,7 +232,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                fillXYCombobox();
+                fillXYCombobox(false);
                 updateXYCbxVisibility();
                 
             }
@@ -297,7 +297,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         
     }
     
-    private void fillXYCombobox() {
+    private void fillXYCombobox(boolean changePlotType) {
 
         m_isUpdatingCbx = true;
         try {
@@ -311,7 +311,17 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
             ((DefaultComboBoxModel) m_valueYComboBox.getModel()).removeAllElements();
             ((DefaultComboBoxModel) m_valueZComboBox.getModel()).removeAllElements();
 
-            PlotType plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
+            PlotType plotType = null;
+            if ((changePlotType) && (m_values instanceof BestGraphicsInterface)) {
+                plotType = ((BestGraphicsInterface)m_values).getBestPlotType();
+                if (plotType != null) {
+                    m_allPlotsComboBox.setSelectedItem(plotType);
+                }
+            }
+            if (plotType == null) {
+                plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
+            }
+
             HashSet<Class> acceptedValues = plotType.getAcceptedXValues();
 
             int nbValuesType = m_values.getColumnCount();
@@ -397,7 +407,7 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         
         if (m_valueXComboBox.getItemCount() == 0) {
             
-            fillXYCombobox();
+            fillXYCombobox(true);
             
             ActionListener actionForXYCbx = new ActionListener() {
 

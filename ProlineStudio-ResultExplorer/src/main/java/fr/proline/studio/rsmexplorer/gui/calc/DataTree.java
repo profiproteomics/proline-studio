@@ -9,6 +9,9 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.JoinFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.PValueFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.TtdFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterGraphic;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
@@ -39,6 +42,7 @@ public abstract class DataTree extends JTree {
 
     private ParentDataNode m_parentDataNode = null;
     private ParentFunctionNode m_parentFunctionNode = null;
+    private ParentGraphicNode m_parentGraphicNode = null;
 
     
     protected DataTree(DataNode root, boolean tableOnly, GraphPanel graphPanel) {
@@ -56,6 +60,10 @@ public abstract class DataTree extends JTree {
             fillFunctionNodes(m_parentFunctionNode);
             root.add(m_parentFunctionNode);
 
+            m_parentGraphicNode = new ParentGraphicNode();
+            fillGraphicNodes(m_parentGraphicNode);
+            root.add(m_parentGraphicNode);
+            
             DefaultTreeModel model = (DefaultTreeModel) getModel();
             model.nodeStructureChanged(root);
             
@@ -149,6 +157,14 @@ public abstract class DataTree extends JTree {
         DefaultTreeModel model = (DefaultTreeModel) getModel();
         model.nodeStructureChanged(parentFunctionNode);
     }
+    
+    private void fillGraphicNodes(ParentGraphicNode parentGraphicNode) {
+        GraphicNode scatterNode = new GraphicNode(new ScatterGraphic(null));
+        parentGraphicNode.add(scatterNode);
+        
+        DefaultTreeModel model = (DefaultTreeModel) getModel();
+        model.nodeStructureChanged(parentGraphicNode);
+    }
 
     public DataNode[] getSelectedNodes() {
         TreePath[] paths = getSelectionModel().getSelectionPaths();
@@ -171,6 +187,8 @@ public abstract class DataTree extends JTree {
             PARENT_DATA,
             PARENT_FUNCTION,
             FUNCTION,
+            PARENT_GRAPHIC,
+            GRAPHIC,
             WINDOW_DATA,
             VIEW_DATA,
             COLUMN_DATA
@@ -256,6 +274,23 @@ public abstract class DataTree extends JTree {
         }
     }
     
+    public static class ParentGraphicNode extends DataNode {
+
+        public ParentGraphicNode() {
+            super(DataNode.DataNodeType.PARENT_GRAPHIC);
+        }
+        
+        @Override
+        public ImageIcon getIcon() {
+            return IconManager.getIcon(IconManager.IconType.WAVE);
+        }
+
+        @Override
+        public String toString() {
+            return "Graphics";
+        }
+    } 
+    
     public static class FunctionNode extends DataNode {
 
         private AbstractFunction m_function = null;
@@ -277,6 +312,30 @@ public abstract class DataTree extends JTree {
         @Override
         public String toString() {
             return m_function.getName();
+        }
+    }
+    
+    public static class GraphicNode extends DataNode {
+
+        private AbstractGraphic m_graphic = null;
+
+        public GraphicNode(AbstractGraphic function) {
+            super(DataNodeType.GRAPHIC);
+            m_graphic = function;
+        }
+
+        public AbstractGraphic getGraphic() {
+            return m_graphic;
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            return IconManager.getIcon(IconManager.IconType.WAVE);
+        }
+
+        @Override
+        public String toString() {
+            return m_graphic.getName();
         }
     }
     

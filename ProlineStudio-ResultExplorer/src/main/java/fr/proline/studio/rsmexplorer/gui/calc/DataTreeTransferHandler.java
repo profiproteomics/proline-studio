@@ -5,6 +5,8 @@ import fr.proline.studio.rsmexplorer.gui.calc.DataTree.DataNode;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.DataGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
 import java.awt.Point;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -42,7 +44,8 @@ public class DataTreeTransferHandler extends TransferHandler {
             int nbSelectedNode = selectedNodes.length;
             for (int i=0;i<nbSelectedNode;i++) {
                 DataNode node = selectedNodes[i];
-                if ((node.getType() != DataNode.DataNodeType.VIEW_DATA) && (node.getType() != DataNode.DataNodeType.FUNCTION)) {
+                DataNode.DataNodeType nodeType = node.getType();
+                if ((nodeType != DataNode.DataNodeType.VIEW_DATA) && (nodeType != DataNode.DataNodeType.FUNCTION) && (nodeType != DataNode.DataNodeType.GRAPHIC)) {
                     return null;
                 }
             } 
@@ -79,75 +82,6 @@ public class DataTreeTransferHandler extends TransferHandler {
             
             
             return true;
-            
-            /*
-            // Determine whether we accept the location
-            Object dropComponent = dropTreePath.getLastPathComponent();
-            
-            if (! (dropComponent instanceof AbstractNode)) {
-                return false;
-            }
-            
-            // We can drop only in project or aggregate node with no Rsm or Rset
-            // The node must not being changed
-            AbstractNode dropRSMNode = (AbstractNode) dropComponent;
-            if (dropRSMNode.isChanging()) {
-                return false;
-            }
-            
-            long dropProjectId;
-            AbstractNode.NodeTypes nodeType = dropRSMNode.getType();
-            if ( nodeType == AbstractNode.NodeTypes.DATA_SET) {
-                DataSetNode dropDatasetNode = (DataSetNode) dropRSMNode;
-                if (dropDatasetNode.hasResultSet() || dropDatasetNode.hasResultSummary()) {
-                    return false;
-                }
-                dropProjectId = dropDatasetNode.getDataset().getProject().getId();
-            } else if ( nodeType == AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) {
-                IdProjectIdentificationNode dropProjectNode = (IdProjectIdentificationNode) dropRSMNode;
-                dropProjectId = dropProjectNode.getProject().getId();
-                if (((JTree.DropLocation) support.getDropLocation()).getChildIndex() == 0) {
-                    // drop can not been done in Project before the All imported
-                    return false;
-                }
-            } else {
-                return false;
-            }
-
-
-            
-            
-            try {
-                
-                // drop node must be in the same project that nodes being transferred
-                IdTransferable nodeListTransferable = (IdTransferable) support.getTransferable().getTransferData(IdTransferable.RSMNodeList_FLAVOR);
-                if (nodeListTransferable.getProjectId() != dropProjectId) {
-                    return false;
-                }
-                
-                // drop node must not be equal or a child of a transferred node
-                IdTransferable.TransferData data = IdTransferable.getData(nodeListTransferable.getTransferKey());
-                
-                if (data.isNodeList()) {
-                    ArrayList<AbstractNode> nodeList = (ArrayList<AbstractNode>) data.getDataList();
-                    int nbNodes = nodeList.size();
-                    for (int i = 0; i < nbNodes; i++) {
-                        AbstractNode nodeTransfered = nodeList.get(i);
-
-                        if (dropRSMNode.isNodeAncestor(nodeTransfered)) {
-                            return false;
-                        }
-                    }
-                }
-            } catch (UnsupportedFlavorException | IOException e) {
-                // should never happen
-                m_logger.error(getClass().getSimpleName() + " DnD error ", e);
-                return false;
-            }
-
-            
-            
-            return true;*/
 
         }
 
@@ -182,6 +116,12 @@ public class DataTreeTransferHandler extends TransferHandler {
                         case FUNCTION: {
                             AbstractFunction function = ((DataTree.FunctionNode) node).getFunction().cloneFunction(m_graphPanel);
                             FunctionGraphNode graphNode = new FunctionGraphNode(function, m_graphPanel);
+                            graphPanel.addGraphNode(graphNode, x, y);
+                            break;
+                        }
+                        case GRAPHIC: {
+                            AbstractGraphic graphic = ((DataTree.GraphicNode) node).getGraphic().cloneGraphic(m_graphPanel);
+                            GraphicGraphNode graphNode = new GraphicGraphNode(m_graphPanel, graphic);
                             graphPanel.addGraphNode(graphNode, x, y);
                             break;
                         }

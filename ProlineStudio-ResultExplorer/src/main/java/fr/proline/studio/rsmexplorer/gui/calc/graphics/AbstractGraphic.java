@@ -1,4 +1,4 @@
-package fr.proline.studio.rsmexplorer.gui.calc.functions;
+package fr.proline.studio.rsmexplorer.gui.calc.graphics;
 
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -7,7 +7,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -16,63 +16,43 @@ import javax.swing.ImageIcon;
 import org.openide.windows.WindowManager;
 
 /**
- * Abstract Parent Function for all functions of the data mixer
+ *
  * @author JM235353
  */
-public abstract class AbstractFunction implements CheckParameterInterface {
+public abstract class AbstractGraphic implements CheckParameterInterface {
 
-    protected GlobalTableModelInterface m_globalTableModelInterface;
+    protected LockedDataGraphicsModel m_graphicsModelInterface;
     
     protected ParameterList[] m_parameters = null;
-    
-    private boolean m_calculating = false;
-    private boolean m_inError = false;
+
     
     protected GraphPanel m_panel;
     
-    public AbstractFunction(GraphPanel panel) {
+    public AbstractGraphic(GraphPanel panel) {
         m_panel = panel;
     }
 
     public void inLinkDeleted() {
         m_parameters = null;
-        m_globalTableModelInterface = null;
+        m_graphicsModelInterface = null;
     }
-    
-    protected void setCalculating(boolean v) {
-        if (v ^ m_calculating) {
-            m_calculating = v;
-            m_panel.repaint();
-        }
-    }
-    
-    protected void setInError(boolean v) {
-        if (v ^ m_inError) {
-            m_inError = v;
-            m_panel.repaint();
-        }
-    }
+
     
     public abstract String getName();
-    public abstract int getNumberOfInParameters();
-    
-    public abstract void process(AbstractGraphObject[] graphObjects, FunctionGraphNode functionGraphNode, boolean display);
-    
-    public GlobalTableModelInterface getGlobalTableModelInterface() {
-        return m_globalTableModelInterface;
+
+    public LockedDataGraphicsModel getGraphicsModelInterface() {
+        return m_graphicsModelInterface;
     }
 
-
+    public abstract void process(AbstractGraphObject[] graphObjects, GraphicGraphNode graphicGraphNode, boolean display);
     public abstract void generateDefaultParameters(AbstractGraphObject[] graphObjects);
-    
     public abstract void userParametersChanged();
-    public abstract AbstractFunction cloneFunction(GraphPanel p);
+    public abstract AbstractGraphic cloneGraphic(GraphPanel p);
     
 
         
     protected void display(String dataName, String functionName) {
-        WindowBox windowBox = WindowBoxFactory.getModelWindowBox(dataName, functionName);
-        windowBox.setEntryData(-1, m_globalTableModelInterface);
+        WindowBox windowBox = WindowBoxFactory.getGraphicsWindowBox(dataName, m_graphicsModelInterface);
         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
         win.open();
         win.requestActive();
@@ -80,13 +60,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     
     public abstract boolean calculationDone();
     public abstract boolean settingsDone();
-    public boolean isCalculating() {
-        return m_calculating;
-    }
-    public boolean inError() {
-        return m_inError;
-    }
-    
+
     public boolean settings(AbstractGraphObject[] graphObjects) {
         if (m_parameters == null) {
             generateDefaultParameters(graphObjects);
@@ -107,7 +81,8 @@ public abstract class AbstractFunction implements CheckParameterInterface {
 
     
     public ImageIcon getIcon() {
-        return IconManager.getIcon(IconManager.IconType.FUNCTION);
+        return IconManager.getIcon(IconManager.IconType.WAVE);
     }
     
 }
+

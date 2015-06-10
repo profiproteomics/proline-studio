@@ -1,6 +1,7 @@
 package fr.proline.studio.pattern;
 
 
+import fr.proline.studio.comparedata.CompareDataInterface;
 import java.util.HashMap;
 
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -84,12 +85,20 @@ public class WindowBoxFactory {
     
     public static WindowBox getGraphicsWindowBox(String fullName, AbstractDataBox srcDatabox) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
-        //boxes[0] = new DataBoxStatisticsFrequencyResponse();
         boxes[0] = new DataboxGraphics(true);
         srcDatabox.addNextDataBox(boxes[0]);
         IconManager.IconType iconType = IconManager.IconType.CHART;
         WindowBox winBox = new WindowBox( fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType) );
         boxes[0].dataChanged();
+        return winBox;
+    }
+    
+    public static WindowBox getGraphicsWindowBox(String fullName, CompareDataInterface srcDataInterface) {
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
+        boxes[0] = new DataboxGraphics(true);
+        IconManager.IconType iconType = IconManager.IconType.CHART;
+        WindowBox winBox = new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+        boxes[0].setEntryData(srcDataInterface);
         return winBox;
     }
     

@@ -110,7 +110,6 @@ public class GraphConnector extends AbstractGraphObject {
             m_connections.clear();
         }
         m_connections.add(connector);
-        //resetState();
     }
     
     public void removeConnection(GraphConnector connector) {
@@ -118,7 +117,6 @@ public class GraphConnector extends AbstractGraphObject {
         if (m_connections.isEmpty()) {
             m_link = null; 
         }
-        //resetState();
     }
     
     public int getXConnection() {
@@ -207,7 +205,7 @@ public class GraphConnector extends AbstractGraphObject {
     
     @Override
     public void delete() {
-        //resetState();
+
         for (GraphConnector connector : m_connections) {
             connector.removeConnection(this);
         }
@@ -222,7 +220,7 @@ public class GraphConnector extends AbstractGraphObject {
         }
         m_connections.clear();
         m_link = null;
-        //resetState();
+
         if (!m_out) {
             m_graphNode.propagateSourceChanged();
         }
@@ -248,16 +246,6 @@ public class GraphConnector extends AbstractGraphObject {
         return null;
     }
 
-    /*@Override
-    public void resetState() {
-        if (m_out) {
-            for (GraphConnector connector : m_connections) {
-                connector.resetState();
-            }
-        } else {
-            m_graphNode.resetState();
-        }
-    }*/
 
     @Override
     public String getPreviousDataName() {

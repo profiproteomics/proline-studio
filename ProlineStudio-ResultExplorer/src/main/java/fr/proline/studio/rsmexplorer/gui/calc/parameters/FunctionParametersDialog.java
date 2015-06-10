@@ -18,15 +18,15 @@ import javax.swing.JPanel;
 public class FunctionParametersDialog extends DefaultDialog {
     
     private final ParameterList[] m_parameterList;
-    private final AbstractFunction m_function;
+    private final CheckParameterInterface m_checkParamInterface;
     
     private int m_currentPanelNumber = 0;
     
-    public FunctionParametersDialog(String name, Window parent, ParameterList[] parameterList, AbstractFunction function) {
+    public FunctionParametersDialog(String name, Window parent, ParameterList[] parameterList, CheckParameterInterface checkParamInterface) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
 
         m_parameterList = parameterList;
-        m_function = function;
+        m_checkParamInterface = checkParamInterface;
         
         setTitle(name+" Settings");
 
@@ -84,7 +84,7 @@ public class FunctionParametersDialog extends DefaultDialog {
         ParameterError error = m_parameterList[m_currentPanelNumber].checkParameters();
         // report error
         if (error == null) {
-            error = m_function.checkParameters();
+            error = m_checkParamInterface.checkParameters();
         }
 
         if (error != null) {

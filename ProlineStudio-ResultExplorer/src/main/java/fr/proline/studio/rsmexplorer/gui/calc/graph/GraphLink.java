@@ -286,10 +286,6 @@ public class GraphLink extends AbstractGraphObject {
         return popup;
     }
 
-    /*@Override
-    public void resetState() {
-        // nothing to do
-    }*/
 
     @Override
     public GlobalTableModelInterface getGlobalTableModelInterface() {

@@ -252,7 +252,7 @@ public class PlotHistogram extends PlotAbstract {
         m_xMin = min;
         m_xMax = max;
         
-        m_plotPanel.updateAxis(this);
+        
         m_plotPanel.setXAxisTitle(m_compareDataInterface.getDataColumnIdentifier(m_colX));
         m_plotPanel.setYAxisTitle(m_asPercentage ? HISTOGRAM_PERCENTAGE : HISTOGRAM_COUNT);
         
@@ -264,12 +264,17 @@ public class PlotHistogram extends PlotAbstract {
         }
 
         
-        updataDataAccordingToBins();
 
+        updataDataAccordingToBins();
+        
         double yStdevLabel = m_yMax*0.1;
         double yMeanLabel = m_yMax*1.1;
         m_yMax *= 1.2; // we let place at the top to be able to put information
 
+                
+
+        m_plotPanel.updateAxis(this);
+        
         // add Stdev value
         double mean = m_values.meanNaN();
         addMarker(new XDeltaMarker(m_plotPanel, mean, mean+std, yStdevLabel));

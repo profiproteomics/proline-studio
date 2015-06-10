@@ -232,6 +232,10 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (m_isUpdatingCbx) {
+                    return;
+                }
+                
                 fillXYCombobox(false);
                 updateXYCbxVisibility();
                 
@@ -320,6 +324,9 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
             }
             if (plotType == null) {
                 plotType = (PlotType) m_allPlotsComboBox.getSelectedItem();
+            }
+            if (changePlotType) {
+                updateXYCbxVisibility();
             }
 
             HashSet<Class> acceptedValues = plotType.getAcceptedXValues();

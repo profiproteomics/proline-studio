@@ -19,37 +19,55 @@ import javax.swing.table.TableCellRenderer;
  */
 public class TablePopupMenu extends JPopupMenu {
 
-   public static class CopyCellAction extends AbstractTableAction {
+    public static class CopyCellAction extends AbstractTableAction {
 
-      public CopyCellAction() {
-         super("Copy cell");
-      }
+        public CopyCellAction() {
+            super("Copy cell");
+        }
 
-      @Override
-      public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
-         TableCellRenderer renderer = table.getCellRenderer(row, col);
-         Component c = table.prepareRenderer(renderer, row, col);
-         String text = componentToText(c);
-         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-         clipboard.setContents(new StringSelection(text), null);
-      }
+        @Override
+        public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
+            TableCellRenderer renderer = table.getCellRenderer(row, col);
+            Component c = table.prepareRenderer(renderer, row, col);
+            String text = componentToText(c);
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(new StringSelection(text), null);
+        }
 
-   @Override
-   public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
-       setEnabled(row != -1);
-   }
+        @Override
+        public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
+            setEnabled(row != -1);
+        }
 
-   private String componentToText(Component c) {
-      if (c instanceof ExportTextInterface) {
-         return ((ExportTextInterface) c).getExportText();
-      } else if (c instanceof JLabel) {
-         return ((JLabel) c).getText();
-      } else if (c instanceof AbstractButton) {
-         return ((AbstractButton) c).getText();
-      }
-      return "";
-   }
-}
+        private String componentToText(Component c) {
+            if (c instanceof ExportTextInterface) {
+                return ((ExportTextInterface) c).getExportText();
+            } else if (c instanceof JLabel) {
+                return ((JLabel) c).getText();
+            } else if (c instanceof AbstractButton) {
+                return ((AbstractButton) c).getText();
+            }
+            return "";
+        }
+    }
+   
+    public static class SelectAllAction extends AbstractTableAction {
+
+        public SelectAllAction() {
+            super("Select All");
+        }
+
+        @Override
+        public void actionPerformed(int col, int row, int[] selectedRows, JTable table) {
+            table.selectAll();
+        }
+
+        @Override
+        public void updateEnabled(int row, int col, int[] selectedRows, JTable table) {
+            setEnabled(true);
+        }
+
+    }
 
    private ArrayList<AbstractTableAction> m_actions = new ArrayList<>();
 
@@ -61,6 +79,7 @@ public class TablePopupMenu extends JPopupMenu {
    public TablePopupMenu(boolean setDefaultActions) {
       if (setDefaultActions) {
          addAction(new CopyCellAction());
+         addAction(new SelectAllAction());
          addAction(null);
       }
    }

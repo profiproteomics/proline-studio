@@ -225,12 +225,12 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
          scanModel.setColor(plotColor);
          if (scan.getDataType() == Scan.ScanType.CENTROID) { // mslevel2
             //stick plot
-            scanPlot = new PlotStick(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
+            scanPlot = new PlotStick(spectrumPlotPanel, scanModel, null, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
             ((PlotStick) scanPlot).setStrokeFixed(true);
             ((PlotStick) scanPlot).setPlotInformation(scanModel.getPlotInformation());
             ((PlotStick) scanPlot).setIsPaintMarker(true);
          } else {
-            scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, scanModel, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
+            scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, null, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
             ((PlotLinear) scanPlot).setStrokeFixed(true);
             ((PlotLinear) scanPlot).setPlotInformation(scanModel.getPlotInformation());
             ((PlotLinear) scanPlot).setIsPaintMarker(true);

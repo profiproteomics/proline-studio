@@ -18,7 +18,7 @@ import javax.swing.table.AbstractTableModel;
  * data for chromatogram
  * @author MB243701
  */
-public class ChromatogramXICModel  extends AbstractTableModel implements CrossSelectionInterface, CompareDataInterface{
+public class ChromatogramXICModel  extends AbstractTableModel implements CompareDataInterface{
 
     private static final String[] m_columnNames = {"Time", "intensities"};
     
@@ -64,15 +64,6 @@ public class ChromatogramXICModel  extends AbstractTableModel implements CrossSe
         return null; // should never happen
     }
 
-    @Override
-    public void select(ArrayList<Integer> rows) {
-        
-    }
-
-    @Override
-    public ArrayList<Integer> getSelection() {
-        return new ArrayList();
-    }
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {

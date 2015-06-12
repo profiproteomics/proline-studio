@@ -344,7 +344,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         Color plotColor = CyclicColorPalette.getColor(1);
         ChromatogramXICModel chromatoModel = new ChromatogramXICModel(currentChromatogram);
         chromatoModel.setColor(plotColor);
-        chromatogramPlot = new PlotLinear(chromatogramPlotPanel, chromatoModel, chromatoModel, ChromatogramXICModel.COLTYPE_CHROMATOGRAM_XIC_TIME, ChromatogramXICModel.COLTYPE_CHROMATOGRAM_XIC_INTENSITIES);
+        chromatogramPlot = new PlotLinear(chromatogramPlotPanel, chromatoModel, null, ChromatogramXICModel.COLTYPE_CHROMATOGRAM_XIC_TIME, ChromatogramXICModel.COLTYPE_CHROMATOGRAM_XIC_INTENSITIES);
         chromatogramPlot.setPlotInformation(chromatoModel.getPlotInformation());
         chromatogramPlot.setIsPaintMarker(true);
         chromatogramPlot.setStrokeFixed(true);
@@ -372,7 +372,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
         Color plotColor = CyclicColorPalette.getColor(chromatogramPlots.size()+1);
         ChromatogramXICModel chromatoModel = new ChromatogramXICModel(chromato);
         chromatoModel.setColor(plotColor);
-        PlotLinear chromatogramPlot = new PlotLinear(chromatogramPlotPanel, chromatoModel, chromatoModel, ChromatogramXICModel.COLTYPE_CHROMATOGRAM_XIC_TIME, ChromatogramXICModel.COLTYPE_CHROMATOGRAM_XIC_INTENSITIES);
+        PlotLinear chromatogramPlot = new PlotLinear(chromatogramPlotPanel, chromatoModel, null, ChromatogramXICModel.COLTYPE_CHROMATOGRAM_XIC_TIME, ChromatogramXICModel.COLTYPE_CHROMATOGRAM_XIC_INTENSITIES);
         chromatogramPlot.setPlotInformation(chromatoModel.getPlotInformation());
         chromatogramPlot.setIsPaintMarker(true);
         chromatogramPlot.setStrokeFixed(true);

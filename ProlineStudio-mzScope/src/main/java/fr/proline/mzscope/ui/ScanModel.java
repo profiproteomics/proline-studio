@@ -18,7 +18,7 @@ import javax.swing.table.AbstractTableModel;
  * data for scan
  * @author MB243701
  */
-public class ScanModel extends AbstractTableModel implements CrossSelectionInterface, CompareDataInterface{
+public class ScanModel extends AbstractTableModel implements CompareDataInterface{
     private static final String[] m_columnNames = {"Masses", "Intensities", "Retention Time", "MS Level"};
     
     public static final int COLTYPE_SCAN_MASS = 0;
@@ -71,15 +71,6 @@ public class ScanModel extends AbstractTableModel implements CrossSelectionInter
         return null; // should never happen
     }
 
-    @Override
-    public void select(ArrayList<Integer> rows) {
-        
-    }
-
-    @Override
-    public ArrayList<Integer> getSelection() {
-        return new ArrayList();
-    }
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {

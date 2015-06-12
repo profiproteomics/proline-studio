@@ -15,6 +15,7 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -24,6 +25,7 @@ import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.LazyTableModel;
 import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.StringUtils;
+import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,13 +52,18 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     private static final String[] m_columnNamesForFilter = {"Id", "Protein Set", "Overview", "#Peptide", "#Quant.Peptide"};
     private static final String[] m_toolTipColumns = {"MasterQuantProteinSet Id",  "Identified Protein label", "Overview", "Number of Identified Peptides", "Number of Quantified Peptides"};
     
-    public static final int COLTYPE_SELECTION_LEVEL = 0;
-    public static final int COLTYPE_ABUNDANCE = 1;
-    public static final int COLTYPE_RAW_ABUNDANCE = 2;
+    public static final int COLTYPE_STATUS = 0;
+    public static final int COLTYPE_PEP_NUMBER = 1;
+    public static final int COLTYPE_SELECTION_LEVEL = 2;
     public static final int COLTYPE_PSM = 3;
+    public static final int COLTYPE_RAW_ABUNDANCE = 4;
+    public static final int COLTYPE_ABUNDANCE = 5;
     
-    private static final String[] m_columnNamesQC = {"Sel. level", "Abundance", "Raw abundance", "Pep. match count"};
-    private static final String[] m_toolTipQC = {"Selection level", "Abundance", "Raw abundance", "Peptides match count"};
+    private static final String[] m_columnNamesQC = { "Status","Peptide Number", "Sel. level", "Pep. match count", "Raw abundance", "Abundance"};
+    private static final String[] m_toolTipQC = {"Status","Peptide Number",  "Selection level", "Peptides match count", "Raw abundance", "Abundance"  };
+    
+    private static final String[] m_columnNamesQC_SC = {"Status","Peptide Number",  "Sel. level",  "Basic SC",  "Specific SC", "Weighted SC",};
+    private static final String[] m_toolTipQC_SC = { "Status", "Peptide Number","Selection level", "Basic Spectral Count", "Specific Spectral Count","Weighted Spectral Count",  };
     
     private List<DMasterQuantProteinSet> m_proteinSets = null;
     private DQuantitationChannel[] m_quantChannels = null;
@@ -65,6 +72,8 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     private int m_overviewType = COLTYPE_ABUNDANCE;
 
     private String m_modelName;
+    
+    private boolean m_isXICMode;
     
     
     public QuantProteinSetTableModel(LazyTable table) {
@@ -101,7 +110,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            sb.append(m_columnNamesQC[id]);
+            if (m_isXICMode){
+                sb.append(m_columnNamesQC[id]);
+            }else{
+                sb.append(m_columnNamesQC_SC[id]);
+            }
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
             /*sb.append("<br/>");
@@ -118,7 +131,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         } else if (m_quantChannels != null) {
             int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
-            return m_columnNamesQC[id];
+            return m_isXICMode ? m_columnNamesQC[id] : m_columnNamesQC_SC[id];
         } else {
             return ""; // should not happen
         }
@@ -133,7 +146,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
             
             StringBuilder sb = new StringBuilder();
-            sb.append(m_columnNamesQC[id]);
+            if (m_isXICMode){
+                sb.append(m_columnNamesQC[id]);
+            }else{
+                sb.append(m_columnNamesQC_SC[id]);
+            }
             sb.append(" ");
             sb.append(m_quantChannels[nbQc].getResultFileName());
             
@@ -147,7 +164,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     @Override
     public String getToolTipForHeader(int col) {
         if (col == COLTYPE_OVERVIEW) {
-            return m_toolTipColumns[col]+" on "+m_toolTipQC[m_overviewType] ;
+            return m_toolTipColumns[col]+" on "+(m_isXICMode ? m_toolTipQC[m_overviewType] : m_toolTipQC_SC[m_overviewType]) ;
         }
         if (col<=LAST_STATIC_COLUMN) {
             return m_toolTipColumns[col];
@@ -159,7 +176,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             StringBuilder sb = new StringBuilder();
             String rsmHtmlColor = CyclicColorPalette.getHTMLColor(nbQc);
             sb.append("<html><font color='").append(rsmHtmlColor).append("'>&#x25A0;&nbsp;</font>");
-            sb.append(m_toolTipQC[id]);
+            if (m_isXICMode){
+                sb.append(m_toolTipQC[id]);
+            }else{
+                sb.append(m_toolTipQC_SC[id]);
+            }
             sb.append("<br/>");
             sb.append(m_quantChannels[nbQc].getResultFileName());
             sb.append("<br/>");
@@ -344,9 +365,16 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                     int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
                     int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
                     Map<Long, DQuantProteinSet> quantProteinSetByQchIds = proteinSet.getQuantProteinSetByQchIds();
+                    Map<Long, String> quantStatusByQCIds = proteinSet.getQuantStatusByQchIds();
+                    Map<Long, Integer> quantPepNumberByQCIds = proteinSet.getQuantPeptideNumberByQchIds();
                     if (quantProteinSetByQchIds == null) {
-                        
                         switch (id) {
+                            case COLTYPE_STATUS:
+                                lazyData.setData("");
+                                break;
+                            case COLTYPE_PEP_NUMBER:
+                                lazyData.setData(Integer.valueOf(0));
+                                break;
                             case COLTYPE_SELECTION_LEVEL:
                                 lazyData.setData(Integer.valueOf(0));
                                 break;
@@ -362,8 +390,16 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                         }
                     }else{
                         DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(m_quantChannels[nbQc].getId()) ;
+                        String status = quantStatusByQCIds.get(m_quantChannels[nbQc].getId());
+                        Integer pepNumber = quantPepNumberByQCIds.get(m_quantChannels[nbQc].getId());
                         if (quantProteinSet == null) {
                             switch (id) {
+                                case COLTYPE_STATUS:
+                                    lazyData.setData("");
+                                    break;
+                                case COLTYPE_PEP_NUMBER:
+                                    lazyData.setData(Integer.valueOf(0));
+                                    break;
                                 case COLTYPE_SELECTION_LEVEL:
                                     lazyData.setData(Integer.valueOf(0));
                                     break;
@@ -379,6 +415,12 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                             }
                         } else {
                             switch (id) {
+                                case COLTYPE_STATUS:
+                                    lazyData.setData(status);
+                                    break;
+                                case COLTYPE_PEP_NUMBER:
+                                    lazyData.setData(pepNumber);
+                                    break;
                                 case COLTYPE_SELECTION_LEVEL:
                                     lazyData.setData(quantProteinSet.getSelectionLevel());
                                     break;
@@ -416,18 +458,16 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
      
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets ) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels, List<DMasterQuantProteinSet> proteinSets, boolean isXICMode ) {
         this.m_quantChannels = quantChannels ;
         this.m_quantChannelNumber = quantChannels.length;
         this.m_proteinSets = proteinSets;
+        this.m_isXICMode = isXICMode;
         fireTableStructureChanged();
         
         m_taskId = taskId;
 
         fireTableDataChanged();
-
-        
-        
     }
 
     
@@ -497,6 +537,12 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             int nbQc = (i - m_columnNames.length) / m_columnNamesQC.length;
             int id = i - m_columnNames.length - (nbQc * m_columnNamesQC.length);
             switch (id) {
+                case COLTYPE_STATUS:
+                    filtersMap.put(i, new StringFilter(getColumnName(i), null));
+                    break;
+                case COLTYPE_PEP_NUMBER:
+                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null));
+                    break;
                 case COLTYPE_SELECTION_LEVEL:
                     filtersMap.put(i, new IntegerFilter(getColumnName(i), null));
                     break;
@@ -556,7 +602,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
     
     public String getByQCMColumnName(int index) {
-        return m_columnNamesQC[index];
+        return m_isXICMode ? m_columnNamesQC[index] : m_columnNamesQC_SC[index];
     }
     
     public int getQCNumber(int col) {
@@ -594,8 +640,14 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
         List<Integer> listIds = new ArrayList();
         if (m_quantChannels != null) {
             for (int i=m_quantChannels.length-1; i>=0; i--) {
-                listIds.add(m_columnNames.length+COLTYPE_RAW_ABUNDANCE+(i*m_columnNamesQC.length));
+                if (m_isXICMode){
+                    listIds.add(m_columnNames.length+COLTYPE_RAW_ABUNDANCE+(i*m_columnNamesQC.length));
+                }
                 listIds.add(m_columnNames.length+COLTYPE_SELECTION_LEVEL+(i*m_columnNamesQC.length));
+                if (m_isXICMode){
+                    listIds.add(m_columnNames.length+COLTYPE_PEP_NUMBER+(i*m_columnNamesQC.length));
+                    listIds.add(m_columnNames.length+COLTYPE_STATUS+(i*m_columnNamesQC.length));
+                }
             }
         }
         return listIds; 
@@ -627,7 +679,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
             int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
 
             StringBuilder sb = new StringBuilder();
-            sb.append(m_columnNamesQC[id]);
+            if (m_isXICMode){
+                sb.append(m_columnNamesQC[id]);
+            }else{
+                sb.append(m_columnNamesQC_SC[id]);
+            }
             sb.append(' ');
             sb.append(m_quantChannels[nbQc].getResultFileName());
             
@@ -658,6 +714,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
                 int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
                 switch (id) {
+                    case COLTYPE_STATUS:
+                        return String.class;
+                    case COLTYPE_PEP_NUMBER:
+                        return Integer.class;
                     case COLTYPE_SELECTION_LEVEL:
                         return Integer.class;
                     case COLTYPE_ABUNDANCE:
@@ -772,10 +832,14 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                         int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length ;
                         int id = col - m_columnNames.length -  (nbQc *m_columnNamesQC.length );
                         DQuantProteinSet quantProteinSet = quantProteinSetByQchIds.get(m_quantChannels[nbQc].getId()) ;
+                        String status = proteinSet.getQuantStatusByQchIds().get(m_quantChannels[nbQc].getId());
+                        Integer pepNumber = proteinSet.getQuantPeptideNumberByQchIds().get(m_quantChannels[nbQc].getId());
                         if (quantProteinSet == null) {
                             return "";
                         } else {
                             switch (id ) {
+                                case COLTYPE_STATUS : return status;
+                                case COLTYPE_PEP_NUMBER : return (pepNumber == null?"":Integer.toString(pepNumber));
                                 case COLTYPE_SELECTION_LEVEL : return (quantProteinSet.getSelectionLevel() == null?"":Integer.toString(quantProteinSet.getSelectionLevel()));
                                 case COLTYPE_ABUNDANCE : return ((quantProteinSet.getAbundance() == null || quantProteinSet.getAbundance().isNaN())? "":Float.toString(quantProteinSet.getAbundance()));
                                 case COLTYPE_RAW_ABUNDANCE : return ((quantProteinSet.getRawAbundance() == null || quantProteinSet.getRawAbundance().isNaN())? "":Float.toString(quantProteinSet.getRawAbundance()));
@@ -818,7 +882,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 break;
             }
             case COLTYPE_PROTEIN_SET_NAME: {
-                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                renderer = new URLCellRenderer("URL_Template_Protein_Accession", "http://www.uniprot.org/uniprot/", COLTYPE_PROTEIN_SET_NAME);
                 break;
             }
             case COLTYPE_OVERVIEW: {
@@ -834,6 +898,7 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                 int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
                 int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
                 switch (id) {
+                    case COLTYPE_PEP_NUMBER:
                     case COLTYPE_SELECTION_LEVEL:
                     case COLTYPE_PSM: {
                         renderer = new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(Integer.class));
@@ -841,7 +906,11 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                     }
                     case COLTYPE_ABUNDANCE:
                     case COLTYPE_RAW_ABUNDANCE: {
-                        renderer = new BigFloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
+                        if (m_isXICMode){
+                            renderer = new BigFloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)), 0 );
+                        }else{
+                            renderer = new FloatRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)));
+                        }
                         break;
                     }
                 }

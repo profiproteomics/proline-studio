@@ -36,6 +36,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
+import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -82,7 +83,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     private QuantProteinSetTable m_quantProteinSetTable;
 
     private MarkerContainerPanel m_markerContainerPanel;
-
+    private boolean m_isXICMode;
     
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
@@ -103,6 +104,11 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     
     public XicProteinSetPanel() {
         initComponents();
+        CompoundTableModel model = (CompoundTableModel) m_quantProteinSetTable.getModel();
+        
+        URLCellRenderer renderer = (URLCellRenderer) model.getRenderer(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_NAME);
+        m_quantProteinSetTable.addMouseListener(renderer);
+        m_quantProteinSetTable.addMouseMotionListener(renderer);
     }
     
     private void initComponents() {
@@ -274,9 +280,10 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<DMasterQuantProteinSet> proteinSets, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<DMasterQuantProteinSet> proteinSets, boolean isXICMode, boolean finished) {
         m_quantChannels = quantChannels;
-        ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).setData(taskId, quantChannels, proteinSets);
+        m_isXICMode = isXICMode;
+        ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).setData(taskId, quantChannels, proteinSets, isXICMode);
 
         m_titleLabel.setText(TABLE_TITLE +" ("+proteinSets.size()+")");
        // select the first row
@@ -620,6 +627,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         
         
         private JRadioButton m_noOverviewRB;
+        private JRadioButton m_psmOverviewRB;
         private JRadioButton m_abundanceOverviewRB;
         private JRadioButton m_rawAbundanceOverviewRB;
         
@@ -782,26 +790,32 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             c.insets = new java.awt.Insets(0, 0, 0, 0);
             
             m_noOverviewRB = new JRadioButton("No Overview");
-            m_abundanceOverviewRB = new JRadioButton("Overview on Abundance");
-            m_rawAbundanceOverviewRB = new JRadioButton("Overview on Raw Abundance");
+            m_psmOverviewRB = new JRadioButton(m_isXICMode ?"Overview on Pep. Match Count"  :"Overview on Basic SC" );
+            m_rawAbundanceOverviewRB = new JRadioButton(m_isXICMode ?"Overview on Raw Abundance"  :"Overview on Specific SC" );
+            m_abundanceOverviewRB = new JRadioButton(m_isXICMode ? "Overview on Abundance" : "Overview on Weighted SC");
             m_noOverviewRB.setBackground(Color.white);
+            m_psmOverviewRB.setBackground(Color.white);
             m_abundanceOverviewRB.setBackground(Color.white);
             m_rawAbundanceOverviewRB.setBackground(Color.white);
             
             ButtonGroup group = new ButtonGroup();
             group.add(m_noOverviewRB);
-            group.add(m_abundanceOverviewRB);
+            group.add(m_psmOverviewRB);
             group.add(m_rawAbundanceOverviewRB);
+            group.add(m_abundanceOverviewRB);
             
             if (!overviewColumnVisible) {
                 m_noOverviewRB.setSelected(true);
             } else {
                 switch (overviewType) {
-                    case QuantPeptideTableModel.COLTYPE_ABUNDANCE:
+                    case QuantProteinSetTableModel.COLTYPE_ABUNDANCE:
                         m_abundanceOverviewRB.setSelected(true);
                         break;
-                    case QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE:
+                    case QuantProteinSetTableModel.COLTYPE_RAW_ABUNDANCE:
                         m_rawAbundanceOverviewRB.setSelected(true);
+                        break;
+                    case QuantProteinSetTableModel.COLTYPE_PSM:
+                        m_psmOverviewRB.setSelected(true);
                         break;
 
                 }
@@ -814,10 +828,13 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             overviewPanel.add(m_noOverviewRB, c);
             
             c.gridy++;
-            overviewPanel.add(m_abundanceOverviewRB, c);
+            overviewPanel.add(m_psmOverviewRB, c);
             
             c.gridy++;
             overviewPanel.add(m_rawAbundanceOverviewRB, c);
+            
+            c.gridy++;
+            overviewPanel.add(m_abundanceOverviewRB, c);
             
             c.gridy++;
             c.weighty = 1;
@@ -848,6 +865,8 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
                 model.setOverviewType(QuantProteinSetTableModel.COLTYPE_ABUNDANCE);
             } else if (m_rawAbundanceOverviewRB.isSelected()) {
                 model.setOverviewType(QuantProteinSetTableModel.COLTYPE_RAW_ABUNDANCE);
+            }else if (m_psmOverviewRB.isSelected()) {
+                model.setOverviewType(QuantProteinSetTableModel.COLTYPE_PSM);
             }
             
             boolean overviewVisible = !m_noOverviewRB.isSelected();

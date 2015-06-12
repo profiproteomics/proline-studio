@@ -32,13 +32,14 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
     private DQuantitationChannel[] quantitationChannelArray = null;
     
     private QuantChannelInfo m_quantChannelInfo;
+    private boolean m_isXICMode = true;
     
     public DataboxXicPeptideIon() { 
         super(DataboxType.DataboxXicPeptideIon);
         
         // Name of this databox
-        m_typeName = "XIC Peptides Ions";
-        m_description = "All Peptides Ions of a XIC Peptide";
+        m_typeName = "Quanti. Peptides Ions";
+        m_description = "All Peptides Ions of a Quanti. Peptide";
 
         // Register Possible in parameters
         // One Dataset and list of Peptide
@@ -108,7 +109,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                     quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
                     m_quantChannelInfo = new QuantChannelInfo(quantitationChannelArray);
-                    ((XicPeptideIonPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, finished);
+                    ((XicPeptideIonPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, m_isXICMode, finished);
                     if (qcChanged) {
                         ((XicPeptideIonPanel) m_panel).setColumnsVisibility();
                     }
@@ -137,6 +138,13 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
 
     }
     
+    public boolean isXICMode() {
+        return m_isXICMode;
+    }
+
+    public void setXICMode(boolean isXICMode) {
+        this.m_isXICMode = isXICMode;
+    }
     
     @Override
     public void setEntryData(Object data) {

@@ -38,7 +38,7 @@ public class DisplayXICPeptideSetAction extends AbstractRSMAction {
         final DDataset dataset = ((DataSetData) dataSetNode.getData()).getDataset();
 
 
-        WindowBox wbox = WindowBoxFactory.getXicQuantPeptideSetWindowBox(dataset.getName(), dataset.getName()+" Peptides");
+        WindowBox wbox = WindowBoxFactory.getXicQuantPeptideSetWindowBox(dataset.getName(), dataset.getName()+" Peptides", dataSetNode.isQuantXIC());
             wbox.setEntryData(dataset.getProject().getId(), dataset);
 
 
@@ -75,7 +75,7 @@ public class DisplayXICPeptideSetAction extends AbstractRSMAction {
         DataSetNode datasetNode = (DataSetNode) node;
 
         // must be a quantitation XIC
-        if (! datasetNode.isQuantXIC()) {
+        if (! datasetNode.isQuantXIC() && !datasetNode.isQuantSC()) {
             setEnabled(false);
             return;
         }

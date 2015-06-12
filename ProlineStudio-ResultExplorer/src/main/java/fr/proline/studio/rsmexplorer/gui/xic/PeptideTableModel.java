@@ -26,6 +26,7 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
     public static final int COLTYPE_ABUNDANCE = 2;
     public static final int COLTYPE_RAW_ABUNDANCE = 3;
     private static final String[] m_columnNames = {"Id", "Quant. Channel", "Abundance", "Raw Abundance"};
+    private static final String[] m_columnNames_SC = {"Id", "Quant. Channel", "Weighted SC", "Specific SC"};
     
     private DMasterQuantPeptide m_quantPeptide = null;
     private DQuantitationChannel[] m_quantChannels = null;
@@ -35,6 +36,9 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
     
     private String m_modelName;
 
+    private boolean  m_isXICMode = true;
+    
+    
     public PeptideTableModel(LazyTable table) {
         super(table);
     }
@@ -46,7 +50,7 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
 
     @Override
     public String getColumnName(int col) {
-        return m_columnNames[col];
+        return m_isXICMode ? m_columnNames[col] : m_columnNames_SC[col];
     }
 
     @Override
@@ -105,9 +109,10 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
         return null; // should never happen
     }
 
-    public void setData(DQuantitationChannel[] quantChannels, DMasterQuantPeptide peptide) {
+    public void setData(DQuantitationChannel[] quantChannels, DMasterQuantPeptide peptide, boolean isXICMode) {
         this.m_quantChannels  =quantChannels ;
         this.m_quantPeptide = peptide ;
+        this.m_isXICMode = isXICMode;
         
         fireTableDataChanged();
 
@@ -139,7 +144,7 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
 
     @Override
     public String getDataColumnIdentifier(int columnIndex) {
-        return m_columnNames[columnIndex];
+        return m_isXICMode? m_columnNames[columnIndex] : m_columnNames_SC[columnIndex];
     }
 
     @Override

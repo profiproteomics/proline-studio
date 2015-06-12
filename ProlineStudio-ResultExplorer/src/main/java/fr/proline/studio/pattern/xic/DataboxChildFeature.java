@@ -42,7 +42,7 @@ public class DataboxChildFeature extends AbstractDataBox {
 
         // Name of this databox
         m_typeName = "XIC Features";
-        m_description = "All  Features for a XIC Peptide Ion";
+        m_description = "All  Features for a Quanti. Peptide Ion";
 
         // Register Possible in parameters
         // One Map 

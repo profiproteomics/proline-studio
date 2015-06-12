@@ -35,12 +35,14 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
     private QuantChannelInfo m_quantChannelInfo;
     private  DQuantitationChannel[] quantitationChannelArray = null;
     
+    private boolean m_isXICMode = true;
+    
     public DataboxXicPeptideSet() { 
         super(DataboxType.DataboxXicPeptideSet);
         
         // Name of this databox
-        m_typeName = "XIC Peptides";
-        m_description = "All XIC Peptides of a ProteinSet";
+        m_typeName = "Quanti Peptides";
+        m_description = "All Quanti. Peptides of a ProteinSet";
 
         // Register Possible in parameters
         // One Dataset and list of Peptide
@@ -63,6 +65,14 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
 
+    }
+    
+    public boolean isXICMode() {
+        return m_isXICMode;
+    }
+
+    public void setXICMode(boolean isXICMode) {
+        this.m_isXICMode = isXICMode;
     }
     
      @Override
@@ -116,7 +126,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                     quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                     listQuantChannel.toArray(quantitationChannelArray);
                     m_quantChannelInfo = new QuantChannelInfo(quantitationChannelArray);
-                    ((XicPeptidePanel) m_panel).setData(taskId, m_proteinSet != null, quantitationChannelArray, m_masterQuantPeptideList, finished);
+                    ((XicPeptidePanel) m_panel).setData(taskId, m_proteinSet != null, quantitationChannelArray, m_masterQuantPeptideList, m_isXICMode, finished);
                     if (qcChanged) {
                         ((XicPeptidePanel) m_panel).setColumnsVisibility();
                     }
@@ -220,7 +230,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
         // one table model per row
         for (DMasterQuantPeptide quantPeptide : m_masterQuantPeptideList) {
             PeptidePanel aPepPanel = new PeptidePanel();
-            aPepPanel.setData(quantitationChannelArray, quantPeptide);
+            aPepPanel.setData(quantitationChannelArray, quantPeptide, m_isXICMode);
             list.add(aPepPanel);
         }
         return list;

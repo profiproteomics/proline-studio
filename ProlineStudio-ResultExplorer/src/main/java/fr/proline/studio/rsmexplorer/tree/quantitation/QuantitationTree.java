@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.tree.quantitation;
 
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.AbstractData;
-import fr.proline.studio.rsmexplorer.actions.identification.RetrieveSCDataAction;
 import fr.proline.studio.rsmexplorer.actions.identification.CreateXICAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DeleteAction;
@@ -20,7 +19,6 @@ import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSActi
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
-import fr.proline.studio.rsmexplorer.actions.xic.ExportAbundancesAction;
 import fr.proline.studio.rsmexplorer.tree.*;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -234,8 +232,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 DisplayXICAction displayXICAction = new DisplayXICAction();
                 m_mainActions.add(displayXICAction);
                 
-                RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
-                m_mainActions.add(retrieveSCDataAction);
+                //RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
+                //m_mainActions.add(retrieveSCDataAction);
                 
                 DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(displayRsmAction);

@@ -75,6 +75,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     private MarkerContainerPanel m_markerContainerPanel;
     
     private DQuantitationChannel[] m_quantChannels;
+    private boolean m_isXICMode;
     
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
@@ -249,10 +250,10 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<MasterQuantPeptideIon> peptideIons, boolean finished) {
+    public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<MasterQuantPeptideIon> peptideIons, boolean isXICMode, boolean finished) {
         m_quantChannels = quantChannels;
-        
-       ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptideIons);
+        m_isXICMode = isXICMode;
+       ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptideIons, m_isXICMode);
 
         m_titleLabel.setText(TABLE_TITLE +" ("+peptideIons.size()+")");
         // select the first row

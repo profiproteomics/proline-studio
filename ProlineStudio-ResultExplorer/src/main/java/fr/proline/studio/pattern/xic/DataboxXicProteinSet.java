@@ -29,12 +29,14 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     private QuantChannelInfo  m_quantChannelInfo;
     private List<DMasterQuantProteinSet> m_masterQuantProteinSetList ;
     
+    private boolean m_isXICMode = true;
+    
     public DataboxXicProteinSet() { 
         super(DataboxType.DataboxXicProteinSet);
         
         // Name of this databox
-        m_typeName = "XIC Protein Sets";
-        m_description = "All Protein Sets of a XIC";
+        m_typeName = "Quanti Protein Sets";
+        m_description = "All Protein Sets of a Quantitation";
 
         // Register Possible in parameters
         // One ResultSummary
@@ -57,6 +59,16 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         registerOutParameter(outParameter);
         
     }
+
+    public boolean isXICMode() {
+        return m_isXICMode;
+    }
+
+    public void setXICMode(boolean isXICMode) {
+        this.m_isXICMode = isXICMode;
+    }
+    
+    
     
      @Override
     public void createPanel() {
@@ -93,7 +105,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                     // proteins set 
                     //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
                     //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
-                    ((XicProteinSetPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantProteinSetList, finished);
+                    ((XicProteinSetPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantProteinSetList, m_isXICMode, finished);
                 } else {
                     ((XicProteinSetPanel) m_panel).dataUpdated(subTask, finished);
                 }

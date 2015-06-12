@@ -53,39 +53,12 @@ public class DisplayXICAction extends AbstractRSMAction {
    @Override
     public void updateEnabled(AbstractNode[] selectedNodes) {
 
-        // only one node selected
-        if (selectedNodes.length != 1) {
-            setEnabled(false);
-            m_menu.setEnabled(false);
-            return;
-        }
-
-        AbstractNode node = (AbstractNode) selectedNodes[0];
-
-        // the node must not be in changing state
-        if (node.isChanging()) {
-            setEnabled(false);
-            m_menu.setEnabled(false);
-            return;
-        }
-
-        // must be a dataset 
-        if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
-            setEnabled(false);
-            m_menu.setEnabled(false);
-            return;
-        }
-
-        DataSetNode datasetNode = (DataSetNode) node;
-
-        // must be a quantitation XIC
-        if (! datasetNode.isQuantXIC()) {
-            setEnabled(false);
-            m_menu.setEnabled(false);
-            return;
-        }
-
-        setEnabled(true);
-        m_menu.setEnabled(true);
+        m_displayXICProteinSetAction.updateEnabled(selectedNodes);
+        m_displayXICPeptideSetAction.updateEnabled(selectedNodes);
+        m_displayXICPeptideIonAction.updateEnabled(selectedNodes);
+        
+        boolean isEnabled = m_displayXICProteinSetAction.isEnabled() || m_displayXICPeptideSetAction.isEnabled() || m_displayXICPeptideIonAction.isEnabled();
+        setEnabled(isEnabled);
+        m_menu.setEnabled(isEnabled);
     }
 }

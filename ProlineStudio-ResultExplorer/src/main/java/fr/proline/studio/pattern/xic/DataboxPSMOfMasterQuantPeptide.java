@@ -1,6 +1,5 @@
 package fr.proline.studio.pattern.xic;
 
-import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.studio.pattern.*;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
@@ -10,16 +9,13 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
-import fr.proline.studio.rsmexplorer.gui.PeptideMatchPanel;
 import fr.proline.studio.rsmexplorer.gui.xic.QuantChannelInfo;
 import fr.proline.studio.rsmexplorer.gui.xic.XicPeptideMatchPanel;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -43,8 +39,8 @@ public class DataboxPSMOfMasterQuantPeptide extends AbstractDataBox {
         super(DataboxType.DataboxPSMOfMasterQuantPeptide);
 
         // Name of this databox
-        m_typeName = "PSM / XIC Peptide";
-        m_description = "All PSM of a XIC Peptide";
+        m_typeName = "PSM / Quanti. Peptide";
+        m_description = "All PSM of a Quanti. Peptide";
 
         // Register Possible in parameters
         // One ResultSummary

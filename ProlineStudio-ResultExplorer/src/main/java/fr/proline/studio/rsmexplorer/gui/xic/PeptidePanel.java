@@ -50,6 +50,7 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
     private PeptideTable m_peptideTable;
     private MarkerContainerPanel m_markerContainerPanel;
     
+    private boolean m_isXICMode;
     private DQuantitationChannel[] m_quantChannels;
     private DMasterQuantPeptide m_peptide;
     
@@ -159,10 +160,11 @@ public class PeptidePanel  extends HourglassPanel implements DataBoxPanelInterfa
         return internalPanel;
     }          
     
-    public void setData(DQuantitationChannel[] quantChannels,  DMasterQuantPeptide peptide) {
+    public void setData(DQuantitationChannel[] quantChannels,  DMasterQuantPeptide peptide, boolean isXICMode) {
         m_quantChannels = quantChannels;
         m_peptide = peptide ;
-        ((PeptideTableModel) ((CompoundTableModel) m_peptideTable.getModel()).getBaseModel()).setData( quantChannels, peptide);
+        m_isXICMode = isXICMode;
+        ((PeptideTableModel) ((CompoundTableModel) m_peptideTable.getModel()).getBaseModel()).setData( quantChannels, peptide, m_isXICMode);
         // select the first row
         if (peptide != null && m_quantChannels != null && m_quantChannels.length > 0) {
             m_peptideTable.getSelectionModel().setSelectionInterval(0, 0);

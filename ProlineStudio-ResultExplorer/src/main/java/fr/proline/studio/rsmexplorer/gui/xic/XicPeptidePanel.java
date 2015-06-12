@@ -87,6 +87,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     
     private boolean m_displayForProteinSet;
     private DQuantitationChannel[] m_quantChannels;
+    private boolean m_isXICMode;
 
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
@@ -297,10 +298,11 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         return internalPanel;
     }                 
     
-    public void setData(Long taskId, boolean displayForProteinSet, DQuantitationChannel[] quantChannels,  List<DMasterQuantPeptide> peptides, boolean finished) {
+    public void setData(Long taskId, boolean displayForProteinSet, DQuantitationChannel[] quantChannels,  List<DMasterQuantPeptide> peptides, boolean isXICMode, boolean finished) {
         m_quantChannels = quantChannels;
+        m_isXICMode = isXICMode;
         this.m_displayForProteinSet = displayForProteinSet;
-        ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptides);
+        ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptides, m_isXICMode);
         m_titleLabel.setText(TABLE_TITLE +" ("+peptides.size()+")");
         // select the first row
         if ((peptides != null) && (peptides.size() > 0)) {
@@ -611,6 +613,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         private JCheckBoxList m_xicList;
         
         private JRadioButton m_noOverviewRB;
+        private JRadioButton m_psmOverviewRB;
         private JRadioButton m_abundanceOverviewRB;
         private JRadioButton m_rawAbundanceOverviewRB;
         
@@ -773,14 +776,17 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             c.insets = new java.awt.Insets(0, 0, 0, 0);
             
             m_noOverviewRB = new JRadioButton("No Overview");
-            m_abundanceOverviewRB = new JRadioButton("Overview on Abundance");
-            m_rawAbundanceOverviewRB = new JRadioButton("Overview on Raw Abundance");
+            m_psmOverviewRB = new JRadioButton(m_isXICMode ? "Overview on Pep. Match Count" : "Overview on Basic SC");
+            m_abundanceOverviewRB = new JRadioButton(m_isXICMode ? "Overview on Abundance" : "Overview on Weighted SC");
+            m_rawAbundanceOverviewRB = new JRadioButton(m_isXICMode ?"Overview on Raw Abundance" : "Overview on Specific SC");
             m_noOverviewRB.setBackground(Color.white);
+            m_psmOverviewRB.setBackground(Color.white);
             m_abundanceOverviewRB.setBackground(Color.white);
             m_rawAbundanceOverviewRB.setBackground(Color.white);
             
             ButtonGroup group = new ButtonGroup();
             group.add(m_noOverviewRB);
+            group.add(m_psmOverviewRB);
             group.add(m_abundanceOverviewRB);
             group.add(m_rawAbundanceOverviewRB);
             
@@ -794,6 +800,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                     case QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE:
                         m_rawAbundanceOverviewRB.setSelected(true);
                         break;
+                    case QuantPeptideTableModel.COLTYPE_PSM:
+                        m_psmOverviewRB.setSelected(true);
+                        break;
 
                 }
             }
@@ -805,10 +814,13 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             overviewPanel.add(m_noOverviewRB, c);
             
             c.gridy++;
-            overviewPanel.add(m_abundanceOverviewRB, c);
+            overviewPanel.add(m_psmOverviewRB, c);
             
             c.gridy++;
             overviewPanel.add(m_rawAbundanceOverviewRB, c);
+            
+            c.gridy++;
+            overviewPanel.add(m_abundanceOverviewRB, c);
             
             c.gridy++;
             c.weighty = 1;
@@ -841,6 +853,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
                 model.setOverviewType(QuantPeptideTableModel.COLTYPE_ABUNDANCE);
             } else if (m_rawAbundanceOverviewRB.isSelected()) {
                 model.setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
+            }else if (m_psmOverviewRB.isSelected()) {
+                model.setOverviewType(QuantPeptideTableModel.COLTYPE_PSM);
             }
             
             boolean overviewVisible = !m_noOverviewRB.isSelected();

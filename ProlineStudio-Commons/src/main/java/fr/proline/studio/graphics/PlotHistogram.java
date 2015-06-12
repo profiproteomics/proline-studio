@@ -33,7 +33,7 @@ public class PlotHistogram extends PlotAbstract {
     private double[] m_dataX;
     private double[] m_dataY;
     private int[] m_dataCountY;
-    private boolean[] m_selected;
+    private double[] m_selected;
     private long[] m_ids;
     private HashMap<Long, Integer> m_idToIndex;
 
@@ -95,10 +95,10 @@ public class PlotHistogram extends PlotAbstract {
             double y1 = m_asPercentage ? m_dataY[i] : m_dataCountY[i];
             
             if ((x>=x1) && (x<=x2) && (y>=y2) && (y<=y1)) {
-                m_selected[i] = true;
+                m_selected[i] = 1;
             } else {
                 if (!append) {
-                    m_selected[i] = false;
+                    m_selected[i] = 0;
                 }
             }            
         }
@@ -117,10 +117,10 @@ public class PlotHistogram extends PlotAbstract {
             double y1 = m_asPercentage ? m_dataY[i] : m_dataCountY[i];
 
             if (path.intersects(x1, y2, x2-x1, y1-y2)) {
-                m_selected[i] = true;
+                m_selected[i] = 1;
             } else {
                 if (!append) {
-                    m_selected[i] = false;
+                    m_selected[i] = 0;
                 }
             }            
         }
@@ -156,7 +156,7 @@ public class PlotHistogram extends PlotAbstract {
             if (index >= m_bins) {
                 index = m_bins - 1;
             }
-            if (m_selected[index]) {
+            if (m_selected[index] > 0) {
                 selectedIds.add(m_ids[i]);
             }
         }
@@ -166,10 +166,10 @@ public class PlotHistogram extends PlotAbstract {
     
     @Override
     public void setSelectedIds(ArrayList<Long> selectedIds) {
-        for (int i = 0; i < m_selected.length; i++) {
-            m_selected[i] = false;
-        }
+        
 
+        int[] m_selectCount = new int[m_bins + 1];
+        
         for (int i = 0; i < selectedIds.size(); i++) {
             Integer index = m_idToIndex.get(selectedIds.get(i));
             if (index == null) {
@@ -181,8 +181,13 @@ public class PlotHistogram extends PlotAbstract {
             if (binIndex >= m_bins) {
                 binIndex = m_bins - 1;
             }
-            m_selected[binIndex] = true;
+            m_selectCount[binIndex]++;
         }
+        
+        for (int i = 0; i < m_selected.length; i++) {
+            m_selected[i] = ((double)m_selectCount[i])/((double)m_dataCountY[i]);
+        }
+        
     }
     
         @Override
@@ -348,16 +353,15 @@ public class PlotHistogram extends PlotAbstract {
         
         m_dataX = new double[m_bins + 1];
         m_dataY = new double[m_bins + 1];
-        m_selected = new boolean[m_bins + 1];
+        m_selected = new double[m_bins];
         double binDelta = delta / m_bins;
         for (int i = 0; i < m_bins; i++) {
             m_dataX[i] = m_xMin + i * binDelta;
             m_dataY[i] = histogram[i];
-            m_selected[i] = false;
+            m_selected[i] = 0;
         }
         m_dataX[m_bins] = m_dataX[m_bins - 1] + binDelta;
         m_dataY[m_bins] = m_dataY[m_bins - 1];
-        m_selected[m_bins] = false;
 
     }
     
@@ -401,12 +405,18 @@ public class PlotHistogram extends PlotAbstract {
             int x2 = xAxis.valueToPixel( m_dataX[i+1]);
             int y1 = yAxis.valueToPixel( m_asPercentage ? m_dataY[i] : m_dataCountY[i]);
             
-            if (m_selected[i]) {
-                g.setColor(CyclicColorPalette.getColor(5));
-            } else {
-                g.setColor(m_colorParameter.getColor());
-            }
+
+            g.setColor(m_colorParameter.getColor());
             g.fillRect(x1, y1 , x2-x1, y2-y1);
+            
+            if (m_selected[i]>0) {
+                g.setColor(CyclicColorPalette.getColor(5));
+                int height = (int) Math.round((1-m_selected[i])*(y2-y1));
+                g.fillRect(x1, y1+height , x2-x1, y2-y1-height);
+                
+                g.setColor(Color.black);
+                g.drawLine(x1, y1+height , x2, y1+height);
+            }
             
             g.setColor(Color.black);
             g.drawRect(x1, y1 , x2-x1, y2-y1);

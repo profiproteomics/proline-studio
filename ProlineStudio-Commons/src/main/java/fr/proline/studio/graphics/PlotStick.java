@@ -220,24 +220,26 @@ public class PlotStick extends PlotAbstract {
     }
 
     @Override
-    public ArrayList<Integer> getSelection() {
-        ArrayList<Integer> selection = new ArrayList();
+    public ArrayList<Long> getSelectedIds() {
+        /*ArrayList<Integer> selection = new ArrayList();
         for (int i = 0; i < m_selected.length; i++) {
             if (m_selected[i]) {
                 selection.add(i);
             }
         }
-        return selection;
+        return selection;*/
+        return null;  // not used for the moment
     }
 
     @Override
-    public void setSelection(ArrayList<Integer> selection) {
-        for (int i = 0; i < m_selected.length; i++) {
+    public void setSelectedIds(ArrayList<Long> selection) {
+        /*for (int i = 0; i < m_selected.length; i++) {
             m_selected[i] = false;
         }
         for (int i = 0; i < selection.size(); i++) {
             m_selected[selection.get(i)] = true;
-        }
+        }*/
+        // not used for the moment
     }
 
     /**

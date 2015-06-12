@@ -133,8 +133,8 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             @Override
             public void actionPerformed(ActionEvent e) {
                 /*if (m_crossSelectionInterface != null) {
-                    ArrayList<Integer> selection = m_crossSelectionInterface.getSelection();
-                    m_plotPanel.setSelection(selection);
+                    ArrayList<Integer> selection = m_crossSelectionInterface.getSelectedIds();
+                    m_plotPanel.setSelectedIds(selection);
                 }*/
             }
         });
@@ -147,7 +147,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
             @Override
             public void actionPerformed(ActionEvent e) {
                 /*if (m_crossSelectionInterface != null) {
-                    m_crossSelectionInterface.select(m_plotPanel.getSelection());
+                    m_crossSelectionInterface.select(m_plotPanel.getSelectedIds());
                 }*/
             }
         });

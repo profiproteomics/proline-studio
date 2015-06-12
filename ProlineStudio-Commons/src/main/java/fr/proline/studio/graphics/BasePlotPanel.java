@@ -352,16 +352,16 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         updateAxis(plot);
     }
     
-    public ArrayList<Integer> getSelection() {
+    public ArrayList<Long> getSelection() {
         if (!m_plots.isEmpty()){
-            return m_plots.get(0).getSelection();
+            return m_plots.get(0).getSelectedIds();
         }else {
             return null;
         }
     }
-    public void setSelection(ArrayList<Integer> selection) {
+    public void setSelection(ArrayList<Long> selection) {
         if (!m_plots.isEmpty()){
-            m_plots.get(0).setSelection(selection);
+            m_plots.get(0).setSelectedIds(selection);
             m_updateDoubleBuffer = true;
             repaint();
        }

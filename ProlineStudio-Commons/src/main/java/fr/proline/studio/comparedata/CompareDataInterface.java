@@ -28,4 +28,8 @@ public interface CompareDataInterface {
     // return the color if we want to impose a color for the graph, the title, ...
     public PlotInformation getPlotInformation();
     
+    // each model must return an unique id
+    public long row2UniqueId(int rowIndex);
+    public int uniqueId2Row(long id);
+
 }

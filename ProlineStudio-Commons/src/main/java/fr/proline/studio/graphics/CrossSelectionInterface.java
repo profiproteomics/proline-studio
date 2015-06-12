@@ -8,6 +8,6 @@ import java.util.ArrayList;
  */
 public interface CrossSelectionInterface {
 
-    public void select(ArrayList<Integer> rows);
-    public ArrayList<Integer> getSelection();
+    public void select(ArrayList<Long> uniqueIds);
+    public ArrayList<Long> getSelection();
 }

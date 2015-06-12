@@ -22,6 +22,8 @@ public class LockedDataModel implements CompareDataInterface, BestGraphicsInterf
     private final String m_name;
     private final Object[][] m_data;
     
+    private final long[] m_uniqueIDs;
+    
     public LockedDataModel(CompareDataInterface src) {
         m_src = src;
         
@@ -36,12 +38,17 @@ public class LockedDataModel implements CompareDataInterface, BestGraphicsInterf
         m_keysColumns = src.getKeysColumn();
         m_name = src.getName();
         m_data = new Object[m_rowCount][m_columnCount];
+        m_uniqueIDs = new long[m_rowCount];
         for (int i=0;i<m_rowCount;i++) {
+            m_uniqueIDs[i] = src.row2UniqueId(i);
             for (int j=0;j<m_columnCount;j++) {
                 m_data[i][j] = src.getDataValueAt(i, j);
             }
         }
         m_infoCol= src.getInfoColumn();
+        
+        
+        
     }
 
     public CompareDataInterface getSrcDataInterface() {
@@ -125,6 +132,22 @@ public class LockedDataModel implements CompareDataInterface, BestGraphicsInterf
     @Override
     public PlotInformation getPlotInformation() {
         return m_src.getPlotInformation();
+    }
+    
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        return m_uniqueIDs[rowIndex];
+    }
+    
+    @Override
+    public int uniqueId2Row(long id) {
+        int nb = m_uniqueIDs.length;
+        for (int i=0;i<nb;i++) {
+            if (id == m_uniqueIDs[i]) {
+                return i;
+            }
+        }
+        return -1; // should never happen
     }
 
 }

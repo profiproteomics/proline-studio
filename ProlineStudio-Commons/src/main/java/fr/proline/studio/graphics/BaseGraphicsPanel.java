@@ -135,13 +135,12 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         final JButton importSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.IMPORT_TABLE_SELECTION));
         importSelectionButton.setToolTipText( "Import Selection from Previous View");
         importSelectionButton.setFocusPainted(false);
-        importSelectionButton.setEnabled(!m_dataLocked);
         importSelectionButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (m_crossSelectionInterface != null) {
-                    ArrayList<Integer> selection = m_crossSelectionInterface.getSelection();
+                    ArrayList<Long> selection = m_crossSelectionInterface.getSelection();
                     m_plotPanel.setSelection(selection);
                 }
             }
@@ -149,7 +148,6 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
         final JButton exportSelectionButton  = new JButton(IconManager.getIcon(IconManager.IconType.EXPORT_TABLE_SELECTION));
         exportSelectionButton.setToolTipText("Export Selection to Previous View");
         exportSelectionButton.setFocusPainted(false);
-        exportSelectionButton.setEnabled(!m_dataLocked);
         exportSelectionButton.addActionListener(new ActionListener() {
 
             @Override
@@ -183,8 +181,6 @@ public class BaseGraphicsPanel extends HourglassPanel implements GridListener {
                 } else {
                     lockButton.setIcon(IconManager.getIcon(IconManager.IconType.UNLOCK));
                 }
-                //importSelectionButton.setEnabled(!m_dataLocked);
-                //exportSelectionButton.setEnabled(!m_dataLocked);
             }
         });
         

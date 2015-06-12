@@ -36,8 +36,8 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     public abstract boolean needsXAxis();
     public abstract boolean needsYAxis();
 
-    public abstract ArrayList<Integer> getSelection();
-    public abstract void setSelection(ArrayList<Integer> selection);
+    public abstract ArrayList<Long> getSelectedIds();
+    public abstract void setSelectedIds(ArrayList<Long> selection);
     
     public abstract void parametersChanged();
     

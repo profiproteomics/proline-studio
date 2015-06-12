@@ -43,6 +43,8 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     
     
     private boolean[] m_selected;
+    private long[] m_ids;
+    private HashMap<Long, Integer> m_idToIndex;
 
     private static final int SELECT_SENSIBILITY = 8;
     
@@ -50,9 +52,9 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     private static final String PLOT_SCATTER_X_JITTER_KEY = "PLOT_SCATTER_X_JITTER";
     private static final String PLOT_SCATTER_Y_JITTER_KEY = "PLOT_SCATTER_Y_JITTER";
     
-    private ColorOrGradientParameter m_colorParameter;
-    private IntegerParameter m_jitterXParameter;
-    private IntegerParameter m_jitterYParameter;
+    private final ColorOrGradientParameter m_colorParameter;
+    private final IntegerParameter m_jitterXParameter;
+    private final IntegerParameter m_jitterYParameter;
     
     private ArrayList<ParameterList> m_parameterListArray = null;
     
@@ -218,22 +220,26 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     }
     
     @Override
-    public ArrayList<Integer> getSelection() {
-        ArrayList<Integer> selection = new ArrayList();
+    public ArrayList<Long> getSelectedIds() {
+        ArrayList<Long> selection = new ArrayList();
         for (int i = 0; i < m_selected.length; i++) {
             if (m_selected[i]) {
-                selection.add(i);
+                selection.add(m_ids[i]);
             }
         }
         return selection;
     }
     @Override
-    public void setSelection(ArrayList<Integer> selection) {
+    public void setSelectedIds(ArrayList<Long> selectedIds) {
         for (int i = 0; i < m_selected.length; i++) {
             m_selected[i] = false;
         }
-        for (int i = 0; i < selection.size(); i++) {
-             m_selected[selection.get(i)] = true; 
+        for (int i = 0; i < selectedIds.size(); i++) {
+            Integer index = m_idToIndex.get(selectedIds.get(i));
+            if (index == null) {
+                continue;
+            }
+             m_selected[index] = true; 
         }
     }
     
@@ -356,6 +362,8 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         m_dataX = new double[size];
         m_dataY = new double[size];
         m_selected = new boolean[size];
+        m_ids = new long[size];
+        m_idToIndex = new HashMap(size);
 
         // set jitter values
         updateJitter();
@@ -371,7 +379,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             for (int i = 0; i < size; i++) {
 
                 String stringValue = m_compareDataInterface.getDataValueAt(i, m_colX).toString();
-                
+
                 Integer enumIndexCur = stringToEnumMap.get(stringValue);
                 if (enumIndexCur == null) {
                     enumIndexCur = enumIndex;
@@ -381,6 +389,8 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                 }
                 m_dataX[i] = enumIndexCur;
                 m_selected[i] = false;
+                m_ids[i] = m_compareDataInterface.row2UniqueId(i);
+                m_idToIndex.put(m_ids[i], i);
             }
             
             m_enumX = new String[enumToStringMap.size()];
@@ -395,6 +405,8 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                 Object value = m_compareDataInterface.getDataValueAt(i, m_colX);
                 m_dataX[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
                 m_selected[i] = false;
+                 m_ids[i] = m_compareDataInterface.row2UniqueId(i);
+                 m_idToIndex.put(m_ids[i], i);
             }
         }
         
@@ -429,24 +441,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                 m_dataY[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
             }
         }
-        
-        /*for (int i = 0; i < size; i++) {
-            
-            if (xAsEnum) {
-                m_dataX[i] = i;
-            } else {
-                Object value = m_compareDataInterface.getDataValueAt(i, m_colX);
-                m_dataX[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
-            }
-            
-            if (yAsEnum) {
-                 m_dataY[i] = i;
-            } else {
-                Object value = m_compareDataInterface.getDataValueAt(i, m_colY);
-                m_dataY[i] = (value == null || !Number.class.isAssignableFrom(value.getClass())) ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO : ne pas avoir a tester le type Number
-            }
-            m_selected[i] = false;
-        }*/
+
 
         // min and max values
         double minX = m_dataX[0];

@@ -1,16 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.studio.comparedata.CompareDataInterface;
-import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.graphics.PlotInformation;
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
@@ -115,6 +108,16 @@ public class ChromatogramXICModel  extends AbstractTableModel implements Compare
     
     public void setColor(Color c){
         this.chromatoColor = c;
+    }
+
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        return rowIndex;
+    }
+    
+    @Override
+    public int uniqueId2Row(long id) {
+        return (int) id;
     }
     
 }

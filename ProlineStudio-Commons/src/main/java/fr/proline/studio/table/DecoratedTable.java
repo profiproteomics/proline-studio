@@ -1,6 +1,7 @@
 package fr.proline.studio.table;
 
 import com.thierry.filtering.TableSelection;
+import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.utils.RelativePainterHighlighter;
 import java.awt.Color;
@@ -82,35 +83,63 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     }
 
     @Override
-    public void select(ArrayList<Integer> rows) {
-        ListSelectionModel model = getSelectionModel();
-        model.clearSelection();
-        for (Integer row1 : rows) {
-            int row = convertRowIndexToView(row1);
-            model.addSelectionInterval(row, row); 
-       }
+    public void select(ArrayList<Long> uniqueIds) {
+        ListSelectionModel selModel = getSelectionModel();
+        selModel.clearSelection();
+        
+        TableModel model = getModel();
+        
+        if (model instanceof CompareDataInterface) {
+            CompareDataInterface compareDataInterface = (CompareDataInterface) model;
+            for (Long id : uniqueIds) {
+                int row = compareDataInterface.uniqueId2Row(id);
+                if (row == -1) {
+                    // id not found (possible after a filtering for instance)
+                    continue;
+                }
+                row = convertRowIndexToView(row);
+                selModel.addSelectionInterval(row, row);
+            }
+        } else {
+            for (Long id : uniqueIds) {
+                int row = convertRowIndexToView(id.intValue());  // should not happen
+                selModel.addSelectionInterval(row, row);
+            }
+        }
+        
+        
        
-        int minRow = model.getMinSelectionIndex();
+        int minRow = selModel.getMinSelectionIndex();
         if (minRow != -1) {
             scrollRowToVisible(minRow);
         }
     }
     
     @Override
-    public ArrayList<Integer> getSelection() {
-        
-        ArrayList<Integer> selectionList = new ArrayList<>();
-        
-        ListSelectionModel selectionModel = getSelectionModel();
+    public ArrayList<Long> getSelection() {
+
+        ArrayList<Long> selectionList = new ArrayList<>();
+
+        ListSelectionModel selModel = getSelectionModel();
         AbstractTableModel model = (AbstractTableModel) getModel();
-        
-        for (int i=0;i<model.getRowCount();i++) {
-            int row = convertRowIndexToView(i);
-            if (selectionModel.isSelectedIndex(row)) {
-                selectionList.add(i);
+
+        if (model instanceof CompareDataInterface) {
+            CompareDataInterface compareDataInterface = (CompareDataInterface) model;
+            for (int i = 0; i < model.getRowCount(); i++) {
+                int row = convertRowIndexToView(i);
+                if (selModel.isSelectedIndex(row)) {
+                    selectionList.add(compareDataInterface.row2UniqueId(i));
+                }
+            }
+        } else {
+            for (int i = 0; i < model.getRowCount(); i++) {
+                int row = convertRowIndexToView(i);
+                if (selModel.isSelectedIndex(row)) {
+                    selectionList.add((long) i);
+                }
             }
         }
-        
+
         return selectionList;
     }
     

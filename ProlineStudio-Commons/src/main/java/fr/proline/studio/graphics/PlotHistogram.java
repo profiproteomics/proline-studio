@@ -14,6 +14,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 import java.util.HashSet;
@@ -33,6 +34,8 @@ public class PlotHistogram extends PlotAbstract {
     private double[] m_dataY;
     private int[] m_dataCountY;
     private boolean[] m_selected;
+    private long[] m_ids;
+    private HashMap<Long, Integer> m_idToIndex;
 
     private StatsModel m_values;
     private int m_bins;
@@ -142,9 +145,9 @@ public class PlotHistogram extends PlotAbstract {
     }
     
     @Override
-    public ArrayList<Integer> getSelection() {
+    public ArrayList<Long> getSelectedIds() {
         
-        ArrayList<Integer> selection = new ArrayList();
+        ArrayList<Long> selectedIds = new ArrayList();
         
         int size = m_values.getRowCount();
         for (int i=0;i<size;i++) {
@@ -154,26 +157,31 @@ public class PlotHistogram extends PlotAbstract {
                 index = m_bins - 1;
             }
             if (m_selected[index]) {
-                selection.add(i);
+                selectedIds.add(m_ids[i]);
             }
         }
 
-        return selection;
+        return selectedIds;
     }
     
     @Override
-    public void setSelection(ArrayList<Integer> selection) {
+    public void setSelectedIds(ArrayList<Long> selectedIds) {
         for (int i = 0; i < m_selected.length; i++) {
             m_selected[i] = false;
         }
 
-        for (int i = 0; i < selection.size(); i++) {
-            double v = m_values.getValue(selection.get(i));
-            int index = (int) (((v - m_xMin) / (m_xMax - m_xMin)) * (m_bins));
-            if (index >= m_bins) {
-                index = m_bins - 1;
+        for (int i = 0; i < selectedIds.size(); i++) {
+            Integer index = m_idToIndex.get(selectedIds.get(i));
+            if (index == null) {
+                continue;
             }
-            m_selected[index] = true;
+            
+            double v = m_values.getValue(index);
+            int binIndex = (int) (((v - m_xMin) / (m_xMax - m_xMin)) * (m_bins));
+            if (binIndex >= m_bins) {
+                binIndex = m_bins - 1;
+            }
+            m_selected[binIndex] = true;
         }
     }
     
@@ -300,10 +308,15 @@ public class PlotHistogram extends PlotAbstract {
         
         int size = m_values.getRowCount();
         
-        double[] data = new double[m_values.getRowCount()];
+        double[] data = new double[size];
+        m_ids = new long[size];
+        m_idToIndex = new HashMap(size);
         for (int i=0;i<data.length;i++) {
             data[i] = m_values.getValue(i);
+            m_ids[i] = m_values.row2UniqueId(i);
+            m_idToIndex.put(m_ids[i], i);
         }
+        
         
         double delta = m_xMax-m_xMin;
         m_dataCountY = new int[m_bins];

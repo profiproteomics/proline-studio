@@ -233,8 +233,16 @@ public class CompareTableModel extends DecoratedTableModel implements GlobalTabl
         return m_dataInterface.getRenderer(col);
     }
 
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        return m_dataInterface.row2UniqueId(rowIndex);
+    }
 
 
+    @Override
+    public int uniqueId2Row(long id) {
+        return m_dataInterface.uniqueId2Row(id);
+    }
 
 
 

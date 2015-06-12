@@ -64,39 +64,6 @@ public class StatsModel implements CompareDataInterface {
         return value == null ? Double.NaN : ((Number) value).doubleValue(); //CBy TODO a revoir ?
     }
 
-    /*
-    public double sum() {
-
-        double s = 0;
-        int nb = getRowCount();
-        for (int i = 0; i < nb; i++) {
-            s += getValue(i);
-        }
-
-        return s;
-    }
-
-    public double mean() {
-        return sum() / getRowCount();
-    }
-
-    public double variance() {
-
-        double v = 0;
-        double mean = mean();
-        int nb = getRowCount();
-        for (int i = 0; i < nb; i++) {
-            double diff = getValue(i) - mean;
-            v += diff * diff;
-        }
-        return v / nb;
-    }
-    
-    public double standardDeviation() {
-        return Math.sqrt(variance());
-    }
-    
-    */
 
     public double sumNaN() {
 
@@ -161,6 +128,16 @@ public class StatsModel implements CompareDataInterface {
     @Override
     public PlotInformation getPlotInformation() {
         return m_sourceDataInterface.getPlotInformation();
+    }
+
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        return m_sourceDataInterface.row2UniqueId(rowIndex);
+    }
+    
+    @Override
+    public int uniqueId2Row(long id) {
+        return m_sourceDataInterface.uniqueId2Row(id);
     }
     
 }

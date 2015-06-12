@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.mzscope.ui;
 
 import fr.profi.mzdb.algo.signal.filtering.ISignalSmoother;
@@ -13,7 +8,6 @@ import fr.profi.mzdb.utils.math.DerivativeAnalysis;
 import fr.proline.mzscope.model.Signal;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.BasePlotPanel;
-import fr.proline.studio.graphics.PlotAbstract;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel;
@@ -221,5 +215,15 @@ class SignalWrapper implements CompareDataInterface {
         plotInformation.setDrawGap(true);
         return plotInformation;
    }
+
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        return rowIndex;
+    }
+    
+    @Override
+    public int uniqueId2Row(long id) {
+        return (int) id;
+    }
    
 }

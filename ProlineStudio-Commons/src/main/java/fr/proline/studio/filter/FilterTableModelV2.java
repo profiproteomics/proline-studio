@@ -374,4 +374,16 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     public TableCellRenderer getRenderer(int col) {
         return m_tableModelSource.getRenderer(col);
     }
+
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        rowIndex = convertRowToOriginalModel(rowIndex);
+        return m_tableModelSource.row2UniqueId(rowIndex);
+    }
+    
+    @Override
+    public int uniqueId2Row(long id) {
+        int rowSource =  m_tableModelSource.uniqueId2Row(id);
+        return convertOriginalModelToRow(rowSource);
+    }
 }

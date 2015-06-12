@@ -187,5 +187,16 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
     public int getLoadingPercentage() {
         return (m_data1.getLoadingPercentage() + m_data2.getLoadingPercentage())/2;
     }
+    
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        return rowIndex;
+    }
+    
+    
+    @Override
+    public int uniqueId2Row(long id) {
+        return (int) id;
+    }
 
 }

@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package fr.proline.mzscope.ui;
 
 import fr.profi.mzdb.model.Feature;
@@ -41,7 +35,7 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
    private static final String[] m_columnTooltips = {"m/z", "Elution Time in min","Duration in min", "Apex Intensity", "Area", "MS Count", "Charge state", "Isotope peakels count"};
     
 
-    private List<Feature> features = new ArrayList<Feature>();
+    private List<Feature> features = new ArrayList<>();
     
     private String m_modelName;
 
@@ -242,7 +236,7 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
     public TableCellRenderer getRenderer(int col) {
         return null;
     }
-    
+
     
     
 }

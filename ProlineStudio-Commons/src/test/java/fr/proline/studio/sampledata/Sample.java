@@ -81,4 +81,14 @@ public class Sample implements CompareDataInterface {
       return null;
    }
 
+    @Override
+    public long row2UniqueId(int rowIndex) {
+        return rowIndex;
+    }
+    
+    @Override
+    public int uniqueId2Row(long id) {
+        return (int) id;
+    }
+
 }

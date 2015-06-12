@@ -8,4 +8,11 @@ import javax.swing.table.AbstractTableModel;
  */
 public abstract class DecoratedTableModel extends AbstractTableModel implements DecoratedTableModelInterface {
 
+    public long row2UniqueId(int rowIndex) {
+        return rowIndex;
+    }
+    
+    public int uniqueId2Row(long id) {
+        return (int) id;
+    }
 }

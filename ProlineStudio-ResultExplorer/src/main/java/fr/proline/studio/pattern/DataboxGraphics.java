@@ -15,7 +15,7 @@ public class DataboxGraphics extends AbstractDataBox  {
     private boolean m_defaultLocked = false;
     
     public DataboxGraphics() {
-       this(false);
+       this(true);
     }
     
     public DataboxGraphics(boolean defaultLocked) {

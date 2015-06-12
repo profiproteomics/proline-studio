@@ -16,6 +16,7 @@ import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSAction;
+import fr.proline.studio.rsmexplorer.actions.identification.RetrieveSCDataAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
@@ -232,8 +233,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 DisplayXICAction displayXICAction = new DisplayXICAction();
                 m_mainActions.add(displayXICAction);
                 
-                //RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
-                //m_mainActions.add(retrieveSCDataAction);
+                RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
+                m_mainActions.add(retrieveSCDataAction);
                 
                 DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(displayRsmAction);

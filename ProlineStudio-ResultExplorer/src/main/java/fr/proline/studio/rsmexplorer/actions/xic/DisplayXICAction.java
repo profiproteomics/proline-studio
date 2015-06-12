@@ -8,7 +8,6 @@ package fr.proline.studio.rsmexplorer.actions.xic;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
-import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;

@@ -192,12 +192,12 @@ public class DefineQuantParamsPanel extends JPanel{
         
         m_alignmentFeatureMappingMoZTolTF = new JTextField();
         m_alignmentFeatureMappingMoZTolTF.setEnabled(!m_readOnly);
-        IntegerParameter alignmentFeatureMappingMoZTolParameter = new IntegerParameter("featureMappingMozTolerance", "Feature Mapping Moz Tolerance", m_alignmentFeatureMappingMoZTolTF, new Integer(5), new Integer(0), null);
+        DoubleParameter alignmentFeatureMappingMoZTolParameter = new DoubleParameter("featureMappingMozTolerance", "Feature Mapping Moz Tolerance", m_alignmentFeatureMappingMoZTolTF, new Double(5), new Double(0), null);
         m_parameterList.add(alignmentFeatureMappingMoZTolParameter);
         
         m_alignmentFeatureMappingTimeToleranceTF = new JTextField();
         m_alignmentFeatureMappingTimeToleranceTF.setEnabled(!m_readOnly);
-        IntegerParameter alignmentFeatureMappingTimeToleranceParameter = new IntegerParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMappingTimeToleranceTF, new Integer(600), new Integer(1), null);
+        DoubleParameter alignmentFeatureMappingTimeToleranceParameter = new DoubleParameter("featureMappingTimeTolerance", "Feature Mapping Time Tolerance", m_alignmentFeatureMappingTimeToleranceTF, new Double(600), new Double(1), null);
         m_parameterList.add(alignmentFeatureMappingTimeToleranceParameter);
         
         m_featureFilterNameCB  = new JComboBox(FEATURE_FILTER_NAME_VALUES);
@@ -224,7 +224,7 @@ public class DefineQuantParamsPanel extends JPanel{
         
         m_featureMappingTimeTolTF = new JTextField();
         m_featureMappingTimeTolTF.setEnabled(!m_readOnly);
-        IntegerParameter featureMappingTimeTolParameter = new IntegerParameter("featureTimeTol", "Feature time tolerance", m_featureMappingTimeTolTF, new Integer(120), new Integer(0), null);
+        DoubleParameter featureMappingTimeTolParameter = new DoubleParameter("featureTimeTol", "Feature time tolerance", m_featureMappingTimeTolTF, new Double(120), new Double(0), null);
         m_parameterList.add(featureMappingTimeTolParameter);
         
         
@@ -343,8 +343,8 @@ public class DefineQuantParamsPanel extends JPanel{
         m_alignmentSmoothingWinOverlapTF.setText(""+Integer.parseInt(smootingParams.get("window_overlap").toString()));
         m_alignmentSmoothingMinWinlandmarksTF.setText(""+Integer.parseInt(smootingParams.get("min_window_landmarks").toString()));
         Map<String,Object> alnFtParams = (Map<String,Object>) alnParams.get("ft_mapping_params");
-        m_alignmentFeatureMappingMoZTolTF.setText(""+Integer.parseInt(alnFtParams.get("moz_tol").toString()));
-        m_alignmentFeatureMappingTimeToleranceTF.setText(""+Integer.parseInt(alnFtParams.get("time_tol").toString()));
+        m_alignmentFeatureMappingMoZTolTF.setText(""+Double.parseDouble(alnFtParams.get("moz_tol").toString()));
+        m_alignmentFeatureMappingTimeToleranceTF.setText(""+Double.parseDouble(alnFtParams.get("time_tol").toString()));
         
         Map<String,Object> ftParams =(Map<String,Object>) quantParams.get("ft_filter");
         for(int i=0; i<FEATURE_FILTER_NAME_KEYS.length; i++){
@@ -363,7 +363,7 @@ public class DefineQuantParamsPanel extends JPanel{
         
         Map<String,Object> ftMappingParams =(Map<String,Object>) quantParams.get("ft_mapping_params");
         m_featureMappingMoZTolTF.setText(""+Double.parseDouble(ftMappingParams.get("moz_tol").toString()));
-        m_featureMappingTimeTolTF.setText(""+Integer.parseInt(ftMappingParams.get("time_tol").toString()));
+        m_featureMappingTimeTolTF.setText(""+Double.parseDouble(ftMappingParams.get("time_tol").toString()));
         
         if (quantParams.containsKey("normalization_method")){
             for(int i=0; i<FEATURE_NORMALIZATION_KEYS.length; i++){

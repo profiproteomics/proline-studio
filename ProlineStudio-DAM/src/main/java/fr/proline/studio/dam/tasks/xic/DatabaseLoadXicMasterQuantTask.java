@@ -513,6 +513,30 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 }
                 dataset.setGroupSetup(groupSetup);
             }
+            // sort qCh by BiologicalGroup/BiologicalSample
+            if (!dataset.getMasterQuantitationChannels().isEmpty()){
+                List<DQuantitationChannel> listQch = dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
+                if (dataset.getGroupSetup() != null && !dataset.getGroupSetup().getBiologicalGroups().isEmpty()){
+                    List<DQuantitationChannel> sortedQch = new ArrayList();
+                    List<BiologicalGroup> listBiolGroup = dataset.getGroupSetup().getBiologicalGroups();
+                    for (BiologicalGroup biolGroup : listBiolGroup) {
+                        List<BiologicalSample> listBiologicalSamples = biolGroup.getBiologicalSamples();
+                        for (BiologicalSample sample : listBiologicalSamples) {
+                            List<QuantitationChannel> listQchSample = sample.getQuantitationChannels(); // are sorted by number
+                            for (QuantitationChannel qchS : listQchSample) {
+                                for(DQuantitationChannel dqch :listQch ){
+                                    if (dqch.getId() == qchS.getId()){
+                                        sortedQch.add(dqch);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // replace by sortedList
+                    dataset.getMasterQuantitationChannels().get(0).setQuantitationChannels(sortedQch);
+                }
+            }
             // load ObjectTree corresponding to the QUANT_PROCESSING_CONFIG
             Map<String, Long> objectTreeIdByName = datasetDB.getObjectTreeIdByName();
             if (objectTreeIdByName != null && objectTreeIdByName.get("quantitation.label_free_config") != null){
@@ -572,7 +596,12 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     //resultSummary
                     if (resultSummaryId != null) {
                         // retrieve the proteinSet list with isValidated = true
+                        QuantitationMethod quantitationMethod = m_dataset.getQuantitationMethod();
+                        boolean isSC = quantitationMethod != null && (quantitationMethod.getAbundanceUnit().compareTo("spectral_counts") == 0);
                         Query proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps.id  FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true ORDER BY pepset.score DESC");
+                        if (isSC){
+                           proteinSetsQuery = entityManagerMSI.createQuery("SELECT ps.id  FROM PeptideSet pepset JOIN pepset.proteinSet as ps WHERE ps.resultSummary.id=:rsmId AND ps.isValidated=true AND ps.masterQuantComponentId is not null ORDER BY pepset.score DESC");
+                        }
                         proteinSetsQuery.setParameter("rsmId", resultSummaryId);
                         List<Long> proteinSets = proteinSetsQuery.getResultList();
                         if (proteinSets != null && !proteinSets.isEmpty()) {

@@ -12,6 +12,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
+import fr.proline.core.orm.uds.BiologicalSplSplAnalysisMap;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
@@ -22,7 +23,6 @@ import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.SelectRawFileDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
-import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -317,10 +317,10 @@ public class XICDesignTree extends AbstractTree {
                 }
                 XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
                 m_model.insertNodeInto(biologicalSampleNode, biologicalGroupNode, childSampleIndex);
-                List<SampleAnalysis> listSampleAnalysis = sample.getSampleReplicates();
+                List<BiologicalSplSplAnalysisMap> listSampleAnalysis = sample.getBiologicalSplSplAnalysisMap();
                 int childSampleAnalysisIndex = 0;
-                for (SampleAnalysis sampleAnalysis : listSampleAnalysis) {
-                    DQuantitationChannel qCh = getQuantChannelSampleAnalysis(sampleAnalysis, listQuantChannels);
+                for (BiologicalSplSplAnalysisMap sampleAnalysis : listSampleAnalysis) {
+                    DQuantitationChannel qCh = getQuantChannelSampleAnalysis(sampleAnalysis.getSampleAnalysis(), listQuantChannels);
                     if (qCh != null){
                         String name = qCh.getResultFileName();
                         // fake dataset

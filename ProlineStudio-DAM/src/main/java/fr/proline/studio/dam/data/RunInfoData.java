@@ -180,7 +180,7 @@ public class RunInfoData extends AbstractData {
         public RawFile getSelectedRawFile() {
             if ((m_selectedRawFile == null) && (m_rawFileOnDisk != null)) {
                 RawFile rawFile = new RawFile();
-                rawFile.setDirectory(m_rawFileOnDisk.getPath());
+                rawFile.setRawFileDirectory(m_rawFileOnDisk.getPath());
                 rawFile.setRawFileName(m_rawFileOnDisk.getName());
                 m_selectedRawFile = rawFile;
             }

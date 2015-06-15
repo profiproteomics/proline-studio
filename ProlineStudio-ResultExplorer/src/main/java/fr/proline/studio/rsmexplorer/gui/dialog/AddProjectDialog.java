@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
 import fr.proline.core.orm.uds.Project;
+import fr.proline.core.orm.uds.ProjectUserAccountMap;
 import fr.proline.core.orm.uds.UserAccount;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.gui.DefaultDialog;
@@ -94,9 +95,9 @@ public class AddProjectDialog extends DefaultDialog {
             boolean isCreatorOfTheProject = (loggedUserAccount.getId() == mainUserAccount.getId());
             
             // fill owners
-            Set<UserAccount> members = p.getMembers();
-            for (UserAccount userAccount : members) {
-                if ((isCreatorOfTheProject) && (userAccount.getId() == mainUserAccount.getId())) {
+            Set<ProjectUserAccountMap> members = p.getProjectUserAccountMap();
+            for (ProjectUserAccountMap userAccount : members) {
+                if ((isCreatorOfTheProject) && (userAccount.getId().getUserAccountId() == mainUserAccount.getId())) {
                     continue;
                 }
                 userAccountListModel.addElement(userAccount);

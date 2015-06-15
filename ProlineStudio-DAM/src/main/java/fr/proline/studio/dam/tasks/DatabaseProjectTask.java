@@ -4,6 +4,7 @@ import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.core.orm.uds.ProjectUserAccountMap;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -104,8 +105,10 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
                 Project projectCur = it.next();
 
                 // avoid lazy initialization problem
-                Set<UserAccount> members = projectCur.getMembers();
-                for (UserAccount userAccount : members) {}
+                Set<ProjectUserAccountMap> members = projectCur.getProjectUserAccountMap();
+                for (ProjectUserAccountMap projectUserAccount : members) {
+                    projectUserAccount.getUserAccount();
+                }
                 
                 ProjectIdentificationData projectDataCur = new ProjectIdentificationData(projectCur);
                 projectDataCur.setHasChildren(true); // always has a Trash
@@ -145,15 +148,15 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             p.setDescription(m_description);
             
             if (m_userAccountList != null) {
-                p.getMembers().clear();
-                m_p.getMembers().clear();
+                p.getProjectUserAccountMap().clear();
+                m_p.getProjectUserAccountMap().clear();
 
                 int nb = m_userAccountList.size();
                 for (int i = 0; i < nb; i++) {
                     UserAccount userAccount = m_userAccountList.get(i);
                     UserAccount userAccountInDB = entityManagerUDS.find(UserAccount.class, userAccount.getId());
-                    p.addMember(userAccountInDB);
-                    m_p.addMember(userAccount);
+                    p.addMember(userAccountInDB, true); // TODO add write permissions
+                    m_p.addMember(userAccount, true);// TODO add write permissions
                 }
             }
             entityManagerUDS.merge(p);

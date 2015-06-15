@@ -4,16 +4,13 @@ import com.google.api.client.http.*;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
-import fr.proline.core.orm.uds.Aggregation;
-import fr.proline.core.orm.uds.Dataset;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import fr.proline.studio.dam.data.ProjectIdentificationData;
 import fr.proline.core.orm.uds.Project;
-import fr.proline.core.orm.uds.UserAccount;
+import fr.proline.core.orm.uds.ProjectUserAccountMap;
 import fr.proline.core.orm.util.DataStoreConnectorFactory;
-import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.ProjectQuantitationData;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
@@ -115,8 +112,10 @@ public class CreateProjectTask extends AbstractServiceTask {
             }
             
             // avoid lazy initialization problem
-            Set<UserAccount> members = p.getMembers();
-            for (UserAccount userAccount : members) {}
+            Set<ProjectUserAccountMap> members = p.getProjectUserAccountMap();
+                for (ProjectUserAccountMap projectUserAccount : members) {
+                    projectUserAccount.getUserAccount();
+                }
             
             
             m_projectIdentificationData.setProject(p);

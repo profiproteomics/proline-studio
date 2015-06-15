@@ -185,7 +185,7 @@ public class MultiGraphicsPanel extends HourglassPanel implements DataBoxPanelIn
         
         ExportButton exportImageButton = new ExportButton("Graphic", m_plotPanel);
         
-        JButton colorPicker = new JButton(IconManager.getIcon(IconManager.IconType.COLOR_PICKER));
+        JButton colorPicker = new JButton(IconManager.getIcon(IconManager.IconType.SETTINGS));
         colorPicker.setFocusPainted(false);
         colorPicker.addActionListener(new ActionListener() {
 

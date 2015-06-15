@@ -699,10 +699,6 @@ public class PropertiesAction extends AbstractRSMAction {
         prop.setName("Peptide Mass Error Tolerance Unit");
         propGroup.put(prop);
         
-        prop = new PropertySupport.Reflection<>(searchSetting, String.class, "getQuantitation", null);
-        prop.setName("Quantitation");
-        propGroup.put(prop);
-        
         prop = new PropertySupport.Reflection<>(searchSetting, String.class, "getSerializedProperties", null);
         prop.setName("Serialized Properties");
         propGroup.put(prop);

@@ -599,10 +599,7 @@ public class PropertiesAction extends AbstractRSMAction {
         prop = new PropertySupport.Reflection<>(msiSearch, String.class, "getSerializedProperties", null);
         prop.setName("Serialized Properties");
         propGroup.put(prop);
-        
-        prop = new PropertySupport.Reflection<>(msiSearch, Integer.class, "getSubmittedQueriesCount", null);
-        prop.setName("Submitted Queries Count");
-        propGroup.put(prop);
+
         
         return propGroup;
     }

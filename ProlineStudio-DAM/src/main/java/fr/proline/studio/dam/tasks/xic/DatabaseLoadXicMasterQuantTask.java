@@ -1250,7 +1250,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
         //masterQuantProteinSetsQuery.setParameter("rsmId", resultSummaryId); // NO NEED, and even if this constaint is added, the query become slow
         List<DMasterQuantProteinSet> listResult = masterQuantProteinSetsQuery.getResultList();
 
-        TypedQuery<DProteinSet> proteinSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.typicalProteinMatchId, ps.resultSummary.id) FROM ProteinSet ps WHERE ps.id=:psId ", DProteinSet.class);
+        TypedQuery<DProteinSet> proteinSetQuery = entityManagerMSI.createQuery("SELECT new fr.proline.core.orm.msi.dto.DProteinSet(ps.id, ps.representativeProteinMatchId, ps.resultSummary.id) FROM ProteinSet ps WHERE ps.id=:psId ", DProteinSet.class);
         String queryProteinMatch = "SELECT new fr.proline.core.orm.msi.dto.DProteinMatch(pm.id, pm.accession,  pm.score, pm.peptideCount, pm.resultSet.id, pm.description) "
                 + "FROM ProteinMatch pm "
                 + "WHERE pm.id=:pmId";
@@ -1271,7 +1271,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                     + "FROM PeptideSetProteinMatchMap pspmm, PeptideSet ps " +
                 "WHERE  pspmm.resultSummary.id=:rsmId  AND ps.id = pspmm.peptideSet.id ";
         Query queryPepNumberQ = entityManagerMSI.createQuery(queryPepNumber);
-        String queryStatus = "SELECT ps.id, pspmi.proteinMatch.id, pspmi.isInSubset, ps.typicalProteinMatchId "
+        String queryStatus = "SELECT ps.id, pspmi.proteinMatch.id, pspmi.isInSubset, ps.representativeProteinMatchId "
                 + "FROM ProteinSetProteinMatchItem pspmi, ProteinSet ps " +
                 " WHERE ps.id = pspmi.proteinSet.id " +
                 " AND pspmi.resultSummary.id=:rsmId ";
@@ -1925,7 +1925,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 + "ps_pi.peptideInstance=pepi AND "
                 + "ps_pi.peptideSet=peps AND "
                 + "peps.proteinSet=prots AND "
-                + "prots.typicalProteinMatchId = typpm.id AND "
+                + "prots.representativeProteinMatchId = typpm.id AND "
                 + "prots.isValidated=true "
                 + "ORDER BY pepm.id ASC, typpm.accession ASC";
         Query proteinSetQuery = entityManagerMSI.createQuery(query);

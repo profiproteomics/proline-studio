@@ -51,7 +51,7 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
     private DProteinMatch[] m_sameSetMatches = null;
     private DProteinMatch[] m_subSetMatches = null;
     private Long m_rsmId = null;
-    private long m_typicalProteinMatchId;
+    private long m_representativeProteinMatchId;
 
     private boolean m_isFiltering = false;
     private boolean m_filteringAsked = false;
@@ -132,7 +132,7 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
             case PROTEIN_DESCRIPTION:
                 return proteinMatch.getDescription();
             case SAMESET_SUBSET:
-                if (proteinMatch.getId() == m_typicalProteinMatchId) {
+                if (proteinMatch.getId() == m_representativeProteinMatchId) {
                     return Sameset.getSameset(Sameset.TYPICAL_SAMESET);
                 } else if (row < m_sameSetMatches.length) {
                     return Sameset.getSameset(Sameset.SAMESET);
@@ -158,9 +158,9 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
         return null; // should never happen
     }
 
-    public void setData(long rsmId, long typicalProteinMatchId, DProteinMatch[] sameSetMatches, DProteinMatch[] subSetMatches) {
+    public void setData(long rsmId, long representativeProteinMatchId, DProteinMatch[] sameSetMatches, DProteinMatch[] subSetMatches) {
         m_rsmId = rsmId;
-        m_typicalProteinMatchId = typicalProteinMatchId;
+        m_representativeProteinMatchId = representativeProteinMatchId;
         m_sameSetMatches = sameSetMatches;
         m_subSetMatches = subSetMatches;
 

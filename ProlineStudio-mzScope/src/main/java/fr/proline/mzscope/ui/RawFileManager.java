@@ -42,7 +42,7 @@ public class RawFileManager {
     }
 
     public IRawFile addRawFile(File file) { 
-       if (file.getAbsolutePath().endsWith(".mzdb")) {
+       if (file.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
             currentFile = new ThreadedMzdbRawFile(file);
             files.put(file.getName(), currentFile);
             logger.info("Rawfile {} added to RawFileManager",file.getAbsolutePath());

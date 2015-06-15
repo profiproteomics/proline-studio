@@ -174,7 +174,7 @@ public class MzDBFilesPanel extends JPanel implements RawFileListener{
     }
     
     private boolean isMzdbFile(File f){
-        return f.getName().endsWith(".mzdb");
+        return f.getName().toLowerCase().endsWith(".mzdb");
     }
     
     @Override

@@ -21,7 +21,7 @@ public class RawFileFactory {
 
    public static IRawFile createRawFile(File file) {
       IRawFile rawFile = null;
-      if (file.getAbsolutePath().endsWith(".mzdb")) {
+      if (file.getAbsolutePath().toLowerCase().endsWith(".mzdb")) {
          rawFile = new ThreadedMzdbRawFile(file);
          logger.info("Rawfile {} created", file.getAbsolutePath());
       } else if (file.getAbsolutePath().endsWith(".mzML")) {

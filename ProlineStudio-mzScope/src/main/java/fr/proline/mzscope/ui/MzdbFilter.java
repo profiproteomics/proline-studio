@@ -17,7 +17,7 @@ import javax.swing.filechooser.FileFilter;
         @Override
         public boolean accept(File file) {
             // Allow only directories, or files with ".txt" extension
-            return file.isDirectory() || file.getAbsolutePath().endsWith(".mzdb");
+            return file.isDirectory() || file.getAbsolutePath().toLowerCase().endsWith(".mzdb");
         }
 
         @Override

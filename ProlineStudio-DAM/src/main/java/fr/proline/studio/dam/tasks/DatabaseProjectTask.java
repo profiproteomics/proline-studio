@@ -94,7 +94,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
 
-            TypedQuery<Project> projectQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.Project p, fr.proline.core.orm.uds.UserAccount user WHERE user in elements(p.members) AND user.login=:user ORDER BY p.name ASC", Project.class);
+            TypedQuery<Project> projectQuery = entityManagerUDS.createQuery("SELECT p FROM fr.proline.core.orm.uds.Project p, fr.proline.core.orm.uds.UserAccount user, fr.proline.core.orm.uds.ProjectUserAccountMap puam  WHERE  user.login=:user AND user.id = puam.userAccount.id AND puam.project.id = p.id ORDER BY p.name ASC", Project.class);
             projectQuery.setParameter("user", m_user);
             List<Project> projectList = projectQuery.getResultList();
 

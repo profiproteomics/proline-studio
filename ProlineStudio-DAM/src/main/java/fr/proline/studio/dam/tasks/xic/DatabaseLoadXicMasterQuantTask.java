@@ -21,13 +21,13 @@ import fr.proline.core.orm.msi.dto.MasterQuantProteinSetProperties;
 import fr.proline.core.orm.msi.dto.MasterQuantProteinSetProperties.MasterQuantProteinSetProfile;
 import fr.proline.core.orm.uds.BiologicalGroup;
 import fr.proline.core.orm.uds.BiologicalSample;
+import fr.proline.core.orm.uds.BiologicalSplSplAnalysisMap;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.GroupSetup;
 import fr.proline.core.orm.uds.MasterQuantitationChannel;
 import fr.proline.core.orm.uds.QuantitationChannel;
 import fr.proline.core.orm.uds.QuantitationLabel;
 import fr.proline.core.orm.uds.QuantitationMethod;
-import fr.proline.core.orm.uds.SampleAnalysis;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.core.orm.uds.dto.DMasterQuantitationChannel;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
@@ -505,9 +505,9 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                 for (BiologicalGroup biolGroup : listBiolGroup) {
                     List<BiologicalSample> listBiologicalSamples = biolGroup.getBiologicalSamples();
                     for (BiologicalSample sample : listBiologicalSamples) {
-                        List<SampleAnalysis> listSampleAnalyis = sample.getSampleReplicates();
-                        for (SampleAnalysis sampleAnalysis : listSampleAnalyis) {
-                            sampleAnalysis.getDataset();
+                        List<BiologicalSplSplAnalysisMap> splAnalysisMap = sample.getBiologicalSplSplAnalysisMap();
+                        for(BiologicalSplSplAnalysisMap splAnalysis:splAnalysisMap){
+                            splAnalysis.getSampleAnalysis().getDataset();
                         }
                     }
                 }

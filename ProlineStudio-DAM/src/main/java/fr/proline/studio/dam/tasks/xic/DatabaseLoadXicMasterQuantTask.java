@@ -423,7 +423,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         dqc.setResultFileName(resultFileName);
                         dqc.setRawFilePath(rawPath);
                         // search for run_identification rawFileName (mzdb fileName) in UDS
-                        String queryUDS  = "SELECT ri.rawFile.rawFileName, ri.rawFile.extension "
+                        String queryUDS  = "SELECT ri.rawFile.rawFileName "
                                 + "FROM fr.proline.core.orm.uds.IdentificationDataset ri, fr.proline.core.orm.uds.Dataset ds "
                                 + "WHERE ri.id = ds.id AND "
                                 + "ds.resultSummaryId =:rsmId AND "
@@ -434,7 +434,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         String mzdbFile = "";
                         try{
                             Object[] res = (Object[]) queryMzdb.getSingleResult();
-                            mzdbFile = res[0]+(res[1] == null ?"" :"."+(res[1].toString().toLowerCase()));
+                            mzdbFile = (String)res[0];
                         }catch( Exception e) {
                             m_logger.error("Error while retrieving mzdb file "+e);
                         }

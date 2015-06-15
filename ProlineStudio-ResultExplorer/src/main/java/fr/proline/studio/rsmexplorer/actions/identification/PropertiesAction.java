@@ -622,7 +622,7 @@ public class PropertiesAction extends AbstractRSMAction {
         prop.setName("Path");
         propGroup.put(prop);
         
-        prop = new PropertySupport.Reflection<>(peaklist, String.class, "getRawFileName", null);
+        prop = new PropertySupport.Reflection<>(peaklist, String.class, "getRawFileIdentifier", null);
         prop.setName("Raw File Name");
         propGroup.put(prop);
         

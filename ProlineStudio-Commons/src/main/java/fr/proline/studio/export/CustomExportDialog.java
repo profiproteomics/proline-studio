@@ -47,6 +47,10 @@ import com.google.gson.GsonBuilder;
  *
  * @author AW
  *
+ * In order to achieve custom export, we first load a default structure defautConfig.
+ * We then load a custom file (if any) and display the saved info first then add the remaining missing tabs and fields
+ * that were in the default. Only both default and custom parameters are displayed, if any old or newly added fields or tabs
+ * are present in a custom file, they will be ignored. The default is the reference for allowing data to be displayed.
  */
 
 public class CustomExportDialog extends DefaultDialog {

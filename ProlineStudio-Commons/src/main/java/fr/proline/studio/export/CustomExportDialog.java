@@ -807,7 +807,7 @@ public class CustomExportDialog extends DefaultDialog {
                 optionPane.setVisible(chk_ExportOptions.isSelected());
                 if (!chk_ExportOptions.isSelected()) {
                     //disable custom parameters and restore default ones
-                	// m_exportConfig = m_exportDefaultConfig;
+                	m_exportConfig = m_exportDefaultConfig;
                     fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
                     recalculateTabsIds();
                     recalculateTabTitleIdHashMap();

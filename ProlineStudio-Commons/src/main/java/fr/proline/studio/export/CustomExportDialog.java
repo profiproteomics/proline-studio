@@ -797,7 +797,7 @@ public class CustomExportDialog extends DefaultDialog {
                 optionPane.setVisible(chk_ExportOptions.isSelected());
                 if (!chk_ExportOptions.isSelected()) {
                     //disable custom parameters and restore default ones
-                	m_exportConfig = m_exportDefaultConfig;
+                	m_exportConfig = null; //m_exportDefaultConfig;
                     fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
                     recalculateTabsIds();
                     recalculateTabTitleIdHashMap();
@@ -953,10 +953,10 @@ public class CustomExportDialog extends DefaultDialog {
     	}
     	if(removedAtIndex>-1) {
     		if(idFullList.size()>1) {
-    			System.out.println("Problem: more than one missing ID");
+    			//System.out.println("Problem: more than one missing ID");
     		}  else 
     		if(idFullList.size()==1) {
-    			System.out.println("Fixed the missing id: " + idFullList.get(0));
+    			//System.out.println("Fixed the missing id: " + idFullList.get(0));
     			m_tabbedPane.setToolTipTextAt(removedAtIndex, idFullList.get(0));
     		} 
 	    }
@@ -989,13 +989,13 @@ public class CustomExportDialog extends DefaultDialog {
             	// reorder param to contain all fields...
 	            
 	       	    fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
-	            //m_exportConfig = ordered;
+
 	       	  updatePresentationModeForNewlySelectedTab();
 	       	  selectLoadedExportValues(m_exportConfig);
 	       	
 	       	  //m_exportConfig = m_exportDefaultConfig; // allows all fields to be present in m_exportConfig, in case some tabs were disabled and avoid problems in processing...
           } else {
-          	System.out.println("no default config loaded!");
+          
           }
 
         }
@@ -1005,20 +1005,20 @@ public class CustomExportDialog extends DefaultDialog {
 	
 	
 	protected void updatePresentationModeForNewlySelectedTab() {
-		System.out.println("1-updating presentation mode for newly selected tab: " + m_tabbedPane.getSelectedIndex());
+		//System.out.println("1-updating presentation mode for newly selected tab: " + m_tabbedPane.getSelectedIndex());
 		
 		if(!m_updateInProgress ) { // update only when no update in progress
     		//if(m_exportConfig!= null) {
 	    	
-			System.out.println("2-updating presentation mode for newly selected tab: " + m_tabbedPane.getSelectedIndex());
-			System.out.println();
+//			System.out.println("2-updating presentation mode for newly selected tab: " + m_tabbedPane.getSelectedIndex());
+//			System.out.println();
 			
 			// reassign all tabs names and ids in case some have been moved around
 			
 			//ExportConfig param = m_exportConfig;
 		
 			//---
-			System.out.println("updating presentation mode for newly selected tab: " + m_tabbedPane.getSelectedIndex());
+//			System.out.println("updating presentation mode for newly selected tab: " + m_tabbedPane.getSelectedIndex());
 			
 	
 				m_updateInProgress = true;
@@ -1029,7 +1029,7 @@ public class CustomExportDialog extends DefaultDialog {
 				String selectedTabId = m_tabbedPane.getToolTipTextAt(m_tabbedPane.getSelectedIndex());
 				if(selectedTabId==null) {
 				//if(sheetIdToSheetIndex(selectedTabId)==m_exportConfig.sheets.length) {
-					System.out.println("ERROR: did not find tab by its id :" +selectedTabId);
+					//System.out.println("ERROR: did not find tab by its id :" +selectedTabId);
 					
 				} else {
 					//if(m_exportConfig.sheets[sheetIdToSheetIndex(selectedTabId)].presentation.equals("rows")) {
@@ -1116,7 +1116,7 @@ public class CustomExportDialog extends DefaultDialog {
 
     protected void presentationModeChanged() {
 		// update the m_presentation attribute when changed for a specific ExportConfigSheet
-		System.out.println("presentation mode changed to " + comboBox_Orientation.getSelectedItem());
+		//System.out.println("presentation mode changed to " + comboBox_Orientation.getSelectedItem());
 		int selectedTab = m_tabbedPane.getSelectedIndex();
 		recalculateTabsIds();
 		recalculateTabTitleIdHashMap();
@@ -1179,7 +1179,7 @@ public class CustomExportDialog extends DefaultDialog {
 	
 
 	protected ExportConfig generateConfigFileFromGUI () {
-		System.out.print("scanning table...");
+		//System.out.print("scanning table...");
 		// this method creates an ExportConfig structure to export.
 		ExportConfig ec = new ExportConfig();
 		
@@ -1218,7 +1218,7 @@ public class CustomExportDialog extends DefaultDialog {
 	    ec.sheet_presentation_values= null; //": ["rows","columns"]
 		
 		
-		System.out.print("parcours.../nb tab= "+  m_tabbedPane.getTabCount());
+		//System.out.print("parcours.../nb tab= "+  m_tabbedPane.getTabCount());
 		
 		int nbActiveTabs=0;
 		for(int i = 0; i< m_tabbedPane.getTabCount() ;i++) { // go through tab panes and jtables
@@ -1226,11 +1226,11 @@ public class CustomExportDialog extends DefaultDialog {
 				nbActiveTabs++;
 			}
 		}
-		System.out.println(">>\n " + nbActiveTabs + " active tabs");
+		//System.out.println(">>\n " + nbActiveTabs + " active tabs");
 		//ec.sheets = new ExportExcelSheet[nbActiveTabs];	// create the number of sheets that are enabled
 		ec.sheets = new ExportExcelSheet[nbActiveTabs];
 		
-		System.out.println("*** ec sheets count:" + ec.sheets.length);	
+		//System.out.println("*** ec sheets count:" + ec.sheets.length);	
 		int usedTabNumber =0; // the tab location for the new structure (smaller than the full table - disabled tabs)
 		for(int i = 0; i< m_tabbedPane.getTabCount() ;i++) { // go through tab panes and jtables
 			if( m_tabbedPane.isEnabledAt(i)) { // save only enabled panes (hence excel sheets)
@@ -1240,12 +1240,12 @@ public class CustomExportDialog extends DefaultDialog {
 					JScrollPane jsp = (JScrollPane) panelTemp.getComponent(0);
 					JTable tableRef = (JTable) jsp.getViewport().getComponents()[0];
 	
-					System.out.println("668: row count:" + tableRef.getRowCount());
+					//System.out.println("668: row count:" + tableRef.getRowCount());
 				
 					int nbRows = tableRef.getRowCount();
 					int nbSelectedRows =0;
 					for(int row = 0 ; row < nbRows  ; row++) { // count selected rows to be exported
-						System.out.println(" row " + row + " with id=" + tableRef.getValueAt(row, 0));
+						//System.out.println(" row " + row + " with id=" + tableRef.getValueAt(row, 0));
 						if(tableRef.getValueAt(row, 2).equals(true)){
 							nbSelectedRows++;
 						}
@@ -1266,10 +1266,10 @@ public class CustomExportDialog extends DefaultDialog {
 					// copy all selected sheet fields into new structure
 					int newStructRow=0; // position in new sheet structure 
 					for(int currentRow = 0 ; currentRow<nbRows ; currentRow++) {
-						System.out.println("current row:" + currentRow );
+						//System.out.println("current row:" + currentRow );
 						if(tableRef.getValueAt(currentRow, 2).equals(true)){ // if selected row then add it
 							ec.sheets[usedTabNumber].fields[newStructRow] = new ExportExcelSheetField();
-							System.out.println("currentRow= " + currentRow + " i = " + i + " new struct row: " + newStructRow);
+							//System.out.println("currentRow= " + currentRow + " i = " + i + " new struct row: " + newStructRow);
 							ec.sheets[usedTabNumber].fields[newStructRow].id = tableRef.getValueAt(currentRow, 0).toString();
 							ec.sheets[usedTabNumber].fields[newStructRow].title = tableRef.getValueAt(currentRow, 1).toString();
 							

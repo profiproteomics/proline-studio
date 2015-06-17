@@ -48,9 +48,13 @@ import com.google.gson.GsonBuilder;
  * @author AW
  *
  */
+
 public class CustomExportDialog extends DefaultDialog {
 
-    private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.Commons");
+   
+	private static final long serialVersionUID = 1L;
+
+	private final static Logger logger = LoggerFactory.getLogger("ProlineStudio.Commons");
     
     private final static String EXPORT_PROTEIN_ALL = "All";
     private final static String EXPORT_PROTEIN_VALIDATED = "Validated only";
@@ -112,9 +116,6 @@ public class CustomExportDialog extends DefaultDialog {
     private ExportConfig m_exportDefaultConfig;
     private JLabel lbl_exportType;
 
-    //private String[] m_presentation; // to complete information not displayed in jtable nor tabpane.
-    //private String[] m_sheetId;  // to complete information not displayed in jtable nor tabpane.
-    //private String[] m_sheetTitle;  // to complete information not displayed in jtable nor tabpane.
     protected boolean m_updateInProgress = true; // indicate when the table is built (to avoid calling event handler on every table update)
     public HashMap<String,String> m_tabTitleIdHashMap; // <title,id> keeps track of id/title for tabs, in case of renaming.
     public HashMap<String,String> m_presentationHashMap; // sheetId,presentation
@@ -480,10 +481,7 @@ public class CustomExportDialog extends DefaultDialog {
 				// put id in tooltip in order to find the tab title from the tooltip even if renamed.
 				// TODO: find a better way...
 				m_tabbedPane.setToolTipTextAt(nbCustomTabsAdded  -1, defaultParam.sheets[i].id /*"Right click to Enable/Disable"*/);
-				//if(param!=null) 
-				{
-					m_tabbedPane.setEnabledAt(nbCustomTabsAdded  -1, defaultParam.sheets[i].default_displayed); // disable default not saved tab
-				}
+				m_tabbedPane.setEnabledAt(nbCustomTabsAdded  -1, defaultParam.sheets[i].default_displayed); // disable default not saved tab
 				panel.setLayout(new BorderLayout(0, 0));
 				// read fields to fill in jtable into this tabbed pane
 				
@@ -558,9 +556,7 @@ public class CustomExportDialog extends DefaultDialog {
 		
 	}
 		
-		
-
-    
+	
 
     private int getIndexOfSheet(ExportConfig config, String sheetId) {
 		int index=-1 ; //config.sheets.length; // if not found, then value is size of table
@@ -586,15 +582,7 @@ public class CustomExportDialog extends DefaultDialog {
     	
 		return(fieldsId);
     }
-    private String getCustomFieldIfFieldContainedInFieldsList(ExportExcelSheetField sheetFieldToCompare, ExportExcelSheetField[] fields) {
-        // this method checks if sheetFieldToCompare is contained in the fields list of elements. It compares by the id only and return
-        for (ExportExcelSheetField field : fields) {
-            if (field.id.equals(sheetFieldToCompare.id)) {
-                return field.title; // return the custom title field
-            }
-        }
-        return null;
-    }
+ 
 
     public final JPanel createCustomExportPanel() {
 
@@ -1010,112 +998,6 @@ public class CustomExportDialog extends DefaultDialog {
 
     }
 
-	private ExportConfig completeParamWithNonUsedDefaultsAndReturnSheetsToDisable(ExportConfig defaultParam, ExportConfig param) {
-		//
-		//reorder default tabs according to custom param file. (and hence solve the problem of after loading a custom file, no right order with tabs)
-		// 
-		ExportConfig orderedExportConfig = new ExportConfig();
-		
-		ArrayList<String> usedSheetsIds = new ArrayList<String>();
-		//ArrayList<ExportExcelSheet> sheetsArrayList = new ArrayList<ExportExcelSheet>(Arrays.asList(param.sheets));
-		// size it to the default elements size
-		orderedExportConfig.sheets = new ExportExcelSheet[defaultParam.sheets.length];
-		
-		// fill the array with 1- the custom param sheet elements
-		for(int i=0; i<param.sheets.length;i++) {
-			usedSheetsIds.add(param.sheets[i].id);
-			System.out.println("sheet id used: " + param.sheets[i].id );
-			// copy data (by value)
-			orderedExportConfig.sheets[i] = new ExportExcelSheet();
-			orderedExportConfig.sheets[i].id = param.sheets[i].id;
-			orderedExportConfig.sheets[i].title = param.sheets[i].title;
-			orderedExportConfig.sheets[i].presentation = param.sheets[i].presentation;
-			orderedExportConfig.sheets[i].default_displayed = true; // to display them.
-
-			orderedExportConfig.sheets[i].fields = new ExportExcelSheetField[defaultParam.sheets[i].fields.length];
-			// TODO: check if size is bigger (in case defaultparam is smaller than previous version of param, if fields have been removed from default)
-			int debug=i;
-				System.out.println("param sheets:" +param.sheets.length + " orderedExport sheets: " + orderedExportConfig.sheets.length 
-						+ " defaultPAram sheets:" + defaultParam.sheets.length);
-				System.out.println("> nb fields for param:" + param.sheets[i].fields.length
-						+  "> nb fields for ordered:" + orderedExportConfig.sheets[i].fields.length
-						+  "> nb fields for default:" + defaultParam.sheets[i].fields.length);
-			ArrayList<String> usedFieldsIds = new ArrayList<String>();
-			for(int j=0;j<param.sheets[i].fields.length;j++) {
-				System.out.println(" ++ param sheet °"+ i + " : " + param.sheets[i].id + " field:" + j + " : " + param.sheets[i].fields[j].id);
-				usedFieldsIds.add(param.sheets[i].fields[j].id); // to check later if field already added or not
-				orderedExportConfig.sheets[i].fields[j] = new ExportExcelSheetField();
-				orderedExportConfig.sheets[i].fields[j].id = param.sheets[i].fields[j].id;
-				orderedExportConfig.sheets[i].fields[j].title = param.sheets[i].fields[j].title;
-				orderedExportConfig.sheets[i].fields[j].default_displayed = true; 
-			}
-			// add missing fields in present sheet in param compared to defautparam.
-			int newIndex=param.sheets[i].fields.length;
-			for(int j=0;j<defaultParam.sheets[i].fields.length;j++) {
-				
-				if(!usedFieldsIds.contains(defaultParam.sheets[i].fields[j].id)) {
-				
-					System.out.println("going through defaultparam sheet field j=" + j + "/" + defaultParam.sheets[i].fields.length);
-					System.out.println("field id:" + defaultParam.sheets[i].fields[j].id);
-					System.out.print("going through ordered sheet field i=" + newIndex + "/");
-					System.out.println(orderedExportConfig.sheets[i].fields.length);
-					orderedExportConfig.sheets[i].fields[newIndex] = new ExportExcelSheetField();
-					
-					orderedExportConfig.sheets[i].fields[newIndex].id = defaultParam.sheets[i].fields[j].id;
-					orderedExportConfig.sheets[i].fields[newIndex].title = defaultParam.sheets[i].fields[j].title;
-					orderedExportConfig.sheets[i].fields[newIndex].default_displayed = false;
-					newIndex++;
-				}
-			}
-			
-		}
-		
-		
-		
-		
-		// fill the array with 2- the remaining sheets from defaultParam
-		int extraSheets=0;
-		for(int i=0; i<defaultParam.sheets.length;i++) {
-			System.out.println(i + ": checking if sheet id " + defaultParam.sheets[i].id + " is contained in usedsheet id");
-			if(!usedSheetsIds.contains(defaultParam.sheets[i].id)) { // if sheet id is not already there...
-				// add the missing sheets
-				System.out.println(i + ": adding the missing sheet: " + defaultParam.sheets[i].id);
-				//orderedExportConfig.sheets[param.sheets.length + extraSheets] = defaultParam.sheets[i];
-				int newIndex = param.sheets.length + extraSheets;
-				orderedExportConfig.sheets[newIndex] = new ExportExcelSheet();
-				orderedExportConfig.sheets[newIndex].id = defaultParam.sheets[i].id;
-				orderedExportConfig.sheets[newIndex].title = defaultParam.sheets[i].title;
-				orderedExportConfig.sheets[newIndex].presentation = defaultParam.sheets[i].presentation;
-				orderedExportConfig.sheets[newIndex].default_displayed = false; // to NOT display them as they were not saved
-
-				orderedExportConfig.sheets[newIndex].fields = new ExportExcelSheetField[defaultParam.sheets[i].fields.length];
-				for(int j=0;j<defaultParam.sheets[i].fields.length;j++) {
-					orderedExportConfig.sheets[newIndex].fields[j] = new ExportExcelSheetField();
-					System.out.println("new index, i,j,ordered size, param size:" +newIndex +","+ i  +","+ j  +","+ orderedExportConfig.sheets.length  +","+ param.sheets.length );
-					
-					
-					orderedExportConfig.sheets[newIndex].fields[j].id = defaultParam.sheets[i].fields[j].id;
-					orderedExportConfig.sheets[newIndex].fields[j].title = defaultParam.sheets[i].fields[j].title;
-					orderedExportConfig.sheets[newIndex].fields[j].default_displayed = defaultParam.sheets[i].fields[j].default_displayed; 
-				}
-				extraSheets++;
-			}
-			
-		}
-		
-		// add the missing data in the new export config:
-		orderedExportConfig.data_export = param.data_export;
-		orderedExportConfig.data_export.all_protein_set = param.data_export.all_protein_set;
-		orderedExportConfig.data_export.best_profile = param.data_export.best_profile;
-		orderedExportConfig.date_format = param.date_format;
-		orderedExportConfig.decimal_separator = param.decimal_separator;
-		orderedExportConfig.format = param.format;
-		
-		
-		return(orderedExportConfig);
-	}
-	
-
 	
 	
 	protected void updatePresentationModeForNewlySelectedTab() {
@@ -1251,14 +1133,10 @@ public class CustomExportDialog extends DefaultDialog {
 	}
 	
 	protected String tabTitleToTabId(String title) { // return the tab id from its known title (supposed to be unique)
-//		for(int i=0;i<m_exportDefaultConfig.sheets.length;i++) {
-//			if(m_exportDefaultConfig.sheets[i].title.equals(title)) {
-//				return m_exportDefaultConfig.sheets[i].id; 
-//			}
-//		}
+
 		 return m_tabTitleIdHashMap.get(title);
 		
-		//return null; // should not happen
+		
 	}
 	
 	protected int tabTitleToTabPosition(String tabTitle) {

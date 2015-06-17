@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.HashMap;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -18,9 +19,6 @@ import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 class TabTitleEditListener extends MouseAdapter implements MouseListener {
     private final JTextField editor = new JTextField();
@@ -29,9 +27,14 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
     private int len = -1;
     private Dimension dim;
     private Component tabComponent;
+    private HashMap<String,String> m_tabTitleIdHashMap;
+    CustomExportDialog m_customEd;
+	private String m_formerTitle;
 
-    public TabTitleEditListener(final JTabbedPane tabbedPane) {
+    public TabTitleEditListener(final JTabbedPane tabbedPane, CustomExportDialog ced) {
         super();
+        m_tabTitleIdHashMap = ced.m_tabTitleIdHashMap;
+        m_customEd = ced;
         this.tabbedPane = tabbedPane;
         editor.setBorder(BorderFactory.createEmptyBorder());
         editor.addFocusListener(new FocusAdapter() {
@@ -76,6 +79,8 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
         tabComponent = tabbedPane.getTabComponentAt(editingIdx);
         tabbedPane.setTabComponentAt(editingIdx, editor);
         editor.setVisible(true);
+        m_formerTitle = tabbedPane.getTitleAt(editingIdx);
+        System.out.println("former title: " + m_formerTitle);
         editor.setText(tabbedPane.getTitleAt(editingIdx));
         editor.selectAll();
         editor.requestFocusInWindow();
@@ -94,12 +99,35 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
             tabbedPane.requestFocusInWindow();
         }
     }
+    
     private void renameTabTitle() {
         String title = editor.getText().trim();
+        boolean canConfirmTitleChange = true;
         if (editingIdx >= 0 && !title.isEmpty()) {
-            tabbedPane.setTitleAt(editingIdx, title);
+        	for(int i=0;i<tabbedPane.getTabCount();i++) {
+        		if(editingIdx != i && tabbedPane.getTitleAt(i).equals(title)) {
+        			cancelEditing();
+        			canConfirmTitleChange = false;
+        			// can't use twice the same title
+        		}
+        	}
+        	if(canConfirmTitleChange) {
+	            tabbedPane.setTitleAt(editingIdx, title);
+	            String sheetId = m_tabTitleIdHashMap.get(m_formerTitle);
+	            m_tabTitleIdHashMap.remove(m_formerTitle);
+	            m_tabTitleIdHashMap.put(title, sheetId);
+	           // if(m_customEd.m_exportConfig.sheets[editingIdx].title.equals(m_formerTitle)) {
+	           // 	m_customEd.m_exportConfig.sheets[editingIdx].title=title; // replace title with new one
+	           // } else
+	           // {
+	           // 	System.out.println(">>ERROR: found title is not at the expected place...");
+	           // }
+        	} else {
+        		// do not change the title
+        	}
         }
         cancelEditing();
     }
 }
     
+

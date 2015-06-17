@@ -300,10 +300,10 @@ public class CustomExportDialog extends DefaultDialog {
 			comboBox_exportProfile.setModel(new DefaultComboBoxModel(new String[] {"Best", "All"}));
 			if(param.data_export.best_profile) 
 			{
-				System.out.println("best profile or not: TRUE***");
+				
 				comboBox_exportProfile.setSelectedIndex(0);	
 			} 	else {
-				System.out.println("best profile or not: ---FALSE");
+				
 				comboBox_exportProfile.setSelectedIndex(1);
 			}
 			
@@ -356,7 +356,7 @@ public class CustomExportDialog extends DefaultDialog {
 		// create tab panes
 		if(param!=null) {
 			for(int i = 0; i<param.sheets.length;i++) {
-				System.out.println("processing custom tab sheet " + i);
+				
 				panel = new JPanel();
 				if(m_tabTitleIdHashMap.containsValue(param.sheets[i].id)) 
 				{ 
@@ -428,8 +428,6 @@ public class CustomExportDialog extends DefaultDialog {
 					//m_tabbedPane.setToolTipTextAt(i, "Right click to Enable/Disable");
 				
 					// now add the fields
-					//HashMap<String,String> defaultFieldsHashMap = new HashMap<String,String>();
-					//String defaultSheetId = m_tabTitleIdHashMap.get(param.sheets[i].title);
 					// add fields contained both in param and defaultparam
 					ArrayList<String> defaultFieldsList = getFieldsFromParamSheet(defaultParam.sheets,param.sheets[i].id);
 					ArrayList<String> addedFieldsList = new ArrayList<String>();// to know which fields have already been added
@@ -465,13 +463,13 @@ public class CustomExportDialog extends DefaultDialog {
 				
 			}
 		}
-		m_updateInProgress = false;
+		
 	// now add the remaining default sheets that are not already added.
 		
 			
 		int nbCustomTabsAdded = addedTabs.size();
 		for(int i=0; i< defaultParam.sheets.length ; i++) {
-			System.out.println("--> checking for missing heet: "+ defaultParam.sheets[i].id);	
+				
 			
 			if(!addedTabs.contains(defaultParam.sheets[i].id)) {
 				nbCustomTabsAdded++;
@@ -482,9 +480,9 @@ public class CustomExportDialog extends DefaultDialog {
 				// put id in tooltip in order to find the tab title from the tooltip even if renamed.
 				// TODO: find a better way...
 				m_tabbedPane.setToolTipTextAt(nbCustomTabsAdded  -1, defaultParam.sheets[i].id /*"Right click to Enable/Disable"*/);
-				if(param!=null) 
+				//if(param!=null) 
 				{
-					m_tabbedPane.setEnabledAt(nbCustomTabsAdded  -1, false); // disable default not saved tab
+					m_tabbedPane.setEnabledAt(nbCustomTabsAdded  -1, defaultParam.sheets[i].default_displayed); // disable default not saved tab
 				}
 				panel.setLayout(new BorderLayout(0, 0));
 				// read fields to fill in jtable into this tabbed pane
@@ -513,7 +511,7 @@ public class CustomExportDialog extends DefaultDialog {
 				});
 				
 	
-				//CustomExportTableModel tableModel = new CustomExportTableModel();
+				/*CustomExportTableModel tableModel = new CustomExportTableModel();*/
 				DefaultTableModel tableModel = new javax.swing.table.DefaultTableModel(
 						
 						new Object [][] {
@@ -556,7 +554,7 @@ public class CustomExportDialog extends DefaultDialog {
 			
 				
 		}
-			
+		m_updateInProgress = false;
 		
 	}
 		
@@ -744,7 +742,7 @@ public class CustomExportDialog extends DefaultDialog {
 		m_tabbedPane = new DnDTabbedPane(JTabbedPane.BOTTOM);
 		m_tabbedPane.addChangeListener(new ChangeListener() {
 	        public void stateChanged(ChangeEvent e) {
-	        	//System.out.println("DND potentially performed!");
+
 	        	//recalculateTabsIds(); // because drag n drop looses tolltiptext info, rebuild it
 	        	//recalculateTabTitleIdHashMap();
 	        	updatePresentationModeForNewlySelectedTab();
@@ -913,7 +911,7 @@ public class CustomExportDialog extends DefaultDialog {
     }
 
     protected void recalculateTabTitleIdHashMap() {
-    	//System.out.println("RECALCULTAING TAB title id hashmap");
+    	//
     	//because after renamed, rebuild it in order to keep tabs ids stored .
     	m_tabTitleIdHashMap.clear();
     	for(int i = 0;i<m_tabbedPane.getTabCount();i++) {
@@ -928,7 +926,7 @@ public class CustomExportDialog extends DefaultDialog {
     protected void recalculateTabsIds() {
     	//because drag n drop looses tooltiptext info, rebuild it in order to keep tabs ids stored there.
     	
-    	System.out.println("RECALCULTAING tab ids ");
+    	//RECALCULTAING tab ids 
     			
     	// 1st: get the list of ids from defaultParam
     	// 2nd: find which one is missing from list
@@ -956,14 +954,9 @@ public class CustomExportDialog extends DefaultDialog {
     			String currentTabTitle = m_tabbedPane.getTitleAt(removedAtIndex);
     	    	String tabId= m_tabTitleIdHashMap.get(currentTabTitle);
     	    	
-				//m_tabbedPane.setToolTipTextAt(removedAtIndex, tabId);
-//    	    	System.out.println("RECALCULTAING tab id: " + removedAtIndex + " currentTabTitle:" + currentTabTitle +
-//    	    			",id= " + tabId);
         	
     		} else {
     			idFullList.remove(m_tabbedPane.getToolTipTextAt(i));
-    		// recreate complete list but the one missing
-    			//tabIdTitleHashMap.put(m_tabbedPane.getTitleAt(i),m_tabbedPane.getToolTipTextAt(i));
     		}
     	}
     	if(removedAtIndex>-1) {
@@ -975,12 +968,7 @@ public class CustomExportDialog extends DefaultDialog {
     			m_tabbedPane.setToolTipTextAt(removedAtIndex, idFullList.get(0));
     		} 
 	    }
-    	// deduce which one is missing by removing the found ones:
-//    	for (String tabTitle : tabIdTitleHashMap.keySet()) { 
-//			m_tabTitleIdHashMap.remove(tabTitle);
-//		}
-//    	if(m_tabTitleIdHashMap.size())
-		
+
 	}
 
 	protected void loadConfigFile() {
@@ -1008,10 +996,7 @@ public class CustomExportDialog extends DefaultDialog {
             if (m_exportDefaultConfig != null) {
             	// reorder param to contain all fields...
 	            
-	            //ExportConfig ordered = completeParamWithNonUsedDefaultsAndReturnSheetsToDisable(m_exportDefaultConfig,m_exportConfig);
 	       	    fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
-	            //disableTabsOnlyInDefaultParam(m_exportDefaultConfig,m_exportConfig);
-	       	    // make the ordered config the new custom param config (even with tabs that were not saved previously)
 	            //m_exportConfig = ordered;
 	       	  updatePresentationModeForNewlySelectedTab();
 	       	  selectLoadedExportValues(m_exportConfig);
@@ -1049,15 +1034,12 @@ public class CustomExportDialog extends DefaultDialog {
 
 			orderedExportConfig.sheets[i].fields = new ExportExcelSheetField[defaultParam.sheets[i].fields.length];
 			// TODO: check if size is bigger (in case defaultparam is smaller than previous version of param, if fields have been removed from default)
-//			for(int debug=0;debug<param.sheets.length;debug++)
-//			{
 			int debug=i;
 				System.out.println("param sheets:" +param.sheets.length + " orderedExport sheets: " + orderedExportConfig.sheets.length 
 						+ " defaultPAram sheets:" + defaultParam.sheets.length);
 				System.out.println("> nb fields for param:" + param.sheets[i].fields.length
 						+  "> nb fields for ordered:" + orderedExportConfig.sheets[i].fields.length
 						+  "> nb fields for default:" + defaultParam.sheets[i].fields.length);
-//			}
 			ArrayList<String> usedFieldsIds = new ArrayList<String>();
 			for(int j=0;j<param.sheets[i].fields.length;j++) {
 				System.out.println(" ++ param sheet °"+ i + " : " + param.sheets[i].id + " field:" + j + " : " + param.sheets[i].fields[j].id);
@@ -1120,7 +1102,6 @@ public class CustomExportDialog extends DefaultDialog {
 			}
 			
 		}
-		//orderedExportConfig.sheets = (ExportExcelSheet[]) sheetsArrayList.toArray();
 		
 		// add the missing data in the new export config:
 		orderedExportConfig.data_export = param.data_export;
@@ -1134,44 +1115,6 @@ public class CustomExportDialog extends DefaultDialog {
 		return(orderedExportConfig);
 	}
 	
-
-	private void disableTabsOnlyInDefaultParam(ExportConfig defaultParam, ExportConfig param) {
-		//
-		//reorder default tabs according to custom param file. (and hence solve the problem of after loading a custom file, no right order with tabs)
-		// 
-		ExportConfig orderedExportConfig = new ExportConfig();
-		
-		ArrayList<String> usedSheetsIds = new ArrayList<String>();
-		//ArrayList<ExportExcelSheet> sheetsArrayList = new ArrayList<ExportExcelSheet>(Arrays.asList(param.sheets));
-	//	orderedExportConfig.sheets = new ExportExcelSheet[defaultParam.sheets.length];
-		
-		// fill the array with 1- the custom param elements
-		for(int i=0; i<param.sheets.length;i++) {
-			usedSheetsIds.add(param.sheets[i].id);
-			System.out.println("sheet id used: " + param.sheets[i].id);
-	//		orderedExportConfig.sheets[i] = param.sheets[i];
-		}
-		
-		
-		// fill the array with 2- the remaining elements from defaultParam
-		//int extraSheets=0;
-		ArrayList<String> tabsToDisable =new ArrayList<String>();
-		for(int i=0; i<defaultParam.sheets.length;i++) {
-			System.out.println(i + ": checking if sheet id " + defaultParam.sheets[i].id + " is contained in usedsheet id");
-			if(!usedSheetsIds.contains(defaultParam.sheets[i].id)) { // if sheet id is not already there...
-				// add the missing sheets
-				//orderedExportConfig.sheets[param.sheets.length + extraSheets] = defaultParam.sheets[i];
-				tabsToDisable.add(defaultParam.sheets[i].id);
-				//extraSheets++;
-			}
-		}
-		for(int i=0; i<defaultParam.sheets.length;i++) {
-			if(tabsToDisable.contains(m_tabbedPane.getTitleAt(i))) {
-				m_tabbedPane.setEnabledAt(i, false);
-			}
-		}
-		
-	}
 
 	
 	
@@ -1215,9 +1158,7 @@ public class CustomExportDialog extends DefaultDialog {
 		
 			
     		}
-    	//}
-		
-		//}
+    
 	}
    
 
@@ -1298,21 +1239,13 @@ public class CustomExportDialog extends DefaultDialog {
 		if(comboBox_Orientation.getSelectedIndex()==0)
 		{ 
 			
-			// m_presentationHashMap (tabId, presentation mode)
 			m_presentationHashMap.put(selectedTabId,"rows");
-			//presentationHashMap.put(m_sheetIdHashMap.get(selectedTab),"rows");
-			//m_exportConfig.sheets[sheetNameToSheetIndex(m_tabbedPane.getTitleAt(selectedTab))].presentation = "rows";
-			//m_presentation[selectedTab] = "rows";
 		
 		}
 		else if(comboBox_Orientation.getSelectedIndex()==1)
 		{
 			m_presentationHashMap.put(selectedTabId,"columns");
-			//m_presentationHashMap.put(m_sheetIdHashMap.get(selectedTab),"columns");
-			//m_exportConfig.sheets[sheetNameToSheetIndex(m_tabbedPane.getTitleAt(selectedTab))].presentation = "columns";
-			//m_presentation[selectedTab] = "columns";
 		}
-	//	System.out.println("presentation mode changed for tab " + selectedTab + " to " +  m_presentationHashMap.get(m_sheetIdHashMap.get(selectedTab))); 
 		
 		
 	}

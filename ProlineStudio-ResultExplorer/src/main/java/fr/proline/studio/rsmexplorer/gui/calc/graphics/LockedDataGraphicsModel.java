@@ -5,7 +5,8 @@ import fr.proline.studio.comparedata.LockedDataModel;
 import fr.proline.studio.graphics.PlotType;
 
 /**
- *
+ * Locked Model for graphics (if src data is modified, the modification is not propagated),
+ * which is used for data mixer
  * @author JM235353
  */
 public class LockedDataGraphicsModel extends LockedDataModel {

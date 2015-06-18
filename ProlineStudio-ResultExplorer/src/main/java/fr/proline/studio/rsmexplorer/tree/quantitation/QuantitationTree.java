@@ -31,7 +31,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 /**
- *
+ * Quantitation tree (Spectral count + XIC dataset)
  * @author JM235353
  */
 public class QuantitationTree extends AbstractTree implements TreeWillExpandListener {

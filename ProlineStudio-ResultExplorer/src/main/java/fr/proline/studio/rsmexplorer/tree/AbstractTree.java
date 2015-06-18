@@ -14,10 +14,9 @@ import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.*;
-import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Base Class for all trees with identification or quantification dataset
  * @author JM235353
  */
 public abstract class AbstractTree extends JTree implements MouseListener {

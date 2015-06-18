@@ -1,7 +1,6 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graphics;
 
 import fr.proline.studio.graphics.PlotType;
-import fr.proline.studio.parameter.MultiObjectParameter;
 import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
@@ -9,10 +8,9 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
-import java.util.List;
 
 /**
- *
+ * Definition of a scatter plot with its parameters for the data mixer
  * @author JM235353
  */
 public class ScatterGraphic extends AbstractGraphic {

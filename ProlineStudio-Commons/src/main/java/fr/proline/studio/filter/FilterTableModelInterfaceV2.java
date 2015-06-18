@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 
 
 /**
- *
+ * Interface which must be respected to do a Filter Model
  * @author JM235353
  */
 public interface FilterTableModelInterfaceV2 extends GlobalTableModelInterface {

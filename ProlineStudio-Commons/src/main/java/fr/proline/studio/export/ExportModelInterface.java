@@ -1,7 +1,7 @@
 package fr.proline.studio.export;
 
 /**
- *
+ * Export interface, to have data as string and column names
  * @author JM235353
  */
 public interface ExportModelInterface {

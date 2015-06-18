@@ -6,7 +6,8 @@ import fr.proline.studio.graphics.PlotType;
 import java.util.Map;
 
 /**
- *
+ * Model which copy the data of the source model, so the data are frozen
+ * (even if the source model is filtered for instance)
  * @author JM235353
  */
 public class LockedDataModel implements CompareDataInterface, BestGraphicsInterface {

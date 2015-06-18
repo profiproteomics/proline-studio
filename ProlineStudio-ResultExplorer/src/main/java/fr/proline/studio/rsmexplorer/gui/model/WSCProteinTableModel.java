@@ -18,7 +18,6 @@ import fr.proline.studio.utils.URLCellRenderer;
 import java.awt.Color;
 import java.util.*;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
 /**
  * Table Model for Spectral Count

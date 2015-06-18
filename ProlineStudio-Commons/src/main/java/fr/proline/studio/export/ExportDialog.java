@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * Dialog used to export an image or a table
  * @author JM235353
  */
 public class ExportDialog extends DefaultDialog  {

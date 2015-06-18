@@ -3,7 +3,7 @@ package fr.proline.studio.export;
 import java.io.IOException;
 
 /**
- *
+ * An exporter must implements this interface (csv, xls, xlsx...)
  * @author JM235353
  */
 public interface ExporterInterface {

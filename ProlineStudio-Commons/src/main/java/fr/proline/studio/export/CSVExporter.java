@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
- *
+ * Export data to CSV
  * @author JM235353
  */
 public class CSVExporter implements ExporterInterface {

@@ -9,7 +9,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * Class used to do a local export of a table
  * @author JM235353
  */
 public class ExportManager {

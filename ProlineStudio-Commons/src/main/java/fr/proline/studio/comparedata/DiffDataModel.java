@@ -14,13 +14,13 @@ import java.util.Map;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * Model to perform a difference between two models (joined thanks to key columns) with the same columns
  * @author JM235353
  */
 public class DiffDataModel extends AbstractJoinDataModel {
 
-    private ArrayList<Integer> m_allColumns1 = new ArrayList<>();
-    private ArrayList<Integer> m_allColumns2 = new ArrayList<>();
+    private final ArrayList<Integer> m_allColumns1 = new ArrayList<>();
+    private final ArrayList<Integer> m_allColumns2 = new ArrayList<>();
 
     
     @Override

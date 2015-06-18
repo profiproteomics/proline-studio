@@ -9,7 +9,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * Renderer for sameset/subset
+ * Renderer for sameset/subset (shown as full or half filled square)
  * @author JM235353
  */
 public class SamesetRenderer extends DefaultTableCellRenderer implements ExportTextInterface {

@@ -3,7 +3,7 @@ package fr.proline.studio.export;
 import java.util.ArrayList;
 
 /**
- *
+ * Link between data type and export type
  * @author JM235353
  */
 public class ExporterFactory {

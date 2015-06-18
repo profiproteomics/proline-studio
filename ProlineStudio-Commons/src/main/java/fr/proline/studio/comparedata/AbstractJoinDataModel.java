@@ -7,7 +7,7 @@ import java.util.HashSet;
 import javax.swing.table.AbstractTableModel;
 
 /**
- *
+ * Abstract Model to do a join/diff between two tables by joining two columns which correspond to a key.
  * @author JM235353
  */
 public abstract class AbstractJoinDataModel extends AbstractTableModel implements GlobalTableModelInterface  {

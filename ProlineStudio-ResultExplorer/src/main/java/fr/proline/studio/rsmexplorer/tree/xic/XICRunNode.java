@@ -25,7 +25,7 @@ import javax.swing.tree.TreeNode;
 import org.openide.nodes.Sheet;
 
 /**
- *
+ * Tree Node representing a Run
  * @author JM235353
  */
 public class XICRunNode extends AbstractNode {

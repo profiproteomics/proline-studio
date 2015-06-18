@@ -15,7 +15,7 @@ import javax.swing.table.TableCellRenderer;
 
 
 /**
- *
+ * JPM.TODO : rename this class
  * @author JM235353
  */
 public class CompareTableModel extends DecoratedTableModel implements GlobalTableModelInterface {

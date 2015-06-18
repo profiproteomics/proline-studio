@@ -8,7 +8,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 
 /**
- *
+ * Export data to Excell 2003 (xls, not xlsx)
  * @author JM235353
  */
 public class Excel2003Exporter implements ExporterInterface {

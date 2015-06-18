@@ -59,7 +59,7 @@ import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.*;
 
 /**
- * Tree of projects and datasets
+ * Tree of projects and datasets (identification type)
  *
  * @author JM235353
  */

@@ -4,7 +4,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import java.util.Map;
 
 /**
- *
+ * Model used to give mean, variance... used for the histogram display
  * @author JM235353
  */
 public class StatsModel implements CompareDataInterface {

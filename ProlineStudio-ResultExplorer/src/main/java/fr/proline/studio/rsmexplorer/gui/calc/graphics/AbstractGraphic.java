@@ -10,13 +10,13 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
-import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Base class for the definition of a Graphic (scatter, histogram...) with its parameters
+ * in the data mixer
  * @author JM235353
  */
 public abstract class AbstractGraphic implements CheckParameterInterface {

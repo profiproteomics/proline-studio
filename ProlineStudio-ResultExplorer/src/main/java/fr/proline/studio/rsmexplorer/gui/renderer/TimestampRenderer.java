@@ -8,7 +8,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * Renderer for a time stamp
  * @author JM235353
  */
 public class TimestampRenderer implements TableCellRenderer {

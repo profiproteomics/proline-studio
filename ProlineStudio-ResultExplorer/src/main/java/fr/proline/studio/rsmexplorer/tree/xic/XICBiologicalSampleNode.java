@@ -7,7 +7,7 @@ import javax.swing.ImageIcon;
 import org.openide.nodes.Sheet;
 
 /**
- *
+ * Tree Node representing a Biological Sample
  * @author JM235353
  */
 public class XICBiologicalSampleNode extends AbstractNode {

@@ -8,7 +8,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 
 /**
- *
+ * Export data to xlsx
  * @author JM235353
  */
 public class ExcelXMLExporter implements ExporterInterface {

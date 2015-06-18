@@ -13,7 +13,7 @@ import java.util.Map;
 import javax.swing.table.TableCellRenderer;
 
 /**
- *
+ * Model to perform a join between two models (joined thanks to key columns)
  * @author JM235353
  */
 public class JoinDataModel extends AbstractJoinDataModel {

@@ -1,11 +1,10 @@
 package fr.proline.studio.comparedata;
 
 import fr.proline.studio.graphics.PlotInformation;
-import java.awt.Color;
 import java.util.Map;
 
 /**
- *
+ * JPM.TODO : rename this class
  * @author JM235353
  */
 public interface CompareDataInterface {

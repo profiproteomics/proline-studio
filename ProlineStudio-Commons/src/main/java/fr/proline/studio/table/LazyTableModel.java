@@ -1,8 +1,7 @@
 package fr.proline.studio.table;
 
 import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.filter.FilterTableModel;
-import javax.swing.table.TableCellRenderer;
+
 
 
 /**

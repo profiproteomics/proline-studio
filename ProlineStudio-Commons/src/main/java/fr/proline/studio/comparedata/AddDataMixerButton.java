@@ -9,7 +9,7 @@ import javax.swing.JButton;
 import org.openide.windows.WindowManager;
 
 /**
- *
+ * Button to send data to the data mixer
  * @author JM235353
  */
 public abstract class AddDataMixerButton  extends JButton implements ActionListener {

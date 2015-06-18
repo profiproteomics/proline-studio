@@ -703,13 +703,13 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 m_mainActions.add(msDiagReportAction);   
               //
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
-                    GetProjectidAndRsmJMSAction getprojectidandrsmJmsAction = new GetProjectidAndRsmJMSAction();
-                    m_mainActions.add(getprojectidandrsmJmsAction);
-                } else {
-                	GetProjectidAndRsmAction getprojectidandrsmAction = new GetProjectidAndRsmAction();
-                   m_mainActions.add(getprojectidandrsmAction);
-                }
+//                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+//                    GetProjectidAndRsmJMSAction getprojectidandrsmJmsAction = new GetProjectidAndRsmJMSAction();
+//                    m_mainActions.add(getprojectidandrsmJmsAction);
+//                } else {
+//                	GetProjectidAndRsmAction getprojectidandrsmAction = new GetProjectidAndRsmAction();
+//                   m_mainActions.add(getprojectidandrsmAction);
+//                }
 
                 m_mainActions.add(null);  // separator
 

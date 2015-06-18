@@ -148,16 +148,34 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
             p.setDescription(m_description);
             
             if (m_userAccountList != null) {
-                p.getProjectUserAccountMap().clear();
-                m_p.getProjectUserAccountMap().clear();
-
                 int nb = m_userAccountList.size();
+                //p.getProjectUserAccountMap().clear();
+                m_p.getProjectUserAccountMap().clear();
+                // remove members if needed
+                for(ProjectUserAccountMap element : p.getProjectUserAccountMap()){
+                    UserAccount userAccountFromProject = element.getUserAccount();
+                    boolean isInList = false;
+                    for(int i = 0; i < nb; i++) {
+                        UserAccount userAccount = m_userAccountList.get(i);
+                        if(userAccount.getId() == userAccountFromProject.getId()){
+                            isInList = true;
+                            break;
+                        }
+                    }
+                    if(!isInList){
+                        p.removeMember(userAccountFromProject);
+                    }
+                }
+                //add the new members
                 for (int i = 0; i < nb; i++) {
                     UserAccount userAccount = m_userAccountList.get(i);
                     UserAccount userAccountInDB = entityManagerUDS.find(UserAccount.class, userAccount.getId());
-                    p.addMember(userAccountInDB, true); // TODO add write permissions
+                    if (!p.isMemberProject(userAccountInDB)){
+                        p.addMember(userAccountInDB, true); // TODO add write permissions
+                    }
                     m_p.addMember(userAccount, true);// TODO add write permissions
                 }
+                
             }
             entityManagerUDS.merge(p);
             

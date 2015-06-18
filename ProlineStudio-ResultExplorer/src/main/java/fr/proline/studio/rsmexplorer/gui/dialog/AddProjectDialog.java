@@ -100,7 +100,7 @@ public class AddProjectDialog extends DefaultDialog {
                 if ((isCreatorOfTheProject) && (userAccount.getId().getUserAccountId() == mainUserAccount.getId())) {
                     continue;
                 }
-                userAccountListModel.addElement(userAccount);
+                userAccountListModel.addElement(userAccount.getUserAccount());
             }
             
             m_userListScrollPane.setEnabled(isCreatorOfTheProject);

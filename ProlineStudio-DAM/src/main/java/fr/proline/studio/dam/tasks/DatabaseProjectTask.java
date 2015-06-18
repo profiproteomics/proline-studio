@@ -170,7 +170,7 @@ public class DatabaseProjectTask extends AbstractDatabaseTask {
                 for (int i = 0; i < nb; i++) {
                     UserAccount userAccount = m_userAccountList.get(i);
                     UserAccount userAccountInDB = entityManagerUDS.find(UserAccount.class, userAccount.getId());
-                    if (!p.isMemberProject(userAccountInDB)){
+                    if (!p.isProjectMember(userAccountInDB)){
                         p.addMember(userAccountInDB, true); // TODO add write permissions
                     }
                     m_p.addMember(userAccount, true);// TODO add write permissions

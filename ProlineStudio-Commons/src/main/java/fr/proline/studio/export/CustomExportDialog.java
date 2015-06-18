@@ -485,7 +485,12 @@ public class CustomExportDialog extends DefaultDialog {
 				// put id in tooltip in order to find the tab title from the tooltip even if renamed.
 				// TODO: find a better way...
 				m_tabbedPane.setToolTipTextAt(nbCustomTabsAdded  -1, defaultParam.sheets[i].id /*"Right click to Enable/Disable"*/);
-				m_tabbedPane.setEnabledAt(nbCustomTabsAdded  -1, defaultParam.sheets[i].default_displayed); // disable default not saved tab
+				
+				if(param!=null) 
+				{
+					m_tabbedPane.setEnabledAt(nbCustomTabsAdded  -1, false); // disable default not saved tab
+				}
+				
 				panel.setLayout(new BorderLayout(0, 0));
 				// read fields to fill in jtable into this tabbed pane
 				

@@ -58,7 +58,7 @@ public class Main {
          }
 
          // Instantiates a Run Slice Data provider
-         RunSliceDataProvider rsdProv = new RunSliceDataProvider(reader.getRunSliceIterator(1));
+         RunSliceDataProvider rsdProv = new RunSliceDataProvider(reader.getLcMsRunSliceIterator());
 
          // Extract features
          List<Feature> mzDbFts = scala.collection.JavaConversions.seqAsJavaList(extractor.extractFeatures(rsdProv, scala.collection.JavaConversions.asScalaBuffer(pfs), tolPPM));

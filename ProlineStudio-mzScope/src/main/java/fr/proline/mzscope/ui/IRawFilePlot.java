@@ -27,7 +27,8 @@ public interface IRawFilePlot {
    void extractChromatogram(double minMz, double maxMz);
 
    void displayFeature(Feature f);
-   void displayScan(int index);
+   
+   void displayScan(long index);
 
    IRawFile getCurrentRawfile();
 

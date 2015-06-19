@@ -69,4 +69,8 @@ public class ScanUtils {
       }
       return resultIdx;
    }
+   
+   public static boolean isInRange(double m1, double m2, double ppmTol) {
+      return ((1e6 * Math.abs(m1 - m2) / m2) < ppmTol);
+   }
 }

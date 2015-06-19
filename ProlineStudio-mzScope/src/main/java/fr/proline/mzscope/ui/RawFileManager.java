@@ -41,7 +41,7 @@ public class RawFileManager {
             currentFile = new ThreadedMzdbRawFile(file);
             files.put(file.getName(), currentFile);
             logger.info("Rawfile {} added to RawFileManager",file.getAbsolutePath());
-        } else if (file.getAbsolutePath().endsWith(".mzML")) {
+        } else if (file.getAbsolutePath().toLowerCase().endsWith(".mzml")) {
             currentFile = new MzMLRawFile(file);
             files.put(file.getName(), currentFile);
             logger.info("Rawfile {} added to RawFileManager",file.getAbsolutePath());

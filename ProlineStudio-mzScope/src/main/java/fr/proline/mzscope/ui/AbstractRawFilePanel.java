@@ -444,9 +444,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePlo
     }
 
     @Override
-    public void displayScan(int index) {
+    public void displayScan(long index) {
         if ((currentScan == null) || (index != currentScan.getIndex())) {
-            currentScan = getCurrentRawfile().getScan(index);
+            currentScan = getCurrentRawfile().getScan((int)index);
             if (currentScan != null) {
                 currentScanTime = currentScan.getRetentionTime();
                 currentScanMarker.setValue(currentScanTime / 60.0);

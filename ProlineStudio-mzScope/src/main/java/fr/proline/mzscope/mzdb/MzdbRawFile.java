@@ -8,6 +8,7 @@ import fr.profi.mzdb.FeatureDetectorConfig;
 import fr.profi.mzdb.MzDbFeatureDetector;
 import fr.profi.mzdb.MzDbFeatureExtractor;
 import fr.profi.mzdb.MzDbReader;
+import fr.profi.mzdb.algo.IsotopicPatternScorer;
 //import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
 import fr.profi.mzdb.io.reader.RunSliceDataProvider;
@@ -23,7 +24,6 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.ExtractionParams;
 import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.model.IsotopePattern;
 import fr.proline.mzscope.util.ScanUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,7 +35,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -56,7 +55,7 @@ public class MzdbRawFile implements IRawFile {
 
    private final File mzDbFile;
    private MzDbReader reader;
-   private Map<Integer, ScanHeader> scanHeadersById = null;
+   private Map<Long, ScanHeader> scanHeadersById = null;
    private ScanHeader[] ms2ScanHeaders = null;
    private double[] ms2ScanHeaderByMz = null;
 
@@ -92,7 +91,7 @@ public class MzdbRawFile implements IRawFile {
       return mzDbFile.getName();
    }
 
-   private Map<Integer, ScanHeader> getScanHeadersById() {
+   private Map<Long, ScanHeader> getScanHeadersById() {
       try {
          if (scanHeadersById == null) {
             long start = System.currentTimeMillis();
@@ -139,7 +138,7 @@ public class MzdbRawFile implements IRawFile {
 
          @Override
          public int compare(ScanHeader sh1, ScanHeader sh2) {
-            return sh1.getScanId() - sh2.getScanId();
+            return (int) (sh1.getScanId() - sh2.getScanId());
          }
 
       });
@@ -215,18 +214,18 @@ public class MzdbRawFile implements IRawFile {
       List<Double> yAxisData = new ArrayList<Double>(peaks.length);
       int previousScanId = 1;
       for (Peak peak : peaks) {
-         int scanId = peak.getLcContext().getScanId();
+         int scanId = (int)peak.getLcContext().getScanId();
          if (previousScanId != getPreviousScanId(scanId, 1)) {
             // there is a gap between peaks, add 0 values after the previous peak and before this one
-            xAxisData.add(getScanHeadersById().get(getNextScanId(previousScanId, 1)).getElutionTime() / 60.0);
+            xAxisData.add(getScanHeadersById().get((long)getNextScanId(previousScanId, 1)).getElutionTime() / 60.0);
             yAxisData.add(0.0);
-            xAxisData.add(getScanHeadersById().get(getPreviousScanId(scanId, 1)).getElutionTime() / 60.0);
+            xAxisData.add(getScanHeadersById().get((long)getPreviousScanId(scanId, 1)).getElutionTime() / 60.0);
             yAxisData.add(0.0);
          }
          double rt = peak.getLcContext().getElutionTime() / 60.0;
          xAxisData.add(rt);
          yAxisData.add((double) peak.getIntensity());
-         previousScanId = peak.getLcContext().getScanId();
+         previousScanId = (int)peak.getLcContext().getScanId();
       }
 
       chromatogram = new Chromatogram();
@@ -278,55 +277,7 @@ public class MzdbRawFile implements IRawFile {
             }
          });
          logger.info("Peakels detected : "+peakels.length);
-         boolean[] assigned = new boolean[peakels.length];
-         Arrays.fill(assigned, false);
-         Pair<Double, Integer> peakelIndexesByMz[] = new Pair[peakels.length];
-         for (int k = 0; k < peakels.length; k++) {
-            peakelIndexesByMz[k] = new ImmutablePair<>(peakels[k].getMz(), k);
-         }
-         
-         Arrays.sort(peakelIndexesByMz, new Comparator<Pair<Double, Integer>>() {
-            @Override
-            public int compare(Pair<Double, Integer> p1, Pair<Double, Integer> p2) {
-               return Double.compare(p1.getLeft(), p2.getLeft());
-            }
-         });
-         
-         
-         for (int k = 0; k < peakels.length; k++) {
-            if ((k % 10000) == 0) {
-               logger.info("processing peakel "+k);
-            }
-            if (!assigned[k]) {
-               ScanSlice[] slices = reader.getScanSlices(peakels[k].getApexMz()-5.0, peakels[k].getApexMz()+5.0, peakels[k].getApexElutionTime()-0.1, peakels[k].getApexElutionTime()+0.1, 1);
-               int i = 0; 
-               while((i < slices.length) && (slices[i].getHeader().getScanId() != peakels[k].getApexScanId())) {
-                i++;
-               }
-               ScanData data = slices[i].getData();
-               //SortedMap putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
-               TreeMap<Double, TheoreticalIsotopePattern> putativePatterns = IsotopePattern.getOrderedIPHypothesis(data, peakels[k].getMz());
-               TheoreticalIsotopePattern bestPattern = (TheoreticalIsotopePattern) putativePatterns.get(putativePatterns.firstKey());
-               List<Peakel> l = new ArrayList<>(bestPattern.isotopeCount()+1);
-               for (Tuple2 t : bestPattern.mzAbundancePairs()) {
-                  int idx = findPeakIndex(peakels, peakelIndexesByMz, (double)t._1, peakels[k], mzTolPPM);
-                  if (idx != -1) {
-                     assigned[idx] = true;
-                     l.add(peakels[idx]);
-                  } //else if ( ((double)t._1 > min) && ((double)t._1 < max)) {
-//                     logger.info("Isotope at "+(double)t._1+" not found");
-//                  }
-               }
-               if (l.isEmpty()) {
-                  logger.warn("Strange situation : peakel not found within isotopic pattern .... "+peakels[k].getMz());
-                  l.add(peakels[k]);
-               }
-//               logger.info("Creates feature with "+l.size()+" peakels at mz="+l.get(0).getMz()+ " from peakel "+peakels[k].getMz()+ " at "+peakels[k].getApexElutionTime()/60.0);
-               Feature feature = new Feature(l.get(0).getMz(), bestPattern.charge(), JavaConverters.asScalaBufferConverter(l).asScala(), true);
-               result.add(feature);
-            }
-         }
-         
+         result = deisotopePeakels(peakels, mzTolPPM);
       } catch (SQLiteException | StreamCorruptedException ex) {
          logger.error("Error while getting LcMs RunSlice Iterator: " + ex);
       }
@@ -336,6 +287,68 @@ public class MzdbRawFile implements IRawFile {
 
    }
 
+   private List<Feature> deisotopePeakels(Peakel[] peakels, float mzTolPPM) throws StreamCorruptedException, SQLiteException {
+      List<Feature> result = new ArrayList<>();
+      boolean[] assigned = new boolean[peakels.length];
+      Arrays.fill(assigned, false);
+      Pair<Double, Integer> peakelIndexesByMz[] = new Pair[peakels.length];
+      for (int k = 0; k < peakels.length; k++) {
+         peakelIndexesByMz[k] = new ImmutablePair<>(peakels[k].getMz(), k);
+      }
+      
+      Arrays.sort(peakelIndexesByMz, new Comparator<Pair<Double, Integer>>() {
+         @Override
+         public int compare(Pair<Double, Integer> p1, Pair<Double, Integer> p2) {
+            return Double.compare(p1.getLeft(), p2.getLeft());
+         }
+      });
+      
+      
+      for (int k = 0; k < peakels.length; k++) {
+         if ((k % 10000) == 0) {
+            logger.info("processing peakel "+k);
+         }
+         if (!assigned[k]) {
+            ScanSlice[] slices = reader.getMsScanSlices(peakels[k].getApexMz()-5.0, peakels[k].getApexMz()+5.0, peakels[k].getApexElutionTime()-0.1, peakels[k].getApexElutionTime()+0.1);
+            int i = 0;
+            while((i < slices.length) && (slices[i].getHeader().getScanId() != peakels[k].getApexScanId())) {
+               i++;
+            }
+            ScanData data = slices[i].getData();
+            Tuple2<Object,TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
+            //TreeMap<Double, TheoreticalIsotopePattern> putativePatterns = IsotopePattern.getOrderedIPHypothesis(data, peakels[k].getMz());
+            TheoreticalIsotopePattern bestPattern = putativePatterns[0]._2;
+            List<Peakel> l = new ArrayList<>(bestPattern.isotopeCount()+1);
+            for (Tuple2 t : bestPattern.mzAbundancePairs()) {
+               int idx = findPeakIndex(peakels, peakelIndexesByMz, (double)t._1, peakels[k], mzTolPPM);
+               if (idx != -1) {
+                  assigned[idx] = true;
+                  l.add(peakels[idx]);
+               } //else if ( ((double)t._1 > min) && ((double)t._1 < max)) {
+//                     logger.info("Isotope at "+(double)t._1+" not found");
+//                  }
+            }
+            if (l.isEmpty()) {
+               logger.warn("Strange situation : peakel not found within isotopic pattern .... "+peakels[k].getMz());
+               l.add(peakels[k]);
+            }
+//               logger.info("Creates feature with "+l.size()+" peakels at mz="+l.get(0).getMz()+ " from peakel "+peakels[k].getMz()+ " at "+peakels[k].getApexElutionTime()/60.0);
+            Feature feature = new Feature(l.get(0).getMz(), bestPattern.charge(), JavaConverters.asScalaBufferConverter(l).asScala(), true);
+            result.add(feature);
+         }
+      }
+      
+     
+
+      logger.info("Features detected : "+result.size());
+      return result;
+   }
+
+   private List<Feature> deisotopePeakelsV2(Peakel[] peakels, float mzTolPPM) {
+      MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, new FeatureDetectorConfig(1, mzTolPPM, 3));
+      Feature[] result = detector._deisotopePeakelsV2(peakels);
+      return Arrays.asList(result);
+   }
    private List<Feature> detectPeakels(float mzTolPPM, double minMz, double maxMz) {
       List<Feature> result = new ArrayList<>();
       // Instantiates a Run Slice Data provider
@@ -400,7 +413,7 @@ public class MzdbRawFile implements IRawFile {
       List<Feature> result = null;
       try {
          // Instantiates a Run Slice Data provider
-         RunSliceDataProvider rsdProv = new RunSliceDataProvider(reader.getRunSliceIterator(1)); // TODO getLcmsRunSliceIte...
+         RunSliceDataProvider rsdProv = new RunSliceDataProvider(reader.getLcMsRunSliceIterator());
          FeatureExtractorConfig extractorConfig = new FeatureExtractorConfig(tolPPM, 5, 1, 3, 1200.0f, 0.05f, Option.empty(), 90, Option.empty());
          MzDbFeatureExtractor extractor = new MzDbFeatureExtractor(reader, 5, 5, extractorConfig);
          // Extract features
@@ -498,7 +511,7 @@ public class MzdbRawFile implements IRawFile {
    @Override
    public int getScanId(double retentionTime) {
       try {
-         return reader.getScanHeaderForTime((float) retentionTime, 1).getScanId();
+         return (int)reader.getScanHeaderForTime((float) retentionTime, 1).getScanId();
       } catch (Exception ex) {
          logger.error("enable to retrieve Scan Id", ex);
       }
@@ -517,15 +530,15 @@ public class MzdbRawFile implements IRawFile {
 
    private int getNextSiblingScanId(int scanIndex, int msLevel, int way) {
       try {
-         ScanHeader header = getScanHeadersById().get(scanIndex);
+         ScanHeader header = getScanHeadersById().get((long)scanIndex);
          int maxScan = reader.getScansCount();
-         int k = header.getScanId() + way;
+         long k = header.getScanId() + way;
          for (; (k > 0) && (k < maxScan); k += way) {
             if (getScanHeadersById().get(k).getMsLevel() == msLevel) {
                break;
             }
          }
-         return k;
+         return (int)k;
       } catch (SQLiteException e) {
          logger.error("Error while reading scansCount", e);
       }

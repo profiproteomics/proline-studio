@@ -1,6 +1,7 @@
 package fr.proline.mzscope.ui;
 
 import fr.profi.ms.model.TheoreticalIsotopePattern;
+import fr.profi.mzdb.algo.IsotopicPatternScorer;
 //import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.proline.mzscope.model.IsotopePattern;
 import fr.proline.mzscope.model.MzScopePreferences;
@@ -28,14 +29,15 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.TreeMap;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
+import scala.collection.immutable.SortedMap;
 
 /**
  * contains the scan panel
@@ -106,28 +108,31 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
    private void displayIsotopicPatterns() {
       float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
-
-//      SortedMap putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(currentScan.getScanData(), positionMarker.getValue(), ppmTol);
-//      
-//      logger.info("scanId=" + currentScan.getIndex() + ", mz = " + positionMarker.getValue() + ", ppm = " + ppmTol);
-//      scala.collection.Iterator it = putativePatterns.keySet().iterator();
-//      while (it.hasNext()) {
-//         Object key = it.next();
-//         TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns.get(key).get();
-//         logger.info("Pattern : " + key + " " + pattern.charge() + " mz = " + pattern.monoMz());
-//      }      
-
-//      logger.info("Local estimation : ");
-      TreeMap<Double, TheoreticalIsotopePattern> putativePatterns2 = IsotopePattern.getOrderedIPHypothesis(currentScan.getScanData(), positionMarker.getValue());
+      
+      int nearestPeakIdx =  ScanUtils.getNearestPeakIndex(currentScan.getScanData().getMzList(), positionMarker.getValue());
+      if (ScanUtils.isInRange(currentScan.getScanData().getMzList()[nearestPeakIdx], positionMarker.getValue(), ppmTol)) {
+         ppmTol = (float)(1e6*currentScan.getScanData().getLeftHwhmList()[nearestPeakIdx]/currentScan.getScanData().getMzList()[nearestPeakIdx]);
+      }
+      Tuple2<Object,TheoreticalIsotopePattern>[]  putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(currentScan.getScanData(), positionMarker.getValue(), ppmTol);
+      
       logger.info("scanId=" + currentScan.getIndex() + ", mz = " + positionMarker.getValue() + ", ppm = " + ppmTol);
-      Iterator itj = putativePatterns2.keySet().iterator();
-      while (itj.hasNext()) {
-         Object key = itj.next();
-         TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns2.get(key);
-         logger.info("Pattern : " + key + " " + pattern.charge() + " mz = " + pattern.monoMz());
+      for (Tuple2<Object,TheoreticalIsotopePattern> t : putativePatterns) {
+         Double score = ((Double)t._1);
+         TheoreticalIsotopePattern pattern = t._2;
+         logger.info("mzdbProcessing Pattern : " + score + " " + pattern.charge() + " mz = " + pattern.monoMz());
       }      
 
-      TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns2.get(putativePatterns2.firstKey());
+//      logger.info("Local estimation : ");
+//      List<Pair<Double, TheoreticalIsotopePattern>> putativePatterns2 = IsotopePattern.getOrderedIPHypothesis(currentScan.getScanData(), positionMarker.getValue());
+//      logger.info("scanId=" + currentScan.getIndex() + ", mz = " + positionMarker.getValue() + ", ppm = " + ppmTol);
+//      Iterator<Pair<Double, TheoreticalIsotopePattern>> itj = putativePatterns2.iterator();
+//      while (itj.hasNext()) {
+//         Pair<Double, TheoreticalIsotopePattern> pair = itj.next();
+//         TheoreticalIsotopePattern pattern = pair.getRight();
+//         logger.info("Pattern : " + pair.getLeft() + " " + pattern.charge() + " mz = " + pattern.monoMz());
+//      }      
+
+      TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns[0]._2;
       int refIdx = 0;
       int idx = ScanUtils.getNearestPeakIndex(currentScan.getScanData().getMzList(), positionMarker.getValue());
       for (Tuple2 t : pattern.mzAbundancePairs()) {
@@ -150,12 +155,6 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
                scanPlot.addMarker(new PointMarker(spectrumPlotPanel, currentScan.getScanData().getMzList()[peakIdx], currentScan.getScanData().getIntensityList()[peakIdx], CyclicColorPalette.getColor(5)));
             }
          }
-//         pattern = IsotopePatternEstimator.getTheoreticalPattern(pattern.monoMz(), pattern.charge());
-//         for (Tuple2 t : pattern.mzAbundancePairs()) {
-//            Double mz = (Double) t._1;
-//            Float ab = (Float) t._2;
-//            scanPlot.addMarker(new PointMarker(spectrumPlotPanel, mz, ab * abundance / normAbundance, CyclicColorPalette.getColor(3)));
-//         }
       }
       spectrumPlotPanel.repaintUpdateDoubleBuffer();
    }

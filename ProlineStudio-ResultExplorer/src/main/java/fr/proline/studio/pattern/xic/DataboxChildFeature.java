@@ -2,7 +2,7 @@ package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.Peakel;
-import fr.proline.core.orm.lcms.Peakel.Peak;
+import fr.proline.core.orm.lcms.Peak;
 import fr.proline.core.orm.msi.MasterQuantPeptideIon;
 
 import fr.proline.studio.comparedata.CompareDataInterface;

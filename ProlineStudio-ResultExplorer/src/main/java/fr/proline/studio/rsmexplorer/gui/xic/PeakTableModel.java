@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
 import fr.proline.core.orm.lcms.Peakel;
-import fr.proline.core.orm.lcms.Peakel.Peak;
+import fr.proline.core.orm.lcms.Peak;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;

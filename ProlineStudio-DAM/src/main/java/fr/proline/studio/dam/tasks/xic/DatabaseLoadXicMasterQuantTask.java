@@ -433,8 +433,7 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         queryMzdb.setParameter("rsId", rsId);
                         String mzdbFile = "";
                         try{
-                            Object[] res = (Object[]) queryMzdb.getSingleResult();
-                            mzdbFile = (String)res[0];
+                            mzdbFile = (String) queryMzdb.getSingleResult();
                         }catch( Exception e) {
                             m_logger.error("Error while retrieving mzdb file "+e);
                         }

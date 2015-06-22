@@ -46,8 +46,10 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     }
     
     /**
-     * Load Run Id for specified RSMs
-     * @return 
+     * Load Run Id for specified RSMs 
+     * @param projectId
+     * @param rsmId
+     * @param runIds
      */
     public void initLoadRunIdForRsm(long projectId, Long rsmId, ArrayList<Long> runIds){
         setTaskInfo(new TaskInfo(" Load RunId for Identification Summary with id "+rsmId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
@@ -60,7 +62,8 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     /**
      * Search Raw Files
      *
-     * @return
+     * @param searchString
+     * @param rawfileFounds
      */
     public void initSearchRawFile(String searchString, ArrayList<RawFile> rawfileFounds) {
         setTaskInfo(new TaskInfo(" Search Raw File " + searchString, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW, true /* hide this task to user */));
@@ -80,6 +83,9 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
     /**
      * Load PeakList Path for Rset
      *
+     * @param projectId
+     * @param rsetId
+     * @param resultPath
      */
     public void initLoadPeakListPathForRset(long projectId, Long rsetId, String[] resultPath) {
         setTaskInfo(new TaskInfo(" Load PeakList Path for Search Result with id " + rsetId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW, true /* hide this task to user */));
@@ -92,7 +98,9 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
      /**
      * Register map between IdentificationDataset & Run
      *
-     * @return
+     * @param datasetId
+     * @param rawfile
+     * @param run
      */
     public void initRegisterIdentificationDatasetRun(long datasetId, RawFile rawfile, Run run) {
         setTaskInfo(new TaskInfo(" Register Run for Dataset with id "+datasetId, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
@@ -134,7 +142,7 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
             runIdQuery.setParameter("rsmId", m_rsmId);
             List<IdentificationDataset> idfDs = runIdQuery.getResultList();
 
-            if(idfDs != null && idfDs.size()>0){
+            if(idfDs != null && idfDs.size()>0 && idfDs.get(0).getRun() != null){
                 m_runIds.add(idfDs.get(0).getRun().getId());
             }
             
@@ -281,10 +289,11 @@ public class DatabaseRunsTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
             IdentificationDataset idf = entityManagerUDS.find(IdentificationDataset.class, m_datasetId);
-            RawFile mergedRaw = entityManagerUDS.find(RawFile.class, m_rawfile.getRawFileName());
+            RawFile mergedRaw = entityManagerUDS.find(RawFile.class, m_rawfile.getIdentifier());
             Run mergedRun = entityManagerUDS.find(Run.class, m_run.getId());
             idf.setRawFile(mergedRaw);
             idf.setRun(mergedRun);
+            entityManagerUDS.merge(idf);
             entityManagerUDS.getTransaction().commit();
         } catch (Exception e) {
             m_logger.error(getClass().getSimpleName() + " failed", e);

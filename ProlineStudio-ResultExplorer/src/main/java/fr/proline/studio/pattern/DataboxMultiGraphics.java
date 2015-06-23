@@ -17,7 +17,7 @@ public class DataboxMultiGraphics extends AbstractDataBox  {
     private boolean m_canChooseColor = false;
     
     public DataboxMultiGraphics() {
-       this(false, true);
+       this(false, false);
     }
     
     public DataboxMultiGraphics(boolean defaultLocked, boolean canChooseColor) {

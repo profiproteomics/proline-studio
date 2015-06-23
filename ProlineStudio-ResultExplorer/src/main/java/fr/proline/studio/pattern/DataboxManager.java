@@ -29,7 +29,7 @@ public class DataboxManager {
                                                  new DataBoxTaskDescription()/*, new DataBoxStatisticsFrequencyResponse()*/, new DataBoxRsetPeptideFragmentation(), 
                                                  new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(), 
                                                  new DataboxGraphics(), new DataboxPSMOfMasterQuantPeptide() , 
-                                                 new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature()   };
+                                                 new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(), new DataboxMultiGraphics(false, false)   };
     
     private DataboxManager() {
     }

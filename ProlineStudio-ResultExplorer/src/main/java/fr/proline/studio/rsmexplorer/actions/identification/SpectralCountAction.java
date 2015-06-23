@@ -1,26 +1,31 @@
 package fr.proline.studio.rsmexplorer.actions.identification;
 
+import fr.proline.core.orm.uds.Aggregation;
 import fr.proline.core.orm.uds.Dataset;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.core.orm.uds.dto.DDataset;
+import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
+import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.task.AbstractServiceCallback;
+import fr.proline.studio.dpm.task.SpectralCountTask;
 import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.pattern.WindowBox;
-import fr.proline.studio.pattern.WindowBoxFactory;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.spectralcount.SpectralCountDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JOptionPane;
+import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
@@ -41,7 +46,7 @@ public class SpectralCountAction extends AbstractRSMAction {
     
     public SpectralCountAction() {
         super(NbBundle.getMessage(SpectralCountAction.class, "CTL_CompareWithSCAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
-    }
+    } 
     
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, final int x, final int y) { 
@@ -130,13 +135,112 @@ public class SpectralCountAction extends AbstractRSMAction {
                 
                 m_logger.debug(" Will Compute SC on "+(datasetList.size())+" RSMs : "+datasetList);
                 
-                WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox((String)params.get(DS_NAME_PROPERTIES), (String)params.get(DS_NAME_PROPERTIES)+" WSC", false) ;
+              /*  WindowBox wbox = WindowBoxFactory.getRsmWSCWindowBox((String)params.get(DS_NAME_PROPERTIES), (String)params.get(DS_NAME_PROPERTIES)+" WSC", false) ;
                 wbox.setEntryData(refDatasetNode.getDataset().getProject().getId(), params);
 
                 // open a window to display the window box
                 DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
                 win.open();
-                win.requestActive(); 
+                win.requestActive(); */
+                
+                // Used in acse of computing SC
+                final Long[] _quantiDatasetId = new Long[1];
+                QuantitationTree tree = QuantitationTree.getCurrentTree();
+                final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                final DataSetNode[] _quantitationNode = new DataSetNode[1];
+
+                // CallBack for SC  Service
+                AbstractServiceCallback scCallback = new AbstractServiceCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success) {
+                        if (success) {
+                            m_logger.debug(" SC SUCCESS : " + _quantiDatasetId[0]);
+                            final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
+
+                            AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
+
+                                @Override
+                                public boolean mustBeCalledInAWT() {
+                                    return true;
+                                }
+
+                                @Override
+                                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                    if (success) {
+                                        final DDataset ds = readDatasetList.get(0);
+                                        AbstractDatabaseCallback loadQCallback = new AbstractDatabaseCallback() {
+                                            @Override
+                                            public boolean mustBeCalledInAWT() {
+                                                return true;
+                                            }
+
+                                            @Override
+                                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                                ((DataSetData) _quantitationNode[0].getData()).setDataset(ds);
+                                                _quantitationNode[0].setIsChanging(false);
+                                                treeModel.nodeChanged(_quantitationNode[0]);
+                                            }
+                                        };
+                                        DatabaseDataSetTask loadQTask = new DatabaseDataSetTask(loadQCallback);
+                                        loadQTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), ds);
+                                        AccessDatabaseThread.getAccessDatabaseThread().addTask(loadQTask);
+                                    } else {
+                                        treeModel.removeNodeFromParent(_quantitationNode[0]);
+                                    }
+                            }
+                        };
+
+                        DatabaseDataSetTask task = new DatabaseDataSetTask(readDatasetCallback);
+                        task.initLoadDataset(_quantiDatasetId[0], readDatasetList);
+                        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+                    } else {
+                        m_logger.debug(" SC ERROR ");
+                        treeModel.removeNodeFromParent(_quantitationNode[0]);
+                    }
+                }
+            };
+
+                if (!Map.class.isAssignableFrom(params.getClass())) {
+                    throw new IllegalArgumentException("Specified parameter (" + params + ") should be a Map.");
+                }
+
+                ArrayList<DDataset> datasetArray = (ArrayList) ((Map) params).get(SpectralCountAction.DS_LIST_PROPERTIES);
+                DDataset refDataset = datasetArray.get(0);
+                int nb = datasetArray.size() - 1;
+                ArrayList<DDataset> datasetRsms = new ArrayList<>(nb);
+                for (int i = 1; i <= nb; i++) {
+                    datasetRsms.add(datasetArray.get(i));
+                }
+
+                String qttDSName = (String) ((Map) params).get(SpectralCountAction.DS_NAME_PROPERTIES);
+                String qttDSDescr = (String) ((Map) params).get(SpectralCountAction.DS_DESCRIPTION_PROPERTIES);
+                ArrayList<DDataset> datasetWeightRsms = (ArrayList) ((Map) params).get(SpectralCountAction.DS_WEIGHT_LIST_PROPERTIES);
+                String[] _spCountJSON = new String[1];
+                SpectralCountTask task = new SpectralCountTask(scCallback,  refDatasetNode.getDataset(), datasetRsms, datasetWeightRsms, qttDSName, qttDSDescr, _quantiDatasetId, _spCountJSON);
+            
+                        
+                // add node for the quantitation dataset which will be created
+                DataSetData quantitationData = new DataSetData(qttDSName, Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION );
+                
+                final DataSetNode quantitationNode = new DataSetNode(quantitationData);
+                _quantitationNode[0] = quantitationNode;
+                quantitationNode.setIsChanging(true);
+            
+                AbstractNode rootNode = (AbstractNode) treeModel.getRoot();
+                // before Trash
+                treeModel.insertNodeInto(quantitationNode, rootNode, rootNode.getChildCount()-1);
+
+                // expand the parent node to display its children
+                tree.expandNodeIfNeeded(rootNode);
+                
+                AccessServiceThread.getAccessServiceThread().addTask(task);
                 
             }
         };

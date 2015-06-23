@@ -80,8 +80,8 @@ public class DisplayXICProteinSetAction extends AbstractRSMAction {
         DataSetNode datasetNode = (DataSetNode) node;
 
         // must be a quantitation XIC
-        //if (!datasetNode.isQuantXIC() && !datasetNode.isQuantSC()) {
-        if (!datasetNode.isQuantXIC() ) {
+        if (!datasetNode.isQuantXIC() && !datasetNode.isQuantSC()) {
+        //if (!datasetNode.isQuantXIC() ) {
             setEnabled(false);
             return;
         }

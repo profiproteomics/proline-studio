@@ -262,10 +262,11 @@ public class CreateXICDialog extends DefaultDialog {
                                     } 
                                 }*/
                                 //  then map IdentificationDataset to RawFile and Run
-                                DatabaseRunsTask registerRunIdsTask = new DatabaseRunsTask(null);
-                                registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData)bioSplAnalysisNode.getData()).getDataset().getId(), runData.getRawFileSouce().getSelectedRawFile(), runData.getRun());
-                                registerRunIdsTask.fetchData();
-
+                                if (((DataSetData)bioSplAnalysisNode.getData()).getDataset().getId() > -1){ // case dsId = -1 when coming from an existing xic, no need to register again the run_identification
+                                    DatabaseRunsTask registerRunIdsTask = new DatabaseRunsTask(null);
+                                    registerRunIdsTask.initRegisterIdentificationDatasetRun(((DataSetData)bioSplAnalysisNode.getData()).getDataset().getId(), runData.getRawFileSouce().getSelectedRawFile(), runData.getRun());
+                                    registerRunIdsTask.fetchData();
+                                }
                             }
                         }
                     }

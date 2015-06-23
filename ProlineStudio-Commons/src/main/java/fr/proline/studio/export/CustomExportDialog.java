@@ -405,7 +405,7 @@ public class CustomExportDialog extends DefaultDialog {
 		
 				            }, 
 				            new String[] {
-									"Internal field name", "Displayed field name (editable)", "Shown"
+									"Internal field name", "Displayed field name (editable)", "Export"
 								}
 				        ) {
 				            Class[] types = new Class [] {
@@ -525,7 +525,7 @@ public class CustomExportDialog extends DefaultDialog {
 	
 			            }, 
 			            new String[] {
-								"Internal field name", "Displayed field name (editable)", "Shown"
+								"Internal field name", "Displayed field name (editable)", "Export"
 							}
 			        ) {
 			            Class[] types = new Class [] {
@@ -637,7 +637,7 @@ public class CustomExportDialog extends DefaultDialog {
         table.setModel(new DefaultTableModel(
                 new Object[][]{},
                 new String[]{
-                    "Internal field name", "Displayed field name", "Shown"
+                    "Internal field name", "Displayed field name", "Export"
                 }
         ) {
             Class[] columnTypes = new Class[]{

@@ -486,6 +486,7 @@ public class CustomExportDialog extends DefaultDialog {
 				// TODO: find a better way...
 				m_tabbedPane.setToolTipTextAt(nbCustomTabsAdded  -1, defaultParam.sheets[i].id /*"Right click to Enable/Disable"*/);
 				
+				m_tabbedPane.setEnabledAt(nbCustomTabsAdded  -1, defaultParam.sheets[i].default_displayed); // disable default not saved tab
 				if(param!=null) 
 				{
 					m_tabbedPane.setEnabledAt(nbCustomTabsAdded  -1, false); // disable default not saved tab

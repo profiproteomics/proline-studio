@@ -42,6 +42,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
     private JPopupMenu m_rootPopup;
     private ArrayList<AbstractRSMAction> m_rootActions;
     private JPopupMenu m_mainPopup;
+    private JPopupMenu m_multiPopup;
+    private ArrayList<AbstractRSMAction> m_multiActions;
     private ArrayList<AbstractRSMAction> m_mainActions;
     private JPopupMenu m_trashPopup;
     private ArrayList<AbstractRSMAction> m_trashActions;
@@ -139,36 +141,36 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         ArrayList<AbstractRSMAction> actions;
 
         if ((nbNodes > 1) ){
-            if (m_mainPopup == null) {
+            if (m_multiPopup == null) {
                 // create the actions
-                m_mainActions = new ArrayList<>(3);  // <--- get in sync
+                m_multiActions = new ArrayList<>(3);  // <--- get in sync
                 
                 PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                m_mainActions.add(propertiesAction);
+                m_multiActions.add(propertiesAction);
                 
-                m_mainActions.add(null);  // separator
+                m_multiActions.add(null);  // separator
                 
                 if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
                     ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                    m_mainActions.add(exportDatasetAction);
+                    m_multiActions.add(exportDatasetAction);
                 }else{
                     ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                    m_mainActions.add(exportDatasetAction);
+                    m_multiActions.add(exportDatasetAction);
                 }       
                 // add actions to popup
             }
-            m_mainPopup = new JPopupMenu();
-                for (int i = 0; i < m_mainActions.size(); i++) {
-                    AbstractRSMAction action = m_mainActions.get(i);
+            m_multiPopup = new JPopupMenu();
+                for (int i = 0; i < m_multiActions.size(); i++) {
+                    AbstractRSMAction action = m_multiActions.get(i);
                     if (action == null) {
-                        m_mainPopup.addSeparator();
+                        m_multiPopup.addSeparator();
                     } else {
-                        m_mainPopup.add(action.getPopupPresenter());
+                        m_multiPopup.add(action.getPopupPresenter());
                     }
                 }
-            popup = m_mainPopup;
-            actions = m_mainActions;
-        }
+            popup = m_multiPopup;
+            actions = m_multiActions;
+        }else
         
         if (isRootPopup) {
             if (m_rootPopup == null) {

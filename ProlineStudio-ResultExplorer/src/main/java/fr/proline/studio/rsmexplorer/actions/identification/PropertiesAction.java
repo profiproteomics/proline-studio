@@ -104,6 +104,12 @@ public class PropertiesAction extends AbstractRSMAction {
                 return;
             }
             
+            // one can be the trash
+            if(((DataSetNode) node).isTrash()){
+                setEnabled(false);
+                return;
+            }
+            
             if ((type==AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) && (type == AbstractNode.NodeTypes.DATA_SET)) {
                 DataSetNode datasetNode = (DataSetNode) node;
                 if (!datasetNode.hasResultSet() && !datasetNode.hasResultSummary()) {

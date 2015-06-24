@@ -296,6 +296,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
     
     public void setData(Long taskId,  List<Feature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak, boolean finished) {
         ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).setData(taskId,  features, quantChannelInfo, featureHasPeak);
+        m_featureTable.setColumnControlVisible(((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).getColumnCount() < XicProteinSetPanel.NB_MAX_COLUMN_CONTROL);     
         m_titleLabel.setText(TABLE_TITLE +" ("+features.size()+")");
         // select the first row
         if ((features.size() > 0)) {

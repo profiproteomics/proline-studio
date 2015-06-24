@@ -77,6 +77,7 @@ import org.openide.windows.WindowManager;
  */
 public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
+    public final static int NB_MAX_COLUMN_CONTROL = 20;
     private AbstractDataBox m_dataBox;
 
     private JScrollPane m_proteinSetScrollPane;
@@ -256,7 +257,6 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         
         m_quantProteinSetTable = new QuantProteinSetTable();
         m_quantProteinSetTable.setModel(new CompoundTableModel(new QuantProteinSetTableModel((LazyTable)m_quantProteinSetTable), true));
-        
         // hide the id column
         m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
         
@@ -284,7 +284,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         m_quantChannels = quantChannels;
         m_isXICMode = isXICMode;
         ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).setData(taskId, quantChannels, proteinSets, isXICMode);
-
+        m_quantProteinSetTable.setColumnControlVisible(((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getColumnCount() < NB_MAX_COLUMN_CONTROL);
         m_titleLabel.setText(TABLE_TITLE +" ("+proteinSets.size()+")");
        // select the first row
         if ((proteinSets != null) && (proteinSets.size() > 0)) {

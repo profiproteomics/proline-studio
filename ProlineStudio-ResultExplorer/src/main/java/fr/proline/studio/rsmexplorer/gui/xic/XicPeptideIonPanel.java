@@ -254,7 +254,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         m_quantChannels = quantChannels;
         m_isXICMode = isXICMode;
        ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptideIons, m_isXICMode);
-
+        m_quantPeptideIonTable.setColumnControlVisible(((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).getColumnCount() < XicProteinSetPanel.NB_MAX_COLUMN_CONTROL);     
         m_titleLabel.setText(TABLE_TITLE +" ("+peptideIons.size()+")");
         // select the first row
         if ((peptideIons != null) && (peptideIons.size() > 0)) {

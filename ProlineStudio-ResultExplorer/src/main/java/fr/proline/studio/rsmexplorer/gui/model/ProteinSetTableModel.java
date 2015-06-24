@@ -38,7 +38,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     public static final int COLTYPE_SPECTRAL_COUNT = 6;
     public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 7;
     public static final int COLTYPE_UNIQUE_SEQUENCES_COUNT = 8;
-    private static final String[] m_columnNames = {"Id", "Protein Set", "Description", "Score", "Proteins", "Peptides", "Peptide Match Count", "Specific Peptide Match Count", "Unique Seq. Count"};
+    private static final String[] m_columnNames = {"Id", "Protein Set", "Description", "Score", "Proteins", "Peptides", "Peptide Match Count", "Specific Peptide Match Count", "Sequence Count"};
     
     private DProteinSet[] m_proteinSets = null;
     
@@ -230,7 +230,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                 } else {
                    Integer value = -1;  // pas tres propre mais NaN n'existe pas pour les Integer
                    try { 
-                        value = ((Integer)proteinMatch.getPeptideSet(rsmId).getSerializedPropertiesAsMap().get("unique_sequence_count"));
+                        value = ((Integer)proteinMatch.getPeptideSet(rsmId).getSequenceCount());
                     } catch (Exception e) { }
                    
                     lazyData.setData( value );

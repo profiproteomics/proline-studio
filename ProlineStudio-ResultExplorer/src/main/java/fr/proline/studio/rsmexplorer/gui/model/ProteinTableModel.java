@@ -34,7 +34,7 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
         SAMESET_SUBSET("Sameset / Subset", Sameset.class, 3),
         PROTEIN_SCORE("Score", Float.class, 4),
         PROTEIN_PEPTIDES_COUNT("Peptides", Integer.class, 5),
-        PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT("Unique Seq.", Integer.class, 6),
+        PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT("Sequence Count", Integer.class, 6),
         PROTEIN_MASS("Mass", Float.class, 7);
         
         String m_name; 
@@ -146,7 +146,7 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
                 return proteinMatch.getPeptideSet(m_rsmId).getPeptideCount();
             case PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT: 
                 try { 
-                    return ((Integer)proteinMatch.getPeptideSet(m_rsmId).getSerializedPropertiesAsMap().get("unique_sequence_count"));
+                    return ((Integer)proteinMatch.getPeptideSet(m_rsmId).getSequenceCount());
                 } catch (Exception e) { return null;}
             case PROTEIN_MASS:
                 DBioSequence bioSequence = proteinMatch.getDBioSequence();

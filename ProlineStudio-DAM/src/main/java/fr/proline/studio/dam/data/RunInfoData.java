@@ -181,7 +181,15 @@ public class RunInfoData extends AbstractData {
             if ((m_selectedRawFile == null) && (m_rawFileOnDisk != null)) {
                 RawFile rawFile = new RawFile();
                 rawFile.setRawFileDirectory(m_rawFileOnDisk.getPath());
-                rawFile.setRawFileName(m_rawFileOnDisk.getName());
+                rawFile.setMzDbFileDirectory(m_rawFileOnDisk.getPath());
+                int id= m_rawFileOnDisk.getName().indexOf(".");
+                if (id == -1){
+                    id = m_rawFileOnDisk.getName().length();
+                }
+                String identifier = m_rawFileOnDisk.getName().substring(0, id);
+                rawFile.setRawFileName(identifier+".raw");
+                rawFile.setIdentifier(identifier);
+                rawFile.setMzDbFileName(m_rawFileOnDisk.getName());
                 m_selectedRawFile = rawFile;
             }
             return m_selectedRawFile;

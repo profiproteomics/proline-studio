@@ -332,7 +332,14 @@ public class XICDesignTree extends AbstractTree {
                         RunInfoData runInfoData = new RunInfoData();
                         RunInfoData.RawFileSource rawFileSource = new RunInfoData.RawFileSource();
                         RawFile rawFile = new RawFile();
-                        rawFile.setRawFileName(qCh.getMzdbFileName());
+                        int id= qCh.getMzdbFileName().indexOf(".");
+                        if (id == -1){
+                            id = qCh.getMzdbFileName().length();
+                        }
+                        String identifier = qCh.getMzdbFileName().substring(0, id);
+                        rawFile.setRawFileName(identifier+".raw");
+                        rawFile.setIdentifier(identifier);
+                        rawFile.setMzDbFileName(qCh.getMzdbFileName());
                         rawFileSource.setLinkedRawFile(rawFile);
                         runInfoData.setRawFileSource(rawFileSource);
                         List<Run> runs = new ArrayList();

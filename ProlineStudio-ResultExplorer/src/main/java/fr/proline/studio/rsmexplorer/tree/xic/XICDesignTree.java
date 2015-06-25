@@ -337,7 +337,7 @@ public class XICDesignTree extends AbstractTree {
                             id = qCh.getMzdbFileName().length();
                         }
                         String identifier = qCh.getMzdbFileName().substring(0, id);
-                        rawFile.setRawFileName(identifier+".raw");
+                        rawFile.setRawFileName(qCh.getMzdbFileName());
                         rawFile.setIdentifier(identifier);
                         rawFile.setMzDbFileName(qCh.getMzdbFileName());
                         rawFileSource.setLinkedRawFile(rawFile);

@@ -81,7 +81,12 @@ public class RegisterRawFileTask extends AbstractServiceTask {
             Map<String, Object> params = new HashMap<>();
             Map<String, String> propertiesMap = new HashMap<>();
             propertiesMap.put("mzdb_file_path", m_raw_file_path);
-            params.put("raw_file_path", m_raw_file_path);
+            String rwFilePath =  m_raw_file_path;
+            int id = rwFilePath.lastIndexOf(".");
+            if (id != -1){
+                rwFilePath = rwFilePath.substring(0, id);
+            }
+            params.put("raw_file_path",rwFilePath);
             params.put("properties", propertiesMap);
             params.put("instrument_id", m_instrumentId);
             params.put("owner_id", m_ownerId);

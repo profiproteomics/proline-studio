@@ -86,7 +86,7 @@ public class RegisterRawFileTask extends AbstractServiceTask {
             if (id != -1){
                 rwFilePath = rwFilePath.substring(0, id);
             }
-            params.put("raw_file_path",rwFilePath);
+            params.put("raw_file_path",m_raw_file_path);
             params.put("properties", propertiesMap);
             params.put("instrument_id", m_instrumentId);
             params.put("owner_id", m_ownerId);

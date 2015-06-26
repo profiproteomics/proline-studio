@@ -149,7 +149,12 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                                                             dirName += "\\";
                                                         }
                                                         String dsName = getDatasetName(fp.substring(id+1), selectedNodes);
-                                                        fn = dirName+fp.substring(id+1, idUnderscore)+dsName+nb+"."+extension;
+                                                        String t = fp.substring(id+1, idUnderscore);
+                                                        int id2 = t.lastIndexOf("/");
+                                                        if (id2 != -1){
+                                                            t = t.substring(id2+1);
+                                                        }
+                                                        fn = dirName+t+dsName+nb+"."+extension;
                                                     }
                                                     nb++;
                                                     DownloadFileTask task = new DownloadFileTask(downloadCallback, fn, fp, _jmsNodeId.get(nb-2));
@@ -196,7 +201,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
     
     public String getDatasetName(String fileName, AbstractNode[] selectedNodes){
         int id0 = fileName.indexOf("-");
-        int id1 = fileName.indexOf("_");
+        int id1 = fileName.lastIndexOf("_");
         if (id0 > -1 && id1 > -1){
             String dsIdStr = fileName.substring(id0+1, id1);
             try{

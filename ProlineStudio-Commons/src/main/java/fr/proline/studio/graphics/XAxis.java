@@ -328,8 +328,8 @@ public class XAxis extends Axis {
             m_dfPlot = selectLogDecimalFormat();
         }
 
-        int pixelStart = valueToPixel(Math.pow(10, m_minValue));
-        int pixelStop = valueToPixel(Math.pow(10, m_maxValue));
+        int pixelStart = valueToPixel(m_minValue);
+        int pixelStop = valueToPixel(m_maxValue);
         g.drawLine(pixelStart, m_y+BasePlotPanel.GAP_AXIS_LINE, pixelStop, m_y+BasePlotPanel.GAP_AXIS_LINE);
 
         if (pixelStart >= pixelStop) { // avoid infinite loop 
@@ -388,17 +388,17 @@ public class XAxis extends Axis {
 
     }
 
-        public void paintGrid(Graphics2D g, int y, int height) {
+        public void paintGrid(Graphics2D g, int x, int width, int y, int height) {
 
         if (m_log) {
             paintGridLog(g, y, height);
         } else {
-            paintGridLinear(g, y, height);
+            paintGridLinear(g, x, width, y, height);
         }
 
     }
     
-    public void paintGridLinear(Graphics2D g, int y, int height) {
+    public void paintGridLinear(Graphics2D g, int xPixel, int width, int yPixel, int height) {
 
         int pixelStart = valueToPixel(m_minTick);
         int pixelStop = valueToPixel(m_maxTick);
@@ -417,7 +417,9 @@ public class XAxis extends Axis {
         while (true) {
             
             if (pX > previousEndX + 2) { // check to avoid to display grid for overlap labels
-                g.drawLine(pX, y, pX, y + height - 1);
+                if ((pX>=xPixel) && (pX<=xPixel+width)) {
+                    g.drawLine(pX, yPixel, pX, yPixel + height - 1);
+                }
                 previousEndX = pX + m_lastWidth;
             }
             
@@ -470,17 +472,27 @@ public class XAxis extends Axis {
     public int valueToPixel(double v) {
         if (m_log) {
             v = Math.log10(v);
+            double min = Math.log10(m_minValue);
+            double max = Math.log10(m_maxValue);
+            return m_x + (int) Math.round(((v - min) / (max - min)) * m_width);
+        } else {
+            return m_x + (int) Math.round(((v - m_minValue) / (m_maxValue - m_minValue)) * m_width);
         }
-        return m_x + (int) Math.round(((v - m_minValue) / (m_maxValue - m_minValue)) * m_width);
     }
 
     @Override
     public double pixelToValue(int pixel) {
-        double v = m_minValue + ((((double) pixel) - m_x) / ((double) m_width)) * (m_maxValue - m_minValue);
         if (m_log) {
+            double min = Math.log10(m_minValue);
+            double max = Math.log10(m_maxValue);
+            double v = min + ((((double) pixel) - m_x) / ((double) m_width)) * (max - min);
             v = Math.pow(10, v);
+            return v;
+        } else {
+            double v = m_minValue + ((((double) pixel) - m_x) / ((double) m_width)) * (m_maxValue - m_minValue);
+            return v;
         }
-        return v;
+        
     }
 
 }

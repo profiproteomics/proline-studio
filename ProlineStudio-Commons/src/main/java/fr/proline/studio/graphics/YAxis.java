@@ -123,7 +123,7 @@ public class YAxis extends Axis {
         }
         int pY = valueToPixel(y);
         int previousEndY = Integer.MAX_VALUE;
-        
+
         while (true) {
 
             String label;
@@ -191,14 +191,18 @@ public class YAxis extends Axis {
 
         int halfAscent = m_valuesFontMetrics.getAscent() / 2;
 
-        int pixelStart = valueToPixel(Math.pow(10, m_minValue));
-        int pixelStop = valueToPixel(Math.pow(10, m_maxValue));
+        int pixelStart = valueToPixel(m_minValue);
+        int pixelStop = valueToPixel(m_maxValue);
         g.drawLine(m_x+m_width-BasePlotPanel.GAP_AXIS_LINE, pixelStart, m_x+m_width-BasePlotPanel.GAP_AXIS_LINE, pixelStop);
 
         if (pixelStart <= pixelStop) { // avoid infinite loop when histogram is flat
             return;
         }
 
+                
+        m_lastHeight = -1;
+        int previousEndY = Integer.MAX_VALUE;
+        
         double y = m_minTick;
         int pY = pixelStart;
         while (true) {
@@ -217,8 +221,15 @@ public class YAxis extends Axis {
                 g.setColor(CyclicColorPalette.GRAY_TEXT_DARK);
             }
             
-            g.drawString(s, m_x+m_width - stringWidth - 6-BasePlotPanel.GAP_AXIS_LINE, pY + halfAscent);
-
+            int height = (int) Math.round(StrictMath.ceil(m_valuesFontMetrics.getLineMetrics(s, g).getHeight()));
+            if (height > m_lastHeight) {
+                m_lastHeight = height;
+            }
+            
+            if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to overlap labels
+                g.drawString(s, m_x + m_width - stringWidth - 6 - BasePlotPanel.GAP_AXIS_LINE, pY + halfAscent);
+                previousEndY = pY;
+            }
             g.drawLine(m_x+m_width-BasePlotPanel.GAP_AXIS_LINE, pY, m_x+m_width-BasePlotPanel.GAP_AXIS_LINE - 4, pY);
 
             y += m_tickSpacing;
@@ -250,17 +261,17 @@ public class YAxis extends Axis {
 
     }
     
-    public void paintGrid(Graphics2D g, int x, int width) {
+    public void paintGrid(Graphics2D g, int x, int width, int y, int height) {
 
         if (m_log) {
             paintGridLog(g, x, width);
         } else {
-            paintGridLinear(g, x, width);
+            paintGridLinear(g, x, width, y, height);
         }
 
     }
     
-    public void paintGridLinear(Graphics2D g, int x, int width) {
+    public void paintGridLinear(Graphics2D g, int xPixel, int width, int yPixel, int height) {
                 
         int pixelStart = valueToPixel(m_minTick);
         int pixelStop = valueToPixel(m_maxTick);
@@ -279,7 +290,9 @@ public class YAxis extends Axis {
         while (true) {
             
             if (pY < previousEndY - m_lastHeight - 2) { // check to avoid to draw line for overlap labels
-                g.drawLine(x+1, pY, x+width, pY);
+                if ((pY>=yPixel) && (pY<=yPixel+height)) {
+                    g.drawLine(xPixel+1, pY, xPixel+width, pY);
+                }
                 previousEndY = pY;
             }
 
@@ -336,17 +349,28 @@ public class YAxis extends Axis {
     public int valueToPixel(double v) {
         if (m_log) {
             v = Math.log10(v);
+            double min = Math.log10(m_minValue);
+            double max = Math.log10(m_maxValue);
+            return (m_y+m_height)-(int) Math.round(((v - min)/(max-min)) * m_height);
+        } else {
+            return (m_y+m_height)-(int) Math.round(((v - m_minValue)/(m_maxValue-m_minValue)) * m_height);
         }
-        return (m_y+m_height)-(int) Math.round(((v - m_minValue)/(m_maxValue-m_minValue)) * m_height);
     }
 
     @Override
     public double pixelToValue(int pixel) {
-        double v = m_minValue+(((double)((m_y+m_height)-pixel))/((double)m_height))*(m_maxValue-m_minValue);
+        
         if (m_log) {
+            double min = Math.log10(m_minValue);
+            double max = Math.log10(m_maxValue);
+            double v = min+(((double)((m_y+m_height)-pixel))/((double)m_height))*(max-min);
             v = Math.pow(10,v);
+            return v;
+        } else {
+            double v = m_minValue+(((double)((m_y+m_height)-pixel))/((double)m_height))*(m_maxValue-m_minValue);
+            return v;
         }
-        return v;
+        
     }
    
     

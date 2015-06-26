@@ -224,6 +224,13 @@ public abstract class Axis {
    public void setLog(boolean log) {
       m_log = log;
       m_df = null; // reinit for display
+      /*if (log) {
+          m_minValue = Math.log10(m_minValue);
+          m_maxValue = Math.log10(m_maxValue);
+      } else {
+          m_minValue = Math.pow(10, m_minValue);
+          m_maxValue = Math.pow(10, m_minValue);
+      }*/
    }
 
    public boolean isLog() {

@@ -4,6 +4,7 @@ import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -144,6 +145,7 @@ public class WindowSavedManager {
         writeSavedWindows();
         
         IdentificationTree.reinitMainPopup();
+        QuantitationTree.reinitMainPopup();
     }
     
     public static void setNoWindowAdded() {

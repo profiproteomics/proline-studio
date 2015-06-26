@@ -36,7 +36,7 @@ import javax.swing.tree.TreePath;
 public class QuantitationTree extends AbstractTree implements TreeWillExpandListener {
 
     private boolean m_isMainTree;
-    private static HashMap<ProjectQuantitationData, QuantitationTree> treeMap = new HashMap<>();
+    private static HashMap<ProjectQuantitationData, QuantitationTree> m_treeMap = new HashMap<>();
     private static QuantitationTree m_currentTree = null;
     private boolean m_loadingDone = false;
     private JPopupMenu m_rootPopup;
@@ -50,10 +50,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
     public static QuantitationTree getTree(ProjectQuantitationData projectData) {
 
-        QuantitationTree tree = treeMap.get(projectData);
+        QuantitationTree tree = m_treeMap.get(projectData);
         if (tree == null) {
             tree = new QuantitationTree(projectData);
-            treeMap.put(projectData, tree);
+            m_treeMap.put(projectData, tree);
         }
 
         m_currentTree = tree;
@@ -323,6 +323,15 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         popup.show((JComponent) e.getSource(), e.getX(), e.getY());
     }
 
+    
+    public static void reinitMainPopup() {
+        Iterator<ProjectQuantitationData> it = m_treeMap.keySet().iterator();
+        while (it.hasNext()) {
+            QuantitationTree tree = m_treeMap.get(it.next());
+            tree.m_mainPopup = null;
+        }
+    }
+    
     @Override
     public void mouseClicked(MouseEvent e) {
     }

@@ -26,7 +26,7 @@ import org.openide.windows.WindowManager;
  */
 public class DisplayUserWindowAction extends AbstractRSMAction {
     
-    private boolean m_forRsm;
+    private final boolean m_forRsm;
     
     public DisplayUserWindowAction(boolean forRsm, TreeType treeType) {
         super(NbBundle.getMessage(DisplayRsmProteinSetsAction.class, "CTL_DisplayUserWindowAction"), treeType);

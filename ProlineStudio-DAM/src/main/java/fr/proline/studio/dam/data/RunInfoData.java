@@ -145,10 +145,10 @@ public class RunInfoData extends AbstractData {
         
          public String getName() {
              if (m_linkedRawFile != null) {
-                 return m_linkedRawFile.getRawFileName();
+                 return m_linkedRawFile.getMzDbFileName();
              }
              if (m_selectedRawFile != null) {
-                 return m_selectedRawFile.getRawFileName();
+                 return m_selectedRawFile.getMzDbFileName();
              }
              if (m_rawFileOnDisk != null) {
                  return m_rawFileOnDisk.getName();

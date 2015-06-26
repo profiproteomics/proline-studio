@@ -70,7 +70,17 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
                 m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
             }
             return false;
-        } finally {
+        } catch(Exception e){
+            m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
+            return false;
+        }
+        finally {
             entityManagerMSI.close();
         }
 
@@ -78,7 +88,7 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
         return true;
     }
     
-    protected static void fetchProteins( EntityManager entityManagerMSI, DProteinSet proteinSet) {
+    protected static void fetchProteins( EntityManager entityManagerMSI, DProteinSet proteinSet) throws Exception{
 
         Long rsmId = proteinSet.getResultSummaryId();
 
@@ -94,6 +104,10 @@ public class DatabaseProteinsFromProteinSetTask extends AbstractDatabaseTask {
         LinkedList<DProteinMatch> sameSet = new LinkedList<>();
         ArrayList<DProteinMatch> subSet = new ArrayList<>(proteinMatchList.size());
 
+        // case of old SC, the typicalId was not correctly set, see Issue#12421
+        if (proteinSet.getTypicalProteinMatch() == null){
+            throw  new Exception("Error while loading typicalProteinMatch: please recalculate the SC!");
+        }
         Long idTypicalProteinMatch = proteinSet.getTypicalProteinMatch().getId();
         
 

@@ -284,7 +284,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         m_quantChannels = quantChannels;
         m_isXICMode = isXICMode;
         ((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).setData(taskId, quantChannels, proteinSets, isXICMode);
-        m_quantProteinSetTable.setColumnControlVisible(((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getColumnCount() < NB_MAX_COLUMN_CONTROL);
+        //m_quantProteinSetTable.setColumnControlVisible(((QuantProteinSetTableModel) ((CompoundTableModel) m_quantProteinSetTable.getModel()).getBaseModel()).getColumnCount() < NB_MAX_COLUMN_CONTROL);
         m_titleLabel.setText(TABLE_TITLE +" ("+proteinSets.size()+")");
        // select the first row
         if ((proteinSets != null) && (proteinSets.size() > 0)) {

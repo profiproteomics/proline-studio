@@ -558,7 +558,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         
     }
 
-    private Color getColorInGradient(LinearGradientPaint gradient, double d) {
+    private Color getColorInGradient(double d) {
         double f = (d-m_gradientParamValuesMin)/(m_gradientParamValuesMax-m_gradientParamValuesMin);
         for (int i=0;i<m_gradientFractions.length-1;i++) {
             float f1 = m_gradientFractions[i];
@@ -621,13 +621,11 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         boolean useGradient = !colorOrGradient.isColorSelected();
         
         Color plotColor = Color.black; // default init
-        LinearGradientPaint gradientPaint = null;
 
         if (!useGradient) {
             plotColor = colorOrGradient.getColor();
         } else {
             setGradientValues(); // set gradient values if needed
-            gradientPaint = colorOrGradient.getGradient();
         }
  
         // first plot non selected
@@ -641,7 +639,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             int y = yAxis.valueToPixel( m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
             if (useGradient) {
-               plotColor = getColorInGradient(gradientPaint,  m_gradientParamValues[i]);
+               plotColor = getColorInGradient(m_gradientParamValues[i]);
                g.setColor(plotColor);
             }
             
@@ -658,7 +656,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             int y = yAxis.valueToPixel( m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
             if (useGradient) {
-               plotColor = getColorInGradient(gradientPaint,  m_gradientParamValues[i]);
+               plotColor = getColorInGradient(m_gradientParamValues[i]);
             }
             
             g.setColor(plotColor);

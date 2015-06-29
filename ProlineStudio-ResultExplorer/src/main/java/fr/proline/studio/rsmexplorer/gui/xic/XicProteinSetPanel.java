@@ -432,6 +432,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
             }
 
             m_dataBox.propagateDataChanged(DProteinSet.class);
+            m_dataBox.propagateDataChanged(CompareDataInterface.class);
 
         }
 

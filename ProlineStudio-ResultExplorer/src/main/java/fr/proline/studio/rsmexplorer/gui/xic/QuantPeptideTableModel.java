@@ -59,8 +59,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
     private static final String[] m_columnNamesQC = {"Sel. level", "Ident. Pep. match count",  "Pep. match count","Raw abundance", "Abundance" };
     private static final String[] m_toolTipQC = {"Selection level", "Identification peptides match count","Peptides match count",  "Raw abundance", "Abundance" };
     
-    private static final String[] m_columnNamesQC_SC = {"Sel. level", "Ident. Pep. match count", "Basic SC",  "Specific SC", "Weighted SC" };
-    private static final String[] m_toolTipQC_SC = {"Selection level", "Identification peptides match count", "Basic Spectral Count", "Specific Spectral Count",  "Weighted Spectral Count" };
+    private static final String[] m_columnNamesQC_SC = {"Sel. level", "Ident. Pep. match count", "Basic SC",  "Specific SC", "Abundance" };
+    private static final String[] m_toolTipQC_SC = {"Selection level", "Identification peptides match count", "Basic Spectral Count", "Specific Spectral Count",  "Abundance" };
 
     private List<DMasterQuantPeptide> m_quantPeptides = null;
     private DQuantitationChannel[] m_quantChannels = null;
@@ -776,6 +776,8 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                 listIds.add(m_columnNames.length + COLTYPE_IDENT_PSM + (i * m_columnNamesQC.length));
                 if (m_isXICMode){
                     listIds.add(m_columnNames.length + COLTYPE_RAW_ABUNDANCE + (i * m_columnNamesQC.length));
+                }else{
+                    listIds.add(m_columnNames.length + COLTYPE_ABUNDANCE + (i * m_columnNamesQC.length));
                 }
                 listIds.add(m_columnNames.length + COLTYPE_SELECTION_LEVEL + (i * m_columnNamesQC.length));
                 

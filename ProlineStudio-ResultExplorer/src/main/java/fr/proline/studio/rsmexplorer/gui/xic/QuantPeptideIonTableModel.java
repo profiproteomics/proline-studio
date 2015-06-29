@@ -54,8 +54,8 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
     private static final String[] m_columnNamesQC = {"Sel. level", "Pep. match count", "Raw abundance", "Abundance" };
     private static final String[] m_toolTipQC = {"Selection level", "Peptides match count", "Raw abundance", "Abundance" };
-    private static final String[] m_columnNamesQC_SC = {"Sel. level", "Basic SC", "Specific SC", "Weighted SC"};
-    private static final String[] m_toolTipQC_SC = {"Selection level", "Basic Spectral Count","Specific Spectral Count",  "Weighted Spectral Count"};
+    private static final String[] m_columnNamesQC_SC = {"Sel. level", "Basic SC", "Specific SC", "Abundance"};
+    private static final String[] m_toolTipQC_SC = {"Selection level", "Basic Spectral Count","Specific Spectral Count",  "Abundance"};
 
     private List<MasterQuantPeptideIon> m_quantPeptideIons = null;
     private DQuantitationChannel[] m_quantChannels = null;

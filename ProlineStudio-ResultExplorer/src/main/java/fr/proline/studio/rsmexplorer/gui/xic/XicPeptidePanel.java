@@ -305,6 +305,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptides, m_isXICMode);
         //m_quantPeptideTable.setColumnControlVisible(((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).getColumnCount() < XicProteinSetPanel.NB_MAX_COLUMN_CONTROL);
         m_titleLabel.setText(TABLE_TITLE +" ("+peptides.size()+")");
+        if (!m_isXICMode){
+            ((QuantPeptideTableModel) ((CompoundTableModel) m_quantPeptideTable.getModel()).getBaseModel()).setOverviewType(QuantPeptideTableModel.COLTYPE_RAW_ABUNDANCE);
+        }
         // select the first row
         if ((peptides != null) && (peptides.size() > 0)) {
             m_quantPeptideTable.getSelectionModel().setSelectionInterval(0, 0);
@@ -778,7 +781,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             
             m_noOverviewRB = new JRadioButton("No Overview");
             m_psmOverviewRB = new JRadioButton(m_isXICMode ? "Overview on Pep. Match Count" : "Overview on Basic SC");
-            m_abundanceOverviewRB = new JRadioButton(m_isXICMode ? "Overview on Abundance" : "Overview on Weighted SC");
+            m_abundanceOverviewRB = new JRadioButton("Overview on Abundance");
             m_rawAbundanceOverviewRB = new JRadioButton(m_isXICMode ?"Overview on Raw Abundance" : "Overview on Specific SC");
             m_noOverviewRB.setBackground(Color.white);
             m_psmOverviewRB.setBackground(Color.white);

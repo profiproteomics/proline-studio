@@ -27,7 +27,7 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
     public static final int COLTYPE_RAW_ABUNDANCE = 3;
     public static final int COLTYPE_PSM = 4;
     private static final String[] m_columnNames = {"Id", "Quant. Channel", "Abundance", "Raw Abundance", "Pep. match count"};
-    private static final String[] m_columnNames_SC = {"Id", "Quant. Channel", "Weighted SC", "Specific SC", "Basic SC"};
+    private static final String[] m_columnNames_SC = {"Id", "Quant. Channel", "Abundance", "Specific SC", "Basic SC"};
     
     private DMasterQuantPeptide m_quantPeptide = null;
     private DQuantitationChannel[] m_quantChannels = null;

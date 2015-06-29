@@ -1030,16 +1030,37 @@ public class ImportIdentificationDialog extends DefaultDialog {
         };
         
         m_instrumentsComboBox = new JComboBox(DatabaseDataManager.getDatabaseDataManager().getInstrumentsWithNullArray());
-        ObjectParameter<InstrumentConfiguration> instrumentParameter = new ObjectParameter<>("instrument", "Instrument", m_instrumentsComboBox, DatabaseDataManager.getDatabaseDataManager().getInstrumentsWithNullArray(), null, -1, instrumentToString);
+        final ObjectParameter<InstrumentConfiguration> instrumentParameter = new ObjectParameter<>("instrument", "Instrument", m_instrumentsComboBox, DatabaseDataManager.getDatabaseDataManager().getInstrumentsWithNullArray(), null, -1, instrumentToString);
         parameterList.add(instrumentParameter);
+        m_instrumentsComboBox.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                instrumentParameter.setUsed(true);  //JPM.WART : found a better fix (parameters not saved if it has never been set)
+            }
+        });
         
         m_peaklistSoftwaresComboBox = new JComboBox(DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray());
-        ObjectParameter<PeaklistSoftware> peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", m_peaklistSoftwaresComboBox, DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray(), null, -1, softwareToString);
+        final ObjectParameter<PeaklistSoftware> peaklistParameter = new ObjectParameter("peaklist_software", "Peaklist Software", m_peaklistSoftwaresComboBox, DatabaseDataManager.getDatabaseDataManager().getPeaklistSoftwaresWithNullArray(), null, -1, softwareToString);
         parameterList.add(peaklistParameter);
+        m_peaklistSoftwaresComboBox.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                peaklistParameter.setUsed(true);   //JPM.WART : found a better fix (parameters not saved if it has never been set)
+            }
+        });
         
         m_decoyComboBox = new JComboBox(DECOY_VALUES);
-        ObjectParameter<String> decoyParameter = new ObjectParameter<>("decoy_accession", "Decoy", m_decoyComboBox, DECOY_VALUES, DECOY_VALUES_ASSOCIATED_KEYS, 0, null);
+        final ObjectParameter<String> decoyParameter = new ObjectParameter<>("decoy_accession", "Decoy", m_decoyComboBox, DECOY_VALUES, DECOY_VALUES_ASSOCIATED_KEYS, 0, null);
         parameterList.add(decoyParameter);
+        m_decoyComboBox.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                decoyParameter.setUsed(true); //JPM.WART : found a better fix (parameters not saved if it has never been set)
+            }
+        });
 
         m_decoyRegexTextField = new JTextField(20);
         m_decoyRegexParameter = new StringParameter("decoy_accession", "Decoy Accession", m_decoyRegexTextField, "", new Integer(2), null);

@@ -25,8 +25,9 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
     public static final int COLTYPE_QC_NAME = 1;
     public static final int COLTYPE_ABUNDANCE = 2;
     public static final int COLTYPE_RAW_ABUNDANCE = 3;
-    private static final String[] m_columnNames = {"Id", "Quant. Channel", "Abundance", "Raw Abundance"};
-    private static final String[] m_columnNames_SC = {"Id", "Quant. Channel", "Weighted SC", "Specific SC"};
+    public static final int COLTYPE_PSM = 4;
+    private static final String[] m_columnNames = {"Id", "Quant. Channel", "Abundance", "Raw Abundance", "Pep. match count"};
+    private static final String[] m_columnNames_SC = {"Id", "Quant. Channel", "Weighted SC", "Specific SC", "Basic SC"};
     
     private DMasterQuantPeptide m_quantPeptide = null;
     private DQuantitationChannel[] m_quantChannels = null;
@@ -105,6 +106,12 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
                 }
                 return quantPeptide.getRawAbundance().isNaN() ? null : quantPeptide.getRawAbundance();
             }
+            case COLTYPE_PSM: {
+                if (quantPeptide == null || quantPeptide.getPeptideMatchesCount() == null) {
+                    return null;
+                }
+                return  quantPeptide.getPeptideMatchesCount();
+            }
         }
         return null; // should never happen
     }
@@ -161,6 +168,9 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
             }
             case COLTYPE_RAW_ABUNDANCE: {
                 return Float.class;
+            }
+            case COLTYPE_PSM: {
+                return Integer.class;
             }
         }
         return null;

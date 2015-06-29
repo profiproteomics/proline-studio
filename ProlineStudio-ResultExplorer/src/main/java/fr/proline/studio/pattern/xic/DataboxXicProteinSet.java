@@ -166,6 +166,9 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             if (parameterType.equals(CrossSelectionInterface.class)) {
                 return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
             }
+            if (parameterType.equals(Boolean.class)) {
+                return isXICMode();
+            }
             
         }
         return super.getData(getArray, parameterType);

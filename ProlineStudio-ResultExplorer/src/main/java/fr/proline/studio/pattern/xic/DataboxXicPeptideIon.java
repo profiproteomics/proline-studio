@@ -80,6 +80,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             if (m_masterQuantPeptide == null || m_masterQuantPeptide.equals(oldPeptide)) {
                 return;
             }
+            m_isXICMode = (Boolean)m_previousDataBox.getData(false, Boolean.class);
         }
         final int loadingId = setLoading();
 

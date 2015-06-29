@@ -96,6 +96,7 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             if (m_proteinSet == null || m_proteinSet.equals(oldProteinSet)) {
                 return;
             }
+            m_isXICMode = (Boolean)m_previousDataBox.getData(false, Boolean.class);
         }
         
         final int loadingId = setLoading();
@@ -184,6 +185,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
                 return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
+            }
+            if (parameterType.equals(Boolean.class)) {
+                return isXICMode();
             }
         }
         return super.getData(getArray, parameterType);

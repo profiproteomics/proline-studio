@@ -568,9 +568,11 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
             actions = m_trashActions;
 
         } else if (allImportedNodeSelected && (nbNodes == 1)) {
+            
 
             // creation of the popup if needed
             if (m_allImportedPopup == null) {
+                boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
                 // create the actions
                 m_allImportedActions = new ArrayList<>(3);  // <--- get in sync
 
@@ -579,7 +581,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 m_allImportedActions.add(null);
 
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                if (isJMSDefined) {
                     ImportSearchResultAsRsetJMSAction importJmsAction = new ImportSearchResultAsRsetJMSAction();
                     m_allImportedActions.add(importJmsAction);
                 } else {
@@ -616,7 +618,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 m_mainActions = new ArrayList<>(19);  // <--- get in sync
 
-
+                boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
 
                 DisplayRsetAction displayRsetAction = new DisplayRsetAction();
                 m_mainActions.add(displayRsetAction);
@@ -632,7 +634,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 AddAction addAction = new AddAction();
                 m_mainActions.add(addAction);
 
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                if (isJMSDefined) {
                     MergeJMSAction mergeJmsAction = new MergeJMSAction();
                     m_mainActions.add(mergeJmsAction);
                 } else {
@@ -640,7 +642,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(mergeAction);
                 }
 
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                if (isJMSDefined) {
                     ValidateJMSAction validateJMSAction = new ValidateJMSAction();
                     m_mainActions.add(validateJMSAction);
                 } else {
@@ -656,7 +658,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(filterProtSetAction);
 //                }
                 
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                if (isJMSDefined) {
                     ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction();
                     m_mainActions.add(changeTypicalProteinJmsAction);
                 } else {
@@ -682,7 +684,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(exportRSMAction);
                 }*/
                 
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                if (isJMSDefined) {
                     ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                     m_mainActions.add(exportDatasetAction);
                 }else{
@@ -691,7 +693,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 }
                 
 
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                if (isJMSDefined) {
                     ExportRSM2PrideJMSAction exportRSM2PrideAction = new ExportRSM2PrideJMSAction();
                     m_mainActions.add(exportRSM2PrideAction);
                 } else {

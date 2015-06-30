@@ -142,6 +142,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
         if ((nbNodes > 1) ){
             if (m_multiPopup == null) {
+                boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
                 // create the actions
                 m_multiActions = new ArrayList<>(3);  // <--- get in sync
                 
@@ -150,7 +151,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 
                 m_multiActions.add(null);  // separator
                 
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                if (isJSMDefined) {
                     ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_multiActions.add(exportDatasetAction);
                 }else{
@@ -216,7 +217,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             if (m_mainPopup == null) {
                 // create the actions
                 m_mainActions = new ArrayList<>(14);  // <--- get in sync
-                
+                boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
                 DisplayExperimentalDesignAction expDesignAction = new DisplayExperimentalDesignAction();
                 m_mainActions.add(expDesignAction);
 
@@ -242,7 +243,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 
                 m_mainActions.add(null);  // separator*
                 
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                if (isJSMDefined) {
                     ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
                     m_mainActions.add(exportDatasetAction);
                 }else{

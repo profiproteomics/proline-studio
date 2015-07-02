@@ -33,8 +33,8 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
 
     public TabTitleEditListener(final JTabbedPane tabbedPane, CustomExportDialog ced) {
         super();
-     //   m_tabTitleIdHashMap = ced.m_tabTitleIdHashMap;
-    //    m_customEd = ced;
+        m_tabTitleIdHashMap = ced.m_tabTitleIdHashMap;
+        m_customEd = ced;
         this.tabbedPane = tabbedPane;
         editor.setBorder(BorderFactory.createEmptyBorder());
         editor.addFocusListener(new FocusAdapter() {

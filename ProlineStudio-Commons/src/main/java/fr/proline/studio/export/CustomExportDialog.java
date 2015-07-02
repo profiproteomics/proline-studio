@@ -773,9 +773,10 @@ public class CustomExportDialog extends DefaultDialog {
 
         lblMouseRightclickOn = new JTextPane();
 		//lblMouseRightclickOn = new JLabel("Tab: Mouse Right-Click: (en/dis)-able sheet, 2X left click: rename sheet");
-        lblMouseRightclickOn.setText("- Mouse Right-Click on tab to enable/disable sheet\r\n- Double Left-Click to Rename tab sheet.\r\nReview all tabs and fields for export  Once done, save and reload later when necessary.");
+        lblMouseRightclickOn.setText("- Mouse Right-Click on tab to enable/disable sheet\r\n- Double Left-Click to rename sheet tab.\r\nReview all tabs and fields for export.  Once done, save and reload later when necessary.");
         
         lblMouseRightclickOn.setBounds(10, 493, 560, 48);
+        lblMouseRightclickOn.setBackground(new Color(255,233,155));
 		//panel_1.add(lblMouseRightclickOn);
 		//lblMouseRightclickOn.setBounds(10, 535, 381, 60);
         insidePanel.add(lblMouseRightclickOn);

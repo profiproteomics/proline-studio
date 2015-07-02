@@ -33,8 +33,8 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
 
     public TabTitleEditListener(final JTabbedPane tabbedPane, CustomExportDialog ced) {
         super();
-        m_tabTitleIdHashMap = ced.m_tabTitleIdHashMap;
-        m_customEd = ced;
+     //   m_tabTitleIdHashMap = ced.m_tabTitleIdHashMap;
+    //    m_customEd = ced;
         this.tabbedPane = tabbedPane;
         editor.setBorder(BorderFactory.createEmptyBorder());
         editor.addFocusListener(new FocusAdapter() {
@@ -80,7 +80,6 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
         tabbedPane.setTabComponentAt(editingIdx, editor);
         editor.setVisible(true);
         m_formerTitle = tabbedPane.getTitleAt(editingIdx);
-        System.out.println("former title: " + m_formerTitle);
         editor.setText(tabbedPane.getTitleAt(editingIdx));
         editor.selectAll();
         editor.requestFocusInWindow();
@@ -120,7 +119,7 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
 	           // 	m_customEd.m_exportConfig.sheets[editingIdx].title=title; // replace title with new one
 	           // } else
 	           // {
-	           // 	System.out.println(">>ERROR: found title is not at the expected place...");
+	           // 	">>ERROR: found title is not at the expected place...");
 	           // }
         	} else {
         		// do not change the title

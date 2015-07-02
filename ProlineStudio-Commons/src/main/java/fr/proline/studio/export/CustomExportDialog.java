@@ -129,7 +129,7 @@ public class CustomExportDialog extends DefaultDialog {
 
     private JComboBox comboBox_exportProfile;
 
-	private JLabel lblMouseRightclickOn;
+	private JTextPane lblMouseRightclickOn;
 
     public static CustomExportDialog getDialog(Window parent, JXTable table, String exportName) {
         if (m_singletonExcelDialog == null) {
@@ -602,21 +602,21 @@ public class CustomExportDialog extends DefaultDialog {
         //exportPanel.setSize(new Dimension(400, 250));
 
         // added 
-        setBounds(100, 100, 600, 600); // gives absolute position in x, relative to the main ProlineStudio window...
+        setBounds(100, 100, 600, 644); // gives absolute position in x, relative to the main ProlineStudio window...
         setPreferredSize(new Dimension(580, 250)); // size of the main CustomExportDialog window.
 
         final JPanel insidePanel = new JPanel(null);
         exportPanel.add(insidePanel);
-        insidePanel.setPreferredSize(new Dimension(580, 600)); //size of the inside panel that contains all parameters to set
+        insidePanel.setPreferredSize(new Dimension(580, 550)); //size of the inside panel that contains all parameters to set
 
         final JPanel optionPane = new JPanel();
         optionPane.setVisible(false);
         optionPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-        optionPane.setSize(new Dimension(600, 650));
-        optionPane.setSize(new Dimension(600, 650));
-        optionPane.setPreferredSize(new Dimension(710, 500));
-        optionPane.setBounds(new Rectangle(10, 105, 560, 446));// position du panneau dans la boite.
-
+        optionPane.setSize(new Dimension(600, 500));
+        optionPane.setPreferredSize(new Dimension(600, 500));
+        //optionPane.setBounds(new Rectangle(10, 105, 560, 446));// position du panneau dans la boite.
+        optionPane.setBounds(new Rectangle(10, 78, 560, 406));
+        
         insidePanel.setLayout(null);
         insidePanel.add(optionPane);
         optionPane.setLayout(null);
@@ -771,10 +771,15 @@ public class CustomExportDialog extends DefaultDialog {
         m_tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
 
-		
-		lblMouseRightclickOn = new JLabel("Mouse Right-Click on tab to enable/disable sheet");
-		lblMouseRightclickOn.setBounds(282, 11, 248, 14);
-		panel_1.add(lblMouseRightclickOn);
+        lblMouseRightclickOn = new JTextPane();
+		//lblMouseRightclickOn = new JLabel("Tab: Mouse Right-Click: (en/dis)-able sheet, 2X left click: rename sheet");
+        lblMouseRightclickOn.setText("- Mouse Right-Click on tab to enable/disable sheet\r\n- Double Left-Click to Rename tab sheet.\r\nReview all tabs and fields for export  Once done, save and reload later when necessary.");
+        
+        lblMouseRightclickOn.setBounds(10, 493, 560, 48);
+		//panel_1.add(lblMouseRightclickOn);
+		//lblMouseRightclickOn.setBounds(10, 535, 381, 60);
+        insidePanel.add(lblMouseRightclickOn);
+
 		
         comboBox_exportProfile = new JComboBox();
         comboBox_exportProfile.setModel(new DefaultComboBoxModel(new String[]{"Best", "All"}));
@@ -809,11 +814,11 @@ public class CustomExportDialog extends DefaultDialog {
                     recalculateTabTitleIdHashMap();
                     //m_exportConfig = m_exportDefaultConfig; // copy config to allow modifications: TODO: check if copy by value better
                 }
-                setSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 200 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
+                setSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 200 + 450 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
                 //setPreferredSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 200 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
             }
         });
-        chk_ExportOptions.setBounds(476, 71, 124, 27);
+        chk_ExportOptions.setBounds(474, 44, 104, 27);
         insidePanel.add(chk_ExportOptions);
 
         final JButton addFileButton = new JButton("");

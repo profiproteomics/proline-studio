@@ -15,6 +15,7 @@ import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.ChangeTypicalProteinTask;
+import fr.proline.studio.dpm.task.SendProjectidAndRsmTasks;
 import fr.proline.studio.dpm.task.ValidationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
@@ -24,10 +25,14 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import javax.swing.tree.DefaultTreeModel;
+
+import org.jfree.util.Log;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -37,29 +42,26 @@ import org.openide.windows.WindowManager;
  * @author jm235353
  */
 public class ValidateAction extends AbstractRSMAction {
-
+	Long rsm=null;
     public ValidateAction() {
         super(NbBundle.getMessage(ValidateAction.class, "CTL_ValidateAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {
-
+        
         int nbAlreadyValidated = 0;
-
         int nbNodes = selectedNodes.length;
         ArrayList<DDataset> datasetList = new ArrayList<>(nbNodes);
         for (int i = 0; i < nbNodes; i++) {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
             DDataset d = dataSetNode.getDataset();
             datasetList.add(d);
-
+            rsm=d.getResultSummaryId(); 
             if (dataSetNode.hasResultSummary()) {
                 nbAlreadyValidated++;
             }
         }
-
-
         if (nbAlreadyValidated > 0) {
             // check if the user wants to revalidate the Search Result
             String message;
@@ -82,12 +84,7 @@ public class ValidateAction extends AbstractRSMAction {
             if (yesNoDialog.getButtonClicked() != DefaultDialog.BUTTON_OK) {
                 return;
             }
-
-
         }
-
-
-
 
         ValidationDialog dialog = ValidationDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
@@ -113,9 +110,10 @@ public class ValidateAction extends AbstractRSMAction {
                 treeModel.nodeChanged(dataSetNode);
 
                 final DDataset d = dataSetNode.getDataset();
+              
 
                 if (dataSetNode.hasResultSummary()) {
-
+                     rsm=dataSetNode.getResultSummaryId();
                     // we remove the result Summary and we start validation
                     
                     AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -129,15 +127,18 @@ public class ValidateAction extends AbstractRSMAction {
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                             askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType);
+                            askValidationRsm(dataSetNode, parserArguments, changeTypicalRules, scoringType,rsm);
                         }
                     };
 
                     DatabaseDataSetTask taskRemoveValidation = new DatabaseDataSetTask(callback);
                     taskRemoveValidation.initModifyDatasetToRemoveValidation(d);
                     AccessDatabaseThread.getAccessDatabaseThread().addTask(taskRemoveValidation);
+                    
                 } else {
                     // there is no result summary, we start validation at once
                     askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType);
+                    
                 }
 
 
@@ -168,22 +169,48 @@ public class ValidateAction extends AbstractRSMAction {
 
                     updateDataset(dataSetNode, d, _resultSummaryId[0], getTaskInfo(), changeTypicalRules);
 
-
                 } else {
                     //JPM.TODO : manage error with errorMessage
                     dataSetNode.setIsChanging(false);
-
-
                     IdentificationTree tree = IdentificationTree.getCurrentTree();
                     DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
                     treeModel.nodeChanged(dataSetNode);
                 }
             }
         };
-
-
+     
         ValidationTask task = new ValidationTask(callback, dataSetNode.getDataset(), "", parserArguments, _resultSummaryId, scoringType);
         AccessServiceThread.getAccessServiceThread().addTask(task);
+    
+    }
+    private void askValidationRsm(final DataSetNode dataSetNode, HashMap<String, String> parserArguments, final List<ChangeTypicalRule> changeTypicalRules, final String scoringType,final Long rsm) {
+
+        final DDataset d = dataSetNode.getDataset();
+
+        // used as out parameter for the service
+       
+        AbstractServiceCallback callback = new AbstractServiceCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success) {
+                if (success) {
+                	
+                    //JPM.TODO : manage error with errorMessage
+                    dataSetNode.setIsChanging(false);
+                    IdentificationTree tree = IdentificationTree.getCurrentTree();
+                    DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+                    treeModel.nodeChanged(dataSetNode);
+                }
+            }
+        };
+        SendProjectidAndRsmTasks task1 = new SendProjectidAndRsmTasks(callback,dataSetNode.getDataset(),parserArguments,rsm);
+        AccessServiceThread.getAccessServiceThread().addTask(task1);
+    
     }
 
     private void changeTypicalProtein(final DataSetNode datasetNode, List<ChangeTypicalRule> changeTypicalRules) {

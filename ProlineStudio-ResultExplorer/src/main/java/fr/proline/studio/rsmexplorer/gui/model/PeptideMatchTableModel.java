@@ -396,7 +396,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
                 } else {
                     Float retentionTime = peptideMatch.getRetentionTime();
                     if (retentionTime== null) {
-                        lazyData.setData( "" );  // JPM.WART will not happen in the future
+                        lazyData.setData( Float.NaN );  // JPM.WART will not happen in the future
                     } else {
                         lazyData.setData( retentionTime );
                     }

@@ -127,7 +127,7 @@ public class ValidateAction extends AbstractRSMAction {
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                             askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType);
-                            askValidationRsm(dataSetNode, parserArguments, changeTypicalRules, scoringType,rsm);
+                            //askValidationRsm(dataSetNode, parserArguments, changeTypicalRules, scoringType,rsm);
                         }
                     };
 

@@ -4,27 +4,37 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
+
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.data.ChangeTypicalRule;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- * 
- */
 public class SendProjectidAndRsmTasks extends AbstractServiceTask {
 
     private DDataset m_dataset;
-   
-    public SendProjectidAndRsmTasks(AbstractServiceCallback callback, DDataset dataset) {
-        super(callback, false /** asynchronous */, new TaskInfo("Compute Protein Sequence for " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+    private HashMap<String,String> m_argumentsMap;
+    private Long m_resultSummaryId = null;
+    
+    // Filter
+    
+    public static String RANK_FILTER_KEY = "RANK";
+    public static String RANK_FILTER_NAME = "Rank";
+    public static String SCORE_FILTER_KEY = "SCORE";
+    public static String SCORE_FILTER_NAME = "Score";
+    public static String PEP_LENGTH_FILTER_KEY = "PEP_SEQ_LENGTH";
+    public static String PEP_LENGTH_FILTER_NAME = "Length";
+       
+    public SendProjectidAndRsmTasks(AbstractServiceCallback callback, DDataset dataset,HashMap<String, String> argumentsMap,Long rsm) {
+        super(callback, false /** asynchronous */, new TaskInfo("Compute and get Protein Sequence for " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
+        m_argumentsMap = argumentsMap;
+        m_resultSummaryId=rsm;
     }
      
     @Override
@@ -32,16 +42,26 @@ public class SendProjectidAndRsmTasks extends AbstractServiceTask {
         try {
             // create the request
             JsonRpcRequest request = new JsonRpcRequest();
-            
             request.setId(m_id);
             request.setMethod("run_job");
-
-
             Map<String, Object> params = new HashMap<>();
             params.put("project_id", m_dataset.getProject().getId());
-            params.put("result_summary_id", m_dataset.getResultSummaryId());
+            params.put("result_summary_id",m_resultSummaryId);
+            
+            if (m_argumentsMap.containsKey(RANK_FILTER_KEY)) {
+            	
+                params.put("rank_filter_key", Integer.valueOf(m_argumentsMap.get(RANK_FILTER_KEY)) );
+            }
+            if (m_argumentsMap.containsKey(SCORE_FILTER_KEY)) {
+            	
+            	params.put("score_fliter_key", Float.valueOf(m_argumentsMap.get(SCORE_FILTER_KEY))); 
+            }
+            if (m_argumentsMap.containsKey(PEP_LENGTH_FILTER_KEY)) { 
+            	
+            	params.put("pep_length_filter_key", Integer.valueOf(m_argumentsMap.get(PEP_LENGTH_FILTER_KEY)));  
+            }
             request.setParameters(params);
-
+            
             HttpResponse response = postRequest("dps.msi/get_protein_sequence/"+request.getMethod()+getIdString(), request);
 
             GenericJson jsonResult = response.parseAs(GenericJson.class);

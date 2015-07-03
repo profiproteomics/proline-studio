@@ -3,30 +3,18 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
-import fr.proline.studio.dpm.task.ChangeTypicalProteinTask;
-import fr.proline.studio.dpm.task.jms.SendProjectidAndRsmTask;
-import fr.proline.studio.gui.DefaultDialog;
-import fr.proline.studio.rsmexplorer.gui.dialog.ChangeTypicalProteinDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
-import fr.proline.studio.dpm.task.jms.SendProjectidAndRsmTask;
 import fr.proline.studio.dpm.task.SendProjectidAndRsmTasks;
-
 import javax.swing.tree.DefaultTreeModel;
-
 import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
-
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.DatabaseDataManager;
-import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
-
-import java.util.List;
 
 
 public class GetProjectidAndRsmAction extends AbstractRSMAction {
@@ -75,8 +63,8 @@ public class GetProjectidAndRsmAction extends AbstractRSMAction {
                         treeModel.nodeChanged(dataSetNode);
                     }
                 };
-                SendProjectidAndRsmTasks task = new SendProjectidAndRsmTasks(callback,d);
-                AccessServiceThread.getAccessServiceThread().addTask(task);
+               // SendProjectidAndRsmTasks task = new SendProjectidAndRsmTasks(callback,d);
+               // AccessServiceThread.getAccessServiceThread().addTask(task);
             } 
     }
     @Override

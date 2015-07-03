@@ -629,7 +629,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         if (m_forRSM) {
             filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null)); colIdx++;
         }
-
+        //filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_RETENTION_TIME
 
     }
 
@@ -662,6 +662,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
             case COLTYPE_PEPTIDE_PPM:
+            case COLTYPE_PEPTIDE_RETENTION_TIME:
                 return Float.class;
             case COLTYPE_PEPTIDE_START:
             case COLTYPE_PEPTIDE_STOP:
@@ -775,7 +776,8 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             }
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ: 
             case COLTYPE_PEPTIDE_CALCULATED_MASS: 
-            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY: {
+            case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
+            case COLTYPE_PEPTIDE_RETENTION_TIME: {
                 renderer = new FloatRenderer( new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4 );
                 break;
             }

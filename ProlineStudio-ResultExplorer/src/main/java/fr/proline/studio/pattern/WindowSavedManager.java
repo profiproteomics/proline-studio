@@ -2,6 +2,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
@@ -19,10 +20,15 @@ public class WindowSavedManager {
     
     private static boolean m_newWindowAdded = true;
     
+    public final static char SAVE_WINDOW_FOR_RSET = '1';
+    public final static char SAVE_WINDOW_FOR_RSM = '2';
+    public final static char SAVE_WINDOW_FOR_QUANTI = '3';
+    
     public static String writeBoxes(String windowName, ArrayList<AbstractDataBox> boxList, ArrayList<SplittedPanelContainer.PanelLayout> layoutList) {
         
         boolean rset = false;
         boolean rsm = false;
+        boolean quanti = false;
         
         AbstractDataBox entryBox = boxList.get(0);
         HashSet<GroupParameter> entryParameterSet = entryBox.getInParameters();
@@ -36,6 +42,8 @@ public class WindowSavedManager {
                     rset = true;
                 } else if (parameter.equalsData(ResultSummary.class)) {
                     rsm = true;
+                }else if (parameter.equalsData(DDataset.class)){
+                    quanti = true;
                 }
             }
         }
@@ -44,9 +52,14 @@ public class WindowSavedManager {
         
         // save rset/rsm entry parameter
         if (rset) {
-            sb.append("1#");
+            sb.append(SAVE_WINDOW_FOR_RSET);
+            sb.append("#");
         } else if (rsm) {
-            sb.append("2#");
+            sb.append(SAVE_WINDOW_FOR_RSM);
+            sb.append("#");
+        }  else if (quanti) {
+            sb.append(SAVE_WINDOW_FOR_QUANTI);
+            sb.append("#");
         } else {
             sb.append("0#");
         }
@@ -68,11 +81,19 @@ public class WindowSavedManager {
     }
     
     public static boolean hasResultSetParameter(String dump) {
-        return dump.charAt(0)  == '1';
+        return dump.charAt(0)  == SAVE_WINDOW_FOR_RSET;
     }
     
     public static boolean hasResultSummaryParameter(String dump) {
-        return dump.charAt(0)  == '2';
+        return dump.charAt(0)  == SAVE_WINDOW_FOR_RSM;
+    }
+    
+    public static boolean hasQuantiParameter(String dump) {
+        return dump.charAt(0)  == SAVE_WINDOW_FOR_QUANTI;
+    }
+    
+    public static char getWindowType(String dump){
+        return dump.charAt(0) ;
     }
     
     public static AbstractDataBox[] readBoxes(String dump) {

@@ -159,7 +159,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
                     String windowSaved = SaveDataBoxActionListener.saveParentContainer("tmp", m_decoyButton);
 
                     AbstractDataBox[] databoxes = WindowSavedManager.readBoxes(windowSaved);
-                    WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false);
+                    WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false, WindowSavedManager.SAVE_WINDOW_FOR_RSET);
                     wbox.setEntryData(m_dataBox.getProjectId(), decoyRset);
 
                     // open a window to display the window box

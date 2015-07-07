@@ -26,11 +26,15 @@ import org.openide.windows.WindowManager;
  */
 public class DisplayUserWindowAction extends AbstractRSMAction {
     
-    private final boolean m_forRsm;
+    private final char m_windowType;
     
-    public DisplayUserWindowAction(boolean forRsm, TreeType treeType) {
+    public DisplayUserWindowAction(char windowType, TreeType treeType) {
         super(NbBundle.getMessage(DisplayRsmProteinSetsAction.class, "CTL_DisplayUserWindowAction"), treeType);
-        m_forRsm = forRsm;
+        m_windowType = windowType;
+    }
+    
+    private boolean forRsm(){
+        return m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSM;
     }
     
     @Override
@@ -39,14 +43,19 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
         DataSetNode dataSetNode = (DataSetNode) selectedNodes[0];
         
         ArrayList<GroupParameter> outParameters = new ArrayList<>();
-        if ((!m_forRsm) && (dataSetNode.hasResultSet())) {
+        if ((!forRsm()) && (dataSetNode.hasResultSet())) {
             GroupParameter outParameter = new GroupParameter();
             outParameter.addParameter(ResultSet.class, false);
             outParameters.add(outParameter);
         }
-        if ((m_forRsm) && (dataSetNode.hasResultSummary())) {
+        if ((forRsm()) && (dataSetNode.hasResultSummary())) {
             GroupParameter outParameter = new GroupParameter();
             outParameter.addParameter(ResultSummary.class, false);
+            outParameters.add(outParameter);
+        }
+        if (m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI && dataSetNode.isQuantitation()){
+            GroupParameter outParameter = new GroupParameter();
+            outParameter.addParameter(DDataset.class, false);
             outParameters.add(outParameter);
         }
 
@@ -60,9 +69,9 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
             try {
                 AbstractDataBox databox = (AbstractDataBox) genericDatabox.getClass().newInstance();
 
-                final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataSet.getName(), dataSet.getName()+" "+dialog.getWndTitle(), databox, false, m_forRsm);
+                final WindowBox wbox = WindowBoxFactory.getUserDefinedWindowBox(dataSet.getName(), dataSet.getName()+" "+dialog.getWndTitle(), databox, false, dataSetNode.isQuantXIC(), m_windowType);
 
-                if (m_forRsm) {
+                if (forRsm()) {
                     
                     // --- RSM
                     
@@ -108,7 +117,7 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
                         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
                     }
-                } else {
+                } else if (m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET){
                     // --- RSET
 
 
@@ -153,6 +162,49 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
                         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
                     }
+                }else if (m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI){
+                    // --- QUANTI
+                    DDataset ds = dataSetNode.getDataset();
+
+
+                    if (ds != null) {
+
+                        wbox.setEntryData(dataSet.getProject().getId(), ds);
+
+
+
+                        // open a window to display the window box
+                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                        win.open();
+                        win.requestActive();
+                    } else {
+
+                        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
+                        win.open();
+                        win.requestActive();
+
+                        // we have to load the result set
+                        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return true;
+                            }
+
+                            @Override
+                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                // prepare window box
+                                wbox.setEntryData(dataSet.getProject().getId(), dataSet.getResultSet());
+                            }
+                        };
+
+
+                        // ask asynchronous loading of data
+                        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+                        task.initLoadQuantitation(dataSet.getProject(), dataSet);
+                        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+                    }
                 }
 
 
@@ -183,13 +235,18 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
         
         DataSetNode dataSetNode = (DataSetNode) node;
         
-        if ((!m_forRsm) && (!dataSetNode.hasResultSet())) {
+        if ((m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET) && (!dataSetNode.hasResultSet())) {
             setEnabled(false);
             return;
         }
         
                 
-        if ((m_forRsm) && (!dataSetNode.hasResultSummary())) {
+        if ((forRsm()) && (!dataSetNode.hasResultSummary())) {
+            setEnabled(false);
+            return;
+        }
+        
+        if ((m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI && (!dataSetNode.isQuantitation())) ) {
             setEnabled(false);
             return;
         }

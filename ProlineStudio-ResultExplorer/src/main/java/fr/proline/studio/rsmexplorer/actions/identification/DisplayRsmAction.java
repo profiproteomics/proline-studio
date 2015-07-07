@@ -40,8 +40,8 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(m_treeType);
         m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(m_treeType);
         
-        m_manageUserWindowsAction = new ManageUserWindowsAction(true, m_treeType);
-        m_displayUserWindowAction = new DisplayUserWindowAction(true, m_treeType);
+        m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSM, m_treeType);
+        m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSM, m_treeType);
         
         ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
         int nb = savedWindowsList.size();
@@ -52,7 +52,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
                 continue;
             }
             String name = WindowSavedManager.getWindowName(wndSaved);
-            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i));
+            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, m_treeType));
         }
 
 

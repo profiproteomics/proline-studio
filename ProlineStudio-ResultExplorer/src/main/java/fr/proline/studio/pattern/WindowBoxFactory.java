@@ -24,16 +24,18 @@ import javax.swing.border.EmptyBorder;
  */
 public class WindowBoxFactory {
     
-    public static WindowBox getUserDefinedWindowBox(String dataName, String windowName, AbstractDataBox databox, boolean isDecoy, boolean isRSM) {
+    public static WindowBox getUserDefinedWindowBox(String dataName, String windowName, AbstractDataBox databox, boolean isDecoy, boolean isXIC, char windowType) {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = databox;
         boxes[0].setDataName(dataName);
 
-        IconManager.IconType iconType;
-        if (isRSM) {
+        IconManager.IconType iconType = IconManager.IconType.DATASET;
+        if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSM) {
             iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
-        } else {
+        } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET){
             iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
+        }else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI){
+            iconType = isXIC ? IconManager.IconType.QUANT_XIC : IconManager.IconType.QUANT_SC;
         }
 
         
@@ -352,13 +354,15 @@ public class WindowBoxFactory {
     }
     
     
-    public static WindowBox getFromBoxesWindowBox(String title, AbstractDataBox[] boxes, boolean isDecoy, boolean isRSM) {
+    public static WindowBox getFromBoxesWindowBox(String title, AbstractDataBox[] boxes, boolean isDecoy, boolean isXIC, char windowType) {
 
-        IconManager.IconType iconType;
-        if (isRSM) {
+        IconManager.IconType iconType = IconManager.IconType.DATASET;
+        if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSM) {
             iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
-        } else {
+        } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET){
             iconType = isDecoy ? IconManager.IconType.DATASET_RSET_DECOY : IconManager.IconType.DATASET_RSET;
+        }else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI){
+            iconType = isXIC? IconManager.IconType.QUANT_XIC : IconManager.IconType.QUANT_SC;
         }
         
         WindowBox winBox = new WindowBox(title, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));

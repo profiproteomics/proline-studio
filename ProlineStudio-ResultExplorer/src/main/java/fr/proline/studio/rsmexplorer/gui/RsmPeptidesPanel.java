@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.AddDataMixerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -23,9 +22,6 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.dialog.CalcDialog;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideInstanceTableModel;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -33,7 +29,6 @@ import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
-import fr.proline.studio.table.LazyTableCellRenderer;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -151,7 +146,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
                 String savedWindow = SaveDataBoxActionListener.saveParentContainer("tmp", m_decoyButton);
 
                 AbstractDataBox[] databoxes = WindowSavedManager.readBoxes(savedWindow);
-                WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, true);
+                WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false, WindowSavedManager.SAVE_WINDOW_FOR_RSM);
                 wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
 
                 // open a window to display the window box

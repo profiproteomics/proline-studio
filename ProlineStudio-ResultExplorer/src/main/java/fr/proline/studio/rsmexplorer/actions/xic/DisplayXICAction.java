@@ -1,8 +1,13 @@
 package fr.proline.studio.rsmexplorer.actions.xic;
 
+import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
+import fr.proline.studio.rsmexplorer.actions.identification.DisplaySavedWindowAction;
+import fr.proline.studio.rsmexplorer.actions.identification.DisplayUserWindowAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ManageUserWindowsAction;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import java.util.ArrayList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import org.openide.util.NbBundle;
@@ -18,9 +23,15 @@ public class DisplayXICAction extends AbstractRSMAction {
     private DisplayXICProteinSetAction m_displayXICProteinSetAction;
     private DisplayXICPeptideSetAction m_displayXICPeptideSetAction;
     private DisplayXICPeptideIonAction m_displayXICPeptideIonAction;
+    private DisplayUserWindowAction m_displayUserWindowAction;
+    private ManageUserWindowsAction m_manageUserWindowsAction;
+    private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
+    
+    private AbstractTree.TreeType m_treeType;
     
    public DisplayXICAction() {
        super(NbBundle.getMessage(DisplayXICAction.class,"CTL_DisplayXicAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+       m_treeType = AbstractTree.TreeType.TREE_QUANTITATION;
    }
    
    @Override
@@ -30,15 +41,41 @@ public class DisplayXICAction extends AbstractRSMAction {
         m_displayXICProteinSetAction = new DisplayXICProteinSetAction();
         m_displayXICPeptideSetAction = new DisplayXICPeptideSetAction();
         m_displayXICPeptideIonAction = new DisplayXICPeptideIonAction();
+        m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, m_treeType);
+        m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_QUANTI, m_treeType);
        
+        ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
+        int nb = savedWindowsList.size();
+        m_displaySavedWindowActionList = new ArrayList<>();
+        for (int i = 0; i < nb; i++) {
+            String wndSaved = savedWindowsList.get(i);
+            if (!WindowSavedManager.hasQuantiParameter(wndSaved)) {
+                continue;
+            }
+            String name = WindowSavedManager.getWindowName(wndSaved);
+            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, m_treeType));
+        }
+        
+        
         JMenuItem displayXICProteinSetItem = new JMenuItem(m_displayXICProteinSetAction);
         JMenuItem displayXICPeptideSetItem = new JMenuItem(m_displayXICPeptideSetAction);
         JMenuItem displayXICPeptideIonItem = new JMenuItem(m_displayXICPeptideIonAction);
+        JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
+        JMenuItem manageUserWindowsItem = new JMenuItem(m_manageUserWindowsAction);
                 
         m_menu.add(displayXICPeptideIonItem);
         m_menu.add(displayXICPeptideSetItem);
         m_menu.add(displayXICProteinSetItem);
-        
+        m_menu.addSeparator();
+        m_menu.add(displayUserWindowItem);
+        m_menu.add(manageUserWindowsItem);
+        int nbUserWindows = m_displaySavedWindowActionList.size();
+        if (nbUserWindows>0) {
+            m_menu.addSeparator();
+        }
+         for (int i = 0; i <nbUserWindows ; i++) {
+            m_menu.add(new JMenuItem(m_displaySavedWindowActionList.get(i)));
+        }
 
         return m_menu;
     }
@@ -50,8 +87,16 @@ public class DisplayXICAction extends AbstractRSMAction {
         m_displayXICProteinSetAction.updateEnabled(selectedNodes);
         m_displayXICPeptideSetAction.updateEnabled(selectedNodes);
         m_displayXICPeptideIonAction.updateEnabled(selectedNodes);
+        m_displayUserWindowAction.updateEnabled(selectedNodes);
+        m_manageUserWindowsAction.updateEnabled(selectedNodes);
         
-        boolean isEnabled = m_displayXICProteinSetAction.isEnabled() || m_displayXICPeptideSetAction.isEnabled() || m_displayXICPeptideIonAction.isEnabled();
+        boolean listEnabled = false;
+        for (DisplaySavedWindowAction m_displaySavedWindowActionList1 : m_displaySavedWindowActionList) {
+            m_displaySavedWindowActionList1.updateEnabled(selectedNodes);
+            listEnabled |= m_displaySavedWindowActionList1.isEnabled();
+        }
+        
+        boolean isEnabled = m_displayXICProteinSetAction.isEnabled() || m_displayXICPeptideSetAction.isEnabled() || m_displayXICPeptideIonAction.isEnabled() || m_displayUserWindowAction.isEnabled() || m_manageUserWindowsAction.isEnabled() || listEnabled;
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

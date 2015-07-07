@@ -35,8 +35,8 @@ public class DisplayRsetAction extends AbstractRSMAction {
         
         m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction();
         m_displayRsetProteinMatchesAction = new DisplayRsetProteinMatchesAction();
-        m_manageUserWindowsAction = new ManageUserWindowsAction(false, m_treeType);
-        m_displayUserWindowAction = new DisplayUserWindowAction(false, m_treeType);
+        m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
+        m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
         
         ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
         int nb = savedWindowsList.size();
@@ -47,7 +47,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
                 continue;
             }
             String name = WindowSavedManager.getWindowName(wndSaved);
-            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i));
+            m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, m_treeType));
         }
        
         JMenuItem displayRsetPeptidesItem = new JMenuItem(m_displayRsetPeptidesAction);

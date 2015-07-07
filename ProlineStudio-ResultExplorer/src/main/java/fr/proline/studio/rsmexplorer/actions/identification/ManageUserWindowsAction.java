@@ -14,11 +14,11 @@ import org.openide.windows.WindowManager;
  */
 public class ManageUserWindowsAction extends AbstractRSMAction {
 
-    private boolean m_forRSM;
+    private char m_windowType;
     
-    public ManageUserWindowsAction(boolean forRSM, TreeType treeType) {
+    public ManageUserWindowsAction(char saveWindowType, TreeType treeType) {
         super(NbBundle.getMessage(ManageUserWindowsAction.class, "CTL_ManagerUserWindowsAction"), treeType);
-        m_forRSM = forRSM;
+        m_windowType = saveWindowType;
     }
     
     @Override
@@ -26,6 +26,18 @@ public class ManageUserWindowsAction extends AbstractRSMAction {
         ManageSaveWindowsDialog dialog = ManageSaveWindowsDialog.getDialog(WindowManager.getDefault().getMainWindow());
         dialog.setLocation(x, y);
         dialog.setVisible(true);
+    }
+    
+    private boolean isForRSM(){
+        return m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSM;
+    }
+    
+    private boolean isForRset(){
+        return m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET;
+    }
+    
+    private boolean isForQuanti(){
+        return m_windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI;
     }
     
     @Override
@@ -37,10 +49,13 @@ public class ManageUserWindowsAction extends AbstractRSMAction {
         int nb = savedWindowsList.size();
         for (int i = 0; i < nb; i++) {
             String wndSaved = savedWindowsList.get(i);
-            if (m_forRSM && WindowSavedManager.hasResultSummaryParameter(wndSaved)) {
+            if (isForRSM() && WindowSavedManager.hasResultSummaryParameter(wndSaved)) {
                 enable = true;
                 break;
-            } else if (!m_forRSM && WindowSavedManager.hasResultSetParameter(wndSaved)) {
+            } else if (isForRset() && WindowSavedManager.hasResultSetParameter(wndSaved)) {
+                enable = true;
+                break;
+            }else if (isForQuanti() && WindowSavedManager.hasQuantiParameter(wndSaved)) {
                 enable = true;
                 break;
             }

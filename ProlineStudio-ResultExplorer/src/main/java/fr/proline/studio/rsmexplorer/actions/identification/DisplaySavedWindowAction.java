@@ -28,8 +28,8 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
 
     private int m_wndIndex;
     
-    public DisplaySavedWindowAction(String name, int wndIndex) {
-        super(name, AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public DisplaySavedWindowAction(String name, int wndIndex, AbstractTree.TreeType treeType) {
+        super(name, treeType);
         m_wndIndex = wndIndex;
     }
 
@@ -43,18 +43,18 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
 
         String savedWindow = savedWindowsList.get(m_wndIndex);
 
-        boolean needsRsm = WindowSavedManager.hasResultSummaryParameter(savedWindow);
+        char windowType = WindowSavedManager.getWindowType(savedWindow);
         String windowName = WindowSavedManager.getWindowName(savedWindow);
 
         int nbNodes = selectedNodes.length;
         for (int i = 0; i < nbNodes; i++) {
             DataSetNode dataSetNode = (DataSetNode) selectedNodes[i];
 
-            actionImpl(windowName, savedWindow, dataSetNode, needsRsm);
+            actionImpl(windowName, savedWindow, dataSetNode, windowType);
         }
     }
 
-    private void actionImpl(String windowName, String savedWindow, DataSetNode dataSetNode, boolean needsRsm) {
+    private void actionImpl(String windowName, String savedWindow, DataSetNode dataSetNode, char windowType) {
         
         final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
         long projectId = dataSet.getProject().getId();
@@ -62,26 +62,32 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
         
         AbstractDataBox[] databoxes = WindowSavedManager.readBoxes(savedWindow);
         databoxes[0].setProjectId(projectId);
-        WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox(dataSet.getName()+" "+windowName, databoxes, false, needsRsm);
+        WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox(dataSet.getName()+" "+windowName, databoxes, false, dataSetNode.isQuantXIC(),  windowType);
         
-        if (needsRsm) {
+        if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSM) {
             ResultSummary rsm = dataSetNode.getResultSummary();
             if (rsm == null) {
-                loadRsmOrRsetAndDisplayWnd(dataSet, wbox, needsRsm);
+                loadRsmOrRsetAndDisplayWnd(dataSet, wbox, WindowSavedManager.SAVE_WINDOW_FOR_RSM);
                 return;
             }
-        } else {
+        } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET){
             ResultSet rset = dataSetNode.getResultSet();
             if (rset == null) {
-                loadRsmOrRsetAndDisplayWnd(dataSet, wbox, needsRsm);
+                loadRsmOrRsetAndDisplayWnd(dataSet, wbox, WindowSavedManager.SAVE_WINDOW_FOR_RSET);
+                return;
+            }
+        }else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI){
+            DDataset ds = dataSetNode.getDataset();
+            if (ds == null) {
+                loadDatasetAndDisplayWnd(dataSet, wbox);
                 return;
             }
         }
         
-        displayWnd(dataSet, wbox, needsRsm);
+        displayWnd(dataSet, wbox, windowType);
 
     }
-    private void loadRsmOrRsetAndDisplayWnd(final DDataset dataSet, final WindowBox wbox, final boolean needsRsm) {
+    private void loadRsmOrRsetAndDisplayWnd(final DDataset dataSet, final WindowBox wbox, final char windowType) {
         // we have to load the result set
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
@@ -92,7 +98,7 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                displayWnd(dataSet, wbox, needsRsm);
+                displayWnd(dataSet, wbox, windowType);
             }
         };
 
@@ -102,15 +108,38 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
         task.initLoadRsetAndRsm(dataSet);
         AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
     }
+    
+    private void loadDatasetAndDisplayWnd(final DDataset dataSet, final WindowBox wbox){
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+
+            @Override
+            public boolean mustBeCalledInAWT() {
+                return true;
+            }
+
+            @Override
+            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                displayWnd(dataSet, wbox, WindowSavedManager.SAVE_WINDOW_FOR_QUANTI);
+            }
+        };
 
 
-    private void displayWnd(DDataset dataSet, WindowBox wbox, boolean needsRsm) {
+        // ask asynchronous loading of data
+        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+        task.initLoadQuantitation(dataSet.getProject(), dataSet);
+        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+    }
+
+
+    private void displayWnd(DDataset dataSet, WindowBox wbox, char windowType) {
         long projectId = dataSet.getProject().getId();
         
-        if (needsRsm) {
+        if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSM) {
             wbox.setEntryData(projectId, dataSet.getResultSummary());
-        } else {
+        } else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_RSET){
             wbox.setEntryData(projectId, dataSet.getResultSet());
+        }else if (windowType == WindowSavedManager.SAVE_WINDOW_FOR_QUANTI){
+            wbox.setEntryData(projectId, dataSet);
         }
 
          // open a window to display the window box
@@ -128,6 +157,7 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
        
        boolean needsRset = WindowSavedManager.hasResultSetParameter(wndDefinition);
        boolean needsRsm = WindowSavedManager.hasResultSummaryParameter(wndDefinition);
+       boolean needsDataset = WindowSavedManager.hasQuantiParameter(wndDefinition);
        
        
        int nbSelectedNodes = selectedNodes.length;
@@ -153,6 +183,11 @@ public class DisplaySavedWindowAction extends AbstractRSMAction {
 
 
             if ((needsRsm) && (!dataSetNode.hasResultSummary())) {
+                setEnabled(false);
+                return;
+            }
+            
+            if ((needsDataset) && (!dataSetNode.isQuantitation())) {
                 setEnabled(false);
                 return;
             }

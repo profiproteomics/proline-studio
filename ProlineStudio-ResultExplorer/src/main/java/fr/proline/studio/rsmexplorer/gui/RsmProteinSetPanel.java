@@ -22,9 +22,6 @@ import fr.proline.studio.pattern.*;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.ProteinCountRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -277,7 +274,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                     String savedWindow = SaveDataBoxActionListener.saveParentContainer("tmp", m_decoyButton);
                     
                     AbstractDataBox[] databoxes = WindowSavedManager.readBoxes(savedWindow);
-                    WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, true);
+                    WindowBox wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false, WindowSavedManager.SAVE_WINDOW_FOR_RSM);
                     wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
 
                     // open a window to display the window box

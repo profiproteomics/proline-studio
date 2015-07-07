@@ -3,7 +3,6 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
-import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.AddDataMixerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
@@ -25,10 +24,6 @@ import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
-import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
-import fr.proline.studio.rsmexplorer.gui.renderer.MsQueryRenderer;
 import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
@@ -36,7 +31,6 @@ import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
-import fr.proline.studio.table.LazyTableCellRenderer;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -250,7 +244,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                         String savedWindow = SaveDataBoxActionListener.saveParentContainer("tmp", m_decoyButton);
 
                         AbstractDataBox[] databoxes = WindowSavedManager.readBoxes(savedWindow);
-                        wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, true);
+                        wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false, WindowSavedManager.SAVE_WINDOW_FOR_RSM);
                         wbox.setEntryData(m_dataBox.getProjectId(), decoyRsm);
 
 
@@ -263,7 +257,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
                         String savedWindow = SaveDataBoxActionListener.saveParentContainer("tmp", m_decoyButton);
 
                         AbstractDataBox[] databoxes = WindowSavedManager. readBoxes(savedWindow);
-                        wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false);
+                        wbox = WindowBoxFactory.getFromBoxesWindowBox("Decoy " + getTopComponentName(), databoxes, true, false, WindowSavedManager.SAVE_WINDOW_FOR_RSET);
                         wbox.setEntryData(m_dataBox.getProjectId(), decoyRset);
                     }
 

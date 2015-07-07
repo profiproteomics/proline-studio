@@ -251,7 +251,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         
         double distanceMin = Double.MAX_VALUE;
         int nearestDataIndex = -1;
-        int size = m_dataX.length;
+        int size = m_dataX == null ? 0 :m_dataX.length;
         for (int i = size - 1; i >= 0; i--) { // reverse loop to select first the data in foreground
             double dataX = m_dataX[i];
             double dataY = m_dataY[i];
@@ -675,7 +675,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     
     @Override
     public boolean needsDoubleBuffering() {
-        return m_dataX.length>2000;
+        return m_dataX != null && m_dataX.length>2000;
     }
 
     @Override

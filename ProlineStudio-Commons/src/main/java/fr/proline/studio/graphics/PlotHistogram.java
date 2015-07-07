@@ -130,7 +130,7 @@ public class PlotHistogram extends PlotAbstract {
     
     private int findPoint(double x, double y) {
         double y2 = 0;
-        int size = m_dataX.length;
+        int size = m_dataX == null ? 0 : m_dataX.length;
         for (int i=0;i<size-1;i++) {
             double x1 = m_dataX[i];
             double x2 = m_dataX[i+1];
@@ -399,7 +399,7 @@ public class PlotHistogram extends PlotAbstract {
         g.setClip(clipX, clipY, clipWidth, clipHeight);
         
         int y2 = yAxis.valueToPixel(0);
-        int size = m_dataX.length;
+        int size = m_dataX == null ? 0 :m_dataX.length;
         for (int i=0;i<size-1;i++) {
             int x1 = xAxis.valueToPixel( m_dataX[i]);
             int x2 = xAxis.valueToPixel( m_dataX[i+1]);

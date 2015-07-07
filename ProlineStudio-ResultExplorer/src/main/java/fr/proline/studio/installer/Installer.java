@@ -8,9 +8,6 @@ import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rserver.RServerManager;
-import fr.proline.studio.utils.IconManager;
-import javax.swing.UIManager;
-import org.openide.modules.ModuleInstall;
 import org.openide.windows.WindowManager;
 
 /**

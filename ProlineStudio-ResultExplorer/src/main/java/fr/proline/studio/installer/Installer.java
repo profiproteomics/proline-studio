@@ -8,6 +8,8 @@ import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rserver.RServerManager;
+import fr.proline.studio.utils.IconManager;
+import javax.swing.UIManager;
 import org.openide.modules.ModuleInstall;
 import org.openide.windows.WindowManager;
 
@@ -23,8 +25,8 @@ public class Installer extends VersionInstaller {
     @Override
     public void restored() {
 
-        //String buildnumber = "1.0.1  alpha ("+moduleBuildDate+")"; //specify if alpha (or nothing = release)
-        String buildnumber = "1.1";
+        String buildnumber = "1.1.1  alpha ("+moduleBuildDate+")"; //specify if alpha (or nothing = release)
+        //String buildnumber = "1.1";
         
         // set the proline version for the application title
         System.setProperty("netbeans.buildnumber", buildnumber);  //"1.0.1 (alpha : build date @build.date@)"

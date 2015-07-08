@@ -95,6 +95,12 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
                 if (info.startsWith("sp|")) {
                     // wart for proteins starting with sp|
                     info = info.substring(3, info.length());
+                } // AW (2015/07/08): to allow uniprot sequence to be openend in browser
+                if (info.subSequence(2, 3).equals("|")) { //  like "sp|P07259|PYR1_YEAST"
+                	 info = info.substring(3, info.length());
+                }
+                if (info.contains("|")) { // like P07259|PYR1_YEAST
+                	info = info.substring(0,info.indexOf("|"));
                 }
                 info = encode(info);
                 
@@ -127,10 +133,10 @@ public class URLCellRenderer extends DefaultTableCellRenderer implements MouseLi
     }
 
     private static boolean isUnsafe(char ch) {
-        if (ch > 128 || ch < 0) {
+        if (ch > 128 || ch < 0 ) {
             return true;
         }
-        return " %$&+,/:;=?@<>#%".indexOf(ch) >= 0;
+        return " %$&+,/:;=?@<>#%|".indexOf(ch) >= 0;
     }
 
 

@@ -13,12 +13,23 @@ public class SampleDataGenerator {
       List<Object[]> data = new ArrayList<Object[]>();
       Random random = new Random();
       for (int k = 0; k < count; k++) {
-         Object[] item = {random.nextGaussian(), random.nextBoolean(), random.nextInt(200), random.nextGaussian() * 10.0, random.nextInt(300), k};
+         Object[] item = {random.nextGaussian(), random.nextBoolean(), random.nextInt(200), random.nextGaussian() * 10000.0, random.nextInt(300), k};
          data.add(item);
       }
       return data;
    }
    
+      public static List<Object[]> generate2DGaussian(int count, double sigma, double h, double noiseLevel) {
+      Random random = new Random();
+      List<Object[]> data = new ArrayList<Object[]>();
+      int m = count / 2;
+      for (int k = 0; k < count; k++) {
+         Object[] item = {k, 1.0*k, h*Math.exp(-(k - m)*(k - m)/(2* sigma * sigma))+random.nextGaussian()*noiseLevel};
+         data.add(item);
+      }
+      return data;
+   }
+
    public static List<Object[]> generate(int count, Class[] classes) {
       List<Object[]> data = new ArrayList<Object[]>();
       Random random = new Random();

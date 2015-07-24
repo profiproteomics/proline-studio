@@ -10,13 +10,20 @@ import javax.swing.table.TableModel;
  *
  * @author CB205360
  */
-public class Sample implements CompareDataInterface {
+public class Gaussian2DSample implements CompareDataInterface {
 
    private TableModel model; 
    
-   public Sample(int size) {
-      List<Object[]> sample = SampleDataGenerator.generate(size);
-      String[] col = { "xValue", "isA", "anInt", "yValue", "anotherInt", "id"};
+   public Gaussian2DSample(int size) {
+      this(size, 1.0, 0.0);
+   }
+
+   public Gaussian2DSample(int size, double noiseLevel) {
+      this(size, 1.0, noiseLevel);
+   }
+   public Gaussian2DSample(int size, double h, double noiseLevel) {
+      List<Object[]> sample = SampleDataGenerator.generate2DGaussian(size, size/8, h, noiseLevel);
+      String[] col = { "id", "xValue", "yValue"};
       model = new SampleTableModel(sample, col);
    }
 
@@ -51,13 +58,13 @@ public class Sample implements CompareDataInterface {
 
    @Override
    public int[] getKeysColumn() {
-      int[] key = { 5 }; 
+      int[] key = { 0 }; 
       return key;
    }
 
    @Override
    public int getInfoColumn() {
-      return 2;
+      return 0;
    }
 
    @Override

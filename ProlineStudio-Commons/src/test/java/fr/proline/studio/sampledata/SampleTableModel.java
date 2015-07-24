@@ -1,13 +1,15 @@
 package fr.proline.studio.sampledata;
 
+import fr.proline.studio.table.DecoratedTableModelInterface;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
  * @author CB205360
  */
-class SampleTableModel extends AbstractTableModel {
+class SampleTableModel extends AbstractTableModel implements DecoratedTableModelInterface {
 
    private List<Object[]> sample;
    private Class[] classes;
@@ -44,6 +46,21 @@ class SampleTableModel extends AbstractTableModel {
    public Class<?> getColumnClass(int columnIndex) {
       // TODO Auto-generated method stub
       return classes[columnIndex];
+   }
+
+   @Override
+   public String getToolTipForHeader(int col) {
+      return columns[col];
+   }
+
+   @Override
+   public String getTootlTipValue(int row, int col) {
+      return columns[col];
+   }
+
+   @Override
+   public TableCellRenderer getRenderer(int col) {
+      return null;
    }
 
 }

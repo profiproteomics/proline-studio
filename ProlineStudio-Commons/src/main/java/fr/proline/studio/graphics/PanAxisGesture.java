@@ -1,8 +1,5 @@
 package fr.proline.studio.graphics;
 
-import java.awt.Color;
-import java.awt.Graphics;
-
 /**
  * Used to manage zoom/unzoom gesture
  * @author JM235353

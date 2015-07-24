@@ -73,8 +73,8 @@ public class PlotLinear extends PlotAbstract {
     private ArrayList<ParameterList> m_parameterListArray = null;
     
     private boolean displayAntiAliasing = true;
-    
 
+    
     public PlotLinear(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
         update(colX, colY, null);
@@ -332,16 +332,19 @@ public class PlotLinear extends PlotAbstract {
 
         }
 
+        XAxis xAxis = m_plotPanel.getXAxis();
+        YAxis yAxis = m_plotPanel.getYAxis();
+        
         if (nearestDataIndex != -1) {
-            Point p = new Point(m_plotPanel.getXAxis().valueToPixel(x), m_plotPanel.getYAxis().valueToPixel(y));
+            Point p = new Point(xAxis.valueToPixel(x), m_plotPanel.getYAxis().valueToPixel(y));
             Point ps = null;
             Point pe = null;
-            Point pnd = new Point(m_plotPanel.getXAxis().valueToPixel(m_dataX[nearestDataIndex]),  m_plotPanel.getYAxis().valueToPixel(m_dataY[nearestDataIndex]));
+            Point pnd = new Point(xAxis.valueToPixel(m_dataX[nearestDataIndex]),  yAxis.valueToPixel(m_dataY[nearestDataIndex]));
             if (nearestDataIndex > 0) {
-                ps = new Point(m_plotPanel.getXAxis().valueToPixel(m_dataX[nearestDataIndex-1]),  m_plotPanel.getYAxis().valueToPixel(m_dataY[nearestDataIndex-1]));
+                ps = new Point(xAxis.valueToPixel(m_dataX[nearestDataIndex-1]),  yAxis.valueToPixel(m_dataY[nearestDataIndex-1]));
             }
             if (nearestDataIndex < size-1) {
-                pe = new Point(m_plotPanel.getXAxis().valueToPixel(m_dataX[nearestDataIndex+1]),  m_plotPanel.getYAxis().valueToPixel(m_dataY[nearestDataIndex+1]));
+                pe = new Point(xAxis.valueToPixel(m_dataX[nearestDataIndex+1]), yAxis.valueToPixel(m_dataY[nearestDataIndex+1]));
             }
             if (ps != null) {
                 double d0 = distanceToSegment(ps, pnd, p);

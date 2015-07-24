@@ -9,6 +9,5 @@ import javax.swing.table.TableCellRenderer;
 public interface DecoratedTableModelInterface {
     public String getToolTipForHeader(int col);
     public String getTootlTipValue(int row, int col);
-    
     public TableCellRenderer getRenderer(int col);
 }

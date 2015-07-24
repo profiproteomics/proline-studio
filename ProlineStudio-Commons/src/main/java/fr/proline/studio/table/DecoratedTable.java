@@ -9,6 +9,7 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.ListSelectionModel;
+import javax.swing.SortOrder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
@@ -20,6 +21,8 @@ import org.jdesktop.swingx.decorator.HighlighterFactory;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.util.PaintUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Table which has a bi-color striping, an ability to select columns viewed and
@@ -29,6 +32,8 @@ import org.jdesktop.swingx.util.PaintUtils;
  */
 public abstract class DecoratedTable extends JXTable implements CrossSelectionInterface {
 
+    protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio");
+   
     private RelativePainterHighlighter.NumberRelativizer m_relativizer = null;
     
     private TablePopupMenu m_popupMenu;
@@ -40,7 +45,10 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
 
         // highlight one line of two
         addHighlighter(HighlighterFactory.createSimpleStriping());
-
+        setGridColor(Color.lightGray);
+        setRowHeight(16);
+        setSortOrderCycle(SortOrder.ASCENDING, SortOrder.DESCENDING, SortOrder.UNSORTED);
+        
         TableSelection.installCopyAction(this);
   
         TablePopupMenu popup = initPopupMenu();
@@ -75,7 +83,7 @@ public abstract class DecoratedTable extends JXTable implements CrossSelectionIn
     public String getToolTipForHeader(int modelColumn) {
         return ((DecoratedTableModelInterface) getModel()).getToolTipForHeader(modelColumn);
     }
-    
+
     
     @Override
     protected JTableHeader createDefaultTableHeader() {

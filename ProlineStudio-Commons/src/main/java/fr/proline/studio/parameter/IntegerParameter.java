@@ -239,7 +239,7 @@ public class IntegerParameter extends AbstractParameter {
         }
         
         if (m_graphicalType.equals(JTextField.class)) {
-           return ((JTextField) m_parameterComponent).getText();
+           return Integer.parseInt(((JTextField) m_parameterComponent).getText());
         }
         if (m_graphicalType.equals(JSlider.class)) {
            return ((JSlider) m_parameterComponent).getValue();

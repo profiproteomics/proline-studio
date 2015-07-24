@@ -9,6 +9,7 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Polygon;
@@ -19,11 +20,14 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -34,13 +38,17 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Panel to display data with an X and Y Axis
  * @author JM235353
  */
-public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionListener, EnumXInterface, EnumYInterface {
+public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, EnumXInterface, EnumYInterface {
     
+    private static final Logger m_logger = LoggerFactory.getLogger(BasePlotPanel.class);
+   
     private static final Color PANEL_BACKGROUND_COLOR = UIManager.getColor ("Panel.background");
     
     private XAxis m_xAxis = null;
@@ -52,8 +60,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private final SelectionGesture m_selectionGesture = new SelectionGesture();
     private final PanAxisGesture m_panAxisGesture = new PanAxisGesture();
     
-    
-    public final static int GAP_FIGURES_Y = 50;
+    public final static int GAP_FIGURES_Y = 30;
     public final static int GAP_FIGURES_X = 24;
     public final static int GAP_END_AXIS = 10;
     public final static int GAP_AXIS_TITLE = 20;
@@ -65,16 +72,16 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     
     private boolean m_plotHorizontalGrid = true;
     private boolean m_plotVerticalGrid = true;
-
     private boolean m_dataLocked = false;
+    private boolean m_drawCursor = false;
+    
+    private Insets m_margins = new Insets(5, 0, 0, 0);
     
     private GridListener m_gridListener = null;
+    private List<PlotPanelListener> m_listeners = new ArrayList<>();
     
     private final Rectangle m_plotArea = new Rectangle();
     
-    List<PlotPanelListener> m_listeners = new ArrayList<PlotPanelListener>();
-    
-    private boolean m_drawCursor = false;
     // show coord.
     private String m_coordX="";
     private String m_coordY="";
@@ -95,10 +102,13 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private final static Font titleFont = new Font("dialog", Font.BOLD, 11);
     private final static Color titleColor = Color.DARK_GRAY;
     
+//    public final FPSUtility fps = new FPSUtility(20);
+    
     public BasePlotPanel() {
         formatE.applyPattern("0.#####E0");
         addMouseListener(this);
         addMouseMotionListener(this);
+        addMouseWheelListener(this);
         ToolTipManager.sharedInstance().registerComponent(this);
         m_plots = new ArrayList();
     }
@@ -106,9 +116,14 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     public void setPlotTitle(String title){
         this.m_plotTitle= title;
     }
+
+   public void setMargins(Insets margins) {
+      this.m_margins = margins;
+   }
     
     @Override
     public void paint(Graphics g) {
+//        fps.startFrame();
         
         Graphics2D g2d = (Graphics2D)g;
         g2d.setRenderingHint( RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -145,6 +160,8 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         g.setColor(Color.darkGray);
 
         int figuresXHeight = GAP_FIGURES_X;
+        double[] tab = getMinMaxPlots();
+        
         if (m_xAxis != null) {
             
             // set default size
@@ -156,6 +173,12 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             // set correct size
             figuresXHeight = m_xAxis.getMiniMumAxisHeight(figuresXHeight);
             m_xAxis.setSize(GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE, height-figuresXHeight -GAP_AXIS_TITLE  /*-GAP_TOP_AXIS*/, width-GAP_FIGURES_Y-GAP_AXIS_TITLE-GAP_END_AXIS, figuresXHeight + GAP_AXIS_TITLE+GAP_AXIS_LINE);
+            if ((m_xAxis.getMinValue() == tab[0] && m_xAxis.getMaxValue() == tab[1])) {
+                double rightMargin = m_margins.right == 0 ? 0.0 : Math.abs(m_xAxis.pixelToValue(0) -  m_xAxis.pixelToValue(m_margins.right));
+                double leftMargin =  m_margins.left == 0 ? 0.0 : Math.abs(m_xAxis.pixelToValue(0) -  m_xAxis.pixelToValue(m_margins.left));
+                m_xAxis.setRange(tab[0] - leftMargin,tab[1] + rightMargin);
+            }
+            
             m_plotArea.x = m_xAxis.m_x+1;
             m_plotArea.width = m_xAxis.m_width;
             m_xAxis.paint(g2d);
@@ -163,7 +186,13 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
         
         if (m_yAxis != null) {
+            
             m_yAxis.setSize(0, GAP_END_AXIS+titleY, GAP_FIGURES_Y+GAP_AXIS_TITLE+GAP_AXIS_LINE/*+GAP_TOP_AXIS*/, height-figuresXHeight-GAP_AXIS_TITLE-GAP_END_AXIS-titleY);
+            if ((m_yAxis.getMinValue() == tab[2] && m_yAxis.getMaxValue() == tab[3])) {
+                double topMargin = m_margins.top == 0 ? 0.0 : Math.abs(m_yAxis.pixelToValue(0) -  m_yAxis.pixelToValue(m_margins.top));
+                double bottomMargin =  m_margins.bottom == 0 ? 0.0 : Math.abs(m_yAxis.pixelToValue(0) -  m_yAxis.pixelToValue(m_margins.bottom));
+                m_yAxis.setRange(tab[2] - bottomMargin,tab[3] + topMargin);
+            }
             m_plotArea.y = m_yAxis.m_y+1;
             m_plotArea.height = m_yAxis.m_height;
             m_yAxis.paint(g2d);
@@ -180,7 +209,6 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                         m_doubleBuffer = new BufferedImage(m_plotArea.width, m_plotArea.height, BufferedImage.TYPE_INT_ARGB);
                     }
                     if (createDoubleBuffer || m_updateDoubleBuffer) {
-                        
                         Graphics2D graphicBufferG2d = (Graphics2D) m_doubleBuffer.getGraphics();
                         graphicBufferG2d.setColor(Color.white);
                         graphicBufferG2d.fillRect(0, 0, m_plotArea.width, m_plotArea.height);
@@ -243,6 +271,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             paintCoord(g2d);
         }
         
+//        fps.stopFrame();
     }
     
     private void paintCoord(Graphics2D g){
@@ -422,7 +451,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             YAxis yAxis = getYAxis();
             yAxis.setLog(false);
             yAxis.setSelected(false);
-            yAxis.setRange(tab[2] ,tab[3]);
+            yAxis.setRange(tab[2],tab[3]);
         }
         
         m_updateDoubleBuffer = true;
@@ -649,17 +678,17 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             m_zoomGesture.moveZooming(e.getX(), e.getY());
             repaint();
         } else if (m_panAxisGesture.isPanning()) {
-           if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.X_AXIS_PAN) {
-            double delta = m_xAxis.pixelToValue(m_panAxisGesture.getPreviousX()) - m_xAxis.pixelToValue(e.getX());
-            m_xAxis.setRange(m_xAxis.getMinValue()+delta, m_xAxis.getMaxValue()+delta);
-           } else {
-              double delta = m_yAxis.pixelToValue(m_panAxisGesture.getPreviousY()) - m_yAxis.pixelToValue(e.getY());
-              m_yAxis.setRange(m_yAxis.getMinValue()+delta, m_yAxis.getMaxValue()+delta);
-        }
-           m_panAxisGesture.movePan(e.getX(), e.getY());
-            m_updateDoubleBuffer = true;
-            repaint();
-    }
+          if (m_panAxisGesture.getPanningAxis() == PanAxisGesture.X_AXIS_PAN) {
+             double delta = m_xAxis.pixelToValue(m_panAxisGesture.getPreviousX()) - m_xAxis.pixelToValue(e.getX());
+             m_xAxis.setRange(m_xAxis.getMinValue() + delta, m_xAxis.getMaxValue() + delta);
+          } else {
+             double delta = m_yAxis.pixelToValue(m_panAxisGesture.getPreviousY()) - m_yAxis.pixelToValue(e.getY());
+             m_yAxis.setRange(m_yAxis.getMinValue() + delta, m_yAxis.getMaxValue() + delta);
+          }
+          m_panAxisGesture.movePan(e.getX(), e.getY());
+          m_updateDoubleBuffer = true;
+          repaint();
+       }
     }
     
     @Override
@@ -740,8 +769,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             setToolTipText(null);
         }
         
-        if (repaintNeeded || m_drawCursor) {
+        if (repaintNeeded) {
             repaintUpdateDoubleBuffer();
+        } else if(m_drawCursor) {
+           repaint();
         }
         
     }
@@ -791,6 +822,32 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         }
         return m_plots.get(0).getEnumValueY(index, fromData);
     }
+
+   @Override
+   public void mouseWheelMoved(MouseWheelEvent e) {
+       if (m_plots == null || m_plots.isEmpty() || e == null) {
+            return;
+        }
+        double factor = 0.20;
+        double xValue = m_xAxis.pixelToValue(e.getX());
+        double yValue = m_yAxis.pixelToValue(e.getY());
+        double newXmin = m_xAxis.getMinValue() + (m_xAxis.getMinValue() - xValue)* factor * e.getWheelRotation();
+        double newXmax = m_xAxis.getMaxValue() - (xValue - m_xAxis.getMaxValue())* factor * e.getWheelRotation();
+        double newYmin = m_yAxis.getMinValue() + (m_yAxis.getMinValue() - yValue)* factor * e.getWheelRotation();
+        double newYmax = m_yAxis.getMaxValue() - (yValue - m_yAxis.getMaxValue())* factor * e.getWheelRotation();
+        
+        if (m_plots.get(0).inside(e.getX(), e.getY())) {
+           m_xAxis.setRange(newXmin, newXmax);
+           m_yAxis.setRange(newYmin, newYmax);
+           repaintUpdateDoubleBuffer();
+        } else if ((m_xAxis != null) && m_xAxis.inside(e.getX(), e.getY())) {
+           m_xAxis.setRange(newXmin, newXmax);
+           repaintUpdateDoubleBuffer();
+        } else if ((m_yAxis != null) && m_yAxis.inside(e.getX(), e.getY())) {
+           m_yAxis.setRange(newYmin, newYmax);
+           repaintUpdateDoubleBuffer();
+        }
+   }
     
     
     public class LogAction extends AbstractAction {
@@ -876,6 +933,37 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     public interface GridListener {
         public void gridChanged();
     }
-    
-    
+
+   public class FPSUtility {
+   
+   private double[] frames;
+   private int index = 0;
+   private long startTime;
+   
+   protected FPSUtility(int size) {
+      frames  = new double[size];
+      Arrays.fill(frames, -1.0);
+   }
+   protected void startFrame() {
+      startTime = System.currentTimeMillis();
+   }
+   
+   protected void stopFrame() {
+      frames[index++] = System.currentTimeMillis() - startTime;
+      index = index % frames.length;
+   }
+   
+   public double getMeanTimePerFrame() {
+      int count = 0;
+      double sum = 0.0;
+      for (double d : frames) {
+         if (d > 0) {
+            count++;
+            sum += d;
+         }
+      }
+      return sum / (double)count;
+   }
 }
+}
+

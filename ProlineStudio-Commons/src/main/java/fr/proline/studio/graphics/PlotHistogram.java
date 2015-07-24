@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 
 import java.util.HashSet;
-import javax.swing.JSlider;
+import javax.swing.JTextField;
 
 /**
  * Histogram Plot
@@ -63,7 +63,7 @@ public class PlotHistogram extends PlotAbstract {
         parameterColorList.add(m_colorParameter);
         
         ParameterList parameterSettingsList = new ParameterList("Settings");
-        m_binsParameter = new IntegerParameter(PLOT_HISTOGRAM_BIN_KEY, "Bins", JSlider.class, m_bins, 5, 100);
+        m_binsParameter = new IntegerParameter(PLOT_HISTOGRAM_BIN_KEY, "Bins", JTextField.class, m_bins, 5, 1000);
         parameterSettingsList.add(m_binsParameter);
         
         m_parameterListArray = new ArrayList<>(2);

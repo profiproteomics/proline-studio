@@ -9,6 +9,7 @@ import fr.proline.studio.dam.tasks.DatabaseProteinSetsTask;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.ProteinCountRenderer;
@@ -522,7 +523,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
         switch (col) {
             case COLTYPE_PROTEIN_SET_NAME:
             case COLTYPE_PROTEIN_SET_DESCRIPTION: {
-                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
             case COLTYPE_PROTEIN_SCORE: {

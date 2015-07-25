@@ -2,7 +2,8 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
-import fr.proline.mzscope.util.MzScopeConstants;
+import fr.proline.mzscope.utils.MzScopeConstants;
+import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -30,13 +31,12 @@ import javax.swing.event.EventListenerList;
  *
  * @author MB243701
  */
-public class HeaderSpectrumPanel extends JPanel {
+public class ScanHeaderPanel extends JPanel {
 
     private final static DecimalFormat TIME_FORMATTER = new DecimalFormat("0.00");
     private final static DecimalFormat MASS_FORMATTER = new DecimalFormat("0.####");
     
-    private final static String TXT_KEEP_MSLEVEL = "keep same ms level";
-    private final static String TXT_ALL_MSLEVEL = "all ms level";
+    private final static String TXT_KEEP_MSLEVEL = "Keep same ms level";
     private final static String TXT_XIC_OVERLAY = "XIC Overlay";
 
     private JScrollPane scrollPane;
@@ -71,7 +71,7 @@ public class HeaderSpectrumPanel extends JPanel {
     //events
     private EventListenerList listenerList = new EventListenerList();
 
-    public HeaderSpectrumPanel(Scan scan, List<Integer> scanIndexList, boolean displayXicModeVisible) {
+    public ScanHeaderPanel(Scan scan, List<Integer> scanIndexList, boolean displayXicModeVisible) {
         this.scan = scan;
         this.displayXicModeVisible = displayXicModeVisible;
         this.scanIndexList = scanIndexList;
@@ -97,12 +97,12 @@ public class HeaderSpectrumPanel extends JPanel {
        if (this.mainPanel == null) {
             mainPanel = new JPanel();
             mainPanel.setName("mainPanel");
-            mainPanel.setLayout(new FlowLayout());
-            mainPanel.add(getPanelTitle());
-            mainPanel.add(getPanelPrecursor());
+            mainPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 5, 2));
             mainPanel.add(getPanelScanIndex());
             mainPanel.add(getPanelRetentionTime());
             mainPanel.add(getPanelMsLevel());
+            mainPanel.add(getPanelTitle());
+            mainPanel.add(getPanelPrecursor());
         }
         return this.mainPanel; 
     }
@@ -207,6 +207,7 @@ public class HeaderSpectrumPanel extends JPanel {
             spinnerScanIndexModel = new SpinnerListModel(scanIndexList);
             spinnerScanIndex = new JSpinner(spinnerScanIndexModel);
             ((DefaultEditor) spinnerScanIndex.getEditor()).getTextField().setEditable(false);
+            ((DefaultEditor) spinnerScanIndex.getEditor()).getTextField().setColumns(5);
             spinnerScanIndex.setName("spinnerScanIndex");
             spinnerScanIndex.addChangeListener(new ChangeListener() {
                 @Override
@@ -328,6 +329,7 @@ public class HeaderSpectrumPanel extends JPanel {
         this.spinnerScanIndexModel = new SpinnerListModel(scanIndexList);
         this.spinnerScanIndex.setModel(spinnerScanIndexModel);
         ((DefaultEditor) spinnerScanIndex.getEditor()).getTextField().setEditable(false);
+        ((DefaultEditor) spinnerScanIndex.getEditor()).getTextField().setColumns(5);
     }
 
     /**
@@ -377,7 +379,7 @@ public class HeaderSpectrumPanel extends JPanel {
         }
     }
     
-    private void fireXicOverlay(int mode) {
+    private void fireXicOverlay(DisplayMode mode) {
         Object[] listeners = listenerList.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if (listeners[i] == ScanHeaderListener.class) {
@@ -422,17 +424,11 @@ public class HeaderSpectrumPanel extends JPanel {
         if (scan == null) {
             return;
         }
-        boolean keepMsLevel = this.cbKeepMsLevel.isSelected();
-        if (keepMsLevel) {
-            cbKeepMsLevel.setText(TXT_KEEP_MSLEVEL);
-        }else{
-            cbKeepMsLevel.setText(TXT_ALL_MSLEVEL);
-        }
-        fireKeepMsLevel(keepMsLevel);
+        fireKeepMsLevel(this.cbKeepMsLevel.isSelected());
     }
     
     public void xicOverlayActionPerformed(ActionEvent evt) {
-        fireXicOverlay(this.cbXicOverlay.isSelected()?MzScopeConstants.MODE_DISPLAY_XIC_OVERLAY:MzScopeConstants.MODE_DISPLAY_XIC_REPLACE);
+        fireXicOverlay(this.cbXicOverlay.isSelected() ? DisplayMode.OVERLAY : DisplayMode.REPLACE);
     }
 
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.proline.mzscope.util.BinarySearch;
+import fr.proline.mzscope.utils.BinarySearch;
 
 public class XICExtractor {
 
@@ -53,7 +53,8 @@ public class XICExtractor {
       logger.info("average iterations :: " + (bs.getIterations() / (float) scans.size()));
       logger.info("nb of failed prediction" + (bs.getFails()));
 
-      Chromatogram chromatogram = new Chromatogram();
+      // WARN : setting rawFilename of Chromato to null is not recommanded : becareful to set a real rawFilename
+      Chromatogram chromatogram = new Chromatogram(null);
       chromatogram.time = XItime;
       chromatogram.intensities = XIintensities;
       chromatogram.minMz = (double) vmin;

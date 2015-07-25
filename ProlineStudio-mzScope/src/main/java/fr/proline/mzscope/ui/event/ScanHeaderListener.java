@@ -1,5 +1,6 @@
 package fr.proline.mzscope.ui.event;
 
+import fr.proline.mzscope.utils.MzScopeConstants;
 import java.util.EventListener;
 
 /**
@@ -34,7 +35,7 @@ public interface ScanHeaderListener extends EventListener {
      * display xic as overlay or replace mode
      * @param mode 
      */
-    public void updateXicDisplayMode(int mode);
+    public void updateXicDisplayMode(MzScopeConstants.DisplayMode mode);
     
 
 }

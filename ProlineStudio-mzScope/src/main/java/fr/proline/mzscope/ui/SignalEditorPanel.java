@@ -1,5 +1,7 @@
 package fr.proline.mzscope.ui;
 
+import fr.profi.mzdb.algo.signal.detection.SmartPeakelFinder;
+import fr.profi.mzdb.algo.signal.filtering.BaselineRemover;
 import fr.profi.mzdb.algo.signal.filtering.ISignalSmoother;
 import fr.profi.mzdb.algo.signal.filtering.PartialSavitzkyGolaySmoother;
 import fr.profi.mzdb.algo.signal.filtering.SavitzkyGolaySmoother;
@@ -11,6 +13,7 @@ import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel;
+import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.PointMarker;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
@@ -37,9 +40,12 @@ public class SignalEditorPanel extends JPanel {
    
    final private static Logger logger = LoggerFactory.getLogger(SignalEditorPanel.class);
    private final PlotPanel m_plotPanel;
+   private final PlotLinear m_linear;
    private final Signal m_signal;
    private Map<Signal, PlotLinear> m_smoothedSignals;
    private final JButton minmaxBtn;
+   private final JButton baseLineBtn;
+   
    
    public SignalEditorPanel(Signal signal) {
       m_signal = signal;
@@ -50,13 +56,14 @@ public class SignalEditorPanel extends JPanel {
       basePlot.setPlotTitle("2d signal");
       basePlot.setDrawCursor(true);
       SignalWrapper wrappedSignal = new SignalWrapper(m_signal, "original signal", CyclicColorPalette.getColor(1));
-      PlotLinear linear = new PlotLinear(basePlot, wrappedSignal, null, 0, 1);
-      linear.setPlotInformation(wrappedSignal.getPlotInformation());
-      linear.setStrokeFixed(true);
-      linear.setAntiAliasing(true);
-      basePlot.setPlot(linear);
+      m_linear = new PlotLinear(basePlot, wrappedSignal, null, 0, 1);
+      m_linear.setPlotInformation(wrappedSignal.getPlotInformation());
+      m_linear.setStrokeFixed(true);
+      m_linear.setAntiAliasing(true);
+      basePlot.setPlot(m_linear);
       setLayout(new BorderLayout());
       JToolBar toolbar = new JToolBar();
+      
       JButton smoothBtn = new JButton("Smooth");
       smoothBtn.addActionListener(new ActionListener() {
 
@@ -86,6 +93,27 @@ public class SignalEditorPanel extends JPanel {
       });
       
       toolbar.add(minmaxBtn);
+      
+      baseLineBtn = new JButton("Baseline");
+      baseLineBtn.addActionListener(new ActionListener() {
+
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            
+            List<Tuple2> input = toScalaArrayTuple();
+            Tuple2[] rtIntPairs = input.toArray(new Tuple2[input.size()]);
+            BaselineRemover baselineRemover = new BaselineRemover(1);
+            double threshold = baselineRemover.calcNoiseThreshold(rtIntPairs);
+            logger.info("detected baseline at threshold "+threshold);
+            LineMarker positionMarker = new LineMarker(m_plotPanel.getBasePlotPanel(), threshold, LineMarker.ORIENTATION_HORIZONTAL, Color.BLUE, true);
+            m_linear.addMarker(positionMarker);
+            SmartPeakelFinder peakelFinder = new SmartPeakelFinder(5, 3, false, 10, false, true);
+            Tuple2[] indices = peakelFinder.findPeakelsIndices(rtIntPairs);
+         }
+      });
+      
+      toolbar.add(baseLineBtn);
+      
       add(m_plotPanel, BorderLayout.CENTER);
       add(toolbar, BorderLayout.NORTH);
       setPreferredSize(new Dimension(300,500));

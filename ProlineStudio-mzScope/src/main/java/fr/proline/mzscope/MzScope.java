@@ -1,8 +1,12 @@
 package fr.proline.mzscope;
 
+import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.ui.MzScopePanel;
+import fr.proline.mzscope.ui.RawFileManager;
 import java.awt.Frame;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.JPanel;
 import org.slf4j.Logger;
@@ -48,7 +52,7 @@ public class MzScope implements IMzScope{
     @Override
     public void openRaw(File file) {
         logger.debug("openRaw for "+file.getName());
-        mzScopePanel.openRaw(file);
+        mzScopePanel.openRaw(Arrays.asList(file));
     }
 
 
@@ -61,13 +65,17 @@ public class MzScope implements IMzScope{
     @Override
     public void detectPeakels(File file) {
         logger.debug("detectPeakel on "+file.getName());
-        mzScopePanel.detectPeakels(file);
+        mzScopePanel.detectPeakels(Arrays.asList(RawFileManager.getInstance().getFile(file.getName())));
     }
 
     @Override
     public void detectPeakels(List<File> fileList) {
-        logger.debug("detectPeakel for list ");
-        mzScopePanel.detectPeakels(fileList);
+        List<IRawFile> listRawFile = new ArrayList();
+        for (File file : fileList) {
+            IRawFile rawFile = RawFileManager.getInstance().getFile(file.getName());
+            listRawFile.add(rawFile);
+        }
+        mzScopePanel.detectPeakels(listRawFile);
     }
 
 }

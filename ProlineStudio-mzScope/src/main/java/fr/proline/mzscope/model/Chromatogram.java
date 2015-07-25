@@ -6,11 +6,14 @@ package fr.proline.mzscope.model;
  */
 public class Chromatogram {
    
-   public IRawFile rawFile;
+   public String rawFilename;
    public String title;
    public double minMz = -1.0;
    public double maxMz = -1.0;
    public double[] time;
    public double[] intensities;
    
+   public Chromatogram(String rawFilename) {
+      this.rawFilename = rawFilename;
+   }
 }

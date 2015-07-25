@@ -1,4 +1,4 @@
-package fr.proline.mzscope.ui;
+package fr.proline.mzscope.ui.dialog;
 
 import java.io.File;
 import javax.swing.filechooser.FileFilter;

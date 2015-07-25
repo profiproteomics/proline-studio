@@ -1,4 +1,4 @@
-package fr.proline.mzscope.ui;
+package fr.proline.mzscope.ui.model;
 
 import fr.profi.mzdb.model.Feature;
 import fr.proline.studio.filter.DoubleFilter;

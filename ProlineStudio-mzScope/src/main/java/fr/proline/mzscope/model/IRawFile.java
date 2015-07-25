@@ -8,22 +8,20 @@ import java.util.List;
  * @author CB205360
  */
 public interface IRawFile {
-
-   public enum ExtractionType { EXTRACT_MS2_FEATURES, DETECT_PEAKELS, DETECT_FEATURES};
    
    public String getName();
 
-   public Chromatogram getXIC(double minMz, double maxMz, float minRT, float maxRT);
-      
-   public Chromatogram getXIC(double min, double max);
+   public Chromatogram getXIC(Ms1ExtractionRequest params);
    
    public Chromatogram getTIC();
 
    public Chromatogram getBPI();
 
-   public List<Feature> extractFeatures(ExtractionType type, ExtractionParams params);
+   public List<Feature> extractFeatures(FeaturesExtractionRequest params);
    
    public Scan getScan(int scanIndex);
+
+   public int getScanCount();
    
    public int getScanId(double retentionTime);
    

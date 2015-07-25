@@ -1,14 +1,14 @@
 package fr.proline.mzscope.ui;
 
+import fr.proline.mzscope.ui.model.ScanTableModel;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.algo.IsotopicPatternScorer;
-//import fr.profi.mzdb.algo.IsotopicPatternScorer;
-import fr.proline.mzscope.model.IsotopePattern;
+import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
-import fr.proline.mzscope.util.MzScopeConstants;
-import fr.proline.mzscope.util.ScanUtils;
+import static fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
+import fr.proline.mzscope.utils.ScanUtils;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.PlotAbstract;
 import fr.proline.studio.graphics.PlotLinear;
@@ -27,17 +27,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Tuple2;
-import scala.collection.immutable.SortedMap;
 
 /**
  * contains the scan panel
@@ -48,19 +45,18 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
    private static final Logger logger = LoggerFactory.getLogger(SpectrumPanel.class);
    
-   private AbstractRawFilePanel rawFilePanel;
+   private final IRawFilePanel rawFilePanel;
 
    protected BasePlotPanel spectrumPlotPanel;
    protected JToolBar spectrumToolbar;
-   private HeaderSpectrumPanel headerSpectrumPanel;
+   private ScanHeaderPanel headerSpectrumPanel;
    protected PlotAbstract scanPlot;
    protected Scan currentScan;
    protected LineMarker positionMarker;
    private boolean keepMsLevel = true;
-    
-   protected int xicModeDisplay = MzScopeConstants.MODE_DISPLAY_XIC_REPLACE;
+   protected DisplayMode xicModeDisplay = DisplayMode.REPLACE;
 
-   public SpectrumPanel(AbstractRawFilePanel rawFilePanel) {
+   public SpectrumPanel(IRawFilePanel rawFilePanel) {
       super();
       this.rawFilePanel = rawFilePanel;
    }
@@ -77,7 +73,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       List<Integer> emptyListScanIndex = new ArrayList<>();
       emptyListScanIndex.add(0);
       boolean multiRawFile = rawFilePanel instanceof MultiRawFilePanel;
-      headerSpectrumPanel = new HeaderSpectrumPanel(null, emptyListScanIndex, !multiRawFile);
+      headerSpectrumPanel = new ScanHeaderPanel(null, emptyListScanIndex, !multiRawFile);
       headerSpectrumPanel.addScanHeaderListener(this);
       spectrumPlotPanel.repaint();
 
@@ -163,7 +159,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    @Override
    public void plotPanelMouseClicked(MouseEvent e, double xValue, double yValue) {
       if (e.getClickCount() == 2) {
-         if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0 && xicModeDisplay != MzScopeConstants.MODE_DISPLAY_XIC_OVERLAY) {
+         if ((e.getModifiers() & KeyEvent.ALT_MASK) == 0 && xicModeDisplay != DisplayMode.OVERLAY) {
             scanPlot.clearMarkers();
             scanPlot.addMarker(positionMarker);
          }
@@ -174,7 +170,14 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
          double maxMz = domain + domain * ppmTol / 1e6;
          double minMz = domain - domain * ppmTol / 1e6;
          scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, minMz, maxMz));
-         rawFilePanel.scanMouseClicked(e, minMz, maxMz, xicModeDisplay);
+         
+         Ms1ExtractionRequest params = Ms1ExtractionRequest.builder().setMinMz(minMz).setMaxMz(maxMz).build();
+        if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0) {
+            rawFilePanel.extractAndDisplayChromatogram(params, DisplayMode.OVERLAY, null);
+        } else {
+           rawFilePanel.extractAndDisplayChromatogram(params, xicModeDisplay, null);
+        }
+                  
       } else if (SwingUtilities.isLeftMouseButton(e)) {
          positionMarker.setValue(xValue);
          positionMarker.setVisible(true);
@@ -201,7 +204,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    public void addMarkerRange(double minMz, double maxMz) {
       scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, minMz, maxMz));
    }
-
+   
    public void displayScan(Scan scan) {
 
       double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0;
@@ -214,25 +217,22 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       }
 
       if (scan != null) {
-         Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile());
-         ScanModel scanModel = new ScanModel(scan);
+         Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
+         ScanTableModel scanModel = new ScanTableModel(scan);
          scanModel.setColor(plotColor);
          if (scan.getDataType() == Scan.ScanType.CENTROID) { // mslevel2
             //stick plot
-            scanPlot = new PlotStick(spectrumPlotPanel, scanModel, null, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
+            scanPlot = new PlotStick(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
             ((PlotStick) scanPlot).setStrokeFixed(true);
             ((PlotStick) scanPlot).setPlotInformation(scanModel.getPlotInformation());
             ((PlotStick) scanPlot).setIsPaintMarker(true);
          } else {
-            scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, null, ScanModel.COLTYPE_SCAN_MASS, ScanModel.COLTYPE_SCAN_INTENSITIES);
+            scanPlot = new PlotLinear(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
             ((PlotLinear) scanPlot).setStrokeFixed(true);
             ((PlotLinear) scanPlot).setPlotInformation(scanModel.getPlotInformation());
             ((PlotLinear) scanPlot).setIsPaintMarker(true);
          }
 
-//         for (int k = 0; k < scan.getPeaksMz().length; k++) {
-//            scanPlot.addMarker(new PointMarker(spectrumPlotPanel, scan.getPeaksMz()[k], scan.getPeaksIntensities()[k], Color.orange));
-//         }
          spectrumPlotPanel.setPlot(scanPlot);
          spectrumPlotPanel.lockMinXValue();
          spectrumPlotPanel.lockMinYValue();
@@ -241,6 +241,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
             spectrumPlotPanel.getXAxis().setRange(xMin, xMax);
             spectrumPlotPanel.getYAxis().setRange(yMin, yMax);
          }
+         
          if ((currentScan != null) && (currentScan.getMsLevel() != scan.getMsLevel())) {
             positionMarker.setVisible(false);
          }
@@ -253,28 +254,32 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       }
    }
 
+   public int getNextScanIndex() {
+      if (keepMsLevel) 
+         return (rawFilePanel.getCurrentRawfile().getNextScanId(currentScan.getIndex(), currentScan.getMsLevel()));
+      return Math.min(currentScan.getIndex() + 1, rawFilePanel.getCurrentRawfile().getScanCount()-1);
+   } 
+
+   public int getPreviousScanIndex() {
+      if (keepMsLevel) 
+         return (rawFilePanel.getCurrentRawfile().getPreviousScanId(currentScan.getIndex(), currentScan.getMsLevel()));
+      return Math.max(1, currentScan.getIndex() - 1);
+   } 
+
    private void updateScanIndexList() {
-      List<Integer> listScanIndex = new ArrayList();
-      if (keepMsLevel) {
-         listScanIndex.add(rawFilePanel.getCurrentRawfile().getPreviousScanId(currentScan.getIndex(), currentScan.getMsLevel()));
-      } else {
-         listScanIndex.add(currentScan.getIndex() - 1);
-      }
+      List<Integer> listScanIndex = new ArrayList(3);
+      listScanIndex.add(getPreviousScanIndex());
       listScanIndex.add(currentScan.getIndex());
-      if (keepMsLevel) {
-         listScanIndex.add(rawFilePanel.getCurrentRawfile().getNextScanId(currentScan.getIndex(), currentScan.getMsLevel()));
-      } else {
-         listScanIndex.add(currentScan.getIndex() + 1);
-      }
+      listScanIndex.add(getNextScanIndex());
       headerSpectrumPanel.setScanIndexList(listScanIndex);
    }
 
    @Override
-   public void updateXicDisplayMode(int mode) {
+   public void updateXicDisplayMode(DisplayMode mode) {
       xicModeDisplay = mode;
    }
 
-   public int getXicModeDisplay() {
+   public DisplayMode getXicModeDisplay() {
       return this.xicModeDisplay;
    }
 

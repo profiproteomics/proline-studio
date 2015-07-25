@@ -1,4 +1,4 @@
-package fr.proline.mzscope.ui;
+package fr.proline.mzscope.ui.model;
 
 import fr.proline.mzscope.model.Scan;
 import fr.proline.studio.comparedata.CompareDataInterface;
@@ -11,7 +11,7 @@ import javax.swing.table.AbstractTableModel;
  * data for scan
  * @author MB243701
  */
-public class ScanModel extends AbstractTableModel implements CompareDataInterface{
+public class ScanTableModel extends AbstractTableModel implements CompareDataInterface{
     private static final String[] m_columnNames = {"Masses", "Intensities", "Retention Time", "MS Level"};
     
     public static final int COLTYPE_SCAN_MASS = 0;
@@ -25,7 +25,7 @@ public class ScanModel extends AbstractTableModel implements CompareDataInterfac
     
     private Color scanColor;
     
-    public ScanModel(Scan scan) {
+    public ScanTableModel(Scan scan) {
         this.scan = scan;
     }
     

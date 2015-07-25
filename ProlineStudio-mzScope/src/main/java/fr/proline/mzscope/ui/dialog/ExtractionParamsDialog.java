@@ -1,6 +1,6 @@
 package fr.proline.mzscope.ui.dialog;
 
-import fr.proline.mzscope.model.ExtractionParams;
+import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.MzScopePreferences;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -38,7 +39,7 @@ public class ExtractionParamsDialog extends JDialog {
 
     // extraction parameters
 
-    private ExtractionParams extractionParams;
+    private FeaturesExtractionRequest.Builder extractionParams;
 
     private JScrollPane scrollPane;
     private JPanel mainPanel;
@@ -60,6 +61,9 @@ public class ExtractionParamsDialog extends JDialog {
     private JPanel panelMass;
     private JRadioButton massRB;
     private JTextField mzTF;
+    private JPanel panelBaseline;
+    private JCheckBox removeBaselineCB;
+    
 
     /**
      * Creates new form ExtractionParamsDialog
@@ -101,6 +105,7 @@ public class ExtractionParamsDialog extends JDialog {
             mainPanel.setName("mainPanel");
             mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
             mainPanel.add(getTolerancePanel());
+            mainPanel.add(getBaselineRemoverPanel());
             mainPanel.add(getPanelBounds());
             mainPanel.add(getButtonPanel());
         }
@@ -129,7 +134,29 @@ public class ExtractionParamsDialog extends JDialog {
         }
         return panelTolerance;
     }
+    
+    private JPanel getBaselineRemoverPanel() {
+        if (panelBaseline == null) {
+            panelBaseline = new JPanel();
+            panelBaseline.setName("baselineRemover");
+            panelBaseline.setLayout(new FlowLayout(FlowLayout.LEFT));
+            panelBaseline.add(getBaselineCB());
+        }
+        return panelBaseline;
+    }
 
+
+    private JCheckBox getBaselineCB() {
+        if (removeBaselineCB == null) {
+            removeBaselineCB = new JCheckBox();
+            removeBaselineCB.setName("removeBaselineCB");
+            removeBaselineCB.setToolTipText("Remove peakels baseline during peakel detection");
+            removeBaselineCB.setText("use peakels baseline remover");
+        }
+        return removeBaselineCB;
+    }
+
+    
     private JLabel getToleranceLabel() {
         if (toleranceLabel == null) {
             toleranceLabel = new JLabel();
@@ -357,7 +384,7 @@ public class ExtractionParamsDialog extends JDialog {
         this.setTitle(title);
     }
 
-    public ExtractionParams getExtractionParams() {
+    public FeaturesExtractionRequest.Builder getExtractionParams() {
         return extractionParams;
     }
 
@@ -381,40 +408,41 @@ public class ExtractionParamsDialog extends JDialog {
     }
 
     private void okBtnActionPerformed(ActionEvent evt) {
-        this.extractionParams = new ExtractionParams();
+        this.extractionParams = FeaturesExtractionRequest.builder();
         try {
-            extractionParams.mzTolPPM = (Float.parseFloat(toleranceTF.getText()));
+            extractionParams.setMzTolPPM(Float.parseFloat(toleranceTF.getText()));
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "tolerance value is incorrect: " + toleranceTF.getText());
             return;
         }
         try {
-            extractionParams.minMz = ((mzBoundsRB.isSelected()) ? Double.parseDouble(minMzTF.getText()) : 0.0);
+            extractionParams.setMinMz((mzBoundsRB.isSelected()) ? Double.parseDouble(minMzTF.getText()) : 0.0);
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "min m/z value is incorrect: " + minMzTF.getText());
             return;
         }
         try {
-            extractionParams.maxMz = ((mzBoundsRB.isSelected()) ? Double.parseDouble(maxMzTF.getText()) : 0.0);
+            extractionParams.setMaxMz((mzBoundsRB.isSelected()) ? Double.parseDouble(maxMzTF.getText()) : 0.0);
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "max m/z value is incorrect: " + maxMzTF.getText());
             return;
         }
-        if (mzBoundsRB.isSelected() && extractionParams.minMz > extractionParams.maxMz) {
+        if (mzBoundsRB.isSelected() && extractionParams.getMinMz() > extractionParams.getMaxMz()) {
             JOptionPane.showMessageDialog(this, "The min m/z value must be lower than max m/z");
             return;
         }
         if (massRB.isSelected()) {
             try {
                 double m = Double.parseDouble(mzTF.getText());
-                extractionParams.minMz = m;
-                extractionParams.maxMz = m + m * extractionParams.mzTolPPM / 1e6;
-                extractionParams.minMz -= m * extractionParams.mzTolPPM / 1e6;
+                extractionParams.setMaxMz(m + m * extractionParams.getMzTolPPM() / 1e6);
+                extractionParams.setMinMz(m - m * extractionParams.getMzTolPPM() / 1e6);
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "m/z value is incorrect: " + mzTF.getText());
                 return;
             }
         }
+
+        extractionParams.setRemoveBaseline(removeBaselineCB.isSelected());
 
         setVisible(false);
     }

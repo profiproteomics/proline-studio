@@ -3,7 +3,7 @@ package fr.proline.mzscope.model;
 import fr.profi.ms.algo.IsotopePatternEstimator;
 import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.model.ScanData;
-import fr.proline.mzscope.util.ScanUtils;
+import fr.proline.mzscope.utils.ScanUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;

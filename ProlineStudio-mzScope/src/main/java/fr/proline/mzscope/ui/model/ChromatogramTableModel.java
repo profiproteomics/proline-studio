@@ -1,4 +1,4 @@
-package fr.proline.mzscope.ui;
+package fr.proline.mzscope.ui.model;
 
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.studio.comparedata.CompareDataInterface;
@@ -11,7 +11,7 @@ import javax.swing.table.AbstractTableModel;
  * data for chromatogram
  * @author MB243701
  */
-public class ChromatogramXICModel  extends AbstractTableModel implements CompareDataInterface{
+public class ChromatogramTableModel  extends AbstractTableModel implements CompareDataInterface{
 
     private static final String[] m_columnNames = {"Time", "intensities"};
     
@@ -24,7 +24,7 @@ public class ChromatogramXICModel  extends AbstractTableModel implements Compare
     
     private Color chromatoColor;
 
-    public ChromatogramXICModel(Chromatogram chromato) {
+    public ChromatogramTableModel(Chromatogram chromato) {
         this.chromato = chromato;
     }
     

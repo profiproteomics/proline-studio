@@ -3,7 +3,8 @@ package fr.proline.mzscope.ui;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Signal;
-import fr.proline.mzscope.util.ScanUtils;
+import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
+import fr.proline.mzscope.utils.ScanUtils;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -28,11 +29,16 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
 
    private IRawFile rawfile;
 
-   public SingleRawFilePanel(IRawFile rawfile) {
+   public SingleRawFilePanel(IRawFile rawfile, boolean displayDefaultChrom) {
       super();
       this.rawfile = rawfile;
       updateToolbar();
-      displayTIC();
+      if (displayDefaultChrom)
+         displayTIC();
+   }
+
+   public SingleRawFilePanel(IRawFile rawfile) {
+      this(rawfile, true);
    }
 
    @Override
@@ -56,8 +62,8 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
    }
 
    private void editFeature() {
-      double min = chromatogramPlotPanel.getXAxis().getMinValue();
-      double max = chromatogramPlotPanel.getXAxis().getMaxValue();
+      double min = chromatogramPanel.getChromatogramPlotPanel().getXAxis().getMinValue();
+      double max = chromatogramPanel.getChromatogramPlotPanel().getXAxis().getMaxValue();
       Chromatogram chrom = getCurrentChromatogram();
       int minIdx = ScanUtils.getNearestPeakIndex(chrom.time, min);
       int maxIdx = Math.min(ScanUtils.getNearestPeakIndex(chrom.time, max)+1, chrom.time.length);
@@ -82,7 +88,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
          @Override
          protected void done() {
             try {
-               displayChromatogram(get());
+               displayChromatogram(get(), DisplayMode.REPLACE);
                setMsMsEventButtonEnabled(false);
             } catch (InterruptedException | ExecutionException e) {
                logger.error("Error while reading chromatogram");
@@ -95,7 +101,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
    @Override
    public void displayBPI() {
       final IRawFile rawFile = this.rawfile;
-      logger.info("Display single BPI chromatogram");
+      logger.info("Display single base peak chromatogram");
       SwingWorker worker = new SwingWorker<Chromatogram, Void>() {
          @Override
          protected Chromatogram doInBackground() throws Exception {
@@ -105,7 +111,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
          @Override
          protected void done() {
             try {
-               displayChromatogram(get());
+               displayChromatogram(get(), DisplayMode.REPLACE);
                setMsMsEventButtonEnabled(false);
             } catch (InterruptedException | ExecutionException e) {
                logger.error("Error while reading chromatogram");
@@ -116,7 +122,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
    }
 
     @Override
-    public Color getPlotColor(IRawFile rawFile) {
+    public Color getPlotColor(String rawFilename) {
         return CyclicColorPalette.getColor(1);
     }
 }

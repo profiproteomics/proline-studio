@@ -8,8 +8,8 @@ import fr.profi.mzdb.FeatureDetectorConfig;
 import fr.profi.mzdb.MzDbFeatureDetector;
 import fr.profi.mzdb.MzDbFeatureExtractor;
 import fr.profi.mzdb.MzDbReader;
+import fr.profi.mzdb.SmartPeakelFinderConfig;
 import fr.profi.mzdb.algo.IsotopicPatternScorer;
-//import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
 import fr.profi.mzdb.io.reader.RunSliceDataProvider;
 import fr.profi.mzdb.model.Feature;
@@ -21,10 +21,11 @@ import fr.profi.mzdb.model.ScanData;
 import fr.profi.mzdb.model.ScanHeader;
 import fr.profi.mzdb.model.ScanSlice;
 import fr.proline.mzscope.model.Chromatogram;
-import fr.proline.mzscope.model.ExtractionParams;
+import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.Scan;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.util.ScanUtils;
+import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.utils.ScanUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.StreamCorruptedException;
@@ -34,7 +35,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -55,7 +55,6 @@ public class MzdbRawFile implements IRawFile {
 
    private final File mzDbFile;
    private MzDbReader reader;
-   private Map<Long, ScanHeader> scanHeadersById = null;
    private ScanHeader[] ms2ScanHeaders = null;
    private double[] ms2ScanHeaderByMz = null;
 
@@ -76,8 +75,8 @@ public class MzdbRawFile implements IRawFile {
       }
    }
 
-   private void sortScanHeader(ScanHeader[] scans) {
-      ms2ScanHeaders = ScanUtils.sortScanHeader(scans);
+   private void buildMs2ScanHeaderIndexes(ScanHeader[] scans) {
+      ms2ScanHeaders = ScanUtils.sortMs2ScanHeaders(scans);
       ms2ScanHeaderByMz = new double[ms2ScanHeaders.length];
       int i = 0;
       for (ScanHeader scan : ms2ScanHeaders) {
@@ -91,19 +90,6 @@ public class MzdbRawFile implements IRawFile {
       return mzDbFile.getName();
    }
 
-   private Map<Long, ScanHeader> getScanHeadersById() {
-      try {
-         if (scanHeadersById == null) {
-            long start = System.currentTimeMillis();
-            scanHeadersById = reader.getScanHeaderById();
-            logger.info("File mzDb headers red in :: " + (System.currentTimeMillis() - start) + " ms");
-         }
-      } catch (SQLiteException ex) {
-         logger.error("cannot read file " + mzDbFile.getAbsolutePath(), ex);
-      }
-      return scanHeadersById;
-   }
-
    @Override
    public String toString() {
       return mzDbFile.getName();
@@ -111,10 +97,9 @@ public class MzdbRawFile implements IRawFile {
 
    @Override
    public Chromatogram getTIC() {
-      logger.info("mzdb extract TIC Chromatogram");
       Chromatogram chromatogram = null;
       try {
-         ScanHeader[] headers = sortHeadersByTime(reader.getScanHeaders());
+         ScanHeader[] headers = reader.getScanHeaders();
          double[] xAxisData = new double[headers.length];
          double[] yAxisData = new double[headers.length];
          for (int i = 0; i < headers.length; i++) {
@@ -122,10 +107,9 @@ public class MzdbRawFile implements IRawFile {
             yAxisData[i] = ((double) headers[i].getTIC());
          }
 
-         chromatogram = new Chromatogram();
+         chromatogram = new Chromatogram(getName());
          chromatogram.time = xAxisData;
          chromatogram.intensities = yAxisData;
-         chromatogram.rawFile = this;
          return chromatogram;
       } catch (SQLiteException ex) {
          logger.error("Cannot generate TIC chromatogram", ex);
@@ -133,24 +117,12 @@ public class MzdbRawFile implements IRawFile {
       return chromatogram;
    }
 
-   private ScanHeader[] sortHeadersByTime(ScanHeader[] headers) {
-      Arrays.sort(headers, new Comparator<ScanHeader>() {
-
-         @Override
-         public int compare(ScanHeader sh1, ScanHeader sh2) {
-            return (int) (sh1.getScanId() - sh2.getScanId());
-         }
-
-      });
-      return headers;
-   }
 
    @Override
    public Chromatogram getBPI() {
-      logger.info("mzdb extract BPI Chromatogram");
       Chromatogram chromatogram = null;
       try {
-         ScanHeader[] headers = sortHeadersByTime(reader.getScanHeaders());
+         ScanHeader[] headers = reader.getScanHeaders();
          double[] xAxisData = new double[headers.length];
          double[] yAxisData = new double[headers.length];
          for (int i = 0; i < headers.length; i++) {
@@ -158,10 +130,9 @@ public class MzdbRawFile implements IRawFile {
             yAxisData[i] = ((double) headers[i].getBasePeakIntensity());
          }
 
-         chromatogram = new Chromatogram();
+         chromatogram = new Chromatogram(getName());
          chromatogram.time = xAxisData;
          chromatogram.intensities = yAxisData;
-         chromatogram.rawFile = this;
          return chromatogram;
       } catch (SQLiteException ex) {
          logger.error("Cannot generate BPI chromatogram", ex);
@@ -170,17 +141,19 @@ public class MzdbRawFile implements IRawFile {
    }
 
    @Override
-   public Chromatogram getXIC(double minMz, double maxMz, float minRT, float maxRT) {
+   public Chromatogram getXIC(Ms1ExtractionRequest params) {
+      long start = System.currentTimeMillis();
       Chromatogram chromatogram = null;
       try {
-         logger.info("mzdb extract Chromato : {} - {} in time range {} - {}", minMz, maxMz, minRT, maxRT);
-         Peak[] peaks = reader.getXIC(minMz, maxMz, minRT, maxRT, 1, MzDbReader.XicMethod.MAX);
-         chromatogram = createChromatoFromPeak(peaks);
-         chromatogram.minMz = minMz;
-         chromatogram.maxMz = maxMz;
+         Peak[] peaks = reader.getXIC(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), 1, params.getMethod());
+         chromatogram = createChromatoFromPeaks(peaks);
+         chromatogram.minMz = params.getMinMz();
+         chromatogram.maxMz = params.getMaxMz();
          StringBuilder builder = new StringBuilder("Mass range: ");
-         builder.append(massFormatter.format(minMz)).append("-").append(massFormatter.format(maxMz));
+         builder.append(massFormatter.format(params.getMinMz())).append("-").append(massFormatter.format(params.getMaxMz()));
          chromatogram.title = builder.toString();
+         logger.info("mzdb chromatogram extracted : {} - {} over time {} - {} in {} ms", massFormatter.format(params.getMinMz()), 
+                 massFormatter.format(params.getMaxMz()), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), (System.currentTimeMillis() - start));
 
       } catch (SQLiteException | StreamCorruptedException e) {
          logger.error("Error during chromatogram extraction", e);
@@ -188,38 +161,19 @@ public class MzdbRawFile implements IRawFile {
       return chromatogram;
    }
 
-   @Override
-   public Chromatogram getXIC(double min, double max) {
+   private Chromatogram createChromatoFromPeaks(Peak[] peaks) {
       Chromatogram chromatogram = null;
+      List<Double> xAxisData = new ArrayList<>(peaks.length);
+      List<Double> yAxisData = new ArrayList<>(peaks.length);
       try {
-         logger.info("mzdb extract Chromato : {} - {} (MAX)", min, max);
-         Peak[] peaks = reader.getXIC(min, max, 1, MzDbReader.XicMethod.MAX);
-         chromatogram = createChromatoFromPeak(peaks);
-         chromatogram.minMz = min;
-         chromatogram.maxMz = max;
-
-         StringBuilder builder = new StringBuilder("Mass range: ");
-         builder.append(massFormatter.format(min)).append("-").append(massFormatter.format(max));
-         chromatogram.title = builder.toString();
-
-      } catch (SQLiteException | StreamCorruptedException e) {
-         logger.error("Error during chromatogram extraction", e);
-      }
-      return chromatogram;
-   }
-
-   private Chromatogram createChromatoFromPeak(Peak[] peaks) {
-      Chromatogram chromatogram = null;
-      List<Double> xAxisData = new ArrayList<Double>(peaks.length);
-      List<Double> yAxisData = new ArrayList<Double>(peaks.length);
-      int previousScanId = 1;
+      int previousScanId = (int)peaks[0].getLcContext().getScanId();
       for (Peak peak : peaks) {
          int scanId = (int)peak.getLcContext().getScanId();
          if (previousScanId != getPreviousScanId(scanId, 1)) {
             // there is a gap between peaks, add 0 values after the previous peak and before this one
-            xAxisData.add(getScanHeadersById().get((long)getNextScanId(previousScanId, 1)).getElutionTime() / 60.0);
+            xAxisData.add(reader.getScanHeaderById().get((long)getNextScanId(previousScanId, 1)).getElutionTime() / 60.0);
             yAxisData.add(0.0);
-            xAxisData.add(getScanHeadersById().get((long)getPreviousScanId(scanId, 1)).getElutionTime() / 60.0);
+            xAxisData.add(reader.getScanHeaderById().get((long)getPreviousScanId(scanId, 1)).getElutionTime() / 60.0);
             yAxisData.add(0.0);
          }
          double rt = peak.getLcContext().getElutionTime() / 60.0;
@@ -227,8 +181,10 @@ public class MzdbRawFile implements IRawFile {
          yAxisData.add((double) peak.getIntensity());
          previousScanId = (int)peak.getLcContext().getScanId();
       }
-
-      chromatogram = new Chromatogram();
+      }catch (SQLiteException sle) {
+         logger.error("Error while reading mzdb file",sle);
+      }
+      chromatogram = new Chromatogram(getName());
       chromatogram.time = Doubles.toArray(xAxisData);
       chromatogram.intensities = Doubles.toArray(yAxisData);
 
@@ -236,21 +192,21 @@ public class MzdbRawFile implements IRawFile {
    }
 
    @Override
-   public List<Feature> extractFeatures(ExtractionType type, ExtractionParams params) {
-      switch (type) {
+   public List<Feature> extractFeatures(FeaturesExtractionRequest params) {
+      switch (params.getExtractionMethod()) {
          case EXTRACT_MS2_FEATURES:
-            return extractFeaturesFromMs2(params.mzTolPPM);
+            return extractFeaturesFromMs2(params.getMzTolPPM());
          case DETECT_FEATURES:
-            return detectFeatures(params.mzTolPPM, params.minMz, params.maxMz);
+            return detectFeatures(params.getMzTolPPM(), params.getMinMz(), params.getMaxMz());
          case DETECT_PEAKELS:
-            return detectPeakels(params.mzTolPPM, params.minMz, params.maxMz);
+            return detectPeakels(params);
       }
       return null;
    }
 
    private List<Feature> detectFeatures(float mzTolPPM, double minMz, double maxMz) {
       List<Feature> result = new ArrayList<>();
-      FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(1, mzTolPPM, 5);
+      FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(1, mzTolPPM, 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, true));
       MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
       try {
          Iterator<RunSlice> runSlices;
@@ -345,22 +301,25 @@ public class MzdbRawFile implements IRawFile {
    }
 
    private List<Feature> deisotopePeakelsV2(Peakel[] peakels, float mzTolPPM) {
-      MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, new FeatureDetectorConfig(1, mzTolPPM, 3));
+      MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, new FeatureDetectorConfig(1, mzTolPPM, 3, new SmartPeakelFinderConfig(5, 3, false, 10, false, true)));
       Feature[] result = detector._deisotopePeakelsV2(peakels);
       return Arrays.asList(result);
    }
-   private List<Feature> detectPeakels(float mzTolPPM, double minMz, double maxMz) {
+   
+   private List<Feature> detectPeakels(FeaturesExtractionRequest params) {
+                  
       List<Feature> result = new ArrayList<>();
-      // Instantiates a Run Slice Data provider
       int msLevel = 1;
-      FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(msLevel, mzTolPPM, 5);
+      FeatureDetectorConfig detectorConfig = new FeatureDetectorConfig(msLevel, params.getMzTolPPM(), 5, new SmartPeakelFinderConfig(5, 3, false, 10, false, params.isRemoveBaseline()));
+      // hack : change SmartPeakelFinder configuration that will be used by the UnsupervisedPeakelDetector
+      logger.info("Extract peakels with params : "+params.toString());
       MzDbFeatureDetector detector = new MzDbFeatureDetector(reader, detectorConfig);
       try {
          Iterator<RunSlice> runSlices;
-         if (minMz == 0 && maxMz == 0) {
+         if (params.getMinMz() == 0 && params.getMaxMz() == 0) {
             runSlices = getMzDbReader().getLcMsRunSliceIterator();
          } else {
-            runSlices = getMzDbReader().getLcMsRunSliceIterator(minMz, maxMz);
+            runSlices = getMzDbReader().getLcMsRunSliceIterator(params.getMinMz(), params.getMaxMz());
          }
          Peakel[] peakels = detector.detectPeakels(runSlices);
          for (Peakel peakel : peakels) {
@@ -368,11 +327,11 @@ public class MzdbRawFile implements IRawFile {
             l.add(peakel);
             //creates a fake Feature associated to this peakel in order to always display Features
             Feature feature = new Feature(peakel.getMz(), 0, JavaConverters.asScalaBufferConverter(l).asScala(), false);
-            if (minMz == 0 && maxMz == 0) {
+            if (params.getMinMz() == 0 && params.getMaxMz() == 0) {
                result.add(feature);
             } else {
                //check that the feature is in the mass range
-               if (feature.getMz() >= minMz && feature.getMz() <= maxMz) {
+               if (feature.getMz() >= params.getMinMz() && feature.getMz() <= params.getMaxMz()) {
                   result.add(feature);
                }
             }
@@ -428,7 +387,7 @@ public class MzdbRawFile implements IRawFile {
    public Scan getScan(int scanIndex) {
       Scan scan = null;
       try {
-         fr.profi.mzdb.model.Scan rawScan = reader.getScan(scanIndex);
+         fr.profi.mzdb.model.Scan rawScan = reader.getScan((long)scanIndex);
          ScanData data = rawScan.getData();
          final double[] mzList = data.getMzList();
          final double[] leftSigma = new double[mzList.length];
@@ -530,11 +489,11 @@ public class MzdbRawFile implements IRawFile {
 
    private int getNextSiblingScanId(int scanIndex, int msLevel, int way) {
       try {
-         ScanHeader header = getScanHeadersById().get((long)scanIndex);
+         ScanHeader header = reader.getScanHeaderById().get((long)scanIndex);
          int maxScan = reader.getScansCount();
-         long k = header.getScanId() + way;
+         long k =  Math.max(1, Math.min(maxScan, header.getScanId() + way));
          for (; (k > 0) && (k < maxScan); k += way) {
-            if (getScanHeadersById().get(k).getMsLevel() == msLevel) {
+            if (reader.getScanHeaderById().get(k).getMsLevel() == msLevel) {
                break;
             }
          }
@@ -558,18 +517,16 @@ public class MzdbRawFile implements IRawFile {
    @Override
    public List<Float> getMsMsEvent(double minMz, double maxMz) {
       Long startTime = System.currentTimeMillis();
-      logger.debug("retrieve MS/MS events");
       List<Float> listMsMsEventTime = new ArrayList();
       if (ms2ScanHeaders == null) {
          try {
             logger.debug("retrieve Ms2 ScanHeader");
-            sortScanHeader(reader.getMs2ScanHeaders());
+            buildMs2ScanHeaderIndexes(reader.getMs2ScanHeaders());
          } catch (SQLiteException ex) {
             logger.error("Exception while retrieving ScanHeader " + ex);
          }
       }
       if (ms2ScanHeaders != null) {
-         logger.debug("retrieve Ms2 ScanHeader in [" + minMz + ", " + maxMz + "] ");
          int minId = ~Arrays.binarySearch(ms2ScanHeaderByMz, minMz);
          int maxId = ~Arrays.binarySearch(ms2ScanHeaderByMz, maxMz);
          if (minId != -1 && maxId != -1) {
@@ -611,6 +568,16 @@ public class MzdbRawFile implements IRawFile {
          }
       }
       return resultIdx;
+   }
+
+   @Override
+   public int getScanCount() {
+      try {
+      return reader.getScansCount();
+      } catch (SQLiteException sle) {
+         logger.error("Error while reading mzdb file", sle);
+      }
+      return 0;
    }
 
 }

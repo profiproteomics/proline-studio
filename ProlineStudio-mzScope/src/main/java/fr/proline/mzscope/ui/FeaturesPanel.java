@@ -1,9 +1,10 @@
 package fr.proline.mzscope.ui;
 
+import fr.proline.mzscope.ui.model.FeaturesTableModel;
 import fr.profi.mzdb.model.Feature;
 import fr.proline.mzscope.model.IRawFile;
-import fr.proline.mzscope.ui.event.DisplayFeatureListener;
-import fr.proline.mzscope.util.NumberFormatter;
+import fr.proline.mzscope.mzdb.MzdbFeatureWrapper;
+import fr.proline.mzscope.utils.NumberFormatter;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
@@ -16,21 +17,16 @@ import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
-import javax.swing.event.EventListenerList;
 import javax.swing.event.RowSorterEvent;
 import javax.swing.event.RowSorterListener;
 import javax.swing.event.TableModelListener;
@@ -54,22 +50,20 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
 
     private FeatureTable featureTable;
     private FeaturesTableModel featureTableModel;
+    private IFeatureViewer featureViewer;
+    
     private JScrollPane jScrollPane;
-
-    //events
-    private EventListenerList displayFeatureListenerList = new EventListenerList();
 
     private MarkerContainerPanel m_markerContainerPanel;
     // toolbar
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
 
-    public FeaturesPanel() {
-        initComponents();
-    }
 
-    public FeaturesPanel(IRawFile rawFile) {
+    public FeaturesPanel(IRawFile rawFile, IFeatureViewer featureViewer) {
         this.rawFile = rawFile;
+        this.featureViewer = featureViewer;
+        
         initComponents();
 
         TableColumnModel columnModel = featureTable.getColumnModel();
@@ -110,37 +104,6 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
         featureTable.setFillsViewportHeight(true);
         featureTable.setViewport(jScrollPane.getViewport());
 
-        JPopupMenu popupMenu = new JPopupMenu();
-        JMenuItem menuItemViewRawFile = new JMenuItem("Display in the raw file");
-        menuItemViewRawFile.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (featureTable.getSelectedRow() == -1) {
-                    return;
-                }
-                // Retrieve Selected Row
-                int selectedRow = featureTable.getSelectedRow();
-                selectedRow = getModelRowId(selectedRow);
-                Feature f = features.get(selectedRow);
-                fireDisplayFeature(f, rawFile);
-            }
-        });
-        JMenuItem menuItemViewSelectedRawFile = new JMenuItem("Display in the selected raw file");
-        menuItemViewSelectedRawFile.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Retrieve Selected Row
-                int selectedRow = featureTable.getSelectedRow();
-                selectedRow = getModelRowId(selectedRow);
-                Feature f = features.get(selectedRow);
-                fireDisplayFeatureInCurrentRawFile(f);
-            }
-        });
-
-        popupMenu.add(menuItemViewRawFile);
-        popupMenu.add(menuItemViewSelectedRawFile);
-        featureTable.setComponentPopupMenu(popupMenu);
-
         JToolBar toolbar = initToolbar();
 
         m_markerContainerPanel = new MarkerContainerPanel(jScrollPane, featureTable);
@@ -173,6 +136,7 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
         featureTableModel.setFeatures(features);
         this.features = features;
         m_markerContainerPanel.setMaxLineNumber(features.size());
+        
     }
 
     private void featureTableMouseClicked(MouseEvent evt) {
@@ -181,7 +145,7 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
             // Retrieve Selected Row
             int selectedRow = featureTable.getSelectedRow();
             Feature f = features.get(getModelRowId(selectedRow));
-            fireDisplayFeature(f, rawFile);
+            featureViewer.displayFeatureInRawFile(new MzdbFeatureWrapper(f), rawFile);
         }
     }
     
@@ -237,37 +201,6 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
     @Override
     public void mouseExited(MouseEvent e) {
 
-    }
-
-    /**
-     * event register
-     *
-     * @param listener
-     */
-    public void addDisplayFeatureListener(DisplayFeatureListener listener) {
-        displayFeatureListenerList.add(DisplayFeatureListener.class, listener);
-    }
-
-    public void removeDisplayFeatureListener(DisplayFeatureListener listener) {
-        displayFeatureListenerList.remove(DisplayFeatureListener.class, listener);
-    }
-
-    private void fireDisplayFeature(Feature f, IRawFile rawFile) {
-        Object[] listeners = displayFeatureListenerList.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == DisplayFeatureListener.class) {
-                ((DisplayFeatureListener) listeners[i + 1]).displayFeatureInRawFile(f, rawFile);
-            }
-        }
-    }
-
-    private void fireDisplayFeatureInCurrentRawFile(Feature f) {
-        Object[] listeners = displayFeatureListenerList.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == DisplayFeatureListener.class) {
-                ((DisplayFeatureListener) listeners[i + 1]).displayFeatureInCurrentRawFile(f);
-            }
-        }
     }
 
     private static class DisplayRawFileAction extends AbstractTableAction {
@@ -361,12 +294,12 @@ public class FeaturesPanel extends JPanel implements RowSorterListener, MouseLis
 
         public void displayInRawFile(int rowIndex) {
             Feature f = features.get(rowIndex);
-            fireDisplayFeature(f, rawFile);
+            featureViewer.displayFeatureInRawFile(new MzdbFeatureWrapper(f), rawFile);
         }
 
         public void displayInCurrentRawFile(int rowIndex) {
             Feature f = features.get(rowIndex);
-            fireDisplayFeatureInCurrentRawFile(f);
+            featureViewer.displayFeatureInCurrentRawFile(new MzdbFeatureWrapper(f));
         }
 
         @Override

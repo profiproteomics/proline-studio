@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import fr.proline.mzscope.util.Base64;
+import fr.proline.mzscope.utils.Base64;
 
 public class ScanFactory {
 

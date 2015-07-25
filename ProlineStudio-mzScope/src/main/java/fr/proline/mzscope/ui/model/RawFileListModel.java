@@ -1,4 +1,4 @@
-package fr.proline.mzscope.ui;
+package fr.proline.mzscope.ui.model;
 
 import fr.proline.mzscope.model.IRawFile;
 import java.util.ArrayList;
@@ -9,8 +9,9 @@ import javax.swing.AbstractListModel;
  *
  * @author VD225637
  */
-public class RawFileListModel extends  AbstractListModel<Object> {
-    private List<IRawFile> rawFiles = new ArrayList<IRawFile>();
+public class RawFileListModel extends  AbstractListModel<IRawFile> {
+   
+    private List<IRawFile> rawFiles = new ArrayList<>();
     
     public RawFileListModel() {
     }
@@ -20,7 +21,7 @@ public class RawFileListModel extends  AbstractListModel<Object> {
     }
 
     @Override
-    public Object getElementAt(int index) {
+    public IRawFile getElementAt(int index) {
         if (index >=0 && index < getSize()) {
             return rawFiles.get(index);
         }

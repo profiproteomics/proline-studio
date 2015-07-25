@@ -310,6 +310,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        
+        <dependency>
             <groupId>no.uib</groupId>
             <artifactId>ols-dialog</artifactId>
             <version>3.4.1</version>

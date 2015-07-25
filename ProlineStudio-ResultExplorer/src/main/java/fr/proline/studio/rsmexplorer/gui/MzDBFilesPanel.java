@@ -3,13 +3,12 @@ package fr.proline.studio.rsmexplorer.gui;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.ui.RawFileManager;
 import fr.proline.mzscope.ui.RawFilesPanel;
-import fr.proline.mzscope.ui.event.RawFileListener;
+import fr.proline.mzscope.utils.IPopupMenuDelegate;
 import fr.proline.studio.mzscope.MzdbInfo;
 import static fr.proline.studio.pattern.DataBoxMzScope.MZDB_DIRECTORY_KEY;
 import fr.proline.studio.pattern.MzScopeWindowBoxManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
-import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -24,7 +23,9 @@ import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import org.openide.util.NbPreferences;
 
@@ -32,7 +33,7 @@ import org.openide.util.NbPreferences;
  *
  * @author MB243701
  */
-public class MzDBFilesPanel extends JPanel implements RawFileListener{
+public class MzDBFilesPanel extends JPanel implements IPopupMenuDelegate {
     
     private static MzDBFilesPanel m_singleton = null;
     
@@ -55,6 +56,9 @@ public class MzDBFilesPanel extends JPanel implements RawFileListener{
         }
         return m_singleton;
     }
+   private JMenuItem detectPeakelsMI;
+   private JMenuItem viewRawFileMI;
+   private ActionListener viewRawFileAction;
     
     public MzDBFilesPanel(){
         super();
@@ -135,9 +139,8 @@ public class MzDBFilesPanel extends JPanel implements RawFileListener{
     
     private RawFilesPanel getRawFilesPanel(){
         if (m_rawFilesPanel == null){
-            m_rawFilesPanel = new RawFilesPanel();
+            m_rawFilesPanel = new RawFilesPanel(this);
             m_rawFilesPanel.setName("m_rawFilesPanel");
-            m_rawFilesPanel.addRawFileListener(this);
         }
         return m_rawFilesPanel;
     }
@@ -172,7 +175,6 @@ public class MzDBFilesPanel extends JPanel implements RawFileListener{
         return f.getName().toLowerCase().endsWith(".mzdb");
     }
     
-    @Override
     public void displayRaw(IRawFile rawfile) {
         File file = mapFiles.get(rawfile);
         if (file != null){
@@ -181,7 +183,6 @@ public class MzDBFilesPanel extends JPanel implements RawFileListener{
         }
     }
 
-    @Override
     public void displayRaw(List<IRawFile> rawfiles) {
         List<File> files = new ArrayList();
         for(IRawFile rawFile: rawfiles){
@@ -192,46 +193,6 @@ public class MzDBFilesPanel extends JPanel implements RawFileListener{
         MzScopeWindowBoxManager.addMzdbScope(mzScope);
     }
 
-    // not implemented
-    @Override
-    public void openRawFile() {
-       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    // not implemented
-    @Override
-    public void closeRawFile(IRawFile rawfile) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    // not implemented
-    @Override
-    public void closeAllFiles() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    // not implemented
-    @Override
-    public void extractFeatures(IRawFile rawfile) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    // not implemented
-    @Override
-    public void extractFeatures(List<IRawFile> rawfiles) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void detectPeakels(IRawFile rawfile) {
-        File file = mapFiles.get(rawfile);
-        if (file != null){
-            MzScope mzScope = new MzScope(MzdbInfo.MZSCOPE_DETECT_PEAKEL, file);
-            MzScopeWindowBoxManager.addMzdbScope(mzScope);
-        }
-    }
-
-    @Override
     public void detectPeakels(List<IRawFile> rawfiles) {
         List<File> files = new ArrayList();
         for(IRawFile rawFile: rawfiles){
@@ -243,15 +204,45 @@ public class MzDBFilesPanel extends JPanel implements RawFileListener{
         
     }
 
-    // not implemented
-    @Override
-    public void exportChromatogram(IRawFile rawfile) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+       @Override
+   public void initPopupMenu(JPopupMenu popupMenu) {
+      // view data
+      viewRawFileAction = new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent evt) {
+            //mzScopePanel.displayRawAction(rawFilesPanel.getSelectedValues(), true);
+         }
+      };
+      viewRawFileMI = new JMenuItem();
+      viewRawFileMI.setText("View");
+      viewRawFileMI.addActionListener(viewRawFileAction);
+      popupMenu.add(viewRawFileMI);
 
-    // not implemented
-    @Override
-    public void exportChromatogram(List<IRawFile> rawfiles) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+      // detect peakels
+      detectPeakelsMI = new JMenuItem();
+      detectPeakelsMI.setText("Detect Peakels...");
+      detectPeakelsMI.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent evt) {
+            detectPeakels(getRawFilesPanel().getSelectedValues());
+         }
+      });
+      popupMenu.add(detectPeakelsMI);
+
+   }
+
+   @Override
+   public void updatePopupMenu() {
+      int nbS = getRawFilesPanel().getSelectedValues().size();
+      viewRawFileMI.setEnabled(nbS > 0);
+      detectPeakelsMI.setEnabled((nbS > 0));
+   }
+
+   @Override
+   public ActionListener getDefaultAction() {
+      return viewRawFileAction;
+   }
+   
+   
+
 }

@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.mzscope.MzScope;
+import fr.proline.mzscope.ui.event.ExtractionEvent;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -12,7 +13,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import javax.swing.JLayeredPane;
 import javax.swing.JScrollPane;
-import fr.proline.mzscope.ui.event.ExtractFeatureListener;
+import fr.proline.mzscope.ui.event.ExtractionStateListener;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.mzscope.MzdbInfo;
 import java.awt.GridBagConstraints;
@@ -22,25 +23,27 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import org.openide.windows.WindowManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * panel which contains mzScope 
  * @author MB243701
  */
-public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelInterface, ExtractFeatureListener {
+public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelInterface, ExtractionStateListener {
 
-    private AbstractDataBox m_dataBox;
-
-    private JScrollPane m_mzscopeScrollPane;
+   protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+   
+   private AbstractDataBox m_dataBox;
+   private JScrollPane m_mzscopeScrollPane;
     
-    private MzScope m_mzScope;
-    private JPanel m_mzScopePanel;
+   private MzScope m_mzScope;
+   private JPanel m_mzScopePanel;
     
     
-    
-    public StudioMzScopePanel() {
+   public StudioMzScopePanel() {
         initComponents();
-    }
+   }
     
     private void initComponents() {
         setLayout(new BorderLayout());
@@ -197,7 +200,7 @@ public class StudioMzScopePanel extends HourglassPanel implements DataBoxPanelIn
     }
 
     @Override
-    public void extractFeatureListener(boolean extractFeatures, boolean detectPeakels) {
+    public void extractionStateChanged(ExtractionEvent event) {
         //
     }
     

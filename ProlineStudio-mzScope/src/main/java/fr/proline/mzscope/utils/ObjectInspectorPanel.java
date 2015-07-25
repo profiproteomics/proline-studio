@@ -1,4 +1,4 @@
-package fr.proline.mzscope.ui;
+package fr.proline.mzscope.utils;
 
 /*
  * ObjectInspectorPanel.java

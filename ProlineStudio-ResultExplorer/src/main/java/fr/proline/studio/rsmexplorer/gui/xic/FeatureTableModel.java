@@ -733,7 +733,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             DQuantitationChannel qc = m_quantChannelInfo.getQuantChannelForMap(feature.getMap().getId());
             if (qc != null) {
                 if (qc.getMzdbFileName() != null) {
-                    String fn = qc.getMzdbFileName()+".mzdb";
+                    String fn = qc.getMzdbFileName();
                     MzdbInfo mzdbInfo = new MzdbInfo(fn, Double.valueOf(feature.getMoz()), Double.valueOf(feature.getElutionTime()), 
                             Double.valueOf(feature.getFirstScan().getTime()), Double.valueOf(feature.getLastScan().getTime()));
                     if (!fileNameList.contains(fn)) {

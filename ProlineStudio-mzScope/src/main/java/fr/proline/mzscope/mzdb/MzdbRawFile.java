@@ -265,7 +265,7 @@ public class MzdbRawFile implements IRawFile {
             logger.info("processing peakel "+k);
          }
          if (!assigned[k]) {
-            ScanSlice[] slices = reader.getMsScanSlices(peakels[k].getApexMz()-5.0, peakels[k].getApexMz()+5.0, peakels[k].getApexElutionTime()-0.1, peakels[k].getApexElutionTime()+0.1);
+            ScanSlice[] slices = reader.getMsScanSlices(peakels[k].getApexMz()-5.0, peakels[k].getApexMz()+5.0, peakels[k].getApexElutionTime()-0.1f, peakels[k].getApexElutionTime()+0.1f);
             int i = 0;
             while((i < slices.length) && (slices[i].getHeader().getScanId() != peakels[k].getApexScanId())) {
                i++;

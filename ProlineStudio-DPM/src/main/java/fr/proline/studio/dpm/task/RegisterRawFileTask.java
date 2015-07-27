@@ -13,12 +13,13 @@ import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.io.File;
 import javax.persistence.EntityManager;
 
 /**
  * Task to create a new Project in the UDS db
  * @author jm235353
- */
+ */ 
 public class RegisterRawFileTask extends AbstractServiceTask {
 
     private String m_raw_file_path;
@@ -30,7 +31,14 @@ public class RegisterRawFileTask extends AbstractServiceTask {
     public RegisterRawFileTask(AbstractServiceCallback callback, long instrumentId, long ownerId, RunInfoData runInfo) {
         super(callback, true /*synchronous*/, new TaskInfo("Register raw file "+runInfo.getRawFileSouce().getRawFileOnDisk(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         
-        m_raw_file_path = runInfo.getRawFileSouce().getRawFileOnDisk().getPath();
+        //Change separator to be complient with both '/' !
+        String Sep = File.separator;
+        String normalizedPath = runInfo.getRawFileSouce().getRawFileOnDisk().getPath();
+        if(Sep.equals("\\") ){
+            normalizedPath = normalizedPath.replaceAll("\\\\","/");
+        }
+
+        m_raw_file_path = normalizedPath;       
         m_raw_file_name = runInfo.getRawFileSouce().getRawFileOnDisk().getName();
         m_ownerId = ownerId;
         m_instrumentId = instrumentId;

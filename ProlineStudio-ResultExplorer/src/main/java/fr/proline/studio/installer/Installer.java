@@ -24,7 +24,7 @@ public class Installer extends VersionInstaller {
     public void restored() {
 
         //String buildnumber = "1.0.1  alpha ("+moduleBuildDate+")"; //specify if alpha (or nothing = release)
-        String buildnumber = "1.1";
+        String buildnumber = "1.1.1";
         
         // set the proline version for the application title
         System.setProperty("netbeans.buildnumber", buildnumber);  //"1.0.1 (alpha : build date @build.date@)"

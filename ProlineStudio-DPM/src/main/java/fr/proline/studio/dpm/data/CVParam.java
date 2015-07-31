@@ -1,5 +1,7 @@
 package fr.proline.studio.dpm.data;
 
+import java.util.Objects;
+
 /**
  *
  * @author VD225637
@@ -67,6 +69,28 @@ public class CVParam {
         String result ="<cvParam cvLabel=\""+m_cvLabel+"\" accession=\""+m_accession +"\" name=\""+m_name+"\"  value=\""+m_value+"\" />";
         return result;
     }
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null)
+            return false;
+            
+        if (obj instanceof CVParam) {
+            return (this.m_cvLabel.equals( ((CVParam)obj).m_cvLabel ) && 
+                    this.m_accession.equals( ((CVParam)obj).m_accession ) );
+        }
+        
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 17 * hash + Objects.hashCode(this.m_cvLabel);
+        hash = 17 * hash + Objects.hashCode(this.m_name);
+        hash = 17 * hash + Objects.hashCode(this.m_accession);
+        return hash;
+    }
+   
     
 }

@@ -5,7 +5,7 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.rpc2.JsonRpcRequest;
 import com.google.api.client.util.ArrayMap;
 import fr.proline.core.orm.uds.RawFile;
-import fr.proline.core.orm.uds.Run;
+import fr.proline.core.orm.uds.Run; 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +13,7 @@ import fr.proline.core.orm.util.DataStoreConnectorFactory;
 import fr.proline.studio.dam.data.RunInfoData;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import java.io.File;
 import javax.persistence.EntityManager;
 
 /**
@@ -30,7 +31,15 @@ public class RegisterRawFileTask extends AbstractServiceTask {
     public RegisterRawFileTask(AbstractServiceCallback callback, long instrumentId, long ownerId, RunInfoData runInfo) {
         super(callback, true /*synchronous*/, new TaskInfo("Register raw file "+runInfo.getRawFileSouce().getRawFileOnDisk(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         
-        m_raw_file_path = runInfo.getRawFileSouce().getRawFileOnDisk().getPath();
+        //Change separator to be complient with both '/' !
+        String Sep = File.separator;
+        String normalizedPath = runInfo.getRawFileSouce().getRawFileOnDisk().getPath();
+        if(Sep.equals("\\") ){
+            normalizedPath = normalizedPath.replaceAll("\\\\","/");
+        }
+
+        m_raw_file_path = normalizedPath;
+        
         m_raw_file_name = runInfo.getRawFileSouce().getRawFileOnDisk().getName();
         m_ownerId = ownerId;
         m_instrumentId = instrumentId;
@@ -92,7 +101,7 @@ public class RegisterRawFileTask extends AbstractServiceTask {
             params.put("owner_id", m_ownerId);
             request.setParameters(params);
 
-            HttpResponse response = postRequest("das.uds/raw_file/"+request.getMethod()+getIdString(), request);
+            HttpResponse response = postRequest("das.uds/raw_file/"+request.getMethod()+getIdString(), request); 
             
             GenericJson jsonResult = response.parseAs(GenericJson.class);
 

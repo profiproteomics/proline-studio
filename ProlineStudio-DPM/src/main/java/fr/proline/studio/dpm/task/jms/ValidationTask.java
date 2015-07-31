@@ -46,7 +46,7 @@ public class ValidationTask extends AbstractJMSTask  {
     public static String SPECIFIC_PEP_FILTER_NAME = "Specific Peptides";   
     
     private DDataset m_dataset = null;
-    private String m_description;
+    private String m_description;  //Not used on server side
     private HashMap<String, String> m_argumentsMap;
     private String m_scoringType = null;
     private Integer[] m_resultSummaryId = null;    
@@ -193,7 +193,7 @@ public class ValidationTask extends AbstractJMSTask  {
         }
 
 
-
+            //DEPRECATED On server Side
         if (m_argumentsMap.containsKey("use_td_competition")) {
             params.put("use_td_competition", Boolean.parseBoolean(m_argumentsMap.get("use_td_competition")));
         }

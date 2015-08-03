@@ -629,7 +629,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         if (m_forRSM) {
             filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null)); colIdx++;
         }
-        //filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_RETENTION_TIME
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_RETENTION_TIME
 
     }
 

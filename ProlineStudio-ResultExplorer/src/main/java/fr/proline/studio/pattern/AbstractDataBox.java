@@ -7,6 +7,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.xic.DataboxChildFeature;
 import fr.proline.studio.pattern.xic.DataboxExperimentalDesign;
+import fr.proline.studio.pattern.xic.DataboxMapAlignment;
 import fr.proline.studio.pattern.xic.DataboxPSMOfMasterQuantPeptide;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideIon;
 import fr.proline.studio.pattern.xic.DataboxXicPeptideSet;
@@ -19,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXTable;
@@ -103,7 +103,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxMzScope(31),
         DataboxDataMixer(32),
         DataboxExperimentalDesign(33),
-        DataBoxAdjacentMatrix(34);
+        DataBoxAdjacentMatrix(34),
+        DataBoxMapAlignment(35);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -184,6 +185,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxAdjacencyMatrix();
                 case DataboxExperimentalDesign:
                     return new DataboxExperimentalDesign();
+                case DataBoxMapAlignment:
+                    return new DataboxMapAlignment();
             }
             return null; // should not happen
         }

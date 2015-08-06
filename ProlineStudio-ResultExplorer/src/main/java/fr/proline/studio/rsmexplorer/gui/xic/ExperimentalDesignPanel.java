@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     private XICDesignTree m_expDesignTree;
     private ExportButton m_exportButton;
     private DefineQuantParamsPanel m_xicParamPanel;
-    private JSplitPane m_splitPane;
+    private JTabbedPane m_tabbedPane;
     private JPanel m_confPanel;
     
     private DDataset m_dataset;
@@ -81,10 +82,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         
-        m_splitPane = new JSplitPane();
-        m_splitPane.setDividerLocation(350);
-        m_splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        m_splitPane.setOneTouchExpandable(true);
+        m_tabbedPane = new JTabbedPane();
         
         // create objects
         m_scrollPaneExpDesign = new JScrollPane();
@@ -98,15 +96,15 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         m_confPanel.setLayout(new BorderLayout());
         
         
-        m_splitPane.setRightComponent(m_confPanel);
-        m_splitPane.setLeftComponent(m_scrollPaneExpDesign);
+        m_tabbedPane.add("Exp.Design", m_scrollPaneExpDesign);
+        m_tabbedPane.add("Exp. Parameters", m_confPanel );
         
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1;
         c.weighty = 1;
         c.gridwidth = 3;
-        internalPanel.add(m_splitPane, c);
+        internalPanel.add(m_tabbedPane, c);
         //internalPanel.add(m_scrollPaneExpDesign, c);
         return internalPanel;
     }
@@ -162,7 +160,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
         } catch (Exception ex) {
             m_logger.error("error while settings quanti params "+ex);
         }
-        m_splitPane.revalidate();
+        m_tabbedPane.revalidate();
     }
 
 

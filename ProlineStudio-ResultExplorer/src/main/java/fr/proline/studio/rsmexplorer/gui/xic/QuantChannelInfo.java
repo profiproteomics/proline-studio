@@ -40,6 +40,15 @@ public class QuantChannelInfo {
         return CyclicColorPalette.getColor(m_quantChannels.length);
     }
     
+    public String  getMapHtmlColor (Long mapId) {
+        for(int i=0; i<m_quantChannels.length; i++) {
+            if (compareMap( m_quantChannels[i], mapId)) {
+                return CyclicColorPalette.getHTMLColor(i);
+            }
+        }
+        return CyclicColorPalette.getHTMLColor(m_quantChannels.length);
+    }
+    
     public String getMapTitle (Long mapId) {
         for (DQuantitationChannel m_quantChannel : m_quantChannels) {
             if (compareMap( m_quantChannel, mapId)) {

@@ -210,7 +210,7 @@ public class MzDBFilesPanel extends JPanel implements IPopupMenuDelegate {
       viewRawFileAction = new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent evt) {
-            //mzScopePanel.displayRawAction(rawFilesPanel.getSelectedValues(), true);
+            displayRaw(getRawFilesPanel().getSelectedValues());
          }
       };
       viewRawFileMI = new JMenuItem();

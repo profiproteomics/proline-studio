@@ -9,6 +9,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.pride.ExportPrideDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class ExportRSM2PrideAction extends AbstractRSMAction {
      protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
      
     public ExportRSM2PrideAction(){
-        super("Export to Pride...", AbstractTree.TreeType.TREE_IDENTIFICATION);    
+        super(NbBundle.getMessage(ExportRSM2PrideAction.class, "CTL_ExportPrideAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);    
     }
     
         @Override

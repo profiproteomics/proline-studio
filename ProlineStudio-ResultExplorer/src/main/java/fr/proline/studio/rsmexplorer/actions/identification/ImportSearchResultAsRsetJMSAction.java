@@ -33,7 +33,7 @@ public class ImportSearchResultAsRsetJMSAction extends AbstractRSMAction {
     private static HashMap<Long, ArrayList<ChangeListener>> m_listenerMap = new HashMap<>();
     
     public ImportSearchResultAsRsetJMSAction() {
-        super(NbBundle.getMessage(ImportSearchResultAsRsetJMSAction.class, "CTL_AddSearchResult")+"_JMS", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(ImportSearchResultAsRsetJMSAction.class, "CTL_AddSearchResult")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
     
     @Override

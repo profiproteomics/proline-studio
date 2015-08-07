@@ -38,7 +38,7 @@ import org.openide.windows.WindowManager;
 public class ValidateJMSAction extends AbstractRSMAction {
 
     public ValidateJMSAction() {
-        super(NbBundle.getMessage(ValidateJMSAction.class, "CTL_ValidateAction")+"_JMS", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(ValidateJMSAction.class, "CTL_ValidateAction")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

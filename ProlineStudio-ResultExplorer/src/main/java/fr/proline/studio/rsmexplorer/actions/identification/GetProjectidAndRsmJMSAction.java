@@ -8,7 +8,6 @@ import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.openide.util.NbBundle;
-import org.openide.windows.WindowManager;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.uds.Project;
@@ -16,18 +15,15 @@ import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.SendProjectidAndRsmTask;
-import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
-import fr.proline.studio.rsmexplorer.gui.dialog.ChangeTypicalProteinDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 
-import java.util.List;
 
 
 public class GetProjectidAndRsmJMSAction extends AbstractRSMAction {
 
     public GetProjectidAndRsmJMSAction() {
-        super(NbBundle.getMessage(GetProjectidAndRsmJMSAction.class, "CTL_GenerateSequenceCoverage")+"_JMS", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(GetProjectidAndRsmJMSAction.class, "CTL_GenerateSequenceCoverage")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {

@@ -31,7 +31,7 @@ import org.openide.util.NbBundle;
 public class MergeJMSAction extends AbstractRSMAction {
 
     public MergeJMSAction() {
-        super(NbBundle.getMessage(AddAction.class, "CTL_MergeAction")+"_JMS", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(MergeJMSAction.class, "CTL_MergeAction")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

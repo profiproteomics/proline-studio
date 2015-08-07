@@ -39,7 +39,7 @@ import org.openide.windows.WindowManager;
 public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
 
     public ImportSearchResultAsDatasetJMSAction() {
-        super(NbBundle.getMessage(ImportSearchResultAsDatasetJMSAction.class, "CTL_IdentificationAction")+"_JMS", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(ImportSearchResultAsDatasetJMSAction.class, "CTL_AddSearchResult")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

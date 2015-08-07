@@ -146,18 +146,19 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 // create the actions
                 m_multiActions = new ArrayList<>(3);  // <--- get in sync
                 
-                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                m_multiActions.add(propertiesAction);
+                if (isJSMDefined) {
+                    ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
+                    m_multiActions.add(exportDatasetAction);
+                }else{
+                    ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
+                    m_multiActions.add(exportDatasetAction);
+                }   
                 
                 m_multiActions.add(null);  // separator
                 
-                if (isJSMDefined) {
-                    ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                    m_multiActions.add(exportDatasetAction);
-                }else{
-                    ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                    m_multiActions.add(exportDatasetAction);
-                }       
+                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                m_multiActions.add(propertiesAction);
+                
                 // add actions to popup
             }
             m_multiPopup = new JPopupMenu();
@@ -216,69 +217,20 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         } else {
             if (m_mainPopup == null) {
                 // create the actions
-                m_mainActions = new ArrayList<>(14);  // <--- get in sync
+                m_mainActions = new ArrayList<>(13);  // <--- get in sync
                 boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
-                DisplayExperimentalDesignAction expDesignAction = new DisplayExperimentalDesignAction();
-                m_mainActions.add(expDesignAction);
-
-                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                m_mainActions.add(propertiesAction);
                 
-                
-                m_mainActions.add(null);  // separator
-
-                ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
-                m_mainActions.add(computeQuantProfileAction);
-                
-                m_mainActions.add(null);  // separator
-
                 DisplayXICAction displayXICAction = new DisplayXICAction();
                 m_mainActions.add(displayXICAction);
-                
-                //RetrieveSCDataAction retrieveSCDataAction = new RetrieveSCDataAction();
-                //m_mainActions.add(retrieveSCDataAction);
                 
                 DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(displayRsmAction);
                 
-                m_mainActions.add(null);  // separator*
+                DisplayExperimentalDesignAction expDesignAction = new DisplayExperimentalDesignAction();
+                m_mainActions.add(expDesignAction);
                 
-                if (isJSMDefined) {
-                    ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                    m_mainActions.add(exportDatasetAction);
-                }else{
-                    ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION);
-                    m_mainActions.add(exportDatasetAction);
-                }     
-                
-               // ExportAbundancesAction exportXICAction = new ExportAbundancesAction();
-               // m_mainActions.add(exportXICAction);
-                
-                /*DisplayXICProteinSetAction displayXICProteinSetAction = new DisplayXICProteinSetAction();
-                m_mainActions.add(displayXICProteinSetAction);
-                
-                
-                DisplayXICPeptideSetAction displayXICPeptideSetAction = new DisplayXICPeptideSetAction();
-                m_mainActions.add(displayXICPeptideSetAction);
-                
-                DisplayXICPeptideIonAction displayXICPeptideIonAction = new DisplayXICPeptideIonAction();
-                m_mainActions.add(displayXICPeptideIonAction);
-                
-                
-                ExportXICAction exportXICActionIons = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPEP_IONS);
-                m_mainActions.add(exportXICActionIons);
-
-                ExportXICAction exportXICActionPep = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPEPS);
-                m_mainActions.add(exportXICActionPep);
-
-                ExportXICAction exportXICActionProtSet = new ExportXICAction(ExportXICAction.ExportType.BASIC_MASTER_QPROT_SETS);
-                m_mainActions.add(exportXICActionProtSet);
-                
-                ExportXICAction exportXICActionProtSetProfile = new ExportXICAction(ExportXICAction.ExportType.MASTER_QPROT_SETS);
-                m_mainActions.add(exportXICActionProtSetProfile);
-*/
                 m_mainActions.add(null);  // separator
-
+                
                 RenameAction renameQuantitationAction = new RenameAction(AbstractTree.TreeType.TREE_QUANTITATION);
                 m_mainActions.add(renameQuantitationAction);
 
@@ -287,9 +239,28 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 
                 m_mainActions.add(null);  // separator
                 
+                ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
+                m_mainActions.add(computeQuantProfileAction);
+                
                 CreateXICAction createXICAction = new CreateXICAction(true);
                 m_mainActions.add(createXICAction);
 
+                m_mainActions.add(null);  // separator
+                
+                if (isJSMDefined) {
+                    ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
+                    m_mainActions.add(exportDatasetAction);
+                }else{
+                    ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_QUANTITATION, true);
+                    m_mainActions.add(exportDatasetAction);
+                }     
+                
+                m_mainActions.add(null);  // separator
+
+                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                m_mainActions.add(propertiesAction);
+                
+                
 
                 // add actions to popup
                 m_mainPopup = new JPopupMenu();

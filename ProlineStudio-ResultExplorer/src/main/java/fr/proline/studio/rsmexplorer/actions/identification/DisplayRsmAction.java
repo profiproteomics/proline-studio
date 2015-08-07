@@ -27,7 +27,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private TreeType m_treeType;
     
     public DisplayRsmAction(TreeType treeType) {
-        super(NbBundle.getMessage(AddAction.class, "CTL_DisplayRsmAction"), treeType);
+        super(NbBundle.getMessage(DisplayRsmAction.class, "CTL_DisplayRsmAction"), treeType);
         m_treeType = treeType;
     }
 

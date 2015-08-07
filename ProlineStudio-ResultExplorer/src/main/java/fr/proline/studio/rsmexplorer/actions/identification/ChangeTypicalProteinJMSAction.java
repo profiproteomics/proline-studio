@@ -28,7 +28,7 @@ public class ChangeTypicalProteinJMSAction extends AbstractRSMAction {
 
     
     public ChangeTypicalProteinJMSAction() {
-        super(NbBundle.getMessage(ChangeTypicalProteinJMSAction.class, "CTL_ChangeTypicalProtein")+"_JMS", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(NbBundle.getMessage(ChangeTypicalProteinJMSAction.class, "CTL_ChangeTypicalProtein")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

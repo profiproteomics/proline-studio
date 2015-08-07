@@ -1,15 +1,12 @@
 package fr.proline.studio.rsmexplorer.tree.identification;
 
 import fr.proline.studio.rsmexplorer.actions.identification.MergeAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ExportRSMAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ChangeDescriptionAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DatasetWrapperAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsmAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DeleteAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ValidateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsRsetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
-import fr.proline.studio.rsmexplorer.actions.identification.AddAction;
 import fr.proline.studio.rsmexplorer.actions.identification.RenameAction;
 import fr.proline.studio.rsmexplorer.actions.identification.SpectralCountAction;
 import fr.proline.studio.rsmexplorer.actions.identification.PropertiesAction;
@@ -18,12 +15,7 @@ import fr.proline.studio.rsmexplorer.actions.identification.DisplayAllRsetAction
 import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProteinAction;
 import fr.proline.studio.rsmexplorer.actions.identification.EmptyTrashAction;
 import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
-import fr.proline.studio.rsmexplorer.actions.identification.GenerateMSDiagReportAction;
-import fr.proline.studio.rsmexplorer.actions.identification.GetProjectidAndRsmJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.GetProjectidAndRsmAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ChangeTypicalProteinJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ExportRSM2PrideJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ExportRSMJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsRsetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.MergeJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ValidateJMSAction;
@@ -38,10 +30,11 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DatasetAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSAction;
-import fr.proline.studio.rsmexplorer.actions.identification.ExportRSM2PrideAction;
+import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.ChildFactory;
@@ -591,8 +584,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 m_allImportedPopup = new JPopupMenu();
 
-                for (int i = 0; i < m_allImportedActions.size(); i++) {
-                    AbstractRSMAction action = m_allImportedActions.get(i);
+                for (AbstractRSMAction action : m_allImportedActions) {
                     if (action == null) {
                         m_allImportedPopup.addSeparator();
                     } else {
@@ -612,10 +604,6 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                 // create the actions
 
 
-                m_mainActions = new ArrayList<>(22);  // <--- get in sync
-
-                m_mainActions = new ArrayList<>(18);  // <--- get in sync
-
                 m_mainActions = new ArrayList<>(19);  // <--- get in sync
 
                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
@@ -625,23 +613,28 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
                 m_mainActions.add(displayRsmAction);
-
-                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                m_mainActions.add(propertiesAction);
-
+                
                 m_mainActions.add(null);  // separator
+                
+                AggregateAction aggregateAction = new AggregateAction();
+                m_mainActions.add(aggregateAction);
+                
+                RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                m_mainActions.add(renameAction);
 
-                AddAction addAction = new AddAction();
-                m_mainActions.add(addAction);
-
-                if (isJMSDefined) {
-                    MergeJMSAction mergeJmsAction = new MergeJMSAction();
-                    m_mainActions.add(mergeJmsAction);
+                DeleteAction deleteAction = new DeleteAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                m_mainActions.add(deleteAction);
+                
+                m_mainActions.add(null);  // separator
+                
+                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+                    ImportSearchResultAsDatasetJMSAction identificationAction = new ImportSearchResultAsDatasetJMSAction();
+                    m_mainActions.add(identificationAction);
                 } else {
-                    MergeAction mergeAction = new MergeAction();
-                    m_mainActions.add(mergeAction);
+                    ImportSearchResultAsDatasetAction identificationAction = new ImportSearchResultAsDatasetAction();
+                    m_mainActions.add(identificationAction);
                 }
-
+                
                 if (isJMSDefined) {
                     ValidateJMSAction validateJMSAction = new ValidateJMSAction();
                     m_mainActions.add(validateJMSAction);
@@ -649,14 +642,17 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     ValidateAction validateAction = new ValidateAction();
                     m_mainActions.add(validateAction);
                 }
-
-//                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
-//                    ValidateJMSAction validateJMSAction = new ValidateJMSAction();
-//                    m_mainActions.add(validateJMSAction);
-//                } else {
-                    FilterRSMProteinSetsAction filterProtSetAction = new FilterRSMProteinSetsAction();
-                    m_mainActions.add(filterProtSetAction);
-//                }
+                
+                if (isJMSDefined) {
+                    MergeJMSAction mergeJmsAction = new MergeJMSAction();
+                    m_mainActions.add(mergeJmsAction);
+                } else {
+                    MergeAction mergeAction = new MergeAction();
+                    m_mainActions.add(mergeAction);
+                }
+                
+                FilterRSMProteinSetsAction filterProtSetAction = new FilterRSMProteinSetsAction();
+                m_mainActions.add(filterProtSetAction);
                 
                 if (isJMSDefined) {
                     ChangeTypicalProteinJMSAction changeTypicalProteinJmsAction = new ChangeTypicalProteinJMSAction();
@@ -668,66 +664,29 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
                 m_mainActions.add(generateSpectrumMatchesAction);
-
+                
                 SpectralCountAction spectralCountAction = new SpectralCountAction();
                 m_mainActions.add(spectralCountAction);
-
-                //RetrieveSCDataAction getSCAction = new RetrieveSCDataAction();
-                //m_mainActions.add(getSCAction); 
-                m_mainActions.add(null);  // separator
-/*
-                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
-                    ExportRSMJMSAction exportJmsRSMAction = new ExportRSMJMSAction();
-                    m_mainActions.add(exportJmsRSMAction);
-                } else {
-                    ExportRSMAction exportRSMAction = new ExportRSMAction();
-                    m_mainActions.add(exportRSMAction);
-                }*/
                 
-                if (isJMSDefined) {
-                    ExportDatasetJMSAction exportDatasetAction = new ExportDatasetJMSAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                    m_mainActions.add(exportDatasetAction);
-                }else{
-                    ExportDatasetAction exportDatasetAction = new ExportDatasetAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                    m_mainActions.add(exportDatasetAction);
-                }
+                m_mainActions.add(null);  // separator
+                
+                ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_IDENTIFICATION, isJMSDefined);
+                m_mainActions.add(exportAction);
+                
+                
+                m_mainActions.add(null);  // separator
+                
+                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
+                m_mainActions.add(propertiesAction);
+                
+                
                 
 
-                if (isJMSDefined) {
-                    ExportRSM2PrideJMSAction exportRSM2PrideAction = new ExportRSM2PrideJMSAction();
-                    m_mainActions.add(exportRSM2PrideAction);
-                } else {
-                    ExportRSM2PrideAction exportRSM2PrideAction = new ExportRSM2PrideAction();
-                    m_mainActions.add(exportRSM2PrideAction);
-                }
-
-                GenerateMSDiagReportAction msDiagReportAction = new GenerateMSDiagReportAction();
-
-                m_mainActions.add(msDiagReportAction);   
-              //
-//                if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
-//                    GetProjectidAndRsmJMSAction getprojectidandrsmJmsAction = new GetProjectidAndRsmJMSAction();
-//                    m_mainActions.add(getprojectidandrsmJmsAction);
-//                } else {
-//                	GetProjectidAndRsmAction getprojectidandrsmAction = new GetProjectidAndRsmAction();
-//                   m_mainActions.add(getprojectidandrsmAction);
-//                }
-
-                m_mainActions.add(null);  // separator
-
-                ChangeDescriptionAction changeDescriptionAction = new ChangeDescriptionAction();
-                m_mainActions.add(changeDescriptionAction);
-
-                RenameAction renameAction = new RenameAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                m_mainActions.add(renameAction);
-
-                DeleteAction deleteAction = new DeleteAction(AbstractTree.TreeType.TREE_IDENTIFICATION);
-                m_mainActions.add(deleteAction);
+                
 
                 // add actions to popup
                 m_mainPopup = new JPopupMenu();
-                for (int i = 0; i < m_mainActions.size(); i++) {
-                    AbstractRSMAction action = m_mainActions.get(i);
+                for (AbstractRSMAction action : m_mainActions) {
                     if (action == null) {
                         m_mainPopup.addSeparator();
                     } else {
@@ -749,9 +708,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
         }
 
         // update of the enable/disable state
-        for (int i = 0; i < actions.size(); i++) {
-            AbstractRSMAction action = actions.get(i);
-
+        for (AbstractRSMAction action : actions) {
             if (action == null) {
                 continue;
             }

@@ -32,6 +32,7 @@ import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.CustomColumnControlButton;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
 import fr.proline.studio.table.LazyTable;
@@ -273,7 +274,8 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         
         m_quantPeptideTable = new QuantPeptideTable();
         m_quantPeptideTable.setModel(new CompoundTableModel(new QuantPeptideTableModel((LazyTable)m_quantPeptideTable), true));
-        
+        CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_quantPeptideTable);
+        m_quantPeptideTable.setColumnControl(customColumnControl);
         // hide the id column
         m_quantPeptideTable.getColumnExt(m_quantPeptideTable.convertColumnIndexToView(QuantPeptideTableModel.COLTYPE_PEPTIDE_ID)).setVisible(false);
         

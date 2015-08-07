@@ -31,6 +31,7 @@ import fr.proline.studio.search.AbstractSearch;
 import fr.proline.studio.search.SearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
+import fr.proline.studio.table.CustomColumnControlButton;
 import fr.proline.studio.table.ExportTableSelectionInterface;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -257,6 +258,8 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         
         m_quantProteinSetTable = new QuantProteinSetTable();
         m_quantProteinSetTable.setModel(new CompoundTableModel(new QuantProteinSetTableModel((LazyTable)m_quantProteinSetTable), true));
+        CustomColumnControlButton customColumnControl = new CustomColumnControlButton(m_quantProteinSetTable);
+        m_quantProteinSetTable.setColumnControl(customColumnControl);
         // hide the id column
         m_quantProteinSetTable.getColumnExt(m_quantProteinSetTable.convertColumnIndexToView(QuantProteinSetTableModel.COLTYPE_PROTEIN_SET_ID)).setVisible(false);
         

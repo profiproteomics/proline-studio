@@ -111,6 +111,7 @@ public class IconManager {
         SAVE_WND, 
         ARROW_DOWN, 
         ARROW_RIGHT,
+        ARROW_UP,
         ADD_DATA_MIXER,
         DATA_MIXER,
         GRID,
@@ -454,6 +455,8 @@ public class IconManager {
                return "fr/proline/studio/images/arrow-down.png";
            case ARROW_RIGHT:
                return "fr/proline/studio/images/arrow-right.png";
+            case ARROW_UP:
+               return "fr/proline/studio/images/arrow-up.png";
            case ADD_DATA_MIXER:
                return "fr/proline/studio/images/addDataMixer.png";
            case DATA_MIXER:

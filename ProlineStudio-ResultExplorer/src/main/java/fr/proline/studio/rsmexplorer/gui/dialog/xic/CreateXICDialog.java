@@ -458,8 +458,7 @@ public class CreateXICDialog extends DefaultDialog {
     protected boolean okCalled() {
 
         if (m_step == STEP_PANEL_CREATE_XIC_DESIGN)  {
-            
-            if ((!checkDesignStructure(m_finalXICDesignNode)) || (!checkRawFiles(m_finalXICDesignNode))) {
+            if ((!checkDesignStructure(m_finalXICDesignNode)) || (!checkRawFiles(m_finalXICDesignNode)) || (!checkBiologicalGroupName(m_finalXICDesignNode))) {
                 return false;
             }
 
@@ -611,6 +610,47 @@ public class CreateXICDialog extends DefaultDialog {
             }
         }
 
+        return true;
+    }
+    
+    /**
+     * Issue 13023: check the biological group names and biological sample names: must be unique
+     * @param parentNode
+     * @return 
+     */
+    private boolean checkBiologicalGroupName(AbstractNode parentNode){
+        List<String> listBiologicalGroupName = new ArrayList();
+        Enumeration children = parentNode.children();
+        //Iterate over Groups
+        while (children.hasMoreElements()) {
+            AbstractNode rsmNode = (AbstractNode) children.nextElement();
+            AbstractNode.NodeTypes type = rsmNode.getType();
+            switch (type) {
+                case BIOLOGICAL_GROUP:{
+                    if (listBiologicalGroupName.contains(rsmNode.getData().getName())) {
+                        showErrorOnNode(rsmNode, "The Biological Group name must be unique.");
+                        return false;
+                    }
+                    listBiologicalGroupName.add(rsmNode.getData().getName());
+                    List<String> listBiologicalSampleName = new ArrayList();
+                    //Iterate over Samples
+                    Enumeration childrenS = rsmNode.children();
+                    while (childrenS.hasMoreElements()) {
+                        AbstractNode sampleNode = (AbstractNode) childrenS.nextElement();
+                        AbstractNode.NodeTypes typeS = sampleNode.getType();
+                        switch (typeS) {
+                            case BIOLOGICAL_SAMPLE:{
+                                if (listBiologicalSampleName.contains(sampleNode.getData().getName())) {
+                                    showErrorOnNode(sampleNode, "The Biological Sample name must be unique.");
+                                    return false;
+                                }
+                                listBiologicalSampleName.add(sampleNode.getData().getName());
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return true;
     }
     

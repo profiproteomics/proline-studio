@@ -1,6 +1,7 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.graphics.marker.DataCoordinates;
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.parameter.ColorOrGradientParameter;
@@ -58,7 +59,6 @@ public class PlotStick extends PlotAbstract {
     private ParameterList m_parameterList;
     private ColorOrGradientParameter m_colorParameter;
 
-    private boolean m_isPaintMarker;
 
     // for stick plots, draw (or not) the points
     private boolean m_isDrawPoints = false;
@@ -476,10 +476,10 @@ public class PlotStick extends PlotAbstract {
                             if (j > 0) {
                                 orientation = LabelMarker.ORIENTATION_X_LEFT;
                             }
-
-                            LabelMarker labelMarker = new LabelMarker(m_plotPanel, d, yL, texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP);
+                            
+                            LabelMarker labelMarker = new LabelMarker(m_plotPanel, new DataCoordinates(d, yL), texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP);
                             if (colors != null && colors.size() >= j) {
-                                labelMarker = new LabelMarker(m_plotPanel, d, yL, texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP, colors.get(j));
+                                labelMarker = new LabelMarker(m_plotPanel, new DataCoordinates(d, yL), texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP, colors.get(j));
                             }
                             addMarker(labelMarker);
                         }
@@ -636,15 +636,10 @@ public class PlotStick extends PlotAbstract {
             }
         }
 
-        if (isPaintMarker()) {
-            paintMarkers(g);
-        }
 
     }
 
-    private boolean isPaintMarker() {
-        return m_isPaintMarker;
-    }
+
 
     @Override
     public boolean needsDoubleBuffering() {
@@ -709,6 +704,15 @@ public class PlotStick extends PlotAbstract {
     @Override
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;
+    }
+    
+    @Override
+    public boolean isMouseOnSelectedPlot(double x, double y) {
+        int index = findPoint(x, y);
+        if (index == -1) {
+            return false;
+        }
+        return m_selected[index];
     }
 
     public void setDrawPoints(boolean drawPoints) {

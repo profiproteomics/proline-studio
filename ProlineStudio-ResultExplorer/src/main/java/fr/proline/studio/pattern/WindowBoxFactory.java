@@ -132,25 +132,6 @@ public class WindowBoxFactory {
         
     }
     
-    /**
-     * 
-     * @param name : title of the created Windows 
-     * @param readData : specify if the spectral count to display has to be retrieve from computing (false)
-     * or read back operation (true)
-     * @return 
-     */
-    public static WindowBox getRsmWSCWindowBox(String dataName, String fullName, boolean readData) {
-        
-        // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataBoxRsmWSC(readData);
-        boxes[0].setDataName(dataName);
-
-        WindowBox winBox = new WindowBox( fullName, generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.QUANT_SC) );
-
-        return winBox;
-        
-    }
     
     public static WindowBox getRsmPSMWindowBox(String dataName, boolean isDecoy) {
         // create boxes

@@ -83,7 +83,6 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxRsmProteinAndPeptideSequence(11),
         DataBoxRsmProteinSetOfPeptides(12),
         DataBoxRsmProteinsOfProteinSet(13),
-        DataBoxRsmWSC(14),
         //DataBoxStatisticsFrequencyResponse(15),
         DataBoxTaskDescription(16),
         DataBoxTaskList(17),
@@ -147,9 +146,7 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxRsmProteinSetOfPeptides();
                 case DataBoxRsmProteinsOfProteinSet:
                     return new DataBoxRsmProteinsOfProteinSet();
-                case DataBoxRsmWSC:
-                    return new DataBoxRsmWSC(false);
-                /*case DataBoxStatisticsFrequencyResponse:
+                 /*case DataBoxStatisticsFrequencyResponse:
                     return new DataBoxStatisticsFrequencyResponse();*/
                 case DataBoxTaskDescription:
                     return new DataBoxTaskDescription();

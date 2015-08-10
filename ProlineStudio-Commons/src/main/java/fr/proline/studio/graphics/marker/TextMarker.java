@@ -30,10 +30,7 @@ public class TextMarker extends AbstractMarker {
 
     @Override
     public void paint(Graphics2D g) {
-        
 
-        
-        
         XAxis xAxis = m_plotPanel.getXAxis();
         YAxis yAxis = m_plotPanel.getYAxis();
 

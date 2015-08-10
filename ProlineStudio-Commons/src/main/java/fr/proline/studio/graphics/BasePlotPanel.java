@@ -59,6 +59,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
     private final ZoomGesture m_zoomGesture = new ZoomGesture();
     private final SelectionGesture m_selectionGesture = new SelectionGesture();
     private final PanAxisGesture m_panAxisGesture = new PanAxisGesture();
+    private final MoveGesture m_moveGesture = new MoveGesture();
     
     public final static int GAP_FIGURES_Y = 30;
     public final static int GAP_FIGURES_X = 24;
@@ -252,6 +253,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                         m_useDoubleBuffering = true;
                     }
                 }
+                
+            for (PlotAbstract plot : m_plots) {
+                plot.paintMarkers(g2d);
+            }
         }
         
         // set clipping area for zooming and selecting
@@ -491,6 +496,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         if(m_xAxis != null && m_yAxis != null){
             double xValue = m_xAxis.pixelToValue(e.getX());
             double yValue = m_yAxis.pixelToValue(e.getY());
+
             fireMouseClicked(e, xValue, yValue);
         }
     }
@@ -518,7 +524,21 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             }
             
             if (SwingUtilities.isLeftMouseButton(e)) {
-                m_selectionGesture.startSelection(x, y);
+                // check if we are over a moveable object
+                 MoveableInterface movable = null;
+                for (PlotAbstract plot : m_plots) {
+                    movable = plot.getOverMovable(x, y);
+                    if (movable != null) {
+                        break;
+                    }
+                }
+                if (movable != null) {
+                    m_moveGesture.startMoving(x, y, movable);
+                    setCursor(new Cursor(Cursor.MOVE_CURSOR));
+                } else {
+                    m_selectionGesture.startSelection(x, y);
+                }
+
             } else if (SwingUtilities.isRightMouseButton(e)) {
                 m_zoomGesture.startZooming(x, y);
             }
@@ -555,7 +575,7 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                 popup.show((JComponent) e.getSource(), x, y);
                 mustRepaint = true;
             }
-        } else if ( !m_zoomGesture.isZooming() && !m_selectionGesture.isSelecting() && (m_panAxisGesture.getAction() != PanAxisGesture.ACTION_PAN)) {
+        } else if ( !m_zoomGesture.isZooming() && !m_selectionGesture.isSelecting() && !m_moveGesture.isMoving() && (m_panAxisGesture.getAction() != PanAxisGesture.ACTION_PAN)) {
             
             if (m_xAxis != null && m_xAxis.inside(x, y)) {
                 mustRepaint |= m_xAxis.setSelected(!m_xAxis.isSelected());
@@ -569,7 +589,12 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             }
         }
         
-        if (m_selectionGesture.isSelecting()) {
+        if (m_moveGesture.isMoving()) {
+            m_moveGesture.stopMoving(x, y);
+            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            m_updateDoubleBuffer = true;
+            mustRepaint = true;
+        } else if (m_selectionGesture.isSelecting()) {
             m_selectionGesture.stopSelection(x, y);
             
             int modifier = e.getModifiers();
@@ -627,8 +652,23 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                     updateAxis(m_plots.get(0));
                 }
                 m_updateDoubleBuffer = true;
+            } else if (e.isPopupTrigger()) { // action == ZoomGesture.ACTION_NONE
+                // WART, in fact we are not zooming, so if it is the right mouse button,
+                // the user wants the popup menu
+                if (!m_plots.isEmpty()) {
+                    PlotAbstract plot = m_plots.get(0);
+                    double xValue = m_xAxis.pixelToValue(e.getX());
+                    double yValue = m_yAxis.pixelToValue(e.getY());
+                    
+                    JPopupMenu popup = plot.getPopupMenu(xValue, yValue);
+                    if (popup != null) {
+                        popup.show((JComponent) e.getSource(), e.getX(), e.getY());
+                    }
+                }
             }
+            
             mustRepaint = true;
+                
         } else if (m_panAxisGesture.isPanning()) {
            m_panAxisGesture.stopPanning(e.getX(), e.getY());
         }
@@ -671,7 +711,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         if (m_drawCursor){
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }
-        if (m_selectionGesture.isSelecting()) {
+        
+        if (m_moveGesture.isMoving()) {
+            m_moveGesture.move(e.getX(), e.getY());
+            repaint();
+        } else if (m_selectionGesture.isSelecting()) {
             m_selectionGesture.continueSelection(e.getX(), e.getY());
             repaint();
         } else if (m_zoomGesture.isZooming()) {

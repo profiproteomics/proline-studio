@@ -24,5 +24,5 @@ public abstract class AbstractMarker {
       this.m_isVisible = m_isVisible;
    }
     
-    public abstract void paint(Graphics2D g);
+   public abstract void paint(Graphics2D g);
 }

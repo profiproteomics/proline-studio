@@ -2,23 +2,35 @@ package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.StatsModel;
+import fr.proline.studio.graphics.marker.AbstractMarker;
+import fr.proline.studio.graphics.marker.DataCoordinates;
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
+import fr.proline.studio.graphics.marker.PercentageCoodinates;
 import fr.proline.studio.graphics.marker.TextMarker;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
 import fr.proline.studio.parameter.ColorParameter;
+import fr.proline.studio.parameter.DefaultParameterDialog;
 import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Set;
+import javax.swing.AbstractAction;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
+import org.openide.windows.WindowManager;
 
 /**
  * Histogram Plot
@@ -43,6 +55,9 @@ public class PlotHistogram extends PlotAbstract {
     private final ColorParameter m_colorParameter;
     private final IntegerParameter m_binsParameter;
     private ArrayList<ParameterList> m_parameterListArray = null;
+    
+    private final LinkedList<GraphicDataGroup> m_dataGroup = new LinkedList<>();
+    private final HashMap<GraphicDataGroup, LinkedHashMap<Integer, Double>> m_graphicDataGroupToIndex = new HashMap<>();
     
     private static final String PLOT_HISTOGRAM_COLOR_KEY = "PLOT_HISTOGRAM_COLOR";
     private static final String PLOT_HISTOGRAM_BIN_KEY = "PLOT_HISTOGRAM_BIN";
@@ -296,12 +311,12 @@ public class PlotHistogram extends PlotAbstract {
         addMarker(new XDeltaMarker(m_plotPanel, mean, mean-std, yStdevLabel));
         addMarker(new LineMarker(m_plotPanel, mean-std, LineMarker.ORIENTATION_VERTICAL));
         
-        addMarker(new LabelMarker(m_plotPanel, mean+std/2, yStdevLabel, "Stdev : "+std, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_TOP));
+        addMarker(new LabelMarker(m_plotPanel, new DataCoordinates(mean+std/2, yStdevLabel), "Stdev : "+std, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_TOP));
         
         
         // add Mean value
         addMarker(new LineMarker(m_plotPanel, mean, LineMarker.ORIENTATION_VERTICAL));
-        addMarker(new LabelMarker(m_plotPanel, mean, yMeanLabel, "Mean : "+mean, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_BOTTOM));
+        addMarker(new LabelMarker(m_plotPanel, new DataCoordinates(mean, yMeanLabel), "Mean : "+mean, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_BOTTOM));
         
         // add Title
         addMarker(new TextMarker(m_plotPanel, 0.05, 0.95, m_values.getDataColumnIdentifier(0) +" Histogram"));
@@ -400,6 +415,8 @@ public class PlotHistogram extends PlotAbstract {
         
         int y2 = yAxis.valueToPixel(0);
         int size = m_dataX == null ? 0 :m_dataX.length;
+        
+        // draw normal bars
         for (int i=0;i<size-1;i++) {
             int x1 = xAxis.valueToPixel( m_dataX[i]);
             int x2 = xAxis.valueToPixel( m_dataX[i+1]);
@@ -408,7 +425,36 @@ public class PlotHistogram extends PlotAbstract {
 
             g.setColor(m_colorParameter.getColor());
             g.fillRect(x1, y1 , x2-x1, y2-y1);
+                        
+            g.setColor(Color.black);
+            g.drawRect(x1, y1 , x2-x1, y2-y1);
             
+        }
+        
+        // draw groups
+        for (GraphicDataGroup group : m_dataGroup) {
+            LinkedHashMap<Integer, Double> indexMap = m_graphicDataGroupToIndex.get(group);
+            Set<Integer> idSet = indexMap.keySet();
+            for (Integer index : idSet) {
+                int x1 = xAxis.valueToPixel(m_dataX[index]);
+                int x2 = xAxis.valueToPixel(m_dataX[index + 1]);
+                int y1 = yAxis.valueToPixel(m_asPercentage ? m_dataY[index] : m_dataCountY[index]);
+                double percentage = indexMap.get(index);
+                g.setColor(group.getColor());
+                int height = (int) Math.round((1-percentage)* (y2 - y1));
+                g.fillRect(x1, y1 + height, x2 - x1, y2 - y1 - height);
+
+                g.setColor(Color.black);
+                g.drawLine(x1, y1 + height, x2, y1 + height);
+            }
+
+        }
+
+        // draw selection
+        for (int i=0;i<size-1;i++) {
+            int x1 = xAxis.valueToPixel( m_dataX[i]);
+            int x2 = xAxis.valueToPixel( m_dataX[i+1]);
+            int y1 = yAxis.valueToPixel( m_asPercentage ? m_dataY[i] : m_dataCountY[i]);
             if (m_selected[i]>0) {
                 g.setColor(CyclicColorPalette.getColor(5));
                 int height = (int) Math.round((1-m_selected[i])*(y2-y1));
@@ -417,14 +463,13 @@ public class PlotHistogram extends PlotAbstract {
                 g.setColor(Color.black);
                 g.drawLine(x1, y1+height , x2, y1+height);
             }
-            
-            g.setColor(Color.black);
-            g.drawRect(x1, y1 , x2-x1, y2-y1);
-            
         }
         
-        paintMarkers(g);
     }
+    
+    
+    
+
 
 
     @Override
@@ -441,6 +486,152 @@ public class PlotHistogram extends PlotAbstract {
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;
     }
+    
+    @Override
+    public boolean isMouseOnSelectedPlot(double x, double y) {
+        int index = findPoint(x, y);
+        if (index == -1) {
+            return false;
+        }
+        return (m_selected[index]>0);
+    }
+    
+    
+    @Override
+    public JPopupMenu getPopupMenu(double x, double y) {
+
+        boolean onPoint = false;
+        boolean onSelection = false;
+        GraphicDataGroup onGroup = null;
+        int index = findPoint(x, y);
+        if (index != -1) {
+            onPoint = true;
+            double yData1 = m_asPercentage ? m_dataY[index] : m_dataCountY[index];
+            if (m_selected[index] > 0) {
+                
+                double ySelection = m_selected[index]*yData1;
+                onSelection = y<ySelection;
+            } else {
+                onSelection = false;
+            }
+
+            // search for group
+            for (GraphicDataGroup group : m_dataGroup) {
+                LinkedHashMap<Integer, Double> percentageMap = m_graphicDataGroupToIndex.get(group);
+                double percentage = percentageMap.get(index);
+                if (y<percentage*yData1) {
+                    onGroup = group;
+                    break;
+                }
+            }
+        }
+
+        AbstractAction addGroupAction = new AbstractAction("Add Group") {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                ArrayList<ParameterList> parameterListArray = new ArrayList<>(1);
+                // Color parameter
+                ParameterList groupParameterList = new ParameterList("Define Group");
+                parameterListArray.add(groupParameterList);
+
+                StringParameter groupNameParameter = new StringParameter("GroupName", "Group Name", JTextField.class, "", 0, 32);
+                groupParameterList.add(groupNameParameter);
+                
+                Color defaultColor = CyclicColorPalette.getColor(21, 128);
+                ColorParameter colorParameter = new ColorParameter("GroupColorParameter", "Color", defaultColor);
+                groupParameterList.add(colorParameter);
+                
+                DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterListArray);
+                parameterDialog.setLocationRelativeTo(m_plotPanel);
+                parameterDialog.setVisible(true);
+                
+                if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
+                   String groupName = groupNameParameter.getStringValue();
+                   Color c = colorParameter.getColor();
+                   GraphicDataGroup dataGroup = new GraphicDataGroup(groupName, c);
+                   
+                   m_dataGroup.addFirst(dataGroup);
+                   LinkedHashMap<Integer, Double> selectedIndexes = new LinkedHashMap<>();
+                   for (int i = 0; i < m_selected.length; i++) {
+                       if (m_selected[i]>0) {
+                           selectedIndexes.put(i, m_selected[i]);   
+                       }
+                   }
+                   m_graphicDataGroupToIndex.put(dataGroup, selectedIndexes);
+                   
+                   String name = dataGroup.getName();
+                    if ((name != null) && (!name.isEmpty())) {
+                        // calculation of percentageY is a wart, could be done in a better way
+                        double percentageY = 1-(0.1*m_dataGroup.size());
+                        if (percentageY<0.1) {
+                            percentageY = 0.1;
+                        }
+                        LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoodinates(0.9, percentageY), dataGroup.getName(), LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, dataGroup.getColor());
+                        dataGroup.setAssociatedMarker(marker);
+                        addMarker(marker);
+                    }
+                   
+                   
+                   // repaint
+                   m_plotPanel.repaintUpdateDoubleBuffer();
+                   
+                }
+            }
+            
+        };
+        
+        addGroupAction.setEnabled(onSelection);
+
+        final GraphicDataGroup _onGroup = onGroup;
+        AbstractAction selectGroupAction = new AbstractAction("Select Group") {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                LinkedHashMap<Integer, Double> percentageMap = m_graphicDataGroupToIndex.get(_onGroup);
+                int size = m_selected.length;
+                for (int i = 0; i < size; i++) {
+                    Double percentage = percentageMap.get(i);
+                    m_selected[i] = (percentage == null) ?0 : percentage;
+                }
+
+
+                // repaint
+                m_plotPanel.repaintUpdateDoubleBuffer();
+
+            }
+        };
+        selectGroupAction.setEnabled(_onGroup != null);
+        
+        
+        AbstractAction deleteGroupAction = new AbstractAction("Delete Group") {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                m_graphicDataGroupToIndex.remove(_onGroup);
+                m_dataGroup.remove(_onGroup);
+                AbstractMarker marker = _onGroup.getAssociatedMarker();
+                if (marker != null) {
+                    removeMarker(marker);
+                }
+                
+                // repaint
+                   m_plotPanel.repaintUpdateDoubleBuffer();
+            }
+        };
+        deleteGroupAction.setEnabled(_onGroup != null);
+        
+        JPopupMenu menu = new JPopupMenu();
+        menu.add(addGroupAction);
+        menu.add(selectGroupAction);
+        menu.add(deleteGroupAction);
+        
+        return menu;
+    }
+    
 
     @Override
     public String getEnumValueX(int index, boolean fromData ) {

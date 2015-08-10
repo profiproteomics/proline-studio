@@ -1,13 +1,20 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.graphics.marker.AbstractMarker;
+import fr.proline.studio.graphics.marker.LabelMarker;
+import fr.proline.studio.graphics.marker.PercentageCoodinates;
 import fr.proline.studio.parameter.ColorOrGradientParameter;
+import fr.proline.studio.parameter.ColorParameter;
+import fr.proline.studio.parameter.DefaultParameterDialog;
 import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.LinearGradientPaint;
+import java.awt.event.ActionEvent;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,6 +22,12 @@ import java.util.Random;
 import javax.swing.JSlider;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import javax.swing.AbstractAction;
+import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
+import org.openide.windows.WindowManager;
 
 /**
  * Scatter Plot
@@ -57,6 +70,10 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     private final IntegerParameter m_jitterYParameter;
     
     private ArrayList<ParameterList> m_parameterListArray = null;
+    
+    private final LinkedList<GraphicDataGroup> m_dataGroup = new LinkedList<>();
+    private final HashMap<Long, GraphicDataGroup> m_idsToGraphicDataGroup = new HashMap<>();
+    private final HashMap<GraphicDataGroup, LinkedHashSet<Long>> m_graphicDataGroupToId = new HashMap<>();
     
     public PlotScatter(BasePlotPanel plotPanel, CompareDataInterface compareDataInterface, CrossSelectionInterface crossSelectionInterface, int colX, int colY) {
         super(plotPanel, PlotType.SCATTER_PLOT, compareDataInterface, crossSelectionInterface);
@@ -629,20 +646,18 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
         }
  
         // first plot non selected
-        g.setColor(plotColor);
-        int size = (m_dataX!=null) ? m_dataX.length : 0;
-        for (int i=0;i<size;i++) {
+        
+        int size = (m_dataX != null) ? m_dataX.length : 0;
+        for (int i = 0; i < size; i++) {
             if (m_selected[i]) {
                 continue;
             }
-            int x = xAxis.valueToPixel( m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
-            int y = yAxis.valueToPixel( m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
+            int x = xAxis.valueToPixel(m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
+            int y = yAxis.valueToPixel(m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
-            if (useGradient) {
-               plotColor = getColorInGradient(m_gradientParamValues[i]);
-               g.setColor(plotColor);
-            }
-            
+            Color c = selectColor(plotColor, useGradient, i);
+            g.setColor(c);
+
             g.fillOval(x-3, y-3, 6, 6);
 
         }
@@ -655,11 +670,9 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             int x = xAxis.valueToPixel( m_dataX[i]) + ((m_jitterX != null) ? m_jitterX[i] : 0);
             int y = yAxis.valueToPixel( m_dataY[i]) + ((m_jitterY != null) ? m_jitterY[i] : 0);
 
-            if (useGradient) {
-               plotColor = getColorInGradient(m_gradientParamValues[i]);
-            }
-            
-            g.setColor(plotColor);
+            Color c = selectColor(plotColor, useGradient, i);
+            g.setColor(c);
+
             g.fillOval(x-3, y-3, 6, 6);
             
             g.setColor(Color.black);
@@ -668,10 +681,25 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
 
         }
 
-        
-        paintMarkers(g);
+
     }
 
+    private Color selectColor(Color plotColor, boolean useGradient, int i) {
+        Color c = null;
+        if (!m_idsToGraphicDataGroup.isEmpty()) {
+            GraphicDataGroup dataGroup = m_idsToGraphicDataGroup.get(m_ids[i]);
+            if (dataGroup != null) {
+                c = dataGroup.getColor();
+            } else {
+                c = plotColor;
+            }
+        } else if (useGradient) {
+            c = getColorInGradient(m_gradientParamValues[i]);
+        } else {
+            c = plotColor;
+        }
+        return c;
+    }
     
     @Override
     public boolean needsDoubleBuffering() {
@@ -691,6 +719,154 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
     @Override
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;
+    }
+    
+    @Override
+    public boolean isMouseOnSelectedPlot(double x, double y) {
+        int index = findPoint(x, y);
+        if (index == -1) {
+            return false;
+        }
+        return m_selected[index];
+    }
+    
+    @Override
+    public JPopupMenu getPopupMenu(double x, double y) {
+
+        boolean onPoint = false;
+        boolean onSelection = false;
+        int index = findPoint(x, y);
+        if (index != -1) {
+            onPoint = true;
+            onSelection = m_selected[index];
+        }
+        long id = (index == -1) ? -1 : m_ids[index];
+        
+        // search for group
+        final GraphicDataGroup group = (id == -1) ? null : m_idsToGraphicDataGroup.get(id);
+        
+        AbstractAction addGroupAction = new AbstractAction("Add Group") {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                ArrayList<ParameterList> parameterListArray = new ArrayList<>(1);
+                // Color parameter
+                ParameterList groupParameterList = new ParameterList("Define Group");
+                parameterListArray.add(groupParameterList);
+
+                StringParameter groupNameParameter = new StringParameter("GroupName", "Group Name", JTextField.class, "", 0, 32);
+                groupParameterList.add(groupNameParameter);
+                
+                Color defaultColor = CyclicColorPalette.getColor(21, 128);
+                ColorParameter colorParameter = new ColorParameter("GroupColorParameter", "Color", defaultColor);
+                groupParameterList.add(colorParameter);
+                
+                DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterListArray);
+                parameterDialog.setLocationRelativeTo(m_plotPanel);
+                parameterDialog.setVisible(true);
+                
+                if (parameterDialog.getButtonClicked() == DefaultParameterDialog.BUTTON_OK) {
+                   String groupName = groupNameParameter.getStringValue();
+                   Color c = colorParameter.getColor();
+                   GraphicDataGroup dataGroup = new GraphicDataGroup(groupName, c);
+                   
+                   m_dataGroup.addFirst(dataGroup);
+                   LinkedHashSet<Long> selectedIds = new LinkedHashSet<>();
+                   for (int i = 0; i < m_selected.length; i++) {
+                       if (m_selected[i]) {
+                           
+                           long id = m_ids[i];
+                           GraphicDataGroup oldGroup = m_idsToGraphicDataGroup.get(id);
+                           if (oldGroup != null) {
+                               m_graphicDataGroupToId.get(oldGroup).remove(id);
+                           }
+                           
+                           m_idsToGraphicDataGroup.put(id, dataGroup);
+                           selectedIds.add(id);
+
+                           
+                       }
+                   }
+                   m_graphicDataGroupToId.put(dataGroup, selectedIds);
+                   
+                   String name = dataGroup.getName();
+                    if ((name != null) && (!name.isEmpty())) {
+                        // calculation of percentageY is a wart, could be done in a better way
+                        double percentageY = 1-(0.1*m_dataGroup.size());
+                        if (percentageY<0.1) {
+                            percentageY = 0.1;
+                        }
+                        LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoodinates(0.9, percentageY), dataGroup.getName(), LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, dataGroup.getColor());
+                        dataGroup.setAssociatedMarker(marker);
+                        addMarker(marker);
+                    }
+                   
+                   
+                   // repaint
+                   m_plotPanel.repaintUpdateDoubleBuffer();
+                   
+                }
+            }
+            
+        };
+        
+        addGroupAction.setEnabled(onSelection);
+
+        AbstractAction selectGroupAction = new AbstractAction("Select Group") {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                int size = m_selected.length;
+                for (int i = 0; i < size; i++) {
+                    m_selected[i] = false;
+                }
+
+                LinkedHashSet<Long> ids = m_graphicDataGroupToId.get(group);
+                for (Long id : ids) {
+
+                    int index = m_idToIndex.get(id);
+                    m_selected[index] = true;
+
+                }
+
+                // repaint
+                m_plotPanel.repaintUpdateDoubleBuffer();
+
+            }
+        };
+        selectGroupAction.setEnabled(group != null);
+        
+        
+        AbstractAction deleteGroupAction = new AbstractAction("Delete Group") {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                LinkedHashSet<Long> ids = m_graphicDataGroupToId.get(group);
+                for (Long id : ids) {
+                    m_idsToGraphicDataGroup.remove(id);
+                }
+                m_graphicDataGroupToId.remove(group);
+                m_dataGroup.remove(group);
+                AbstractMarker marker = group.getAssociatedMarker();
+                if (marker != null) {
+                    removeMarker(marker);
+                }
+                
+                // repaint
+                   m_plotPanel.repaintUpdateDoubleBuffer();
+            }
+        };
+        deleteGroupAction.setEnabled(group != null);
+        
+        JPopupMenu menu = new JPopupMenu();
+        menu.add(addGroupAction);
+        menu.add(selectGroupAction);
+        menu.add(deleteGroupAction);
+        
+        return menu;
     }
     
     @Override

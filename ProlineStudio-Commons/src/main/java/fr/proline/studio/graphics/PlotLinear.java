@@ -1,6 +1,7 @@
 package fr.proline.studio.graphics;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
+import fr.proline.studio.graphics.marker.DataCoordinates;
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.parameter.ColorOrGradientParameter;
@@ -60,7 +61,6 @@ public class PlotLinear extends PlotAbstract {
     private ParameterList m_parameterList;
     private ColorOrGradientParameter m_colorParameter;
 
-    private boolean m_isPaintMarker;
 
     // for linear plots, draw (or not) the points
     private boolean m_isDrawPoints = false;
@@ -505,9 +505,9 @@ public class PlotLinear extends PlotAbstract {
                                 orientation = LabelMarker.ORIENTATION_X_LEFT;
                             }
 
-                            LabelMarker labelMarker = new LabelMarker(m_plotPanel, d, yL, texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP);
+                            LabelMarker labelMarker = new LabelMarker(m_plotPanel, new DataCoordinates(d, yL), texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP);
                             if (colors != null && colors.size() >= j) {
-                                labelMarker = new LabelMarker(m_plotPanel, d, yL, texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP, colors.get(j));
+                                labelMarker = new LabelMarker(m_plotPanel, new DataCoordinates(d, yL), texts.get(j) + df.format(d), orientation, LabelMarker.ORIENTATION_Y_TOP, colors.get(j));
                             }
                             addMarker(labelMarker);
                         }
@@ -676,9 +676,7 @@ public class PlotLinear extends PlotAbstract {
             }
         }
 
-        if (isPaintMarker()) {
-            paintMarkers(g);
-        }
+
 
     }
 
@@ -754,6 +752,11 @@ public class PlotLinear extends PlotAbstract {
     @Override
     public boolean isMouseOnPlot(double x, double y) {
         return findPoint(x, y) != -1;
+    }
+    
+    @Override
+    public boolean isMouseOnSelectedPlot(double x, double y) {
+        return false; // JPM : not supported for the moment
     }
 
     public void setDrawPoints(boolean drawPoints) {

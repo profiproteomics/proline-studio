@@ -7,6 +7,7 @@ import fr.proline.studio.parameter.ParameterList;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
+import javax.swing.JPopupMenu;
 
 /**
  * Base class for all types of plot
@@ -25,6 +26,7 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     protected BasePlotPanel m_plotPanel;
     
     private ArrayList<AbstractMarker> m_markersList = null;
+    protected boolean m_isPaintMarker = true;
 
     protected boolean m_locked = false;
     
@@ -90,6 +92,28 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
         m_markersList.add(m);
     }
     
+    private boolean isPaintMarker() {
+        return m_isPaintMarker;
+    }
+    
+    public MoveableInterface getOverMovable(int x, int y) {
+         if (m_markersList == null) {
+             return null;
+         }
+        int nb = m_markersList.size();
+        for (int i = 0; i < nb; i++) {
+            AbstractMarker m = m_markersList.get(i);
+            if (m instanceof MoveableInterface) {
+                MoveableInterface movable = (MoveableInterface) m;
+                if (movable.isMoveable() && movable.inside(x, y)) {
+                    return movable;
+                }
+            }
+
+        }
+        return null;
+    } 
+    
     /**
      * remove the specified marker, returns true if the marker was in the list, false otherwise
      * @param m
@@ -110,10 +134,16 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     }
     
     public void paintMarkers(Graphics2D g) {
+        if (!m_isPaintMarker) {
+            return;
+        }
+        
         if (m_markersList == null) {
             return;
         }
-        for (int i=0;i<m_markersList.size();i++) {
+        
+        int nb = m_markersList.size();
+        for (int i=0;i<nb;i++) {
             m_markersList.get(i).paint(g);
         }
     }
@@ -143,6 +173,9 @@ public abstract class PlotAbstract implements Axis.EnumXInterface, Axis.EnumYInt
     }
     
     public abstract boolean isMouseOnPlot(double x, double y);
+    public abstract boolean isMouseOnSelectedPlot(double x, double y);
 
-
+    public JPopupMenu getPopupMenu(double x, double y) {
+        return null;
+    }
 }

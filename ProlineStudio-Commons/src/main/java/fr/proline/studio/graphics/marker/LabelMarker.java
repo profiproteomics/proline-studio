@@ -192,6 +192,22 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
                 yBox = pixelY + deltaY - stringHeight / 2 - DELTA;
             }
             
+            // automatically fix values if the frame is outside the visible area
+            Rectangle r = g.getClipBounds();
+            if (xBox<r.getX()) {
+                xBox = (int) Math.round(r.getX());
+            } else if (xBox+m_widthBox>r.getWidth()) {
+                xBox = (int) Math.round(r.getWidth()-m_widthBox-1);
+            }
+            
+            
+            if (yBox<r.getY()) {
+                yBox = (int) Math.round(r.getY());
+            } else if (yBox+m_heightBox>r.getHeight()) {
+                yBox = (int) Math.round(r.getHeight()-m_heightBox-1);
+            }
+            
+            
             m_labelCoordinates.setPixelPosition(m_plotPanel, xBox-pixelX, yBox-pixelY);
             
             m_firstPaint = false;
@@ -240,6 +256,9 @@ public class LabelMarker extends AbstractMarker implements MoveableInterface {
 
     @Override
     public boolean inside(int x, int y) {
+        if (m_labelCoordinates == null) {
+            return false;
+        }
         AbstractCoordinates anchorCoordinates = m_anchorMarker.getCoordinates();
         int pixelX = anchorCoordinates.getPixelX(m_plotPanel);
         int pixelY = anchorCoordinates.getPixelY(m_plotPanel);

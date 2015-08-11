@@ -21,6 +21,7 @@ import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import java.util.*;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
@@ -134,7 +135,7 @@ public class CreateXICAction extends AbstractRSMAction {
 
             m_logger.debug(" Will Compute XIC Quanti with on " + ((List) expParams.get("biological_samples")).size() + "samples.");
 
-            QuantitationTree tree = QuantitationTree.getCurrentTree();
+            final QuantitationTree tree = QuantitationTree.getCurrentTree();
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             final DataSetNode[] _quantitationNode = new DataSetNode[1];
 
@@ -172,6 +173,7 @@ public class CreateXICAction extends AbstractRSMAction {
                                         @Override
                                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                             ((DataSetData) _quantitationNode[0].getData()).setDataset(ds);
+                                            XICDesignTree.setExpDesign(_quantitationNode[0].getDataset(), _quantitationNode[0],  tree, true);
                                             _quantitationNode[0].setIsChanging(false);
                                             treeModel.nodeChanged(_quantitationNode[0]);
                                         }

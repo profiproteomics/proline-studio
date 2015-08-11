@@ -35,4 +35,9 @@ public class XICBiologicalGroupNode extends AbstractNode {
     public void loadDataForProperties(Runnable callback) {
     }
     
+    @Override
+    public boolean canBeDeleted() {
+        return true;
+    }
+    
 }

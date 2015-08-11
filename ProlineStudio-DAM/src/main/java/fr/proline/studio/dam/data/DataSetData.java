@@ -7,6 +7,7 @@ import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
+import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import java.util.List;
 
 /**
@@ -94,13 +95,19 @@ public class DataSetData extends AbstractData {
     
     @Override
     public void load(AbstractDatabaseCallback callback, List<AbstractData> list, AbstractDatabaseTask.Priority priority, boolean identificationDataset) {
-        DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
+        if (!identificationDataset && m_dataset.isQuantiXIC()){
+            DatabaseLoadXicMasterQuantTask task = new DatabaseLoadXicMasterQuantTask(callback);
+            task.initLoadQuantChannels(m_dataset.getProject().getId(), m_dataset);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+        }else{
+            DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
 
-        task.initLoadChildrenDataset(m_dataset, list,  identificationDataset);
-        if (priority != null) {
-            task.setPriority(priority);
+            task.initLoadChildrenDataset(m_dataset, list,  identificationDataset);
+            if (priority != null) {
+                task.setPriority(priority);
+            }
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
-        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
 
     }
 }

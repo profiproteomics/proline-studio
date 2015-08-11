@@ -20,6 +20,11 @@ import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileActio
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayExperimentalDesignAction;
 import fr.proline.studio.rsmexplorer.actions.xic.DisplayXICAction;
 import fr.proline.studio.rsmexplorer.tree.*;
+import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalGroupNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleAnalysisNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICBiologicalSampleNode;
+import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
+import fr.proline.studio.rsmexplorer.tree.xic.XICRunNode;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import javax.swing.*;
@@ -135,6 +140,10 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             if (selectedNodes[i].isChanging()) {
                 // do not show a popup on a node which is changing
                 return;
+            }
+            if (selectedNodes[i] instanceof XICBiologicalGroupNode || selectedNodes[i] instanceof XICBiologicalSampleNode || selectedNodes[i] instanceof XICRunNode || selectedNodes[i] instanceof XICBiologicalSampleAnalysisNode){
+                // do not show  a popup on biological information
+                return ;
             }
         }
         JPopupMenu popup;
@@ -729,4 +738,29 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         return null;
 
     }
+    
+    @Override
+    protected void dataLoaded(AbstractData data, List<AbstractData> list) {
+
+        AbstractNode parentNode = loadingMap.remove(data);
+
+
+        parentNode.remove(0); // remove the first child which correspond to the hour glass
+
+
+        int indexToInsert = 0;
+        Iterator<AbstractData> it = list.iterator();
+        while (it.hasNext()) {
+            AbstractData dataCur = it.next();
+            parentNode.insert(ChildFactory.createNode(dataCur), indexToInsert);
+            indexToInsert++;
+        }
+        m_model.nodeStructureChanged(parentNode);
+
+        if (parentNode instanceof DataSetNode && ((DataSetNode)parentNode).isQuantXIC()){
+            XICDesignTree.setExpDesign(((DataSetNode)parentNode).getDataset(), parentNode,  this, true);
+        }
+
+    }
+    
 }

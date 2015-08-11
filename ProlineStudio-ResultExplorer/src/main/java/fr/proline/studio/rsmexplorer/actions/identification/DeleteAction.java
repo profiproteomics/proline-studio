@@ -53,7 +53,7 @@ public class DeleteAction extends AbstractRSMAction {
         
         long commonProjectId = -1;
         int nbSelectedNodes = selectedNodes.length;
-        HashSet<DataSetNode> selectedNodesHashSet = new HashSet<>();
+        HashSet<AbstractNode> selectedNodesHashSet = new HashSet<>();
         for (int i=0;i<nbSelectedNodes;i++) {
             AbstractNode node = selectedNodes[i];
             
@@ -62,24 +62,31 @@ public class DeleteAction extends AbstractRSMAction {
                 return;
             }
             
-            DataSetNode datasetNode = (DataSetNode) selectedNodes[i];
-            long projectId = datasetNode.getDataset().getProject().getId();
-            if (commonProjectId == -1) {
-                commonProjectId = projectId;
-            } else if (commonProjectId != projectId) {
+            if (selectedNodes[i] instanceof DataSetNode) {
+                DataSetNode datasetNode = (DataSetNode) selectedNodes[i];
+                long projectId = datasetNode.getDataset().getProject().getId();
+                if (commonProjectId == -1) {
+                    commonProjectId = projectId;
+                } else if (commonProjectId != projectId) {
+                    setEnabled(false);
+                    return;
+                }
+                selectedNodesHashSet.add(datasetNode);
+                addChildren(datasetNode, selectedNodesHashSet);
+            }else{
+                // no datasetNode (can be also BiologicalSampleNode or BiologicalGroupNode) 
                 setEnabled(false);
                 return;
             }
             
-            selectedNodesHashSet.add(datasetNode);
-            addChildren(datasetNode, selectedNodesHashSet);
+            
         }
         
         // Check if one selected node is a child of a non selected node with merged results
         // in this case, it can not be suppressed alone
-        Iterator<DataSetNode> it = selectedNodesHashSet.iterator();
+        Iterator<AbstractNode> it = selectedNodesHashSet.iterator();
         while (it.hasNext()) {
-            DataSetNode node = it.next();
+            AbstractNode node = it.next();
             AbstractNode parent = (AbstractNode) node.getParent();
             if (parent instanceof DataSetNode) {
                 
@@ -99,10 +106,10 @@ public class DeleteAction extends AbstractRSMAction {
 
     }
     
-    private void addChildren(DataSetNode parentNode, HashSet<DataSetNode> nodesHashSet) {
+    private void addChildren(AbstractNode parentNode, HashSet<AbstractNode> nodesHashSet) {
         Enumeration e = parentNode.children();
         while (e.hasMoreElements()) {
-            DataSetNode child = (DataSetNode) e.nextElement();
+            AbstractNode child = (AbstractNode) e.nextElement();
             nodesHashSet.add(child);
             addChildren(child, nodesHashSet);
         }

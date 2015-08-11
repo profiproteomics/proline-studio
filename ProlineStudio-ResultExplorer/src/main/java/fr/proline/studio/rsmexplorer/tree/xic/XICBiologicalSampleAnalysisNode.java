@@ -77,4 +77,10 @@ public class XICBiologicalSampleAnalysisNode extends AbstractNode {
     public void loadDataForProperties(Runnable callback) {
     }
     
+    @Override
+    public boolean canBeDeleted() {
+        return true;
+    }
+    
+    
 }

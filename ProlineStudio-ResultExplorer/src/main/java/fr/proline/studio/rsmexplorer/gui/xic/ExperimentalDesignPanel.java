@@ -8,6 +8,7 @@ import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.DefineQuantParamsPanel;
+import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
 import fr.proline.studio.rsmexplorer.tree.xic.XICDesignTree;
 import java.awt.BorderLayout;
@@ -17,7 +18,6 @@ import java.awt.event.ActionListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import org.slf4j.Logger;
@@ -145,7 +145,7 @@ public class ExperimentalDesignPanel extends HourglassPanel implements DataBoxPa
     }
     
     private void updateData(){
-        m_expDesignTree.setExpDesign(m_dataset);
+        XICDesignTree.setExpDesign(m_dataset, (AbstractNode) m_expDesignTree.getModel().getRoot(),   m_expDesignTree, true);
         try {
             if (m_dataset.getQuantProcessingConfig() != null){
                 m_confPanel.removeAll();

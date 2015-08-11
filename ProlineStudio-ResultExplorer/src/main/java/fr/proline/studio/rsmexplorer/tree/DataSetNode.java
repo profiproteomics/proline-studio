@@ -58,9 +58,9 @@ public class DataSetNode extends AbstractNode {
             case QUANTITATION: {
                 if (dataset == null || dataset.getQuantitationMethod() == null)
                     return getIcon(IconManager.IconType.QUANT_XIC);
-                if (dataset.getQuantitationMethod().getAbundanceUnit().compareTo("feature_intensity")== 0) { // XIC
+                if (dataset.isQuantiXIC()) { // XIC
                     return getIcon(IconManager.IconType.QUANT_XIC);            
-                } else if(dataset.getQuantitationMethod().getAbundanceUnit().compareTo("spectral_counts") == 0) { // Spectral count
+                } else if(dataset.isQuantiSC()) { // Spectral count
                     return getIcon(IconManager.IconType.QUANT_SC);
                 } else 
                     return getIcon(IconManager.IconType.QUANT);
@@ -357,14 +357,7 @@ public class DataSetNode extends AbstractNode {
     public boolean isQuantXIC() {
         if (isQuantitation()) {
             DDataset d =  ((DataSetData) getData()).getDataset();
-            QuantitationMethod quantitationMethod = d.getQuantitationMethod();
-            if (quantitationMethod == null) {
-                return false;
-            }else if (quantitationMethod.getAbundanceUnit().compareTo("feature_intensity") == 0) { // XIC
-                return true;
-            } else {
-                return false;
-            }
+            return d.isQuantiXIC();
         }else {
             return false;
         }

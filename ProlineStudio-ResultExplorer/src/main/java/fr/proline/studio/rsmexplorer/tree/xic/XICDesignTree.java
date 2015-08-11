@@ -292,22 +292,22 @@ public class XICDesignTree extends AbstractTree {
     private ArrayList<AbstractRSMAction> m_mainActions;
 
     
-    public void setExpDesign(DDataset dataset){
+    public static void setExpDesign(DDataset dataset, AbstractNode rootNode,  AbstractTree tree, boolean expandPath){
         if (dataset == null){
             return;
         }
+        RSMTreeModel model = (RSMTreeModel)tree.getModel();
         GroupSetup groupSetup = dataset.getGroupSetup();
         if (groupSetup == null){
             return;
         }
         List<DQuantitationChannel> listQuantChannels = dataset.getMasterQuantitationChannels().isEmpty() ? new ArrayList() : dataset.getMasterQuantitationChannels().get(0).getQuantitationChannels();
         
-        AbstractNode rootNode = (AbstractNode) m_model.getRoot();
         List<BiologicalGroup> listBiologicalGroups = groupSetup.getBiologicalGroups();
         int childIndex  = 0;
         for (BiologicalGroup bioGroup : listBiologicalGroups) {
             XICBiologicalGroupNode biologicalGroupNode = new XICBiologicalGroupNode(new DataSetData(bioGroup.getName(), Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
-            m_model.insertNodeInto(biologicalGroupNode, rootNode, childIndex);
+            model.insertNodeInto(biologicalGroupNode, rootNode, childIndex);
             List<BiologicalSample> listSample = bioGroup.getBiologicalSamples();
             int childSampleIndex = 0;
             for (BiologicalSample sample : listSample) {
@@ -317,7 +317,7 @@ public class XICDesignTree extends AbstractTree {
                     sampleName = sampleName.substring(bioGroup.getName().length());
                 }
                 XICBiologicalSampleNode biologicalSampleNode = new XICBiologicalSampleNode(new DataSetData(sampleName, Dataset.DatasetType.AGGREGATE, Aggregation.ChildNature.OTHER));
-                m_model.insertNodeInto(biologicalSampleNode, biologicalGroupNode, childSampleIndex);
+                model.insertNodeInto(biologicalSampleNode, biologicalGroupNode, childSampleIndex);
                 List<BiologicalSplSplAnalysisMap> listSampleAnalysis = sample.getBiologicalSplSplAnalysisMap();
                 int childSampleAnalysisIndex = 0;
                 for (BiologicalSplSplAnalysisMap sampleAnalysis : listSampleAnalysis) {
@@ -351,8 +351,10 @@ public class XICDesignTree extends AbstractTree {
                         XICRunNode runNode = new XICRunNode(runInfoData);
                         sampleAnalysisNode.add(runNode);
                         sampleAnalysisNode.m_hasError = false;
-                        m_model.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childSampleAnalysisIndex);
-                        expandPath( new TreePath(sampleAnalysisNode.getPath()));
+                        model.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childSampleAnalysisIndex);
+                        if(expandPath){
+                            tree.expandPath( new TreePath(sampleAnalysisNode.getPath()));
+                        }
                         childSampleAnalysisIndex++;
                     }
                 }
@@ -363,7 +365,7 @@ public class XICDesignTree extends AbstractTree {
         }
     }
     
-    private DQuantitationChannel getQuantChannelSampleAnalysis(SampleAnalysis sampleAnalysis, List<DQuantitationChannel> listQuantChannels){
+    private static DQuantitationChannel getQuantChannelSampleAnalysis(SampleAnalysis sampleAnalysis, List<DQuantitationChannel> listQuantChannels){
         for (DQuantitationChannel qCh : listQuantChannels) {
             SampleAnalysis sampleReplicate = qCh.getSampleReplicate();
             if (sampleReplicate != null && sampleReplicate.getId() == sampleAnalysis.getId()){

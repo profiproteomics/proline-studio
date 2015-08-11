@@ -428,12 +428,18 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             Iterator<DDataset> it = datasetListSelected.iterator();
             while (it.hasNext()) {
                 DDataset datasetCur = it.next();
-               
-                
+                boolean isQuantiXIC = datasetCur.isQuantiXIC();
+                if (isQuantiXIC) {
+                    datasetCur.setChildrenCount(1);
+                }
                 if (datasetCur.getType() == Dataset.DatasetType.TRASH) {
                     trash = datasetCur;
                 } else {
-                    m_list.add(new DataSetData(datasetCur));
+                    DataSetData dsData = new DataSetData(datasetCur);
+                    if (isQuantiXIC){
+                        dsData.setHasChildren(true);
+                    }
+                    m_list.add(dsData);
                     Long resultSetId = datasetCur.getResultSetId();
                     if (resultSetId != null) {
                         rsetIdList.add(resultSetId);
@@ -474,8 +480,13 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     QuantitationMethod quantitationMethod = (QuantitationMethod) resCur[1];
                     ddatasetMap.get(id).setQuantitationMethod(quantitationMethod);
                 }
-                
-   
+                // force XIC dataset to have a children to display the exp. design
+                for (Map.Entry<Long, DDataset> entrySet : ddatasetMap.entrySet()) {
+                    DDataset ds = entrySet.getValue();
+                    if ( ds.isQuantiXIC()  ) {
+                        ds.setChildrenCount(1);
+                    }
+                }
         
             }
             
@@ -607,6 +618,13 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                     Long id = (Long) resCur[0];
                     QuantitationMethod quantitationMethod = (QuantitationMethod) resCur[1];
                     ddatasetMap.get(id).setQuantitationMethod(quantitationMethod);
+                }
+                
+                for (Map.Entry<Long, DDataset> entrySet : ddatasetMap.entrySet()) {
+                    DDataset ds = entrySet.getValue();
+                    if ( ds.isQuantiXIC() ) {
+                        ds.setChildrenCount(1);
+                    }
                 }
         
             }

@@ -19,6 +19,7 @@ import fr.proline.studio.graphics.PlotStick;
 import fr.proline.studio.graphics.marker.IntervalMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.PointMarker;
+import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -144,11 +145,11 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
          for (Tuple2 t : pattern.mzAbundancePairs()) {
             Double mz = (Double) t._1;
             Float ab = (Float) t._2;
-            scanPlot.addMarker(new PointMarker(spectrumPlotPanel, mz, ab * abundance / normAbundance, CyclicColorPalette.getColor(0)));
+            scanPlot.addMarker(new PointMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), CyclicColorPalette.getColor(0)));
             int peakIdx = ScanUtils.getPeakIndex(currentScan.getScanData().getMzList(), mz, ppmTol);
             if ((peakIdx != -1) && (currentScan.getScanData().getIntensityList()[peakIdx] < 2.0 * ab * abundance / normAbundance)) {
                logger.info("Peak found mz= "+mz+" expected= "+(ab * abundance / normAbundance)+" observed= "+currentScan.getScanData().getIntensityList()[peakIdx]);
-               scanPlot.addMarker(new PointMarker(spectrumPlotPanel, currentScan.getScanData().getMzList()[peakIdx], currentScan.getScanData().getIntensityList()[peakIdx], CyclicColorPalette.getColor(5)));
+               scanPlot.addMarker(new PointMarker(spectrumPlotPanel, new DataCoordinates(currentScan.getScanData().getMzList()[peakIdx], currentScan.getScanData().getIntensityList()[peakIdx]), CyclicColorPalette.getColor(5)));
             }
          }
       }

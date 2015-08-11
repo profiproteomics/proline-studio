@@ -1,37 +1,45 @@
 package fr.proline.studio.graphics.marker;
 
 import fr.proline.studio.graphics.BasePlotPanel;
-import fr.proline.studio.graphics.XAxis;
-import fr.proline.studio.graphics.YAxis;
+import fr.proline.studio.graphics.marker.coordinates.AbstractCoordinates;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
 /**
- * marker with a point shape on a plot
+ * marker with a point shape on a plot (or nothing)
  * @author MB243701
  */
 public class PointMarker extends AbstractMarker{
     
-    private double m_x;
-    private double m_y;
-    private Color m_markerColor;
+    private AbstractCoordinates m_coordinates;
+    private Color m_markerColor = null;
     
-    private static final int width = 6;
+    private static final int OVAL_WIDTH = 6;
 
-    public PointMarker(BasePlotPanel plotPanel, double x, double y, Color color) {
+        public PointMarker(BasePlotPanel plotPanel,  AbstractCoordinates coordinates) {
         super(plotPanel);
-        this.m_x = x;
-        this.m_y = y;
-        this.m_markerColor = color;
+        m_coordinates = coordinates;
     }
     
+    public PointMarker(BasePlotPanel plotPanel,  AbstractCoordinates coordinates, Color color) {
+        super(plotPanel);
+        m_coordinates = coordinates;
+        m_markerColor = color;
+    }
+    
+    public AbstractCoordinates getCoordinates() {
+        return m_coordinates;
+    }
     
     @Override
     public void paint(Graphics2D g) {
-        XAxis xAxis = m_plotPanel.getXAxis();
-        YAxis yAxis = m_plotPanel.getYAxis(); 
+        if (m_markerColor == null) {
+            return;
+        }
+        int pixelX = m_coordinates.getPixelX(m_plotPanel);
+        int pixelY = m_coordinates.getPixelY(m_plotPanel);
         g.setColor(m_markerColor);
-        g.fillOval(xAxis.valueToPixel(m_x)-(width/2), yAxis.valueToPixel(m_y)-(width/2), width, width);
+        g.fillOval(pixelX-(OVAL_WIDTH/2), pixelY-(OVAL_WIDTH/2), OVAL_WIDTH, OVAL_WIDTH);
     }
     
 }

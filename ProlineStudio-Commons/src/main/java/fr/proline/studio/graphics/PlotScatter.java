@@ -3,7 +3,7 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.marker.AbstractMarker;
 import fr.proline.studio.graphics.marker.LabelMarker;
-import fr.proline.studio.graphics.marker.PercentageCoodinates;
+import fr.proline.studio.graphics.marker.coordinates.PercentageCoordinates;
 import fr.proline.studio.parameter.ColorOrGradientParameter;
 import fr.proline.studio.parameter.ColorParameter;
 import fr.proline.studio.parameter.DefaultParameterDialog;
@@ -797,7 +797,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                         if (percentageY<0.1) {
                             percentageY = 0.1;
                         }
-                        LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoodinates(0.9, percentageY), dataGroup.getName(), LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, dataGroup.getColor());
+                        LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoordinates(0.9, percentageY), dataGroup.getName(), LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, dataGroup.getColor());
                         dataGroup.setAssociatedMarker(marker);
                         addMarker(marker);
                     }

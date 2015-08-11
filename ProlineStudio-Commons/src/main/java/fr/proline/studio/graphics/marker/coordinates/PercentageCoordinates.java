@@ -1,19 +1,19 @@
-package fr.proline.studio.graphics.marker;
+package fr.proline.studio.graphics.marker.coordinates;
 
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 
 /**
- *
+ * Coordinates expressed in percentage of the visible area
  * @author JM235353
  */
-public class PercentageCoodinates extends AbstractCoordinates {
+public class PercentageCoordinates extends AbstractCoordinates {
     
     private double m_percentageX;
     private double m_percentageY;
     
-    public PercentageCoodinates(double percentageX, double percentageY) {
+    public PercentageCoordinates(double percentageX, double percentageY) {
         m_percentageX = percentageX;
         m_percentageY = percentageY;
     }

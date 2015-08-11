@@ -1,11 +1,11 @@
-package fr.proline.studio.graphics.marker;
+package fr.proline.studio.graphics.marker.coordinates;
 
 import fr.proline.studio.graphics.BasePlotPanel;
 import fr.proline.studio.graphics.XAxis;
 import fr.proline.studio.graphics.YAxis;
 
 /**
- *
+ * Coordinates expressed in data according to X and Y axis
  * @author JM235353
  */
 public class DataCoordinates extends AbstractCoordinates {

@@ -3,11 +3,10 @@ package fr.proline.studio.graphics;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.StatsModel;
 import fr.proline.studio.graphics.marker.AbstractMarker;
-import fr.proline.studio.graphics.marker.DataCoordinates;
+import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.graphics.marker.LabelMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
-import fr.proline.studio.graphics.marker.PercentageCoodinates;
-import fr.proline.studio.graphics.marker.TextMarker;
+import fr.proline.studio.graphics.marker.coordinates.PercentageCoordinates;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
 import fr.proline.studio.parameter.ColorParameter;
 import fr.proline.studio.parameter.DefaultParameterDialog;
@@ -319,7 +318,10 @@ public class PlotHistogram extends PlotAbstract {
         addMarker(new LabelMarker(m_plotPanel, new DataCoordinates(mean, yMeanLabel), "Mean : "+mean, LabelMarker.ORIENTATION_X_RIGHT, LabelMarker.ORIENTATION_Y_BOTTOM));
         
         // add Title
-        addMarker(new TextMarker(m_plotPanel, 0.05, 0.95, m_values.getDataColumnIdentifier(0) +" Histogram"));
+        LabelMarker titleMarker = new LabelMarker(m_plotPanel, new PercentageCoordinates(0.2, 0.95), m_values.getDataColumnIdentifier(0) +" Histogram");
+        titleMarker.setFont(LabelMarker.TITLE_FONT);
+        titleMarker.setDrawFrame(false);
+        addMarker(titleMarker);
         
         m_plotPanel.repaint();
     }
@@ -568,7 +570,7 @@ public class PlotHistogram extends PlotAbstract {
                         if (percentageY<0.1) {
                             percentageY = 0.1;
                         }
-                        LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoodinates(0.9, percentageY), dataGroup.getName(), LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, dataGroup.getColor());
+                        LabelMarker marker = new LabelMarker(m_plotPanel, new PercentageCoordinates(0.9, percentageY), dataGroup.getName(), LabelMarker.ORIENTATION_XY_MIDDLE, LabelMarker.ORIENTATION_XY_MIDDLE, dataGroup.getColor());
                         dataGroup.setAssociatedMarker(marker);
                         addMarker(marker);
                     }

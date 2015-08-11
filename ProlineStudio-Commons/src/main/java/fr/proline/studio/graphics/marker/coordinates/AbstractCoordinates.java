@@ -1,4 +1,4 @@
-package fr.proline.studio.graphics.marker;
+package fr.proline.studio.graphics.marker.coordinates;
 
 import fr.proline.studio.graphics.BasePlotPanel;
 

@@ -15,6 +15,7 @@ import fr.proline.studio.graphics.PlotLinear;
 import fr.proline.studio.graphics.PlotPanel;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.PointMarker;
+import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -139,7 +140,7 @@ public class SignalEditorPanel extends JPanel {
          DerivativeAnalysis.ILocalDerivativeChange[] mm = DerivativeAnalysis.findSignificantMiniMaxi(s.getYSeries(),3,0.66f);
          for (int k = 0; k < mm.length; k++) {
             PlotLinear plot = e.getValue();
-            plot.addMarker(new PointMarker(m_plotPanel.getBasePlotPanel(), s.getXSeries()[mm[k].index()], s.getYSeries()[mm[k].index()], plot.getPlotInformation().getPlotColor()));
+            plot.addMarker(new PointMarker(m_plotPanel.getBasePlotPanel(), new DataCoordinates(s.getXSeries()[mm[k].index()], s.getYSeries()[mm[k].index()]), plot.getPlotInformation().getPlotColor()));
          }
       }
       m_plotPanel.getBasePlotPanel().repaintUpdateDoubleBuffer();

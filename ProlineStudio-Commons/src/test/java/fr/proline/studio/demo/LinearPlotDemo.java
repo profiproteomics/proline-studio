@@ -7,6 +7,7 @@ import fr.proline.studio.graphics.marker.IntervalMarker;
 import fr.proline.studio.graphics.marker.LineMarker;
 import fr.proline.studio.graphics.marker.PointMarker;
 import fr.proline.studio.graphics.marker.XDeltaMarker;
+import fr.proline.studio.graphics.marker.coordinates.DataCoordinates;
 import fr.proline.studio.sampledata.Sample;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -42,7 +43,7 @@ public class LinearPlotDemo extends JFrame {
       linear.addMarker(new LineMarker(basePlot, 1250, Color.BLUE));
       linear.addMarker(new IntervalMarker(basePlot, Color.orange, Color.RED, 1200, 1300));
       linear.addMarker(new XDeltaMarker(basePlot, 1400, 1500, 3));
-      linear.addMarker(new PointMarker(basePlot, 1600, 2.5, Color.ORANGE));
+      linear.addMarker(new PointMarker(basePlot, new DataCoordinates(1600, 2.5), Color.ORANGE));
 
       basePlot.setPlot(linear);
       basePlot.setMargins(new Insets(10, 0, 10, 0));

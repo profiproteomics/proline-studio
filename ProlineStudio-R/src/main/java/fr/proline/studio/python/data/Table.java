@@ -64,7 +64,7 @@ public class Table extends PyObject {
             JXTable t = m_tableMap.get(m_index);
             if (t != null) {
                 CompoundTableModel model = (CompoundTableModel) t.getModel();
-                if (model.getColumnCount() <= colIndex) {
+                if (model.getColumnCount() < colIndex) {
                     String error = "ColRef.getCol(" + colIndex + ") : Out of bound error";
                     throw Py.IndexError(error);
                 }

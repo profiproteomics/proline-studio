@@ -609,7 +609,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
 
                 boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
 
-                DisplayRsetAction displayRsetAction = new DisplayRsetAction();
+                DisplayRsetAction displayRsetAction = new DisplayRsetAction(isJMSDefined);
                 m_mainActions.add(displayRsetAction);
 
                 DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_IDENTIFICATION);

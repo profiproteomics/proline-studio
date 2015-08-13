@@ -24,10 +24,12 @@ public class DisplayRsetAction extends AbstractRSMAction {
 
    private JMenu m_menu;
    private TreeType m_treeType;
+   private Boolean m_isJMSDefined;
     
-   public DisplayRsetAction() {
+   public DisplayRsetAction(Boolean isJMSDefined) {
        super(NbBundle.getMessage(DisplayRsetAction.class, "CTL_DisplayRsetAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
        m_treeType = AbstractTree.TreeType.TREE_IDENTIFICATION;
+       m_isJMSDefined = isJMSDefined;
    }
 
     @Override
@@ -36,7 +38,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
         
         m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction();
         m_displayRsetProteinMatchesAction = new DisplayRsetProteinMatchesAction();
-        m_msDiagReportAction = new GenerateMSDiagReportAction(); 
+        m_msDiagReportAction = new GenerateMSDiagReportAction(m_isJMSDefined); 
         m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
         m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
         

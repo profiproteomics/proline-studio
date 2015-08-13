@@ -31,8 +31,8 @@ import org.openide.windows.WindowManager;
  */
 public class GenerateMSDiagReportAction extends AbstractRSMAction {
 
-    public GenerateMSDiagReportAction() {
-        super(NbBundle.getMessage(GenerateMSDiagReportAction.class, "CTL_GenerateMSDiagReportAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public GenerateMSDiagReportAction(Boolean isJMSDefined) {
+        super(NbBundle.getMessage(GenerateMSDiagReportAction.class, "CTL_GenerateMSDiagReportAction")+(isJMSDefined?" (JMS)": ""), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

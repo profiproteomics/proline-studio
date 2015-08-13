@@ -33,6 +33,7 @@ import fr.proline.studio.gui.DatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.AggregateAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.FilterRSMProteinSetsAction;
+import fr.proline.studio.rsmexplorer.actions.identification.GenerateSpectrumMatchesJMSAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ImportSearchResultAsDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
@@ -661,9 +662,14 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     ChangeTypicalProteinAction changeTypicalProteinAction = new ChangeTypicalProteinAction();
                     m_mainActions.add(changeTypicalProteinAction);
                 }
-
-                GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
-                m_mainActions.add(generateSpectrumMatchesAction);
+                
+                if (isJMSDefined) {
+                    GenerateSpectrumMatchesJMSAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesJMSAction();
+                    m_mainActions.add(generateSpectrumMatchesAction);
+                } else {
+                    GenerateSpectrumMatchesAction generateSpectrumMatchesAction = new GenerateSpectrumMatchesAction();
+                    m_mainActions.add(generateSpectrumMatchesAction);
+                }
                 
                 SpectralCountAction spectralCountAction = new SpectralCountAction();
                 m_mainActions.add(spectralCountAction);

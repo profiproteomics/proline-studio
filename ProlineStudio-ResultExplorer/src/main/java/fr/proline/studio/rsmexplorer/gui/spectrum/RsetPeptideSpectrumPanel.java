@@ -50,8 +50,11 @@ import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.uds.Project;
 import fr.proline.studio.dam.DatabaseDataManager;
 import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.GenerateSpectrumMatchTask;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
@@ -287,7 +290,35 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
     }
     
     private void generateSpectrumMatch() {
-        AbstractServiceCallback spectrumMatchCallback = new AbstractServiceCallback() {
+        if (JMSConnectionManager.getJMSConnectionManager().isJMSDefined()) {
+            generateSpectrumMatchJMS();
+        } else {
+            AbstractServiceCallback spectrumMatchCallback = new AbstractServiceCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success) {
+                    if (success) {
+                        ((DataBoxRsetPeptideSpectrum) m_dataBox).loadAnnotations(m_previousPeptideMatch);
+                    } else {
+                        m_logger.error("Fail to generate spectrum matches for peptide_match.id=" + m_previousPeptideMatch.getId());
+                    }
+                    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            };
+
+            setCursor(new Cursor(Cursor.WAIT_CURSOR));
+            GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(spectrumMatchCallback, null, m_dataBox.getProjectId(), m_previousPeptideMatch.getResultSetId(), null, m_previousPeptideMatch.getId());
+            AccessServiceThread.getAccessServiceThread().addTask(task);
+        }
+    }
+    
+    private void generateSpectrumMatchJMS() {
+        AbstractJMSCallback spectrumMatchCallback = new AbstractJMSCallback() {
             
             @Override
             public boolean mustBeCalledInAWT() {
@@ -306,8 +337,8 @@ public class RsetPeptideSpectrumPanel extends HourglassPanel implements DataBoxP
         };
         
         setCursor(new Cursor(Cursor.WAIT_CURSOR));
-        GenerateSpectrumMatchTask task = new GenerateSpectrumMatchTask(spectrumMatchCallback, null, m_dataBox.getProjectId(), m_previousPeptideMatch.getResultSetId(), null, m_previousPeptideMatch.getId());
-        AccessServiceThread.getAccessServiceThread().addTask(task);
+        fr.proline.studio.dpm.task.jms.GenerateSpectrumMatchTask task = new fr.proline.studio.dpm.task.jms.GenerateSpectrumMatchTask(spectrumMatchCallback, null, m_dataBox.getProjectId(), m_previousPeptideMatch.getResultSetId(), null, m_previousPeptideMatch.getId());
+        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
         
     }
     

@@ -13,8 +13,10 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.ComputeQuantProfileTask;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.actions.identification.AbstractRSMAction;
@@ -41,9 +43,11 @@ import org.slf4j.LoggerFactory;
 public class ComputeQuantitationProfileAction extends AbstractRSMAction {
 
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
+    private Boolean m_isJMSDefined;
 
-    public ComputeQuantitationProfileAction() {
-        super(NbBundle.getMessage(ComputeQuantitationProfileAction.class, "CTL_ComputeQuantitationProfileAction"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public ComputeQuantitationProfileAction(Boolean isJMSDefined) {
+        super(NbBundle.getMessage(ComputeQuantitationProfileAction.class, "CTL_ComputeQuantitationProfileAction")+(isJMSDefined?" (JMS)":""), AbstractTree.TreeType.TREE_QUANTITATION);
+        m_isJMSDefined = isJMSDefined;
     }
 
     @Override
@@ -115,24 +119,44 @@ public class ComputeQuantitationProfileAction extends AbstractRSMAction {
                         if (listMasterQuantChannels != null && !listMasterQuantChannels.isEmpty()) {
                             Long masterQuantChannelId = new Long(listMasterQuantChannels.get(0).getId());
                             // CallBack for Xic Quantitation Service
-                            AbstractServiceCallback xicCallback = new AbstractServiceCallback() {
+                            if(m_isJMSDefined){
+                                AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
 
-                                @Override
-                                public boolean mustBeCalledInAWT() {
-                                    return true;
-                                }
-
-                                @Override
-                                public void run(boolean success) {
-                                    if (success) {
+                                    @Override
+                                    public boolean mustBeCalledInAWT() {
+                                        return true;
                                     }
-                                    node.setIsChanging(false);
-                                    treeModel.nodeChanged(node);
-                                }
-                            };
 
-                            ComputeQuantProfileTask task = new ComputeQuantProfileTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);
-                            AccessServiceThread.getAccessServiceThread().addTask(task);
+                                    @Override
+                                    public void run(boolean success) {
+                                        if (success) {
+                                        }
+                                        node.setIsChanging(false);
+                                        treeModel.nodeChanged(node);
+                                    }
+                                };
+                                fr.proline.studio.dpm.task.jms.ComputeQuantProfileTask task = new fr.proline.studio.dpm.task.jms.ComputeQuantProfileTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);
+                                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                            }else{
+                                AbstractServiceCallback xicCallback = new AbstractServiceCallback() {
+
+                                    @Override
+                                    public boolean mustBeCalledInAWT() {
+                                        return true;
+                                    }
+
+                                    @Override
+                                    public void run(boolean success) {
+                                        if (success) {
+                                        }
+                                        node.setIsChanging(false);
+                                        treeModel.nodeChanged(node);
+                                    }
+                                };
+
+                                ComputeQuantProfileTask task = new ComputeQuantProfileTask(xicCallback, pID, masterQuantChannelId, quantParams, xicName);
+                                AccessServiceThread.getAccessServiceThread().addTask(task);
+                            }
                         }
                     } //End OK entered   
                 }

@@ -248,7 +248,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 
                 m_mainActions.add(null);  // separator
                 
-                ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction();
+                ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction(isJSMDefined);
                 m_mainActions.add(computeQuantProfileAction);
                 
                 CreateXICAction createXICAction = new CreateXICAction(true);

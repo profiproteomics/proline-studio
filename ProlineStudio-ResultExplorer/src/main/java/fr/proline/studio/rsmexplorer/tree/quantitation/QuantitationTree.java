@@ -187,8 +187,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             if (m_rootPopup == null) {
                 // create the actions
                 m_rootActions = new ArrayList<>(1);  // <--- get in sync
-
-                CreateXICAction createXICAction = new CreateXICAction();
+                boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
+                CreateXICAction createXICAction = new CreateXICAction(isJSMDefined);
 
                 m_rootActions.add(createXICAction);
 
@@ -251,7 +251,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 ComputeQuantitationProfileAction computeQuantProfileAction = new ComputeQuantitationProfileAction(isJSMDefined);
                 m_mainActions.add(computeQuantProfileAction);
                 
-                CreateXICAction createXICAction = new CreateXICAction(true);
+                CreateXICAction createXICAction = new CreateXICAction(true, isJSMDefined);
                 m_mainActions.add(createXICAction);
 
                 m_mainActions.add(null);  // separator

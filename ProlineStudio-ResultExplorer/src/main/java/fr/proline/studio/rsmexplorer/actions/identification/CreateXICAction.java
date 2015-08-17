@@ -12,8 +12,10 @@ import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.RunXICTask;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.xic.CreateXICDialog;
@@ -39,15 +41,18 @@ public class CreateXICAction extends AbstractRSMAction {
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 
     private boolean m_fromExistingXIC = false;
+    private boolean m_isJMSDefined;
 
-    public CreateXICAction() {
-        super(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public CreateXICAction(boolean isJMSDefined) {
+        super(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC")+(isJMSDefined?" (JMS)":""), AbstractTree.TreeType.TREE_QUANTITATION);
         m_fromExistingXIC = false;
+        m_isJMSDefined = isJMSDefined;
     }
 
-    public CreateXICAction(boolean fromExistingXIC) {
-        super(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC"), AbstractTree.TreeType.TREE_QUANTITATION);
+    public CreateXICAction(boolean fromExistingXIC, boolean isJMSDefined) {
+        super(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC")+(isJMSDefined?" (JMS)":""), AbstractTree.TreeType.TREE_QUANTITATION);
         m_fromExistingXIC = true;
+        m_isJMSDefined = isJMSDefined;
     }
 
     @Override
@@ -57,7 +62,7 @@ public class CreateXICAction extends AbstractRSMAction {
             JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), "A project should be selected !", "Warning", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         if (m_fromExistingXIC) {
             final DDataset currentDataset = ((DataSetData) ((DataSetNode) selectedNodes[0]).getData()).getDataset();
             final int posx = x;
@@ -139,67 +144,6 @@ public class CreateXICAction extends AbstractRSMAction {
             final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             final DataSetNode[] _quantitationNode = new DataSetNode[1];
 
-            // CallBack for Xic Quantitation Service
-            AbstractServiceCallback xicCallback = new AbstractServiceCallback() {
-
-                @Override
-                public boolean mustBeCalledInAWT() {
-                    return true;
-                }
-
-                @Override
-                public void run(boolean success) {
-                    if (success) {
-                        m_logger.debug(" XIC SUCCESS : " + _xicQuantiDataSetId[0]);
-                        final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
-
-                        AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
-
-                            @Override
-                            public boolean mustBeCalledInAWT() {
-                                return true;
-                            }
-
-                            @Override
-                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                if (success) {
-                                    final DDataset ds = readDatasetList.get(0);
-                                    AbstractDatabaseCallback loadQCallback = new AbstractDatabaseCallback() {
-                                        @Override
-                                        public boolean mustBeCalledInAWT() {
-                                            return true;
-                                        }
-
-                                        @Override
-                                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                                            ((DataSetData) _quantitationNode[0].getData()).setDataset(ds);
-                                            XICDesignTree.setExpDesign(_quantitationNode[0].getDataset(), _quantitationNode[0],  tree, true);
-                                            _quantitationNode[0].setIsChanging(false);
-                                            treeModel.nodeChanged(_quantitationNode[0]);
-                                        }
-                                    };
-                                    DatabaseDataSetTask loadQTask = new DatabaseDataSetTask(loadQCallback);
-                                    loadQTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), ds);
-                                    AccessDatabaseThread.getAccessDatabaseThread().addTask(loadQTask);
-                                } else {
-                                    treeModel.removeNodeFromParent(_quantitationNode[0]);
-                                }
-                            }
-                        };
-
-                        DatabaseDataSetTask task = new DatabaseDataSetTask(readDatasetCallback);
-                        task.initLoadDataset(_xicQuantiDataSetId[0], readDatasetList);
-                        AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
-
-                    } else {
-                        m_logger.debug(" XIC ERROR ");
-                        treeModel.removeNodeFromParent(_quantitationNode[0]);
-                    }
-                }
-            };
-
-            RunXICTask task = new RunXICTask(xicCallback, pID, _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
-
             // add node for the quantitation dataset which will be created
             DataSetData quantitationData = new DataSetData(_quantiDS.getName(), Dataset.DatasetType.QUANTITATION, Aggregation.ChildNature.QUANTITATION_FRACTION);
 
@@ -214,9 +158,94 @@ public class CreateXICAction extends AbstractRSMAction {
             // expand the parent node to display its children
             tree.expandNodeIfNeeded(rootNode);
 
-            AccessServiceThread.getAccessServiceThread().addTask(task);
+            // CallBack for Xic Quantitation Service
+            if (m_isJMSDefined) {
+                AbstractJMSCallback xicCallback = new AbstractJMSCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success) {
+                        runXic(success, _xicQuantiDataSetId[0], _quantitationNode[0], tree, treeModel);
+
+                    }
+                };
+
+                fr.proline.studio.dpm.task.jms.RunXICTask task = new fr.proline.studio.dpm.task.jms.RunXICTask(xicCallback, pID, _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
+                AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+            } else {
+
+                AbstractServiceCallback xicCallback = new AbstractServiceCallback() {
+
+                    @Override
+                    public boolean mustBeCalledInAWT() {
+                        return true;
+                    }
+
+                    @Override
+                    public void run(boolean success) {
+                        runXic(success, _xicQuantiDataSetId[0], _quantitationNode[0], tree, treeModel);
+
+                    }
+                };
+
+                RunXICTask task = new RunXICTask(xicCallback, pID, _quantiDS.getName(), quantParams, expParams, _xicQuantiDataSetId);
+                AccessServiceThread.getAccessServiceThread().addTask(task);
+            }
 
         } //End OK entered      
+    }
+
+    private void runXic(boolean success, Long xicQuantiDsId, final DataSetNode dsNode, final QuantitationTree tree, final DefaultTreeModel treeModel) {
+        if (success) {
+            m_logger.debug(" XIC SUCCESS : " + xicQuantiDsId);
+            final ArrayList<DDataset> readDatasetList = new ArrayList<>(1);
+
+            AbstractDatabaseCallback readDatasetCallback = new AbstractDatabaseCallback() {
+
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
+                }
+
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                    if (success) {
+                        final DDataset ds = readDatasetList.get(0);
+                        AbstractDatabaseCallback loadQCallback = new AbstractDatabaseCallback() {
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return true;
+                            }
+
+                            @Override
+                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                                ((DataSetData) dsNode.getData()).setDataset(ds);
+                                XICDesignTree.setExpDesign(dsNode.getDataset(), dsNode, tree, true);
+                                dsNode.setIsChanging(false);
+                                treeModel.nodeChanged(dsNode);
+                            }
+                        };
+                        DatabaseDataSetTask loadQTask = new DatabaseDataSetTask(loadQCallback);
+                        loadQTask.initLoadQuantitation(ProjectExplorerPanel.getProjectExplorerPanel().getSelectedProject(), ds);
+                        AccessDatabaseThread.getAccessDatabaseThread().addTask(loadQTask);
+                    } else {
+                        treeModel.removeNodeFromParent(dsNode);
+                    }
+                }
+            };
+
+            DatabaseDataSetTask task = new DatabaseDataSetTask(readDatasetCallback);
+            task.initLoadDataset(xicQuantiDsId, readDatasetList);
+            AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
+
+        } else {
+            m_logger.debug(" XIC ERROR ");
+            treeModel.removeNodeFromParent(dsNode);
+        }
     }
 
     @Override

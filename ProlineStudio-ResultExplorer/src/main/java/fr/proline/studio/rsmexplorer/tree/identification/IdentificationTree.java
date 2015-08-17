@@ -677,7 +677,7 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     m_mainActions.add(generateSpectrumMatchesAction);
                 }
                 
-                SpectralCountAction spectralCountAction = new SpectralCountAction();
+                SpectralCountAction spectralCountAction = new SpectralCountAction(isJMSDefined);
                 m_mainActions.add(spectralCountAction);
                 
                 m_mainActions.add(null);  // separator

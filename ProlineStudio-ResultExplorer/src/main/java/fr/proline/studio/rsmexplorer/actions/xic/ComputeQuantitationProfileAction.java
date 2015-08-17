@@ -26,6 +26,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.quantitation.QuantitationTree;
+import fr.proline.studio.utils.StringUtils;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
@@ -46,7 +47,7 @@ public class ComputeQuantitationProfileAction extends AbstractRSMAction {
     private Boolean m_isJMSDefined;
 
     public ComputeQuantitationProfileAction(Boolean isJMSDefined) {
-        super(NbBundle.getMessage(ComputeQuantitationProfileAction.class, "CTL_ComputeQuantitationProfileAction")+(isJMSDefined?" (JMS)":""), AbstractTree.TreeType.TREE_QUANTITATION);
+        super(StringUtils.getActionName(NbBundle.getMessage(ComputeQuantitationProfileAction.class, "CTL_ComputeQuantitationProfileAction"), isJMSDefined), AbstractTree.TreeType.TREE_QUANTITATION);
         m_isJMSDefined = isJMSDefined;
     }
 

@@ -18,6 +18,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -31,7 +32,7 @@ import org.openide.util.NbBundle;
 public class MergeJMSAction extends AbstractRSMAction {
 
     public MergeJMSAction() {
-        super(NbBundle.getMessage(MergeJMSAction.class, "CTL_MergeAction")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(StringUtils.getActionName(NbBundle.getMessage(MergeJMSAction.class, "CTL_MergeAction"), true), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

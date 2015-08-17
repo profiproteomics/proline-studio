@@ -18,6 +18,7 @@ import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.ChangeTypicalProteinTask;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.utils.StringUtils;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class ChangeTypicalProteinJMSAction extends AbstractRSMAction {
 
     
     public ChangeTypicalProteinJMSAction() {
-        super(NbBundle.getMessage(ChangeTypicalProteinJMSAction.class, "CTL_ChangeTypicalProtein")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(StringUtils.getActionName(NbBundle.getMessage(ChangeTypicalProteinJMSAction.class, "CTL_ChangeTypicalProtein"), true), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

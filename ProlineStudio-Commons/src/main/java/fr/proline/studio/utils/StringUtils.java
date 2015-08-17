@@ -32,4 +32,14 @@ public class StringUtils {
        else 
            return fm.stringWidth(s);
     }
+    
+    /**
+     * return the action's name suffixed with JMS if needed
+     * @param s
+     * @param isJMSDefined
+     * @return 
+     */
+    public static String getActionName(String s, boolean isJMSDefined) {
+        return s+ (isJMSDefined?" (JMS)":"");
+    }
 }

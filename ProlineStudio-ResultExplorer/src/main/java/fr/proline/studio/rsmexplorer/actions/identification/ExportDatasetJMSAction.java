@@ -12,6 +12,7 @@ import fr.proline.studio.rsmexplorer.gui.dialog.LoadWaitingDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
+import fr.proline.studio.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import org.openide.util.NbBundle;
@@ -30,11 +31,11 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
     private List<String> m_config;
 
     public ExportDatasetJMSAction(AbstractTree.TreeType treeType) {
-        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportDatasetAction")+" (JMS)", treeType);
+        super(StringUtils.getActionName(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportDatasetAction"), true), treeType);
     }
     
     public ExportDatasetJMSAction(AbstractTree.TreeType treeType, boolean exportTitle) {
-        super(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportAction")+" "+NbBundle.getMessage(ExportDatasetAction.class, "CTL_ExportDatasetAction")+" (JMS)" , treeType);
+        super(StringUtils.getActionName(NbBundle.getMessage(ExportDatasetJMSAction.class, "CTL_ExportAction")+" "+NbBundle.getMessage(ExportDatasetAction.class, "CTL_ExportDatasetAction"), true) , treeType);
     }
 
     @Override

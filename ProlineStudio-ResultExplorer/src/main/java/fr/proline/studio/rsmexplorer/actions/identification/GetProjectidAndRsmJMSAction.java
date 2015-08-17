@@ -17,13 +17,14 @@ import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.SendProjectidAndRsmTask;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.utils.StringUtils;
 
 
 
 public class GetProjectidAndRsmJMSAction extends AbstractRSMAction {
 
     public GetProjectidAndRsmJMSAction() {
-        super(NbBundle.getMessage(GetProjectidAndRsmJMSAction.class, "CTL_GenerateSequenceCoverage")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(StringUtils.getActionName(NbBundle.getMessage(GetProjectidAndRsmJMSAction.class, "CTL_GenerateSequenceCoverage"), true), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
     @Override
     public void actionPerformed(AbstractNode[] selectedNodes, int x, int y) {

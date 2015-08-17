@@ -16,6 +16,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
+import fr.proline.studio.utils.StringUtils;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 
@@ -26,7 +27,7 @@ import org.openide.util.NbBundle;
 public class GenerateSpectrumMatchesJMSAction extends AbstractRSMAction {
     
     public GenerateSpectrumMatchesJMSAction() {
-        super(NbBundle.getMessage(GenerateSpectrumMatchesAction.class, "CTL_GenerateSpectrumMatchesAction")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(StringUtils.getActionName(NbBundle.getMessage(GenerateSpectrumMatchesAction.class, "CTL_GenerateSpectrumMatchesAction"), true), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
     
     @Override

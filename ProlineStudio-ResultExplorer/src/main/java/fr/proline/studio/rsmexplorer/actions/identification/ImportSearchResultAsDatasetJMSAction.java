@@ -24,6 +24,7 @@ import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
 import fr.proline.studio.dpm.task.jms.CertifyIdentificationTask;
 import fr.proline.studio.dpm.task.jms.ImportIdentificationTask;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
+import fr.proline.studio.utils.StringUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ import org.openide.windows.WindowManager;
 public class ImportSearchResultAsDatasetJMSAction extends AbstractRSMAction {
 
     public ImportSearchResultAsDatasetJMSAction() {
-        super(NbBundle.getMessage(ImportSearchResultAsDatasetJMSAction.class, "CTL_AddSearchResult")+" (JMS)", AbstractTree.TreeType.TREE_IDENTIFICATION);
+        super(StringUtils.getActionName(NbBundle.getMessage(ImportSearchResultAsDatasetJMSAction.class, "CTL_AddSearchResult"), true), AbstractTree.TreeType.TREE_IDENTIFICATION);
     }
 
     @Override

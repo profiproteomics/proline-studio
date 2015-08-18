@@ -51,7 +51,7 @@ public class CreateXICAction extends AbstractRSMAction {
     }
 
     public CreateXICAction(boolean fromExistingXIC, boolean isJMSDefined) {
-        super(StringUtils.getActionName(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC"), isJMSDefined), AbstractTree.TreeType.TREE_QUANTITATION);
+        super(StringUtils.getActionName(NbBundle.getMessage(CreateXICAction.class, "CTL_CreateXIC_Clone"), isJMSDefined), AbstractTree.TreeType.TREE_QUANTITATION);
         m_fromExistingXIC = true;
         m_isJMSDefined = isJMSDefined;
     }

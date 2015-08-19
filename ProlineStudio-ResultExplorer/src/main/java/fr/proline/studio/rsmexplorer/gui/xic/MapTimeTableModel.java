@@ -34,7 +34,7 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
     public static final int COLTYPE_TIME = 0;
     public static final int COLTYPE_DELTA_TIME = 1;
     
-    private static final String[] m_columnNames = {"Time (min)", "Delta time (s)"};
+    private static final String[] m_columnNames = {"Time in Reference Map (min)", "Delta time vs. Reference Map (s)"};
     private static final String[] m_toolTipColumns = {"Time (min)", "Delta time (s)"};
     
     private MapAlignment m_mapAlignment;

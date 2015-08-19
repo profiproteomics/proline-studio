@@ -40,9 +40,9 @@ public class ExportAction extends AbstractRSMAction {
         
         
         if (m_isJMSDefined) {
-            m_exportPrideAction = new ExportRSM2PrideJMSAction();
+            m_exportPrideAction = new ExportRSM2PrideJMSAction(m_treeType);
         } else {
-            m_exportPrideAction = new ExportRSM2PrideAction();
+            m_exportPrideAction = new ExportRSM2PrideAction(m_treeType);
         }
 
         JMenuItem exportDatasetItem = new JMenuItem(m_exportDatasetAction);

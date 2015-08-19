@@ -239,7 +239,7 @@ public class ExportDatasetAction extends AbstractRSMAction {
             }
 
             AbstractNode.NodeTypes nodeType = node.getType();
-            if (nodeType != AbstractNode.NodeTypes.DATA_SET) {
+            if (nodeType != AbstractNode.NodeTypes.DATA_SET && node.getType() != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
                 setEnabled(false);
                 return;
             }

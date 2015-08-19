@@ -99,7 +99,7 @@ public class PropertiesAction extends AbstractRSMAction {
                 setEnabled(false);
                 return;
             }
-            if (((type!=AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) || (type!=AbstractNode.NodeTypes.PROJECT_QUANTITATION)) && (type!=AbstractNode.NodeTypes.DATA_SET)) {
+            if (((type!=AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) || (type!=AbstractNode.NodeTypes.PROJECT_QUANTITATION)) && (type!=AbstractNode.NodeTypes.DATA_SET) && (type!=AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)) {
                 setEnabled(false);
                 return;
             }
@@ -111,6 +111,14 @@ public class PropertiesAction extends AbstractRSMAction {
             }
             
             if ((type==AbstractNode.NodeTypes.PROJECT_IDENTIFICATION) && (type == AbstractNode.NodeTypes.DATA_SET)) {
+                DataSetNode datasetNode = (DataSetNode) node;
+                if (!datasetNode.hasResultSet() && !datasetNode.hasResultSummary()) {
+                    setEnabled(false);
+                    return;
+                }
+            }
+            
+            if ((type==AbstractNode.NodeTypes.PROJECT_QUANTITATION) && (type == AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS)) {
                 DataSetNode datasetNode = (DataSetNode) node;
                 if (!datasetNode.hasResultSet() && !datasetNode.hasResultSummary()) {
                     setEnabled(false);

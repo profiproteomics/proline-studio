@@ -106,7 +106,7 @@ public class DisplayRsmPeptidesAction extends AbstractRSMAction {
         
         for (int i=0;i<nbSelectedNodes;i++) {
             AbstractNode node = selectedNodes[i];
-            if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
+            if (node.getType() != AbstractNode.NodeTypes.DATA_SET && node.getType() != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
                 setEnabled(false);
                 return;
             }

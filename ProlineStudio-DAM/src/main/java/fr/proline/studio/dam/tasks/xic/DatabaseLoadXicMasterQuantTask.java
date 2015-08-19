@@ -5,6 +5,7 @@ import fr.proline.core.orm.msi.ObjectTree;
 import fr.proline.core.orm.msi.Peptide;
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.PeptideReadablePtmString;
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DCluster;
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
@@ -451,6 +452,19 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             dqc.setLcmsRawMapId(rawMapId);
                         } catch (NoResultException | NonUniqueResultException e) {
 
+                        }
+                        ResultSet rsetFound = entityManagerMSI.find(ResultSet.class, rsId);
+                        dqc.setIdentRs(rsetFound);
+                        // search if a dataset with rsmId, rsId exists
+                        String queryIdentDsS = "SELECT ds.id FROM Dataset ds WHERE ds.resultSetId=:rsId AND ds.resultSummaryId=:rsmId ";
+                        TypedQuery<Long> queryIdentDs = entityManagerUDS.createQuery(queryIdentDsS, Long.class);
+                        queryIdentDs.setParameter("rsId",rsId );
+                        queryIdentDs.setParameter("rsmId", qc.getIdentResultSummaryId());
+                        try {
+                            Long identDsId  = queryIdentDs.getSingleResult();
+                            dqc.setIdentDatasetId(identDsId);
+                        } catch (NoResultException | NonUniqueResultException e) {
+                            dqc.setIdentDatasetId((long)-1);
                         }
                         
                         listDQuantChannels.add(dqc);

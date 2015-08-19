@@ -14,6 +14,8 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
+import fr.proline.studio.rsmexplorer.actions.identification.DisplayRsetAction;
+import fr.proline.studio.rsmexplorer.actions.identification.ExportAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetAction;
 import fr.proline.studio.rsmexplorer.actions.identification.ExportDatasetJMSAction;
 import fr.proline.studio.rsmexplorer.actions.xic.ComputeQuantitationProfileAction;
@@ -52,6 +54,8 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
     private ArrayList<AbstractRSMAction> m_mainActions;
     private JPopupMenu m_trashPopup;
     private ArrayList<AbstractRSMAction> m_trashActions;
+    private JPopupMenu m_identPopup;
+    private ArrayList<AbstractRSMAction> m_identActions;
 
     public static QuantitationTree getTree(ProjectQuantitationData projectData) {
 
@@ -136,20 +140,25 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             }
         }
         // check if nodes are changing
+        //check if xicSampleAnanlysisNode are selected
+        boolean xicSampleAnalysisNodeSelected = false;
         for (int i = 0; i < nbNodes; i++) {
             if (selectedNodes[i].isChanging()) {
                 // do not show a popup on a node which is changing
                 return;
             }
-            if (selectedNodes[i] instanceof XICBiologicalGroupNode || selectedNodes[i] instanceof XICBiologicalSampleNode || selectedNodes[i] instanceof XICRunNode || selectedNodes[i] instanceof XICBiologicalSampleAnalysisNode){
+            if (selectedNodes[i] instanceof XICBiologicalGroupNode || selectedNodes[i] instanceof XICBiologicalSampleNode || selectedNodes[i] instanceof XICRunNode ){
                 // do not show  a popup on biological information
                 return ;
+            }
+            if (selectedNodes[i] instanceof XICBiologicalSampleAnalysisNode){
+                xicSampleAnalysisNodeSelected = true;
             }
         }
         JPopupMenu popup;
         ArrayList<AbstractRSMAction> actions;
 
-        if ((nbNodes > 1) ){
+        if ((nbNodes > 1) && !xicSampleAnalysisNodeSelected){
             if (m_multiPopup == null) {
                 boolean isJSMDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
                 // create the actions
@@ -181,7 +190,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
                 }
             popup = m_multiPopup;
             actions = m_multiActions;
-        }else
+        }else{
         
         if (isRootPopup) {
             if (m_rootPopup == null) {
@@ -223,7 +232,45 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
 
             popup = m_trashPopup;
             actions = m_trashActions;
-        } else {
+        } else if (xicSampleAnalysisNodeSelected){
+            // creation of the popup if needed
+            if (m_identPopup == null){
+                
+                m_identActions = new ArrayList<>(6);  // <--- get in sync
+
+                boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
+
+                DisplayRsetAction displayRsetAction = new DisplayRsetAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
+                m_identActions.add(displayRsetAction);
+
+                DisplayRsmAction displayRsmAction = new DisplayRsmAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                m_identActions.add(displayRsmAction);
+                
+                m_identActions.add(null);  // separator
+                
+                ExportAction exportAction = new ExportAction(AbstractTree.TreeType.TREE_QUANTITATION, isJMSDefined);
+                m_identActions.add(exportAction);
+                
+                
+                m_identActions.add(null);  // separator
+                
+                PropertiesAction propertiesAction = new PropertiesAction(AbstractTree.TreeType.TREE_QUANTITATION);
+                m_identActions.add(propertiesAction);
+                
+                // add actions to popup
+                m_identPopup = new JPopupMenu();
+                for (int i = 0; i < m_identActions.size(); i++) {
+                    AbstractRSMAction action = m_identActions.get(i);
+                    if (action == null) {
+                        m_identPopup.addSeparator();
+                    } else {
+                        m_identPopup.add(action.getPopupPresenter());
+                    }
+                }
+            }
+            popup = m_identPopup;
+            actions = m_identActions;
+        }else {
             if (m_mainPopup == null) {
                 // create the actions
                 m_mainActions = new ArrayList<>(13);  // <--- get in sync
@@ -286,6 +333,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
             popup = m_mainPopup;
             actions = m_mainActions;
 
+        }
         }
 
 

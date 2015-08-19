@@ -17,7 +17,7 @@ import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.dialog.MSDiagDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.utils.StringUtils;
 
@@ -32,8 +32,8 @@ import org.openide.windows.WindowManager;
  */
 public class GenerateMSDiagReportAction extends AbstractRSMAction {
 
-    public GenerateMSDiagReportAction(Boolean isJMSDefined) {
-        super(StringUtils.getActionName(NbBundle.getMessage(GenerateMSDiagReportAction.class, "CTL_GenerateMSDiagReportAction"), isJMSDefined), AbstractTree.TreeType.TREE_IDENTIFICATION);
+    public GenerateMSDiagReportAction(TreeType treeType, boolean isJMSDefined) {
+        super(StringUtils.getActionName(NbBundle.getMessage(GenerateMSDiagReportAction.class, "CTL_GenerateMSDiagReportAction"), isJMSDefined), treeType);
     }
 
     @Override
@@ -162,7 +162,7 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
         
         for (int i=0;i<nbSelectedNodes;i++) {
             AbstractNode node = selectedNodes[i];
-            if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
+            if (node.getType() != AbstractNode.NodeTypes.DATA_SET && node.getType() != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
                 setEnabled(false);
                 return;
             }
@@ -173,7 +173,7 @@ public class GenerateMSDiagReportAction extends AbstractRSMAction {
                 return;
             }
             
-            if (!dataSetNode.isLeaf()) {
+            if (node.getType() == AbstractNode.NodeTypes.DATA_SET && !dataSetNode.isLeaf()) {
                 setEnabled(false);
                 return;
             }

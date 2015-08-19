@@ -4,6 +4,7 @@ import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.data.AbstractData;
 import fr.proline.studio.dam.data.DataSetData;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
+import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.IconManager;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeModel;
@@ -13,7 +14,7 @@ import org.openide.nodes.Sheet;
  * Biological Sample Analysis Node used in XIC Design Tree
  * @author JM235353
  */
-public class XICBiologicalSampleAnalysisNode extends AbstractNode {
+public class XICBiologicalSampleAnalysisNode extends DataSetNode {
 
     boolean m_hasError = true;
     
@@ -65,7 +66,7 @@ public class XICBiologicalSampleAnalysisNode extends AbstractNode {
 
     @Override
     public Sheet createSheet() {
-        return null;
+        return super.createSheet();
     }
 
     @Override
@@ -75,6 +76,7 @@ public class XICBiologicalSampleAnalysisNode extends AbstractNode {
 
     @Override
     public void loadDataForProperties(Runnable callback) {
+        super.loadDataForProperties(callback);
     }
     
     @Override

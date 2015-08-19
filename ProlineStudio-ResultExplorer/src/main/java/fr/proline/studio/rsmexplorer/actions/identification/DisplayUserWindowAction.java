@@ -228,7 +228,7 @@ public class DisplayUserWindowAction extends AbstractRSMAction {
         }
         
          AbstractNode node = selectedNodes[0];
-        if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
+        if (node.getType() != AbstractNode.NodeTypes.DATA_SET && node.getType() != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
             setEnabled(false);
             return;
         }

@@ -8,7 +8,7 @@ import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.pride.ExportPrideDialog;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 public class ExportRSM2PrideAction extends AbstractRSMAction {
      protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
      
-    public ExportRSM2PrideAction(){
-        super(NbBundle.getMessage(ExportRSM2PrideAction.class, "CTL_ExportPrideAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);    
+    public ExportRSM2PrideAction(TreeType treeType){
+        super(NbBundle.getMessage(ExportRSM2PrideAction.class, "CTL_ExportPrideAction"), treeType);    
     }
     
         @Override
@@ -130,7 +130,7 @@ public class ExportRSM2PrideAction extends AbstractRSMAction {
 
         AbstractNode node = selectedNodes[0];
         AbstractNode.NodeTypes nodeType = node.getType();
-        if (nodeType != AbstractNode.NodeTypes.DATA_SET) {
+        if (nodeType != AbstractNode.NodeTypes.DATA_SET && node.getType() != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
             setEnabled(false);
             return;
         }

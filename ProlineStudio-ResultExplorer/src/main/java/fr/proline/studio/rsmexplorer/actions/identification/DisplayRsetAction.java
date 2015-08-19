@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.actions.identification;
 
 import fr.proline.studio.pattern.WindowSavedManager;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import java.util.ArrayList;
 import javax.swing.JMenu;
@@ -26,9 +25,9 @@ public class DisplayRsetAction extends AbstractRSMAction {
    private TreeType m_treeType;
    private Boolean m_isJMSDefined;
     
-   public DisplayRsetAction(Boolean isJMSDefined) {
-       super(NbBundle.getMessage(DisplayRsetAction.class, "CTL_DisplayRsetAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
-       m_treeType = AbstractTree.TreeType.TREE_IDENTIFICATION;
+   public DisplayRsetAction(TreeType treeType, boolean isJMSDefined) {
+       super(NbBundle.getMessage(DisplayRsetAction.class, "CTL_DisplayRsetAction"), treeType);
+       m_treeType = treeType;
        m_isJMSDefined = isJMSDefined;
    }
 
@@ -36,9 +35,9 @@ public class DisplayRsetAction extends AbstractRSMAction {
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
         
-        m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction();
-        m_displayRsetProteinMatchesAction = new DisplayRsetProteinMatchesAction();
-        m_msDiagReportAction = new GenerateMSDiagReportAction(m_isJMSDefined); 
+        m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction(m_treeType);
+        m_displayRsetProteinMatchesAction = new DisplayRsetProteinMatchesAction(m_treeType);
+        m_msDiagReportAction = new GenerateMSDiagReportAction(m_treeType, m_isJMSDefined); 
         m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
         m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
         

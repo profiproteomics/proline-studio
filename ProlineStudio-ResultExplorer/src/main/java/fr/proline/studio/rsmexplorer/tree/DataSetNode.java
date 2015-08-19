@@ -26,7 +26,9 @@ import org.openide.nodes.Sheet;
  */
 public class DataSetNode extends AbstractNode {
 
-   
+    public DataSetNode(NodeTypes type, AbstractData data) {
+        super(type, data);
+    }
     
     
     public DataSetNode(AbstractData data) {

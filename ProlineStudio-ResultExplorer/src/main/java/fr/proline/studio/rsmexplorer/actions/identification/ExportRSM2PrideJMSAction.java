@@ -7,7 +7,7 @@ import fr.proline.studio.dpm.task.jms.ExportRSM2PrideTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.pride.ExportPrideDialog;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.StringUtils;
 import org.openide.util.NbBundle;
@@ -23,8 +23,8 @@ public class ExportRSM2PrideJMSAction extends AbstractRSMAction {
    
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
  
-    public ExportRSM2PrideJMSAction(){
-        super(StringUtils.getActionName(NbBundle.getMessage(ExportRSM2PrideJMSAction.class, "CTL_ExportPrideAction"), true), AbstractTree.TreeType.TREE_IDENTIFICATION);    
+    public ExportRSM2PrideJMSAction(TreeType treeType){
+        super(StringUtils.getActionName(NbBundle.getMessage(ExportRSM2PrideJMSAction.class, "CTL_ExportPrideAction"), true), treeType);    
     }
     
      @Override
@@ -126,7 +126,7 @@ public class ExportRSM2PrideJMSAction extends AbstractRSMAction {
 
         AbstractNode node = selectedNodes[0];
         AbstractNode.NodeTypes nodeType = node.getType();
-        if (nodeType != AbstractNode.NodeTypes.DATA_SET) {
+        if (nodeType != AbstractNode.NodeTypes.DATA_SET && node.getType() != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
             setEnabled(false);
             return;
         }

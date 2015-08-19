@@ -325,7 +325,8 @@ public class XICDesignTree extends AbstractTree {
                     if (qCh != null){
                         String name = qCh.getResultFileName();
                         // fake dataset
-                        DDataset dds = new DDataset(-1,dataset.getProject() , name, Dataset.DatasetType.IDENTIFICATION, 0, dataset.getResultSetId(), qCh.getIdentResultSummaryId(), 1);
+                        DDataset dds = new DDataset(qCh.getIdentDatasetId(),dataset.getProject() , name, Dataset.DatasetType.IDENTIFICATION, 0, qCh.getIdentRs().getId(), qCh.getIdentResultSummaryId(), 1);
+                        dds.setResultSet(qCh.getIdentRs());
                         DataSetData dsData = new DataSetData(name, Dataset.DatasetType.IDENTIFICATION, Aggregation.ChildNature.SAMPLE_ANALYSIS ); 
                         dsData.setDataset(dds);
                         XICBiologicalSampleAnalysisNode sampleAnalysisNode = new XICBiologicalSampleAnalysisNode(dsData);

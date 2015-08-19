@@ -14,7 +14,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.rsmexplorer.tree.AbstractNode;
-import fr.proline.studio.rsmexplorer.tree.AbstractTree;
+import fr.proline.studio.rsmexplorer.tree.AbstractTree.TreeType;
 import org.openide.util.NbBundle;
 
 /**
@@ -25,8 +25,8 @@ public class DisplayRsetPeptidesAction extends AbstractRSMAction {
 
    //private static ProteinGroupsAction instance = null;
 
-   public DisplayRsetPeptidesAction() {
-       super(NbBundle.getMessage(DisplayRsetPeptidesAction.class, "CTL_DisplayPeptidesAction"), AbstractTree.TreeType.TREE_IDENTIFICATION);
+   public DisplayRsetPeptidesAction(TreeType treeType) {
+       super(NbBundle.getMessage(DisplayRsetPeptidesAction.class, "CTL_DisplayPeptidesAction"), treeType);
    }
 
     @Override
@@ -111,7 +111,7 @@ public class DisplayRsetPeptidesAction extends AbstractRSMAction {
         
         for (int i=0;i<nbSelectedNodes;i++) {
             AbstractNode node = selectedNodes[i];
-            if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
+            if (node.getType() != AbstractNode.NodeTypes.DATA_SET && node.getType() != AbstractNode.NodeTypes.BIOLOGICAL_SAMPLE_ANALYSIS) {
                 setEnabled(false);
                 return;
             }

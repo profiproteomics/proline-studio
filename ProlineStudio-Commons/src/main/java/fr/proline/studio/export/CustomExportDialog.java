@@ -745,14 +745,11 @@ public class CustomExportDialog extends DefaultDialog {
         m_tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
         lblMouseRightclickOn = new JTextPane();
-        //lblMouseRightclickOn = new JLabel("Tab: Mouse Right-Click: (en/dis)-able sheet, 2X left click: rename sheet");
         lblMouseRightclickOn.setText("- Mouse Right-Click on tab to enable/disable sheet\r\n- Double Left-Click to rename sheet tab.\r\nReview all tabs and fields for export.  Once done, save and reload later when necessary.");
 
         lblMouseRightclickOn.setBounds(10, 493, 560, 48);
         lblMouseRightclickOn.setBackground(new Color(255, 233, 155));
-		//panel_1.add(lblMouseRightclickOn);
-        //lblMouseRightclickOn.setBounds(10, 535, 381, 60);
-        insidePanel.add(lblMouseRightclickOn);
+		insidePanel.add(lblMouseRightclickOn);
 
         comboBox_exportProfile = new JComboBox();
         comboBox_exportProfile.setModel(new DefaultComboBoxModel(new String[]{"Best", "All"}));
@@ -787,7 +784,6 @@ public class CustomExportDialog extends DefaultDialog {
                     //m_exportConfig = m_exportDefaultConfig; // copy config to allow modifications: TODO: check if copy by value better
                 }
                 setSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 200 + 450 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
-                //setPreferredSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 200 + 400 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
             }
         });
         chk_ExportOptions.setBounds(474, 44, 104, 27);
@@ -804,7 +800,6 @@ public class CustomExportDialog extends DefaultDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                //ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
                 if (m_exporTypeCombobox.getSelectedItem() != null) {
                     FileNameExtensionFilter filter = null;
                     if (m_exporTypeCombobox.getSelectedItem().toString().contains("xls")) {
@@ -872,9 +867,7 @@ public class CustomExportDialog extends DefaultDialog {
         lbl_exportType.setBounds(10, 44, 93, 27);
         insidePanel.add(lbl_exportType);
 
-        //m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
         m_exporTypeCombobox = new JComboBox();
-        // m_exporTypeCombobox.setSelectedIndex(0);
         m_exporTypeCombobox.setBounds(86, 47, 206, 20);
         insidePanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         insidePanel.add(new JLabel("Export Type:"));
@@ -931,9 +924,9 @@ public class CustomExportDialog extends DefaultDialog {
         }
         if (removedAtIndex > -1) {
             if (idFullList.size() > 1) {
-                //System.out.println("Problem: more than one missing ID");
+                logger.warn("Problem: more than one missing ID");
             } else if (idFullList.size() == 1) {
-                //System.out.println("Fixed the missing id: " + idFullList.get(0));
+                logger.warn("Fixed the missing id: " + idFullList.get(0));
                 m_tabbedPane.setToolTipTextAt(removedAtIndex, idFullList.get(0));
             }
         }
@@ -980,29 +973,17 @@ public class CustomExportDialog extends DefaultDialog {
     }
 
     protected void updatePresentationModeForNewlySelectedTab() {
-		//System.out.println("1-updating presentation mode for newly selected tab: " + m_tabbedPane.getSelectedIndex());
+		
 
         if (!m_updateInProgress) { // update only when no update in progress
-            //if(m_exportConfig!= null) {
-
-//			System.out.println("2-updating presentation mode for newly selected tab: " + m_tabbedPane.getSelectedIndex());
-//			System.out.println();
-			// reassign all tabs names and ids in case some have been moved around
-			//ExportConfig param = m_exportConfig;
-			//---
-//			System.out.println("updating presentation mode for newly selected tab: " + m_tabbedPane.getSelectedIndex());
             m_updateInProgress = true;
-				//String selectedTabTitle = m_tabbedPane.getTitleAt(m_tabbedPane.getSelectedIndex());
-
+			
             recalculateTabsIds();
             recalculateTabTitleIdHashMap();
             String selectedTabId = m_tabbedPane.getToolTipTextAt(m_tabbedPane.getSelectedIndex());
             if (selectedTabId == null) {
-				//if(sheetIdToSheetIndex(selectedTabId)==m_exportConfig.sheets.length) {
-                //System.out.println("ERROR: did not find tab by its id :" +selectedTabId);
-
+				logger.warn("ERROR: did not find tab by its id :" +selectedTabId);
             } else {
-                //if(m_exportConfig.sheets[sheetIdToSheetIndex(selectedTabId)].presentation.equals("rows")) {
                 if (m_presentationHashMap.get(selectedTabId).equals("rows")) {
                     comboBox_Orientation.setSelectedIndex(0);
                 } else {
@@ -1081,7 +1062,6 @@ public class CustomExportDialog extends DefaultDialog {
 
     protected void presentationModeChanged() {
 		// update the m_presentation attribute when changed for a specific ExportConfigSheet
-        //System.out.println("presentation mode changed to " + comboBox_Orientation.getSelectedItem());
         int selectedTab = m_tabbedPane.getSelectedIndex();
         recalculateTabsIds();
         recalculateTabTitleIdHashMap();
@@ -1137,7 +1117,7 @@ public class CustomExportDialog extends DefaultDialog {
     }
 
     protected ExportConfig generateConfigFileFromGUI() {
-		//System.out.print("scanning table...");
+		
         // this method creates an ExportConfig structure to export.
         ExportConfig ec = new ExportConfig();
 
@@ -1169,18 +1149,14 @@ public class CustomExportDialog extends DefaultDialog {
         ec.date_format_values = null; //": ["YYYY:MM:DD HH:mm:ss","YYYY:MM:DD"],
         ec.sheet_presentation_values = null; //": ["rows","columns"]
 
-		//System.out.print("parcours.../nb tab= "+  m_tabbedPane.getTabCount());
-        int nbActiveTabs = 0;
+		int nbActiveTabs = 0;
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) { // go through tab panes and jtables
             if (m_tabbedPane.isEnabledAt(i)) {
                 nbActiveTabs++;
             }
         }
-		//System.out.println(">>\n " + nbActiveTabs + " active tabs");
-        //ec.sheets = new ExportExcelSheet[nbActiveTabs];	// create the number of sheets that are enabled
-        ec.sheets = new ExportExcelSheet[nbActiveTabs];
+		ec.sheets = new ExportExcelSheet[nbActiveTabs];
 
-        //System.out.println("*** ec sheets count:" + ec.sheets.length);	
         int usedTabNumber = 0; // the tab location for the new structure (smaller than the full table - disabled tabs)
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) { // go through tab panes and jtables
             if (m_tabbedPane.isEnabledAt(i)) { // save only enabled panes (hence excel sheets)
@@ -1190,23 +1166,16 @@ public class CustomExportDialog extends DefaultDialog {
                 JScrollPane jsp = (JScrollPane) panelTemp.getComponent(0);
                 JTable tableRef = (JTable) jsp.getViewport().getComponents()[0];
 
-					//System.out.println("668: row count:" + tableRef.getRowCount());
-                int nbRows = tableRef.getRowCount();
+				int nbRows = tableRef.getRowCount();
                 int nbSelectedRows = 0;
                 for (int row = 0; row < nbRows; row++) { // count selected rows to be exported
-                    //System.out.println(" row " + row + " with id=" + tableRef.getValueAt(row, 0));
                     if (tableRef.getValueAt(row, 2).equals(true)) {
                         nbSelectedRows++;
                     }
                 }
                 ec.sheets[usedTabNumber] = new ExportExcelSheet();
 
-					//ec.sheets[usedTabNumber].id = m_sheetId[i];
-                //ec.sheets[usedTabNumber].id = m_sheetIdHashMap.get(i);
-                ec.sheets[usedTabNumber].id = tabTitleToTabId(m_tabbedPane.getTitleAt(i));
-//					ec.sheets[usedTabNumber].title = m_sheetTitle[i];
-//					ec.sheets[usedTabNumber].presentation = m_presentation[i];
-                //ec.sheets[usedTabNumber].title = m_sheetTitleHashMap.get(i);
+				ec.sheets[usedTabNumber].id = tabTitleToTabId(m_tabbedPane.getTitleAt(i));
                 ec.sheets[usedTabNumber].title = m_tabbedPane.getTitleAt(i);
                 ec.sheets[usedTabNumber].presentation = m_presentationHashMap.get(m_tabbedPane.getToolTipTextAt(i)); //m_exportConfig.sheets[i].presentation;
 
@@ -1215,18 +1184,14 @@ public class CustomExportDialog extends DefaultDialog {
                 // copy all selected sheet fields into new structure
                 int newStructRow = 0; // position in new sheet structure 
                 for (int currentRow = 0; currentRow < nbRows; currentRow++) {
-                    //System.out.println("current row:" + currentRow );
                     if (tableRef.getValueAt(currentRow, 2).equals(true)) { // if selected row then add it
                         ec.sheets[usedTabNumber].fields[newStructRow] = new ExportExcelSheetField();
-                        //System.out.println("currentRow= " + currentRow + " i = " + i + " new struct row: " + newStructRow);
                         ec.sheets[usedTabNumber].fields[newStructRow].id = tableRef.getValueAt(currentRow, 0).toString();
                         ec.sheets[usedTabNumber].fields[newStructRow].title = tableRef.getValueAt(currentRow, 1).toString();
 
                         newStructRow++;
                     }
                 }
-
-//					
                 usedTabNumber++;
             }
         }
@@ -1313,11 +1278,7 @@ public class CustomExportDialog extends DefaultDialog {
             c.gridy++;
             c.gridx = 0;
             c.gridwidth = 2;
-            //m_exportAllPSMsChB = new JCheckBox(" Export all PSMs");
-            //m_exportAllPSMsChB.setBounds(6, 78, 114, 20);
-            //insidePanel.add(m_exportAllPSMsChB);
-
-            //exportPanel.add(m_exportAllPSMsChB, c);
+            
         }
 
         m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());

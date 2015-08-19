@@ -67,17 +67,10 @@ public class XICDesignTree extends AbstractTree {
 
         setDropMode(DropMode.ON_OR_INSERT);
         setDragEnabled(true);
-
-        
         
         initTree(top);
     }
 
-    @Override
-    protected void initTree(AbstractNode top) {
-        super.initTree(top);
-
-    }
     
     @Override
     public void rename(AbstractNode rsmNode, String newName) {
@@ -297,6 +290,13 @@ public class XICDesignTree extends AbstractTree {
             return;
         }
         RSMTreeModel model = (RSMTreeModel)tree.getModel();
+        if (rootNode.getChildCount() > 0) {
+            rootNode.remove(0); // remove the first child which correspond to the hour glass
+            model.nodeStructureChanged(rootNode);
+        }
+        
+        rootNode.setIsChanging(false);
+        model.nodeChanged(rootNode);
         GroupSetup groupSetup = dataset.getGroupSetup();
         if (groupSetup == null){
             return;

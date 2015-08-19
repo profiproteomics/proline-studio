@@ -13,7 +13,6 @@ import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
-import fr.proline.studio.rsmexplorer.gui.MultiGraphicsPanel;
 import fr.proline.studio.utils.MapAlignmentConverter;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -67,7 +66,6 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
     private DefaultComboBoxModel m_cbDestModel;
     private Map<Integer, ProcessedMap> m_mapName; 
     
-    private MultiGraphicsPanel m_graphicPanel;
     
     public MapAlignmentPanel() {
         super();
@@ -83,9 +81,7 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         m_labelTitle = new JLabel(panelTitle);
         panelHeader.add(m_labelTitle, BorderLayout.NORTH);
         panelHeader.add(mapAlignmentPanel, BorderLayout.CENTER);
-        this.add(panelHeader, BorderLayout.NORTH);
-        m_graphicPanel = new MultiGraphicsPanel(false, false);
-        this.add(m_graphicPanel, BorderLayout.CENTER);
+        this.add(panelHeader, BorderLayout.CENTER);
     }
     
     private JPanel createMapAlignmentPanel(){
@@ -208,7 +204,6 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         }
         
         repaint();
-        m_graphicPanel.setData(compareDataInterfaceList, crossSelectionInterfaceList);
     }
     
     

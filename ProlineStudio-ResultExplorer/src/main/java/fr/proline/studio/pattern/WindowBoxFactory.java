@@ -297,10 +297,19 @@ public class WindowBoxFactory {
     public static WindowBox getExperimentalDesignWindowBox(String dataName, String fullName) {
 
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxExperimentalDesign();
         boxes[0].setDataName(dataName);
-        boxes[1] = new DataboxMapAlignment();
+        IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
+        return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
+    }
+    
+    public static WindowBox getMapAlignmentWindowBox(String dataName, String fullName) {
+        // create boxes
+        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        boxes[0] = new DataboxMapAlignment();
+        boxes[0].setDataName(dataName);
+        boxes[1] = new DataboxMultiGraphics(false, false);
         boxes[1].setLayout(SplittedPanelContainer.PanelLayout.VERTICAL);
         IconManager.IconType iconType = IconManager.IconType.QUANT_XIC;
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));

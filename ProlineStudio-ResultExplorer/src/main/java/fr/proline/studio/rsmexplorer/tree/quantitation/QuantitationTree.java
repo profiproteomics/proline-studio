@@ -758,7 +758,7 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
         m_model.nodeStructureChanged(parentNode);
 
         if (parentNode instanceof DataSetNode && ((DataSetNode)parentNode).isQuantXIC()){
-            XICDesignTree.setExpDesign(((DataSetNode)parentNode).getDataset(), parentNode,  this, true);
+            XICDesignTree.setExpDesign(((DataSetNode)parentNode).getDataset(), parentNode,  this, false);
         }
 
     }

@@ -354,6 +354,8 @@ public class XICDesignTree extends AbstractTree {
                         model.insertNodeInto(sampleAnalysisNode, biologicalSampleNode, childSampleAnalysisIndex);
                         if(expandPath){
                             tree.expandPath( new TreePath(sampleAnalysisNode.getPath()));
+                        }else{
+                            tree.expandPath( new TreePath(biologicalSampleNode.getPath()));
                         }
                         childSampleAnalysisIndex++;
                     }

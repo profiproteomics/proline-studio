@@ -225,7 +225,7 @@ public class CreateXICAction extends AbstractRSMAction {
                             @Override
                             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                                 ((DataSetData) dsNode.getData()).setDataset(ds);
-                                XICDesignTree.setExpDesign(dsNode.getDataset(), dsNode, tree, true);
+                                XICDesignTree.setExpDesign(dsNode.getDataset(), dsNode, tree, false);
                                 dsNode.setIsChanging(false);
                                 treeModel.nodeChanged(dsNode);
                             }

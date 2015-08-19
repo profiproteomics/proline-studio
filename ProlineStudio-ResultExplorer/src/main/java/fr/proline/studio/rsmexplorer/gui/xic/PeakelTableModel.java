@@ -8,6 +8,7 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
@@ -480,7 +481,7 @@ public class PeakelTableModel extends LazyTableModel implements GlobalTableModel
                 break;
             }
             case COLTYPE_PEAKEL_IS_OVERLAPPING: {
-                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
             case COLTYPE_PEAKEL_FEATURE_COUNT:

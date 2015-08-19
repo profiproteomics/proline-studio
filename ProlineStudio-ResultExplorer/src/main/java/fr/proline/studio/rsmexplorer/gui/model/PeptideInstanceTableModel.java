@@ -17,6 +17,7 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.PeptideRenderer;
@@ -548,7 +549,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
                 break;
             } 
             case COLTYPE_PEPTIDE_PTM:{
-                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
   

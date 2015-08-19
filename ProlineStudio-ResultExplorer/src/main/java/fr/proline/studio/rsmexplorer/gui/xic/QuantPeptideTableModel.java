@@ -15,6 +15,7 @@ import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.CompareValueRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
 import fr.proline.studio.table.CompoundTableModel;
@@ -925,7 +926,7 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
         switch (col) {
             case COLTYPE_PEPTIDE_NAME:
             case COLTYPE_PEPTIDE_CLUSTER: {
-                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
             case COLTYPE_OVERVIEW: {

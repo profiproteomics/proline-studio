@@ -12,6 +12,7 @@ import fr.proline.studio.filter.StringDiffFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.TimeRenderer;
@@ -726,7 +727,7 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
         switch (col) {
 
             case COLTYPE_PEPTIDE_ION_NAME: {
-                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
             case COLTYPE_PEPTIDE_ION_CHARGE: {

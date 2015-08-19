@@ -11,6 +11,7 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.filter.*;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FloatRenderer;
@@ -489,7 +490,7 @@ public class PeptideTableModel extends DecoratedTableModel implements GlobalTabl
             case COLTYPE_PEPTIDE_NEXT_AA:
             case COLTYPE_PROTEIN_SETS_MATCHES: 
             case COLTYPE_PEPTIDE_PTM: {
-                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
             case COLTYPE_PEPTIDE_NAME: {

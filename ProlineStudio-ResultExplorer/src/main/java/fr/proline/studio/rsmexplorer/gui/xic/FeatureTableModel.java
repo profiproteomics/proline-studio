@@ -12,6 +12,7 @@ import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.mzscope.MzdbInfo;
 import fr.proline.studio.rsmexplorer.gui.renderer.BigFloatRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultLeftAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.rsmexplorer.gui.renderer.FontRenderer;
@@ -758,12 +759,12 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         
         switch (col) {
             case COLTYPE_FEATURE_MAP_NAME: {
-                renderer = new FontRenderer( TableDefaultRendererManager.getDefaultRenderer(String.class) );
+                renderer = new FontRenderer( new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)) );
                 break;
             }
             case COLTYPE_FEATURE_QC:
             case COLTYPE_FEATURE_IS_OVERLAPPING: {
-                renderer = TableDefaultRendererManager.getDefaultRenderer(String.class);
+                renderer = new DefaultLeftAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class));
                 break;
             }
             case COLTYPE_FEATURE_MOZ: {

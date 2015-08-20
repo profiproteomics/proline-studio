@@ -10,8 +10,6 @@ import fr.proline.core.orm.lcms.MapAlignmentPK;
 import fr.proline.core.orm.lcms.MapTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 /**
  * to convert elution time between maps depending of maps alignments
@@ -90,7 +88,7 @@ public class MapAlignmentConverter {
      * @param refTime
      * @return 
      */
-    public static Double calcTargetMapElutionTime(MapAlignment mapAlignment, Double refTime){
+    public static Double calcTargetMapElutionTime(MapAlignment mapAlignment, Double refTime)throws Exception {
         List<MapTime> mapTimeList = mapAlignment.getMapTimeList();
         int nb = mapTimeList.size();
         double[] times = new double[nb];
@@ -104,10 +102,68 @@ public class MapAlignmentConverter {
         return refTime + linearInterpolation(refTime, times, deltaTimes);
     }
     
-    public static Double linearInterpolation(double refTime, double[] x, double[] y  ){
-        LinearInterpolator linearIn = new LinearInterpolator();
-        PolynomialSplineFunction f = linearIn.interpolate(x, y);
-        return f.value(refTime);
+    public static Double linearInterpolation(double refTime, double[] x, double[] y  )throws Exception {
+        int index = -1;
+        for (int i=0; i<x.length; i++){
+            if (x[i] >= refTime){
+                index = i;
+                break;
+            }
+        }
+        if( index == -1 ) {
+            if (refTime < x[0]){
+                index = 0;
+            }
+        }
+        // If we are looking at the left-side of the vector boundaries
+        // then we take the Y value of the first element
+        if( index == 0 ){
+            return y[0];
+        }
+        // Else if we are looking at the right-side of the vector boundaries
+        // then we take the Y of the last element
+        else if (index == -1){
+            return y[y.length-1];
+        }
+        // Else we are inside the vector boundaries
+        // We then compute the linear interpolation
+        else{
+            double x1 = x[index -1];
+            double y1 = y[index-1];
+            double x2 = x[index];
+            double y2 = y[index];
+            // If the vector contains two consecutive values with a same X coordinate
+            // Then we take the mean of the corresponding Y values
+            if (x1 == x2){
+                return (y1 + y2)/2;
+            }else{
+                double[] lineP = calcLineParams( x1, y1, x2, y2 );
+                return lineP[0] * refTime + lineP[1];
+            }
+        }
+        
+    }
+    
+    /** 
+     * compute slope and intercept of a line using two data points coordinates 
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @return 
+     */
+    private static double[] calcLineParams (double x1, double y1, double x2, double y2) throws Exception {
+        double[] lineP = new double[2];
+        double deltaX = x2 - x1;
+        
+        if (deltaX == 0){
+            throw new Exception("can't solve line parameters with two identical x values (" + x1 + ")");
+        }
+        double slope = (y2 - y1) / deltaX;
+        double intercept = y1 - (slope * x1);
+        lineP[0] = slope;
+        lineP[1] = intercept;
+        return lineP;
     }
     
     public static MapAlignment getRevertedMapAlignment(MapAlignment map){

@@ -383,7 +383,7 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         filtersMap.put(COLTYPE_FEATURE_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_FEATURE_INTENSITY), null));
         filtersMap.put(COLTYPE_FEATURE_DURATION, new DoubleFilter(getColumnName(COLTYPE_FEATURE_DURATION), null));
         filtersMap.put(COLTYPE_FEATURE_QUALITY_SCORE, new DoubleFilter(getColumnName(COLTYPE_FEATURE_QUALITY_SCORE), null));
-        filtersMap.put(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME), null));
+        filtersMap.put(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME), minuteConverter));
         filtersMap.put(COLTYPE_FEATURE_PEAKELS_COUNT, new IntegerFilter(getColumnName(COLTYPE_FEATURE_PEAKELS_COUNT), null));
 
     }

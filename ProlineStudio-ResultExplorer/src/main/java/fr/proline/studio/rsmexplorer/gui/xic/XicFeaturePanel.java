@@ -1,6 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.lcms.Feature;
+import fr.proline.core.orm.lcms.dto.DFeature;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -294,7 +295,7 @@ public class XicFeaturePanel  extends HourglassPanel implements DataBoxPanelInte
         return internalPanel;
     }                 
     
-    public void setData(Long taskId,  List<Feature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak, boolean finished) {
+    public void setData(Long taskId,  List<DFeature> features, QuantChannelInfo quantChannelInfo, List<Boolean> featureHasPeak, boolean finished) {
         ((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).setData(taskId,  features, quantChannelInfo, featureHasPeak);
         //m_featureTable.setColumnControlVisible(((FeatureTableModel) ((CompoundTableModel) m_featureTable.getModel()).getBaseModel()).getColumnCount() < XicProteinSetPanel.NB_MAX_COLUMN_CONTROL);     
         m_titleLabel.setText(TABLE_TITLE +" ("+features.size()+")");

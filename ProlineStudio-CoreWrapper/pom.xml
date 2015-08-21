@@ -142,6 +142,7 @@
                         <publicPackage>fr.proline.core.orm.uds.dto</publicPackage>
                         <publicPackage>fr.proline.core.orm.uds.repository</publicPackage>
                         <publicPackage>fr.proline.core.orm.util</publicPackage>
+                        <publicPackage>fr.proline.core.orm.lcms.dto</publicPackage>
                         <publicPackage>fr.proline.core.parser.lcms</publicPackage>
                         <publicPackage>fr.proline.core.parser.lcms.impl</publicPackage>
                         <publicPackage>fr.proline.core.service.lcms</publicPackage>

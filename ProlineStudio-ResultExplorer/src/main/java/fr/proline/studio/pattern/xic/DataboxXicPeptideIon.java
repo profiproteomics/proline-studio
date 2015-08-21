@@ -55,6 +55,10 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         registerOutParameter(outParameter);
         
         outParameter = new GroupParameter();
+        outParameter.addParameter(DDataset.class, true);
+        registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
         outParameter.addParameter(CompareDataInterface.class, true);
         registerOutParameter(outParameter);
 
@@ -161,6 +165,9 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             }
             if (parameterType.equals(MasterQuantPeptideIon.class)) {
                 return ((XicPeptideIonPanel) m_panel).getSelectedMasterQuantPeptideIon();
+            }
+            if (parameterType.equals(DDataset.class)) {
+                return m_dataset;
             }
             if (parameterType.equals(CompareDataInterface.class)) {
                 return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();

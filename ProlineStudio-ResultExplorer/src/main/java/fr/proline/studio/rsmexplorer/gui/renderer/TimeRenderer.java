@@ -1,6 +1,5 @@
 package fr.proline.studio.rsmexplorer.gui.renderer;
 
-import fr.proline.studio.table.LazyData;
 import fr.proline.studio.utils.DataFormat;
 import java.awt.Component;
 import javax.swing.JTable;

@@ -904,7 +904,10 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                     m_childFeatureList.add(dFeature);
                     //
                     queryPeakel.setParameter("featureId", feature.getId());
-                    List<Long> listIds = queryPeakel.getResultList();
+                    List<Long> listIds = new ArrayList();
+                    if (feature.getId() > -1){
+                        listIds = queryPeakel.getResultList();
+                    }
                     if (listIds != null && !listIds.isEmpty()) {
                         String queryPeakelLoadS = "SELECT p, fpi.isotopeIndex "
                                 + "FROM fr.proline.core.orm.lcms.Peakel p, FeaturePeakelItem fpi "

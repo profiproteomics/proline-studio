@@ -103,7 +103,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+            public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
                 if (subTask == null) {
 
                     AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
@@ -114,7 +114,7 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                         }
 
                         @Override
-                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                        public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
                             // list quant Channels
                             List<DQuantitationChannel> listQuantChannel = new ArrayList();
                             if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
@@ -128,14 +128,12 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                             m_quantChannelInfo.setMapAlignments(m_mapAlignments);
                             m_quantChannelInfo.setAllMaps(m_allMaps);
 
-                        // proteins set 
+                            // proteins set 
                             //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
                             //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
                             ((XicProteinSetPanel) m_panel).setData(taskId, m_quantitationChannelArray, m_masterQuantProteinSetList, m_isXICMode, finished);
-                            getProteinQuantTableModelList();
                             if (finished) {
-                                unregisterTask(taskId);
-                                propagateDataChanged(CompareDataInterface.class); 
+                                unregisterTask(task2Id);
                             }
                         }
                     };
@@ -150,7 +148,6 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                 } else {
                     ((XicProteinSetPanel) m_panel).dataUpdated(subTask, finished);
                 }
-                getProteinQuantTableModelList();
                 setLoaded(loadingId);
 
                 if (finished) {

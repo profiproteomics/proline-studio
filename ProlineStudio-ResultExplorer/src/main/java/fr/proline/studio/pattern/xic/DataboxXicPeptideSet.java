@@ -148,13 +148,9 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
                                 m_quantChannelInfo.setAllMaps(m_allMaps);
 
                                 ((XicPeptidePanel) m_panel).setData(taskId, m_proteinSet != null, quantitationChannelArray, m_masterQuantPeptideList, m_isXICMode, finished);
-                                if (!allProteinSet) {
-                                    getPeptideTableModelList();
-                                }
-                    
+                                
                                 if (finished) {
                                     unregisterTask(task2Id);
-                                    propagateDataChanged(CompareDataInterface.class); 
                                 }
                             }
                         };
@@ -169,9 +165,6 @@ public class DataboxXicPeptideSet extends AbstractDataBox {
 
                 } else {
                     ((XicPeptidePanel) m_panel).dataUpdated(subTask, finished);
-                }
-                if (!allProteinSet) {
-                    getPeptideTableModelList();
                 }
                 setLoaded(loadingId);
 

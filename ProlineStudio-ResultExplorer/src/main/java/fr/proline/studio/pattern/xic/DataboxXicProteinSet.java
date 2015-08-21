@@ -1,5 +1,7 @@
 package fr.proline.studio.pattern.xic;
 
+import fr.proline.core.orm.lcms.MapAlignment;
+import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinSet;
@@ -10,6 +12,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
+import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadXicMasterQuantTask;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -27,14 +30,18 @@ import java.util.List;
 public class DataboxXicProteinSet extends AbstractDataBox {
 
     private DDataset m_dataset;
-    private QuantChannelInfo  m_quantChannelInfo;
-    private List<DMasterQuantProteinSet> m_masterQuantProteinSetList ;
-    private  DQuantitationChannel[] m_quantitationChannelArray = null;
+    private QuantChannelInfo m_quantChannelInfo;
+    private List<DMasterQuantProteinSet> m_masterQuantProteinSetList;
+    private DQuantitationChannel[] m_quantitationChannelArray = null;
     private boolean m_isXICMode = true;
-    
-    public DataboxXicProteinSet() { 
+
+    private List<MapAlignment> m_mapAlignments;
+    private List<MapAlignment> m_allMapAlignments;
+    private List<ProcessedMap> m_allMaps;
+
+    public DataboxXicProteinSet() {
         super(DataboxType.DataboxXicProteinSet);
-        
+
         // Name of this databox
         m_typeName = "Quanti Protein Sets";
         m_description = "All Protein Sets of a Quantitation";
@@ -42,9 +49,8 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
-        inParameter.addParameter(DDataset.class, false); 
+        inParameter.addParameter(DDataset.class, false);
         registerInParameter(inParameter);
-
 
         // Register possible out parameters
         // One or Multiple ProteinSet
@@ -58,15 +64,15 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         outParameter = new GroupParameter();
         outParameter.addParameter(CompareDataInterface.class, false);
         registerOutParameter(outParameter);
-        
+
         outParameter = new GroupParameter();
         outParameter.addParameter(CompareDataInterface.class, true);
         registerOutParameter(outParameter);
-       
+
         outParameter = new GroupParameter();
         outParameter.addParameter(CrossSelectionInterface.class, true);
         registerOutParameter(outParameter);
-        
+
     }
 
     public boolean isXICMode() {
@@ -76,10 +82,8 @@ public class DataboxXicProteinSet extends AbstractDataBox {
     public void setXICMode(boolean isXICMode) {
         this.m_isXICMode = isXICMode;
     }
-    
-    
-    
-     @Override
+
+    @Override
     public void createPanel() {
         XicProteinSetPanel p = new XicProteinSetPanel();
         p.setName(m_typeName);
@@ -100,34 +104,59 @@ public class DataboxXicProteinSet extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
                 if (subTask == null) {
-                    // list quant Channels
-                    List<DQuantitationChannel> listQuantChannel = new ArrayList();
-                    if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
-                        DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
-                        listQuantChannel = masterChannel.getQuantitationChannels();
-                    }
-                    m_quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
-                    listQuantChannel.toArray(m_quantitationChannelArray);
-                    m_quantChannelInfo = new QuantChannelInfo(m_quantitationChannelArray);
-                    // proteins set 
-                    //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
-                    //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
-                    ((XicProteinSetPanel) m_panel).setData(taskId, m_quantitationChannelArray, m_masterQuantProteinSetList, m_isXICMode, finished);
+
+                    AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
+
+                        @Override
+                        public boolean mustBeCalledInAWT() {
+                            return true;
+                        }
+
+                        @Override
+                        public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                            // list quant Channels
+                            List<DQuantitationChannel> listQuantChannel = new ArrayList();
+                            if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
+                                DMasterQuantitationChannel masterChannel = m_dataset.getMasterQuantitationChannels().get(0);
+                                listQuantChannel = masterChannel.getQuantitationChannels();
+                            }
+                            m_quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
+                            listQuantChannel.toArray(m_quantitationChannelArray);
+                            m_quantChannelInfo = new QuantChannelInfo(m_quantitationChannelArray);
+                            m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
+                            m_quantChannelInfo.setMapAlignments(m_mapAlignments);
+                            m_quantChannelInfo.setAllMaps(m_allMaps);
+
+                        // proteins set 
+                            //DMasterQuantProteinSet[] masterQuantProteinSetArray = new DMasterQuantProteinSet[m_masterQuantProteinSetList.size()];
+                            //m_masterQuantProteinSetList.toArray(masterQuantProteinSetArray);
+                            ((XicProteinSetPanel) m_panel).setData(taskId, m_quantitationChannelArray, m_masterQuantProteinSetList, m_isXICMode, finished);
+                            if (finished) {
+                                unregisterTask(taskId);
+                            }
+                        }
+                    };
+                    // ask asynchronous loading of data
+                    m_mapAlignments = new ArrayList();
+                    m_allMapAlignments = new ArrayList();
+                    m_allMaps = new ArrayList();
+                    DatabaseLoadLcMSTask taskMap = new DatabaseLoadLcMSTask(mapCallback);
+                    taskMap.initLoadAlignmentForXic(getProjectId(), m_dataset, m_mapAlignments, m_allMapAlignments, m_allMaps);
+                    registerTask(taskMap);
+
                 } else {
                     ((XicProteinSetPanel) m_panel).dataUpdated(subTask, finished);
                 }
                 getProteinQuantTableModelList();
                 setLoaded(loadingId);
-                
+
                 if (finished) {
                     unregisterTask(taskId);
-                    propagateDataChanged(CompareDataInterface.class); 
+                    propagateDataChanged(CompareDataInterface.class);
                 }
             }
         };
-
 
         // ask asynchronous loading of data
         m_masterQuantProteinSetList = new ArrayList();
@@ -135,22 +164,21 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         task.initLoadProteinSets(getProjectId(), m_dataset, m_masterQuantProteinSetList);
         //Long taskId = task.getId();
         /*if (m_previousTaskId != null) {
-            // old task is suppressed if it has not been already done
-            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
-        }*/
+         // old task is suppressed if it has not been already done
+         AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousTaskId);
+         }*/
         //m_previousTaskId = taskId;
         registerTask(task);
 
     }
     //private Long m_previousTaskId = null;
-    
-    
+
     @Override
     public void setEntryData(Object data) {
         m_dataset = (DDataset) data;
         dataChanged();
     }
-   
+
     @Override
     public Object getData(boolean getArray, Class parameterType) {
         if (parameterType != null) {
@@ -173,16 +201,16 @@ public class DataboxXicProteinSet extends AbstractDataBox {
                 return ((GlobalTabelModelProviderInterface) m_panel).getGlobalTableModelInterface();
             }
             if (parameterType.equals(CrossSelectionInterface.class)) {
-                return ((GlobalTabelModelProviderInterface)m_panel).getCrossSelectionInterface();
+                return ((GlobalTabelModelProviderInterface) m_panel).getCrossSelectionInterface();
             }
             if (parameterType.equals(Boolean.class)) {
                 return isXICMode();
             }
-            
+
         }
         return super.getData(getArray, parameterType);
     }
-    
+
     @Override
     public Object getData(boolean getArray, Class parameterType, boolean isList) {
         if (parameterType != null && isList) {
@@ -195,12 +223,12 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         }
         return super.getData(getArray, parameterType, isList);
     }
-   
+
     @Override
     public String getFullName() {
-        return m_dataset.getName()+" "+getTypeName();
+        return m_dataset.getName() + " " + getTypeName();
     }
-    
+
     private List<CompareDataInterface> getCompareDataInterfaceList() {
         List<CompareDataInterface> listCDI = new ArrayList();
         ProteinQuantPanel aProtPanel = getProteinQuantTableModelList();
@@ -214,10 +242,10 @@ public class DataboxXicProteinSet extends AbstractDataBox {
         listCSI.add(aProtPanel.getCrossSelectionInterface());
         return listCSI;
     }
-    
+
     private ProteinQuantPanel getProteinQuantTableModelList() {
         ProteinQuantPanel aProtPanel = new ProteinQuantPanel();
-        aProtPanel.setData(m_quantitationChannelArray,((XicProteinSetPanel) m_panel).getSelectedMasterQuantProteinSet(), m_isXICMode);       
+        aProtPanel.setData(m_quantitationChannelArray, ((XicProteinSetPanel) m_panel).getSelectedMasterQuantProteinSet(), m_isXICMode);
         return aProtPanel;
     }
 }

@@ -148,6 +148,9 @@ public class DataboxMapAlignment extends AbstractDataBox {
                 m_quantitationChannelArray = new DQuantitationChannel[listQuantChannel.size()];
                 listQuantChannel.toArray(m_quantitationChannelArray);
                 m_quantChannelInfo = new QuantChannelInfo(m_quantitationChannelArray);
+                m_quantChannelInfo.setAllMapAlignments(m_allMapAlignments);
+                m_quantChannelInfo.setMapAlignments(m_mapAlignments);
+                m_quantChannelInfo.setAllMaps(m_allMaps);
                 ((MapAlignmentPanel) m_panel).setData(m_quantChannelInfo, m_mapAlignments, m_allMaps, m_allMapAlignments, getCompareDataInterfaceList(), getCrossSelectionInterfaceList());
                 
                 setLoaded(loadingId);

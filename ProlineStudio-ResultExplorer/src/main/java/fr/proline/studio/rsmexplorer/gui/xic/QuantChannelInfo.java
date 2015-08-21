@@ -1,8 +1,13 @@
 package fr.proline.studio.rsmexplorer.gui.xic;
 
+import fr.proline.core.orm.lcms.MapAlignment;
+import fr.proline.core.orm.lcms.ProcessedMap;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
+import fr.proline.studio.dam.tasks.xic.MapAlignmentConverter;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * map quantChannel info and map info, especilaly to maintain the same colors between the maps and the quantChannels
@@ -11,6 +16,11 @@ import java.awt.Color;
 public class QuantChannelInfo {
     
     private DQuantitationChannel[] m_quantChannels = null;
+    
+    private List<MapAlignment> m_mapAlignments;
+    private List<MapAlignment> m_allMapAlignments;
+    List<MapAlignment> m_allMapAlignmentsRev;
+    private List<ProcessedMap> m_allMaps;
 
     
     public QuantChannelInfo(DQuantitationChannel[] quantChannels) {
@@ -80,6 +90,47 @@ public class QuantChannelInfo {
         }
         return false;
     }
+
+    public List<MapAlignment> getMapAlignments() {
+        return m_mapAlignments;
+    }
+
+    public void setMapAlignments(List<MapAlignment> mapAlignments) {
+        this.m_mapAlignments = mapAlignments;
+    }
+
+    public List<MapAlignment> getAllMapAlignments() {
+        return m_allMapAlignments;
+    }
+
+    public void setAllMapAlignments(List<MapAlignment> allMapAlignments) {
+        this.m_allMapAlignments = allMapAlignments;
+        addReversedAlignment();
+    }
+
+    public List<ProcessedMap> getAllMaps() {
+        return m_allMaps;
+    }
+
+    public void setAllMaps(List<ProcessedMap> allMaps) {
+        this.m_allMaps = allMaps;
+    }
+    
+    public void addReversedAlignment(){
+        // add the reversed alignments
+        m_allMapAlignmentsRev = new ArrayList();
+        m_allMapAlignmentsRev.addAll(m_allMapAlignments);
+        for (MapAlignment ma : m_allMapAlignments) {
+            MapAlignment reversedMap = MapAlignmentConverter.getRevertedMapAlignment(ma);
+            m_allMapAlignmentsRev.add(reversedMap);
+        }
+    }
+
+    public List<MapAlignment> getAllMapAlignmentsRev() {
+        return m_allMapAlignmentsRev;
+    }
+    
+     
     
         
 }

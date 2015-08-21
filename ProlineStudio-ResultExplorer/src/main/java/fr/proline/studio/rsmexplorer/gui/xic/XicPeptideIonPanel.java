@@ -253,6 +253,12 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     }                 
     
     public void setData(Long taskId, DQuantitationChannel[] quantChannels,  List<MasterQuantPeptideIon> peptideIons, boolean isXICMode, boolean finished) {
+        boolean qcChanged = true;
+        if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
+            for (int q = 0; q < m_quantChannels.length; q++) {
+                qcChanged = !(m_quantChannels[q].equals(quantChannels[q]));
+            }
+        }
         m_quantChannels = quantChannels;
         m_isXICMode = isXICMode;
        ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).setData(taskId, quantChannels, peptideIons, m_isXICMode);
@@ -268,6 +274,9 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
             // allow to change column visibility
             m_columnVisibilityButton.setEnabled(true);
             m_quantPeptideIonTable.setSortable(true);
+        }
+        if (qcChanged){
+            setColumnsVisibility();
         }
     }
     

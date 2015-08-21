@@ -301,6 +301,12 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     }                 
     
     public void setData(Long taskId, boolean displayForProteinSet, DQuantitationChannel[] quantChannels,  List<DMasterQuantPeptide> peptides, boolean isXICMode, boolean finished) {
+        boolean qcChanged = true;
+        if (m_quantChannels != null && m_quantChannels.length == quantChannels.length) {
+            for (int q = 0; q < m_quantChannels.length; q++) {
+                qcChanged = !(m_quantChannels[q].equals(quantChannels[q]));
+            }
+        }
         m_quantChannels = quantChannels;
         m_isXICMode = isXICMode;
         this.m_displayForProteinSet = displayForProteinSet;
@@ -320,6 +326,9 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             // allow to change column visibility
             m_columnVisibilityButton.setEnabled(true);
             m_quantPeptideTable.setSortable(true);
+        }
+        if (qcChanged){
+            setColumnsVisibility();
         }
     }
     

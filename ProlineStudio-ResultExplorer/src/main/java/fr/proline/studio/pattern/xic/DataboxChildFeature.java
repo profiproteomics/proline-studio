@@ -1,7 +1,6 @@
 package fr.proline.studio.pattern.xic;
 
 import fr.proline.core.orm.lcms.Feature;
-import fr.proline.core.orm.lcms.MapAlignment;
 import fr.proline.core.orm.lcms.Peakel;
 import fr.proline.core.orm.lcms.Peak;
 import fr.proline.core.orm.lcms.ProcessedMap;
@@ -14,7 +13,6 @@ import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dam.tasks.xic.DatabaseLoadLcMSTask;
-import fr.proline.studio.dam.tasks.xic.MapAlignmentConverter;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.mzscope.MzScopeInterface;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -42,10 +40,6 @@ public class DataboxChildFeature extends AbstractDataBox {
 
     private List<List<Peakel>> m_peakelList;
     private List<List<List<Peak>>> m_peakList;
-
-    private List<MapAlignment> m_mapAlignments;
-    private List<MapAlignment> m_allMapAlignments;
-    private List<ProcessedMap> m_allMaps;
 
     public DataboxChildFeature() {
         super(DataboxType.DataboxXicChildFeature);
@@ -98,7 +92,7 @@ public class DataboxChildFeature extends AbstractDataBox {
         }
 
         final int loadingId = setLoading();
-        AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
+        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
             @Override
             public boolean mustBeCalledInAWT() {
@@ -107,81 +101,55 @@ public class DataboxChildFeature extends AbstractDataBox {
 
             @Override
             public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                        m_peakList = new ArrayList();
-                        if (m_childFeatureList != null) {
-                            for (int i = 0; i < m_childFeatureList.size(); i++) {
-                                boolean hasPeak = false;
-                                List<List<Peak>> list = new ArrayList();
-                                if (m_peakelList.size() >= i + 1) {
-                                    for (Peakel peakel : m_peakelList.get(i)) {
-                                        List<Peak> listPeak = peakel.getPeakList();
-                                        if (listPeak.size() > 0) {
-                                            hasPeak = true;
-                                        }
-                                        list.add(listPeak);
-                                    }
+                m_peakList = new ArrayList();
+                if (m_childFeatureList != null) {
+                    for (int i = 0; i < m_childFeatureList.size(); i++) {
+                        boolean hasPeak = false;
+                        List<List<Peak>> list = new ArrayList();
+                        if (m_peakelList.size() >= i + 1) {
+                            for (Peakel peakel : m_peakelList.get(i)) {
+                                List<Peak> listPeak = peakel.getPeakList();
+                                if (listPeak.size() > 0) {
+                                    hasPeak = true;
                                 }
-                                m_peakList.add(list);
-                                m_featureHasPeak.add(hasPeak);
+                                list.add(listPeak);
                             }
                         }
-
-                        if (subTask == null) {
-                            ((XicFeaturePanel) m_panel).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
-                        } else {
-                            ((XicFeaturePanel) m_panel).dataUpdated(subTask, finished);
-                        }
-
-                        setLoaded(loadingId);
-
-                        if (finished) {
-                            unregisterTask(taskId);
-                            propagateDataChanged(CompareDataInterface.class);
-                        }
-
-                    }
-                };
-                Long alnRefMapId = (long)-1;
-                for (ProcessedMap pmap : m_allMaps) {
-                    if (pmap.getIsAlnReference()){
-                        alnRefMapId = pmap.getId();
+                        m_peakList.add(list);
+                        m_featureHasPeak.add(hasPeak);
                     }
                 }
-                // add the reversed alignments
-                List<MapAlignment> listRev = new ArrayList();
-                listRev.addAll(m_allMapAlignments);
-                for(MapAlignment ma: m_allMapAlignments){
-                    MapAlignment reversedMap = MapAlignmentConverter.getRevertedMapAlignment(ma);
-                    listRev.add(reversedMap);
+
+                if (subTask == null) {
+                    ((XicFeaturePanel) m_panel).setData(taskId, m_childFeatureList, m_quantChannelInfo, m_featureHasPeak, finished);
+                } else {
+                    ((XicFeaturePanel) m_panel).dataUpdated(subTask, finished);
                 }
-                // ask asynchronous loading of data
-                m_childFeatureList = new ArrayList();
-                m_featureHasPeak = new ArrayList();
-                m_peakelList = new ArrayList();
-                m_peakList = new ArrayList();
-                DatabaseLoadLcMSTask task = new DatabaseLoadLcMSTask(callback);
-                task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_childFeatureList, m_peakelList, listRev, alnRefMapId, m_allMaps);
-                registerTask(task);
+
+                setLoaded(loadingId);
+
+                if (finished) {
+                    unregisterTask(taskId);
+                    propagateDataChanged(CompareDataInterface.class);
+                }
 
             }
         };
-
+        Long alnRefMapId = (long) -1;
+        for (ProcessedMap pmap : m_quantChannelInfo.getAllMaps()) {
+            if (pmap.getIsAlnReference()) {
+                alnRefMapId = pmap.getId();
+            }
+        }
+        
         // ask asynchronous loading of data
-        m_mapAlignments = new ArrayList();
-        m_allMapAlignments = new ArrayList();
-        m_allMaps = new ArrayList();
-        DatabaseLoadLcMSTask task = new DatabaseLoadLcMSTask(mapCallback);
-        task.initLoadAlignmentForXic(getProjectId(), m_dataset, m_mapAlignments, m_allMapAlignments, m_allMaps);
+        m_childFeatureList = new ArrayList();
+        m_featureHasPeak = new ArrayList();
+        m_peakelList = new ArrayList();
+        m_peakList = new ArrayList();
+        DatabaseLoadLcMSTask task = new DatabaseLoadLcMSTask(callback);
+        task.initLoadChildFeatureForPeptideIonWithPeakel(getProjectId(), m_masterQuantPeptideIon, m_childFeatureList, m_peakelList, m_quantChannelInfo.getAllMapAlignmentsRev(), alnRefMapId, m_quantChannelInfo.getAllMaps());
         registerTask(task);
 
     }

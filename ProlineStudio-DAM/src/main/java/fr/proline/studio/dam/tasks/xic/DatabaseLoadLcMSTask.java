@@ -866,6 +866,8 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         fakeFeature.setId((long)-1);
                         fakeFeature.setMap(fakeMap);
                         fakeFeature.setCharge(0);
+                        fakeFeature.setIsOverlapping(false);
+                        fakeFeature.setIsCluster(false);
                         
                         allFeature.add(fakeFeature);
                     }

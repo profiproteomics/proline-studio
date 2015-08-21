@@ -103,11 +103,12 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
             }
 
             @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+            public void run(boolean success, final long taskId, SubTask subTask, boolean finished) {
 
                 if (subTask == null) {
                     if (!allPeptides) {
-                        ((XicPeptideIonPanel) m_panel).setData(taskId, m_quantChannelInfo.getQuantChannels(), m_masterQuantPeptideIonList, m_isXICMode, finished);
+                        quantitationChannelArray = m_quantChannelInfo.getQuantChannels();
+                        ((XicPeptideIonPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, m_isXICMode, finished);
                     } else {
                         AbstractDatabaseCallback mapCallback = new AbstractDatabaseCallback() {
 
@@ -117,7 +118,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                             }
 
                             @Override
-                            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+                            public void run(boolean success, long task2Id, SubTask subTask, boolean finished) {
                                 // list quant Channels
                                 List<DQuantitationChannel> listQuantChannel = new ArrayList();
                                 if (m_dataset.getMasterQuantitationChannels() != null && !m_dataset.getMasterQuantitationChannels().isEmpty()) {
@@ -134,7 +135,7 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
                                 ((XicPeptideIonPanel) m_panel).setData(taskId, quantitationChannelArray, m_masterQuantPeptideIonList, m_isXICMode, finished);
 
                                 if (finished) {
-                                    unregisterTask(taskId);
+                                    unregisterTask(task2Id);
                                 }
                             }
                         };

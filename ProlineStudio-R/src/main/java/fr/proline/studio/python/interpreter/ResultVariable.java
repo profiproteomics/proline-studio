@@ -1,6 +1,7 @@
 package fr.proline.studio.python.interpreter;
 
 import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
@@ -35,6 +36,8 @@ public class ResultVariable {
             return m_name + "=" + ((PyFloat) m_value).getValue();
         } else if (m_value instanceof PyInteger) {
             return m_name + "=" + ((PyInteger) m_value).getValue();
+        } else if (m_value instanceof PythonImage) {
+            return m_name;
         }
         return null; // should not happen
     }

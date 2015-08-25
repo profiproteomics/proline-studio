@@ -4,13 +4,14 @@ import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.AdjustPFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.BBinomialFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.JoinFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.PValueFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.TtdFunction;
-import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.AbstractGraphic;
+import fr.proline.studio.rsmexplorer.gui.calc.graphics.CalibrationPlotGraphic;
 import fr.proline.studio.rsmexplorer.gui.calc.graphics.ScatterGraphic;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -139,6 +140,9 @@ public abstract class DataTree extends JTree {
     
     private void fillFunctionNodes(ParentFunctionNode parentFunctionNode) {
         
+        FunctionNode adjustPFunction = new FunctionNode(new AdjustPFunction(null));
+        parentFunctionNode.add(adjustPFunction);
+        
         FunctionNode diffFunction = new FunctionNode(new DiffFunction(null));
         parentFunctionNode.add(diffFunction);
         
@@ -147,7 +151,7 @@ public abstract class DataTree extends JTree {
         
         FunctionNode bbinomialFunction = new FunctionNode(new BBinomialFunction(null));
         parentFunctionNode.add(bbinomialFunction);
-        
+
         FunctionNode pvalueFunction = new FunctionNode(new PValueFunction(null));
         parentFunctionNode.add(pvalueFunction);
         
@@ -159,6 +163,10 @@ public abstract class DataTree extends JTree {
     }
     
     private void fillGraphicNodes(ParentGraphicNode parentGraphicNode) {
+        
+        GraphicNode calibrationPlotNode = new GraphicNode(new CalibrationPlotGraphic(null));
+        parentGraphicNode.add(calibrationPlotNode);
+        
         GraphicNode scatterNode = new GraphicNode(new ScatterGraphic(null));
         parentGraphicNode.add(scatterNode);
         

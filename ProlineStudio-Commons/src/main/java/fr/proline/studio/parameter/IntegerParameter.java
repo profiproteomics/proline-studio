@@ -52,6 +52,12 @@ public class IntegerParameter extends AbstractParameter {
             if (m_graphicalType.equals(JTextField.class)) {
                 ((JTextField) m_parameterComponent).setText(startValue.toString());
                 return m_parameterComponent;
+            } else if (m_graphicalType.equals(JSlider.class)) {
+                ((JSlider) m_parameterComponent).setValue(startValue);
+                return m_parameterComponent;
+            } else if (m_graphicalType.equals(JSpinner.class)) {
+                ((JSpinner) m_parameterComponent).setValue(startValue);
+                return m_parameterComponent;
             }
         }
         

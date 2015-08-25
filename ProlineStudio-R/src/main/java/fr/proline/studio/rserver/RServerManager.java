@@ -361,7 +361,7 @@ public class RServerManager {
     public REXP parseAndEval(String code) throws RServerException {
         
         try {
-            
+
             REXP result = m_connection.parseAndEval("try(" + code + ",silent=TRUE)");
             if (result.inherits("try-error")) {
                 RServerException e = new RServerException(result.asString());

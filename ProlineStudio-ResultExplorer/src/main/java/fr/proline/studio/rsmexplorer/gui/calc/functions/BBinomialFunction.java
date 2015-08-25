@@ -7,6 +7,7 @@ import fr.proline.studio.python.data.ColData;
 import fr.proline.studio.python.data.ColRef;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcCallback;
+import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
@@ -14,6 +15,8 @@ import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +49,7 @@ public class BBinomialFunction extends AbstractFunction {
     @Override
     public void process(AbstractGraphObject[] graphObjects, final FunctionGraphNode functionGraphNode, final boolean display) {
         
-        setInError(false);
+        setInError(false, null);
         
         if (m_columnsParameter1 == null) {
             //m_state = GraphNode.NodeState.UNSET;
@@ -110,7 +113,7 @@ public class BBinomialFunction extends AbstractFunction {
             CalcCallback callback = new CalcCallback() {
 
                 @Override
-                public void run(ArrayList<ResultVariable> variables, String error, int lineError) {
+                public void run(ArrayList<ResultVariable> variables, CalcError error) {
                     if (variables != null) {
                         // look for res
                         for (ResultVariable var : variables) {
@@ -126,8 +129,7 @@ public class BBinomialFunction extends AbstractFunction {
                             }
                         }
                     } else if (error != null) {
-                        //JPM.TODO
-                        setInError(true);
+                        setInError(error);
                     }
                     setCalculating(false);
                 }
@@ -139,7 +141,9 @@ public class BBinomialFunction extends AbstractFunction {
             CalcInterpreterThread.getCalcInterpreterThread().addTask(task);
 
         } catch (Exception e) {
-            setInError(true);
+
+            setInError(new CalcError(e, null, -1));
+
             setCalculating(false);
         }
         
@@ -188,7 +192,7 @@ public class BBinomialFunction extends AbstractFunction {
             Class c = model1.getDataColumnClass(i);
             if (c.equals(Float.class) || c.equals(Double.class)) {
                 objectArray1[iKept] = model1.getColumnName(i);
-                associatedObjectArray1[iKept] = i;
+                associatedObjectArray1[iKept] = i+1;  // +1 because it is used in python calc expression
                 iKept++;
             }
         }

@@ -270,7 +270,7 @@ public class MSDiag_BoxChart  extends HourglassPanel implements  ImageExporterIn
 	        		double median= (double) (msdo.matrix[serie][4]);
 	        		double q1= 0; //(double) (msdo.matrix[serie][2]);
 	        		double q3= 0; //(double) (msdo.matrix[serie][2]);
-	        		double minRegularValue= (double) (msdo.matrix[serie][1]);
+	        		double minRegularValue= (double) (Double.valueOf((String) msdo.matrix[serie][1])); // if it's a string
 	        		double maxRegularValue= (double) (msdo.matrix[serie][2]);
 	        		double minOutlier = minRegularValue; // not used
 	        		double maxOutlier = maxRegularValue; // not used

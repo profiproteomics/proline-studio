@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import fr.proline.studio.rsmexplorer.gui.MSDiagOutput_AW;
+import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -42,7 +43,9 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
     protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
     private static final long serialVersionUID = 1L;
     private AbstractDataBox m_dataBox;
-    private JTabbedPane m_tabbedPane = null;
+    public JTabbedPane m_tabbedPane = null;
+	private String m_displayType = "default"; // force display to be default or Pie chart or table etc.
+	private String m_lastUsedDataContent; // stores last used data in order to be reused when changing display mode
        
     @Override // declared in ProlineStudioCommons ImageExporterInterface
     public void generateSvgImage(String file) {
@@ -97,8 +100,8 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
         //m_picWrapper = new ExportPictureWrapper();
         //m_picWrapper.setFile(m_svgFile);
 
-//        ExportButton exportImageButton = new ExportButton("MSDiag", (ImageExporterInterface) this);
-//        toolbar.add(exportImageButton);
+        FlipButton flipModeButton = new FlipButton("flip button text", this);
+        toolbar.add(flipModeButton);
         
         
         return toolbar;
@@ -127,10 +130,15 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
         
     	
         launchMSDiag(jsonMessageHashMapJson);
+        m_lastUsedDataContent = jsonMessageHashMapJson;
  
     }
     
       
+    public void setDisplayType (String type) {
+    	m_displayType = type;
+    }
+       
     private void launchMSDiag(String messageHashMapJson) {
         
     	
@@ -163,46 +171,67 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 			        		String msOutputString =  msOutputHashMap.get(msOutputItem);
 			        		MSDiagOutput_AW msOutput = gson.fromJson(msOutputString, MSDiagOutput_AW.class);
 			        		if(msOutput != null) {
-			        			
-			        			switch (msOutput.output_type.value) { // could be changed to use enum in MSDiagOutput_AW
-								
-			        			case "chromatogram":
-									MSDiag_Chromatogram m_msdiagChromatogram = new MSDiag_Chromatogram();
-									m_msdiagChromatogram.setData(msOutput);
-									scrollPane = new JScrollPane();
-							        scrollPane.setViewportView(m_msdiagChromatogram);
-							        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
-									break;
-			        			case "whisker":
-									MSDiag_BoxChart m_msdiagBoxAndWhisker = new MSDiag_BoxChart();
-									m_msdiagBoxAndWhisker.setData(msOutput);
-									scrollPane = new JScrollPane();
-							        scrollPane.setViewportView(m_msdiagBoxAndWhisker);
-							        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
-									break;
-								case "pie":
-									MSDiag_PieChart m_msdiagPieChart = new MSDiag_PieChart();
-									m_msdiagPieChart.setData(msOutput);
-									scrollPane = new JScrollPane();
-							        scrollPane.setViewportView(m_msdiagPieChart);
-							        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
-									break;
-		
-								
-								default: 
-									// use table as default ---
+			        			if(m_displayType.equals("default")) {
+			        				System.out.println("adding default outputs..." + msOutput.output_type.value);
+			        				switch (msOutput.output_type.value) { // could be changed to use enum in MSDiagOutput_AW
+				        			case "chromatogram":
+										MSDiag_Chromatogram m_msdiagChromatogram = new MSDiag_Chromatogram();
+										m_msdiagChromatogram.setData(msOutput);
+										scrollPane = new JScrollPane();
+								        scrollPane.setViewportView(m_msdiagChromatogram);
+								        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
+										break;
+									case "box":
+										MSDiag_BoxChart m_msdiagBoxChart = new MSDiag_BoxChart();
+										m_msdiagBoxChart.setData(msOutput);
+										scrollPane = new JScrollPane();
+								        scrollPane.setViewportView(m_msdiagBoxChart);
+								        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
+										break;
+				        			case "whisker":
+										MSDiag_BoxChart m_msdiagBoxAndWhisker = new MSDiag_BoxChart();
+										m_msdiagBoxAndWhisker.setData(msOutput);
+										scrollPane = new JScrollPane();
+								        scrollPane.setViewportView(m_msdiagBoxAndWhisker);
+								        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
+										break;
+									case "pie":
+										MSDiag_PieChart m_msdiagPieChart = new MSDiag_PieChart();
+										m_msdiagPieChart.setData(msOutput);
+										scrollPane = new JScrollPane();
+								        scrollPane.setViewportView(m_msdiagPieChart);
+								        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
+										break;
+			
 									
-								case "table":
-									MSDiagTable_GenericTable m_msdiagTable = new MSDiagTable_GenericTable();
+									default: 
+										// use table as default ---
+										
+									case "table":
+										MSDiagTable_GenericTable m_msdiagTable = new MSDiagTable_GenericTable();
+										m_msdiagTable.setModel(new MSdiagTable_GenericTableModel());
+										((MSdiagTable_GenericTableModel) m_msdiagTable.getModel()).setData(msOutput);
+										//---add it to the tabbed pane	
+										
+								        scrollPane.setViewportView(m_msdiagTable);
+									    m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
+										break;
+									}
+			        			}
+		        				else {
+		        					System.out.println("adding in forced : table");
+		        					MSDiagTable_GenericTable m_msdiagTable = new MSDiagTable_GenericTable();
 									m_msdiagTable.setModel(new MSdiagTable_GenericTableModel());
 									((MSdiagTable_GenericTableModel) m_msdiagTable.getModel()).setData(msOutput);
 									//---add it to the tabbed pane	
 									
 							        scrollPane.setViewportView(m_msdiagTable);
 								    m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
-									break;
-								}
+									
+			        			}
+			        			
 			        		}
+			        			
 							
 							
 						}
@@ -257,6 +286,10 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
         return m_dataBox.getSaveAction(splittedPanel);
     }
+
+	public void displayData() { // re display data with new (or same) display parameters
+		launchMSDiag(m_lastUsedDataContent);
+	}
 
 	    
 }

@@ -58,7 +58,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    private DefaultTableXYDataset m_dataSet;
 	    private JFreeChart m_chart;
 	    private File m_pngFile;
-	    private javax.swing.JPanel m_chromatogragmPanel;
+	    private javax.swing.JPanel m_chromatogramPanel;
 	    
 	   	    
 	    @Override // declared in ProlineStudioCommons ImageExporterInterface
@@ -133,12 +133,12 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        cp.setMaximumDrawHeight(Integer.MAX_VALUE); // when the windows becomes bigger.
 	        m_chart.getPlot().setBackgroundPaint(Color.white);
 	       
-	        m_chromatogragmPanel = cp;
+	        m_chromatogramPanel = cp;
 	        
 	        JToolBar toolbar = initToolbar();
 	        
 	        add(toolbar, BorderLayout.WEST);
-	        add(m_chromatogragmPanel, BorderLayout.CENTER);
+	        add(m_chromatogramPanel, BorderLayout.CENTER);
 	        
 	        
 	    }
@@ -165,7 +165,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    public void writeToPNG(String fileName) {
 	        m_pngFile = new File(fileName);
 	        try {
-	            ChartUtilities.saveChartAsPNG(m_pngFile, m_chart, m_chromatogragmPanel.getWidth(), m_chromatogragmPanel.getHeight());
+	            ChartUtilities.saveChartAsPNG(m_pngFile, m_chart, m_chromatogramPanel.getWidth(), m_chromatogramPanel.getHeight());
 	        } catch (IOException e) {
 	            LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("writeToPNG", e);
 	        }
@@ -181,7 +181,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        org.apache.batik.svggen.SVGGraphics2D my_svg_generator = new org.apache.batik.svggen.SVGGraphics2D(document);
 	        //m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 800,600), null);
 	        // draw a rectangle of the size that determines the scale of the axis graduations.
-	        m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, m_chromatogragmPanel.getWidth(), m_chromatogragmPanel.getHeight()), null);
+	        m_chart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, m_chromatogramPanel.getWidth(), m_chromatogramPanel.getHeight()), null);
 	        
 	        
 	        try {

@@ -1,9 +1,7 @@
 package fr.proline.studio.python.data;
 
 import fr.proline.studio.python.util.Conversion;
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
-import org.python.core.Py;
 
 /**
  *

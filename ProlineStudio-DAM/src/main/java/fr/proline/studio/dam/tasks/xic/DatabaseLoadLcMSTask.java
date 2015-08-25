@@ -800,6 +800,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 Double bestChildElutionTime = Double.NaN;
                 Long sourceMapId = (long)-1;
                 Float maxIntensity = Float.NaN;
+                List<Long> childFeatureIdsForCluster = new ArrayList();
                 for (MasterFeatureItem mfi : resultMFIList) {
                     allFeature.add(mfi.getChildFeature());
                     if (!listOfRawMapsId.contains(mfi.getChildFeature().getMap().getId())){
@@ -811,7 +812,10 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                         bestChildElutionTime = new Double(bestChild.getElutionTime());
                         sourceMapId = bestChild.getMap().getId();
                     }
-                    
+                    // if child feature is in processed map => search into cluster feature
+                    if (!mapRawToProcessedId.containsKey(mfi.getChildFeature().getMap().getId()) ){
+                        childFeatureIdsForCluster.add(mfi.getChildFeature().getId());
+                    }
                 }
                 // isBestChild is always set to false! cf Issue #13116
                 if (bestChild == null){
@@ -850,19 +854,15 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                 String queryF = "SELECT f "
                             + "FROM fr.proline.core.orm.lcms.Feature f, fr.proline.core.orm.lcms.FeatureClusterItem fci  "
                             + "WHERE f.id = fci.subFeature.id AND "
-                            + "fci.clusterFeature.id =:masterFeatureId ";
+                            + "fci.clusterFeature.id in (:listClusterFeatureId) ";
                 TypedQuery<Feature> queryChildF = entityManagerLCMS.createQuery(queryF, Feature.class);
-                queryChildF.setParameter("masterFeatureId", m_masterQuantPeptideIon.getLcmsMasterFeatureId());
-                List<Feature> resultList = queryChildF.getResultList();
-                for (Feature feature : resultList) {
-                    queryChildF.setParameter("masterFeatureId", feature.getId());
-                    List<Feature> r2 = queryChildF.getResultList();
-                    if (r2 != null && !r2.isEmpty()) {
-                        allFeature.addAll(r2);
-                        for (Feature f: r2){
-                            if (!listOfRawMapsId.contains(f.getMap().getId())){
-                                listOfRawMapsId.add(f.getMap().getId());
-                            }
+                queryChildF.setParameter("listClusterFeatureId", childFeatureIdsForCluster);
+                if(!childFeatureIdsForCluster.isEmpty()){
+                    List<Feature> resultList = queryChildF.getResultList();
+                    allFeature.addAll(resultList);
+                    for (Feature f : resultList) {
+                        if (!listOfRawMapsId.contains(f.getMap().getId())) {
+                            listOfRawMapsId.add(f.getMap().getId());
                         }
                     }
                 }

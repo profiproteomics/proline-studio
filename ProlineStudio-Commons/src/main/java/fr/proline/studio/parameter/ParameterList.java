@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.openide.util.NbPreferences;
@@ -19,6 +20,8 @@ public class ParameterList extends ArrayList<AbstractParameter> {
     private String m_name;
     private JPanel m_parametersPanel;
 
+    private final HashMap<JComponent, JLabel> m_associatedLabels = new HashMap<>();
+    
     public ParameterList(String name) {
         m_name = name;
     }
@@ -61,8 +64,9 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             
             c.gridx = 0;
             c.weightx = 0;
+            JLabel l = null;
             if (parameter.showLabel() == AbstractParameter.LabelVisibility.VISIBLE) {
-                JLabel l = new JLabel(parameter.getName() + " :");
+                l = new JLabel(parameter.getName() + " :");
 
                 l.setHorizontalAlignment(JLabel.RIGHT);
                 m_parametersPanel.add(l, c);
@@ -73,6 +77,7 @@ public class ParameterList extends ArrayList<AbstractParameter> {
             
             if (parameter.hasComponent()) {
                 
+                JComponent comp = null;
                 if (parameter.showLabel() == AbstractParameter.LabelVisibility.AS_BORDER_TITLE) {
                     c.gridx = 0;
                     c.gridwidth = 2;
@@ -84,13 +89,18 @@ public class ParameterList extends ArrayList<AbstractParameter> {
                     cFrame.fill = GridBagConstraints.BOTH;
                     cFrame.insets = new java.awt.Insets(5, 5, 5, 5);
                     cFrame.weightx = 1;
-                    framedPanel.add(parameter.getComponent(parameterValue), cFrame);
+                    comp = parameter.getComponent(parameterValue);
+                    framedPanel.add(comp, cFrame);
                     m_parametersPanel.add(framedPanel, c);
                     c.gridwidth = 1;
                 } else {
                     c.gridx = 1;
                     c.weightx = 1;
-                    m_parametersPanel.add(parameter.getComponent(parameterValue), c);
+                    comp = parameter.getComponent(parameterValue);
+                    m_parametersPanel.add(comp, c);
+                }
+                if ((l != null) && (comp !=null)) {
+                    m_associatedLabels.put(comp, l);
                 }
             }
 
@@ -99,6 +109,10 @@ public class ParameterList extends ArrayList<AbstractParameter> {
         }
 
         return m_parametersPanel;
+    }
+    
+    public JLabel getAssociatedLabel(JComponent c) {
+        return m_associatedLabels.get(c);
     }
     
     public void completePanel(JPanel p, GridBagConstraints c) {

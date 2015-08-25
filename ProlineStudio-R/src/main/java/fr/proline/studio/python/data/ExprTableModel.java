@@ -22,9 +22,11 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
 
     private final Col m_column;
     private GlobalTableModelInterface m_parentModel;
+    private TableCellRenderer m_colRenderer = null;
     
-    public ExprTableModel(Col column, GlobalTableModelInterface parentModel) {
+    public ExprTableModel(Col column, TableCellRenderer colRenderer, GlobalTableModelInterface parentModel) {
         m_column = column;
+        m_colRenderer = colRenderer;
         m_parentModel = parentModel;
     }
     
@@ -249,7 +251,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     @Override
     public TableCellRenderer getRenderer(int col) {
         if (col >= m_parentModel.getColumnCount()) {
-            return null;
+            return m_colRenderer;
         }
         return m_parentModel.getRenderer(col);   
     }

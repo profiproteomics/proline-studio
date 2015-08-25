@@ -1,12 +1,14 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.graphics.colorpicker.ColorPickerDialog;
+import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
+import org.openide.windows.WindowManager;
 
 /**
  *
@@ -34,10 +36,11 @@ public class ColorButton extends JButton {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-
-                Color newColor = JColorChooser.showDialog(colorButton, null, colorButton.getBackground());
-                if (newColor != null) {
-                    colorButton.setBackground(newColor);
+                ColorPickerDialog colorPickerDialog = new ColorPickerDialog(WindowManager.getDefault().getMainWindow(), colorButton.getBackground());
+                colorPickerDialog.setLocationRelativeTo(colorButton);
+                colorPickerDialog.setVisible(true);
+                if (colorPickerDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                    colorButton.setBackground(colorPickerDialog.getColor());
                 }
             }
         };
@@ -59,14 +62,45 @@ public class ColorButton extends JButton {
 
     @Override
     protected void paintComponent(Graphics g) {
+        
+        int height = getHeight();
+        int width = getWidth();
+        
+        // white background
         g.setColor(Color.white); // necessary for transparent colors
-        g.fillRect(0, 0, getWidth(), getHeight());
+        g.fillRect(0, 0, width, height);
 
+        // draw a board with gray squares
+        g.setColor(Color.gray);
+        int y = 0;
+        while (true) {
+
+            int x = 0;
+            while (true) {
+
+                if ((x + y) % 2 == 0) {
+                    // draw square
+                    g.fillRect(x * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+                }
+
+                x++;
+                if (x * SQUARE_SIZE > width) {
+                    break;
+                }
+            }
+
+            y++;
+            if (y * SQUARE_SIZE > height) {
+                break;
+            }
+        }
+        
         g.setColor(getBackground());
-        g.fillRect(0, 0, getWidth(), getHeight());
+        g.fillRect(0, 0, width, height);
 
         g.setColor(Color.darkGray);
-        g.drawRect(0, 0, getWidth(), getHeight());
+        g.drawRect(0, 0, width-1, height-1);
 
     }
+    private final int SQUARE_SIZE = 10;
 }

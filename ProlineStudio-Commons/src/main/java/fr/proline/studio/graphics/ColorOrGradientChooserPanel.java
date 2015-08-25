@@ -1,6 +1,7 @@
 package fr.proline.studio.graphics;
 
-import fr.proline.studio.parameter.ColorOrGradientParameter;
+import fr.proline.studio.graphics.colorpicker.ColorPickerDialog;
+import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -21,6 +22,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import org.openide.windows.WindowManager;
 
 /**
  *
@@ -132,10 +134,14 @@ public class ColorOrGradientChooserPanel extends JPanel {
                         m_colorRadioButton.setSelected(true);
                     }
 
-                    Color newColor = JColorChooser.showDialog(m_colorSelectionButton, null, m_colorSelectionButton.getBackground());
-                    if (newColor != null) {
-                        m_colorSelectionButton.setBackground(newColor);
+                    
+                    ColorPickerDialog colorPickerDialog = new ColorPickerDialog(WindowManager.getDefault().getMainWindow(), m_colorSelectionButton.getBackground());
+                    colorPickerDialog.setLocationRelativeTo(m_colorSelectionButton);
+                    colorPickerDialog.setVisible(true);
+                    if (colorPickerDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                        m_colorSelectionButton.setBackground(colorPickerDialog.getColor());
                     }
+
                 }
             };
             return a;
@@ -197,24 +203,55 @@ public class ColorOrGradientChooserPanel extends JPanel {
             Graphics2D g2D = (Graphics2D) g;
             g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             
+            int width = getWidth();
+            int height = getHeight();
+        
+            
             g.setColor(Color.white);
-            g.fillRect(0, 0, getWidth(), getHeight());
+            g.fillRect(0, 0, width, height);
+            
+            // draw a board with gray squares
+            g.setColor(Color.gray);
+            int y = 0;
+            while (true) {
+
+                int x = 0;
+                while (true) {
+
+                    if ((x + y) % 2 == 0) {
+                        // draw square
+                        g.fillRect(x * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+                    }
+
+                    x++;
+                    if (x * SQUARE_SIZE > width) {
+                        break;
+                    }
+                }
+
+                y++;
+                if (y * SQUARE_SIZE > height) {
+                    break;
+                }
+            }
+            
             g.setColor(Color.darkGray);
-            g.drawRect(0, 0, getWidth(), getHeight());
+            g.drawRect(0, 0, width-1, height-1);
             
             if (m_linearGradientPaint != null) {
                 g2D.setPaint(m_linearGradientPaint);
-                Rectangle2D r2d = new Rectangle2D.Double(DELTA_X, DELTA_Y_TOP, getWidth()-2*DELTA_X, getHeight()-DELTA_Y_TOP-DELTA_Y_BOTTOM);
+                Rectangle2D r2d = new Rectangle2D.Double(DELTA_X, DELTA_Y_TOP, width-2*DELTA_X, height-DELTA_Y_TOP-DELTA_Y_BOTTOM);
                 g2D.fill(r2d);
             }
             
             g.setColor(Color.darkGray);
-            g.drawRect(DELTA_X, DELTA_Y_TOP, getWidth()-2*DELTA_X, getHeight()-DELTA_Y_TOP-DELTA_Y_BOTTOM);
+            g.drawRect(DELTA_X, DELTA_Y_TOP, width-2*DELTA_X, height-DELTA_Y_TOP-DELTA_Y_BOTTOM);
             
             for (int i=0;i<m_colorSelectors.size();i++) {
-                m_colorSelectors.get(i).paint(g, DELTA_X, getWidth()-DELTA_X, getHeight()-DELTA_Y_BOTTOM);
+                m_colorSelectors.get(i).paint(g, DELTA_X, width-DELTA_X, height-DELTA_Y_BOTTOM);
             }
         }
+        private final int SQUARE_SIZE = 10;
         
 
 

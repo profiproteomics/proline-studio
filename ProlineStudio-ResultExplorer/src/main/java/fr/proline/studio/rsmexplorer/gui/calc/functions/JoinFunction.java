@@ -5,6 +5,7 @@ import fr.proline.studio.parameter.ObjectParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.python.data.Table;
+import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
@@ -80,7 +81,7 @@ public class JoinFunction extends AbstractFunction {
         }
         
         setCalculating(true);
-        setInError(false);
+        setInError(false, null);
         
         try {
             Table t1 = new Table(graphObjects[0].getGlobalTableModelInterface());
@@ -98,7 +99,7 @@ public class JoinFunction extends AbstractFunction {
             m_globalTableModelInterface = joinedTable.getModel();
         } catch (Exception e) {
             //JPM.TODO
-            setInError(true);
+            setInError(new CalcError(e, null, -1));
         }
         
         setCalculating(false);
@@ -136,7 +137,7 @@ public class JoinFunction extends AbstractFunction {
             Class c = model1.getDataColumnClass(i);
             if (c.equals(String.class) || c.equals(Integer.class) || c.equals(Long.class)) {
                 objectArray1[iKept] = model1.getColumnName(i);
-                associatedObjectArray1[iKept] = i;
+                associatedObjectArray1[iKept] = i;  // no +1 because it is not used in python calc expression
                 iKept++;
             }
         }

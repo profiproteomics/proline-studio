@@ -1,6 +1,7 @@
 package fr.proline.studio.python.interpreter;
 
 import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -102,13 +103,13 @@ public class CalcInterpreterThread extends Thread {
                                 col.setColumnName(key.toString());
                             }
                         }
-                        if ((value instanceof ColData) || (value instanceof PyInteger) || (value instanceof PyFloat) || (value instanceof Table)) {
+                        if ((value instanceof ColData) || (value instanceof PyInteger) || (value instanceof PyFloat) || (value instanceof Table) || (value instanceof PythonImage)) {
 
                             resultVariableArray.add(new ResultVariable(key.toString(), value));
                         }
                     }
 
-                    runCallback(task, resultVariableArray, null, -1);
+                    runCallback(task, resultVariableArray, null);
 
                 } catch (Throwable e) {
                     int lineError = -1;
@@ -133,7 +134,7 @@ public class CalcInterpreterThread extends Thread {
                     
                     
                     
-                    runCallback(task, null, error, lineError);
+                    runCallback(task, null, new CalcError(e, error, lineError));
                 }
             }
         } catch (Throwable t) {
@@ -143,12 +144,12 @@ public class CalcInterpreterThread extends Thread {
 
     }
     
-    private void runCallback(final CalcInterpreterTask task, final ArrayList<ResultVariable> resultVariableArray, final String error, final int lineError) {
+    private void runCallback(final CalcInterpreterTask task, final ArrayList<ResultVariable> resultVariableArray, final CalcError error) {
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override
             public void run() {
-                task.getCallback().run(resultVariableArray, error, lineError);
+                task.getCallback().run(resultVariableArray, error);
                 //getTaskInfo().setFinished(success, m_taskError, false);
             }
         });

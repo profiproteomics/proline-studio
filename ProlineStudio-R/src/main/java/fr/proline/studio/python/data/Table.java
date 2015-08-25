@@ -8,6 +8,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 
 import java.util.HashMap;
 import java.util.List;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import org.jdesktop.swingx.JXTable;
@@ -116,8 +117,10 @@ public class Table extends PyObject {
     }
     
 
-    
     public void addColumn(Col col) {
+        addColumn(col, null);
+    }
+    public void addColumn(Col col, TableCellRenderer colRenderer) {
 
         
         JXTable table = m_tableMap.get(m_index);
@@ -133,7 +136,7 @@ public class Table extends PyObject {
 
             TableModel model = table.getModel();
             if (model instanceof CompoundTableModel) {
-                ((CompoundTableModel) model).addModel(new ExprTableModel(col, ((CompoundTableModel) model).getLastNonFilterModel()));
+                ((CompoundTableModel) model).addModel(new ExprTableModel(col, colRenderer, ((CompoundTableModel) model).getLastNonFilterModel()));
             }
 
             columns = table.getColumns(true);
@@ -144,7 +147,7 @@ public class Table extends PyObject {
             }
         } else {
             // we have only the model
-            m_model = new ExprTableModel(col, m_model);
+            m_model = new ExprTableModel(col, colRenderer, m_model);
         }
 
     }

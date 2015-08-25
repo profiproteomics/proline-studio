@@ -4,6 +4,7 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.comparedata.CompareTableModel;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.gui.SplittedPanelContainer;
@@ -178,7 +179,7 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
     }
 
     
-    private class DataTable extends LazyTable {
+    private class DataTable extends LazyTable implements ExportModelInterface {
 
         public DataTable() {
             super(m_dataScrollPane.getVerticalScrollBar());
@@ -212,6 +213,16 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
         @Override
         public int getLoadingPercentage() {
             return ((CompoundTableModel) getModel()).getLoadingPercentage();
+        }
+
+        @Override
+        public String getExportRowCell(int row, int col) {
+            return ((ExportModelInterface) getModel()).getExportRowCell(row, col);
+        }
+
+        @Override
+        public String getExportColumnName(int col) {
+            return ((ExportModelInterface) getModel()).getExportColumnName(col);
         }
 
     }

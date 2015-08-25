@@ -4,6 +4,7 @@ import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
@@ -12,6 +13,8 @@ import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import javax.swing.ImageIcon;
 import org.openide.windows.WindowManager;
 
@@ -27,6 +30,7 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     
     private boolean m_calculating = false;
     private boolean m_inError = false;
+    private String m_errorMessage = null;
     
     protected GraphPanel m_panel;
     
@@ -46,11 +50,23 @@ public abstract class AbstractFunction implements CheckParameterInterface {
         }
     }
     
-    protected void setInError(boolean v) {
+    protected void setInError(CalcError error) {
+        if (error == null) {
+            setInError(false, null);
+        } else {
+            setInError(true, error.getFullErrorMessage());
+        }
+    }
+    protected void setInError(boolean v, String errorMessage) {
         if (v ^ m_inError) {
             m_inError = v;
             m_panel.repaint();
         }
+        m_errorMessage = errorMessage;
+    }
+    
+    public String getErrorMessage() {
+        return m_errorMessage;
     }
     
     public abstract String getName();

@@ -8,5 +8,5 @@ import java.util.ArrayList;
  */
 public abstract class CalcCallback {
     
-    public abstract void run(ArrayList<ResultVariable> variables, String error, int lineError);
+    public abstract void run(ArrayList<ResultVariable> variables, CalcError error);
 }

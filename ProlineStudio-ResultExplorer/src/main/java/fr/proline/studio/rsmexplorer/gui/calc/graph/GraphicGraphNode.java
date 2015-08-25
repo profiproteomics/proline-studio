@@ -48,6 +48,10 @@ public class GraphicGraphNode extends GraphNode {
         return m_graphic.getName();
     }
     
+    @Override
+    public String getErrorMessage() {
+        return m_graphic.getErrorMessage();
+    }
     
     @Override
     public Color getFrameColor() {
@@ -62,12 +66,23 @@ public class GraphicGraphNode extends GraphNode {
     
     @Override
     public ImageIcon getStatusIcon() {
+
         
         if (!isConnected()) {
             return IconManager.getIcon(IconManager.IconType.WARNING);
         }
         if (!settingsDone()) {
             return IconManager.getIcon(IconManager.IconType.WARNING);
+        }
+        
+        if (m_graphic.isCalculating()) {
+            return IconManager.getIcon(IconManager.IconType.HOUR_GLASS);
+        }
+        if (m_graphic.inError()) {
+            return IconManager.getIcon(IconManager.IconType.EXCLAMATION);
+        }
+        if (m_graphic.calculationDone()) {
+            return IconManager.getIcon(IconManager.IconType.TICK_CIRCLE);
         }
 
         return IconManager.getIcon(IconManager.IconType.TICK_CIRCLE);

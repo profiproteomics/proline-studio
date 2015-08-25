@@ -1,5 +1,7 @@
 package fr.proline.studio.rsmexplorer.gui.calc.graph;
 
+import fr.proline.studio.gui.InfoDialog;
+import fr.proline.studio.gui.OptionDialog;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -17,6 +19,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import org.openide.windows.WindowManager;
 
 /**
  * Parent Node for all graph nodes
@@ -75,8 +78,9 @@ public abstract class GraphNode extends AbstractGraphObject {
     public int getCenterY() {
         return m_y+HEIGHT/2;
     }
-    
 
+    
+    public abstract String getErrorMessage();
     
     @Override
     public void draw(Graphics g) {
@@ -278,6 +282,7 @@ public abstract class GraphNode extends AbstractGraphObject {
         JPopupMenu popup = new JPopupMenu();
         popup.add(new DisplayAction(this, nbConnections));
         popup.add(new SettingsAction(this, nbConnections));
+        popup.add(new ErrorAction(this));
         popup.addSeparator();
         popup.add(new DeleteAction(panel, this));
         popup.addPopupMenuListener(new PopupMenuListener() {
@@ -360,6 +365,26 @@ public abstract class GraphNode extends AbstractGraphObject {
                 m_graphNode.process(false);
             }
             
+        }
+    }
+    
+    public class ErrorAction extends AbstractAction {
+        private GraphNode m_graphNode = null;
+        
+        public ErrorAction(GraphNode graphNode) {
+            super("Display Error");
+
+            m_graphNode = graphNode;
+            setEnabled(graphNode.getErrorMessage()!=null);
+
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            InfoDialog errorDialog = new InfoDialog(WindowManager.getDefault().getMainWindow(), InfoDialog.InfoType.WARNING, "Error", m_graphNode.getErrorMessage());
+            errorDialog.setButtonVisible(InfoDialog.BUTTON_CANCEL, false);
+            errorDialog.centerToWindow(WindowManager.getDefault().getMainWindow());
+            errorDialog.setVisible(true);
         }
     }
 

@@ -53,6 +53,10 @@ public class FunctionGraphNode extends GraphNode {
         return m_function.getName();
     }
     
+    @Override
+    public String getErrorMessage() {
+        return m_function.getErrorMessage();
+    }
     
     @Override
     public Color getFrameColor() {

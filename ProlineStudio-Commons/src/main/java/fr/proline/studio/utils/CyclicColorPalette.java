@@ -45,6 +45,15 @@ public class CyclicColorPalette {
         return new Color(Color.HSBtoRGB(hsb[0], hsb[1], brightness));
     }
     
+    public static Color[] getPalette() {
+        int paletteSize = palette.length * 3;
+        Color[] palette = new Color[paletteSize];
+        for (int i=0;i<paletteSize;i++) {
+            palette[i] = getColor(i);
+        }
+        return palette;
+    }
+    
     public static Color getColor(int colorIndex, int alpha) {
         Color c = getColor(colorIndex);
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);

@@ -5,11 +5,14 @@ package fr.proline.studio.rsmexplorer.gui.dialog;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.python.data.ColData;
+import fr.proline.studio.python.data.PythonImage;
 import fr.proline.studio.python.data.Table;
 import fr.proline.studio.python.interpreter.CalcCallback;
+import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.python.interpreter.CalcInterpreterTask;
 import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.python.interpreter.ResultVariable;
+import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree;
 import fr.proline.studio.utils.IconManager;
@@ -27,6 +30,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -60,6 +64,7 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -248,6 +253,13 @@ public class CalcDialog extends JDialog {
                         DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
                         win.open();
                         win.requestActive();
+                    } else if (o instanceof PythonImage) {
+                        BufferedImage image = ((PythonImage) o).getImage();
+
+                        ImageViewerTopComponent win = new ImageViewerTopComponent(resultVariable.getName(), image);
+                        win.open();
+                        win.requestActive();
+
                     }
 
                     results.clearSelection();
@@ -485,7 +497,8 @@ public class CalcDialog extends JDialog {
 
     public void cleanupOnClose() {
         
-        Table.setTables(null);
+        //JPM.TODO : removed for the moment, problem with data mixer
+        //Table.setTables(null);
 
     }
     
@@ -508,7 +521,9 @@ public class CalcDialog extends JDialog {
 
     
     private void fillFunctions() {
+        m_functionsListModel.addElement(new Function("adjustP", "adjustp = Stats.adjustP(,,,,)", "adjustp = Stats.adjustP(Table.get(1)[14], \"abh\")"));
         m_functionsListModel.addElement(new Function("bbinomial", "bbinomial = Stats.bbinomial( (,) , (,) )", "bbinomial = Stats.bbinomial( (Table.get(1)[5],Table.get(1)[7]), (Table.get(1)[9],Table.get(1)[11]) )"));
+        m_functionsListModel.addElement(new Function("calibrationPlot", "calibrationplot = Stats.calibrationPlot(,,,)", "calibrationplot = Stats.calibrationPlot(Table.get(1)[14], \"ALL\")"));   
         m_functionsListModel.addElement(new Function("diff", "diffTable = Table.diff(,)", "diffTable = Table.diff(Table.get(1),Table.get(2))"));
         m_functionsListModel.addElement(new Function("join", "joinTable = Table.join(,)", "joinTable = Table.join(Table.get(1),Table.get(2))"));
         m_functionsListModel.addElement(new Function("pvalue", "pvalue = Stats.pvalue( (,) , (,) )", "pvalue = Stats.pvalue( (Table.get(1)[5],Table.get(1)[7]), (Table.get(1)[9],Table.get(1)[11]) )"));
@@ -528,7 +543,7 @@ public class CalcDialog extends JDialog {
         CalcCallback callback = new CalcCallback() {
 
             @Override
-            public void run(ArrayList<ResultVariable> variables, String error, int lineError) {
+            public void run(ArrayList<ResultVariable> variables, CalcError error) {
                 if (variables != null) {
                     long milliseconds = (System.currentTimeMillis()-timeStart);
                     int seconds = (int) (milliseconds / 1000) % 60 ;
@@ -548,6 +563,7 @@ public class CalcDialog extends JDialog {
                     m_tabbedPane.setSelectedIndex(2); // Tab with results
                     
                 } else if (error != null) {
+                    int lineError = error.getLineError();
                     if (lineError != -1) {
 
                         try {
@@ -569,7 +585,7 @@ public class CalcDialog extends JDialog {
                         m_statusTextField.setText("At line " + lineError + ": " + error);
 
                     } else {
-                        m_statusTextField.setText(error);
+                        m_statusTextField.setText(error.getErrorMessage());
                     }
                 }
                 

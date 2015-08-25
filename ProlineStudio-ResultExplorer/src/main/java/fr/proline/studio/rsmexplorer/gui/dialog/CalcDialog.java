@@ -15,6 +15,9 @@ import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.DataTree;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import fr.proline.studio.utils.IconManager;
 import java.awt.Color;
 import java.awt.Dialog;
@@ -37,16 +40,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.prefs.Preferences;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -64,20 +62,14 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.TableColumn;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.table.TableColumnExt;
 import org.openide.util.NbPreferences;
-import org.openide.windows.TopComponent;
 import org.python.core.PyObject;
 
 
@@ -246,7 +238,7 @@ public class CalcDialog extends JDialog {
                     if (o instanceof ColData) {
                         ColData col = (ColData) o;
                         Table t = col.getTable();
-                        t.addColumn(col);
+                        t.addColumn(col, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
                     } else if (o instanceof Table) {
                         WindowBox windowBox = WindowBoxFactory.getModelWindowBox(null, resultVariable.getName());
                         windowBox.setEntryData(-1, ((Table)o).getModel() );

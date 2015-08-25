@@ -14,7 +14,10 @@ import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,7 +128,7 @@ public class TtdFunction extends AbstractFunction {
                             if (var.getName().compareTo("ttd") == 0) {
                                 // we have found the result
                                 ColData col = (ColData) var.getValue();
-                                sourceTable.addColumn(col);
+                                sourceTable.addColumn(col, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
                                 m_globalTableModelInterface = sourceTable.getModel();
                                 if (display) {
                                     display(functionGraphNode.getPreviousDataName(), var.getName());

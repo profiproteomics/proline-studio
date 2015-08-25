@@ -4,6 +4,8 @@ import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.pattern.WindowBox;
 import fr.proline.studio.pattern.WindowBoxFactory;
+import fr.proline.studio.python.interpreter.CalcError;
+import fr.proline.studio.rserver.dialog.ImageViewerTopComponent;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
@@ -11,6 +13,9 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface;
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
 import fr.proline.studio.utils.IconManager;
+import java.awt.Image;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import javax.swing.ImageIcon;
 import org.openide.windows.WindowManager;
 
@@ -22,9 +27,13 @@ import org.openide.windows.WindowManager;
 public abstract class AbstractGraphic implements CheckParameterInterface {
 
     protected LockedDataGraphicsModel m_graphicsModelInterface;
+    protected Image m_generatedImage;
     
     protected ParameterList[] m_parameters = null;
 
+    private boolean m_calculating = false;
+    private boolean m_inError = false;
+    private String m_errorMessage = null;
     
     protected GraphPanel m_panel;
     
@@ -35,6 +44,7 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
     public void inLinkDeleted() {
         m_parameters = null;
         m_graphicsModelInterface = null;
+        m_generatedImage = null;
     }
 
     
@@ -52,16 +62,56 @@ public abstract class AbstractGraphic implements CheckParameterInterface {
 
         
     protected void display(String dataName, String functionName) {
-        WindowBox windowBox = WindowBoxFactory.getGraphicsWindowBox(dataName, m_graphicsModelInterface);
-        DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
-        win.open();
-        win.requestActive();
+        if (m_generatedImage != null) {
+            ImageViewerTopComponent win = new ImageViewerTopComponent(dataName + " " + functionName, m_generatedImage);
+            win.open();
+            win.requestActive();
+        } else {
+            WindowBox windowBox = WindowBoxFactory.getGraphicsWindowBox(dataName, m_graphicsModelInterface);
+            DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(windowBox);
+            win.open();
+            win.requestActive();
+        }
     }
     
     public abstract boolean calculationDone();
     public abstract boolean settingsDone();
+    public boolean isCalculating() {
+        return m_calculating;
+    }
+    public boolean inError() {
+        return m_inError;
+    }
+    
+    protected void setCalculating(boolean v) {
+        if (v ^ m_calculating) {
+            m_calculating = v;
+            m_panel.repaint();
+        }
+    }
 
+    protected void setInError(CalcError error) {
+        if (error == null) {
+            setInError(false, null);
+        } else {
+            setInError(true, error.getFullErrorMessage());
+        }
+    }
+    
+    protected void setInError(boolean v, String errorMessage) {
+        if (v ^ m_inError) {
+            m_inError = v;
+            m_panel.repaint();
+        }
+        m_errorMessage = errorMessage;
+    }
+    
+    public String getErrorMessage() {
+        return m_errorMessage;
+    }
+    
     public boolean settings(AbstractGraphObject[] graphObjects) {
+        
         if (m_parameters == null) {
             generateDefaultParameters(graphObjects);
         }

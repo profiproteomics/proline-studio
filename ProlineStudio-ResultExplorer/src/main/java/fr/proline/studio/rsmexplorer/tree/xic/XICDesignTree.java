@@ -345,6 +345,7 @@ public class XICDesignTree extends AbstractTree {
                         runInfoData.setRawFileSource(rawFileSource);
                         List<Run> runs = new ArrayList();
                         Run run = new Run();
+                        run.setId(-1); // explicitely set the runId to -1, to avoid to register runidentification (no need)
                         run.setRawFile(rawFile);
                         runInfoData.setRun(run);
                         runs.add(run);

@@ -30,6 +30,10 @@ public class DataGraphNode extends GraphNode {
         m_outConnector = new GraphConnector(this, true);
     }
 
+    @Override
+    public String getErrorMessage() {
+        return null;
+    }
     
     @Override
     public void propagateSourceChanged() {

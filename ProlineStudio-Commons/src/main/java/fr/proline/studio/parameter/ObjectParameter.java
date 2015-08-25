@@ -1,6 +1,8 @@
 package fr.proline.studio.parameter;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.*;
 
 
@@ -18,6 +20,7 @@ public class ObjectParameter<E> extends AbstractParameter {
     private int m_defaultIndex;
     private AbstractParameterToString<E> m_paramToString = null;
 
+    private AbstractLinkedParameters m_linkedParameters = null;
 
     public ObjectParameter(String key, String name, E[] objects, int defaultIndex, AbstractParameterToString<E> paramToString) {
         super(key, name, Integer.class, JComboBox.class);
@@ -194,7 +197,23 @@ public class ObjectParameter<E> extends AbstractParameter {
         return null; // should not happen
     }
     
-    
-    
+    public void setLinkedParameters(AbstractLinkedParameters linkedParameters) {
+        
+        // create parameterComponent if needed
+        getComponent(null);
+        
+        m_linkedParameters = linkedParameters;
+        if (m_parameterComponent instanceof JComboBox) {
+            ((JComboBox) m_parameterComponent).addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    m_linkedParameters.valueChanged(getStringValue());
+                }
+                
+            });
+            initDefault();
+        }
+    }
+
     
 }

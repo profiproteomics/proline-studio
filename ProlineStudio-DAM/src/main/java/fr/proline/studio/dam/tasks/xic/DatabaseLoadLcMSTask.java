@@ -805,19 +805,30 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                     if (!listOfRawMapsId.contains(mfi.getChildFeature().getMap().getId())){
                         listOfRawMapsId.add(mfi.getChildFeature().getMap().getId());
                     }
-                    // isBestChild is always set to false! cf Issue #13116
-                    // for now we determine the best child as the child with the max apex intensity (but it could be not correct!)
-                    /*
+                    
                     if (mfi.getIsBestChild()){
                         bestChild = mfi.getChildFeature();
                         bestChildElutionTime = new Double(bestChild.getElutionTime());
                         sourceMapId = bestChild.getMap().getId();
-                    }*/
-                    if (maxIntensity.isNaN() || mfi.getChildFeature().getApexIntensity() > maxIntensity){
-                        maxIntensity = mfi.getChildFeature().getApexIntensity();
-                        bestChild = mfi.getChildFeature();
-                        bestChildElutionTime = new Double(bestChild.getElutionTime());
-                        sourceMapId = bestChild.getMap().getId();
+                    }
+                    
+                }
+                // isBestChild is always set to false! cf Issue #13116
+                if (bestChild == null){
+                    // then we determine the best child as the child with the max apex intensity , among the childs that do not have predicted elution time
+                    for (MasterFeatureItem mfi : resultMFIList) {
+                        boolean hasPredElTime = false;
+                        java.util.Map<String,Object>  prop = mfi.getChildFeature().getSerializedPropertiesAsMap();
+                        if (prop != null){
+                            Object o = prop.get("predicted_elution_time");
+                            hasPredElTime = (o != null && o instanceof Double);
+                        }
+                        if (!hasPredElTime && (maxIntensity.isNaN() || mfi.getChildFeature().getApexIntensity() > maxIntensity)){
+                            maxIntensity = mfi.getChildFeature().getApexIntensity();
+                            bestChild = mfi.getChildFeature();
+                            bestChildElutionTime = new Double(bestChild.getElutionTime());
+                            sourceMapId = bestChild.getMap().getId();
+                        }
                     }
                 }
                 Long processedSourceMapId = sourceMapId;
@@ -962,7 +973,9 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                     if (listQuantChannels != null && !listQuantChannels.isEmpty()) {
                         List<Long> listMapIds = new ArrayList();
                         for (DQuantitationChannel quantitationChannel : listQuantChannels) {
-                            listMapIds.add(quantitationChannel.getLcmsMapId());
+                            if (quantitationChannel.getLcmsMapId() != null){
+                                listMapIds.add(quantitationChannel.getLcmsMapId());
+                            }
                         }
                         // determine the alignment reference map and the mapSet
                         String queryMasterMap = "SELECT pm.id, pm.mapSet.id "
@@ -1022,11 +1035,13 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
                                 + "FROM fr.proline.core.orm.lcms.ProcessedMap pm "
                                 + "WHERE pm.id IN (:listId) "
                                 + "ORDER BY "+orderBy;
-                        TypedQuery<ProcessedMap> queryAllProcessedMap = entityManagerLCMS.createQuery(queryAllProcessedMapS, ProcessedMap.class);
-                        queryAllProcessedMap.setParameter("listId", listMapIds);
-                        List<ProcessedMap> rs3 = queryAllProcessedMap.getResultList();
-                        for (ProcessedMap pm : rs3) {
-                            m_allMaps.add(pm);
+                        if (listMapIds.size() > 0){
+                            TypedQuery<ProcessedMap> queryAllProcessedMap = entityManagerLCMS.createQuery(queryAllProcessedMapS, ProcessedMap.class);
+                            queryAllProcessedMap.setParameter("listId", listMapIds);
+                            List<ProcessedMap> rs3 = queryAllProcessedMap.getResultList();
+                            for (ProcessedMap pm : rs3) {
+                                m_allMaps.add(pm);
+                            }
                         }
                     }
                 }

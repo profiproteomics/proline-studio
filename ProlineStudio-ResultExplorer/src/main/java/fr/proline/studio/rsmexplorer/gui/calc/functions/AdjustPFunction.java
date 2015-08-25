@@ -17,7 +17,10 @@ import fr.proline.studio.python.interpreter.ResultVariable;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import java.util.ArrayList;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -135,7 +138,7 @@ public class AdjustPFunction extends AbstractFunction {
                                 ColData col = (ColData) var.getValue();
                                 // give a specific column name
                                 col.setColumnName(columnName);
-                                sourceTable.addColumn(col);
+                                sourceTable.addColumn(col, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
                                 
                                 
                                 m_globalTableModelInterface = sourceTable.getModel();

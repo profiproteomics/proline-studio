@@ -179,12 +179,15 @@ public class Stats {
             try {
                 pvalue = -Math.log10(tTest.tTest(ds1.getValues(), ds2.getValues()));
                 if (Double.isInfinite(pvalue) || Double.isNaN(pvalue)) {
-                    pvalue = -1.0;
+                    pvalue = Double.NaN;
+                } else {
+                    // avoid -0.0
+                    pvalue += 0.0;
                 }
             } catch (IllegalArgumentException ex) {
-                pvalue = -1.0;
+                pvalue = Double.NaN;
             } catch (MathException ex) {
-                pvalue = -1.0;
+                pvalue = Double.NaN;
             }
 
             resArray.add(pvalue);

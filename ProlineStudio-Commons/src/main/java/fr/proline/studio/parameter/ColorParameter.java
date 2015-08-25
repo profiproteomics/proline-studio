@@ -3,6 +3,8 @@ package fr.proline.studio.parameter;
 
 import fr.proline.studio.graphics.ColorButton;
 import fr.proline.studio.graphics.ColorOrGradient;
+import fr.proline.studio.graphics.colorpicker.ColorPickerPanel;
+import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.Color;
 import javax.swing.JComponent;
 
@@ -16,6 +18,11 @@ public class ColorParameter extends AbstractParameter {
     
     public ColorParameter(String key, String name, Color defaultColor) {
         super(key, name, Color.class, ColorButton.class);
+        m_defaultColor = defaultColor;
+    }
+    
+    public ColorParameter(String key, String name, Color defaultColor, Class graphicalType) {
+        super(key, name, Color.class, graphicalType);
         m_defaultColor = defaultColor;
     }
 
@@ -33,6 +40,9 @@ public class ColorParameter extends AbstractParameter {
             if (m_graphicalType.equals(ColorButton.class)) {
                 ((ColorButton) m_parameterComponent).setColor(startValue);
                 return m_parameterComponent;
+            } else if (m_graphicalType.equals(ColorPickerPanel.class)) {
+                ((ColorPickerPanel) m_parameterComponent).setColor(startValue);
+                return m_parameterComponent;
             }
         }
 
@@ -44,6 +54,13 @@ public class ColorParameter extends AbstractParameter {
 
             m_parameterComponent = colorButton;
             return colorButton;
+        } else if (m_graphicalType.equals(ColorPickerPanel.class)) {
+
+            ColorPickerPanel colorPanel = new ColorPickerPanel(CyclicColorPalette.getPalette());
+            colorPanel.setColor(startValue);
+
+            m_parameterComponent = colorPanel;
+            return colorPanel;
         }
 
 
@@ -59,6 +76,9 @@ public class ColorParameter extends AbstractParameter {
         if (m_graphicalType.equals(ColorButton.class)) {
             ColorButton colorButton = (ColorButton) m_parameterComponent;
             colorButton.setColor(m_defaultColor);
+        } else if (m_graphicalType.equals(ColorPickerPanel.class)) {
+            ColorPickerPanel colorPanel = (ColorPickerPanel) m_parameterComponent;
+            colorPanel.setColor(m_defaultColor);
         }
     }
 
@@ -76,6 +96,8 @@ public class ColorParameter extends AbstractParameter {
     public Object getObjectValue() {
         if (m_graphicalType.equals(ColorButton.class) && (m_parameterComponent != null)) {
            return ((ColorButton) m_parameterComponent).getColor();
+        } else if (m_graphicalType.equals(ColorPickerPanel.class) && (m_parameterComponent != null)) {
+           return ((ColorPickerPanel) m_parameterComponent).getColor();
         }
         return null; // should not happen
     }
@@ -97,6 +119,8 @@ public class ColorParameter extends AbstractParameter {
         }
         if (m_graphicalType.equals(ColorButton.class)) {
             //((ColorButton) m_parameterComponent).setColor(ColorButton.read(v));  //JPM.TODO
+        } else if (m_graphicalType.equals(ColorPickerPanel.class)) {
+             //JPM.TODO
         }
         
         

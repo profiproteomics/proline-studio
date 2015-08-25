@@ -434,7 +434,9 @@ public class PlotHistogram extends PlotAbstract {
         }
         
         // draw groups
-        for (GraphicDataGroup group : m_dataGroup) {
+        int nbDataGroups = m_dataGroup.size();
+        for (int i=nbDataGroups-1;i>=0;i--) {
+            GraphicDataGroup group = m_dataGroup.get(i);
             LinkedHashMap<Integer, Double> indexMap = m_graphicDataGroupToIndex.get(group);
             Set<Integer> idSet = indexMap.keySet();
             for (Integer index : idSet) {
@@ -447,7 +449,8 @@ public class PlotHistogram extends PlotAbstract {
                 g.fillRect(x1, y1 + height, x2 - x1, y2 - y1 - height);
 
                 g.setColor(Color.black);
-                g.drawLine(x1, y1 + height, x2, y1 + height);
+                //g.drawLine(x1, y1 + height, x2, y1 + height);
+                g.drawRect(x1, y1 + height, x2 - x1, y2 - y1 - height);
             }
 
         }
@@ -463,7 +466,8 @@ public class PlotHistogram extends PlotAbstract {
                 g.fillRect(x1, y1+height , x2-x1, y2-y1-height);
                 
                 g.setColor(Color.black);
-                g.drawLine(x1, y1+height , x2, y1+height);
+                //g.drawLine(x1, y1+height , x2, y1+height);
+                g.drawRect(x1, y1+height , x2-x1, y2-y1-height);
             }
         }
         
@@ -541,7 +545,7 @@ public class PlotHistogram extends PlotAbstract {
                 StringParameter groupNameParameter = new StringParameter("GroupName", "Group Name", JTextField.class, "", 0, 32);
                 groupParameterList.add(groupNameParameter);
                 
-                Color defaultColor = CyclicColorPalette.getColor(21, 128);
+                Color defaultColor = CyclicColorPalette.getColor(18);
                 ColorParameter colorParameter = new ColorParameter("GroupColorParameter", "Color", defaultColor);
                 groupParameterList.add(colorParameter);
                 

@@ -14,7 +14,10 @@ import fr.proline.studio.python.interpreter.CalcInterpreterThread;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.FunctionGraphNode;
+import fr.proline.studio.rsmexplorer.gui.renderer.DefaultRightAlignRenderer;
+import fr.proline.studio.rsmexplorer.gui.renderer.DoubleRenderer;
 import fr.proline.studio.table.GlobalTableModelInterface;
+import fr.proline.studio.table.TableDefaultRendererManager;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -127,7 +130,7 @@ public class PValueFunction extends AbstractFunction {
                             if (var.getName().compareTo("pvalue") == 0) {
                                 // we have found the result
                                 ColData col = (ColData) var.getValue();
-                                sourceTable.addColumn(col);
+                                sourceTable.addColumn(col, new DoubleRenderer(new DefaultRightAlignRenderer(TableDefaultRendererManager.getDefaultRenderer(String.class)),4,true,true));
                                 m_globalTableModelInterface = sourceTable.getModel();
                                 
                                 if (display) {

@@ -21,7 +21,6 @@ public abstract class Filter {
         FILTER_DOUBLE
     }
     
-    //protected HashMap<Integer, String> m_values = null;
     protected ArrayList<Integer> m_valueKeys = null;
     protected HashMap<Integer, Component> m_components = null;
     

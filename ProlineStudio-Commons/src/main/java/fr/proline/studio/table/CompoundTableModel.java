@@ -5,6 +5,7 @@ import fr.proline.studio.filter.FilterTableModelInterfaceV2;
 import fr.proline.studio.filter.FilterTableModelV2;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -347,6 +348,51 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     @Override
     public int uniqueId2Row(long id) {
         return m_lastModel.uniqueId2Row(id);
+    }
+
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        CompoundTableModel copyModel = new CompoundTableModel(null, true);
+        
+        ArrayList<GlobalTableModelInterface> modelList = new ArrayList<>();
+        GlobalTableModelInterface curModel = m_lastModel;
+        FilterTableModelV2 filterModel = null;
+        while (curModel != null) {
+            GlobalTableModelInterface frozzenModel = curModel.getFrozzenModel();
+            modelList.add(0, frozzenModel);
+            if (frozzenModel instanceof FilterTableModelV2) {
+                filterModel = (FilterTableModelV2) frozzenModel;
+            }
+            if (curModel instanceof ChildModelInterface) {
+                curModel = ((ChildModelInterface) curModel).getParentModel();
+            } else {
+                curModel = null;
+            }
+        }
+        
+        if (modelList.isEmpty()) {
+            return copyModel;
+        }
+        
+        for (int i=modelList.size()-1;i>=1;i--) {
+            GlobalTableModelInterface prevModel = modelList.get(i-1);
+            GlobalTableModelInterface model = modelList.get(i);
+            if (model instanceof ChildModelInterface) {
+                ((ChildModelInterface) model).setParentModel(prevModel);
+                prevModel.addTableModelListener((TableModelListener)model);
+            }
+        }
+        
+        copyModel.m_baseModel = modelList.get(0);
+        copyModel.m_filterModel = filterModel;
+        if (filterModel != null) {
+            filterModel.setTableModelSource(((ChildModelInterface) filterModel).getParentModel());
+        }
+        copyModel.m_lastModel = modelList.get(modelList.size()-1);
+
+        copyModel.m_lastModel.addTableModelListener(this);
+        
+        return copyModel;
     }
 
 }

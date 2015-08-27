@@ -252,6 +252,11 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
         fireTableDataChanged();
 
     }
+
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
     
 
 }

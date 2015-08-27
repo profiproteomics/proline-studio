@@ -3,6 +3,7 @@ package fr.proline.studio.filter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.table.ChildModelInterface;
 import fr.proline.studio.table.DecoratedTableModel;
 import fr.proline.studio.table.DecoratedTableModelInterface;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -13,75 +14,35 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
 /**
  * Model use to filter data and/or restrain rows of another model
  * @author JM235353
  */
-public class FilterTableModelV2 extends DecoratedTableModel implements FilterTableModelInterfaceV2, TableModelListener {
+public class LockedFilterTableModel extends DecoratedTableModel implements GlobalTableModelInterface, TableModelListener, ChildModelInterface {
 
-    protected LinkedHashMap<Integer, Filter> m_filters = null;
     protected HashSet<Integer> m_restrainIds = null;
     protected ArrayList<Integer> m_filteredIds = null;
     
     private GlobalTableModelInterface m_tableModelSource = null;
+
     
-    private boolean m_isFiltering = false;
-    //private boolean m_filteringAsked = false;
-    
-    public FilterTableModelV2(GlobalTableModelInterface tableModelSource) {
-        setTableModelSource(tableModelSource);
-    }
-    
-    @Override
-    public void setTableModelSource(GlobalTableModelInterface tableModelSource) {
-        if (m_tableModelSource != null) {
-            m_tableModelSource.removeTableModelListener(this);
-        }
+    public LockedFilterTableModel(HashSet<Integer> restrainIds,  ArrayList<Integer> filteredIds, GlobalTableModelInterface tableModelSource) {
         m_tableModelSource = tableModelSource;
         m_tableModelSource.addTableModelListener(this);
-        initFilters();
-    }
-    
-    @Override
-    public GlobalTableModelInterface getTableModelSource() {
-        return m_tableModelSource;
-    }
-    
-    @Override
-    public LinkedHashMap<Integer, Filter> getFilters() {
-        return m_filters;
+        m_restrainIds = restrainIds;
+        m_filteredIds = filteredIds;
     }
 
-    @Override
-    public Filter getColumnFilter(int col) {
 
-        return m_filters.get(col);
-        
-    }
-
-    @Override
-    public boolean filter(int row) {
-        int nbCol = getColumnCount();
-        for (int i=0;i<nbCol;i++) {
-            if (!filter(row, i)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    @Override
     public int convertRowToOriginalModel(int row) {
         if (m_filteredIds == null) {
             return row;
         }
         return m_filteredIds.get(row);
     }
-    
-    @Override
+
     public int convertOriginalModelToRow(int row) {
         // JPM?.TODO : to be changed
         if (m_filteredIds == null) {
@@ -95,22 +56,7 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
         }
         return -1;
     }
-    
-    @Override
-    public void restrain(HashSet<Integer> restrainRowSet) {
-        m_restrainIds = restrainRowSet;
-        filter();
-    }
-    
-    @Override
-    public HashSet<Integer> getRestrainRowSet() {
-        return m_restrainIds;
-    }
-    
-    @Override
-    public boolean hasRestrain() {
-        return (m_restrainIds != null) && (!m_restrainIds.isEmpty());
-    }
+
 
     @Override
     public String getToolTipForHeader(int col) {
@@ -120,7 +66,7 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     @Override
     public String getTootlTipValue(int row, int col) {
         int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
+        if (m_filteredIds != null) {
             rowFiltered = m_filteredIds.get(row).intValue();
         }
         return m_tableModelSource.getTootlTipValue(rowFiltered, col);
@@ -129,7 +75,7 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
 
     @Override
     public int getRowCount() {
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
+        if (m_filteredIds != null) {
             return m_filteredIds.size();
         }
         return m_tableModelSource.getRowCount();
@@ -144,7 +90,7 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     public Object getValueAt(int rowIndex, int columnIndex) {
          
         int rowFiltered = rowIndex;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
+        if (m_filteredIds != null) {
             rowFiltered = m_filteredIds.get(rowIndex).intValue();
         }
         return m_tableModelSource.getValueAt(rowFiltered, columnIndex);
@@ -152,90 +98,6 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     @Override
     public Class getColumnClass(int columnIndex) {
         return m_tableModelSource.getColumnClass(columnIndex);
-    }
-
-    @Override
-    public void initFilters() {
-        if (m_filters == null) {
-            m_filters = new LinkedHashMap<>();
-        }
-        m_tableModelSource.addFilters(m_filters);
-    }
-
-    @Override
-    public void filter() {
-        try {
-        int nbData = ((AbstractTableModel) m_tableModelSource).getRowCount();
-
-        
-        m_isFiltering = true;
-        try {
-
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
-
-            for (int i = 0; i < nbData; i++) {
-                
-                Integer iInteger = i;
-                
-                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
-                    continue;
-                }
-                
-                if (!filter(i)) {
-                    continue;
-                }
-                m_filteredIds.add(iInteger);
-            }
-
-        } finally {
-            m_isFiltering = false;
-        }
-        fireTableDataChanged();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public boolean filter(int row, int col) {
-        Filter filter = getColumnFilter(col);
-        if ((filter == null) || (!filter.isUsed())) {
-            return true;
-        }
-        
-        Object data = getValueAt(row, col);
-        data = filter.convertValue(data);
-
-        if (data == null) {
-            return true; // should not happen
-        }
-        
-        
-        
-        switch (filter.getFilterType()) {
-            case FILTER_STRING: {
-                return ((StringFilter) filter).filter((String)data);
-            }
-            case FILTER_INTEGER: {
-                return ((IntegerFilter) filter).filter((Integer)data);
-            }
-            case FILTER_DOUBLE: {
-                return ((DoubleFilter) filter).filter(((Number)data).doubleValue());
-            }
-            case FILTER_STRING_DIFF: {
-                return ((StringDiffFilter) filter).filter((String)data);
-            }
-            case FILTER_VALUE: {
-                return ((ValueFilter) filter).filter((Integer)data);
-            }
-    
-        }
-        
-        return true; // should never happen
     }
 
     @Override
@@ -287,7 +149,7 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     public Object getDataValueAt(int rowIndex, int columnIndex) {
         
         int rowFiltered = rowIndex;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
+        if (m_filteredIds != null) {
             rowFiltered = m_filteredIds.get(rowIndex).intValue();
         }
         return m_tableModelSource.getDataValueAt(rowFiltered, columnIndex);
@@ -348,7 +210,7 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     public String getExportRowCell(int row, int col) {
                  
         int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
+        if (m_filteredIds != null) {
             rowFiltered = m_filteredIds.get(row).intValue();
         }
         return m_tableModelSource.getExportRowCell(rowFiltered, col);
@@ -361,7 +223,6 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
 
     @Override
     public void tableChanged(TableModelEvent e) {
-        filter();
     }
     
     
@@ -389,6 +250,20 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
 
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
-        return new LockedFilterTableModel(m_restrainIds, m_filteredIds, m_tableModelSource);
+        return this;
+    }
+
+    @Override
+    public void setParentModel(GlobalTableModelInterface parentModel) {
+        if (m_tableModelSource != null) {
+            m_tableModelSource.removeTableModelListener(this);
+        }
+        m_tableModelSource = parentModel;
+        m_tableModelSource.addTableModelListener(this);
+    }
+
+    @Override
+    public GlobalTableModelInterface getParentModel() {
+        return m_tableModelSource;
     }
 }

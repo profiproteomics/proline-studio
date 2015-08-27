@@ -404,4 +404,9 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
      public MsQuery getSelectedMsQuery(int row){
         return m_msqueries.get(row);
      }
+
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
 }

@@ -36,7 +36,7 @@ public class Table extends PyObject {
     }
     
     public Table(GlobalTableModelInterface model) {
-        m_model = model;
+        m_model = model.getFrozzenModel();
     }
     
     public static Table get(int index) {

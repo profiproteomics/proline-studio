@@ -6,6 +6,7 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -285,6 +286,11 @@ public class DiffDataModel extends AbstractJoinDataModel {
     public TableCellRenderer getRenderer(int col) {
         //JPM.TODO
         return null;
+    }
+
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
     }
     
 }

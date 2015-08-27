@@ -23,7 +23,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
     private final Col m_column;
     private GlobalTableModelInterface m_parentModel;
     private TableCellRenderer m_colRenderer = null;
-    
+
     public ExprTableModel(Col column, TableCellRenderer colRenderer, GlobalTableModelInterface parentModel) {
         m_column = column;
         m_colRenderer = colRenderer;
@@ -254,6 +254,11 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
             return m_colRenderer;
         }
         return m_parentModel.getRenderer(col);   
+    }
+
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
     }
  
 }

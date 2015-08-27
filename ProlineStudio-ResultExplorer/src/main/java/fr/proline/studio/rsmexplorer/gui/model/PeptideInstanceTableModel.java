@@ -560,6 +560,11 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
 
     }
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
     
     
 }

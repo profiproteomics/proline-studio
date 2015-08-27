@@ -356,6 +356,11 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
     }
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
+
 
 
 }

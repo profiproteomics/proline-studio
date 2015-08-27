@@ -924,5 +924,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
     }
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
+
     
 }

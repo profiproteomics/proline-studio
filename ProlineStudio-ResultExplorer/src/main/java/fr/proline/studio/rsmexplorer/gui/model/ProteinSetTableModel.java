@@ -543,6 +543,11 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     }
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
+
     public class ProteinCount implements Comparable {
 
         private final int m_sameSetCount;

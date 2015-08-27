@@ -818,6 +818,11 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
         return renderer;
     }
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
+
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
     
 
 

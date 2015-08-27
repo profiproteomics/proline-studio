@@ -12,5 +12,5 @@ import javax.swing.table.TableModel;
  * @author JM235353
  */
 public interface GlobalTableModelInterface extends LazyTableModelInterface, DecoratedTableModelInterface, CompareDataInterface, TableModel, FilterProviderInterface, ProgressInterface, BestGraphicsInterface, ExportModelInterface {
-    
+    public GlobalTableModelInterface getFrozzenModel();
 }

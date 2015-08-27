@@ -255,6 +255,11 @@ public class ProteinQuantTableModel extends LazyTableModel implements  GlobalTab
     public TableCellRenderer getRenderer(int col) {
         return null;
     }
+
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
     
 }
 

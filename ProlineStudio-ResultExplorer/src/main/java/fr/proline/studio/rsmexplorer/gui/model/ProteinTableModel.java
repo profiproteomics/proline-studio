@@ -28,6 +28,8 @@ import javax.swing.table.TableCellRenderer;
 public class ProteinTableModel extends DecoratedTableModel implements GlobalTableModelInterface {
 
 
+
+
     public enum Column {
         PROTEIN_ID("Id", Long.class, 0),
         PROTEIN_NAME("Protein", String.class, 1),
@@ -401,4 +403,8 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
     }
     private final HashMap<Integer, TableCellRenderer> m_rendererMap = new HashMap();
 
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
 }

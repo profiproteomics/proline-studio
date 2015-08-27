@@ -592,6 +592,11 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
             return null;
         }
 
+        @Override
+        public GlobalTableModelInterface getFrozzenModel() {
+            return this;
+        }
+
     }
 
     public class TaskInfoStepRenderer extends DefaultTableCellRenderer {

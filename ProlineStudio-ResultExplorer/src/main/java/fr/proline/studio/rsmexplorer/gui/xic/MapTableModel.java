@@ -265,5 +265,10 @@ public class MapTableModel extends LazyTableModel implements GlobalTableModelInt
         return null;
     }
 
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
+
 
 }

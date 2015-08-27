@@ -18,7 +18,7 @@ import javax.swing.table.TableCellRenderer;
  * data for one masterQuantPeptide : for the different conditions (quant channels), abundances values
  * @author MB243701
  */
-public class PeptideTableModel extends LazyTableModel implements  GlobalTableModelInterface /*, CrossSelectionInterface*/ {
+public class PeptideTableModel extends LazyTableModel implements  GlobalTableModelInterface {
     
     
     public static final int COLTYPE_QC_ID = 0;
@@ -264,6 +264,11 @@ public class PeptideTableModel extends LazyTableModel implements  GlobalTableMod
     @Override
     public TableCellRenderer getRenderer(int col) {
         return null;
+    }
+
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
     }
     
 }

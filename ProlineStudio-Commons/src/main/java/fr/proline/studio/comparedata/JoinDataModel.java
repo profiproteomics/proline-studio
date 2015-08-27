@@ -6,6 +6,7 @@ import fr.proline.studio.filter.IntegerFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyData;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -335,6 +336,11 @@ public class JoinDataModel extends AbstractJoinDataModel {
             return m_data2.getRenderer(m_allColumns2.get(col));
         }
         return null;
+    }
+
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
     }
     
     

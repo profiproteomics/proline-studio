@@ -237,6 +237,11 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
         return null;
     }
 
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
+
     
     
 }

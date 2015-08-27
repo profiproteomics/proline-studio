@@ -244,6 +244,11 @@ public class CompareTableModel extends DecoratedTableModel implements GlobalTabl
         return m_dataInterface.uniqueId2Row(id);
     }
 
+    @Override
+    public GlobalTableModelInterface getFrozzenModel() {
+        return this;
+    }
+
 
 
 

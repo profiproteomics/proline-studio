@@ -5,7 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.actions.identification;
 
-import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.data.DataSetData;
@@ -24,10 +24,10 @@ import org.openide.util.NbBundle;
  * Action to display all msQueries for a given resultSet
  * @author MB243701
  */
-public class DisplayMSQueryAction extends AbstractRSMAction {
+public class DisplayMSQueryForRsetAction extends AbstractRSMAction {
 
-    public DisplayMSQueryAction(AbstractTree.TreeType treeType) {
-       super(NbBundle.getMessage(DisplayMSQueryAction.class, "CTL_DisplayMSQueryAction"), treeType);
+    public DisplayMSQueryForRsetAction(AbstractTree.TreeType treeType) {
+       super(NbBundle.getMessage(DisplayMSQueryForRsetAction.class, "CTL_DisplayMSQueryAction"), treeType);
     }
     
     @Override
@@ -46,23 +46,23 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
         
         final DDataset dataSet = ((DataSetData) dataSetNode.getData()).getDataset();
         
-        if (!dataSetNode.hasResultSummary()) {
+        if (!dataSetNode.hasResultSet()) {
             return; // should not happen
         }
         
-        ResultSummary rsm = dataSetNode.getResultSummary();
-        if (rsm != null) {
+        ResultSet rset = dataSetNode.getResultSet();
+        if (rset != null) {
         
             // prepare window box
-            WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBox(dataSet.getName(), true);
-            wbox.setEntryData(dataSet.getProject().getId(), rsm);
+            WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBox(dataSet.getName(), false);
+            wbox.setEntryData(dataSet.getProject().getId(), rset);
             
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();
             win.requestActive();
         } else {
-            final WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBox(dataSet.getName(), true);
+            final WindowBox wbox = WindowBoxFactory.getMSQueriesWindowBox(dataSet.getName(), false);
             // open a window to display the window box
             DataBoxViewerTopComponent win = new DataBoxViewerTopComponent(wbox);
             win.open();
@@ -79,7 +79,7 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
                     // prepare window box
-                    wbox.setEntryData(dataSet.getProject().getId(), dataSet.getResultSummary());
+                    wbox.setEntryData(dataSet.getProject().getId(), dataSet.getResultSet());
                 }
             };
 
@@ -110,7 +110,7 @@ public class DisplayMSQueryAction extends AbstractRSMAction {
             }
 
             DataSetNode dataSetNode = (DataSetNode) node;
-            if (! dataSetNode.hasResultSummary()) {
+            if (! dataSetNode.hasResultSet()) {
                 setEnabled(false);
                 return;
             }

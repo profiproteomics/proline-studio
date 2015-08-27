@@ -315,12 +315,12 @@ public class WindowBoxFactory {
         return new WindowBox(fullName, generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     
-    public static WindowBox getMSQueriesWindowBox(String dataName) {
+    public static WindowBox getMSQueriesWindowBox(String dataName, boolean fromRSM) {
         // create boxes
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataBoxMSQueries();
         boxes[0].setDataName(dataName);
-        IconManager.IconType iconType = IconManager.IconType.DATASET_RSET;
+        IconManager.IconType iconType = fromRSM ? IconManager.IconType.DATASET_RSM : IconManager.IconType.DATASET_RSET;
         return new WindowBox(boxes[0].getFullName(), generatePanel(boxes), boxes[0], IconManager.getImage(iconType));
     }
     

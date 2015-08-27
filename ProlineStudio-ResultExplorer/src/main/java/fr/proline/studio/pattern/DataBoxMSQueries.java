@@ -7,6 +7,7 @@ package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -22,6 +23,7 @@ import java.util.Map;
  */
 public class DataBoxMSQueries extends AbstractDataBox{
 
+    private ResultSummary m_rsm = null;
     private ResultSet m_rset = null;
     private List<MsQuery> m_msQueriesList = null;
     private Map<Long, Integer> m_nbPeptideMatchesByMsQueryIdMap;
@@ -36,6 +38,11 @@ public class DataBoxMSQueries extends AbstractDataBox{
         // Register Possible in parameters
         // One ResultSummary
         GroupParameter inParameter = new GroupParameter();
+        inParameter.addParameter(ResultSummary.class, false);
+        registerInParameter(inParameter);
+        
+        // One ResultSet
+        inParameter = new GroupParameter();
         inParameter.addParameter(ResultSet.class, false);
         registerInParameter(inParameter);
         
@@ -59,7 +66,8 @@ public class DataBoxMSQueries extends AbstractDataBox{
 
     @Override
     public void dataChanged() {
-        final ResultSet _rset = (m_rset!=null) ? m_rset : (ResultSet) m_previousDataBox.getData(false, ResultSet.class);
+        ResultSummary _rsm = (m_rsm!=null) ? m_rsm : m_previousDataBox == null ? null : (ResultSummary) m_previousDataBox.getData(false, ResultSummary.class);
+        final ResultSet _rset =  (_rsm != null)? _rsm.getResultSet() : ((m_rset!=null) ? m_rset : m_previousDataBox == null ? null : (ResultSet) m_previousDataBox.getData(false, ResultSet.class));
 
         final int loadingId = setLoading();
         AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
@@ -95,6 +103,10 @@ public class DataBoxMSQueries extends AbstractDataBox{
     
     @Override
     public void setEntryData(Object data) {
+        if (data instanceof ResultSummary) {
+            m_rsm = (ResultSummary) data;
+            dataChanged();
+        }
         if (data instanceof ResultSet) {
             m_rset = (ResultSet) data;
             dataChanged();

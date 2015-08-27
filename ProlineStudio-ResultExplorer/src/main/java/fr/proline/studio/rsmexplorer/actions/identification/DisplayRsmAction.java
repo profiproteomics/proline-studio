@@ -18,6 +18,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
     private DisplayRsmPeptidesAction m_displayRsmPeptidesAction;
     private DisplayRsmProteinSetsAction m_displayRsmProteinSetsAction;
     private DisplayAdjacencyMatrixAction m_displayAdjacencyMatrixAction;
+    private DisplayMSQueryAction m_displayMSQueryAction;
     
     private DisplayUserWindowAction m_displayUserWindowAction;
     private ManageUserWindowsAction m_manageUserWindowsAction;
@@ -39,6 +40,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction(m_treeType);
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(m_treeType);
         m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(m_treeType);
+        m_displayMSQueryAction = new DisplayMSQueryAction(m_treeType);
         
         m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSM, m_treeType);
         m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSM, m_treeType);
@@ -60,6 +62,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         JMenuItem displayRsmPeptidesItem = new JMenuItem(m_displayRsmPeptidesAction);
         JMenuItem displayRsmProteinSetsItem = new JMenuItem(m_displayRsmProteinSetsAction);
         JMenuItem displayAdjacencyMatrixItem = new JMenuItem(m_displayAdjacencyMatrixAction);
+        JMenuItem displayMSQueryItem = new JMenuItem(m_displayMSQueryAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
         JMenuItem manageUserWindowsItem = new JMenuItem(m_manageUserWindowsAction);
 
@@ -67,6 +70,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_menu.add(displayRsmPSMItem);
         m_menu.add(displayRsmPeptidesItem);
         m_menu.add(displayRsmProteinSetsItem);
+        m_menu.add(displayMSQueryItem);
         //m_menu.add(displayAdjacencyMatrixItem); //JPM : remove comment to see adjacency matrix
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);
@@ -91,6 +95,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
         m_displayAdjacencyMatrixAction.updateEnabled(selectedNodes);
         m_displayUserWindowAction.updateEnabled(selectedNodes);
         m_manageUserWindowsAction.updateEnabled(selectedNodes);
+        m_displayMSQueryAction.updateEnabled(selectedNodes);
         
         boolean listEnabled = false;
         for (int i=0;i<m_displaySavedWindowActionList.size();i++) {
@@ -98,7 +103,7 @@ public class DisplayRsmAction extends AbstractRSMAction {
             listEnabled |= m_displaySavedWindowActionList.get(i).isEnabled();
         }
 
-        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled() || m_displayUserWindowAction.isEnabled()|| m_manageUserWindowsAction.isEnabled() || listEnabled;
+        boolean isEnabled = m_displayRsmPSMAction.isEnabled() || m_displayRsmPeptidesAction.isEnabled() || m_displayRsmProteinSetsAction.isEnabled() || m_displayMSQueryAction.isEnabled() || m_displayUserWindowAction.isEnabled()|| m_manageUserWindowsAction.isEnabled() || listEnabled;
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
 

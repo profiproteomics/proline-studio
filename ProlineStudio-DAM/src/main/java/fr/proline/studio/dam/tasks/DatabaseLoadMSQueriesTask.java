@@ -68,7 +68,7 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
                 return fetchDataMSQueriesMainTask();
             } else {
                 // fetch data of SubTasks
-                return fetchMSQueriesDataSubTask();
+                return fetchDataSubTaskFor();
             }
         }
         return true; // should not happen
@@ -80,7 +80,7 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
         super.abortTask();
         switch (action) {
             case LOAD_MSQUERY:
-                m_resultSet = null;
+                m_listMsQueries = null;
                 break;
         }
     }
@@ -161,7 +161,7 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
      *
      * @return
      */
-    private boolean fetchMSQueriesDataSubTask() {
+    private boolean fetchDataSubTaskFor() {
         SubTask slice = m_subTaskManager.getNextSubTask();
         if (slice == null) {
             return true; // nothing to do : should not happen

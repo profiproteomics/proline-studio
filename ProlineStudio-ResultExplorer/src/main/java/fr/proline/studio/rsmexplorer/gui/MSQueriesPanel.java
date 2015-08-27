@@ -6,7 +6,6 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.MsQuery;
-import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.AddDataMixerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -189,7 +188,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
        
         m_msqueriesTable.setSortable(false);
 
-        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane, m_msqueriesTable);
+        m_markerContainerPanel = new MarkerContainerPanel(m_scrollPane,  (MSQueriesTable) m_msqueriesTable);
         
         m_scrollPane.setViewportView(m_msqueriesTable);
         m_msqueriesTable.setFillsViewportHeight(true);
@@ -216,17 +215,17 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
     
     public void setData(Long taskId, List<MsQuery> msQueries, Map<Long, Integer> nbPeptideMatchesByMsQueryIdMap, boolean finished) {
         ((MSQueriesTableModel) ((CompoundTableModel) m_msqueriesTable.getModel()).getBaseModel()).setData(taskId, msQueries, nbPeptideMatchesByMsQueryIdMap);
+        int nbQ = msQueries.size();
         m_titleLabel.setText(TABLE_TITLE +" ("+msQueries.size()+")");
         m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_INITIAL_ID)).setVisible(false);
         m_msqueriesTable.getColumnExt(m_msqueriesTable.convertColumnIndexToView(MSQueriesTableModel.COLTYPE_MSQUERY_ID)).setVisible(false);
-        
+        m_markerContainerPanel.setMaxLineNumber(nbQ);
+        // select the first row
+        if ((nbQ > 0)) {
+            m_msqueriesTable.getSelectionModel().setSelectionInterval(0, 0);
+        }
         if (finished) {
             m_msqueriesTable.setSortable(true);
-            // select the first row
-            if ((msQueries.size() > 0)) {
-                m_msqueriesTable.getSelectionModel().setSelectionInterval(0, 0);
-                m_markerContainerPanel.setMaxLineNumber(msQueries.size());
-            }
         }
     }
     

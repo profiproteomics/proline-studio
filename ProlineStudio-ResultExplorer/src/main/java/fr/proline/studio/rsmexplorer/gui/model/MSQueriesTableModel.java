@@ -6,6 +6,7 @@
 package fr.proline.studio.rsmexplorer.gui.model;
 
 import fr.proline.core.orm.msi.MsQuery;
+import fr.proline.studio.dam.tasks.DatabaseLoadMSQueriesTask;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
@@ -64,7 +65,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
     
     @Override
     public int getSubTaskId(int col) {
-        return -1;
+        return DatabaseLoadMSQueriesTask.SUB_TASK_MSQUERY;
     }
 
     @Override
@@ -138,7 +139,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
                 if (msquery.getMsiSearch()!= null) {
-                    lazyData.setData(msquery.getSpectrum().getFirstScan());
+                    lazyData.setData(msquery.getSpectrum().getFirstScan() == null ? 0: msquery.getSpectrum().getFirstScan());
                 }else{
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, rowIndex, columnIndex);
@@ -149,7 +150,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
                 if (msquery.getMsiSearch()!= null) {
-                    lazyData.setData(msquery.getSpectrum().getLastScan());
+                    lazyData.setData(msquery.getSpectrum().getLastScan() == null ? 0 : msquery.getSpectrum().getLastScan());
                 }else{
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, rowIndex, columnIndex);
@@ -160,7 +161,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
                 if (msquery.getMsiSearch()!= null) {
-                    lazyData.setData(msquery.getSpectrum().getFirstTime());
+                    lazyData.setData(msquery.getSpectrum().getFirstTime() == null ? Float.NaN : msquery.getSpectrum().getFirstTime());
                 }else{
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, rowIndex, columnIndex);
@@ -171,7 +172,7 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
                 LazyData lazyData = getLazyData(rowIndex,columnIndex);
                 
                 if (msquery.getMsiSearch()!= null) {
-                    lazyData.setData(msquery.getSpectrum().getLastTime());
+                    lazyData.setData(msquery.getSpectrum().getLastTime() == null ? Float.NaN : msquery.getSpectrum().getLastTime());
                 }else{
                     lazyData.setData(null);
                     givePriorityTo(m_taskId, rowIndex, columnIndex);

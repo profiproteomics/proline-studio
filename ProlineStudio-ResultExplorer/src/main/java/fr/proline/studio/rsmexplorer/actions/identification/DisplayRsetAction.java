@@ -17,6 +17,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
    private DisplayRsetPeptidesAction m_displayRsetPeptidesAction;
    private DisplayUserWindowAction m_displayUserWindowAction;
    private DisplayRsetProteinMatchesAction m_displayRsetProteinMatchesAction;
+   private DisplayMSQueryForRsetAction m_displayMSQueryAction;
    private GenerateMSDiagReportAction m_msDiagReportAction;
    private ManageUserWindowsAction m_manageUserWindowsAction;
    private ArrayList<DisplaySavedWindowAction> m_displaySavedWindowActionList;
@@ -40,6 +41,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
         m_msDiagReportAction = new GenerateMSDiagReportAction(m_treeType, m_isJMSDefined); 
         m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
         m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
+        m_displayMSQueryAction = new DisplayMSQueryForRsetAction(m_treeType);
         
         ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
         int nb = savedWindowsList.size();
@@ -55,12 +57,14 @@ public class DisplayRsetAction extends AbstractRSMAction {
        
         JMenuItem displayRsetPeptidesItem = new JMenuItem(m_displayRsetPeptidesAction);
         JMenuItem displayRsetProteinMatchesItem = new JMenuItem(m_displayRsetProteinMatchesAction);
+        JMenuItem displayMSQueryItem = new JMenuItem(m_displayMSQueryAction);
         JMenuItem displayMsDiagReportItem = new JMenuItem(m_msDiagReportAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
         JMenuItem manageUserWindowsItem = new JMenuItem(m_manageUserWindowsAction);
                 
         m_menu.add(displayRsetPeptidesItem);
         m_menu.add(displayRsetProteinMatchesItem);
+        m_menu.add(displayMSQueryItem);
         m_menu.addSeparator();
         m_menu.add(displayMsDiagReportItem);
         m_menu.addSeparator();
@@ -82,6 +86,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
         
         m_displayRsetPeptidesAction.updateEnabled(selectedNodes);
         m_displayRsetProteinMatchesAction.updateEnabled(selectedNodes);
+        m_displayMSQueryAction.updateEnabled(selectedNodes);
         m_msDiagReportAction.updateEnabled(selectedNodes);
         m_displayUserWindowAction.updateEnabled(selectedNodes);
         m_manageUserWindowsAction.updateEnabled(selectedNodes);
@@ -92,7 +97,7 @@ public class DisplayRsetAction extends AbstractRSMAction {
             listEnabled |= m_displaySavedWindowActionList.get(i).isEnabled();
         }
         
-        boolean isEnabled = m_displayRsetPeptidesAction.isEnabled() || m_displayRsetProteinMatchesAction.isEnabled() || m_msDiagReportAction.isEnabled() || m_displayUserWindowAction.isEnabled() || m_manageUserWindowsAction.isEnabled() || listEnabled;
+        boolean isEnabled = m_displayRsetPeptidesAction.isEnabled() || m_displayRsetProteinMatchesAction.isEnabled() || m_displayMSQueryAction.isEnabled() || m_msDiagReportAction.isEnabled() || m_displayUserWindowAction.isEnabled() || m_manageUserWindowsAction.isEnabled() || listEnabled;
         setEnabled(isEnabled);
         m_menu.setEnabled(isEnabled);
     }

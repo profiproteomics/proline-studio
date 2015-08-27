@@ -37,6 +37,7 @@ import fr.proline.studio.gui.HourglassPanel;
 
 
 
+
 import org.slf4j.Logger;
 
 	/**
@@ -59,6 +60,8 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    private JFreeChart m_chart;
 	    private File m_pngFile;
 	    private javax.swing.JPanel m_chromatogramPanel;
+
+		private RsetMSDiagPanel m_msdiagPanel;
 	    
 	   	    
 	    @Override // declared in ProlineStudioCommons ImageExporterInterface
@@ -79,9 +82,11 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 
 	    /**
 	     * Creates new form MSDiag_PieChart
+	     * @param rsetMSDiagPanel 
 	     */
-	    public MSDiag_Chromatogram() {
+	    public MSDiag_Chromatogram(RsetMSDiagPanel rsetMSDiagPanel) {
 	        
+	    	m_msdiagPanel = rsetMSDiagPanel;
 	    	m_dataSet = new DefaultTableXYDataset();
 	    	
 
@@ -147,8 +152,12 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        
 	        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
 	        toolbar.setFloatable(false);
-
+	        
+	        FlipButton flipModeButton = new FlipButton("flip button text", m_msdiagPanel);
+	        toolbar.add(flipModeButton);
+	        
 	        ExportButton exportImageButton = new ExportButton("chart", (ImageExporterInterface) this);
+	        
 	        toolbar.add(exportImageButton);
 	       
 	        

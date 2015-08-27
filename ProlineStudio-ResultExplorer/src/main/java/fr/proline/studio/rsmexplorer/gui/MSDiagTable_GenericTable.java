@@ -25,9 +25,12 @@ public class MSDiagTable_GenericTable extends DecoratedTable {
 	    private MSDiagTableCustomRenderer m_matrixRenderer;
 	    private String m_outputType = "";
 
+
+		private RsetMSDiagPanel m_msdiagPanel;
+
 	    
-	    public MSDiagTable_GenericTable() {
-	        
+	    public MSDiagTable_GenericTable(RsetMSDiagPanel rsetMSDiagPanel) {
+	        m_msdiagPanel = rsetMSDiagPanel;
 	        MSdiagTable_GenericTableModel msDiagTableModel1 = new MSdiagTable_GenericTableModel();
 
 	        m_matrixRenderer = new MSDiagTableCustomRenderer();

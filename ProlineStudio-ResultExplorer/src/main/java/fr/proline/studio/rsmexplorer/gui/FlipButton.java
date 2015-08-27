@@ -71,7 +71,7 @@ public class FlipButton extends JButton implements ActionListener {
         setIcon(IconManager.getIcon(IconManager.IconType.TABLE));
        
         
-        setToolTipText("Show predefined graphics/table or force table display...");
+       // setToolTipText("Switch between table and graphics");
 
         addActionListener(this);
     }
@@ -83,21 +83,23 @@ public class FlipButton extends JButton implements ActionListener {
         this.msdiagPanel = msdiagPanel;
        // m_imageExporter = null;
 
+        m_buttonStatus = msdiagPanel.m_displayType;
         if(m_buttonStatus.equals("default")) {
 	        	setIcon(IconManager.getIcon(IconManager.IconType.TABLE));
 	        	msdiagPanel.setDisplayType("default");
 	        	m_buttonStatus="default";
+	        	setToolTipText("Switch to table view");
 	        	
 	    }
 	    else {
 	        	setIcon(IconManager.getIcon(IconManager.IconType.CHART));
 	        	msdiagPanel.setDisplayType("table");
 	        	m_buttonStatus="table";
-	        	
+	        	setToolTipText("Switch to graphical view");
 	    }
-        System.out.println(m_buttonStatus);
         
-        setToolTipText("Show predefined graphics/table or force table display...");
+        
+        
        // setToolTipText("Export Image...");
       
         addActionListener(this);
@@ -108,7 +110,7 @@ public class FlipButton extends JButton implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-    	System.out.println("action performed: " + m_buttonStatus);
+    	
         if ((m_progressInterface != null) && (!m_progressInterface.isLoaded())) {
 
             ProgressBarDialog dialog = ProgressBarDialog.getDialog(WindowManager.getDefault().getMainWindow(), m_progressInterface, "Data loading", "Export is not available while data is loading. Please Wait.");
@@ -137,7 +139,7 @@ public class FlipButton extends JButton implements ActionListener {
         msdiagPanel.m_tabbedPane.removeAll();
         msdiagPanel.displayData();
 	    msdiagPanel.m_tabbedPane.setSelectedIndex(selectedTabIndex);
-	    System.out.println(m_buttonStatus);
+	    
     
 	    
 //	        ExportDialog dialog;

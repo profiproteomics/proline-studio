@@ -103,7 +103,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataboxDataMixer(32),
         DataboxExperimentalDesign(33),
         DataBoxAdjacentMatrix(34),
-        DataBoxMapAlignment(35);
+        DataBoxMapAlignment(35), 
+        DataBoxMSQueries(36);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -184,6 +185,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxExperimentalDesign();
                 case DataBoxMapAlignment:
                     return new DataboxMapAlignment();
+                case DataBoxMSQueries:
+                    return new DataBoxMSQueries();
             }
             return null; // should not happen
         }

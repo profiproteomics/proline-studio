@@ -205,7 +205,7 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 								        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
 										break;
 									case "pie":
-										MSDiag_PieChart m_msdiagPieChart = new MSDiag_PieChart();
+										MSDiag_PieChart m_msdiagPieChart = new MSDiag_PieChart(this);
 										m_msdiagPieChart.setData(msOutput);
 										//scrollPane = new JScrollPane();
 								        scrollPane.setViewportView(m_msdiagPieChart);

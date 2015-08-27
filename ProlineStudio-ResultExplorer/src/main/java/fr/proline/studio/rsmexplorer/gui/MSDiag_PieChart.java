@@ -46,6 +46,8 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
     private File m_pngFile;
  
     private javax.swing.JPanel m_pieChartPanel;
+
+	private RsetMSDiagPanel m_msdiagPanel;
  
      
     @Override // declared in ProlineStudioCommons ImageExporterInterface
@@ -67,8 +69,10 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
     /**
      * Creates new form MSDiag_PieChart
      */
-    public MSDiag_PieChart() {
+    public MSDiag_PieChart(RsetMSDiagPanel rsetMSDiagPanel) {
         
+    	m_msdiagPanel = rsetMSDiagPanel;
+    	
         m_dataSet = new DefaultPieDataset();
         m_chart = ChartFactory.createPieChart(
 	            "Chart Title",  // chart title
@@ -107,6 +111,9 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
    
+        FlipButton flipModeButton = new FlipButton("flip button text", m_msdiagPanel);
+        toolbar.add(flipModeButton);
+        
         ExportButton exportImageButton = new ExportButton("pieChart", (ImageExporterInterface) this);
         toolbar.add(exportImageButton);
        

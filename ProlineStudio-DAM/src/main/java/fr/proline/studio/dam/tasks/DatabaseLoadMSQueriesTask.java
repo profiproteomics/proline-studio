@@ -228,10 +228,11 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
         
         String queryCountPMS = "SELECT pm.msQuery.id, count(pm.id) "
                 + "FROM fr.proline.core.orm.msi.PeptideMatch pm "
-                + "WHERE pm.msQuery.id IN (:listId) "
+                + "WHERE pm.msQuery.id IN (:listId) AND pm.resultSet.id =:rsId "
                 + "GROUP BY pm.msQuery.id";
         Query queryCountPM = entityManagerMSI.createQuery(queryCountPMS);
         queryCountPM.setParameter("listId", listMSQueriesId);
+        queryCountPM.setParameter("rsId", m_resultSet.getId());
         if (listMSQueriesId != null && !listMSQueriesId.isEmpty()) {
             List<Object[]> rsCount = queryCountPM.getResultList();
             for (Object[] o: rsCount){

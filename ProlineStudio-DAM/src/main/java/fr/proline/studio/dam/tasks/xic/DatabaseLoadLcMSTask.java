@@ -242,7 +242,7 @@ public class DatabaseLoadLcMSTask extends AbstractDatabaseSlicerTask {
             }
         }else if (action == LOAD_ALIGNMENT_FOR_XIC) {
             if (needToFetch()) {
-                DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_projectId, m_dataset, m_taskError);
+                DatabaseLoadXicMasterQuantTask.fetchDataQuantChannels(m_projectId, m_dataset_align, m_taskError);
                 return fetchDataMainTaskAlignmentForXic();
             }
         } 

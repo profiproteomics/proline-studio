@@ -73,7 +73,7 @@ public class PlotHistogram extends PlotAbstract {
         
         ParameterList parameterColorList = new ParameterList("Colors");
         Color histogramColor = CyclicColorPalette.getColor(21);
-        m_colorParameter = new ColorParameter(PLOT_HISTOGRAM_COLOR_KEY, "Histogram Plot Color", histogramColor);
+        m_colorParameter = new ColorParameter(PLOT_HISTOGRAM_COLOR_KEY, "Histogram Plot Color", histogramColor, ColorButtonAndPalettePanel.class);
         parameterColorList.add(m_colorParameter);
         
         ParameterList parameterSettingsList = new ParameterList("Settings");
@@ -546,7 +546,7 @@ public class PlotHistogram extends PlotAbstract {
                 groupParameterList.add(groupNameParameter);
                 
                 Color defaultColor = CyclicColorPalette.getColor(18);
-                ColorParameter colorParameter = new ColorParameter("GroupColorParameter", "Color", defaultColor);
+                ColorParameter colorParameter = new ColorParameter("GroupColorParameter", "Color", defaultColor, ColorButtonAndPalettePanel.class);
                 groupParameterList.add(colorParameter);
                 
                 DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterListArray);

@@ -1,5 +1,6 @@
 package fr.proline.studio.graphics;
 
+import fr.proline.studio.graphics.colorpicker.ColorDataInterface;
 import fr.proline.studio.graphics.colorpicker.ColorPickerDialog;
 import fr.proline.studio.gui.DefaultDialog;
 import java.awt.Color;
@@ -7,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import javax.swing.JButton;
 import org.openide.windows.WindowManager;
 
@@ -14,13 +16,15 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class ColorButton extends JButton {
+public class ColorButton extends JButton implements ColorDataInterface {
 
-    private static final int WIDTH = 100;
+    private static final int WIDTH = 135;
     private static final int HEIGHT = 35;
 
     private final Dimension m_dimension = new Dimension(WIDTH, HEIGHT);
 
+    private ArrayList<ColorDataInterface> m_listeners = null;
+    
     public ColorButton() {
     }
     
@@ -41,6 +45,7 @@ public class ColorButton extends JButton {
                 colorPickerDialog.setVisible(true);
                 if (colorPickerDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                     colorButton.setBackground(colorPickerDialog.getColor());
+                    colorChangedToListeners();
                 }
             }
         };
@@ -103,4 +108,41 @@ public class ColorButton extends JButton {
 
     }
     private final int SQUARE_SIZE = 10;
+
+    @Override
+    public void propagateColorChanged(int r, int g, int b) {
+        setBackground(new Color(r,g,b, getBackground().getAlpha()));
+    }
+
+    @Override
+    public int getRed() {
+        return getBackground().getRed();
+    }
+
+    @Override
+    public int getGreen() {
+        return getBackground().getGreen();
+    }
+
+    @Override
+    public int getBlue() {
+        return getBackground().getBlue();
+    }
+
+    @Override
+    public void addListener(ColorDataInterface colorDataInterface) {
+        if (m_listeners == null) {
+            m_listeners = new ArrayList<>();
+        }
+        m_listeners.add(colorDataInterface);
+    }
+    
+    public void colorChangedToListeners() {
+        if (m_listeners == null) {
+            return;
+        }
+        for (ColorDataInterface cdi : m_listeners) {
+            cdi.propagateColorChanged(getRed(), getGreen(), getBlue());
+        }
+    }
 }

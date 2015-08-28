@@ -5,6 +5,7 @@ import fr.proline.studio.graphics.ColorButton;
 import fr.proline.studio.graphics.ColorOrGradient;
 import fr.proline.studio.graphics.colorpicker.ColorPickerPanel;
 import fr.proline.studio.utils.CyclicColorPalette;
+import fr.proline.studio.graphics.ColorButtonAndPalettePanel;
 import java.awt.Color;
 import javax.swing.JComponent;
 
@@ -43,6 +44,9 @@ public class ColorParameter extends AbstractParameter {
             } else if (m_graphicalType.equals(ColorPickerPanel.class)) {
                 ((ColorPickerPanel) m_parameterComponent).setColor(startValue);
                 return m_parameterComponent;
+            } else if (m_graphicalType.equals(ColorButtonAndPalettePanel.class)) {
+                ((ColorButtonAndPalettePanel) m_parameterComponent).setColor(startValue);
+                return m_parameterComponent;
             }
         }
 
@@ -61,6 +65,11 @@ public class ColorParameter extends AbstractParameter {
 
             m_parameterComponent = colorPanel;
             return colorPanel;
+        }  else if (m_graphicalType.equals(ColorButtonAndPalettePanel.class)) {
+            ColorButtonAndPalettePanel colorButtonPalettePanel = new ColorButtonAndPalettePanel();
+            colorButtonPalettePanel.setColor(startValue);
+            m_parameterComponent = colorButtonPalettePanel;
+            return colorButtonPalettePanel;
         }
 
 
@@ -79,6 +88,9 @@ public class ColorParameter extends AbstractParameter {
         } else if (m_graphicalType.equals(ColorPickerPanel.class)) {
             ColorPickerPanel colorPanel = (ColorPickerPanel) m_parameterComponent;
             colorPanel.setColor(m_defaultColor);
+        } else if (m_graphicalType.equals(ColorButtonAndPalettePanel.class)) {
+            ColorButtonAndPalettePanel panel = (ColorButtonAndPalettePanel) m_parameterComponent;
+            panel.setColor(m_defaultColor);
         }
     }
 
@@ -98,6 +110,8 @@ public class ColorParameter extends AbstractParameter {
            return ((ColorButton) m_parameterComponent).getColor();
         } else if (m_graphicalType.equals(ColorPickerPanel.class) && (m_parameterComponent != null)) {
            return ((ColorPickerPanel) m_parameterComponent).getColor();
+        } else if (m_graphicalType.equals(ColorButtonAndPalettePanel.class) && (m_parameterComponent != null)) {
+            return ((ColorButtonAndPalettePanel) m_parameterComponent).getColor();
         }
         return null; // should not happen
     }
@@ -120,6 +134,8 @@ public class ColorParameter extends AbstractParameter {
         if (m_graphicalType.equals(ColorButton.class)) {
             //((ColorButton) m_parameterComponent).setColor(ColorButton.read(v));  //JPM.TODO
         } else if (m_graphicalType.equals(ColorPickerPanel.class)) {
+             //JPM.TODO
+        } else if (m_graphicalType.equals(ColorButtonAndPalettePanel.class)) {
              //JPM.TODO
         }
         

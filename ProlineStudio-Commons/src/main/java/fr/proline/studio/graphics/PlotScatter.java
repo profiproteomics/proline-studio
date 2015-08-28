@@ -690,6 +690,8 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
             GraphicDataGroup dataGroup = m_idsToGraphicDataGroup.get(m_ids[i]);
             if (dataGroup != null) {
                 c = dataGroup.getColor();
+            } else if (useGradient) {
+                c = getColorInGradient(m_gradientParamValues[i]);
             } else {
                 c = plotColor;
             }
@@ -759,7 +761,7 @@ public class PlotScatter extends PlotAbstract implements Axis.EnumXInterface, Ax
                 groupParameterList.add(groupNameParameter);
                 
                 Color defaultColor = CyclicColorPalette.getColor(21, 128);
-                ColorParameter colorParameter = new ColorParameter("GroupColorParameter", "Color", defaultColor);
+                ColorParameter colorParameter = new ColorParameter("GroupColorParameter", "Color", defaultColor, ColorButtonAndPalettePanel.class);
                 groupParameterList.add(colorParameter);
                 
                 DefaultParameterDialog parameterDialog = new DefaultParameterDialog(WindowManager.getDefault().getMainWindow(), "Plot Parameters", parameterListArray);

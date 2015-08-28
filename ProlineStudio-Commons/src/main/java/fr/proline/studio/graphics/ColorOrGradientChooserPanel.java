@@ -40,6 +40,8 @@ public class ColorOrGradientChooserPanel extends JPanel {
 
     private JComboBox m_gradientParamComboBox = null;
     
+    private final static int SQUARE_SIZE = 10;
+    
     public ColorOrGradientChooserPanel(ColorOrGradient color, ArrayList<ReferenceIdName> gradientParam) {
         setLayout(new GridBagLayout());
 
@@ -79,7 +81,7 @@ public class ColorOrGradientChooserPanel extends JPanel {
         c.gridx++;
         c.gridy = 0;
         c.weightx = 1.0;
-        add(m_colorSelectionButton, c);
+        add(new ColorButtonAndPalettePanel(m_colorSelectionButton), c);
         
         c.gridx = 0;
         c.gridy++;
@@ -124,7 +126,6 @@ public class ColorOrGradientChooserPanel extends JPanel {
         @Override
         protected ActionListener getActionListener() {
 
-            final ColorButton colorButton = this;
             ActionListener a = new ActionListener() {
 
                 @Override
@@ -140,11 +141,20 @@ public class ColorOrGradientChooserPanel extends JPanel {
                     colorPickerDialog.setVisible(true);
                     if (colorPickerDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
                         m_colorSelectionButton.setBackground(colorPickerDialog.getColor());
+                        colorChangedToListeners();
                     }
 
                 }
             };
             return a;
+        }
+        
+        @Override
+        public void propagateColorChanged(int r, int g, int b) {
+            super.propagateColorChanged(r, g, b);
+            if (!m_colorRadioButton.isSelected()) {
+                m_colorRadioButton.setSelected(true);
+            }
         }
 
     }
@@ -211,29 +221,8 @@ public class ColorOrGradientChooserPanel extends JPanel {
             g.fillRect(0, 0, width, height);
             
             // draw a board with gray squares
-            g.setColor(Color.gray);
-            int y = 0;
-            while (true) {
+            drawGraySquares(g, DELTA_X, DELTA_Y_TOP, width-DELTA_X, height-DELTA_Y_BOTTOM);
 
-                int x = 0;
-                while (true) {
-
-                    if ((x + y) % 2 == 0) {
-                        // draw square
-                        g.fillRect(x * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
-                    }
-
-                    x++;
-                    if (x * SQUARE_SIZE > width) {
-                        break;
-                    }
-                }
-
-                y++;
-                if (y * SQUARE_SIZE > height) {
-                    break;
-                }
-            }
             
             g.setColor(Color.darkGray);
             g.drawRect(0, 0, width-1, height-1);
@@ -251,7 +240,7 @@ public class ColorOrGradientChooserPanel extends JPanel {
                 m_colorSelectors.get(i).paint(g, DELTA_X, width-DELTA_X, height-DELTA_Y_BOTTOM);
             }
         }
-        private final int SQUARE_SIZE = 10;
+        
         
 
 
@@ -308,10 +297,14 @@ public class ColorOrGradientChooserPanel extends JPanel {
                     return false;
                 }
                 if (m_p.contains(x, y)) {
-                    Color newColor = JColorChooser.showDialog(null, null, m_color);
-                    if (newColor != null) {
-                        m_color = newColor;
+                    
+                    ColorPickerDialog colorPickerDialog = new ColorPickerDialog(WindowManager.getDefault().getMainWindow(), m_color);
+                    colorPickerDialog.setLocationRelativeTo(m_gradientSelector);
+                    colorPickerDialog.setVisible(true);
+                    if (colorPickerDialog.getButtonClicked() == DefaultDialog.BUTTON_OK) {
+                        m_color = colorPickerDialog.getColor();
                     }
+
                     
                     return true;
                 }
@@ -352,6 +345,32 @@ public class ColorOrGradientChooserPanel extends JPanel {
 
         }
         
+    }
+    
+    private static void drawGraySquares(Graphics g, int x1, int y1, int x2, int y2) {
+                    g.setColor(Color.gray);
+            int y = 0;
+            while (true) {
+
+                int x = 0;
+                while (true) {
+
+                    if ((x + y) % 2 == 0) {
+                        // draw square
+                        g.fillRect(x1+x * SQUARE_SIZE, y1+y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+                    }
+
+                    x++;
+                    if (x1+x * SQUARE_SIZE > x2) {
+                        break;
+                    }
+                }
+
+                y++;
+                if (y1+y * SQUARE_SIZE > y2) {
+                    break;
+                }
+            }
     }
     
     public static LinearGradientPaint getGradientForPanel(Color[] colors, float[] fractions) {

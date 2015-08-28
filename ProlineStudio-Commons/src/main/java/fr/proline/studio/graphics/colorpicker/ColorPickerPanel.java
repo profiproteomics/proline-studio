@@ -26,7 +26,7 @@ import javax.swing.event.ChangeListener;
  * Based on HSL for panels, RGB for display
  * @author jm235353
  */
-public class ColorPickerPanel extends JPanel {
+public class ColorPickerPanel extends JPanel implements ColorDataInterface {
     
     private final int MAIN_SIZE = 200;
     private final int DELTA = 1;
@@ -34,6 +34,10 @@ public class ColorPickerPanel extends JPanel {
     
     private final BasicStroke STROKE_1 = new BasicStroke(1);
     private final BasicStroke STROKE_3 = new BasicStroke(3);
+    
+    final int PALETTE_DELTA = 4;
+    final int PALETTE_SQUARE_SIZE = 18;
+    final int PALETTE_WIDTH = 9;
     
     private boolean m_imageUnset = true;
     
@@ -54,9 +58,7 @@ public class ColorPickerPanel extends JPanel {
     private final ArrayList<ColorChanged> m_colorChangedListeners = new ArrayList<>();
     
     public ColorPickerPanel(Color[] palette) {
-        
-        setPalette(palette);
-        
+
         setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -87,7 +89,8 @@ public class ColorPickerPanel extends JPanel {
         c.weighty = 0;
         c.anchor = GridBagConstraints.CENTER;
         c.fill = GridBagConstraints.NONE;
-        PalettePanel palettePanel = new PalettePanel();
+
+        ColorPalettePanel palettePanel = new ColorPalettePanel(this, palette, PALETTE_SQUARE_SIZE, PALETTE_DELTA, PALETTE_WIDTH);
         add(palettePanel, c);
         
         
@@ -107,15 +110,16 @@ public class ColorPickerPanel extends JPanel {
         return new Color(m_r,m_g,m_b,m_alpha);
     }
     
-    public final void setPalette(Color[] palette) {
+    /*public final void setPalette(Color[] palette) {
         m_palette = palette;
-    }
+    }*/
     
     public void repaintAll() {
         m_imageUnset = true;
         repaint();
     }
     
+    @Override
     public void propagateColorChanged(int r, int g, int b) {
         propagateColorChanged(r, g, b, true);
     }
@@ -210,6 +214,26 @@ public class ColorPickerPanel extends JPanel {
         return getHSBArray()[2];
     }
     private float[] hsbArray = new float[3];
+
+    @Override
+    public int getRed() {
+        return m_r;
+    }
+
+    @Override
+    public int getGreen() {
+        return m_g;
+    }
+
+    @Override
+    public int getBlue() {
+        return m_b;
+    }
+
+    @Override
+    public void addListener(ColorDataInterface colorDataInterface) {
+        // not used
+    }
     
     private class HSBPanel extends JPanel implements MouseListener, MouseMotionListener {
         
@@ -653,132 +677,6 @@ public class ColorPickerPanel extends JPanel {
         
     }
     
-    private class PalettePanel extends JPanel implements MouseListener {
-        
-        final int DELTA = 4;
-        final int SQUARE_SIZE = 18;
-        
-        
-        final int PALETTE_WIDTH = 9;
-        
-        ColorSquare[] m_squares = null;
-        
-        public PalettePanel() {
-            if (m_palette == null) {
-                setPreferredSize(new Dimension(0,0));
-                return;
-            }
-
-            int paletteSize = m_palette.length;
-            int paletteWidth = PALETTE_WIDTH;
-            int paletteHeight = ((paletteSize-1) / 9)+1;
-            
-            int heightPixel = paletteHeight*(SQUARE_SIZE+DELTA)+DELTA;
-            int widthPixel = paletteWidth*(SQUARE_SIZE+DELTA)+DELTA;
-            setPreferredSize(new Dimension(widthPixel,heightPixel));
-            
-            m_squares = new ColorSquare[paletteSize];
-            for (int i=0;i<paletteSize;i++) {
-                m_squares[i] = new ColorSquare(i);
-            }
-            
-            addMouseListener(this);
-        }
-        
-        @Override
-        public void paint(Graphics g) {
-            
-            if (m_palette == null) {
-                return;
-            }
-            
-            int paletteSize = m_palette.length;
-            int paletteWidth = 9;
-            int paletteHeight = ((paletteSize - 1) / 9) + 1;
-
-            g.setColor(Color.white);
-            g.fillRect(0,0,DELTA+paletteWidth*(DELTA+SQUARE_SIZE)-1,DELTA+paletteHeight*(DELTA+SQUARE_SIZE)-1);
-            
-            for (int i=0;i<paletteSize;i++) {
-                m_squares[i].paint(g);
-            }
-
-            g.setColor(Color.black);
-            g.drawRect(0,0,DELTA+paletteWidth*(DELTA+SQUARE_SIZE)-1,DELTA+paletteHeight*(DELTA+SQUARE_SIZE)-1);
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            int paletteSize = m_palette.length;
-            for (int i=0;i<paletteSize;i++) {
-                if (m_squares[i].inside(e.getX(), e.getY())) {
-                    Color c = m_palette[i];
-                    propagateColorChanged(c.getRed(), c.getGreen(), c.getBlue());
-                    break;
-                }
-            }
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {}
-
-        @Override
-        public void mouseReleased(MouseEvent e) {}
-
-        @Override
-        public void mouseEntered(MouseEvent e) {}
-
-        @Override
-        public void mouseExited(MouseEvent e) {}
-        
-        public class ColorSquare {
-            
-            private int m_index;
-            
-            public ColorSquare(int index) {
-                m_index = index;
-            }
-            
-            public void paint(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                
-                g2d.setColor( m_palette[m_index]);
-                g2d.fillRect(getX(), getY(), SQUARE_SIZE, SQUARE_SIZE);
-                g2d.setColor(Color.black);
-                if (isSelected()) {
-                    g2d.setStroke(STROKE_3);
-                } else {
-                    g2d.setStroke(STROKE_1);
-                }
-                g2d.drawRect(getX(), getY(), SQUARE_SIZE, SQUARE_SIZE);
-                g2d.setStroke(STROKE_1);
-            }
-            
-            private int getX() {
-                int x = m_index % PALETTE_WIDTH;
-                return DELTA+x * (DELTA+SQUARE_SIZE);
-            }
-            
-             private int getY() {
-                int y = m_index / PALETTE_WIDTH;
-                return  DELTA+y * (DELTA+SQUARE_SIZE);
-            }
-            
-            private boolean isSelected() {
-                Color c = m_palette[m_index];
-                return ((m_r == c.getRed()) && (m_b == c.getBlue()) && (m_g==c.getGreen()) );
-            }
-            
-            public boolean inside(int x, int y) {
-                int xSquare = getX();
-                int ySquare = getY();
-                return (x>=xSquare) && (y>=ySquare) && (x<=xSquare+SQUARE_SIZE) && (y<=ySquare+SQUARE_SIZE);
-            }
-            
-        }
-    }
-
-
     
     private interface ColorChanged {
         public void colorChanged();

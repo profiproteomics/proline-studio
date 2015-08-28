@@ -119,7 +119,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	    	
 	    	
 	    	
-	        m_chart.setBackgroundPaint(Color.white);
+	        //m_chart.setBackgroundPaint(Color.white);
 	        TextTitle textTitle = m_chart.getTitle();
 	        textTitle.setFont(textTitle.getFont().deriveFont(Font.PLAIN, 10.0f));
 	        
@@ -136,7 +136,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        cp.setMinimumDrawHeight(0);
 	        cp.setMaximumDrawWidth(Integer.MAX_VALUE); // make the legend to have a fixed size and not strecht it 
 	        cp.setMaximumDrawHeight(Integer.MAX_VALUE); // when the windows becomes bigger.
-	        m_chart.getPlot().setBackgroundPaint(Color.white);
+	        //m_chart.getPlot().setBackgroundPaint(Color.white);
 	       
 	        m_chromatogramPanel = cp;
 	        
@@ -224,7 +224,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	        
 	        
 	        
-	        m_chart.getPlot().setBackgroundPaint(Color.white);
+	        //m_chart.getPlot().setBackgroundPaint(Color.white);
 
 	        int nbSeries = msdo.matrix[0].length;
 	        int nbCategories = msdo.matrix.length - 1; // -1 because of 1st column is series names

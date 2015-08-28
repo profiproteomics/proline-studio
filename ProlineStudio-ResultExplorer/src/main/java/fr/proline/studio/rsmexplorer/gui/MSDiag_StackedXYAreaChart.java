@@ -258,7 +258,7 @@ public class MSDiag_StackedXYAreaChart  extends HourglassPanel implements  Image
 	        	for (int cat = 0; cat < nbCategories; cat++) { // columns of data table also
 	        		//m_dataSet.addValue((double) msdo.matrix[cat][serie], msdo.column_names[serie],  msdo.matrix[cat][0].toString());
 	        		
-	        		double x = (Double) msdo.matrix[cat][0];
+	        		double x = (Double) Double.parseDouble( Integer.toString(serie)); //msdo.matrix[cat][0];
 	        		double y = (Double) msdo.matrix[cat][serie];
 	        		String seriesName = msdo.column_names[serie];
 					if(y>0) { // do not add a zero value otherwise it adds an element on the graph with 0 "thickness"

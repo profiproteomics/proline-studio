@@ -197,13 +197,21 @@ public class RsetMSDiagPanel extends HourglassPanel implements DataBoxPanelInter
 								        scrollPane.setViewportView(m_msdiagBoxChart);
 								        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
 										break;
-				        			case "whisker":
-										MSDiag_BoxChart m_msdiagBoxAndWhisker = new MSDiag_BoxChart();
-										m_msdiagBoxAndWhisker.setData(msOutput);
+									/*case "StackedXYAreaChart":
+										MSDiag_StackedXYAreaChart m_msdiagBoxStackedXY = new MSDiag_StackedXYAreaChart();
+										m_msdiagBoxStackedXY.setData(msOutput);
 										//scrollPane = new JScrollPane();
-								        scrollPane.setViewportView(m_msdiagBoxAndWhisker);
+								        scrollPane.setViewportView(m_msdiagBoxStackedXY);
+								        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
+										break;*/
+									case "categoryPlot":
+										MSDiag_CategoryPlot m_msdiagCategoryPlot = new MSDiag_CategoryPlot(this);
+										m_msdiagCategoryPlot.setData(msOutput);
+										//scrollPane = new JScrollPane();
+								        scrollPane.setViewportView(m_msdiagCategoryPlot);
 								        m_tabbedPane.addTab(msOutput.description,icon, scrollPane);
 										break;
+															
 									case "pie":
 										MSDiag_PieChart m_msdiagPieChart = new MSDiag_PieChart(this);
 										m_msdiagPieChart.setData(msOutput);

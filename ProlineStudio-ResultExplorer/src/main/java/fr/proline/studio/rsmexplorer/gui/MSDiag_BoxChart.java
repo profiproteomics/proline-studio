@@ -52,14 +52,14 @@ import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
 
 	/**
-	 * Panel used to display MSDiag Chromatogram
+	 * Panel used to display MSDiag box chart
 	 *
 	 * @author AW
 	 */
 
 public class MSDiag_BoxChart  extends HourglassPanel implements  ImageExporterInterface {
 	    
-	    public static final String SERIES_NAME = "Chromatogram";
+	    public static final String SERIES_NAME = "BoxChart";
 	    
 	    protected static final Logger m_logger = LoggerFactory.getLogger("ProlineStudio.ResultExplorer");
 	    private static final long serialVersionUID = 1L;
@@ -191,7 +191,7 @@ public class MSDiag_BoxChart  extends HourglassPanel implements  ImageExporterIn
 	    
 	    public void setData(MSDiagOutput_AW msdo) {
 	             
-	        constructChromatogram(msdo);
+	        constructBoxChart(msdo);
 
 	    }
 	    
@@ -225,7 +225,7 @@ public class MSDiag_BoxChart  extends HourglassPanel implements  ImageExporterIn
 	    }
 	   
 	    
-	    private void constructChromatogram(MSDiagOutput_AW msdo) {
+	    private void constructBoxChart(MSDiagOutput_AW msdo) {
 
 	        // clear all data
 	        m_dataSet.clear(); 
@@ -252,31 +252,33 @@ public class MSDiag_BoxChart  extends HourglassPanel implements  ImageExporterIn
 	        
 	        
 	        //String serieTable[] = new String[msdo.matrix[0].length];
-	        int nbSeries = msdo.matrix[0].length;
+	        int nbSeries = msdo.matrix.length;
 	        
 	        ArrayList<Double> listOutliers = new ArrayList();
 	        Comparable<String> serieString; 
 			Comparable<String> catString;  
-	        for (int serie = 1; serie < nbSeries; serie++) { // lines of data table
+	        for (int serie = 0; serie < nbSeries; serie++) { // lines of data table
 	        		// Charge","Lowest Mass","Highest Mass","Average Mass","Median Mass
 	                // series n°; minregularvalue,maxregvalue,mean,median
 	                //BoxAndWhiskerItem item = new BoxAndWhiskerItem(mean,median,q1,q3,minregularValue,maxRegularValue,minOutlier,maxOutlier,listOutliers);
 	                
-	        		serieString = msdo.column_names[serie];
-	        		catString = msdo.matrix[serie][0].toString();
+	        		serieString = msdo.matrix[serie][0].toString();// msdo.column_names[serie];
+	        		catString = msdo.matrix[serie][1].toString();
 	        		// column_names\":[\"Charge\",\"Lowest Mass\",\"Highest Mass\",\"Average Mass\",\"Median Mass\"]
 	        		//double charge = (double) (msdo.matrix[serie][0]);
-	        		double mean = (double) (msdo.matrix[serie][3]);
-	        		double median= (double) (msdo.matrix[serie][4]);
-	        		double q1= 0; //(double) (msdo.matrix[serie][2]);
-	        		double q3= 0; //(double) (msdo.matrix[serie][2]);
-	        		double minRegularValue= (double) (Double.valueOf((String) msdo.matrix[serie][1])); // if it's a string
-	        		double maxRegularValue= (double) (msdo.matrix[serie][2]);
-	        		double minOutlier = minRegularValue; // not used
-	        		double maxOutlier = maxRegularValue; // not used
-	        		listOutliers = new ArrayList(0); // not used
-	               
-					m_dataSet.add(new BoxAndWhiskerItem(mean,median,q1,q3,minRegularValue,maxRegularValue,minOutlier,maxOutlier,listOutliers),serieString,catString);
+	        		double mean = (double) (msdo.matrix[serie][4]);
+	        		double median= (double) (msdo.matrix[serie][5]);
+	        		double minRegularValue= (double) (/*Double.valueOf*/(/*(String)*/ msdo.matrix[serie][2])); // if it's a string
+	        		double maxRegularValue= (double) (msdo.matrix[serie][3]);
+	        		Number q1= minRegularValue;//0; //(double) (msdo.matrix[serie][2]);
+	        		Number q3= maxRegularValue;// null; //(double) (msdo.matrix[serie][2]);
+	        		
+	        		Number minOutlier = minRegularValue; // not used
+	        		Number maxOutlier = maxRegularValue; // not used
+	        		listOutliers = null; //new ArrayList(0); // not used
+	        		//listOutliers.add(55.0);
+	               System.out.println("min,max,mean,median:" + minRegularValue + "," + maxRegularValue+ "," + mean+ "," + median);
+					m_dataSet.add(new BoxAndWhiskerItem(mean,median,q1,q3,minRegularValue,maxRegularValue,minOutlier,maxOutlier,listOutliers),catString,serieString);
 	        
 	        }
 	      

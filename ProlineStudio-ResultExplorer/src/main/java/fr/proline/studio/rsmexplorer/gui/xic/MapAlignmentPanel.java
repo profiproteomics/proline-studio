@@ -198,7 +198,9 @@ public class MapAlignmentPanel extends HourglassPanel implements DataBoxPanelInt
         m_cbDestModel = new DefaultComboBoxModel(mapItems);
         m_cbSourceMaps.setModel(m_cbSourceModel);
         m_cbDestMaps.setModel(m_cbDestModel);
-        m_cbSourceModel.setSelectedItem(mapItems[0]);
+        if (mapItems.length > 0){
+            m_cbSourceModel.setSelectedItem(mapItems[0]);
+        }
         if(mapItems.length > 1){
             m_cbDestModel.setSelectedItem(mapItems[1]);
         }

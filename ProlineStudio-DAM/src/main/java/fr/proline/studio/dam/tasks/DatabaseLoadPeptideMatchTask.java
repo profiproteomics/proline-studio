@@ -37,6 +37,8 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     private DProteinMatch m_proteinMatch = null;
     private DProteinSet m_proteinSet = null;
     private PeptideInstance m_peptideInstance = null;
+    private MsQuery m_msQuery = null;
+    private List<DPeptideMatch> m_listPeptideMatches =null;
     
     // data kept for sub tasks
     private ArrayList<Long> m_peptideMatchIds = null;
@@ -52,6 +54,7 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
     private final static int LOAD_PEPTIDES_FOR_PROTEIN_RSET = 2;
     private final static int LOAD_PSM_FOR_PROTEIN_SET_RSM = 3;
     private final static int LOAD_PSM_FOR_PEPTIDE_RSM = 4;
+    private final static int LOAD_PSM_FOR_MSQUERY = 5;
     
     public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, ResultSet rset) {
         super(callback, SUB_TASK_COUNT_RSET, new TaskInfo("Load Peptide Matches for Search Result "+rset.getId(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
@@ -88,6 +91,16 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
         m_action = LOAD_PSM_FOR_PEPTIDE_RSM;
     }
     
+    public DatabaseLoadPeptideMatchTask(AbstractDatabaseCallback callback, long projectId, MsQuery msQuery, ResultSummary rsm, ResultSet rs, List<DPeptideMatch> listPeptideMatches){
+        super(callback, SUB_TASK_COUNT_RSM, new TaskInfo("Load PSM for MsQuery " + (msQuery == null ? "null": msQuery.getId()), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        m_projectId = projectId;
+        m_msQuery = msQuery;
+        m_rsm = rsm;
+        m_rset = rs;
+        m_listPeptideMatches = listPeptideMatches;
+        m_action = LOAD_PSM_FOR_MSQUERY;
+    }
+    
     
 
     @Override
@@ -114,6 +127,8 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 m_peptideInstance.getTransientData().setPeptideMatches(null);
                 m_peptideInstance.getTransientData().setPeptideMatchesId(null);
                 break;
+            case LOAD_PSM_FOR_MSQUERY:
+                m_listPeptideMatches = null;
         }
     }
     
@@ -131,6 +146,8 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                 return (m_proteinSet.getTypicalProteinMatch().getPeptideMatches() == null);
             case LOAD_PSM_FOR_PEPTIDE_RSM:
                 return (m_peptideInstance.getTransientData().getPeptideMatches() == null);
+            case LOAD_PSM_FOR_MSQUERY:
+                return (m_listPeptideMatches == null || m_listPeptideMatches.isEmpty());
         }
 
         return false; // should never be called
@@ -151,6 +168,8 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
                     return fetchPeptidesForProteinSetRsmMainTask();
                 case LOAD_PSM_FOR_PEPTIDE_RSM:
                     return fetchPSMForPeptideInstanceMainTask();
+                case LOAD_PSM_FOR_MSQUERY: 
+                    return fetchPSMForMsQueryMainTask();
              }
              return false; // should never be called
         } else {
@@ -977,5 +996,109 @@ public class DatabaseLoadPeptideMatchTask extends AbstractDatabaseSlicerTask {
             }
         }
     }
+    
+    public boolean fetchPSMForMsQueryMainTask() {
+        EntityManager entityManagerMSI = DataStoreConnectorFactory.getInstance().getMsiDbConnector(m_projectId).getEntityManagerFactory().createEntityManager();
+        try {
+            entityManagerMSI.getTransaction().begin();
+            Long rsmId = (long)-1;
+            if (m_rsm != null){
+                rsmId = m_rsm.getId();
+            }
+            ArrayList<DPeptideMatch> peptideMatches;
+            DPeptideMatch[] peptideMatchArray;
+            
+            String query = "SELECT new fr.proline.core.orm.msi.dto.DPeptideMatch(pm.id, pm.rank, pm.charge, pm.deltaMoz, pm.experimentalMoz, pm.missedCleavage, pm.score, pm.resultSet.id, pm.cdPrettyRank, pm.sdPrettyRank) "
+                    + "FROM fr.proline.core.orm.msi.PeptideMatch pm "
+                    + "WHERE pm.msQuery.id =:msQueryId AND "
+                    + "pm.resultSet.id =:rsId "
+                    + "ORDER BY pm.msQuery.initialId ASC";
+            TypedQuery peptideMatchQuery = entityManagerMSI.createQuery(query, DPeptideMatch.class);
+            peptideMatchQuery.setParameter("msQueryId", m_msQuery.getId());
+            peptideMatchQuery.setParameter("rsId", m_rset.getId());
+            
+            List<DPeptideMatch> resultList = peptideMatchQuery.getResultList();
+            int nbP = resultList.size();
+            peptideMatches = new ArrayList<>(nbP);
+            peptideMatchArray = new DPeptideMatch[nbP];
+            long[] peptideMatchIdsArray = new long[nbP];
+            Iterator<DPeptideMatch> it = resultList.iterator();
+            int index = 0;
+            while (it.hasNext()) {
+                DPeptideMatch pm = it.next();
+                peptideMatchIdsArray[index] = pm.getId();
+                peptideMatchArray[index++] = pm;
+                
+                peptideMatches.add(pm);
+                // resCur[1] : (pm.msQuery is fetch because it is declared as lazy and it is needed later)
+            }
+            
+            m_listPeptideMatches.addAll(resultList);
+                
+            // Retrieve Peptide Match Ids and create map of PeptideMatch in the same time
+            int nb = peptideMatchArray.length;
+            m_peptideMatchIds = new ArrayList<>(nb);
+            m_peptideMatchMap = new HashMap<>();
+            for (int i = 0; i < nb; i++) {
+                DPeptideMatch pm = peptideMatchArray[i];
+                Long pmId = pm.getId();
+                m_peptideMatchIds.add(i, pmId);
+                m_peptideMatchMap.put(pmId, pm);
+            }
+            
+            if (nb > 0) { // check that there is at least one PSM validated
+                /**
+                 * Peptide for each PeptideMatch
+                 *
+                 */
+                // slice the task and get the first one
+                SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PEPTIDE, peptideMatches.size(), SLICE_SIZE);
+
+                // execute the first slice now
+                fetchPeptide(entityManagerMSI, subTask);
+
+                /**
+                 * MS_Query for each PeptideMatch
+                 *
+                 */
+                // slice the task and get the first one
+                subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, peptideMatches.size(), SLICE_SIZE);
+
+                // execute the first slice now
+                fetchMsQuery(entityManagerMSI, subTask);
+
+
+                /**
+                 * ProteinSet String list for each PeptideMatch
+                 *
+                 */
+                // slice the task and get the first one
+                subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_PROTEINSET_NAME_LIST, peptideMatches.size(), SLICE_SIZE);
+
+                // execute the first slice now
+                fetchProteinSetName(entityManagerMSI, subTask);
+
+            }
+            entityManagerMSI.getTransaction().commit();
+        } catch (Exception e) {
+            m_logger.error(getClass().getSimpleName()+" failed", e);
+            m_taskError = new TaskError(e);
+            try {
+                entityManagerMSI.getTransaction().rollback();
+            } catch (Exception rollbackException) {
+                m_logger.error(getClass().getSimpleName() + " failed : potential network problem", rollbackException);
+            }
+            return false;
+        } finally {
+            entityManagerMSI.close();
+        }
+
+        // set priority as low for the possible sub tasks
+        m_defaultPriority = Priority.LOW;
+        m_currentPriority = Priority.LOW;
+
+        return true;
+    }
+
 
 }

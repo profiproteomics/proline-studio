@@ -21,6 +21,7 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
+import fr.proline.studio.pattern.MsQueryInfo;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.gui.model.MSQueriesTableModel;
 import fr.proline.studio.table.CompoundTableModel;
@@ -409,7 +410,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
                 return;
             }
  
-            m_dataBox.propagateDataChanged(MsQuery.class);
+            m_dataBox.propagateDataChanged(MsQueryInfo.class);
 
         }
         

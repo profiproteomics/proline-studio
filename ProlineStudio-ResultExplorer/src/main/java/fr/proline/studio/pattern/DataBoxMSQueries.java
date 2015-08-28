@@ -51,6 +51,18 @@ public class DataBoxMSQueries extends AbstractDataBox{
         GroupParameter outParameter = new GroupParameter();
         outParameter.addParameter(MsQuery.class, false);
         registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(ResultSummary.class, false);
+        registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(ResultSet.class, false);
+        registerOutParameter(outParameter);
+        
+        outParameter = new GroupParameter();
+        outParameter.addParameter(MsQueryInfo.class, false);
+        registerOutParameter(outParameter);
 
        
     }
@@ -118,6 +130,20 @@ public class DataBoxMSQueries extends AbstractDataBox{
         if (parameterType != null) {
             if (parameterType.equals(MsQuery.class)) {
                 return ((MSQueriesPanel)m_panel).getSelectedMsQuery();
+            }
+            if (parameterType.equals(ResultSet.class)) {
+                return m_rset;
+            }
+            if (parameterType.equals(ResultSummary.class)) {
+                return m_rsm;
+            }
+            if (parameterType.equals(MsQueryInfo.class)) {
+                MsQuery msq = ((MSQueriesPanel)m_panel).getSelectedMsQuery();
+                if (m_rsm == null){
+                    return new MsQueryInfo(msq, m_rset);
+                }else{
+                    return new MsQueryInfo(msq,m_rsm);
+                }
             }
         }
         return super.getData(getArray, parameterType);

@@ -141,6 +141,8 @@ public class ExportDatasetAction extends AbstractRSMAction {
                                                 int nb = 1;
                                                 for (String _filePath1 : _filePath) {
                                                     int id = _filePath1.lastIndexOf("\\");
+                                                    if (id == -1)
+                                                        id = _filePath1.lastIndexOf("/");
                                                     int idUnderscore = _filePath1.lastIndexOf("_");
                                                     int idExtC = fileName.lastIndexOf(".");
                                                     String fn = fileName;
@@ -201,7 +203,7 @@ public class ExportDatasetAction extends AbstractRSMAction {
     public String getDatasetName(String fileName, AbstractNode[] selectedNodes){
         int id0 = fileName.indexOf("-");
         int id1 = fileName.indexOf("_");
-        if (id0 > -1 && id1 > -1){
+        if (id0 > -1 && id1 > -1 && id0<id1){
             String dsIdStr = fileName.substring(id0+1, id1);
             try{
                 Long dsId  = Long.parseLong(dsIdStr);

@@ -475,7 +475,8 @@ public class IdentificationTree extends AbstractTree implements TreeWillExpandLi
                     datasetList.add(dataset);
                     //nodeToBeChanged.add((DataSetNode)childNode);
                 } else if (childNode instanceof HourGlassNode) {
-                    // it works!
+                    // potential bug
+                    //JPM.TODO ??? (should not happen)
                 }
             }
 

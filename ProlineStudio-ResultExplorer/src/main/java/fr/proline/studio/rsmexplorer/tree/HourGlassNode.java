@@ -48,9 +48,4 @@ public class HourGlassNode extends AbstractNode {
         return copy;
     }
     
-    @Override
-    public boolean canBeDeleted() {
-        return true;
-    }
-    
 }

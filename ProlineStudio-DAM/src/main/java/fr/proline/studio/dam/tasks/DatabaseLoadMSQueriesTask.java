@@ -128,12 +128,14 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
                 }
                 
                 m_msiSearch = entityManagerMSI.find(MsiSearch.class, msiSearchId);
+                if (m_listMsQueries.size() > 0){
                 
-                // slice the task and get the first one
-                SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, m_listMsQueries.size(), SLICE_SIZE);
+                    // slice the task and get the first one
+                    SubTask subTask = m_subTaskManager.sliceATaskAndGetFirst(SUB_TASK_MSQUERY, m_listMsQueries.size(), SLICE_SIZE);
 
-                // execute the first slice now
-                fetchMSQueriesData(subTask, entityManagerMSI);
+                    // execute the first slice now
+                    fetchMSQueriesData(subTask, entityManagerMSI);
+                }
             }
             entityManagerMSI.getTransaction().commit();
         } catch (Exception e) {

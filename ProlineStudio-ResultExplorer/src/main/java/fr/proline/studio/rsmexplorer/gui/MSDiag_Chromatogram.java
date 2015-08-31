@@ -98,7 +98,7 @@ public class MSDiag_Chromatogram  extends HourglassPanel implements  ImageExport
 	         renderer.setDrawBarOutline(false);  
 	        renderer.setBarPainter(new StandardXYBarPainter());
 	         
-	        renderer.setSeriesPaint(0, new Color(254,60,60));
+	        renderer.setSeriesPaint(0, new Color(220,220,220/*254,60,60*/));
 	        renderer.setSeriesPaint(1, new Color(176,190,255));
 	        renderer.setSeriesPaint(2, new Color(132,153,255));
 	        renderer.setSeriesPaint(3, new Color(91,120,255));

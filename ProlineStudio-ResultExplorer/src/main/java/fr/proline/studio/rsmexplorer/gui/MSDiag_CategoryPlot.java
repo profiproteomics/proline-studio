@@ -131,7 +131,7 @@ public class MSDiag_CategoryPlot  extends HourglassPanel implements  ImageExport
 	        StackedBarRenderer3D renderer = (StackedBarRenderer3D) plot.getRenderer();
 	        renderer.setShadowVisible(true);
             //renderer.setDrawBarOutline();
-	        renderer.setSeriesPaint(0, new Color(254,60,60));
+	        renderer.setSeriesPaint(0, new Color(220,220,220/*254,60,60*/));
 	        renderer.setSeriesPaint(1, new Color(176,190,255));
 	        renderer.setSeriesPaint(2, new Color(132,153,255));
 	        renderer.setSeriesPaint(3, new Color(91,120,255));

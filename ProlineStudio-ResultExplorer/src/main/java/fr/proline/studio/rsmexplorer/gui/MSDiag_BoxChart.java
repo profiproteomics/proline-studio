@@ -71,6 +71,8 @@ public class MSDiag_BoxChart  extends HourglassPanel implements  ImageExporterIn
 	    
 	    private CategoryPlot m_subplot; // the plot that holds the range values data
 
+		private RsetMSDiagPanel m_msdiagPanel;
+
 			    
 	    @Override // declared in ProlineStudioCommons ImageExporterInterface
 	    public void generateSvgImage(String file) {
@@ -91,8 +93,9 @@ public class MSDiag_BoxChart  extends HourglassPanel implements  ImageExporterIn
 	    /**
 	     * Creates new form MSDiag_PieChart
 	     */
-	    public MSDiag_BoxChart() {
+	    public MSDiag_BoxChart(RsetMSDiagPanel rsetMSDiagPanel) {
 	        
+	    	m_msdiagPanel = rsetMSDiagPanel;
 	    	m_dataSet = new DefaultBoxAndWhiskerCategoryDataset();
 	    	
 	    	
@@ -180,7 +183,8 @@ public class MSDiag_BoxChart  extends HourglassPanel implements  ImageExporterIn
 	        toolbar.setFloatable(false);
 	        //m_picWrapper = new ExportPictureWrapper();
 	        //m_picWrapper.setFile(m_svgFile);
-
+	        FlipButton flipModeButton = new FlipButton("flip button text", m_msdiagPanel);
+	        toolbar.add(flipModeButton);
 	        ExportButton exportImageButton = new ExportButton("pieChart", (ImageExporterInterface) this);
 	        toolbar.add(exportImageButton);
 	       

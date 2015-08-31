@@ -182,8 +182,8 @@ public class MSDiag_PieChart extends HourglassPanel implements  ImageExporterInt
 	    	if(msdo.matrix[0].length == 2) { // then both data are present
 		        m_dataSet.setValue(msdo.column_names[0], (Double) Math.abs((double) msdo.matrix[0][0]));
 			    m_dataSet.setValue(msdo.column_names[1], (Double) Math.abs((double) msdo.matrix[0][1]));
-			    ((PiePlot) m_chart.getPlot()).setSectionPaint(msdo.column_names[0], new Color(255,60,60));
-		        ((PiePlot) m_chart.getPlot()).setSectionPaint(msdo.column_names[1], new Color(60,60,255));
+			    ((PiePlot) m_chart.getPlot()).setSectionPaint(msdo.column_names[0], new Color(220,220,220/*255,60,60*/));
+		        ((PiePlot) m_chart.getPlot()).setSectionPaint(msdo.column_names[1], new Color(60,60,220));
 		    }
 	    }
 	    

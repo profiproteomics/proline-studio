@@ -171,7 +171,7 @@ public class CalibrationPlotGraphic extends AbstractGraphic {
 
         ParameterList parameterList1 = new ParameterList("param1");
         
-        m_columnsParameter1 = new ObjectParameter(SEL_COLS1, "First Column Group", null, objectArray1, associatedObjectArray1, -1, null);
+        m_columnsParameter1 = new ObjectParameter(SEL_COLS1, "P Values Column", null, objectArray1, associatedObjectArray1, -1, null);
 
         String[] pi0Values = { "ALL","Numeric Value", "abh", "jiang", "histo", "langaas", "pounds", "slim", "st.boot", "st.spline" };
         m_pi0MethodParameter = new ObjectParameter(PI0PARAMETER, "pi0 Method", pi0Values, 0, null);

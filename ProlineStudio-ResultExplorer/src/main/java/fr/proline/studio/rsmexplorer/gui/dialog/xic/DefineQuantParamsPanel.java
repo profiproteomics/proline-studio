@@ -138,11 +138,15 @@ public class DefineQuantParamsPanel extends JPanel{
         
         m_clusteringMoZTolTF = new JTextField();
         m_clusteringMoZTolTF.setEnabled(!m_readOnly);
+        // do not allow to change the method of quanti
+        m_clusteringMoZTolTF.setEnabled(false);
         DoubleParameter m_clusteringMoZTolParameter = new DoubleParameter("clusteringMoZTol", "Clustering moz tolerance", m_clusteringMoZTolTF, new Double(5), new Double(0), null);
         m_parameterList.add(m_clusteringMoZTolParameter);
         
         m_clusteringTimeTolTF = new JTextField();
         m_clusteringTimeTolTF.setEnabled(!m_readOnly);
+        // do not allow to change the method of quanti
+        m_clusteringTimeTolTF.setEnabled(false);
         DoubleParameter m_clusteringTimeTolParameter = new DoubleParameter("clusteringTimeTol", "Clustering time tolerance", m_clusteringTimeTolTF, new Double(15), new Double(0), null);
         m_parameterList.add(m_clusteringTimeTolParameter);
 
@@ -244,11 +248,15 @@ public class DefineQuantParamsPanel extends JPanel{
         m_extractedXICFromCB = new JComboBox(FEATURE_EXTRACTED_XIC_VALUES);
         m_extractedXICFromCB.setEnabled(!m_readOnly);
         m_extractedXICFromParameter = new ObjectParameter<>("extractedXICFrom", "ExtractedXICFrom", m_extractedXICFromCB, FEATURE_EXTRACTED_XIC_VALUES, FEATURE_EXTRACTED_XIC_KEYS,  0, null);
+        // do not allow to change the method of quanti
+        m_extractedXICFromCB.setEnabled(false);
         m_parameterList.add(m_extractedXICFromParameter);
         
         m_detectPeakelChB = new JCheckBox("Deisotoping Identification Based");
         m_detectPeakelChB.setEnabled(!m_readOnly);
         m_detectPeakelsParameter = new BooleanParameter("detectPeakel", "Deisotoping Identification Based", m_detectPeakelChB, true);
+        // do not allow to change the method of quanti
+        m_detectPeakelChB.setEnabled(false);
         m_parameterList.add(m_detectPeakelsParameter);
  
     }
@@ -444,7 +452,8 @@ public class DefineQuantParamsPanel extends JPanel{
         boolean start_from_validated_peptides = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ALL_DETECTABLE_FEATURES")) ;
         params.put("detect_features", detectFeatures);
         params.put("start_from_validated_peptides", start_from_validated_peptides);
-        params.put("detect_peakels", m_detectPeakelChB.isEnabled() && m_detectPeakelChB.isSelected());
+        //params.put("detect_peakels", m_detectPeakelChB.isEnabled() && m_detectPeakelChB.isSelected());
+        params.put("detect_peakels", m_detectPeakelChB.isSelected());
         return params;
     }
         
@@ -507,7 +516,7 @@ public class DefineQuantParamsPanel extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 boolean start_from_validated_peptides = (m_extractedXICFromParameter.getStringValue() != null && m_extractedXICFromParameter.getStringValue().equalsIgnoreCase("ALL_DETECTABLE_FEATURES")) ;
-                m_detectPeakelChB.setEnabled(!m_readOnly && start_from_validated_peptides);
+                //m_detectPeakelChB.setEnabled(!m_readOnly && start_from_validated_peptides);
             }
         });
             

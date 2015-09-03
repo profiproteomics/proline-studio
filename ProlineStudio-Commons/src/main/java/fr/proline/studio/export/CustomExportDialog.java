@@ -752,8 +752,11 @@ public class CustomExportDialog extends DefaultDialog {
             @Override
             public void mouseClicked(MouseEvent arg0) {
                 if (SwingUtilities.isRightMouseButton(arg0)) {
-                    boolean tabEnabled = m_tabbedPane.isEnabledAt(m_tabbedPane.indexAtLocation(arg0.getX(), arg0.getY()));
                     int tabIndex = m_tabbedPane.indexAtLocation(arg0.getX(), arg0.getY());
+                    if (tabIndex == -1) {
+                        return;
+                    }
+                    boolean tabEnabled = m_tabbedPane.isEnabledAt(tabIndex);
                     m_tabbedPane.setEnabledAt(tabIndex, !tabEnabled);
                     repaint();
                     arg0.consume();

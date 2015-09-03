@@ -5,7 +5,7 @@
   <parent>
     <artifactId>ProlineStudio-parent</artifactId>
     <groupId>fr.proline</groupId>
-    <version>0.4.2</version>
+    <version>0.4.3-SNAPSHOT</version>
   </parent>
 
     <groupId>fr.proline</groupId>

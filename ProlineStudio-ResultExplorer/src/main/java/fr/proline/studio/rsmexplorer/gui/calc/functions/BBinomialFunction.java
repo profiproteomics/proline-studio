@@ -188,7 +188,7 @@ public class BBinomialFunction extends AbstractFunction {
             Class c = model1.getDataColumnClass(i);
             if (c.equals(Float.class) || c.equals(Double.class)) {
                 objectArray1[iKept] = model1.getColumnName(i);
-                associatedObjectArray1[iKept] = i;
+                associatedObjectArray1[iKept] = i+1;  // +1 because it is used in python calc expression
                 iKept++;
             }
         }

@@ -15,6 +15,7 @@ import fr.proline.studio.rsmexplorer.tree.DataSetNode;
 import fr.proline.studio.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.SwingUtilities;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                 return 0;
             }
 
-            @Override
+            @Override 
             public int getMaxValue() {
                 return 100;
             }
@@ -189,10 +190,21 @@ public class ExportDatasetJMSAction extends AbstractRSMAction {
                                 return null;
                             }
                         };
-
+                        
                         dialog.setTask(task);
                         dialog.setLocation(x, y);
-                        dialog.setVisible(true);
+
+                        SwingUtilities.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                dialog.setVisible(true);
+                            }
+                            
+                        });
+                        
+                        
+                        
                     }
                 };
                 GetExportInformationTask task = new GetExportInformationTask(getExportCallback, dataSetNode.getDataset(), m_config);

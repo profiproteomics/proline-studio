@@ -19,13 +19,13 @@ import javax.swing.JButton;
  *
  * @author shivanishah
  */
-public class imageButton  extends JButton{
+public class MatrixImageButton  extends JButton{
     
     public Component componentOfImage ;
     
     private DrawVisualization m_drawVisualization;
     
-    public imageButton (Component c, DrawVisualization drawVisualization) {
+    public MatrixImageButton (Component c, DrawVisualization drawVisualization) {
         this.componentOfImage = c ;
         m_drawVisualization = drawVisualization;
         

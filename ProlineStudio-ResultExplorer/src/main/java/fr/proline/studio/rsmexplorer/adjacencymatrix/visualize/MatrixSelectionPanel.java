@@ -158,7 +158,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
             for (int j = 0; j < layoutArray.get(i); j++) {
                 //    jRow.add(pList.get(k));
-                JButton bTemp = new imageButton(cList1.get(k), m_drawVisualization);
+                JButton bTemp = new MatrixImageButton(cList1.get(k), m_drawVisualization);
                 StringBuilder sb = new StringBuilder();
                 sb.append("");
                 sb.append(k);

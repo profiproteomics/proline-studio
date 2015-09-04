@@ -57,7 +57,8 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     private static final String GLOBALPANEL = "Main Panel";
     
     public MatrixSelectionPanel() {
-
+        setLoading(0);
+        
         
     }
     
@@ -106,7 +107,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         ArrayList<Integer> layoutArray = new ArrayList<>() ;
         
         //Indices start at 0, so 4 specifies the pig.
-        JComboBox<String> searchList = new JComboBox<String>(searchStrings);
+        JComboBox<String> searchList = new JComboBox<>(searchStrings);
         searchList.setPrototypeDisplayValue("XXXXXXXXXX");
         searchList.setEditable(false);
         comboEvent = new SearchEvent();
@@ -158,7 +159,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
             for (int j = 0; j < layoutArray.get(i); j++) {
                 //    jRow.add(pList.get(k));
-                JButton bTemp = new MatrixImageButton(cList1.get(k), m_drawVisualization);
+                JButton bTemp = new MatrixImageButton(j, cList1.get(k), m_drawVisualization);
                 StringBuilder sb = new StringBuilder();
                 sb.append("");
                 sb.append(k);
@@ -177,16 +178,11 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
         Dimension dCol = new Dimension(screenSize.width, length + 30);
         jCol.setMinimumSize(dCol);
-           // jCol.setMaximumSize(new Dimension(fWidth,fHight));
-        // jCol.setPreferredSize(dCol);
         jCol.setPreferredSize(dCol);
 
-          //  JScrollBar scroll = new JScrollBar(JScrollBar.VERTICAL, 30, 40, 0, 300);
-        //  jCol.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.BLACK));
         jCol.setBackground(Color.WHITE);
 
         JScrollPane scroll = new JScrollPane(jCol);
-        //  final String TEXTPANEL = "Card with JTextField";
         scroll.setName(GLOBALPANEL);
         cardPanel.add(scroll, GLOBALPANEL);
 
@@ -349,9 +345,13 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         m_drawVisualization = new DrawVisualization();
         
         m_drawVisualization.setData(matrixData);
-        
-        //JPM.TODO
+
         initPanel();
+        
+        setLoaded(0);
+        
+        revalidate(); 
+        repaint();
     }
     
     private ArrayList<Component> filterComponents(ArrayList<Component> cList) {

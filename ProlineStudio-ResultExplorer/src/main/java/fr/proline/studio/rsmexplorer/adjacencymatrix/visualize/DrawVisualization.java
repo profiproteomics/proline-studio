@@ -7,7 +7,6 @@ import java.util.HashMap;
 import fr.proline.studio.dam.tasks.data.LightPeptideMatch;
 import fr.proline.studio.dam.tasks.data.LightProteinMatch;
 
-//Defined as singleton
 public class DrawVisualization {
 
     private AdjacencyMatrixData m_adjacencyMatrixData = null;
@@ -15,15 +14,6 @@ public class DrawVisualization {
 
     private ArrayList<Component> m_cList;
     private ConnectedComponents m_cObject;
-
-    /*private static DrawVisualization instance;
-
-    public static DrawVisualization getInstance() {
-        if (instance == null) {
-            instance = new DrawVisualization();
-        }
-        return instance;
-    }*/
 
     public void setData(AdjacencyMatrixData adjacencyMatrixData) {
         m_adjacencyMatrixData = adjacencyMatrixData;

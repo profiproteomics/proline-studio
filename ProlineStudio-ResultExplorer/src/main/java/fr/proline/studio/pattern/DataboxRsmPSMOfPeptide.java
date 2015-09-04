@@ -1,7 +1,6 @@
 package fr.proline.studio.pattern;
 
 import fr.proline.core.orm.msi.PeptideInstance;
-import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -47,7 +46,7 @@ public class DataboxRsmPSMOfPeptide extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        PeptideMatchPanel p = new PeptideMatchPanel(true, false, true);
+        PeptideMatchPanel p = new PeptideMatchPanel(true, false, true, false);
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;

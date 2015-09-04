@@ -56,6 +56,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     private boolean m_forRSM;
     private boolean m_startingPanel;
     private boolean m_proteinMatchUnknown;
+    private boolean m_isDecoyAndValidated; // to display columns isDecoy and isValidated (in case of rsm)
     
     private PeptideMatchTable m_peptideMatchTable;
     private JScrollPane m_scrollPane;
@@ -72,10 +73,11 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     private JButton m_graphicsButton;
     private AddDataMixerButton m_addCompareDataButton;
 
-    public PeptideMatchPanel(boolean forRSM, boolean startingPanel, boolean proteinMatchUnknown) {
+    public PeptideMatchPanel(boolean forRSM, boolean startingPanel, boolean proteinMatchUnknown, boolean isDecoyAndValidated) {
         m_forRSM = forRSM;
         m_startingPanel = startingPanel;
         m_proteinMatchUnknown = proteinMatchUnknown;
+        m_isDecoyAndValidated = isDecoyAndValidated;
         initComponents();
 
     }
@@ -378,7 +380,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         // create objects
         m_scrollPane = new JScrollPane();
         m_peptideMatchTable = new PeptideMatchTable();
-        PeptideMatchTableModel peptideMatchTableModel = new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !(m_startingPanel || m_proteinMatchUnknown));
+        PeptideMatchTableModel peptideMatchTableModel = new PeptideMatchTableModel((LazyTable)m_peptideMatchTable, m_forRSM, !(m_startingPanel || m_proteinMatchUnknown), m_isDecoyAndValidated);
         CompoundTableModel compoundTableModel = new CompoundTableModel(peptideMatchTableModel, true);
         m_peptideMatchTable.setModel(compoundTableModel);
         m_peptideMatchTable.displayColumnAsPercentage(peptideMatchTableModel.convertColToColUsed(PeptideMatchTableModel.COLTYPE_PEPTIDE_SCORE));

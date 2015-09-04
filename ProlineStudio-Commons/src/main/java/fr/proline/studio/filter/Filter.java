@@ -18,7 +18,8 @@ public abstract class Filter {
         FILTER_STRING,
         FILTER_STRING_DIFF,
         FILTER_VALUE,
-        FILTER_DOUBLE
+        FILTER_DOUBLE, 
+        FILTER_BOOLEAN
     }
     
     protected ArrayList<Integer> m_valueKeys = null;

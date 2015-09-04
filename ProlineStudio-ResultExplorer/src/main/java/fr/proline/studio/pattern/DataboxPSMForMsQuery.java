@@ -65,7 +65,7 @@ public class DataboxPSMForMsQuery extends AbstractDataBox{
     
     @Override
     public void createPanel() {
-        PeptideMatchPanel p = new PeptideMatchPanel(m_fromRSM, false, true); 
+        PeptideMatchPanel p = new PeptideMatchPanel(m_fromRSM, false, true, true); 
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
@@ -76,7 +76,7 @@ public class DataboxPSMForMsQuery extends AbstractDataBox{
     public void dataChanged() {
         long oldMsQId = m_msQuery == null? -1: m_msQuery.getId();
         final MsQueryInfo _msqI = (MsQueryInfo) m_previousDataBox.getData(false, MsQueryInfo.class);
-        if (oldMsQId == _msqI.getMsQuery().getId()){
+        if (_msqI != null && _msqI.getMsQuery() != null && oldMsQId == _msqI.getMsQuery().getId()){
             return ;
         }
         m_msQuery = _msqI.getMsQuery();
@@ -118,7 +118,9 @@ public class DataboxPSMForMsQuery extends AbstractDataBox{
 
         // ask asynchronous loading of data
         m_peptideMatches = new ArrayList();
-        registerTask(new DatabaseLoadPeptideMatchTask(callback, getProjectId(), m_msQuery, m_rsm, m_rset, m_peptideMatches));
+        if (m_msQuery != null){
+            registerTask(new DatabaseLoadPeptideMatchTask(callback, getProjectId(), m_msQuery, m_rsm, m_rset, m_peptideMatches));
+        }
 
     }
     

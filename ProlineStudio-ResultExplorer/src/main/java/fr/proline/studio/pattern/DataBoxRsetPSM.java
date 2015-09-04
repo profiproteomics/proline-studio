@@ -55,7 +55,7 @@ public class DataBoxRsetPSM extends AbstractDataBox {
 
     @Override
     public void createPanel() {
-        PeptideMatchPanel p = new PeptideMatchPanel(false, true, true);
+        PeptideMatchPanel p = new PeptideMatchPanel(false, true, true, false);
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;

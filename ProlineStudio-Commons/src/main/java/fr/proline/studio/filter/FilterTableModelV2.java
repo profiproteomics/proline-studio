@@ -232,7 +232,9 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
             case FILTER_VALUE: {
                 return ((ValueFilter) filter).filter((Integer)data);
             }
-    
+            case FILTER_BOOLEAN: {
+                return ((BooleanFilter) filter).filter((Boolean)data);
+            }
         }
         
         return true; // should never happen

@@ -102,10 +102,11 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxMzScope(31),
         DataboxDataMixer(32),
         DataboxExperimentalDesign(33),
-        DataBoxAdjacentMatrix(34),
-        DataBoxMapAlignment(35), 
-        DataBoxMSQueries(36), 
-        DataBoxPSMForMsQuery(37);
+        DataBoxAdjacencyMatrix(34),
+        DataBoxAdjacencyMatrixChoice(35),
+        DataBoxMapAlignment(36), 
+        DataBoxMSQueries(37), 
+        DataBoxPSMForMsQuery(38);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;
@@ -180,8 +181,10 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataboxPSMOfMasterQuantPeptide();
                 case DataBoxMzScope:
                     return new DataBoxMzScope();
-                case DataBoxAdjacentMatrix:
+                case DataBoxAdjacencyMatrix:
                     return new DataBoxAdjacencyMatrix();
+                case DataBoxAdjacencyMatrixChoice:
+                    return new DataBoxAdjacencyMatrixChoice();
                 case DataboxExperimentalDesign:
                     return new DataboxExperimentalDesign();
                 case DataBoxMapAlignment:

@@ -8,7 +8,6 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.dam.tasks.data.LightPeptideMatch;
 import fr.proline.studio.dam.tasks.data.LightProteinMatch;
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -18,20 +17,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.GroupLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.LayoutStyle;
-import javax.swing.SwingConstants;
 
 /**
  *
@@ -42,20 +33,16 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     private AbstractDataBox m_dataBox;
     
     private DrawVisualization m_drawVisualization = null; 
-    
-    private navigationData nData;
+
     
     private static HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap ;
     private ArrayList<Component> cList1;
     
     private SearchEvent comboEvent;
+
     
-    private JPanel cardPanel;
-    private JTextField idDisplay;
-    private JTextField idEntry;
-    
-    private static final String GLOBALPANEL = "Main Panel";
-    
+    private Component m_currentComponent = null;
+
     public MatrixSelectionPanel() {
         setLoading(0);
         
@@ -63,9 +50,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     }
     
     private void initPanel() {
-        
-        nData = new navigationData();
-        
+
         // search filter order
         m_peptideToProteinMap = m_drawVisualization.get_peptideToProteinMap();
         cList1 = filterComponents(m_drawVisualization.get_ComponentList());
@@ -78,44 +63,13 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         setLayout(new BorderLayout());
         
         // create objects
-        idDisplay = new JTextField();
-        idDisplay.setHorizontalAlignment(SwingConstants.CENTER);
-        idDisplay.setBackground(Color.white);
-        idDisplay.setEditable(false);
-        idDisplay.setVisible(false);
-        
-        
-        JButton previousB = new JButton("Previous Frame");
-        previousB.setEnabled(false);
-        
-        JButton nextB = new JButton("Next Frame");
-        nextB.setEnabled(false);
-        
-        JButton mainPageButton = new JButton("Global view");
 
-        cardPanel = new JPanel(new CardLayout());
-        
-        JPanel buttonPane = new JPanel();
-        GroupLayout layout = new GroupLayout(buttonPane);
-        buttonPane.setLayout(layout);
-        layout.setAutoCreateGaps(true);
-        layout.setAutoCreateContainerGaps(true);
-
-        JLabel label1 = new JLabel("Search:");
-        String[] searchStrings = {"  -----", "Proteins", "Peptides"};
-        
         ArrayList<Integer> layoutArray = new ArrayList<>() ;
         
         //Indices start at 0, so 4 specifies the pig.
-        JComboBox<String> searchList = new JComboBox<>(searchStrings);
-        searchList.setPrototypeDisplayValue("XXXXXXXXXX");
-        searchList.setEditable(false);
-        comboEvent = new SearchEvent();
-        searchList.addItemListener(comboEvent);
-        searchList.setAlignmentY(java.awt.Component.CENTER_ALIGNMENT);
 
-        JLabel label2 = new JLabel("     ID :");
-        idEntry = new JTextField(10);
+
+
         
         
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -164,7 +118,17 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
                 sb.append("");
                 sb.append(k);
                 String str = sb.toString();
-                bTemp.addActionListener(new ZoomEvent(cList1.get(k), cardPanel, str, nData, previousB, nextB, idDisplay, m_drawVisualization));
+                final Component _c = cList1.get(k);
+                bTemp.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        setCurrentComponent(_c);
+                        m_dataBox.propagateDataChanged(Component.class);
+                    }
+                    
+                });
+
                 jRow.add(bTemp);
 
                 jRow.add(Box.createRigidArea(new Dimension(8, 0)));
@@ -183,69 +147,118 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         jCol.setBackground(Color.WHITE);
 
         JScrollPane scroll = new JScrollPane(jCol);
-        scroll.setName(GLOBALPANEL);
-        cardPanel.add(scroll, GLOBALPANEL);
 
-        
-        
-        
-        
-        java.awt.Component rigidArea = Box.createRigidArea(new Dimension(10, 10));
-        layout.setHorizontalGroup(layout.createSequentialGroup()
-                .addComponent(previousB)
-                .addComponent(nextB)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED,
-                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(idDisplay)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED,
-                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(label1)
-                        .addComponent(label2))
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(searchList, GroupLayout.PREFERRED_SIZE, 130,
-                                GroupLayout.PREFERRED_SIZE)
-                        .addComponent(idEntry, GroupLayout.PREFERRED_SIZE, 130,
-                                GroupLayout.PREFERRED_SIZE))
-                .addComponent(rigidArea)
-                .addComponent(mainPageButton)
-        );
-
-        layout.setVerticalGroup(
-                layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(previousB)
-                        .addComponent(nextB)
-                        .addComponent(idDisplay)
-                        .addComponent(label1)
-                        .addComponent(searchList, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                                GroupLayout.PREFERRED_SIZE)
-                        .addComponent(rigidArea)
-                        .addComponent(mainPageButton)
-                )
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(label2)
-                        .addComponent(idEntry, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                                GroupLayout.PREFERRED_SIZE)
-                )
-        );
-
-        JPanel topPane = new JPanel();
-        topPane.setLayout(new BoxLayout(topPane, BoxLayout.Y_AXIS));
-        topPane.add(buttonPane);
-        
+  
         
         // add panels to the MatrixSelectionPanel
-        add(cardPanel, BorderLayout.CENTER);
-        add(topPane, BorderLayout.NORTH);
-        
-        
-        // Actions
-        mainPageButton.addActionListener(new GlobalViewEvent(cardPanel, nData, previousB, nextB, idDisplay));
-        previousB.addActionListener(new navigateCards("previous", cardPanel, nData, previousB, nextB, idDisplay));
-        nextB.addActionListener(new navigateCards("next", cardPanel, nData, previousB, nextB, idDisplay));
+        add(scroll, BorderLayout.CENTER);
 
-        Action action = new AbstractAction() {
+
+
+
+
+    }
+    
+    public DrawVisualization getDrawVisualization() {
+        return m_drawVisualization;
+    }
+    
+    public void setData(AdjacencyMatrixData matrixData) {
+        
+        m_drawVisualization = new DrawVisualization();
+        
+        m_drawVisualization.setData(matrixData);
+
+        initPanel();
+        
+        setLoaded(0);
+        
+        revalidate(); 
+        repaint();
+    }
+    
+    private ArrayList<Component> filterComponents(ArrayList<Component> cList) {
+        ArrayList<Component> subCList = new ArrayList<>();
+        for (Component temp : cList) {
+            if (temp.peptideSet.size() > 1 && temp.proteinSet.size() > 1) {
+                if (!fullMatch(temp)) {
+                    subCList.add(temp);
+                }
+            }
+        }
+
+        return subCList;
+    }
+    
+    private boolean fullMatch(Component temp) {
+        for (LightPeptideMatch peptTemp : temp.peptideSet) {
+            ArrayList<LightProteinMatch> protList = m_peptideToProteinMap.get(peptTemp);
+            for (LightProteinMatch protTemp : temp.proteinSet) {
+                if (!protList.contains(protTemp)) {
+                    return false;
+                }
+            }
+
+        }
+        return true;
+    }
+    
+    public void setCurrentComponent(Component c) {
+        m_currentComponent = c;
+    }
+    
+    public Component getCurrentComponent() {
+        return m_currentComponent;
+    }
+
+    @Override
+    public void setDataBox(AbstractDataBox dataBox) {
+        m_dataBox = dataBox;
+    }
+
+    @Override
+    public AbstractDataBox getDataBox() {
+        return m_dataBox;
+    }
+
+    @Override
+    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
+        //JPM.TODO
+        return null;
+    }
+
+    @Override
+    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
+       //JPM.TODO
+        return null; 
+    }
+
+    @Override
+    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
+        //JPM.TODO
+        return null;
+    }
+
+    
+
+
+    public class CustomComparator implements Comparator<Component> {
+
+        @Override
+        public int compare(Component o1, Component o2) {
+
+            if (o1 == null || o2 == null) {
+                throw new NullPointerException();
+            }
+
+            return (o2.getPeptideSize() * o2.getProteinSize()) - (o1.getPeptideSize() * o1.getProteinSize());
+        }
+    }
+
+    
+    /* OLD SEARCH EVENT 
+    
+            Action action = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Component currentComponent = null;
@@ -310,7 +323,8 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
                         sb.append(componentSearchIndex);
                         String str = sb.toString();
 
-                        MatrixPanel cCard = new MatrixPanel(currentComponent, cardPanel, idDisplay, m_drawVisualization);
+                        MatrixPanel cCard = new MatrixPanel();
+                        cCard.setData(currentComponent, idDisplay, m_drawVisualization);
 
                         if (searchItem.compareToIgnoreCase("Proteins")==0) {
                             String idProt = idEntry.getText();
@@ -327,8 +341,6 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
                         CardLayout cl = (CardLayout) (cardPanel.getLayout());
                         cl.show(cardPanel, str);
 
-                        nData.previous.push(nData.currentCard);
-                        nData.currentCard = str;
                     } else {
 	            	 //"Item not found!");
 
@@ -336,93 +348,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
                 }
             }
         };
-        idEntry.addActionListener(action);
-        
-    }
+    */
     
-    public void setData(AdjacencyMatrixData matrixData) {
-        
-        m_drawVisualization = new DrawVisualization();
-        
-        m_drawVisualization.setData(matrixData);
-
-        initPanel();
-        
-        setLoaded(0);
-        
-        revalidate(); 
-        repaint();
-    }
-    
-    private ArrayList<Component> filterComponents(ArrayList<Component> cList) {
-        ArrayList<Component> subCList = new ArrayList<>();
-        for (Component temp : cList) {
-            if (temp.peptideSet.size() > 1 && temp.proteinSet.size() > 1) {
-                if (!fullMatch(temp)) {
-                    subCList.add(temp);
-                }
-            }
-        }
-
-        return subCList;
-    }
-    
-    private boolean fullMatch(Component temp) {
-        for (LightPeptideMatch peptTemp : temp.peptideSet) {
-            ArrayList<LightProteinMatch> protList = m_peptideToProteinMap.get(peptTemp);
-            for (LightProteinMatch protTemp : temp.proteinSet) {
-                if (!protList.contains(protTemp)) {
-                    return false;
-                }
-            }
-
-        }
-        return true;
-    }
-
-    @Override
-    public void setDataBox(AbstractDataBox dataBox) {
-        m_dataBox = dataBox;
-    }
-
-    @Override
-    public AbstractDataBox getDataBox() {
-        return m_dataBox;
-    }
-
-    @Override
-    public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
-        //JPM.TODO
-        return null;
-    }
-
-    @Override
-    public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
-       //JPM.TODO
-        return null; 
-    }
-
-    @Override
-    public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
-        //JPM.TODO
-        return null;
-    }
-
-    
-
-
-    public class CustomComparator implements Comparator<Component> {
-
-        @Override
-        public int compare(Component o1, Component o2) {
-
-            if (o1 == null || o2 == null) {
-                throw new NullPointerException();
-            }
-
-            return (o2.getPeptideSize() * o2.getProteinSize()) - (o1.getPeptideSize() * o1.getProteinSize());
-        }
-    }
-
 }
 

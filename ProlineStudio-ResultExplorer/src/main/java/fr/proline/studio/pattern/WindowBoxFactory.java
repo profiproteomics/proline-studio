@@ -190,9 +190,10 @@ public class WindowBoxFactory {
     public static WindowBox getAdjacencyMatrixWindowBox(String dataName, boolean isDecoy) {
 
         // create boxes
-        AbstractDataBox[] boxes = new AbstractDataBox[1];
-        boxes[0] = new DataBoxAdjacencyMatrix();
+        AbstractDataBox[] boxes = new AbstractDataBox[2];
+        boxes[0] = new DataBoxAdjacencyMatrixChoice();
         boxes[0].setDataName(dataName);
+        boxes[1] = new DataBoxAdjacencyMatrix();
 
         IconManager.IconType iconType = isDecoy ? IconManager.IconType.DATASET_RSM_DECOY : IconManager.IconType.DATASET_RSM;
 

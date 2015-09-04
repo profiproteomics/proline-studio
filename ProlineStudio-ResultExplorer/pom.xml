@@ -325,6 +325,14 @@
                 </exclusion>            
             </exclusions>
         </dependency>
+        
+
+        <dependency> 
+            <groupId>sape.inf.usi.ch</groupId> 
+            <artifactId>hac</artifactId> 
+            <version>2015-04</version> 
+        </dependency> 
+
 
 
     </dependencies>

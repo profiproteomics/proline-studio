@@ -20,7 +20,6 @@ import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -37,12 +36,10 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     
     private static HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap ;
     private ArrayList<Component> cList1;
-    
-    private SearchEvent comboEvent;
 
-    
     private Component m_currentComponent = null;
-
+    private MatrixImageButton m_currentImageButton = null;
+    
     public MatrixSelectionPanel() {
         setLoading(0);
         
@@ -113,7 +110,12 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
             for (int j = 0; j < layoutArray.get(i); j++) {
                 //    jRow.add(pList.get(k));
-                JButton bTemp = new MatrixImageButton(j, cList1.get(k), m_drawVisualization);
+                final MatrixImageButton bTemp = new MatrixImageButton(j, cList1.get(k), m_drawVisualization);
+                if (m_currentImageButton == null) {
+                    m_currentComponent = cList1.get(k);
+                    m_currentImageButton = bTemp;
+                    bTemp.setSelection(true);
+                }
                 StringBuilder sb = new StringBuilder();
                 sb.append("");
                 sb.append(k);
@@ -123,8 +125,18 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        
+                        if (m_currentImageButton != null) {
+                            m_currentImageButton.setSelection(false);
+                        }
+                        bTemp.setSelection(true);
+                        m_currentImageButton = bTemp;
+                        
                         setCurrentComponent(_c);
                         m_dataBox.propagateDataChanged(Component.class);
+                        
+                        repaint();
+                        
                     }
                     
                 });
@@ -155,7 +167,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
 
 
-
+        m_dataBox.propagateDataChanged(Component.class);
 
     }
     

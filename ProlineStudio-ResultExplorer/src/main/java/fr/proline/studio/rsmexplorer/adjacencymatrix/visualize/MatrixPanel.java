@@ -2,7 +2,6 @@
  * */
 package fr.proline.studio.rsmexplorer.adjacencymatrix.visualize;
 
-import javax.swing.JPanel;
 
 import fr.proline.studio.dam.tasks.data.LightPeptideMatch;
 import fr.proline.studio.dam.tasks.data.LightProteinMatch;
@@ -60,10 +59,13 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
      // use new Color(95,87,88) insted of black
 
     public MatrixPanel() {
-        
+        setLoading(0);
     }
     
     public void setData(Component c, JTextField idDisplay, DrawVisualization drawVisualization) {
+        
+        setLoaded(0);
+        
         this.setBorder(BorderFactory.createLineBorder(new Color(95, 87, 88)));
         tempObject = drawVisualization;
 
@@ -143,7 +145,6 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
      */
     @Override
     public Dimension getPreferredSize() {
-       //   Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
         int fWidth = 1346 - 20;
         int fHight = 768 - 100;

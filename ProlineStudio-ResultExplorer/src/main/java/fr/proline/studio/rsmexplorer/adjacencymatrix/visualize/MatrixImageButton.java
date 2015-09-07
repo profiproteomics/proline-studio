@@ -6,9 +6,12 @@ package fr.proline.studio.rsmexplorer.adjacencymatrix.visualize;
 import fr.proline.studio.dam.tasks.data.LightPeptideMatch;
 import fr.proline.studio.dam.tasks.data.LightProteinMatch;
 import fr.proline.studio.utils.CyclicColorPalette;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,16 +23,24 @@ import javax.swing.JButton;
  */
 public class MatrixImageButton extends JButton {
 
+    private static final int SQUARE_SIZE = 3;
+    private static final int DELTA = 1;
+    private static final int FRAME = 2;
+    
+    private static final BasicStroke SELECT_STROKE = new BasicStroke(3.0f);
     
     private BufferedImage m_image = null;
+
+    private boolean m_isSelected = false;
     
-    private static final int SQUARE_SIZE = 3;
-
     public MatrixImageButton(int index, Component componentOfImage, DrawVisualization drawVisualization) {
-        int height = componentOfImage.getPeptideSize();
-        int width = componentOfImage.getProteinSize();
+        int nbPeptides = componentOfImage.getPeptideSize();
+        int nbProteins = componentOfImage.getProteinSize();
 
-        Dimension dimension = new Dimension(width * SQUARE_SIZE, height * SQUARE_SIZE);
+        int width = (nbProteins * (SQUARE_SIZE+DELTA))+DELTA+FRAME*2;
+        int height = (nbPeptides * (SQUARE_SIZE+DELTA))+DELTA+FRAME*2;
+        
+        Dimension dimension = new Dimension(width, height);
         setMaximumSize(dimension);
         setMinimumSize(dimension);
         setPreferredSize(dimension);
@@ -39,12 +50,12 @@ public class MatrixImageButton extends JButton {
     
     private void createImage(int index, Component componentOfImage, DrawVisualization drawVisualization) {
 
-        int height = componentOfImage.getPeptideSize();
-        int width = componentOfImage.getProteinSize();
+        int nbPeptides = componentOfImage.getPeptideSize();
+        int nbProteins = componentOfImage.getProteinSize();
 
-        boolean[][] flagArray = new boolean[height][width];
-        for (int i=0;i<height;i++) {
-            for (int j=0;j<width;j++) {
+        boolean[][] flagArray = new boolean[nbPeptides][nbProteins];
+        for (int i=0;i<nbPeptides;i++) {
+            for (int j=0;j<nbProteins;j++) {
                 flagArray[i][j] = false;
             }
         }
@@ -65,40 +76,59 @@ public class MatrixImageButton extends JButton {
             }
         }
 
-        m_image = new BufferedImage(width * SQUARE_SIZE, height * SQUARE_SIZE, BufferedImage.TYPE_INT_RGB);
+        Dimension d = getPreferredSize();
+        m_image = new BufferedImage(d.width, d.height, BufferedImage.TYPE_INT_RGB);
         Graphics g = m_image.getGraphics();
 
+        
+        g.setColor(Color.white);
+        g.fillRect(0, 0, d.width, d.height);
+        
         Color color = CyclicColorPalette.getColor(index);
 
-        for (int x = 0; x < height; x++) {
+        for (int x = 0; x < nbPeptides; x++) {
 
-            for (int y = 0; y < width; y++) // pept=Yaxis, length, prot=Xaxis, width fArray[][]
+            for (int y = 0; y < nbProteins; y++) // pept=Yaxis, length, prot=Xaxis, width fArray[][]
             {
-                int i = y * SQUARE_SIZE;
-                int j = x * SQUARE_SIZE;
+                int i = (y * (SQUARE_SIZE+DELTA))+DELTA+FRAME;
+                int j = (x * (SQUARE_SIZE+DELTA))+DELTA+FRAME;
                 //if(flagArray[x*width+y] == 1)
                 if (flagArray[x][y]) {
                     g.setColor(color);
-                    g.fillRect(i,j,SQUARE_SIZE,SQUARE_SIZE);
+                    g.fillRect(i,j, SQUARE_SIZE, SQUARE_SIZE);
                 } else {
-                    g.setColor(Color.black);
-                    g.fillRect(i,j,SQUARE_SIZE,SQUARE_SIZE);
+                    g.setColor(Color.lightGray);
+                    g.fillRect(i,j, SQUARE_SIZE, SQUARE_SIZE);
                 }
 
             }
         }
+        
+        g.setColor(Color.black);
+        g.drawRect(0, 0, d.width-1, d.height-1);
+        
     }
 
+    public void setSelection(boolean isSelected) {
+        m_isSelected = isSelected;
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
-        g.drawImage(m_image, 0, 0, null); // see javadoc for more info on the parameters            
+        
+        Graphics2D g2d = (Graphics2D) g;
+        
+        g2d.drawImage(m_image, 0, 0, null); // see javadoc for more info on the parameters
+        
+        if (m_isSelected) {
+            Dimension d = getPreferredSize();
+            g2d.setColor(Color.black);
+            Stroke s = g2d.getStroke();
+            g2d.setStroke(SELECT_STROKE);
+            g2d.drawRect(1, 1, d.width-3, d.height-3);
+            g2d.setStroke(s);
+        }
+        
     }
-
-
-    /*@Override
-    public Dimension getPreferredSize() {
-        return new Dimension(m_componentOfImage.getPeptideSize() * 3, m_componentOfImage.getProteinSize() * 3);
-    }*/
 
 }

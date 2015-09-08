@@ -341,7 +341,7 @@ public class WindowBoxFactory {
         AbstractDataBox[] boxes = new AbstractDataBox[1];
         boxes[0] = new DataboxDataMixer();
 
-        WindowBox winBox = new WindowBox("Data Mixer", generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.DATA_MIXER));
+        WindowBox winBox = new WindowBox("Data Analyzer", generatePanel(boxes), boxes[0], IconManager.getImage(IconManager.IconType.DATA_MIXER));
 
         return winBox;
     }

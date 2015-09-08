@@ -2,7 +2,7 @@ package fr.proline.studio.rsmexplorer.gui.xic;
 
 import fr.proline.core.orm.msi.dto.DMasterQuantPeptide;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
-import fr.proline.studio.comparedata.AddDataMixerButton;
+import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -94,7 +94,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
     private JButton m_graphicsButton;
-    private AddDataMixerButton m_addCompareDataButton;
+    private AddDataAnalyzerButton m_addCompareDataButton;
     
     private SearchFloatingPanel m_searchPanel;
     private JToggleButton m_searchToggleButton;
@@ -241,7 +241,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
             toolbar.add(m_graphicsButton);
         }
         
-        m_addCompareDataButton = new AddDataMixerButton(((CompoundTableModel) m_quantPeptideTable.getModel())) {
+        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_quantPeptideTable.getModel())) {
             
             @Override
             public void actionPerformed() {

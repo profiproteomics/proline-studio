@@ -9,19 +9,19 @@ import javax.swing.JButton;
 import org.openide.windows.WindowManager;
 
 /**
- * Button to send data to the data mixer
+ * Button to send data to the data analyzer
  * @author JM235353
  */
-public abstract class AddDataMixerButton  extends JButton implements ActionListener {
+public abstract class AddDataAnalyzerButton  extends JButton implements ActionListener {
 
     private ProgressInterface m_progressInterface = null;
     
-    public AddDataMixerButton(ProgressInterface progressInterface) {
+    public AddDataAnalyzerButton(ProgressInterface progressInterface) {
 
         m_progressInterface = progressInterface;
 
         setIcon(IconManager.getIcon(IconManager.IconType.ADD_DATA_MIXER));
-        setToolTipText("Add Data to Data Mixer...");
+        setToolTipText("Add Data to Data Analyzer...");
 
         addActionListener(this);
     }

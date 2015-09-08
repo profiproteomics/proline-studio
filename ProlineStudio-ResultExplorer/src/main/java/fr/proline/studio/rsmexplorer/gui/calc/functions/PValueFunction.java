@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * PValue Function for the data mixer
+ * PValue Function for the data analyzer
  * @author JM235353
  */
 public class PValueFunction extends AbstractFunction {

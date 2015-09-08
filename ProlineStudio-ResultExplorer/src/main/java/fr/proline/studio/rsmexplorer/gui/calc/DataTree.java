@@ -7,6 +7,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.functions.AbstractFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.AdjustPFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.BBinomialFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.DiffFunction;
+import fr.proline.studio.rsmexplorer.gui.calc.functions.ImportTSVFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.JoinFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.PValueFunction;
 import fr.proline.studio.rsmexplorer.gui.calc.functions.TtdFunction;
@@ -146,6 +147,9 @@ public abstract class DataTree extends JTree {
         FunctionNode diffFunction = new FunctionNode(new DiffFunction(null));
         parentFunctionNode.add(diffFunction);
         
+        FunctionNode tsvFunction = new FunctionNode(new ImportTSVFunction(null));
+        parentFunctionNode.add(tsvFunction);
+        
         FunctionNode joinFunction = new FunctionNode(new JoinFunction(null));
         parentFunctionNode.add(joinFunction);
         
@@ -242,7 +246,7 @@ public abstract class DataTree extends JTree {
 
         @Override
         public String toString() {
-            return "Data Mixer";
+            return "Data Analyzer";
         }
     }
     

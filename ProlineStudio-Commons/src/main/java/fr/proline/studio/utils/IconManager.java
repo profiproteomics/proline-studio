@@ -132,7 +132,8 @@ public class IconManager {
         FUNCTION,
         TICK_CIRCLE,
         REFRESH,
-        SETTINGS;
+        SETTINGS,
+        TABLE_IMPORT;
         
     }
     private final static HashMap<IconType, ImageIcon> m_iconMap = new HashMap<>();
@@ -499,6 +500,8 @@ public class IconManager {
                return "fr/proline/studio/images/refresh.png";
            case SETTINGS:
                return "fr/proline/studio/images/settings.png";
+           case TABLE_IMPORT:
+               return "fr/proline/studio/images/table-import.png";
         }
 
 

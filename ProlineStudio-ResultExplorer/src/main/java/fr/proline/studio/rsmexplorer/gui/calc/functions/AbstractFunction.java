@@ -13,13 +13,14 @@ import fr.proline.studio.rsmexplorer.gui.calc.parameters.CheckParameterInterface
 import fr.proline.studio.rsmexplorer.gui.calc.parameters.FunctionParametersDialog;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
+import java.awt.Color;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.swing.ImageIcon;
 import org.openide.windows.WindowManager;
 
 /**
- * Abstract Parent Function for all functions of the data mixer
+ * Abstract Parent Function for all functions of the data analyzer
  * @author JM235353
  */
 public abstract class AbstractFunction implements CheckParameterInterface {
@@ -125,5 +126,14 @@ public abstract class AbstractFunction implements CheckParameterInterface {
     public ImageIcon getIcon() {
         return IconManager.getIcon(IconManager.IconType.FUNCTION);
     }
+    
+    public Color getFrameColor() {
+        return null;
+    }
+    
+    public String getDataName() {
+        return null;
+    }
+    
     
 }

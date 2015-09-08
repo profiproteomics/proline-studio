@@ -12,7 +12,7 @@ import java.awt.Window;
 import javax.swing.JPanel;
 
 /**
- * Generic Dialog used to set the parameters for data mixer function
+ * Generic Dialog used to set the parameters for data analyzer function
  * @author JM235353
  */
 public class FunctionParametersDialog extends DefaultDialog {

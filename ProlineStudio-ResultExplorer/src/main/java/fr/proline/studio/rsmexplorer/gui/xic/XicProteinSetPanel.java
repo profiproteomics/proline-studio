@@ -4,7 +4,7 @@ import fr.proline.core.orm.msi.dto.DMasterQuantProteinSet;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.rsmexplorer.gui.dialog.CalcDialog;
-import fr.proline.studio.comparedata.AddDataMixerButton;
+import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -90,7 +90,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
     private JButton m_columnVisibilityButton;
-    private AddDataMixerButton m_addCompareDataButton;
+    private AddDataAnalyzerButton m_addCompareDataButton;
     
     private JButton m_calcButton;
     
@@ -211,7 +211,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         });
         toolbar.add(m_columnVisibilityButton);
         
-        m_addCompareDataButton = new AddDataMixerButton(((CompoundTableModel) m_quantProteinSetTable.getModel())) {
+        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_quantProteinSetTable.getModel())) {
            
             @Override
             public void actionPerformed() {

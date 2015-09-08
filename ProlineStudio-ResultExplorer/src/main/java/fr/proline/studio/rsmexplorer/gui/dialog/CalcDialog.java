@@ -489,7 +489,7 @@ public class CalcDialog extends JDialog {
 
     public void cleanupOnClose() {
         
-        //JPM.TODO : removed for the moment, problem with data mixer
+        //JPM.TODO : removed for the moment, problem with data analyzer
         //Table.setTables(null);
 
     }

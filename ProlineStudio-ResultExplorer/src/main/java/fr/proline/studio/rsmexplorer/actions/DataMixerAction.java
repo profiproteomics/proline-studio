@@ -16,7 +16,7 @@ id = "fr.proline.studio.rsmexplorer.actions.DataMixerAction")
 @ActionReferences({
     @ActionReference(path = "Menu/Window", position = 100)
 })
-@NbBundle.Messages("CTL_DataMixerAction=Data Mixer")
+@NbBundle.Messages("CTL_DataMixerAction=Data Analyzer")
 public final class DataMixerAction implements ActionListener {
 
     @Override

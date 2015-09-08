@@ -6,7 +6,7 @@
 package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.MsQuery;
-import fr.proline.studio.comparedata.AddDataMixerButton;
+import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.tasks.SubTask;
@@ -64,7 +64,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
     
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
-    private AddDataMixerButton m_addCompareDataButton;
+    private AddDataAnalyzerButton m_addCompareDataButton;
     
     private JLabel m_titleLabel;
     private final String TABLE_TITLE = "MS Queries";
@@ -148,7 +148,7 @@ public class MSQueriesPanel extends HourglassPanel implements DataBoxPanelInterf
         
         
         
-        m_addCompareDataButton = new AddDataMixerButton(((CompoundTableModel) m_msqueriesTable.getModel())) {
+        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_msqueriesTable.getModel())) {
            
             @Override
             public void actionPerformed() {

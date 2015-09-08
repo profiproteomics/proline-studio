@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Ttd Function for the data mixer
+ * Ttd Function for the data analyzer
  * @author JM235353
  */
 public class TtdFunction extends AbstractFunction {

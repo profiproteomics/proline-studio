@@ -4,7 +4,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinSet;
-import fr.proline.studio.comparedata.AddDataMixerButton;
+import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
@@ -68,7 +68,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
-    private AddDataMixerButton m_addCompareDataButton;
+    private AddDataAnalyzerButton m_addCompareDataButton;
     
     /**
      * Creates new form RsmProteinSetPanel
@@ -306,7 +306,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
 
-        m_addCompareDataButton = new AddDataMixerButton(((CompoundTableModel) m_proteinSetTable.getModel())) {
+        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_proteinSetTable.getModel())) {
            
             @Override
             public void actionPerformed() {

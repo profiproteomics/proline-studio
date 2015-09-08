@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 /**
- * Panel to display the Graph for the Data Mixer
+ * Panel to display the Graph for the Data analyzer
  * @author JM235353
  */
 public class GraphPanel extends JPanel implements MouseListener, MouseMotionListener {

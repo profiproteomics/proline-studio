@@ -19,7 +19,7 @@ public class DataboxDataMixer extends AbstractDataBox {
         super(DataboxType.DataboxDataMixer);
 
         // Name of this databox
-        m_typeName = "Data Mixer";
+        m_typeName = "Data Analyzer";
 
 
     }

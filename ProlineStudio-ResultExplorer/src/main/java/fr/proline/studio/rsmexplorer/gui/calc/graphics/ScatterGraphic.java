@@ -10,7 +10,7 @@ import fr.proline.studio.rsmexplorer.gui.calc.graph.GraphicGraphNode;
 import fr.proline.studio.table.GlobalTableModelInterface;
 
 /**
- * Definition of a scatter plot with its parameters for the data mixer
+ * Definition of a scatter plot with its parameters for the data analyzer
  * @author JM235353
  */
 public class ScatterGraphic extends AbstractGraphic {

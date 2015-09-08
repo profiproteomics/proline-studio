@@ -45,6 +45,10 @@ public class FunctionGraphNode extends GraphNode {
 
     @Override
     public String getDataName() {
+        String dataName = m_function.getDataName();
+        if (dataName != null) {
+            return dataName;
+        }
         return getPreviousDataName();
     }
 
@@ -60,6 +64,10 @@ public class FunctionGraphNode extends GraphNode {
     
     @Override
     public Color getFrameColor() {
+        Color frameColor = m_function.getFrameColor();
+        if (frameColor != null) {
+            return frameColor;
+        }
         return FRAME_COLOR;
     }
 
@@ -102,11 +110,11 @@ public class FunctionGraphNode extends GraphNode {
     @Override
     public boolean isConnected() {
         int countUnlinkedConnectors = m_function.getNumberOfInParameters();
-        for (GraphConnector connector : m_inConnectors) {
-            if (connector.isConnected()) {
-                
-                GraphNode graphNode = connector.getLinkedSourceGraphNode();
-                countUnlinkedConnectors--;
+        if (m_inConnectors != null) {
+            for (GraphConnector connector : m_inConnectors) {
+                if (connector.isConnected()) {
+                    countUnlinkedConnectors--;
+                }
             }
         }
         return (countUnlinkedConnectors == 0);
@@ -118,12 +126,14 @@ public class FunctionGraphNode extends GraphNode {
             return false;
         }
         int countSettingsDone = m_function.getNumberOfInParameters();
-        for (GraphConnector connector : m_inConnectors) {
-            if (connector.isConnected()) {
-                
-                GraphNode graphNode = connector.getLinkedSourceGraphNode();
-                if (graphNode.settingsDone() && graphNode.calculationDone()) {
-                    countSettingsDone--;
+        if (m_inConnectors != null) {
+            for (GraphConnector connector : m_inConnectors) {
+                if (connector.isConnected()) {
+
+                    GraphNode graphNode = connector.getLinkedSourceGraphNode();
+                    if (graphNode.settingsDone() && graphNode.calculationDone()) {
+                        countSettingsDone--;
+                    }
                 }
             }
         }
@@ -161,12 +171,18 @@ public class FunctionGraphNode extends GraphNode {
             return;
         }
 
-        AbstractGraphObject[] graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
-        int i = 0;
-        for (GraphConnector connector : m_inConnectors) {
-            GraphNode graphNode = connector.getLinkedSourceGraphNode();
-            graphNode.process(false);
-            graphObjectArray[i++] = graphNode;
+        AbstractGraphObject[] graphObjectArray;
+        
+        if (m_inConnectors != null) {
+            graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
+            int i = 0;
+            for (GraphConnector connector : m_inConnectors) {
+                GraphNode graphNode = connector.getLinkedSourceGraphNode();
+                graphNode.process(false);
+                graphObjectArray[i++] = graphNode;
+            }
+        } else {
+            graphObjectArray = new AbstractGraphObject[0];
         }
         
         m_function.process(graphObjectArray, this, display);
@@ -182,12 +198,17 @@ public class FunctionGraphNode extends GraphNode {
     @Override
     public void settings() {
         
-        AbstractGraphObject[] graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
-        int i = 0;
-        for (GraphConnector connector : m_inConnectors) {
-            GraphNode graphNode = connector.getLinkedSourceGraphNode();
-            graphNode.process(false);  // need to process previous nodes to be able to do settings
-            graphObjectArray[i++] = graphNode;
+        AbstractGraphObject[] graphObjectArray;
+        if (m_inConnectors != null) {
+            graphObjectArray = new AbstractGraphObject[m_inConnectors.size()];
+            int i = 0;
+            for (GraphConnector connector : m_inConnectors) {
+                GraphNode graphNode = connector.getLinkedSourceGraphNode();
+                graphNode.process(false);  // need to process previous nodes to be able to do settings
+                graphObjectArray[i++] = graphNode;
+            }
+        } else {
+            graphObjectArray = new AbstractGraphObject[0];
         }
         
         

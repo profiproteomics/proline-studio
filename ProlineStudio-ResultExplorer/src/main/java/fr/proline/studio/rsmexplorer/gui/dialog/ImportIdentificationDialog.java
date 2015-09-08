@@ -985,8 +985,14 @@ public class ImportIdentificationDialog extends DefaultDialog {
         ParameterList parameterList = new ParameterList(OMSSA_PARSER);
         
         Preferences preferences = NbPreferences.root();
-        parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "usermod.xml.file", "Usermods file path", JTextField.class, preferences.get("Omssa_Parser.Usermods_file_path", ""), "Usermods XML File", "xml"));
-        parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "ptm.composition.file", "PTM composition file path", JTextField.class, preferences.get("Omssa_Parser.PTM_composition_file_path", ""), "PTM composition File", "txt"));
+        
+        String[] fileFilterNames = { "Usermods XML File" };
+        String[] fileFilterExtensions = { "xml" };
+        parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "usermod.xml.file", "Usermods file path", JTextField.class, preferences.get("Omssa_Parser.Usermods_file_path", ""), fileFilterNames, fileFilterExtensions));
+        
+        String[] fileFilterNames2 = { "PTM composition File" };
+        String[] fileFilterExtensions2 = { "txt" };
+        parameterList.add(new FileParameter(ServerFileSystemView.getServerFileSystemView(), "ptm.composition.file", "PTM composition file path", JTextField.class, preferences.get("Omssa_Parser.PTM_composition_file_path", ""), fileFilterNames2, fileFilterExtensions2));
 //        parameterList.add(new BooleanParameter("fasta.contains.target", "Fasta contains target entries", JCheckBox.class, Boolean.TRUE));
 //        parameterList.add(new BooleanParameter("fasta.contains.decoy", "Fasta contains decoy entries", JCheckBox.class, Boolean.TRUE));
 

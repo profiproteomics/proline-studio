@@ -6,7 +6,7 @@ import fr.proline.core.orm.msi.PeptideSet;
 import fr.proline.core.orm.msi.dto.DPeptideInstance;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.core.orm.msi.dto.DProteinMatch;
-import fr.proline.studio.comparedata.AddDataMixerButton;
+import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.export.ExportButton;
@@ -54,7 +54,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     
     private DProteinMatch m_currentProteinMatch = null;
     
-    private AddDataMixerButton m_addCompareDataButton;
+    private AddDataAnalyzerButton m_addCompareDataButton;
     
     /**
      * Creates new form RsmPeptidesOfProteinPanel
@@ -126,7 +126,7 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
             
         };
         m_exportButton = new ExportButton(((ProgressInterface) m_peptidesTable.getModel()), "Peptides", m_peptidesTable);
-        m_addCompareDataButton = new AddDataMixerButton(((CompoundTableModel) m_peptidesTable.getModel())) {
+        m_addCompareDataButton = new AddDataAnalyzerButton(((CompoundTableModel) m_peptidesTable.getModel())) {
            
             @Override
             public void actionPerformed() {

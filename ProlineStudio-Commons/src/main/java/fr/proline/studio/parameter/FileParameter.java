@@ -17,18 +17,20 @@ import javax.swing.filechooser.FileSystemView;
 public class FileParameter extends AbstractParameter {
 
 
-    private FileSystemView m_fsv;
+    private final FileSystemView m_fsv;
     private String m_defaultValue;
-    private String m_fileFilterName;
-    private String m_fileFilterExtension;
+    private final String[] m_fileFilterName;
+    private final String[] m_fileFilterExtension;
 
-    public FileParameter(FileSystemView fsv, String key, String name, Class graphicalType, String defaultValue, String fileFilterName, String fileFilterExtension) {
+    public FileParameter(FileSystemView fsv, String key, String name, Class graphicalType, String defaultValue, String[] fileFilterName, String[] fileFilterExtension) {
         super(key, name, String.class, graphicalType);
         m_fsv = fsv;
         m_defaultValue = defaultValue;
         m_fileFilterName = fileFilterName;
         m_fileFilterExtension = fileFilterExtension;
     }
+    
+
 
     @Override
     public JComponent getComponent(Object value) {
@@ -59,10 +61,12 @@ public class FileParameter extends AbstractParameter {
                     fchooser.setMultiSelectionEnabled(false);
 
                     if (m_fileFilterName != null) {
-                        FileNameExtensionFilter filter = new FileNameExtensionFilter(m_fileFilterName, m_fileFilterExtension);
-                        fchooser.addChoosableFileFilter(filter);
+                        for (int i=0;i<m_fileFilterName.length;i++) {
+                            FileNameExtensionFilter filter = new FileNameExtensionFilter(m_fileFilterName[i], m_fileFilterExtension[i]);
+                            fchooser.addChoosableFileFilter(filter);
+                        }
                     }
-                    //fchooser.setFileFilter(defaultFilter);
+
                     int result = fchooser.showOpenDialog(addFileButton);
                     if (result == JFileChooser.APPROVE_OPTION) {
 

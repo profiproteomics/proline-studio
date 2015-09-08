@@ -13,7 +13,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import javax.swing.JComboBox;
 
 /**
- * Diff Function for the data mixer
+ * Diff Function for the data analyzer
  * @author JM235353
  */
 public class DiffFunction extends AbstractFunction {

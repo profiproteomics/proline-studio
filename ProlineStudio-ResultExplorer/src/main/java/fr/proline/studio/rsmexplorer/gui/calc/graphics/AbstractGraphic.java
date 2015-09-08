@@ -21,7 +21,7 @@ import org.openide.windows.WindowManager;
 
 /**
  * Base class for the definition of a Graphic (scatter, histogram...) with its parameters
- * in the data mixer
+ * in the data analyzer
  * @author JM235353
  */
 public abstract class AbstractGraphic implements CheckParameterInterface {

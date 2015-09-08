@@ -6,7 +6,7 @@ import fr.proline.studio.graphics.PlotType;
 
 /**
  * Locked Model for graphics (if src data is modified, the modification is not propagated),
- * which is used for data mixer
+ * which is used for data analyzer
  * @author JM235353
  */
 public class LockedDataGraphicsModel extends LockedDataModel {

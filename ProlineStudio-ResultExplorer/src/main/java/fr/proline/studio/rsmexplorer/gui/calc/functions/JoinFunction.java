@@ -13,7 +13,7 @@ import fr.proline.studio.table.GlobalTableModelInterface;
 import javax.swing.JComboBox;
 
 /**
- * Join Function for the data mixer
+ * Join Function for the data analyzer
  * @author JM235353
  */
 public class JoinFunction extends AbstractFunction {

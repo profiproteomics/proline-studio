@@ -33,6 +33,8 @@ public class MatrixImageButton extends JButton {
 
     private boolean m_isSelected = false;
     
+    private static final Color EMPTY_CASE_COLOR = new Color(224, 224, 224);
+    
     public MatrixImageButton(int index, Component componentOfImage, DrawVisualization drawVisualization) {
         int nbPeptides = componentOfImage.getPeptideSize();
         int nbProteins = componentOfImage.getProteinSize();
@@ -97,7 +99,7 @@ public class MatrixImageButton extends JButton {
                     g.setColor(color);
                     g.fillRect(i,j, SQUARE_SIZE, SQUARE_SIZE);
                 } else {
-                    g.setColor(Color.lightGray);
+                    g.setColor(EMPTY_CASE_COLOR);
                     g.fillRect(i,j, SQUARE_SIZE, SQUARE_SIZE);
                 }
 

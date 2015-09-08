@@ -10,6 +10,7 @@ import fr.proline.studio.dam.tasks.data.LightProteinMatch;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,14 +36,14 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
     
     private static HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap ;
-    private ArrayList<Component> cList1;
+    private ArrayList<Component> m_componentList;
 
     private Component m_currentComponent = null;
     private MatrixImageButton m_currentImageButton = null;
     
     public MatrixSelectionPanel() {
         setLoading(0);
-        
+        setBackground(Color.white);
         
     }
     
@@ -50,122 +51,56 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
         // search filter order
         m_peptideToProteinMap = m_drawVisualization.get_peptideToProteinMap();
-        cList1 = filterComponents(m_drawVisualization.get_ComponentList());
+        m_componentList = filterComponents(m_drawVisualization.get_ComponentList());
 
         //Sort clist
-        Collections.sort(cList1, new CustomComparator());
-        
-        
-        
+        Collections.sort(m_componentList, new CustomComparator());
+
         setLayout(new BorderLayout());
         
         // create objects
 
-        ArrayList<Integer> layoutArray = new ArrayList<>() ;
+        JPanel horizontalPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        horizontalPanel.setBackground(Color.white);
+        horizontalPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         
-        //Indices start at 0, so 4 specifies the pig.
-
-
-
-        
-        
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int fWidth = screenSize.width - 20;
-        int fHight = screenSize.height;
-        
-        int tWidth = 0;
-        layoutArray.add(0);
-        for (int i = 0; i < cList1.size(); i++) {
-            tWidth = tWidth + cList1.get(i).proteinSet.size() * 3 + 10;
-
-            if (tWidth < fWidth) {
-                int index = layoutArray.size() - 1;
-                int tempValue = layoutArray.get(index);
-                tempValue++;
-                layoutArray.set(index, tempValue);
-            } else {
-                tWidth = cList1.get(i).getPeptideSize() + 10;
-                layoutArray.add(1);
+        int nbComponents = m_componentList.size();
+        for (int i=0;i<nbComponents;i++) {
+            final Component component = m_componentList.get(i);
+            final MatrixImageButton curImageButton =    new MatrixImageButton(i, component, m_drawVisualization);
+            if (m_currentImageButton == null) {
+                m_currentComponent = component;
+                m_currentImageButton = curImageButton;
+                curImageButton.setSelection(true);
             }
+            
+            curImageButton.addActionListener(new ActionListener() {
 
-        }
+                @Override
+                public void actionPerformed(ActionEvent e) {
 
-        // Drawing layout  
-        JPanel jCol = new JPanel();
-        jCol.setLayout(new BoxLayout(jCol, BoxLayout.Y_AXIS));
-
-        jCol.add(Box.createRigidArea(new Dimension(0, 10)));
-
-        int k = 0;
-        int length = 0;
-        for (int i = 0; i < layoutArray.size(); i++) {
-            JPanel jRow = new JPanel();
-            jRow.setLayout(new BoxLayout(jRow, BoxLayout.X_AXIS));
-            jRow.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
-            Dimension d = new Dimension(fWidth + 10, ((cList1.get(k).peptideSet.size() * 3) + 10));
-            jRow.setMinimumSize(d);
-
-            jRow.add(Box.createVerticalGlue());
-            length = length + d.height + 10;
-
-            for (int j = 0; j < layoutArray.get(i); j++) {
-                //    jRow.add(pList.get(k));
-                final MatrixImageButton bTemp = new MatrixImageButton(j, cList1.get(k), m_drawVisualization);
-                if (m_currentImageButton == null) {
-                    m_currentComponent = cList1.get(k);
-                    m_currentImageButton = bTemp;
-                    bTemp.setSelection(true);
-                }
-                StringBuilder sb = new StringBuilder();
-                sb.append("");
-                sb.append(k);
-                String str = sb.toString();
-                final Component _c = cList1.get(k);
-                bTemp.addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        
-                        if (m_currentImageButton != null) {
-                            m_currentImageButton.setSelection(false);
-                        }
-                        bTemp.setSelection(true);
-                        m_currentImageButton = bTemp;
-                        
-                        setCurrentComponent(_c);
-                        m_dataBox.propagateDataChanged(Component.class);
-                        
-                        repaint();
-                        
+                    if (m_currentImageButton != null) {
+                        m_currentImageButton.setSelection(false);
                     }
-                    
-                });
+                    curImageButton.setSelection(true);
+                    m_currentImageButton = curImageButton;
 
-                jRow.add(bTemp);
+                    setCurrentComponent(component);
+                    m_dataBox.propagateDataChanged(Component.class);
 
-                jRow.add(Box.createRigidArea(new Dimension(8, 0)));
-                k++;
-            }
-            jRow.setBackground(Color.WHITE);
-            jCol.add(jRow);
-            jCol.add(Box.createRigidArea(new Dimension(0, 10)));
+                    repaint();
 
+                }
+
+            });
+            
+            horizontalPanel.add(curImageButton);
         }
 
-        Dimension dCol = new Dimension(screenSize.width, length + 30);
-        jCol.setMinimumSize(dCol);
-        jCol.setPreferredSize(dCol);
+        JScrollPane scroll = new JScrollPane(horizontalPanel);
 
-        jCol.setBackground(Color.WHITE);
-
-        JScrollPane scroll = new JScrollPane(jCol);
-
-  
-        
         // add panels to the MatrixSelectionPanel
         add(scroll, BorderLayout.CENTER);
-
-
 
         m_dataBox.propagateDataChanged(Component.class);
 

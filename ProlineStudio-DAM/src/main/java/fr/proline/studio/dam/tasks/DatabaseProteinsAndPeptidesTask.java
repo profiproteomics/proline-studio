@@ -117,7 +117,7 @@ public class DatabaseProteinsAndPeptidesTask extends AbstractDatabaseTask {
                 Integer cdPrettyRank = (Integer) res[2];
                 String sequence = (String) res[3];
                 
-                LightPeptideMatch peptideMatch = new LightPeptideMatch(peptideMatchId,score, cdPrettyRank);
+                LightPeptideMatch peptideMatch = new LightPeptideMatch(peptideMatchId, score, cdPrettyRank, sequence);
                 
                 peptideMatchMap.put(peptideMatchId, peptideMatch);
                 allPeptides.add(peptideMatch);

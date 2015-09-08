@@ -57,7 +57,7 @@ public class DataBoxAdjacencyMatrix extends AbstractDataBox {
 
         Component component = (Component) m_previousDataBox.getData(false, Component.class);
         DrawVisualization drawVisualization = (DrawVisualization) m_previousDataBox.getData(false, DrawVisualization.class);
-        ((MatrixPanel) m_panel).setData(component, null, drawVisualization);
+        ((MatrixPanel) m_panel).setData(component, drawVisualization);
 
     }
 

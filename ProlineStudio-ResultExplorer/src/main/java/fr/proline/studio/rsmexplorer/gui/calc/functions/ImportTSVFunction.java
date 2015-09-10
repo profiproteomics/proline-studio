@@ -5,6 +5,7 @@ package fr.proline.studio.rsmexplorer.gui.calc.functions;
 import au.com.bytecode.opencsv.CSVReader;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
+import fr.proline.studio.filter.LongFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -432,7 +433,7 @@ public class ImportTSVFunction extends AbstractFunction {
                 if (c.equals(Double.class)) {
                     filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
                 } else if (c.equals(Long.class)) {
-                    //filtersMap.put(i, new LongFilter(getColumnName(i), null)); // to be done
+                    filtersMap.put(i, new LongFilter(getColumnName(i), null));
                 } else if (c.equals(String.class)) {
                     filtersMap.put(i, new StringFilter(getColumnName(i), null));
                 }

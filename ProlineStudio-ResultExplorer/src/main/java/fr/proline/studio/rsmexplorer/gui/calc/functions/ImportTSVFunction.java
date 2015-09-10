@@ -8,9 +8,12 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
+import fr.proline.studio.parameter.AbstractLinkedParameters;
+import fr.proline.studio.parameter.BooleanParameter;
 import fr.proline.studio.parameter.FileParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
+import fr.proline.studio.parameter.StringParameter;
 import fr.proline.studio.python.interpreter.CalcError;
 import fr.proline.studio.rsmexplorer.gui.calc.GraphPanel;
 import fr.proline.studio.rsmexplorer.gui.calc.graph.AbstractGraphObject;
@@ -31,6 +34,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellRenderer;
 
@@ -41,9 +45,13 @@ import javax.swing.table.TableCellRenderer;
 public class ImportTSVFunction extends AbstractFunction {
 
     private static final String KEY_FILE_PARAMETER = "FILE_KEY";
+    private static final String SEPARATOR_AUTO_PARAMETER = "SEPARATOR_AUTO_KEY";
+    private static final String SEPARATOR_PARAMETER = "SEPARATOR_KEY";
     
     private ParameterList m_parameterList;
     private FileParameter m_fileParameter;
+    private BooleanParameter m_automaticSeparatorParameter;
+    private StringParameter m_separatorParameter;
     
     private String m_modelName = null;
     
@@ -119,14 +127,31 @@ public class ImportTSVFunction extends AbstractFunction {
         setCalculating(true);
         setInError(false, null);
         
+        //JPM.TODO : should be done in a thread *****************************************************
+        
         try {
             String filePath = ((String) m_fileParameter.getObjectValue()).trim();
 
             CSVReader reader;
-            if (filePath.endsWith("csv")) {
-                reader = new CSVReader(new FileReader(filePath), ',');
+            boolean automaticSeparator = (Boolean) m_automaticSeparatorParameter.getObjectValue();
+            if (automaticSeparator) {
+                if (filePath.endsWith("csv")) {
+                    reader = new CSVReader(new FileReader(filePath), ',');
+                } else {
+                    reader = new CSVReader(new FileReader(filePath), '\t');
+                }
             } else {
-                reader = new CSVReader(new FileReader(filePath), '\t');
+                char separator;
+                String separatorString = m_separatorParameter.getStringValue();
+                if (separatorString.length() == 1) {
+                    separator = separatorString.charAt(0);
+                } else if (separatorString.compareTo("\\t") == 0) {
+                    separator = '\t';
+                } else  {
+                    // we try with tab for the moment 
+                    separator = '\t';
+                }
+                reader = new CSVReader(new FileReader(filePath), separator);
             }
             
 
@@ -228,12 +253,30 @@ public class ImportTSVFunction extends AbstractFunction {
         final String[] fileFilterExtensions = { "tsv", "csv" };
         
         m_fileParameter = new FileParameter(null, KEY_FILE_PARAMETER, "CSV/TSV File", JTextField.class, "", fileFilterNames, fileFilterExtensions);
+        m_automaticSeparatorParameter = new BooleanParameter(SEPARATOR_AUTO_PARAMETER, "Separator according to file extension", JCheckBox.class, true);
+        m_separatorParameter = new StringParameter(SEPARATOR_PARAMETER, "Separator", JTextField.class, "\\t",1,2);
         
         m_parameterList = new ParameterList("ImportTSV");
         m_parameters = new ParameterList[1];
         m_parameters[0] = m_parameterList;
         
         m_parameterList.add(m_fileParameter);
+        m_parameterList.add(m_automaticSeparatorParameter);
+        m_parameterList.add(m_separatorParameter);
+        
+        AbstractLinkedParameters linkedParameters = new AbstractLinkedParameters(m_parameterList) {
+            @Override
+            public void valueChanged(String value) {
+                showParameter(m_separatorParameter, (value.compareTo("false") == 0));
+
+                updataParameterListPanel();
+            }
+            
+        };
+        
+        m_parameterList.getPanel(); // generate panel at once
+        linkedParameters.showParameter(m_separatorParameter, false); // separator parameter not visible by default
+        m_automaticSeparatorParameter.setLinkedParameters(linkedParameters); // link parameter, it will modify the panel
         
     }
     

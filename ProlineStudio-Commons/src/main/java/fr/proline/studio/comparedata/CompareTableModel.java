@@ -89,30 +89,6 @@ public class CompareTableModel extends DecoratedTableModel implements GlobalTabl
         return null;
     }
 
-    
-    /*@Override
-    public void initFilters() {
-        if (m_filters == null) {
-            int nbCol = getColumnCount();
-            m_filters = new Filter[nbCol];
-            
-            for (int i=0;i<nbCol;i++) {
-                Class columnClass = getColumnClass(i);
-                if (columnClass.equals(String.class)) {
-                    m_filters[i] = new StringFilter(getColumnName(i), null);
-                } else if (columnClass.equals(Integer.class)) {
-                    m_filters[i] = new IntegerFilter(getColumnName(i), null);
-                } else if (columnClass.equals(Double.class)) {
-                    m_filters[i] = new DoubleFilter(getColumnName(i), null);
-                } else if (columnClass.equals(Float.class)) {
-                    m_filters[i] = new DoubleFilter(getColumnName(i), null);
-                } else {
-                    m_filters[i] = null;
-                }
-            }
-
-        }
-    }*/
 
 
  

@@ -16,7 +16,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -36,7 +36,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     private static final int MAX_CELL_SIZE = 30;
     private static final int DELTA = 3;
     private static final int TITLE_SIZE = 20;
-    private static final int INFO_SIZE = 20;
+    private static final int INFO_SIZE = 50;
     private static final int PEPTIDE_NAME_SIZE = 80;
     private static final int PROTEIN_NAME_SIZE = 80;
     private static final int VISIBILITY_MARGE_SIZE = 20;
@@ -51,9 +51,8 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     private static final ArrayList<Color> SCORE_COLOR_LIST = new ArrayList<>(6);
 
     private static final Color COLOR_GRAY = new Color(95, 87, 88);
-    private static final Color COLOR_PEPTIDE_RANK1= new Color(134, 180, 96);
+    private static final Color COLOR_PEPTIDE_RANK1 = new Color(134, 180, 96);
     private static final Color COLOR_OVER = new Color(95, 158, 160);
-    
 
     private boolean m_firstPaint = true;
 
@@ -66,16 +65,12 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     private int m_xOffsetMatrix;
     private int m_yOffsetMatrix;
 
-    private Point selectedCell, selectedLabel;
-    private Point PeptBound1, PeptBound2;
-    String lStr;
-
     private Component m_component;
     private int[] m_flagArray;
-    DrawVisualization m_drawVisualization = null;
-    HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = new HashMap<>();
+    private DrawVisualization m_drawVisualization = null;
+    private HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = new HashMap<>();
 
-    Long showProtid = (long) 0, showPeptid = (long) 0;
+    private String[] m_info = new String[2];
 
     public MatrixPanel() {
         setLoading(0);
@@ -95,6 +90,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         InternalPanel internalPanel = new InternalPanel();
         scrollPane.setViewportView(internalPanel);
         add(scrollPane);
+
     }
 
     public void setData(Component c, DrawVisualization drawVisualization) {
@@ -145,6 +141,79 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
     public class InternalPanel extends JPanel {
 
+        public InternalPanel() {
+            MouseAdapter mouseHandler = new MouseAdapter() {
+                @Override
+                public void mouseMoved(MouseEvent e) {
+
+                    if (m_component == null) {
+                        return;
+                    }
+                    
+                    boolean needRepaint = false;
+
+                    // reinit selection if needed
+                    if (m_selectedCell != null) {
+                        m_selectedCell.setSelected(false);
+                        m_selectedCell = null;
+                        needRepaint = true;
+                    }
+
+                    int mouseX = e.getX();
+                    int mouseY = e.getY();
+
+                    int columnCount = m_component.getProteinSize();
+
+                    int matrixX1 = m_cells.get(0).getPixelX();
+                    int matrixX2 = m_cells.get(m_cells.size() - 1).getPixelX() + m_squareSize;
+                    int matrixY1 = m_cells.get(0).getPixelY();
+                    int matrixY2 = m_cells.get(m_cells.size() - 1).getPixelY() + m_squareSize;
+                    int proteinY1 = m_proteinCells.get(0).getPixelY();
+                    int proteinY2 = proteinY1 + m_squareSize;
+                    int peptideX1 = m_peptideCells.get(0).getPixelX();
+                    int peptideX2 = peptideX1 + m_squareSize;
+
+                    // check matrix mouse over
+                    if ((mouseX >= matrixX1)
+                            && (mouseX < matrixX2)
+                            && (mouseY >= matrixY1)
+                            && (mouseY < matrixY2)) {
+                        // we are over the matrix
+                        int column = (mouseX - matrixX1) / m_squareSize;
+                        int row = (mouseY - matrixY1) / m_squareSize;
+                        int indexCell = row * columnCount + column;
+                        if (indexCell < m_cells.size()) {
+                            m_selectedCell = m_cells.get(row * columnCount + column);
+                            m_selectedCell.setSelected(true);
+                            needRepaint = true;
+                        }
+                    } else if ((mouseX >= matrixX1)
+                            && (mouseX < matrixX2)
+                            && (mouseY >= proteinY1)
+                            && (mouseY < proteinY2)) {
+                        int column = (mouseX - matrixX1) / m_squareSize;
+                        m_selectedCell = m_proteinCells.get(column);
+                        m_selectedCell.setSelected(true);
+                        needRepaint = true;
+                    } else if ((mouseY >= matrixY1)
+                            && (mouseY < matrixY2)
+                            && (mouseX >= peptideX1)
+                            && (mouseX < peptideX2)) {
+                        int row = (mouseY - matrixY1) / m_squareSize;
+                        m_selectedCell = m_peptideCells.get(row);
+                        m_selectedCell.setSelected(true);
+                        needRepaint = true;
+                    }
+
+                    if (needRepaint) {
+                        repaint();
+                    }
+
+                }
+            };
+            addMouseMotionListener(mouseHandler);
+        }
+        
         @Override
         public void paint(Graphics g) {
 
@@ -152,6 +221,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             int height = getHeight();
 
             Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g2d.setColor(Color.white);
             g2d.fillRect(0, 0, width, height);
 
@@ -276,11 +346,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
                 g2d.drawString(sequence, m_xOffset + TITLE_SIZE, (int) (y + (m_squareSize / 2)));
 
-                if (dIndex == 0) {
-                    PeptBound1 = new Point(m_xOffset + TITLE_SIZE, (int) (y + (m_squareSize / 2)));
-                } else if (dIndex == rowCount - 1) {
-                    PeptBound2 = new Point(m_xOffset + TITLE_SIZE, (int) (y + (m_squareSize / 2)));
-                }
+
 
                 dIndex++;
             }
@@ -308,261 +374,21 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
             }
 
-            g2d.setColor(c);
-
-            MouseAdapter mouseHandler;
-            mouseHandler = new MouseAdapter() {
-                @Override
-                public void mouseMoved(MouseEvent e) {
-
-                    boolean needRepaint = false;
-                    
-                    // reinit selection if needed
-                    if (m_selectedCell != null) {
-                        m_selectedCell.setSelected(false);
-                        m_selectedCell = null;
-                        needRepaint = true;
-                    }
-                    
-                    int mouseX = e.getX();
-                    int mouseY = e.getY();
-                    
-                    int columnCount = m_component.getProteinSize();
-                    
-                    
-                    
-                    int matrixX1 = m_cells.get(0).getPixelX();
-                    int matrixX2 = m_cells.get(m_cells.size()-1).getPixelX()+m_squareSize;
-                    int matrixY1 = m_cells.get(0).getPixelY();
-                    int matrixY2 = m_cells.get(m_cells.size()-1).getPixelY()+m_squareSize;
-                    int proteinY1 = m_proteinCells.get(0).getPixelY();
-                    int proteinY2 = proteinY1+m_squareSize;
-                    int peptideX1 = m_peptideCells.get(0).getPixelX();
-                    int peptideX2 = peptideX1+m_squareSize;
-                    
-                    // check matrix mouse over
-                    if ((mouseX>=matrixX1) &&
-                        (mouseX<matrixX2) &&
-                        (mouseY>=matrixY1) &&
-                        (mouseY<matrixY2)   ) {
-                        // we are over the matrix
-                        int column = (mouseX - matrixX1) / m_squareSize;
-                        int row = (mouseY - matrixY1) / m_squareSize;
-                        int indexCell = row*columnCount+column;
-                        if (indexCell<m_cells.size()) {
-                            m_selectedCell = m_cells.get(row * columnCount + column);
-                            m_selectedCell.setSelected(true);
-                            needRepaint = true;
-                        }
-                    } else if ((mouseX>=matrixX1) &&
-                        (mouseX<matrixX2) &&
-                        (mouseY>=proteinY1) &&
-                        (mouseY<proteinY2)   ) {
-                        int column = (mouseX - matrixX1) / m_squareSize;
-                         m_selectedCell = m_proteinCells.get(column);
-                         m_selectedCell.setSelected(true);
-                         needRepaint = true;
-                    } else if ((mouseY>=matrixY1) &&
-                        (mouseY<matrixY2) &&
-                        (mouseX>=peptideX1) &&
-                        (mouseX<peptideX2)   ) {
-                        int row = (mouseY - matrixY1) / m_squareSize;
-                         m_selectedCell = m_peptideCells.get(row);
-                         m_selectedCell.setSelected(true);
-                         needRepaint = true;
-                    }
-                    
-                    
-                    
-                    if (needRepaint) {
-                        repaint();
-                    }
-                    
+            if (m_selectedCell != null) {
+                m_selectedCell.getInfo(m_info);
+                
+                g2d.setFont(new Font("Helvetica", Font.BOLD, 12));
+                g2d.setColor(Color.black);
+                g2d.drawString(m_info[0], 10, INFO_SIZE/3);
+                g2d.drawString(m_info[1], 10, 2*(INFO_SIZE/3));
+            }
 
 
-                }
-            };
-            addMouseMotionListener(mouseHandler);
+            
+            
 
-            /*
-            if (selectedLabel != null || showPeptid != 0 || showProtid != 0) {
-
-                if (showPeptid != 0) {
-
-                    int Num = 0;
-                    int z = 0;
-                    for (LightPeptideMatch p : m_component.peptideSet) {
-                        if (p.getId() == showPeptid) {
-                            Num = z;
-                            break;
-                        }
-                        z++;
-                    }
-
-                    if (Num < rowCount) {
-                        for (int i = (int) (Num * columnCount); i < (Num + 1) * columnCount; i++) {
-                            if (m_flagArray[i] == 1) {
-                                g2d.setColor(new Color(67, 168, 170));
-                            } else {
-                                g2d.setColor(Color.black);
-                            }
-                            g2d.fill(m_cells.get(i));
-                            g2d.setColor(COLOR_GRAY);
-                            g2d.draw(m_cells.get(i));
-
-                        }
-
-                        g2d.setColor(new Color(95, 158, 160));
-                        g2d.fill(m_peptideCells.get(Num));
-                        showPeptid = (long) 0;
-                    }
-
-                } else if (showProtid != 0) {
-
-                    int Num1 = 0;
-                    int z1 = 0;
-                    for (LightProteinMatch p : m_component.proteinSet) {
-                        if (p.getId() == showProtid) {
-                            Num1 = z1;
-                            break;
-                        }
-                        z1++;
-                    }
-
-                    for (int i = Num1; i < m_cells.size(); i = i + columnCount) {
-                        if (m_flagArray[i] == 1) {
-                            g2d.setColor(new Color(67, 168, 170));
-                        } else {
-                            g2d.setColor(Color.black);
-                        }
-                        g2d.fill(m_cells.get(i));
-                        g2d.setColor(COLOR_GRAY);
-                        g2d.draw(m_cells.get(i));
-
-                    }
-
-                    g2d.setColor(new Color(95, 158, 160));
-                    g2d.fill(m_proteinCells.get(Num1));
-                    showProtid = (long) 0;
-
-                } else {
-
-                    String id = "";
-                    StringBuilder sb = new StringBuilder();
-                    int labelNum = -1;
-
-                    if (lStr.compareTo("Pept place") == 0) {
-
-                        labelNum = (selectedLabel.y - m_yOffsetMatrix) / m_squareSize;
-
-                        if (labelNum < rowCount) {
-                            id = String.valueOf(m_component.peptideSet.get(labelNum).getId());
-
-        			//g2d.setColor(new Color(134,180,96));
-                            //g2d.setColor(new Color(67,168,170));
-                            for (int i = labelNum * columnCount; i < (labelNum + 1) * columnCount; i++) {
-                                if (m_flagArray[i] == 1) {
-                                    g2d.setColor(new Color(67, 168, 170));
-                                } else {
-                                    g2d.setColor(Color.black);
-                                }
-                                g2d.fill(m_cells.get(i));
-                                g2d.setColor(COLOR_GRAY);
-                                g2d.draw(m_cells.get(i));
-
-                            }
-
-                            g2d.setColor(new Color(95, 158, 160));
-                            g2d.fill(m_peptideCells.get(labelNum));
-
-                        } else {
-                            labelNum = -1;
-                        }
-
-                        sb.append("Peptide: ");
-                        sb.append(id);
-                        sb.append("   Score: ");
-                        sb.append(m_peptideScore[labelNum]);
-                        sb.append("   Rank: ");
-                        sb.append(m_peptideRank[labelNum]);
-
-                    } else if (lStr.compareTo("Prot place") == 0) {
-
-                        labelNum = (selectedLabel.x - m_xOffsetMatrix) / m_squareSize;
-
-                        if (labelNum < columnCount) {
-                            id = String.valueOf(m_component.proteinSet.get(labelNum).getId());
-
-                            //g2d.setColor(new Color(67,168,170));
-                            for (int i = labelNum; i < m_cells.size(); i = i + columnCount) {
-                                if (m_flagArray[i] == 1) {
-                                    g2d.setColor(new Color(67, 168, 170));
-                                } else {
-                                    g2d.setColor(Color.black);
-                                }
-                                g2d.fill(m_cells.get(i));
-                                g2d.setColor(COLOR_GRAY);
-                                g2d.draw(m_cells.get(i));
-
-                            }
-
-                            // imp##                   g2d.getFontMetrics().stringWidth(str)
-                            g2d.setColor(new Color(95, 158, 160));
-                            g2d.fill(m_proteinCells.get(labelNum));
-
-                        }
-
-                        sb.append("Protein : ");
-                        sb.append(id);
-                        sb.append("   Score: ");
-                        sb.append(m_proteinScore[labelNum]);
-                    }
-
-                //if (idDisplay != null) idDisplay.setVisible(true);
-                    //if (idDisplay != null) idDisplay.setText(sb.toString());
-                }
-            }*/
-
-            /*if (selectedCell != null) {
-
-                int index = selectedCell.x + (selectedCell.y * columnCount);
-
-                Rectangle cell = m_cells.get(index);
-                g2d.setColor(new Color(95, 158, 160));
-                g2d.fill(cell);
-
-                int protNum = index % columnCount, peptNum = index / columnCount;
-                String p1 = "Protein: ";
-                String p2 = String.valueOf(m_component.proteinSet.get(protNum).getId());
-            // String p5 = " Score: ";
-                // String p6 = String.valueOf(protScore[protNum]);
-                String p3 = "   Peptide: ";
-                String p4 = String.valueOf(m_component.peptideSet.get(peptNum).getId());
-            // String p7 = " Score: ";
-                // String p8 = String.valueOf(peptScore[peptNum]);
-
-                g2d.setColor(new Color(95, 158, 160));
-                g2d.fill(m_peptideCells.get(peptNum));
-                g2d.fill(m_proteinCells.get(protNum));
-
-                StringBuilder sb = new StringBuilder();
-                sb.append("");
-                sb.append(p1);
-                sb.append(p2);
-            // sb.append(p5);
-                // sb.append(p6);
-                sb.append(p3);
-                sb.append(p4);
-            // sb.append(p7);
-                // sb.append(p8);
-                String str = sb.toString();
-             //);
-                //text.concat("Peptide : ");
-                //text.concat(String.valueOf(pComponent.peptideSet.get(peptNum).getId()));
-
-            //if (idDisplay != null) idDisplay.setVisible(true);
-            //if (idDisplay != null) idDisplay.setText(str);
-            }*/
+            
+            
 
             if (m_firstPaint) {
                 setPreferredSize(new Dimension(matrixTotalWidth+VISIBILITY_MARGE_SIZE, matrixTotalHeight+VISIBILITY_MARGE_SIZE));
@@ -573,15 +399,6 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
         }
 
-        public void heighlightPeptide(Long id) {
-            showPeptid = id;
-
-        }
-
-        public void heighlightProtein(Long id) {
-            showProtid = id;
-
-        }
 
         private void label_line(Graphics g, double x, double y, double theta, String label) {
 
@@ -700,6 +517,37 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                 return Color.white;
             }
         }
+        
+        public void getInfo(String[] info) {
+            LightProteinMatch proteinMatch = (m_col>=0) ? m_component.proteinSet.get(m_col) : null;
+            LightPeptideMatch peptideMatch = (m_row>=0) ? m_component.peptideSet.get(m_row) : null;
+            
+            if (proteinMatch == null) {
+                info[0] = "";
+            } else {
+                m_sb.append("Protein: ");
+                m_sb.append(proteinMatch.getAccession());
+                m_sb.append("    Score: ");
+                m_sb.append(proteinMatch.getScore());
+                info[0] = m_sb.toString();
+                m_sb.setLength(0);
+            }
+            
+            if (peptideMatch == null) {
+                info[1] = "";
+            } else {
+                m_sb.append("Peptide: ");
+                m_sb.append(peptideMatch.getSequence());
+                m_sb.append("    Score: ");
+                m_sb.append(peptideMatch.getScore());
+                m_sb.append("    Rank: ");
+                m_sb.append(peptideMatch.getCDPrettyRank());
+                info[1] = m_sb.toString();
+                m_sb.setLength(0);
+            }
+            
+        }
+        private StringBuilder m_sb = new StringBuilder();
         
     }
     

@@ -51,7 +51,8 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     private static final ArrayList<Color> SCORE_COLOR_LIST = new ArrayList<>(6);
 
     private static final Color COLOR_GRAY = new Color(95, 87, 88);
-    private static final Color COLOR_OVER = new Color(134, 180, 96);
+    private static final Color COLOR_PEPTIDE_RANK1= new Color(134, 180, 96);
+    private static final Color COLOR_OVER = new Color(95, 158, 160);
     
 
     private boolean m_firstPaint = true;
@@ -316,21 +317,30 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
                     boolean needRepaint = false;
                     
+                    // reinit selection if needed
                     if (m_selectedCell != null) {
                         m_selectedCell.setSelected(false);
                         m_selectedCell = null;
-                        needRepaint= true;
+                        needRepaint = true;
                     }
                     
                     int mouseX = e.getX();
                     int mouseY = e.getY();
+                    
                     int columnCount = m_component.getProteinSize();
+                    
+                    
                     
                     int matrixX1 = m_cells.get(0).getPixelX();
                     int matrixX2 = m_cells.get(m_cells.size()-1).getPixelX()+m_squareSize;
                     int matrixY1 = m_cells.get(0).getPixelY();
                     int matrixY2 = m_cells.get(m_cells.size()-1).getPixelY()+m_squareSize;
+                    int proteinY1 = m_proteinCells.get(0).getPixelY();
+                    int proteinY2 = proteinY1+m_squareSize;
+                    int peptideX1 = m_peptideCells.get(0).getPixelX();
+                    int peptideX2 = peptideX1+m_squareSize;
                     
+                    // check matrix mouse over
                     if ((mouseX>=matrixX1) &&
                         (mouseX<matrixX2) &&
                         (mouseY>=matrixY1) &&
@@ -344,47 +354,31 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                             m_selectedCell.setSelected(true);
                             needRepaint = true;
                         }
+                    } else if ((mouseX>=matrixX1) &&
+                        (mouseX<matrixX2) &&
+                        (mouseY>=proteinY1) &&
+                        (mouseY<proteinY2)   ) {
+                        int column = (mouseX - matrixX1) / m_squareSize;
+                         m_selectedCell = m_proteinCells.get(column);
+                         m_selectedCell.setSelected(true);
+                         needRepaint = true;
+                    } else if ((mouseY>=matrixY1) &&
+                        (mouseY<matrixY2) &&
+                        (mouseX>=peptideX1) &&
+                        (mouseX<peptideX2)   ) {
+                        int row = (mouseY - matrixY1) / m_squareSize;
+                         m_selectedCell = m_peptideCells.get(row);
+                         m_selectedCell.setSelected(true);
+                         needRepaint = true;
                     }
+                    
+                    
                     
                     if (needRepaint) {
                         repaint();
                     }
                     
-                    /*
-                    Rectangle lastCell = m_cells.get(m_cells.size() - 1);
-                    Rectangle firstCell = m_cells.get(0);
 
-                    selectedLabel = null;
-                    lStr = null;
-
-                    if (e.getX() <= firstCell.x || e.getY() <= firstCell.y) {
-                        selectedCell = null;
-                    } else if (e.getX() >= (lastCell.x + m_squareSize) || e.getY() >= (lastCell.y + m_squareSize)) {
-                        selectedCell = null;
-                    } else {
-                        int column = (e.getX() - m_xOffsetMatrix) / m_squareSize;
-                        int row = (e.getY() - m_yOffsetMatrix) / m_squareSize;
-
-                        selectedCell = new Point(column, row);
-
-                    }
-
-                    int rowCount = m_component.getPeptideSize();
-                    int columnCount = m_component.getProteinSize();
-
-                    if (selectedCell == null) {
-
-                        if ((e.getX() <= m_xOffsetMatrix && e.getX() >= (PeptBound1.x - m_squareSize - 3)) && (e.getY() <= PeptBound2.y - 2 && e.getY() >= m_yOffsetMatrix)) {
-                            selectedLabel = new Point(e.getX(), e.getY());
-                            lStr = "Pept place";
-                        } else if ((e.getX() <= (m_xOffsetMatrix + (m_squareSize * columnCount) - 3) && e.getX() >= m_xOffsetMatrix) && (e.getY() <= m_yOffsetMatrix && e.getY() >= (m_yOffsetMatrix - 40 - 3 - m_squareSize))) {
-                            selectedLabel = new Point(e.getX(), e.getY());
-                            lStr = "Prot place";
-                        }
-
-                    }
-
-                    repaint();*/
 
                 }
             };
@@ -683,12 +677,14 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         
         public Color getFillColor() {
 
+            if (m_selected) {
+                return COLOR_OVER;
+            }
+            
             int index = m_row * m_component.getProteinSize() + m_col;
             if (m_flagArray[index] == 1) {
 
-                if (m_selected) {
-                    return new Color(95, 158, 160); //JPM.TODO
-                }
+                
                 
                 float score = m_peptideScore[m_row];
 
@@ -719,12 +715,26 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         }
         
         @Override
-        public Color getFillColor() {
-            if (m_peptideRank[m_row] == 1) {
-                return COLOR_OVER; 
-            } else {
-                return Color.lightGray;
+        public void setSelected(boolean v) {
+            super.setSelected(v);
+            int columnCount = m_component.getProteinSize();
+            for (int i = 0; i < columnCount; i++) {
+                m_cells.get(m_row *columnCount + i).setSelected(v);
             }
+        }
+        
+        @Override
+        public Color getFillColor() {
+            if (m_selected) {
+                return COLOR_OVER;
+            }
+            
+            if (m_peptideRank[m_row] == 1) {
+                return COLOR_PEPTIDE_RANK1;
+            }
+            
+            return Color.lightGray;
+       
         }
         
     }
@@ -741,9 +751,23 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         }
         
         @Override
+        public void setSelected(boolean v) {
+            super.setSelected(v);
+            int rowCount = m_component.getPeptideSize();
+            int columnCount = m_component.getProteinSize();
+            for (int i=0;i<rowCount;i++) {
+                m_cells.get(i*columnCount+m_col).setSelected(v);
+            }
+        }
+        
+        @Override
         public Color getFillColor() {
             
-                return new Color(134, 180, 96);  //JPM.TODO
+            if (m_selected) {
+                return COLOR_OVER;
+            }
+            
+            return new Color(134, 180, 96);  //JPM.TODO
 
         }
         

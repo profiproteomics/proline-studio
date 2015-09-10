@@ -25,7 +25,7 @@ public abstract class AbstractLinkedParameters {
     
     public abstract void valueChanged(String value);
     
-    protected void showParameter(AbstractParameter parameter, boolean show) {
+    public void showParameter(AbstractParameter parameter, boolean show) {
         JComponent comp = parameter.getComponent(null);
         comp.setVisible(show);
         JLabel l = getParameterList().getAssociatedLabel(comp);

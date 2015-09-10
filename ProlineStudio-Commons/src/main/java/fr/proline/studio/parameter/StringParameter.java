@@ -110,7 +110,7 @@ public class StringParameter extends AbstractParameter {
         }
         if (m_maxChars != null) {
             if (length>m_maxChars.intValue()) {
-                return new ParameterError(m_name+" exceeds "+m_minChars.intValue()+" characters", m_parameterComponent);
+                return new ParameterError(m_name+" exceeds "+m_maxChars.intValue()+" characters", m_parameterComponent);
                 
             }
         }

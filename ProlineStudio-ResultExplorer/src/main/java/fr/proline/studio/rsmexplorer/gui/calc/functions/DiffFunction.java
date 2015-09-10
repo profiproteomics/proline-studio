@@ -182,10 +182,7 @@ public class DiffFunction extends AbstractFunction {
     
     @Override
     public void userParametersChanged() {
-        Integer key1 = (Integer) m_paramColumn1.getAssociatedObjectValue();
-        Integer key2 = (Integer) m_paramColumn2.getAssociatedObjectValue();
-        ((AbstractJoinDataModel)m_globalTableModelInterface).setKeys(key1, key2);
-        //m_state = GraphNode.NodeState.UNSET;
+        m_globalTableModelInterface = null;
     }
     
 }

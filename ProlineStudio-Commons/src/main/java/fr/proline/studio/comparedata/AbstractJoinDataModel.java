@@ -70,27 +70,29 @@ public abstract class AbstractJoinDataModel extends AbstractTableModel implement
         int[] keys2 = m_data2.getKeysColumn();
 
         // try to find a corresponding key with the same name and type
-        for (int i = 0; i < keys1.length; i++) {
-            int col1 = keys1[i];
-            Class c1 = m_data1.getDataColumnClass(col1);
-            String id1 = m_data1.getDataColumnIdentifier(col1);
-            for (int j = 0; j < keys2.length; j++) {
-                int col2 = keys2[i];
-                Class c2 = m_data2.getDataColumnClass(col2);
-                String id2 = m_data2.getDataColumnIdentifier(col2);
-                if (!c1.equals(c2)) {
-                    continue;
-                }
-                if (id1.compareTo(id2) == 0) {
-                    // perfect match, we have found the keys
-                    m_selectedKey1 = col1;
-                    m_selectedKey2 = col2;
-                    return;
-                }
-                if (m_selectedKey1 == -1) {
-                    // match with a different key name
-                    m_selectedKey1 = col1;
-                    m_selectedKey2 = col2;
+        if ((keys1 != null) && (keys2 != null)) {
+            for (int i = 0; i < keys1.length; i++) {
+                int col1 = keys1[i];
+                Class c1 = m_data1.getDataColumnClass(col1);
+                String id1 = m_data1.getDataColumnIdentifier(col1);
+                for (int j = 0; j < keys2.length; j++) {
+                    int col2 = keys2[i];
+                    Class c2 = m_data2.getDataColumnClass(col2);
+                    String id2 = m_data2.getDataColumnIdentifier(col2);
+                    if (!c1.equals(c2)) {
+                        continue;
+                    }
+                    if (id1.compareTo(id2) == 0) {
+                        // perfect match, we have found the keys
+                        m_selectedKey1 = col1;
+                        m_selectedKey2 = col2;
+                        return;
+                    }
+                    if (m_selectedKey1 == -1) {
+                        // match with a different key name
+                        m_selectedKey1 = col1;
+                        m_selectedKey2 = col2;
+                    }
                 }
             }
         }

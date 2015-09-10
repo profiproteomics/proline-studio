@@ -26,12 +26,12 @@
         <dependency>
             <groupId>fr.profi</groupId>
             <artifactId>mzdb-access</artifactId>
-            <version>0.3.0-SNAPSHOT</version>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fr.profi</groupId>
             <artifactId>mzdb-processing</artifactId>
-            <version>0.3.0-SNAPSHOT</version>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
         
         <!-- Proline Studio Commons -->

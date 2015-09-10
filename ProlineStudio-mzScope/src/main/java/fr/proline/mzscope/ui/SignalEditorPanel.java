@@ -103,12 +103,12 @@ public class SignalEditorPanel extends JPanel {
             
             List<Tuple2> input = toScalaArrayTuple();
             Tuple2[] rtIntPairs = input.toArray(new Tuple2[input.size()]);
-            BaselineRemover baselineRemover = new BaselineRemover(1);
+            BaselineRemover baselineRemover = new BaselineRemover(1, 3);
             double threshold = baselineRemover.calcNoiseThreshold(rtIntPairs);
             logger.info("detected baseline at threshold "+threshold);
             LineMarker positionMarker = new LineMarker(m_plotPanel.getBasePlotPanel(), threshold, LineMarker.ORIENTATION_HORIZONTAL, Color.BLUE, true);
             m_linear.addMarker(positionMarker);
-            SmartPeakelFinder peakelFinder = new SmartPeakelFinder(5, 3, false, 10, false, true);
+            SmartPeakelFinder peakelFinder = new SmartPeakelFinder(5, 3, (float)0.66, false, 10, false, false, true);
             Tuple2[] indices = peakelFinder.findPeakelsIndices(rtIntPairs);
          }
       });

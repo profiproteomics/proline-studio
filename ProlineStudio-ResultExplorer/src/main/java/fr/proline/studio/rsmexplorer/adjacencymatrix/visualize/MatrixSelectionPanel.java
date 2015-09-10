@@ -7,6 +7,8 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.dam.tasks.data.LightPeptideMatch;
 import fr.proline.studio.dam.tasks.data.LightProteinMatch;
+import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.export.ImageExporterInterface;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -23,6 +25,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 
 /**
  *
@@ -41,14 +44,43 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
     private Component m_currentComponent = null;
     private MatrixImageButton m_currentImageButton = null;
     
+    private InternalPanel m_internalPanel = null;
+    
     public MatrixSelectionPanel() {
         setLoading(0);
         setBackground(Color.white);
         
+        setLayout(new BorderLayout());
+        
+        
+        m_internalPanel = new InternalPanel();
+         
+        JToolBar toolbar = initToolbar();
+        
+       
+        
+        add(toolbar, BorderLayout.WEST);
+        add(m_internalPanel, BorderLayout.CENTER);
+        
     }
     
-    private void initPanel() {
+    private JToolBar initToolbar() {
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
 
+        ExportButton exportImageButton = new ExportButton("Adjacency Matrices", m_internalPanel);
+        toolbar.add(exportImageButton);
+
+        return toolbar;
+    }
+    
+    public class InternalPanel extends JPanel {
+        private InternalPanel() {
+            setBackground(Color.white);
+        }
+        
+        private void initPanel() {
+                        
         // search filter order
         m_peptideToProteinMap = m_drawVisualization.get_peptideToProteinMap();
         m_componentList = filterComponents(m_drawVisualization.get_ComponentList());
@@ -104,7 +136,9 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
         m_dataBox.propagateDataChanged(Component.class);
 
+        }
     }
+
     
     public DrawVisualization getDrawVisualization() {
         return m_drawVisualization;
@@ -116,7 +150,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         
         m_drawVisualization.setData(matrixData);
 
-        initPanel();
+        m_internalPanel.initPanel();
         
         setLoaded(0);
         
@@ -202,100 +236,7 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
         }
     }
 
-    
-    /* OLD SEARCH EVENT 
-    
-            Action action = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Component currentComponent = null;
-                String searchItem = comboEvent.getItem();
-                long id;
 
-              //System.out.println("some action"+searchItem);
-                if (searchItem == null) {
-                } else {
-                    if (searchItem.compareToIgnoreCase("Peptides")==0) {
-                        String idPept = idEntry.getText();
-
-                        try {
-                            id = Long.valueOf(idPept);
-                            for (Component c : cList1) {
-                                for (LightPeptideMatch p : c.peptideSet) {
-                                    if (p.getId() == id) {
-                                        currentComponent = c;
-                                        break;
-                                    } else {
-                                    }
-                                }
-                            }
-
-                        } catch (NumberFormatException ex) {
-
-                        }
-
-                        if (currentComponent == null) {
-                            idEntry.setText("Peptide not found !");
-		            	 // idEntry.sett
-
-                        }
-                    } else if (searchItem.compareToIgnoreCase("Proteins")==0) {
-                        String idProt = idEntry.getText();
-
-                        try {
-                            id = Long.valueOf(idProt);
-
-                            for (Component c : cList1) {
-                                for (LightProteinMatch p : c.proteinSet) {
-                                    if (p.getId() == id) {
-                                        currentComponent = c;
-
-                                        break;
-                                    }
-                                }
-                            }
-                        } catch (NumberFormatException ex) {
-                        }
-
-                        if (currentComponent == null) {
-                            idEntry.setText("Protine not found !");
-                        }
-                    }
-
-                    if (currentComponent != null) {
-                        int componentSearchIndex = cList1.indexOf(currentComponent);
-
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("");
-                        sb.append(componentSearchIndex);
-                        String str = sb.toString();
-
-                        MatrixPanel cCard = new MatrixPanel();
-                        cCard.setData(currentComponent, idDisplay, m_drawVisualization);
-
-                        if (searchItem.compareToIgnoreCase("Proteins")==0) {
-                            String idProt = idEntry.getText();
-                            id = Long.valueOf(idProt);
-                            cCard.heighlightProtein(id);
-
-                        } else if (searchItem.compareToIgnoreCase("Peptides")==0) {
-                            String idPept = idEntry.getText();
-                            id = Long.valueOf(idPept);
-                            cCard.heighlightPeptide(id);
-                        }
-
-                        cardPanel.add(cCard, str);
-                        CardLayout cl = (CardLayout) (cardPanel.getLayout());
-                        cl.show(cardPanel, str);
-
-                    } else {
-	            	 //"Item not found!");
-
-                    }
-                }
-            }
-        };
-    */
     
 }
 

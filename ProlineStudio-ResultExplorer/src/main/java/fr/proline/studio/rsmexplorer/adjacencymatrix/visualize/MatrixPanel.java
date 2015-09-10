@@ -4,6 +4,8 @@ package fr.proline.studio.rsmexplorer.adjacencymatrix.visualize;
 
 import fr.proline.studio.dam.tasks.data.LightPeptideMatch;
 import fr.proline.studio.dam.tasks.data.LightProteinMatch;
+import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -27,6 +29,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 
 public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface {
 
@@ -72,6 +75,8 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
     private String[] m_info = new String[2];
 
+    private JPanel m_internalPanel;
+    
     public MatrixPanel() {
         setLoading(0);
         setBorder(BorderFactory.createLineBorder(COLOR_GRAY));
@@ -87,12 +92,26 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         }
 
         JScrollPane scrollPane = new JScrollPane();
-        InternalPanel internalPanel = new InternalPanel();
-        scrollPane.setViewportView(internalPanel);
-        add(scrollPane);
+        m_internalPanel = new InternalPanel();
+        scrollPane.setViewportView(m_internalPanel);
+        
+        JToolBar toolbar = initToolbar();
+
+        add(toolbar, BorderLayout.WEST);
+        add(scrollPane, BorderLayout.CENTER);
 
     }
 
+    private JToolBar initToolbar() {
+        JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+        toolbar.setFloatable(false);
+        
+        ExportButton exportImageButton = new ExportButton("Protein/Peptide Matrix", m_internalPanel);
+        toolbar.add(exportImageButton);
+        
+        return toolbar;
+    }
+    
     public void setData(Component c, DrawVisualization drawVisualization) {
 
         setLoaded(0);

@@ -235,6 +235,9 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
             case FILTER_BOOLEAN: {
                 return ((BooleanFilter) filter).filter((Boolean)data);
             }
+            case FILTER_LONG: {
+                return ((LongFilter) filter).filter((Long)data);
+            }
         }
         
         return true; // should never happen

@@ -10,9 +10,12 @@ import fr.proline.mzscope.ui.model.ExtractionResultsTableModel;
 import fr.proline.mzscope.model.ExtractionResult;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.markerbar.MarkerContainerPanel;
+import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.TablePopupMenu;
+import fr.proline.studio.utils.IconManager;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -54,6 +57,7 @@ public class ExtractionResultsPanel extends JPanel {
 
     private JFileChooser m_fchooser;
     private MarkerContainerPanel m_markerContainerPanel;
+    private ExportButton m_exportButton;
 
     public ExtractionResultsPanel() {
         initComponents();
@@ -62,15 +66,10 @@ public class ExtractionResultsPanel extends JPanel {
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        add(getToolBar(), BorderLayout.NORTH);
         add(getExtractionResultsTable(), BorderLayout.CENTER);
+        add(getToolBar(), BorderLayout.NORTH);
 
-        String defaultExportPath = "";
-        if (defaultExportPath.length() > 0) {
-            m_fchooser = new JFileChooser(new File(defaultExportPath));
-        } else {
-            m_fchooser = new JFileChooser();
-        }
+        m_fchooser = new JFileChooser();
         m_fchooser.setMultiSelectionEnabled(false);
         FileNameExtensionFilter filter = new FileNameExtensionFilter("*.csv", "csv");
         m_fchooser.setFileFilter(filter);
@@ -79,7 +78,8 @@ public class ExtractionResultsPanel extends JPanel {
     private JToolBar getToolBar() {
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
-        JButton importCSVBtn = new JButton("CSV");
+        JButton importCSVBtn = new JButton();
+        importCSVBtn.setIcon(IconManager.getIcon(IconManager.IconType.TABLE_IMPORT));
         importCSVBtn.setToolTipText("Import m/z values from a csv file...");
         importCSVBtn.addActionListener(new ActionListener() {
 
@@ -102,8 +102,9 @@ public class ExtractionResultsPanel extends JPanel {
         });
         toolbar.add(iRTBtn);
         toolbar.addSeparator();
-        JButton extractBtn = new JButton("Run");
-        extractBtn.setToolTipText("start Extractions on all files");
+        JButton extractBtn = new JButton();
+        extractBtn.setIcon(IconManager.getIcon(IconManager.IconType.EXECUTE));
+        extractBtn.setToolTipText("Start Extractions on all files");
         extractBtn.addActionListener(new ActionListener() {
 
             @Override
@@ -112,6 +113,11 @@ public class ExtractionResultsPanel extends JPanel {
             }
         });
         toolbar.add(extractBtn);
+        
+        toolbar.addSeparator();
+        m_exportButton = new ExportButton(((CompoundTableModel) extractionResultsTable.getModel()), "Extraction Values", extractionResultsTable);
+        toolbar.add(m_exportButton);
+        
         return toolbar;
     }
 
@@ -133,12 +139,12 @@ public class ExtractionResultsPanel extends JPanel {
                 while ((line = br.readLine()) != null) {
                     // use comma as separator
                     String[] values = line.split(cvsSplitBy);
-                    for (String value : values) {
+                    if (values.length >0){
                         try {
-                            Double v = Double.parseDouble(value);
+                            Double v = Double.parseDouble(values[0]);
                             mzValues.add(v);
                         } catch (NumberFormatException e) {
-                            logger.error("Error while reading the csv file, values are not Number " + value);
+                            logger.error("Error while reading the csv file, values are not Number " + values[0]); // first line could be a title
                         }
                     }
                 }
@@ -185,6 +191,7 @@ public class ExtractionResultsPanel extends JPanel {
     }
 
     private void startExtractions() {
+        logger.info("startExtractions...");
         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
         if ((extractionWorker == null) || extractionWorker.isDone()) {
             extractionWorker = new SwingWorker<Integer, Chromatogram>() {
@@ -230,7 +237,7 @@ public class ExtractionResultsPanel extends JPanel {
         extractionResultsTableModel = new ExtractionResultsTableModel();
         JScrollPane jScrollPane = new JScrollPane();
         extractionResultsTable = new ExtractionResultsTable();
-        extractionResultsTable.setModel(extractionResultsTableModel);
+        extractionResultsTable.setModel(new CompoundTableModel(extractionResultsTableModel, true));
         extractionResultsTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent evt) {

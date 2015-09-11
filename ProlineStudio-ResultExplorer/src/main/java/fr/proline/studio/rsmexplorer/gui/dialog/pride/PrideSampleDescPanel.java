@@ -127,7 +127,7 @@ public class PrideSampleDescPanel extends PrideWizardPanel implements OLSInputab
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new java.awt.Insets(5, 5, 5, 5);
-        JLabel sampleNameLabel = new JLabel("Sample Name:");
+        JLabel sampleNameLabel = new JLabel("Sample Name* :");
         m_sampleNameTextField  = new JTextField(30);
         c.gridx = 0;
         c.gridy = 0;

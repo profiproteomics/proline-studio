@@ -9,7 +9,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * Renderer for extraction status: show a green tick for DONE, nothing otherwise (REQUESTED)
+ * Renderer for extraction status: show a green tick for DONE, a hour glass for REQUESTED, nothing otherwise (NONE)
  * @author MB243701
  */
 public class StatusRenderer  extends DefaultTableCellRenderer implements ExportTextInterface{
@@ -38,8 +38,11 @@ public class StatusRenderer  extends DefaultTableCellRenderer implements ExportT
         if (st.equals(Status.DONE)) {
             m_basicTextForExport = "done";
             label.setIcon(IconManager.getIcon(IconManager.IconType.TICK_SMALL));
-        } else {
+        } else if (st.equals(Status.REQUESTED)) {
             m_basicTextForExport = "requested";
+            label.setIcon(IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI16));
+        } else {
+            m_basicTextForExport = "none";
             label.setIcon(null);
         }
         

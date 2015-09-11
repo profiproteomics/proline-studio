@@ -30,7 +30,7 @@ public class MzScope implements IMzScope{
      * @return 
      */
     public JPanel createMzScopePanel(Frame frame){
-        mzScopePanel = new MzScopePanel(frame);
+        mzScopePanel = new MzScopePanel(frame, true);
         return mzScopePanel;
         
     }

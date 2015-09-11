@@ -36,7 +36,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel implements 
     public enum Column {
 
         MZ(0, "m/z", "m/z extration value"),
-        STATUS(1, "status", "Extraction status : REQUESTED or DONE");
+        STATUS(1, "status", "Extraction status : NONE, REQUESTED or DONE");
 
         private final String name;
         private final String tooltip;

@@ -58,8 +58,15 @@ public class ExtractionResultsPanel extends JPanel {
     private JFileChooser m_fchooser;
     private MarkerContainerPanel m_markerContainerPanel;
     private ExportButton m_exportButton;
+    
+    
+    public final static int TOOLBAR_ALIGN_VERTICAL = 0;
+    public final static int TOOLBAR_ALIGN_HORIZONTAL = 1;
+    private int m_toolbarAlign = TOOLBAR_ALIGN_HORIZONTAL;
 
-    public ExtractionResultsPanel() {
+    
+    public ExtractionResultsPanel(int align) {
+        m_toolbarAlign = align;
         initComponents();
 
     }
@@ -67,7 +74,11 @@ public class ExtractionResultsPanel extends JPanel {
     private void initComponents() {
         setLayout(new BorderLayout());
         add(getExtractionResultsTable(), BorderLayout.CENTER);
-        add(getToolBar(), BorderLayout.NORTH);
+        if (m_toolbarAlign == TOOLBAR_ALIGN_HORIZONTAL){
+            add(getToolBar(), BorderLayout.NORTH);
+        }else if (m_toolbarAlign == TOOLBAR_ALIGN_VERTICAL){
+            add(getToolBar(), BorderLayout.WEST);
+        }
 
         m_fchooser = new JFileChooser();
         m_fchooser.setMultiSelectionEnabled(false);
@@ -76,7 +87,7 @@ public class ExtractionResultsPanel extends JPanel {
     }
 
     private JToolBar getToolBar() {
-        JToolBar toolbar = new JToolBar();
+        JToolBar toolbar = new JToolBar(m_toolbarAlign == TOOLBAR_ALIGN_HORIZONTAL? JToolBar.HORIZONTAL : JToolBar.VERTICAL);
         toolbar.setFloatable(false);
         JButton importCSVBtn = new JButton();
         importCSVBtn.setIcon(IconManager.getIcon(IconManager.IconType.TABLE_IMPORT));
@@ -194,6 +205,10 @@ public class ExtractionResultsPanel extends JPanel {
         logger.info("startExtractions...");
         final List<IRawFile> rawfiles = RawFileManager.getInstance().getAllFiles();
         if ((extractionWorker == null) || extractionWorker.isDone()) {
+            for (ExtractionResult extraction : extractions) {
+                extraction.setStatus(ExtractionResult.Status.REQUESTED);
+            }
+            extractionResultsTableModel.fireTableDataChanged();
             extractionWorker = new SwingWorker<Integer, Chromatogram>() {
                 int count = 0;
 

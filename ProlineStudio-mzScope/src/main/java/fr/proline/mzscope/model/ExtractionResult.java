@@ -22,12 +22,12 @@ public class ExtractionResult {
 
    public enum Status {
 
-      REQUESTED, DONE
+      NONE, REQUESTED, DONE
    };
 
    private Ms1ExtractionRequest request;
    private List<Pair<Chromatogram, Object>> chromatograms;
-   private Status status = Status.REQUESTED;
+   private Status status = Status.NONE;
 
    public ExtractionResult(Ms1ExtractionRequest request) {
       this.request = request;

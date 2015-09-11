@@ -23,7 +23,7 @@ public class ExtractionResultsTableModel extends DecoratedTableModel {
 
    public enum Column {
 
-      MZ("mz", "m/z extration value"),
+      MZ("m/z", "m/z extration value"),
       STATUS("status", "Extraction status : REQUESTED or DONE");
 
       private final String name;

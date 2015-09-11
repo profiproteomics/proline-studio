@@ -107,7 +107,7 @@ public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInput
         c.gridy = 0;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.fill = GridBagConstraints.BOTH;
-        JLabel protocolLabel = new JLabel("Protocol Name :");
+        JLabel protocolLabel = new JLabel("Protocol Name* :");
         mainPanel.add(protocolLabel, c);
 
         m_protocolNameTextField = new JTextField(30);
@@ -145,7 +145,7 @@ public class PrideProtocolDescPanel extends PrideWizardPanel implements OLSInput
 
     protected JPanel createStepsPanel() {
         JPanel stepPanel = new JPanel(new GridBagLayout());
-        stepPanel.setBorder(BorderFactory.createTitledBorder(" Steps Description "));
+        stepPanel.setBorder(BorderFactory.createTitledBorder(" Steps Description* "));
 
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new java.awt.Insets(5, 5, 5, 5);

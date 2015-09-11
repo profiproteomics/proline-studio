@@ -64,21 +64,21 @@ public class PrideExpDescPanel extends PrideWizardPanel {
             return m_expNameTextField;
         }
         
-        if(StringUtils.isEmpty(m_contactNameTextField.getText().trim())){
-            errorMsg = "Missing contact name";
-            return m_expNameTextField;
-        }
-        
-        if(StringUtils.isEmpty(m_contactInstitutionTextField.getText().trim())){
-            errorMsg = "Missing contact institution";
-            return m_expNameTextField;
-        }
-        
         if(StringUtils.isEmpty(m_expShortLabelTextField.getText().trim())){
             errorMsg = "Missing experimental short label";
             return m_expShortLabelTextField;
         }
         
+        if(StringUtils.isEmpty(m_contactNameTextField.getText().trim())){
+            errorMsg = "Missing contact name";
+            return m_contactNameTextField;
+        }
+        
+        if(StringUtils.isEmpty(m_contactInstitutionTextField.getText().trim())){
+            errorMsg = "Missing contact institution";
+            return m_contactInstitutionTextField;
+        }
+                
         return null;        
     }
     

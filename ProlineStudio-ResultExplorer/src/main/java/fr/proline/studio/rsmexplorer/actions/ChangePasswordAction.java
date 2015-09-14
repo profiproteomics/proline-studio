@@ -1,8 +1,11 @@
 package fr.proline.studio.rsmexplorer.actions;
 
 import fr.proline.studio.dpm.AccessServiceThread;
+import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.ChangePasswordTask;
+import fr.proline.studio.dpm.task.jms.AbstractJMSCallback;
+import fr.proline.studio.dpm.task.util.JMSConnectionManager;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.rsmexplorer.gui.dialog.ChangePasswordDialog;
 import java.awt.event.ActionEvent;
@@ -51,39 +54,63 @@ public class ChangePasswordAction extends AbstractAction implements ContextAware
             String user = dialog.getUser();
             String oldPwd = dialog.getOldPassword();
             String pwd = dialog.getPassword();
-
+            boolean isJMSDefined = JMSConnectionManager.getJMSConnectionManager().isJMSDefined();
             final Object mutexPasswdLoaded = new Object();
 
             try {
                 synchronized (mutexPasswdLoaded) {
+                    if (isJMSDefined) {
+                        AbstractJMSCallback callback = new AbstractJMSCallback() {
 
-
-                    AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-                        @Override
-                        public boolean mustBeCalledInAWT() {
-                            return false;
-                        }
-
-                        @Override
-                        public void run(boolean success) {
-                            synchronized (mutexPasswdLoaded) {
-                                resultChgPasswd[0] = success;
-                                mutexPasswdLoaded.notifyAll();
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return false;
                             }
+
+                            @Override
+                            public void run(boolean success) {
+                                synchronized (mutexPasswdLoaded) {
+                                    resultChgPasswd[0] = success;
+                                    mutexPasswdLoaded.notifyAll();
+                                }
+                            }
+                        };
+
+                        fr.proline.studio.dpm.task.jms.ChangePasswordTask task = new fr.proline.studio.dpm.task.jms.ChangePasswordTask(callback, user, oldPwd, pwd);
+                        AccessJMSManagerThread.getAccessJMSManagerThread().addTask(task);
+                        // wait untill the change password is done
+                        mutexPasswdLoaded.wait();
+                        
+                        //Test if success 
+                        if (resultChgPasswd[0] == false) {
+                            JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), callback.getTaskError().getErrorTitle(), "Error", JOptionPane.ERROR_MESSAGE);
                         }
-                    };
+                    } else {
+                        AbstractServiceCallback callback = new AbstractServiceCallback() {
 
+                            @Override
+                            public boolean mustBeCalledInAWT() {
+                                return false;
+                            }
 
-                    ChangePasswordTask task = new ChangePasswordTask(callback, user, oldPwd, pwd);
-                    AccessServiceThread.getAccessServiceThread().addTask(task);
+                            @Override
+                            public void run(boolean success) {
+                                synchronized (mutexPasswdLoaded) {
+                                    resultChgPasswd[0] = success;
+                                    mutexPasswdLoaded.notifyAll();
+                                }
+                            }
+                        };
 
-                    // wait untill the change password is done
-                    mutexPasswdLoaded.wait();
+                        ChangePasswordTask task = new ChangePasswordTask(callback, user, oldPwd, pwd);
+                        AccessServiceThread.getAccessServiceThread().addTask(task);
+                        // wait untill the change password is done
+                        mutexPasswdLoaded.wait();
 
-                    //Test if success 
-                    if (resultChgPasswd[0] == false) {
-                        JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), callback.getTaskError().getErrorTitle(), "Error", JOptionPane.ERROR_MESSAGE);
+                        //Test if success 
+                        if (resultChgPasswd[0] == false) {
+                            JOptionPane.showMessageDialog(WindowManager.getDefault().getMainWindow(), callback.getTaskError().getErrorTitle(), "Error", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
 
                 }
@@ -91,7 +118,6 @@ public class ChangePasswordAction extends AbstractAction implements ContextAware
             } catch (InterruptedException ie) {
                 // should not happen
             }
-
 
         }
     }

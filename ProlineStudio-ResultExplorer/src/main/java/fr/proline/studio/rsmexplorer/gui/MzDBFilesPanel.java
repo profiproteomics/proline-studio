@@ -155,6 +155,7 @@ public class MzDBFilesPanel extends JPanel implements IPopupMenuDelegate {
     
     private void setRawFiles(){
         m_rawFilesPanel.removeAllFiles();
+        RawFileManager.getInstance().removeAllFiles();
         mapFiles = new HashMap<IRawFile, File>();
         if (m_mzdbDir != null){
             File mzdbDir = new File(m_mzdbDir);

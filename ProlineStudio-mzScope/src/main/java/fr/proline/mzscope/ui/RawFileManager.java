@@ -66,4 +66,8 @@ public class RawFileManager {
     public List<IRawFile> getAllFiles(){
         return new ArrayList<IRawFile>(files.values());
     }
+    
+    public void removeAllFiles(){
+        files = new HashMap<String,IRawFile>();
+    }
 }

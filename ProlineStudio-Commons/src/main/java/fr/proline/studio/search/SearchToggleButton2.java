@@ -53,6 +53,7 @@ public class SearchToggleButton2 extends JToggleButton {
                     dialog.setVisible(true);
 
                     if (!dialog.isWaitingFinished()) {
+                        setSelected(false);
                         return;
                     }
                 }

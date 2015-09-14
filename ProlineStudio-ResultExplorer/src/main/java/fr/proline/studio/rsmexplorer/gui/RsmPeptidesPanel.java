@@ -20,7 +20,6 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.dialog.CalcDialog;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideInstanceTableModel;
-import fr.proline.studio.search.AdvancedSearchFloatingPanel;
 import fr.proline.studio.search.SearchToggleButton2;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;

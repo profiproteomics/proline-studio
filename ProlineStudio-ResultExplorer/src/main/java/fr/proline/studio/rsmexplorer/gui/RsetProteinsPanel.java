@@ -31,9 +31,7 @@ import fr.proline.studio.graphics.CrossSelectionInterface;
 import fr.proline.studio.pattern.*;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.search.SearchFloatingPanel;
-import fr.proline.studio.search.AbstractSearch;
-import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.search.SearchToggleButton2;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.TablePopupMenu;
@@ -60,9 +58,8 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
     private MarkerContainerPanel m_markerContainerPanel;
     private JButton m_decoyButton;
     private final boolean m_startingPanel;
-    
-    private final SearchFloatingPanel m_searchPanel;
-    private JToggleButton m_searchToggleButton;
+
+    private SearchToggleButton2 m_searchToggleButton;
 
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
@@ -75,11 +72,8 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         
         setLayout(new BorderLayout());
 
-        
-        m_searchPanel = new SearchFloatingPanel(new Search());
-        
+
         final JPanel proteinPanel = createProteinPanel();
-        m_searchPanel.setToggleButton(m_searchToggleButton);
 
         final JLayeredPane layeredPane = new JLayeredPane();
 
@@ -110,7 +104,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(proteinPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchPanel, JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
 
 
     }
@@ -171,7 +165,7 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
         }
 
         // Search Button
-        m_searchToggleButton = new SearchToggleButton(m_searchPanel);
+        m_searchToggleButton = new SearchToggleButton2(m_proteinTable, m_proteinTable, ((CompoundTableModel) m_proteinTable.getModel()));
        
         m_filterButton = new FilterButtonV2(((CompoundTableModel) m_proteinTable.getModel())) {
 
@@ -560,118 +554,4 @@ public class RsetProteinsPanel extends HourglassPanel implements DataBoxPanelInt
 
     }
 
-    private class Search extends AbstractSearch {
-
-        String previousSearch = "";
-        int searchIndex = 0;
-        ArrayList<Long> proteinMatchIds = new ArrayList<>();
-
-        @Override
-        public void reinitSearch() {
-            if (proteinMatchIds.isEmpty()) {
-                return;
-            }
-            searchIndex = -1;
-            ((ProteinsOfPeptideMatchTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel()).sortAccordingToModel(proteinMatchIds, (CompoundTableModel) m_proteinTable.getModel());
-        }
-
-        @Override
-        public void doSearch(String text) {
-            final String searchText = text.trim().toUpperCase();
-
-            
-             if (searchText.compareTo(previousSearch) == 0) {
-                
-                int checkLoopIndex = -1;
-                while (true) {
-                    // search already done, display next result
-                    searchIndex++;
-                    if (searchIndex >= proteinMatchIds.size()) {
-                        searchIndex = 0;
-                    }
-
-                    if (checkLoopIndex == searchIndex) {
-                        break;
-                    }
-                    
-                    if (!proteinMatchIds.isEmpty()) {
-                        boolean found = ((ProteinTable) m_proteinTable).selectProteinMatch(proteinMatchIds.get(searchIndex), searchText);
-                        if (found) {
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                    if (checkLoopIndex == -1) {
-                        checkLoopIndex =  searchIndex;
-                    }
-                }
-                
-            } else {
-                previousSearch = searchText;
-                searchIndex = 0;
-
-                // prepare callback for the search
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                        // contruct the Map of proteinMatchId
-                        if (!proteinMatchIds.isEmpty()) {
-
-                            ((ProteinsOfPeptideMatchTableModel) ((CompoundTableModel) m_proteinTable.getModel()).getBaseModel()).sortAccordingToModel(proteinMatchIds, (CompoundTableModel) m_proteinTable.getModel());
-
-                            
-                                                      int checkLoopIndex = -1;
-                             while (true) {
-                                // search already done, display next result
-                                searchIndex++;
-                                if (searchIndex >= proteinMatchIds.size()) {
-                                    searchIndex = 0;
-                                }
-
-                                if (checkLoopIndex == searchIndex) {
-                                    break;
-                                }
-
-                                if (!proteinMatchIds.isEmpty()) {
-                                    boolean found = ((ProteinTable) m_proteinTable).selectProteinMatch(proteinMatchIds.get(searchIndex), searchText);
-                                    if (found) {
-                                        break;
-                                    }
-                                } else {
-                                    break;
-                                }
-                                if (checkLoopIndex == -1) {
-                                    checkLoopIndex = searchIndex;
-                                }
-                            }
-                            
-                            
-                            
-
-                        }
-
-
-                        m_searchPanel.enableSearch(true);
-                    }
-                };
-
-                ResultSet rset = (ResultSet) m_dataBox.getData(false, ResultSet.class);
-
-
-                // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchProteinMatchTask(callback, m_dataBox.getProjectId(), rset, searchText, proteinMatchIds));
-
-                m_searchPanel.enableSearch(false);
-
-            }
-        }
-    }
 }

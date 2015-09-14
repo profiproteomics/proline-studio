@@ -9,7 +9,6 @@ import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseSearchPeptideMatchTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButtonV2;
@@ -24,9 +23,7 @@ import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
-import fr.proline.studio.search.AbstractSearch;
-import fr.proline.studio.search.SearchFloatingPanel;
-import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.search.SearchToggleButton2;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -53,10 +50,10 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
     private AbstractDataBox m_dataBox;
 
-    private boolean m_forRSM;
-    private boolean m_startingPanel;
-    private boolean m_proteinMatchUnknown;
-    private boolean m_isDecoyAndValidated; // to display columns isDecoy and isValidated (in case of rsm)
+    private final boolean m_forRSM;
+    private final boolean m_startingPanel;
+    private final boolean m_proteinMatchUnknown;
+    private final boolean m_isDecoyAndValidated; // to display columns isDecoy and isValidated (in case of rsm)
     
     private PeptideMatchTable m_peptideMatchTable;
     private JScrollPane m_scrollPane;
@@ -65,8 +62,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     
     private JButton m_decoyButton;
 
-    private SearchFloatingPanel m_searchPanel;
-    private JToggleButton m_searchToggleButton;
+    private SearchToggleButton2 m_searchToggleButton;
     
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
@@ -182,9 +178,8 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         
         setLayout(new BorderLayout());
 
-        m_searchPanel = new SearchFloatingPanel(new Search());
         final JPanel peptideMatch = createPeptideMatchPanel();
-        m_searchPanel.setToggleButton(m_searchToggleButton);
+
         
         final JLayeredPane layeredPane = new JLayeredPane();
 
@@ -215,7 +210,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         add(layeredPane, BorderLayout.CENTER);
         
         layeredPane.add(peptideMatch, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchPanel, JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
 
     }
     
@@ -273,7 +268,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
         
         // Search Button
-        m_searchToggleButton = new SearchToggleButton(m_searchPanel);
+        m_searchToggleButton = new SearchToggleButton2(m_peptideMatchTable, m_peptideMatchTable, ((CompoundTableModel) m_peptideMatchTable.getModel()));
         
         m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peptideMatchTable.getModel())) {
 
@@ -426,120 +421,6 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
         return m_peptideMatchTable;
     }
 
-    private class Search extends AbstractSearch {
-
-        String previousSearch = "";
-        int searchIndex = 0;
-        ArrayList<Long> peptideMatchIds = new ArrayList<>();
-
-        @Override
-        public void reinitSearch() {
-            if (peptideMatchIds.isEmpty()) {
-                return;
-            }
-            searchIndex = -1;
-            ((PeptideMatchTableModel) ((CompoundTableModel) m_peptideMatchTable.getModel()).getBaseModel()).sortAccordingToModel(peptideMatchIds, (CompoundTableModel) m_peptideMatchTable.getModel());
-        }
-
-        @Override
-        public void doSearch(String text) {
-            final String searchText = text.trim().toUpperCase();
-
-            if (searchText.compareTo(previousSearch) == 0) {
-                
-                int checkLoopIndex = -1;
-                while (true) {
-                    // search already done, display next result
-                    searchIndex++;
-                    if (searchIndex >= peptideMatchIds.size()) {
-                        searchIndex = 0;
-                    }
-
-                    if (checkLoopIndex == searchIndex) {
-                        break;
-                    }
-                    
-                    if (!peptideMatchIds.isEmpty()) {
-                        boolean found = ((PeptideMatchTable) m_peptideMatchTable).selectPeptideMatch(peptideMatchIds.get(searchIndex), searchText);
-                        if (found) {
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                    if (checkLoopIndex == -1) {
-                        checkLoopIndex =  searchIndex;
-                    }
-                }
-                
-            } else {
-                previousSearch = searchText;
-                searchIndex = 0;
-
-                // prepare callback for the search
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                        // contruct the Map of proteinSetId
-
-
-                        if (!peptideMatchIds.isEmpty()) {
-
-                            ((PeptideMatchTableModel) ((CompoundTableModel) m_peptideMatchTable.getModel()).getBaseModel()).sortAccordingToModel(peptideMatchIds, (CompoundTableModel) m_peptideMatchTable.getModel());
-
-                             int checkLoopIndex = -1;
-                             while (true) {
-                                // search already done, display next result
-                                searchIndex++;
-                                if (searchIndex >= peptideMatchIds.size()) {
-                                    searchIndex = 0;
-                                }
-
-                                if (checkLoopIndex == searchIndex) {
-                                    break;
-                                }
-
-                                if (!peptideMatchIds.isEmpty()) {
-                                    boolean found = ((PeptideMatchTable) m_peptideMatchTable).selectPeptideMatch(peptideMatchIds.get(searchIndex), searchText);
-                                    if (found) {
-                                        break;
-                                    }
-                                } else {
-                                    break;
-                                }
-                                if (checkLoopIndex == -1) {
-                                    checkLoopIndex = searchIndex;
-                                }
-                            }
-                            
-                            
-                            
-
-                        }
-
-
-                        //System.out.println("Ids size "+proteinSetIds.size());
-                        m_searchPanel.enableSearch(true);
-                    }
-                };
-
-                long rsetId = ((PeptideMatchTableModel) ((CompoundTableModel) m_peptideMatchTable.getModel()).getBaseModel()).getResultSetId();
-
-                
-                // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideMatchTask(callback, m_dataBox.getProjectId(), rsetId, searchText, peptideMatchIds));
-
-                m_searchPanel.enableSearch(false);
-            }
-        }
-    }
     
     
  

@@ -5,9 +5,6 @@ import fr.proline.core.orm.uds.dto.DQuantitationChannel;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseSearchMasterQuantPeptideIonTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
@@ -24,9 +21,7 @@ import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.python.data.TableInfo;
-import fr.proline.studio.search.AbstractSearch;
-import fr.proline.studio.search.SearchFloatingPanel;
-import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.search.SearchToggleButton2;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.CustomColumnControlButton;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -53,7 +48,6 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
@@ -83,12 +77,12 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     private JButton m_columnVisibilityButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
     
-    private SearchFloatingPanel m_searchPanel;
-    private JToggleButton m_searchToggleButton;
-    private XICPeptideIonSearch m_search = null;
+
+    private SearchToggleButton2 m_searchToggleButton;
+
     
     private JLabel m_titleLabel;
-    private String TABLE_TITLE = "Peptides Ions";
+    private static final String TABLE_TITLE = "Peptides Ions";
     
 
     public XicPeptideIonPanel() {
@@ -98,10 +92,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
     private void initComponents() {
         setLayout(new BorderLayout());
 
-        m_search = new XICPeptideIonSearch();
-        m_searchPanel = new SearchFloatingPanel(m_search);
         final JPanel peptideIonPanel = createPeptideIonPanel();
-        m_searchPanel.setToggleButton(m_searchToggleButton); 
 
         final JLayeredPane layeredPane = new JLayeredPane();
 
@@ -132,7 +123,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(peptideIonPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchPanel, JLayeredPane.PALETTE_LAYER); 
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER); 
 
 
     }
@@ -161,7 +152,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
         toolbar.setFloatable(false);
 
         // Search Button
-        m_searchToggleButton = new SearchToggleButton(m_searchPanel);
+        m_searchToggleButton = new SearchToggleButton2(m_quantPeptideIonTable, m_quantPeptideIonTable, ((CompoundTableModel) m_quantPeptideIonTable.getModel()));
         toolbar.add(m_searchToggleButton);
         
         m_filterButton = new FilterButtonV2(((CompoundTableModel) m_quantPeptideIonTable.getModel())) {
@@ -458,11 +449,7 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
                 setSortable(true);
             }
         }
-        
-        @Override
-        public void sortingChanged(int col) {
-            m_search.reinitSearch(); 
-        }
+
     
         public void selectionWillBeRestored(boolean b) {
             selectionWillBeRestored = b;
@@ -706,121 +693,6 @@ public class XicPeptideIonPanel  extends HourglassPanel implements DataBoxPanelI
 
     }
     
-    
-    
-    private class XICPeptideIonSearch extends AbstractSearch {
 
-        String previousSearch = "";
-        int searchIndex = 0;
-        ArrayList<Long> peptideIonsIds = new ArrayList<>();
-
-        @Override
-        public void reinitSearch() {
-            if (peptideIonsIds.isEmpty()) {
-                return;
-            }
-            searchIndex = -1;
-            ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).sortAccordingToModel(peptideIonsIds, (CompoundTableModel) m_quantPeptideIonTable.getModel());
-        
-        }
-
-        @Override
-        public void doSearch(String text) {
-            final String searchText = text.trim().toUpperCase();
-
-            if (searchText.compareTo(previousSearch) == 0) {
-                
-                int checkLoopIndex = -1;
-                while (true) {
-                    // search already done, display next result
-                    searchIndex++;
-                    if (searchIndex >= peptideIonsIds.size()) {
-                        searchIndex = 0;
-                    }
-
-                    if (checkLoopIndex == searchIndex) {
-                        break;
-                    }
-                    
-                    if (!peptideIonsIds.isEmpty()) {
-                        boolean found = ((QuantPeptideIonTable) m_quantPeptideIonTable).selectPeptideIon(peptideIonsIds.get(searchIndex), searchText);
-                        if (found) {
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                    if (checkLoopIndex == -1) {
-                        checkLoopIndex =  searchIndex;
-                    }
-                }
-                
-            } else {
-                previousSearch = searchText;
-                searchIndex = -1;
-
-                // prepare callback for the search
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                        // contruct the Map of proteinSetId
-
-
-                        if (!peptideIonsIds.isEmpty()) {
-
-                            ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).sortAccordingToModel(peptideIonsIds, (CompoundTableModel) m_quantPeptideIonTable.getModel());
-        
-
-                            
-                             int checkLoopIndex = -1;
-                             while (true) {
-                                // search already done, display next result
-                                searchIndex++;
-                                if (searchIndex >= peptideIonsIds.size()) {
-                                    searchIndex = 0;
-                                }
-
-                                if (checkLoopIndex == searchIndex) {
-                                    break;
-                                }
-
-                                if (!peptideIonsIds.isEmpty()) {
-                                    boolean found = ((QuantPeptideIonTable) m_quantPeptideIonTable).selectPeptideIon(peptideIonsIds.get(searchIndex), searchText);
-                                    if (found) {
-                                        break;
-                                    }
-                                } else {
-                                    break;
-                                }
-                                if (checkLoopIndex == -1) {
-                                    checkLoopIndex = searchIndex;
-                                }
-                            }
-
-                        }
-
-
-                        //System.out.println("Ids size "+proteinSetIds.size());
-                        m_searchPanel.enableSearch(true);
-                    }
-                };
-
-                Long rsmId = ((QuantPeptideIonTableModel) ((CompoundTableModel) m_quantPeptideIonTable.getModel()).getBaseModel()).getResultSummaryId();
-
-                // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchMasterQuantPeptideIonTask(callback, m_dataBox.getProjectId(), rsmId, searchText, peptideIonsIds));
-
-                m_searchPanel.enableSearch(false);
-
-            }
-        }
-    }
     
 }

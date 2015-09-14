@@ -7,7 +7,6 @@ import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
-import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.*;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.filter.FilterButtonV2;
@@ -22,9 +21,7 @@ import fr.proline.studio.pattern.*;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
-import fr.proline.studio.search.AbstractSearch;
-import fr.proline.studio.search.SearchFloatingPanel;
-import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.search.SearchToggleButton2;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.ImportTableSelectionInterface;
@@ -36,7 +33,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.util.ArrayList;
 import java.util.HashSet;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -61,10 +57,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     
     private boolean m_firstPanel;
     private JButton m_decoyButton;
-    
-    private SearchFloatingPanel m_searchPanel;
-    private JToggleButton m_searchToggleButton;
-    private Search m_search = null;
+
+    private SearchToggleButton2 m_searchToggleButton;
     
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
@@ -193,10 +187,8 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
         setLayout(new BorderLayout());
 
-        m_search = new Search();
-        m_searchPanel = new SearchFloatingPanel(m_search);
         final JPanel proteinSetPanel = createProteinSetPanel();
-        m_searchPanel.setToggleButton(m_searchToggleButton);
+
 
         final JLayeredPane layeredPane = new JLayeredPane();
 
@@ -227,7 +219,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(proteinSetPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchPanel, JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
 
 
     }
@@ -285,12 +277,14 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 }
             });
 
-            // Search Button
-            m_searchToggleButton = new SearchToggleButton(m_searchPanel);
-
+           
             toolbar.add(m_decoyButton);
-            toolbar.add(m_searchToggleButton);
+            
         }
+        
+        // Search Button
+        m_searchToggleButton = new SearchToggleButton2(m_proteinSetTable, m_proteinSetTable, ((CompoundTableModel) m_proteinSetTable.getModel()));
+        toolbar.add(m_searchToggleButton);
         
         m_filterButton = new FilterButtonV2(((CompoundTableModel) m_proteinSetTable.getModel())) {
 
@@ -478,12 +472,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
                 setSortable(true);
             }
         }
-        
-        @Override
-        public void sortingChanged(int col) {
-            m_search.reinitSearch();
-        }
-    
+
         public void selectionWillBeRestored(boolean b) {
             selectionWillBeRestored = b;
         }
@@ -562,118 +551,5 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     }
     
 
-    
-    private class Search extends AbstractSearch {
-
-        String previousSearch = "";
-        int searchIndex = 0;
-        ArrayList<Long> proteinSetIds = new ArrayList<>();
-
-        @Override
-        public void reinitSearch() {
-            if (proteinSetIds.isEmpty()) {
-                return;
-            }
-            searchIndex = -1;
-            ((ProteinSetTableModel) ((CompoundTableModel) m_proteinSetTable.getModel()).getBaseModel()).sortAccordingToModel(proteinSetIds, (CompoundTableModel) m_proteinSetTable.getModel());
-        }
-
-        @Override
-        public void doSearch(String text) {
-            final String searchText = text.trim().toUpperCase();
-
-            if (searchText.compareTo(previousSearch) == 0) {
-                
-                int checkLoopIndex = -1;
-                while (true) {
-                    // search already done, display next result
-                    searchIndex++;
-                    if (searchIndex >= proteinSetIds.size()) {
-                        searchIndex = 0;
-                    }
-
-                    if (checkLoopIndex == searchIndex) {
-                        break;
-                    }
-                    
-                    if (!proteinSetIds.isEmpty()) {
-                        boolean found = ((ProteinSetTable) m_proteinSetTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
-                        if (found) {
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                    if (checkLoopIndex == -1) {
-                        checkLoopIndex =  searchIndex;
-                    }
-                }
-                
-            } else {
-                previousSearch = searchText;
-                searchIndex = -1;
-
-                // prepare callback for the search
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                        // contruct the Map of proteinSetId
-                        
-                        
-                        if (!proteinSetIds.isEmpty()) {
-                            
-                            ((ProteinSetTableModel) ((CompoundTableModel) m_proteinSetTable.getModel()).getBaseModel()).sortAccordingToModel(proteinSetIds, (CompoundTableModel) m_proteinSetTable.getModel());
-
-                             int checkLoopIndex = -1;
-                             while (true) {
-                                // search already done, display next result
-                                searchIndex++;
-                                if (searchIndex >= proteinSetIds.size()) {
-                                    searchIndex = 0;
-                                }
-
-                                if (checkLoopIndex == searchIndex) {
-                                    break;
-                                }
-
-                                if (!proteinSetIds.isEmpty()) {
-                                    boolean found = ((ProteinSetTable) m_proteinSetTable).selectProteinSet(proteinSetIds.get(searchIndex), searchText);
-                                    if (found) {
-                                        break;
-                                    }
-                                } else {
-                                    break;
-                                }
-                                if (checkLoopIndex == -1) {
-                                    checkLoopIndex = searchIndex;
-                                }
-                            }
-                            
-                        }
-
-
-                        //System.out.println("Ids size "+proteinSetIds.size());
-                        m_searchPanel.enableSearch(true);
-                    }
-                };
-
-                Long rsmId = ((ProteinSetTableModel) ((CompoundTableModel) m_proteinSetTable.getModel()).getBaseModel()).getResultSummaryId();
-
-
-                // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchProteinSetsTask(callback, m_dataBox.getProjectId() ,rsmId, searchText, proteinSetIds));
-
-                m_searchPanel.enableSearch(false);
-            }
-        
-        }
-    }
     
 }

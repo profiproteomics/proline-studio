@@ -178,9 +178,9 @@ public class PeakTableModel extends LazyTableModel implements GlobalTableModelIn
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_PEAK_MOZ, new DoubleFilter(getColumnName(COLTYPE_PEAK_MOZ), null));
-        filtersMap.put(COLTYPE_PEAK_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_PEAK_ELUTION_TIME), null));
-        filtersMap.put(COLTYPE_PEAK_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_PEAK_INTENSITY), null));
+        filtersMap.put(COLTYPE_PEAK_MOZ, new DoubleFilter(getColumnName(COLTYPE_PEAK_MOZ), null, COLTYPE_PEAK_MOZ));
+        filtersMap.put(COLTYPE_PEAK_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_PEAK_ELUTION_TIME), null, COLTYPE_PEAK_ELUTION_TIME));
+        filtersMap.put(COLTYPE_PEAK_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_PEAK_INTENSITY), null, COLTYPE_PEAK_INTENSITY));
     }
     
 

@@ -97,7 +97,6 @@ public class FilterPanel extends JPanel {
         c.insets = new java.awt.Insets(5, 5, 5, 5);
         c.gridy = 0;
 
-        int nbDefined = 0;
         boolean putAndInFront = false;
         int nbParameters = m_filters.length;
         for (int i = 0; i < nbParameters; i++) {
@@ -131,8 +130,6 @@ public class FilterPanel extends JPanel {
                     }
                 });
                 m_filterSelectedPanel.add(removeButton, c);
-
-                nbDefined++;
 
                 c.gridy++;
             } else {

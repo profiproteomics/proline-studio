@@ -472,13 +472,13 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
    @Override
    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_PROTEIN_SET_NAME, new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_NAME), null));
-        filtersMap.put(COLTYPE_PROTEIN_SET_DESCRIPTION, new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_DESCRIPTION), null));
-        filtersMap.put(COLTYPE_PROTEIN_SCORE, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE), null));
-        filtersMap.put(COLTYPE_PEPTIDES_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT), null));
-        filtersMap.put(COLTYPE_SPECTRAL_COUNT, new IntegerFilter(getColumnName(COLTYPE_SPECTRAL_COUNT), null));
-        filtersMap.put(COLTYPE_SPECIFIC_SPECTRAL_COUNT, new IntegerFilter(getColumnName(COLTYPE_SPECIFIC_SPECTRAL_COUNT), null));
-        filtersMap.put(COLTYPE_UNIQUE_SEQUENCES_COUNT, new IntegerFilter(getColumnName(COLTYPE_UNIQUE_SEQUENCES_COUNT), null));
+        filtersMap.put(COLTYPE_PROTEIN_SET_NAME, new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_NAME), null, COLTYPE_PROTEIN_SET_NAME));
+        filtersMap.put(COLTYPE_PROTEIN_SET_DESCRIPTION, new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_DESCRIPTION), null, COLTYPE_PROTEIN_SET_DESCRIPTION));
+        filtersMap.put(COLTYPE_PROTEIN_SCORE, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE), null, COLTYPE_PROTEIN_SCORE));
+        filtersMap.put(COLTYPE_PEPTIDES_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT), null, COLTYPE_PEPTIDES_COUNT));
+        filtersMap.put(COLTYPE_SPECTRAL_COUNT, new IntegerFilter(getColumnName(COLTYPE_SPECTRAL_COUNT), null, COLTYPE_SPECTRAL_COUNT));
+        filtersMap.put(COLTYPE_SPECIFIC_SPECTRAL_COUNT, new IntegerFilter(getColumnName(COLTYPE_SPECIFIC_SPECTRAL_COUNT), null, COLTYPE_SPECIFIC_SPECTRAL_COUNT));
+        filtersMap.put(COLTYPE_UNIQUE_SEQUENCES_COUNT, new IntegerFilter(getColumnName(COLTYPE_UNIQUE_SEQUENCES_COUNT), null, COLTYPE_UNIQUE_SEQUENCES_COUNT));
     }
 
     @Override

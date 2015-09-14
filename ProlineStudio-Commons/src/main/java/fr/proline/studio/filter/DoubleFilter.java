@@ -18,12 +18,21 @@ public class DoubleFilter extends Filter {
     private Double m_min;
     private Double m_max;
 
-    public DoubleFilter(String variableName, ConvertValueInterface convertValueInterface) {
-        super(FilterType.FILTER_DOUBLE ,variableName, convertValueInterface);
+    public DoubleFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
+        super(FilterType.FILTER_DOUBLE ,variableName, convertValueInterface, modelColumn);
 
         m_valueKeys = new ArrayList<>(2);
         m_valueKeys.add(VALUE_MIN);
         m_valueKeys.add(VALUE_MAX);
+    }
+    
+    @Override
+    public Filter cloneFilter() {
+        DoubleFilter clone = new DoubleFilter(m_variableName, m_convertValueInterface, m_modelColumn);
+        clone.m_min = m_min;
+        clone.m_max = m_max;
+        setValuesForClone(clone);
+        return clone;
     }
 
     @Override
@@ -61,9 +70,15 @@ public class DoubleFilter extends Filter {
     }
 
     @Override
-    public void registerValues() {
+    public boolean registerValues() {
 
+        boolean hasChanged = false;
+        
         if (isDefined()) {
+            
+            Double lastMinValue = m_min;
+            Double lastMaxValue = m_max;
+            
             String minValue = ((JTextField) getComponent(VALUE_MIN)).getText().trim();
             if ((minValue == null) || (minValue.length() == 0)) {
                 m_min = null;
@@ -85,12 +100,22 @@ public class DoubleFilter extends Filter {
                     // should never happen
                 }
             }
+            
+            if (((lastMinValue == null) && (m_min!=null)) || ((lastMinValue != null) && (m_min==null))) {
+                hasChanged = true;
+            } else if (((lastMaxValue == null) && (m_max!=null)) || ((lastMaxValue != null) && (m_max==null))) {
+                hasChanged = true;
+            } else if ((lastMinValue != null) && (lastMinValue.doubleValue() != m_min.doubleValue())) {
+                hasChanged = true;
+            } else if ((lastMaxValue != null) && (lastMaxValue.doubleValue() != m_max.doubleValue())) {
+                hasChanged = true;
+            }
+
         }
 
-
-
-
         registerDefinedAsUsed();
+        
+        return hasChanged;
     }
 
     public boolean filter(double value) {

@@ -4,6 +4,7 @@ import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import org.jdesktop.swingx.JXTable;
 
 
 /**
@@ -26,7 +27,7 @@ public interface FilterTableModelInterfaceV2 extends GlobalTableModelInterface {
     public boolean filter(int row);
     
     public boolean filter(int row, int col);
-    
+
     public int convertRowToOriginalModel(int row);
     
     public int convertOriginalModelToRow(int row);
@@ -40,6 +41,9 @@ public interface FilterTableModelInterfaceV2 extends GlobalTableModelInterface {
     public HashSet<Integer> getRestrainRowSet();
     
     public boolean hasRestrain();
+    
+    
+    public int search(JXTable table, Filter f, boolean newSearch);
 
     
 }

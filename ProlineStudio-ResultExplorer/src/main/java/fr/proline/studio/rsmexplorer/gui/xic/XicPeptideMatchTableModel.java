@@ -379,7 +379,7 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
         int colIdx = 0;
         colIdx++;//COLTYPE_PEPTIDE_ID
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_QC_NAME
+        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_QC_NAME
             
         ConvertValueInterface peptideConverter = new ConvertValueInterface() {
             @Override
@@ -391,8 +391,8 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
             }
 
         };
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), peptideConverter));  colIdx++;//COLTYPE_PEPTIDE_NAME
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_SCORE
+        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), peptideConverter, colIdx));  colIdx++;//COLTYPE_PEPTIDE_NAME
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_SCORE
             
         ConvertValueInterface msQueryConverter = new ConvertValueInterface() {
             @Override
@@ -404,16 +404,16 @@ public class XicPeptideMatchTableModel extends LazyTableModel implements GlobalT
             }
 
         };
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), msQueryConverter));  colIdx++;//COLTYPE_PEPTIDE_MSQUERY
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_RANK
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_CALCULATED_MASS
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_PPM
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_CHARGE
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_MISSED_CLIVAGE
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_RETENTION_TIME
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_ION_PARENT_INTENSITY
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_PTM
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), msQueryConverter, colIdx));  colIdx++;//COLTYPE_PEPTIDE_MSQUERY
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_RANK
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_CALCULATED_MASS
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_PPM
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_CHARGE
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_MISSED_CLIVAGE
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_RETENTION_TIME
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_ION_PARENT_INTENSITY
+        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_PTM
 
     }
 

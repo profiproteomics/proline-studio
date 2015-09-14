@@ -18,10 +18,19 @@ public class StringFilter extends Filter {
     private String m_filterText = null;
     private Pattern m_searchPattern;
 
-    public StringFilter(String variableName, ConvertValueInterface convertValueInterface) {
-        super(FilterType.FILTER_STRING, variableName, convertValueInterface);
+    public StringFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
+        super(FilterType.FILTER_STRING, variableName, convertValueInterface, modelColumn);
     }
 
+    @Override
+    public Filter cloneFilter() {
+        StringFilter clone = new StringFilter(m_variableName, m_convertValueInterface, m_modelColumn);
+        clone.m_filterText = m_filterText;
+        clone.m_searchPattern = m_searchPattern;
+        setValuesForClone(clone);
+        return clone;
+    }
+    
     public boolean filter(String value) {
         if (m_filterText == null) {
             return true;
@@ -48,18 +57,27 @@ public class StringFilter extends Filter {
     }
 
     @Override
-    public void registerValues() {
+    public boolean registerValues() {
 
+        boolean hasChanged = false;
+        
         if (isDefined()) {
+            
+            String lastValue = m_filterText;
+            
             m_filterText = ((JTextField) getComponent(SEARCH_TEXT)).getText().trim();
             if (m_filterText.isEmpty()) {
                 m_filterText = null;
             }
 
             m_searchPattern = compileRegex(m_filterText);
+            
+            hasChanged = (lastValue == null) || (m_filterText==null) || (lastValue.compareTo(m_filterText)!=0);
         }
 
         registerDefinedAsUsed();
+        
+        return hasChanged;
     }
 
     private static Pattern compileRegex(String text) {
@@ -107,6 +125,7 @@ public class StringFilter extends Filter {
         JTextField vTextField = ((JTextField) getComponent(SEARCH_TEXT));
         if (vTextField == null) {
             vTextField = new JTextField(8);
+            vTextField.setToolTipText("<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
             if (m_filterText != null) {
                 vTextField.setText(m_filterText.toString());
             }

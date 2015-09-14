@@ -179,7 +179,7 @@ public class ExprTableModel extends DecoratedTableModel implements ChildModelInt
         
         Integer key = m_parentModel.getColumnCount();
         if (!filtersMap.containsKey(key)) {
-            filtersMap.put(m_parentModel.getColumnCount(), new DoubleFilter(m_column.getColumnName(),null));
+            filtersMap.put(m_parentModel.getColumnCount(), new DoubleFilter(m_column.getColumnName(),null, getColumnCount()-1));
         }
     }
 

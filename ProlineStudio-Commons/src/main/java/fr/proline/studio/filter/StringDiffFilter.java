@@ -17,15 +17,25 @@ public class StringDiffFilter extends Filter {
 
     private static final Integer SEARCH_TEXT = 0;
     private String m_filterText = null;
-    private Pattern m_searchPattern;
+    private Pattern m_searchPattern = null;
     private JComboBox m_cbOp = null;
     private int m_selIndex = 0;
     
     
-    public StringDiffFilter(String variableName, ConvertValueInterface convertValueInterface) {
-        super(FilterType.FILTER_STRING_DIFF, variableName, convertValueInterface);
+    public StringDiffFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
+        super(FilterType.FILTER_STRING_DIFF, variableName, convertValueInterface, modelColumn);
     }
 
+    @Override
+    public Filter cloneFilter() {
+        StringDiffFilter clone = new StringDiffFilter(m_variableName, m_convertValueInterface, m_modelColumn);
+        clone.m_filterText = m_filterText;
+        clone.m_searchPattern = m_searchPattern;
+        clone.m_selIndex = m_selIndex;
+        setValuesForClone(clone);
+        return clone;
+    }
+    
     public boolean filter(String value) {
         if (m_filterText == null) {
             return true;
@@ -52,15 +62,25 @@ public class StringDiffFilter extends Filter {
     }
 
     @Override
-    public void registerValues() {
+    public boolean registerValues() {
 
+        boolean hasChanged = false;
+        
         if (isDefined()) {
+            
+            String lastValue = m_filterText;
+            int lastSelIndex = m_selIndex;
+            
             m_filterText = ((JTextField) getComponent(SEARCH_TEXT)).getText().trim();
             m_searchPattern = compileRegex(m_filterText);
             m_selIndex = m_cbOp.getSelectedIndex();
+            
+            hasChanged = (lastValue == null) || (m_filterText==null) || (lastValue.compareTo(m_filterText)!=0) || (lastSelIndex != m_selIndex);
         }
 
         registerDefinedAsUsed();
+        
+        return hasChanged;
     }
 
     private static Pattern compileRegex(String text) {
@@ -114,6 +134,7 @@ public class StringDiffFilter extends Filter {
         JTextField vTextField = ((JTextField) getComponent(SEARCH_TEXT));
         if (vTextField == null) {
             vTextField = new JTextField(8);
+            vTextField.setToolTipText("<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
             if (m_filterText != null) {
                 vTextField.setText(m_filterText.toString());
             }

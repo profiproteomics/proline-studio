@@ -16,10 +16,19 @@ public class LongFilter extends Filter {
     private Long m_min;
     private Long m_max;
 
-    public LongFilter(String variableName, ConvertValueInterface convertValueInterface) {
-        super(FilterType.FILTER_LONG, variableName, convertValueInterface);
+    public LongFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
+        super(FilterType.FILTER_LONG, variableName, convertValueInterface, modelColumn);
     }
 
+    @Override
+    public Filter cloneFilter() {
+        LongFilter clone = new LongFilter(m_variableName, m_convertValueInterface, m_modelColumn);
+        clone.m_min = m_min;
+        clone.m_max = m_max;
+        setValuesForClone(clone);
+        return clone;
+    }
+    
     public boolean filter(long value) {
         if (m_min != null) {
             if (value < m_min.longValue()) {
@@ -69,9 +78,15 @@ public class LongFilter extends Filter {
     }
 
     @Override
-    public void registerValues() {
+    public boolean registerValues() {
 
+         boolean hasChanged = false;
+        
         if (isDefined()) {
+            
+            Long lastMinValue = m_min;
+            Long lastMaxValue = m_max;
+            
             String minValue = ((JTextField) getComponent(VALUE_MIN)).getText().trim();
             if ((minValue == null) || (minValue.length() == 0)) {
                 m_min = null;
@@ -93,9 +108,21 @@ public class LongFilter extends Filter {
                     // should never happen
                 }
             }
+            
+            if (((lastMinValue == null) && (m_min != null)) || ((lastMinValue != null) && (m_min == null))) {
+                hasChanged = true;
+            } else if (((lastMaxValue == null) && (m_max != null)) || ((lastMaxValue != null) && (m_max == null))) {
+                hasChanged = true;
+            } else if ((lastMinValue != null) && (lastMinValue.longValue() != m_min.longValue())) {
+                hasChanged = true;
+            } else if ((lastMaxValue != null) && (lastMaxValue.longValue() != m_max.longValue())) {
+                hasChanged = true;
+            }
         }
 
         registerDefinedAsUsed();
+        
+        return hasChanged;
     }
 
     @Override

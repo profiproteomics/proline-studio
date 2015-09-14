@@ -249,10 +249,10 @@ public class ProteinsOfPeptideMatchTableModel extends LazyTableModel implements 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
-        filtersMap.put(COLTYPE_PROTEIN_NAME, new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME), null));
-        filtersMap.put(COLTYPE_PROTEIN_SCORE, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE), null));
-        filtersMap.put(COLTYPE_PROTEIN_PEPTIDES_COUNT, new IntegerFilter(getColumnName(COLTYPE_PROTEIN_PEPTIDES_COUNT), null));
-        filtersMap.put(COLTYPE_PROTEIN_MASS, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_MASS), null));
+        filtersMap.put(COLTYPE_PROTEIN_NAME, new StringFilter(getColumnName(COLTYPE_PROTEIN_NAME), null, COLTYPE_PROTEIN_NAME));
+        filtersMap.put(COLTYPE_PROTEIN_SCORE, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE), null, COLTYPE_PROTEIN_SCORE));
+        filtersMap.put(COLTYPE_PROTEIN_PEPTIDES_COUNT, new IntegerFilter(getColumnName(COLTYPE_PROTEIN_PEPTIDES_COUNT), null, COLTYPE_PROTEIN_PEPTIDES_COUNT));
+        filtersMap.put(COLTYPE_PROTEIN_MASS, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_MASS), null, COLTYPE_PROTEIN_MASS));
 
     }
 

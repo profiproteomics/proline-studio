@@ -329,14 +329,14 @@ public class MSQueriesTableModel extends LazyTableModel implements GlobalTableMo
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_MSQUERY_CHARGE, new IntegerFilter(getColumnName(COLTYPE_MSQUERY_CHARGE), null));
-        filtersMap.put(COLTYPE_MSQUERY_MOZ, new DoubleFilter(getColumnName(COLTYPE_MSQUERY_MOZ), null));
-        filtersMap.put(COLTYPE_MSQUERY_NB_PEPTIDE_MATCH, new IntegerFilter(getColumnName(COLTYPE_MSQUERY_NB_PEPTIDE_MATCH), null));
-        filtersMap.put(COLTYPE_MSQUERY_FIRST_SCAN, new IntegerFilter(getColumnName(COLTYPE_MSQUERY_FIRST_SCAN), null));
-        filtersMap.put(COLTYPE_MSQUERY_LAST_SCAN, new IntegerFilter(getColumnName(COLTYPE_MSQUERY_LAST_SCAN), null));
-        filtersMap.put(COLTYPE_MSQUERY_FIRST_TIME, new DoubleFilter(getColumnName(COLTYPE_MSQUERY_FIRST_TIME), null));
-        filtersMap.put(COLTYPE_MSQUERY_LAST_TIME, new DoubleFilter(getColumnName(COLTYPE_MSQUERY_LAST_TIME), null));
-        filtersMap.put(COLTYPE_MSQUERY_SPECTRUM_TITLE, new StringFilter(getColumnName(COLTYPE_MSQUERY_SPECTRUM_TITLE), null));
+        filtersMap.put(COLTYPE_MSQUERY_CHARGE, new IntegerFilter(getColumnName(COLTYPE_MSQUERY_CHARGE), null, COLTYPE_MSQUERY_CHARGE));
+        filtersMap.put(COLTYPE_MSQUERY_MOZ, new DoubleFilter(getColumnName(COLTYPE_MSQUERY_MOZ), null, COLTYPE_MSQUERY_MOZ));
+        filtersMap.put(COLTYPE_MSQUERY_NB_PEPTIDE_MATCH, new IntegerFilter(getColumnName(COLTYPE_MSQUERY_NB_PEPTIDE_MATCH), null, COLTYPE_MSQUERY_NB_PEPTIDE_MATCH));
+        filtersMap.put(COLTYPE_MSQUERY_FIRST_SCAN, new IntegerFilter(getColumnName(COLTYPE_MSQUERY_FIRST_SCAN), null, COLTYPE_MSQUERY_FIRST_SCAN));
+        filtersMap.put(COLTYPE_MSQUERY_LAST_SCAN, new IntegerFilter(getColumnName(COLTYPE_MSQUERY_LAST_SCAN), null, COLTYPE_MSQUERY_LAST_SCAN));
+        filtersMap.put(COLTYPE_MSQUERY_FIRST_TIME, new DoubleFilter(getColumnName(COLTYPE_MSQUERY_FIRST_TIME), null, COLTYPE_MSQUERY_FIRST_TIME));
+        filtersMap.put(COLTYPE_MSQUERY_LAST_TIME, new DoubleFilter(getColumnName(COLTYPE_MSQUERY_LAST_TIME), null, COLTYPE_MSQUERY_LAST_TIME));
+        filtersMap.put(COLTYPE_MSQUERY_SPECTRUM_TITLE, new StringFilter(getColumnName(COLTYPE_MSQUERY_SPECTRUM_TITLE), null, COLTYPE_MSQUERY_SPECTRUM_TITLE));
     }
 
     @Override

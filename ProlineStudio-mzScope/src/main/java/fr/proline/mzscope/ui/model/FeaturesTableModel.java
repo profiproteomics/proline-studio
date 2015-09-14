@@ -185,16 +185,15 @@ public class FeaturesTableModel extends DecoratedTableModel implements GlobalTab
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_FEATURE_MZCOL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_MZCOL), null));
-        filtersMap.put(COLTYPE_FEATURE_ET_COL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_ET_COL), null));
-        filtersMap.put(COLTYPE_FEATURE_DURATION_COL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_DURATION_COL), null));
-        filtersMap.put(COLTYPE_FEATURE_APEX_INT_COL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_APEX_INT_COL), null));
-        filtersMap.put(COLTYPE_FEATURE_AREA_COL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_AREA_COL), null));
-        filtersMap.put(COLTYPE_FEATURE_SCAN_COUNT_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_SCAN_COUNT_COL), null));
-        filtersMap.put(COLTYPE_FEATURE_PEAKELS_COUNT_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_PEAKELS_COUNT_COL), null));
-        filtersMap.put(COLTYPE_FEATURE_CHARGE_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_CHARGE_COL), null));
-        
-        
+        filtersMap.put(COLTYPE_FEATURE_MZCOL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_MZCOL), null, COLTYPE_FEATURE_MZCOL));
+        filtersMap.put(COLTYPE_FEATURE_ET_COL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_ET_COL), null, COLTYPE_FEATURE_ET_COL));
+        filtersMap.put(COLTYPE_FEATURE_DURATION_COL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_DURATION_COL), null, COLTYPE_FEATURE_DURATION_COL));
+        filtersMap.put(COLTYPE_FEATURE_APEX_INT_COL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_APEX_INT_COL), null, COLTYPE_FEATURE_APEX_INT_COL));
+        filtersMap.put(COLTYPE_FEATURE_AREA_COL, new DoubleFilter(getColumnName(COLTYPE_FEATURE_AREA_COL), null, COLTYPE_FEATURE_AREA_COL));
+        filtersMap.put(COLTYPE_FEATURE_SCAN_COUNT_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_SCAN_COUNT_COL), null, COLTYPE_FEATURE_SCAN_COUNT_COL));
+        filtersMap.put(COLTYPE_FEATURE_PEAKELS_COUNT_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_PEAKELS_COUNT_COL), null, COLTYPE_FEATURE_PEAKELS_COUNT_COL));
+        filtersMap.put(COLTYPE_FEATURE_CHARGE_COL, new IntegerFilter(getColumnName(COLTYPE_FEATURE_CHARGE_COL), null, COLTYPE_FEATURE_CHARGE_COL));
+  
     }
 
     @Override

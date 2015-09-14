@@ -462,8 +462,8 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 }
 
             };
-            filtersMap.put(COLTYPE_STEP, new ValueFilter("State", TaskInfo.PUBLIC_STATE_VALUES, PUBLIC_STATE_ICONS, ValueFilter.ValueFilterType.EQUAL, stepConverter));
-            filtersMap.put(COLTYPE_TASKINFO_ID, new IntegerFilter(getColumnName(COLTYPE_TASKINFO_ID), null));
+            filtersMap.put(COLTYPE_STEP, new ValueFilter("State", TaskInfo.PUBLIC_STATE_VALUES, PUBLIC_STATE_ICONS, ValueFilter.ValueFilterType.EQUAL, stepConverter, COLTYPE_STEP));
+            filtersMap.put(COLTYPE_TASKINFO_ID, new IntegerFilter(getColumnName(COLTYPE_TASKINFO_ID), null, COLTYPE_TASKINFO_ID));
             
             
             ConvertValueInterface criticalityConverter = new ConvertValueInterface() {
@@ -476,8 +476,8 @@ public class TasksPanel extends HourglassPanel implements DataBoxPanelInterface 
                 }
 
             };
-            filtersMap.put(COLTYPE_TASKINFO_CRITICALITY, new ValueFilter(getColumnName(COLTYPE_TASKINFO_CRITICALITY), TaskInfo.IMPORTANCE_VALUES, null, ValueFilter.ValueFilterType.GREATER_EQUAL, criticalityConverter));
-            filtersMap.put(COLTYPE_DESCRIPTION, new StringFilter(getColumnName(COLTYPE_DESCRIPTION), null));
+            filtersMap.put(COLTYPE_TASKINFO_CRITICALITY, new ValueFilter(getColumnName(COLTYPE_TASKINFO_CRITICALITY), TaskInfo.IMPORTANCE_VALUES, null, ValueFilter.ValueFilterType.GREATER_EQUAL, criticalityConverter, COLTYPE_TASKINFO_CRITICALITY));
+            filtersMap.put(COLTYPE_DESCRIPTION, new StringFilter(getColumnName(COLTYPE_DESCRIPTION), null, COLTYPE_DESCRIPTION));
 
         }
 

@@ -30,13 +30,22 @@ public class ValueFilter extends Filter {
         EQUAL
     }
     
-    public ValueFilter(String variableName, Object[] values, ImageIcon[] displayIcons, ValueFilterType type, ConvertValueInterface convertValueInterface ) {
-        super(FilterType.FILTER_VALUE, variableName, convertValueInterface);
+    public ValueFilter(String variableName, Object[] values, ImageIcon[] displayIcons, ValueFilterType type, ConvertValueInterface convertValueInterface, int modelColumn) {
+        super(FilterType.FILTER_VALUE, variableName, convertValueInterface, modelColumn);
         
         m_values = values;
         m_displayIcons = displayIcons;
         m_type = type;
     }
+    
+    @Override
+    public Filter cloneFilter() {
+        ValueFilter clone = new ValueFilter(m_variableName, m_values, m_displayIcons, m_type, m_convertValueInterface, m_modelColumn);
+        clone.m_index = m_index;
+        setValuesForClone(clone);
+        return clone;
+    }
+    
 
     public boolean filter(int index) {
 
@@ -54,14 +63,22 @@ public class ValueFilter extends Filter {
     }
 
     @Override
-    public void registerValues() {
+    public boolean registerValues() {
 
+        boolean hasChanged = false;
+        
         if (isDefined()) {
             
+            int lastIndex = m_index;
+            
             m_index = ((JComboBox) getComponent(VALUE)).getSelectedIndex();
+            
+            hasChanged = (m_index != lastIndex);
         }
 
         registerDefinedAsUsed();
+        
+        return hasChanged;
     }
 
 

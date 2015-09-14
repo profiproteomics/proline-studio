@@ -196,12 +196,12 @@ public class ProteinTableModel extends DecoratedTableModel implements GlobalTabl
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
-        filtersMap.put(Column.PROTEIN_NAME.ordinal(), new StringFilter(getColumnName(Column.PROTEIN_NAME.ordinal()), null));
-        filtersMap.put(Column.PROTEIN_DESCRIPTION.ordinal(), new StringFilter(getColumnName(Column.PROTEIN_DESCRIPTION.ordinal()), null));
-        filtersMap.put(Column.PROTEIN_SCORE.ordinal(), new DoubleFilter(getColumnName(Column.PROTEIN_SCORE.ordinal()), null));
-        filtersMap.put(Column.PROTEIN_PEPTIDES_COUNT.ordinal(), new IntegerFilter(getColumnName(Column.PROTEIN_PEPTIDES_COUNT.ordinal()), null));
-        filtersMap.put(Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal(), new IntegerFilter(getColumnName(Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal()), null));
-        filtersMap.put(Column.PROTEIN_MASS.ordinal(), new DoubleFilter(getColumnName(Column.PROTEIN_MASS.ordinal()), null));
+        filtersMap.put(Column.PROTEIN_NAME.ordinal(), new StringFilter(getColumnName(Column.PROTEIN_NAME.ordinal()), null, Column.PROTEIN_NAME.ordinal()));
+        filtersMap.put(Column.PROTEIN_DESCRIPTION.ordinal(), new StringFilter(getColumnName(Column.PROTEIN_DESCRIPTION.ordinal()), null, Column.PROTEIN_DESCRIPTION.ordinal()));
+        filtersMap.put(Column.PROTEIN_SCORE.ordinal(), new DoubleFilter(getColumnName(Column.PROTEIN_SCORE.ordinal()), null, Column.PROTEIN_SCORE.ordinal()));
+        filtersMap.put(Column.PROTEIN_PEPTIDES_COUNT.ordinal(), new IntegerFilter(getColumnName(Column.PROTEIN_PEPTIDES_COUNT.ordinal()), null, Column.PROTEIN_PEPTIDES_COUNT.ordinal()));
+        filtersMap.put(Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal(), new IntegerFilter(getColumnName(Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal()), null, Column.PROTEIN_UNIQUE_PEPTIDE_SEQUENCES_COUNT.ordinal()));
+        filtersMap.put(Column.PROTEIN_MASS.ordinal(), new DoubleFilter(getColumnName(Column.PROTEIN_MASS.ordinal()), null, Column.PROTEIN_MASS.ordinal()));
 
     }
 

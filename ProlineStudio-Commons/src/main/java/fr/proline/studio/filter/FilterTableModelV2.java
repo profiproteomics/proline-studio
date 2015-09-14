@@ -15,6 +15,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import org.jdesktop.swingx.JXTable;
 
 /**
  * Model use to filter data and/or restrain rows of another model
@@ -26,10 +27,13 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     protected HashSet<Integer> m_restrainIds = null;
     protected ArrayList<Integer> m_filteredIds = null;
     
+    private ArrayList<Integer> m_searchIds = null;
+    private int m_searchIndex = 0;
+    
     private GlobalTableModelInterface m_tableModelSource = null;
     
     private boolean m_isFiltering = false;
-    //private boolean m_filteringAsked = false;
+
     
     public FilterTableModelV2(GlobalTableModelInterface tableModelSource) {
         setTableModelSource(tableModelSource);
@@ -164,39 +168,42 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
 
     @Override
     public void filter() {
-        try {
-        int nbData = ((AbstractTableModel) m_tableModelSource).getRowCount();
-
         
-        m_isFiltering = true;
+        // reinit search
+        m_searchIds = null;
+        
         try {
+            int nbData = ((AbstractTableModel) m_tableModelSource).getRowCount();
 
-            if (m_filteredIds == null) {
-                m_filteredIds = new ArrayList<>(nbData);
-            } else {
-                m_filteredIds.clear();
-            }
+            m_isFiltering = true;
+            try {
 
-            for (int i = 0; i < nbData; i++) {
-                
-                Integer iInteger = i;
-                
-                if ((m_restrainIds!=null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
-                    continue;
+                if (m_filteredIds == null) {
+                    m_filteredIds = new ArrayList<>(nbData);
+                } else {
+                    m_filteredIds.clear();
                 }
-                
-                if (!filter(i)) {
-                    continue;
-                }
-                m_filteredIds.add(iInteger);
-            }
 
-        } finally {
-            m_isFiltering = false;
-        }
-        fireTableDataChanged();
+                for (int i = 0; i < nbData; i++) {
+
+                    Integer iInteger = i;
+
+                    if ((m_restrainIds != null) && (!m_restrainIds.isEmpty()) && (!m_restrainIds.contains(iInteger))) {
+                        continue;
+                    }
+
+                    if (!filter(i)) {
+                        continue;
+                    }
+                    m_filteredIds.add(iInteger);
+                }
+
+            } finally {
+                m_isFiltering = false;
+            }
+            fireTableDataChanged();
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -206,16 +213,16 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
         if ((filter == null) || (!filter.isUsed())) {
             return true;
         }
-        
+        return filter(filter, row, col);
+    }
+    private boolean filter(Filter filter, int row, int col) {
         Object data = getValueAt(row, col);
         data = filter.convertValue(data);
 
         if (data == null) {
             return true; // should not happen
         }
-        
-        
-        
+
         switch (filter.getFilterType()) {
             case FILTER_STRING: {
                 return ((StringFilter) filter).filter((String)data);
@@ -270,6 +277,7 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
 
     @Override
     public void sortingChanged(int col) {
+        m_searchIds = null;
         m_tableModelSource.sortingChanged(col);
     }
 
@@ -395,5 +403,48 @@ public class FilterTableModelV2 extends DecoratedTableModel implements FilterTab
     @Override
     public GlobalTableModelInterface getFrozzenModel() {
         return new LockedFilterTableModel(m_restrainIds, m_filteredIds, m_tableModelSource);
+    }
+    
+    @Override
+    public int search(JXTable table, Filter filter, boolean newSearch) {
+        
+        if (m_searchIds == null) {
+            m_searchIds = new ArrayList<>();
+            newSearch = true;
+        }
+            
+        if (newSearch) {
+            m_searchIndex = 0;
+            m_searchIds.clear();
+            int nb = getRowCount();
+            for (int row = 0; row < nb; row++) {
+                
+                int searchRow;
+                if (table != null) {
+                    // we search according to table
+                    searchRow = table.convertRowIndexToModel(row);
+                } else {
+                    searchRow = row;
+                }
+                
+                int col = filter.getModelColumn();
+                boolean found = filter(filter, searchRow, col);
+                if (found) {
+                    m_searchIds.add(searchRow);
+                }
+            }
+        } else {
+            m_searchIndex++;
+            if (m_searchIndex>=m_searchIds.size()) {
+                m_searchIndex = 0;
+            }
+        }
+        
+        if (m_searchIds.isEmpty()) {
+            return -1;
+        }
+        return m_searchIds.get(m_searchIndex);
+        
+
     }
 }

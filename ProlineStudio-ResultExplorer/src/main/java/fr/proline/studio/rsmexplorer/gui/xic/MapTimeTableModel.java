@@ -197,8 +197,8 @@ public class MapTimeTableModel  extends LazyTableModel implements GlobalTableMod
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_TIME, new DoubleFilter(getColumnName(COLTYPE_TIME), null));
-        filtersMap.put(COLTYPE_DELTA_TIME, new DoubleFilter(getColumnName(COLTYPE_DELTA_TIME), null));
+        filtersMap.put(COLTYPE_TIME, new DoubleFilter(getColumnName(COLTYPE_TIME), null, COLTYPE_TIME));
+        filtersMap.put(COLTYPE_DELTA_TIME, new DoubleFilter(getColumnName(COLTYPE_DELTA_TIME), null, COLTYPE_DELTA_TIME));
     }
 
     @Override

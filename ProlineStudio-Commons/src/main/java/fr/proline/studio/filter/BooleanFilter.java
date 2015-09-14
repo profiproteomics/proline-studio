@@ -20,8 +20,16 @@ public class BooleanFilter extends Filter{
     private final static Integer BOOLEAN_CB = 0;
     private Boolean m_bValue = null;
     
-    public BooleanFilter(String variableName, ConvertValueInterface convertValueInterface) {
-        super(FilterType.FILTER_BOOLEAN, variableName, convertValueInterface);
+    public BooleanFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
+        super(FilterType.FILTER_BOOLEAN, variableName, convertValueInterface, modelColumn);
+    }
+    
+    @Override
+    public Filter cloneFilter() {
+        BooleanFilter clone = new BooleanFilter(m_variableName, m_convertValueInterface, m_modelColumn);
+        clone.m_bValue = m_bValue;
+        setValuesForClone(clone);
+        return clone;
     }
     
     @Override
@@ -30,12 +38,22 @@ public class BooleanFilter extends Filter{
     }
 
     @Override
-    public void registerValues() {
+    public boolean registerValues() {
+        
+        boolean hasChanged = false;
+        
         if (isDefined()) {
+           
+            Boolean lastValue = m_bValue;
+           
             m_bValue =((JComboBox) getComponent(BOOLEAN_CB)).getSelectedIndex() == 0;
+            
+            hasChanged = (lastValue == null) || (lastValue ^ m_bValue);
         }
 
         registerDefinedAsUsed();
+        
+        return hasChanged;
     }
 
     @Override

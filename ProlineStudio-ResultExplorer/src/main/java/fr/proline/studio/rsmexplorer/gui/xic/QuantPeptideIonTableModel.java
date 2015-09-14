@@ -402,9 +402,9 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
 
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_PEPTIDE_ION_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME), null));
-        filtersMap.put(COLTYPE_PEPTIDE_ION_CHARGE, new IntegerFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_CHARGE), null));
-        filtersMap.put(COLTYPE_PEPTIDE_ION_MOZ, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_MOZ), null));
+        filtersMap.put(COLTYPE_PEPTIDE_ION_NAME, new StringDiffFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_NAME), null, COLTYPE_PEPTIDE_ION_NAME));
+        filtersMap.put(COLTYPE_PEPTIDE_ION_CHARGE, new IntegerFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_CHARGE), null, COLTYPE_PEPTIDE_ION_CHARGE));
+        filtersMap.put(COLTYPE_PEPTIDE_ION_MOZ, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_MOZ), null, COLTYPE_PEPTIDE_ION_MOZ));
         
         ConvertValueInterface minuteConverter = new ConvertValueInterface() {
             @Override
@@ -416,26 +416,26 @@ public class QuantPeptideIonTableModel extends LazyTableModel implements GlobalT
             }
 
         };
-        filtersMap.put(COLTYPE_PEPTIDE_ION_ELUTION_TIME, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_ELUTION_TIME), minuteConverter));
+        filtersMap.put(COLTYPE_PEPTIDE_ION_ELUTION_TIME, new DoubleFilter(getColumnNameForFilter(COLTYPE_PEPTIDE_ION_ELUTION_TIME), minuteConverter, COLTYPE_PEPTIDE_ION_ELUTION_TIME));
         int nbCol = getColumnCount();
         for (int i=LAST_STATIC_COLUMN+1; i< nbCol; i++){
             int nbQc = (i - m_columnNames.length) / m_columnNamesQC.length;
             int id = i - m_columnNames.length - (nbQc * m_columnNamesQC.length);
             switch (id) {
                 case COLTYPE_SELECTION_LEVEL:
-                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null));
+                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null, i));
                     break;
                 case COLTYPE_ABUNDANCE:
-                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null, i));
                     break;
                 case COLTYPE_RAW_ABUNDANCE:
-                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null, i));
                     break;
                 case COLTYPE_PSM:
-                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null));
+                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null, i));
                     break;
                 default:
-                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null, i));
                     break;
             }
         }

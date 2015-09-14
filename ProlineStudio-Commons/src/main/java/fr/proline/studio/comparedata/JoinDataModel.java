@@ -3,6 +3,7 @@ package fr.proline.studio.comparedata;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.IntegerFilter;
+import fr.proline.studio.filter.LongFilter;
 import fr.proline.studio.filter.StringFilter;
 import fr.proline.studio.graphics.PlotInformation;
 import fr.proline.studio.graphics.PlotType;
@@ -259,11 +260,13 @@ public class JoinDataModel extends AbstractJoinDataModel {
             if (i==0) {
                 Class c = getDataColumnClass(0);
                 if (c.equals(Double.class)) {
-                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null, i));
                 } else if (c.equals(Integer.class)) {
-                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null));
+                    filtersMap.put(i, new IntegerFilter(getColumnName(i), null, i));
                 } else if (c.equals(String.class)) {
-                    filtersMap.put(i, new StringFilter(getColumnName(i), null));
+                    filtersMap.put(i, new StringFilter(getColumnName(i), null, i));
+                } else if (c.equals(Long.class)) {
+                    filtersMap.put(i, new LongFilter(getColumnName(i), null, i));
                 }
             } else {
                 int colIndex = i-1;

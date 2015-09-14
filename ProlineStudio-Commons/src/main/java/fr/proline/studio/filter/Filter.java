@@ -32,12 +32,27 @@ public abstract class Filter {
     
     protected final FilterType m_type;
     
-    private final ConvertValueInterface m_convertValueInterface;
+    protected final int m_modelColumn;
     
-    public Filter(FilterType type, String variableName, ConvertValueInterface convertValueInterface) {
+    protected final ConvertValueInterface m_convertValueInterface;
+    
+    public Filter(FilterType type, String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
         m_type = type;
         m_variableName = variableName;
         m_convertValueInterface = convertValueInterface;
+        m_modelColumn = modelColumn;
+    }
+    
+    public abstract Filter cloneFilter();
+    public void setValuesForClone(Filter clone) {
+        clone.m_used = m_used;
+        clone.m_defined = m_defined;
+        clone.m_valueKeys = m_valueKeys;
+    }
+    
+    
+    public int getModelColumn() {
+        return m_modelColumn;
     }
     
     public Object convertValue(Object o) {
@@ -61,7 +76,11 @@ public abstract class Filter {
     public void registerDefinedAsUsed() {
         m_used = m_defined;
     }
-    public abstract void registerValues();
+    
+    /**
+     * @return if the filter has been changed since the last time
+     */
+    public abstract boolean registerValues();
     
 
     public ArrayList<Integer> getValueKeys() {

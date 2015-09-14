@@ -365,8 +365,8 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
         
-        filtersMap.put(COLTYPE_FEATURE_MOZ, new DoubleFilter(getColumnName(COLTYPE_FEATURE_MOZ), null));
-        filtersMap.put(COLTYPE_FEATURE_CHARGE, new IntegerFilter(getColumnName(COLTYPE_FEATURE_CHARGE), null));
+        filtersMap.put(COLTYPE_FEATURE_MOZ, new DoubleFilter(getColumnName(COLTYPE_FEATURE_MOZ), null, COLTYPE_FEATURE_MOZ));
+        filtersMap.put(COLTYPE_FEATURE_CHARGE, new IntegerFilter(getColumnName(COLTYPE_FEATURE_CHARGE), null, COLTYPE_FEATURE_CHARGE));
         
         ConvertValueInterface minuteConverter = new ConvertValueInterface() {
             @Override
@@ -378,13 +378,13 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             }
 
         };
-        filtersMap.put(COLTYPE_FEATURE_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_ELUTION_TIME), minuteConverter));
-        filtersMap.put(COLTYPE_FEATURE_APEX_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_FEATURE_APEX_INTENSITY), null));
-        filtersMap.put(COLTYPE_FEATURE_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_FEATURE_INTENSITY), null));
-        filtersMap.put(COLTYPE_FEATURE_DURATION, new DoubleFilter(getColumnName(COLTYPE_FEATURE_DURATION), null));
-        filtersMap.put(COLTYPE_FEATURE_QUALITY_SCORE, new DoubleFilter(getColumnName(COLTYPE_FEATURE_QUALITY_SCORE), null));
-        filtersMap.put(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME), minuteConverter));
-        filtersMap.put(COLTYPE_FEATURE_PEAKELS_COUNT, new IntegerFilter(getColumnName(COLTYPE_FEATURE_PEAKELS_COUNT), null));
+        filtersMap.put(COLTYPE_FEATURE_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_ELUTION_TIME), minuteConverter, COLTYPE_FEATURE_ELUTION_TIME));
+        filtersMap.put(COLTYPE_FEATURE_APEX_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_FEATURE_APEX_INTENSITY), null, COLTYPE_FEATURE_APEX_INTENSITY));
+        filtersMap.put(COLTYPE_FEATURE_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_FEATURE_INTENSITY), null, COLTYPE_FEATURE_INTENSITY));
+        filtersMap.put(COLTYPE_FEATURE_DURATION, new DoubleFilter(getColumnName(COLTYPE_FEATURE_DURATION), null, COLTYPE_FEATURE_DURATION));
+        filtersMap.put(COLTYPE_FEATURE_QUALITY_SCORE, new DoubleFilter(getColumnName(COLTYPE_FEATURE_QUALITY_SCORE), null, COLTYPE_FEATURE_QUALITY_SCORE));
+        filtersMap.put(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_FEATURE_PREDICTED_ELUTION_TIME), minuteConverter, COLTYPE_FEATURE_PREDICTED_ELUTION_TIME));
+        filtersMap.put(COLTYPE_FEATURE_PEAKELS_COUNT, new IntegerFilter(getColumnName(COLTYPE_FEATURE_PEAKELS_COUNT), null, COLTYPE_FEATURE_PEAKELS_COUNT));
 
     }
 

@@ -17,10 +17,19 @@ public class IntegerFilter extends Filter {
     private Integer m_min;
     private Integer m_max;
 
-    public IntegerFilter(String variableName, ConvertValueInterface convertValueInterface) {
-        super(FilterType.FILTER_INTEGER, variableName, convertValueInterface);
+    public IntegerFilter(String variableName, ConvertValueInterface convertValueInterface, int modelColumn) {
+        super(FilterType.FILTER_INTEGER, variableName, convertValueInterface, modelColumn);
     }
 
+    @Override
+    public Filter cloneFilter() {
+        IntegerFilter clone = new IntegerFilter(m_variableName, m_convertValueInterface, m_modelColumn);
+        clone.m_min = m_min;
+        clone.m_max = m_max;
+        setValuesForClone(clone);
+        return clone;
+    }
+    
     public boolean filter(int value) {
         if (m_min != null) {
             if (value < m_min.intValue()) {
@@ -70,9 +79,15 @@ public class IntegerFilter extends Filter {
     }
 
     @Override
-    public void registerValues() {
+    public boolean registerValues() {
 
+        boolean hasChanged = false;
+        
         if (isDefined()) {
+            
+            Integer lastMinValue = m_min;
+            Integer lastMaxValue = m_max;
+            
             String minValue = ((JTextField) getComponent(VALUE_MIN)).getText().trim();
             if ((minValue == null) || (minValue.length() == 0)) {
                 m_min = null;
@@ -94,9 +109,21 @@ public class IntegerFilter extends Filter {
                     // should never happen
                 }
             }
+
+            if (((lastMinValue == null) && (m_min != null)) || ((lastMinValue != null) && (m_min == null))) {
+                hasChanged = true;
+            } else if (((lastMaxValue == null) && (m_max != null)) || ((lastMaxValue != null) && (m_max == null))) {
+                hasChanged = true;
+            } else if ((lastMinValue != null) && (lastMinValue.intValue()!= m_min.intValue())) {
+                hasChanged = true;
+            } else if ((lastMaxValue != null) && (lastMaxValue.intValue() != m_max.intValue())) {
+                hasChanged = true;
+            }
         }
 
         registerDefinedAsUsed();
+        
+        return hasChanged;
     }
 
     @Override

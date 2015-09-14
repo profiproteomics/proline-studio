@@ -431,11 +431,11 @@ public class ImportTSVFunction extends AbstractFunction {
             for (int i = 0; i < nbCols; i++) {
                 Class c = getColumnClass(i);
                 if (c.equals(Double.class)) {
-                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null));
+                    filtersMap.put(i, new DoubleFilter(getColumnName(i), null,i ));
                 } else if (c.equals(Long.class)) {
-                    filtersMap.put(i, new LongFilter(getColumnName(i), null));
+                    filtersMap.put(i, new LongFilter(getColumnName(i), null, i));
                 } else if (c.equals(String.class)) {
-                    filtersMap.put(i, new StringFilter(getColumnName(i), null));
+                    filtersMap.put(i, new StringFilter(getColumnName(i), null, i));
                 }
             }
         }

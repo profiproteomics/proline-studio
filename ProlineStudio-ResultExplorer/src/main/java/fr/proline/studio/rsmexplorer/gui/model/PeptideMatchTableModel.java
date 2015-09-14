@@ -609,7 +609,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
         
         // COLTYPE_PEPTIDE_PREVIOUS_AA
         if (m_hasPrevNextAA) {
-            filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null));
+            filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx));
             colIdx++;
         }
         
@@ -623,23 +623,23 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             }
             
         };
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), peptideConverter)); //COLTYPE_PEPTIDE_NAME
+        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), peptideConverter, colIdx)); //COLTYPE_PEPTIDE_NAME
         colIdx++;
 
         
         // COLTYPE_PEPTIDE_NEXT_AA
         if (m_hasPrevNextAA) {
-            filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null));
+            filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx));
             colIdx++;
         }
             
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null)); //COLTYPE_PEPTIDE_SCORE
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx)); //COLTYPE_PEPTIDE_SCORE
         colIdx++;
 
         // COLTYPE_PEPTIDE_START and COLTYPE_PEPTIDE_STOP
         if (m_hasPrevNextAA) {
-            filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null)); colIdx++; // COLTYPE_PEPTIDE_START
-            filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null)); colIdx++; // COLTYPE_PEPTIDE_STOP
+            filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_PEPTIDE_START
+            filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_PEPTIDE_STOP
         }
            
                     
@@ -654,25 +654,25 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
             }
             
         };
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), msQueryConverter));  colIdx++;//COLTYPE_PEPTIDE_MSQUERY
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_RANK
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_CALCULATED_MASS
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_DELTA_MOZ  (COLTYPE_PEPTIDE_PPM)
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_CHARGE
-        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_MISSED_CLIVAGE
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_ION_PARENT_INTENSITY
-        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_PTM
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), msQueryConverter, colIdx));  colIdx++;//COLTYPE_PEPTIDE_MSQUERY
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_RANK
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_CALCULATED_MASS
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_DELTA_MOZ  (COLTYPE_PEPTIDE_PPM)
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_CHARGE
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_MISSED_CLIVAGE
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_ION_PARENT_INTENSITY
+        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_PTM
             
         //COLTYPE_PEPTIDE_PROTEIN_SET_NAMES
         if (m_forRSM) {
-            filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null)); colIdx++;
+            filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx)); colIdx++;
         }
-        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_RETENTION_TIME
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_RETENTION_TIME
         if (m_isDecoyAndValidated){
-            filtersMap.put(colIdx, new BooleanFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_IS_DECOY
+            filtersMap.put(colIdx, new BooleanFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_IS_DECOY
             if (m_forRSM) {
-                filtersMap.put(colIdx, new BooleanFilter(getColumnName(colIdx), null));  colIdx++;//COLTYPE_PEPTIDE_IS_VALIDATED
+                filtersMap.put(colIdx, new BooleanFilter(getColumnName(colIdx), null, colIdx));  colIdx++;//COLTYPE_PEPTIDE_IS_VALIDATED
             }
         }
 

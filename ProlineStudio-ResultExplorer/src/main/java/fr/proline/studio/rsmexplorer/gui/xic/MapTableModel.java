@@ -178,8 +178,8 @@ public class MapTableModel extends LazyTableModel implements GlobalTableModelInt
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
-        filtersMap.put(COLTYPE_MAP_NAME, new StringFilter(getColumnName(COLTYPE_MAP_NAME), null));
-        filtersMap.put(COLTYPE_MAP_DESCRIPTION, new StringFilter(getColumnName(COLTYPE_MAP_DESCRIPTION), null));
+        filtersMap.put(COLTYPE_MAP_NAME, new StringFilter(getColumnName(COLTYPE_MAP_NAME), null, COLTYPE_MAP_NAME));
+        filtersMap.put(COLTYPE_MAP_DESCRIPTION, new StringFilter(getColumnName(COLTYPE_MAP_DESCRIPTION), null, COLTYPE_MAP_DESCRIPTION));
 
     }
 

@@ -13,6 +13,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import org.jdesktop.swingx.JXTable;
 
 /**
  *
@@ -196,6 +197,12 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
             return false;
         }
         return m_filterModel.hasRestrain();
+    }
+    
+    @Override
+    public int search(JXTable table, Filter f, boolean newSearch) {
+        initFilters();
+        return m_filterModel.search(table, f, newSearch);
     }
 
     @Override

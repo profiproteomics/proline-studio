@@ -19,7 +19,7 @@ import org.openide.windows.WindowManager;
  */
 public class ExportButton extends JButton implements ActionListener {
 
-    private String m_exportName;
+    private final String m_exportName;
     private JXTable m_table = null;
     private JPanel m_panel = null;
     private ImageExporterInterface  m_imageExporter = null;

@@ -301,14 +301,14 @@ public class PeakelTableModel extends LazyTableModel implements GlobalTableModel
     @Override
     public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
 
-        filtersMap.put(COLTYPE_PEAKEL_MOZ, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_MOZ), null));
-        filtersMap.put(COLTYPE_PEAKEL_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_ELUTION_TIME), null));
-        filtersMap.put(COLTYPE_PEAKEL_APEX_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_APEX_INTENSITY), null));
-        filtersMap.put(COLTYPE_PEAKEL_AREA, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_AREA), null));
-        filtersMap.put(COLTYPE_PEAKEL_DURATION, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_DURATION), null));
-        filtersMap.put(COLTYPE_PEAKEL_FWHM, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_FWHM), null));
-        filtersMap.put(COLTYPE_PEAKEL_FEATURE_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEAKEL_FEATURE_COUNT), null));
-        filtersMap.put(COLTYPE_PEAKEL_PEAK_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEAKEL_PEAK_COUNT), null));
+        filtersMap.put(COLTYPE_PEAKEL_MOZ, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_MOZ), null, COLTYPE_PEAKEL_MOZ));
+        filtersMap.put(COLTYPE_PEAKEL_ELUTION_TIME, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_ELUTION_TIME), null, COLTYPE_PEAKEL_ELUTION_TIME));
+        filtersMap.put(COLTYPE_PEAKEL_APEX_INTENSITY, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_APEX_INTENSITY), null, COLTYPE_PEAKEL_APEX_INTENSITY));
+        filtersMap.put(COLTYPE_PEAKEL_AREA, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_AREA), null, COLTYPE_PEAKEL_AREA));
+        filtersMap.put(COLTYPE_PEAKEL_DURATION, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_DURATION), null, COLTYPE_PEAKEL_DURATION));
+        filtersMap.put(COLTYPE_PEAKEL_FWHM, new DoubleFilter(getColumnName(COLTYPE_PEAKEL_FWHM), null, COLTYPE_PEAKEL_FWHM));
+        filtersMap.put(COLTYPE_PEAKEL_FEATURE_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEAKEL_FEATURE_COUNT), null, COLTYPE_PEAKEL_FEATURE_COUNT));
+        filtersMap.put(COLTYPE_PEAKEL_PEAK_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEAKEL_PEAK_COUNT), null, COLTYPE_PEAKEL_PEAK_COUNT));
     }
 
     @Override

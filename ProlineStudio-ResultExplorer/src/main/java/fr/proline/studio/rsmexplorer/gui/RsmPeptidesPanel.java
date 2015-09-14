@@ -5,11 +5,9 @@ import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
-import fr.proline.studio.dam.AccessDatabaseThread;
-import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
-import fr.proline.studio.dam.tasks.DatabaseSearchPeptideInstanceTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.export.ExportButton;
+import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterButtonV2;
 import fr.proline.studio.filter.actions.ClearRestrainAction;
 import fr.proline.studio.filter.actions.RestrainAction;
@@ -22,9 +20,8 @@ import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.dialog.CalcDialog;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideInstanceTableModel;
-import fr.proline.studio.search.AbstractSearch;
-import fr.proline.studio.search.SearchFloatingPanel;
-import fr.proline.studio.search.SearchToggleButton;
+import fr.proline.studio.search.AdvancedSearchFloatingPanel;
+import fr.proline.studio.search.SearchToggleButton2;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -35,7 +32,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
@@ -55,8 +51,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
     private JScrollPane m_scrollPane;
     private MarkerContainerPanel m_markerContainerPanel;
     private JButton m_decoyButton;
-    private SearchFloatingPanel m_searchPanel;
-    private JToggleButton m_searchToggleButton;
+    private SearchToggleButton2 m_searchToggleButton;
 
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
@@ -73,9 +68,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
         setLayout(new BorderLayout());
 
-        m_searchPanel = new SearchFloatingPanel(new Search());
         final JPanel peptidesPanel = createPeptidesPanel();
-        m_searchPanel.setToggleButton(m_searchToggleButton);
 
         final JLayeredPane layeredPane = new JLayeredPane();
 
@@ -106,8 +99,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         add(layeredPane, BorderLayout.CENTER);
 
         layeredPane.add(peptidesPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.add(m_searchPanel, JLayeredPane.PALETTE_LAYER);
-
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
 
     }
 
@@ -158,7 +150,7 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
         });
 
         // Search Button
-        m_searchToggleButton = new SearchToggleButton(m_searchPanel);
+        m_searchToggleButton = new SearchToggleButton2(m_peptideInstanceTable, m_peptideInstanceTable, ((CompoundTableModel) m_peptideInstanceTable.getModel()));
 
         m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peptideInstanceTable.getModel())) {
 
@@ -523,117 +515,8 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
 
     }
-
-    private class Search extends AbstractSearch {
-
-        String previousSearch = "";
-        int searchIndex = 0;
-        ArrayList<Long> peptideInstanceIds = new ArrayList<>();
-
-        @Override
-        public void reinitSearch() {
-            if (peptideInstanceIds.isEmpty()) {
-                return;
-            }
-            searchIndex = -1;
-            ((PeptideInstanceTableModel) ((CompoundTableModel) m_peptideInstanceTable.getModel()).getBaseModel()).sortAccordingToModel(peptideInstanceIds, (CompoundTableModel) m_peptideInstanceTable.getModel());
-        }
-
-        @Override
-        public void doSearch(String text) {
-            final String searchText = text.trim().toUpperCase();
-
-            if (searchText.compareTo(previousSearch) == 0) {
-                
-                int checkLoopIndex = -1;
-                while (true) {
-                    // search already done, display next result
-                    searchIndex++;
-                    if (searchIndex >= peptideInstanceIds.size()) {
-                        searchIndex = 0;
-                    }
-
-                    if (checkLoopIndex == searchIndex) {
-                        break;
-                    }
-                    
-                    if (!peptideInstanceIds.isEmpty()) {
-                        boolean found = ((PeptideInstanceTable) m_peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
-                        if (found) {
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                    if (checkLoopIndex == -1) {
-                        checkLoopIndex =  searchIndex;
-                    }
-                }
-                
-            } else {
-                previousSearch = searchText;
-                searchIndex = -1;
-
-                // prepare callback for the search
-                AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-                    @Override
-                    public boolean mustBeCalledInAWT() {
-                        return true;
-                    }
-
-                    @Override
-                    public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                        // contruct the Map of proteinSetId
+    
 
 
-                        if (!peptideInstanceIds.isEmpty()) {
 
-                            ((PeptideInstanceTableModel) ((CompoundTableModel) m_peptideInstanceTable.getModel()).getBaseModel()).sortAccordingToModel(peptideInstanceIds, (CompoundTableModel) m_peptideInstanceTable.getModel());
-
-                            
-                             int checkLoopIndex = -1;
-                             while (true) {
-                                // search already done, display next result
-                                searchIndex++;
-                                if (searchIndex >= peptideInstanceIds.size()) {
-                                    searchIndex = 0;
-                                }
-
-                                if (checkLoopIndex == searchIndex) {
-                                    break;
-                                }
-
-                                if (!peptideInstanceIds.isEmpty()) {
-                                    boolean found = ((PeptideInstanceTable) m_peptideInstanceTable).selectPeptideInstance(peptideInstanceIds.get(searchIndex), searchText);
-                                    if (found) {
-                                        break;
-                                    }
-                                } else {
-                                    break;
-                                }
-                                if (checkLoopIndex == -1) {
-                                    checkLoopIndex = searchIndex;
-                                }
-                            }
-
-                        }
-
-
-                        //System.out.println("Ids size "+proteinSetIds.size());
-                        m_searchPanel.enableSearch(true);
-                    }
-                };
-
-                ResultSummary rsm = ((PeptideInstanceTableModel)((CompoundTableModel) m_peptideInstanceTable.getModel()).getBaseModel()).getResultSummary();
-
-                // Load data if needed asynchronously
-                AccessDatabaseThread.getAccessDatabaseThread().addTask(new DatabaseSearchPeptideInstanceTask(callback, m_dataBox.getProjectId(), rsm.getId(), searchText, peptideInstanceIds));
-
-                m_searchPanel.enableSearch(false);
-
-            }
-        }
-    }
 }

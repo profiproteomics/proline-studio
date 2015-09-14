@@ -18,7 +18,7 @@ import org.openide.windows.WindowManager;
  *
  * @author JM235353
  */
-public class SearchToggleButton2 extends JToggleButton {
+public class SearchToggleButton extends JToggleButton {
 
     private ProgressInterface m_progressInterface = null;
     private JXTable m_table = null;
@@ -26,7 +26,7 @@ public class SearchToggleButton2 extends JToggleButton {
     
     private AdvancedSearchFloatingPanel m_searchPanel = null;
     
-    public SearchToggleButton2(ProgressInterface progressInterface, JXTable table, FilterTableModelInterfaceV2 tableModelFilterInterface) {
+    public SearchToggleButton(ProgressInterface progressInterface, JXTable table, FilterTableModelInterfaceV2 tableModelFilterInterface) {
         
         m_progressInterface = progressInterface;
         m_table = table;
@@ -85,7 +85,7 @@ public class SearchToggleButton2 extends JToggleButton {
     }
     
     
-    private class Search extends AbstractSearch2 {
+    private class Search extends AbstractSearch {
 
         @Override
         public void doSearch(Filter f, boolean firstSearch) {

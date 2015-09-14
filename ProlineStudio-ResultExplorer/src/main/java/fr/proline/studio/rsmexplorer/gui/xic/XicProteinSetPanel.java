@@ -24,7 +24,7 @@ import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.pattern.DataMixerWindowBoxManager;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.actions.table.DisplayIdentificationProteinSetsAction;
-import fr.proline.studio.search.SearchToggleButton2;
+import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.CustomColumnControlButton;
 import fr.proline.studio.table.ExportTableSelectionInterface;
@@ -90,7 +90,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
     private JButton m_calcButton;
     
 
-    private SearchToggleButton2 m_searchToggleButton;
+    private SearchToggleButton m_searchToggleButton;
 
     
     private JLabel m_titleLabel;
@@ -170,7 +170,7 @@ public class XicProteinSetPanel  extends HourglassPanel implements DataBoxPanelI
         toolbar.setFloatable(false);
 
         // Search Button
-        m_searchToggleButton  = new SearchToggleButton2(m_quantProteinSetTable, m_quantProteinSetTable, ((CompoundTableModel) m_quantProteinSetTable.getModel()));
+        m_searchToggleButton  = new SearchToggleButton(m_quantProteinSetTable, m_quantProteinSetTable, ((CompoundTableModel) m_quantProteinSetTable.getModel()));
         toolbar.add(m_searchToggleButton);
         
         m_filterButton = new FilterButtonV2(((CompoundTableModel) m_quantProteinSetTable.getModel())) {

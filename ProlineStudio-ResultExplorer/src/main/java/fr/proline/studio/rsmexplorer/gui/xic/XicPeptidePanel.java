@@ -25,7 +25,7 @@ import fr.proline.studio.pattern.WindowBoxFactory;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.search.SearchToggleButton2;
+import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.CustomColumnControlButton;
 import fr.proline.studio.table.GlobalTableModelInterface;
@@ -90,7 +90,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
     private JButton m_columnVisibilityButton;
     private JButton m_graphicsButton;
     private AddDataAnalyzerButton m_addCompareDataButton;
-    private SearchToggleButton2 m_searchToggleButton;
+    private SearchToggleButton m_searchToggleButton;
 
     
     private JLabel m_titleLabel;
@@ -168,7 +168,7 @@ public class XicPeptidePanel  extends HourglassPanel implements DataBoxPanelInte
         toolbar.setFloatable(false);
 
         // Search Button
-        m_searchToggleButton = new SearchToggleButton2(m_quantPeptideTable, m_quantPeptideTable, ((CompoundTableModel) m_quantPeptideTable.getModel()));
+        m_searchToggleButton = new SearchToggleButton(m_quantPeptideTable, m_quantPeptideTable, ((CompoundTableModel) m_quantPeptideTable.getModel()));
         toolbar.add(m_searchToggleButton);
         
         m_filterButton = new FilterButtonV2(((CompoundTableModel) m_quantPeptideTable.getModel())) {

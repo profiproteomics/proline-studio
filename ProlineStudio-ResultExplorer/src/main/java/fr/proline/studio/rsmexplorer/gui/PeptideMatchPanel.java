@@ -23,7 +23,7 @@ import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.PeptideMatchTableModel;
-import fr.proline.studio.search.SearchToggleButton2;
+import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.utils.IconManager;
@@ -62,7 +62,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
     
     private JButton m_decoyButton;
 
-    private SearchToggleButton2 m_searchToggleButton;
+    private SearchToggleButton m_searchToggleButton;
     
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
@@ -268,7 +268,7 @@ public class PeptideMatchPanel extends HourglassPanel implements DataBoxPanelInt
 
         
         // Search Button
-        m_searchToggleButton = new SearchToggleButton2(m_peptideMatchTable, m_peptideMatchTable, ((CompoundTableModel) m_peptideMatchTable.getModel()));
+        m_searchToggleButton = new SearchToggleButton(m_peptideMatchTable, m_peptideMatchTable, ((CompoundTableModel) m_peptideMatchTable.getModel()));
         
         m_filterButton = new FilterButtonV2(((CompoundTableModel) m_peptideMatchTable.getModel())) {
 

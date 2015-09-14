@@ -21,7 +21,7 @@ import fr.proline.studio.pattern.*;
 import fr.proline.studio.python.data.TableInfo;
 import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
 import fr.proline.studio.rsmexplorer.gui.model.ProteinSetTableModel;
-import fr.proline.studio.search.SearchToggleButton2;
+import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.ImportTableSelectionInterface;
@@ -58,7 +58,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     private boolean m_firstPanel;
     private JButton m_decoyButton;
 
-    private SearchToggleButton2 m_searchToggleButton;
+    private SearchToggleButton m_searchToggleButton;
     
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
@@ -283,7 +283,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
         }
         
         // Search Button
-        m_searchToggleButton = new SearchToggleButton2(m_proteinSetTable, m_proteinSetTable, ((CompoundTableModel) m_proteinSetTable.getModel()));
+        m_searchToggleButton = new SearchToggleButton(m_proteinSetTable, m_proteinSetTable, ((CompoundTableModel) m_proteinSetTable.getModel()));
         toolbar.add(m_searchToggleButton);
         
         m_filterButton = new FilterButtonV2(((CompoundTableModel) m_proteinSetTable.getModel())) {

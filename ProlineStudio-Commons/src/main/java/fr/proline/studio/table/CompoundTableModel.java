@@ -26,13 +26,16 @@ public class CompoundTableModel extends AbstractTableModel implements GlobalTabl
     private FilterTableModelV2 m_filterModel = null;
 
     public CompoundTableModel(GlobalTableModelInterface baseModel, boolean filterCapability) {
+        setBaseModel(baseModel);
+    }
+    
+    public final void setBaseModel(GlobalTableModelInterface baseModel) {
         m_baseModel = baseModel;
         m_lastModel = baseModel;
-        
+
         if (m_baseModel != null) {
-            ((GlobalTableModelInterface)m_baseModel).addTableModelListener(this);
+            ((GlobalTableModelInterface) m_baseModel).addTableModelListener(this);
         }
-        
     }
 
     public void addModel(ChildModelInterface model) {

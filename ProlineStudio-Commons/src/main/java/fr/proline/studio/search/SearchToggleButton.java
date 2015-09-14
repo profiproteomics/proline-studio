@@ -28,9 +28,7 @@ public class SearchToggleButton extends JToggleButton {
     
     public SearchToggleButton(ProgressInterface progressInterface, JXTable table, FilterTableModelInterfaceV2 tableModelFilterInterface) {
         
-        m_progressInterface = progressInterface;
-        m_table = table;
-        m_tableModelFilterInterface = tableModelFilterInterface;
+        init(progressInterface, table, tableModelFilterInterface);
 
         m_searchPanel = new AdvancedSearchFloatingPanel(new Search());
         m_searchPanel.setToggleButton(this);
@@ -78,6 +76,12 @@ public class SearchToggleButton extends JToggleButton {
                 }
             }
         });
+    }
+    
+    public final void init(ProgressInterface progressInterface, JXTable table, FilterTableModelInterfaceV2 tableModelFilterInterface) {
+        m_progressInterface = progressInterface;
+        m_table = table;
+        m_tableModelFilterInterface = tableModelFilterInterface;
     }
     
     public AdvancedSearchFloatingPanel getSearchPanel() {

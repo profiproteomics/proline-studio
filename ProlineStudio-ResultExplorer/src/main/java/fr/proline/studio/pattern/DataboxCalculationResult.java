@@ -3,7 +3,7 @@ package fr.proline.studio.pattern;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
 import fr.proline.studio.graphics.CrossSelectionInterface;
-import fr.proline.studio.rsmexplorer.gui.ResultComparePanel;
+import fr.proline.studio.rsmexplorer.gui.GenericPanel;
 import fr.proline.studio.table.GlobalTableModelInterface;
 
 /**
@@ -45,7 +45,7 @@ public class DataboxCalculationResult extends AbstractDataBox {
     
     @Override
     public void createPanel() {
-        ResultComparePanel p = new ResultComparePanel();
+        GenericPanel p = new GenericPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
@@ -66,7 +66,7 @@ public class DataboxCalculationResult extends AbstractDataBox {
             dataInterface = (GlobalTableModelInterface) m_previousDataBox.getData(false, GlobalTableModelInterface.class);
         }
 
-        ((ResultComparePanel) m_panel).setData(dataInterface);
+        ((GenericPanel) m_panel).setData(dataInterface);
 
     }
     

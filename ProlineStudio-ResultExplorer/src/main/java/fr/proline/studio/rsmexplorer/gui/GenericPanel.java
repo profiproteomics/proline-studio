@@ -2,7 +2,6 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
-import fr.proline.studio.comparedata.CompareTableModel;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.export.ExportModelInterface;
 import fr.proline.studio.filter.FilterButtonV2;
@@ -12,50 +11,95 @@ import fr.proline.studio.markerbar.MarkerContainerPanel;
 import fr.proline.studio.pattern.AbstractDataBox;
 import fr.proline.studio.pattern.DataBoxPanelInterface;
 import fr.proline.studio.progress.ProgressInterface;
+import fr.proline.studio.search.SearchToggleButton;
 import fr.proline.studio.table.CompoundTableModel;
-import fr.proline.studio.table.DecoratedMarkerTable;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import fr.proline.studio.table.LazyTable;
 import fr.proline.studio.table.TablePopupMenu;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.TableCellRenderer;
 import org.jdesktop.swingx.JXTable;
 
 /**
  *
  * @author JM235353
  */
-public class ResultComparePanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
+public class GenericPanel extends JPanel implements DataBoxPanelInterface, GlobalTabelModelProviderInterface {
 
     private AbstractDataBox m_dataBox;
 
 
     private FilterButtonV2 m_filterButton;
     private ExportButton m_exportButton;
+    private SearchToggleButton m_searchToggleButton;
     
     private JScrollPane m_dataScrollPane = new JScrollPane();
     private DataTable m_dataTable;
     private MarkerContainerPanel m_markerContainerPanel;
     
-    public ResultComparePanel() {
+    public GenericPanel() {
         
         setLayout(new BorderLayout());
-        setBounds(0, 0, 500, 400);
+
+        final JPanel resultPanel = createResultPanel();
+
+        final JLayeredPane layeredPane = new JLayeredPane();
+
+        layeredPane.addComponentListener(new ComponentListener() {
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                final Component c = e.getComponent();
+
+                resultPanel.setBounds(0, 0, c.getWidth(), c.getHeight());
+                layeredPane.revalidate();
+                layeredPane.repaint();
+
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+            }
+        });
+        add(layeredPane, BorderLayout.CENTER);
+        
+        layeredPane.add(resultPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(m_searchToggleButton.getSearchPanel(), JLayeredPane.PALETTE_LAYER);
+    }
+    
+    private JPanel createResultPanel() {
+        JPanel resultPanel = new JPanel();
+        resultPanel.setLayout(new BorderLayout());
+        resultPanel.setBounds(0, 0, 500, 400);
 
 
         JPanel internalPanel = initComponents();
-        add(internalPanel, BorderLayout.CENTER);
+        resultPanel.add(internalPanel, BorderLayout.CENTER);
 
         JToolBar toolbar = initToolbar();
-        add(toolbar, BorderLayout.WEST);
+        resultPanel.add(toolbar, BorderLayout.WEST);
+        
+        return resultPanel;
     }
+    
     
     private JPanel initComponents() {
 
@@ -99,7 +143,9 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
         JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
         toolbar.setFloatable(false);
 
-
+        // Search Button
+        m_searchToggleButton = new SearchToggleButton(m_dataTable, m_dataTable, ((CompoundTableModel) m_dataTable.getModel()));
+        
         m_filterButton = new FilterButtonV2((((CompoundTableModel) m_dataTable.getModel()))) {
 
             @Override
@@ -110,7 +156,7 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
         };  // does not work for the moment, finish it later
         m_exportButton = new ExportButton(((ProgressInterface) m_dataTable.getModel()), "Data", m_dataTable);
 
-
+        toolbar.add(m_searchToggleButton);
         toolbar.add(m_filterButton);
         toolbar.add(m_exportButton);
 
@@ -124,10 +170,10 @@ public class ResultComparePanel extends JPanel implements DataBoxPanelInterface,
         m_dataTable.setModel(model);
         m_filterButton.setModelFilterInterface(model);
         m_exportButton.setProgressInterface(model);
+        m_searchToggleButton.init(m_dataTable, m_dataTable, model);
 
         m_markerContainerPanel.setMaxLineNumber(model.getRowCount());
     }
- 
 
     @Override
     public void setDataBox(AbstractDataBox dataBox) {

@@ -67,7 +67,7 @@ public class ExportDatasetAction extends AbstractRSMAction {
 
                     @Override
                     public void run(boolean success) {
-                        final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), false, selectedNodes.length ==1 );
+                        final CustomExportDialog dialog = CustomExportDialog.getDialog(WindowManager.getDefault().getMainWindow(), selectedNodes.length ==1 );
                         loadWaitingDialog.setVisible(false);
                         if (success) {
                             if (!m_config.isEmpty()) {

@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -22,10 +21,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 import java.util.prefs.Preferences;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
@@ -34,13 +31,13 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
-import org.jdesktop.swingx.JXTable;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 
 /**
  *
@@ -63,160 +60,94 @@ public class CustomExportDialog extends DefaultDialog {
     private final static String EXPORT_PROTEIN_VALIDATED = "Validated only";
     private final static String[] EXPORT_PROTEIN_VALUES = new String[]{EXPORT_PROTEIN_VALIDATED, EXPORT_PROTEIN_ALL};
 
-    private static CustomExportDialog m_singletonImageDialog = null;
-    private static CustomExportDialog m_singletonImage2Dialog = null;
-    private static CustomExportDialog m_singletonExcelDialog = null;
-    private static CustomExportDialog m_singletonServerDialog = null;
 
-    private int m_exportType;
+    private static CustomExportDialog m_singletonDialog = null;
 
     private JTextField m_fileTextField;
     private JComboBox m_exporTypeCombobox;
-    private JCheckBox m_exportAllPSMsChB;
-    private Boolean m_showExportAllPSMsChB;
+
+
 
     // true if the user has to choose a file, false if it's a directory, in case of tsv or multi export
     private static boolean m_fileExportMode;
 
-    private JXTable m_table = null;
-    private JPanel m_panel = null;
-    private ImageExporterInterface m_imageExporter = null;
 
-    private JFileChooser m_fchooser;
-    private JFileChooser m_exportFchooser;
-    private List<FileNameExtensionFilter> m_filterList = new ArrayList<>();
+    private final JFileChooser m_fchooser;
+    private final JFileChooser m_exportFchooser;
+    private final List<FileNameExtensionFilter> m_filterList = new ArrayList<>();
     private static final String jsonExtension = "json";
     private static final String tsvExtension = "tsv";
 
     private DefaultDialog.ProgressTask m_task = null;
 
-    private String m_exportName = null;
 
     // created by AW:
     private JTabbedPane m_tabbedPane;
-    private JPanel panel;
-    private JLabel lblExportExcelTabs;
-    private JTable table;
-    private JScrollPane scrollPane;
-    private JLabel lblOrientation;
-    private JTextField m_configFile;
-    private JLabel lblFormat;
-    private JLabel lblDateFormat;
-    private JLabel lblNumberSeparator;
-    private JLabel lblProteinSets;
-    private JButton btnNewButton;
-    private JButton btnLoad;
+
+    private String m_configFile = "";
+
+
+
     //---
     private JComboBox comboBox_ProteinSets;
     private JComboBox comboBox_DateFormat;
-    //private JComboBox comboBox_Format;
+
     private JComboBox comboBox_NumberSeparator;
     private JComboBox comboBox_Orientation;
-    //private JButton addFileButton;
-    private JLabel lblExportToFile;
-    private JCheckBox chk_ExportOptions;
+
+    private ExpandButton m_customOptionsButton;
     public ExportConfig m_exportConfig;
     private ExportConfig m_exportDefaultConfig;
-    private JLabel lbl_exportType;
+
 
     protected boolean m_updateInProgress = true; // indicate when the table is built (to avoid calling event handler on every table update)
     public HashMap<String, String> m_tabTitleIdHashMap; // <title,id> keeps track of id/title for tabs, in case of renaming.
     public HashMap<String, String> m_presentationHashMap; // sheetId,presentation
-    private JPanel panel_1;
 
-    private JLabel lblExportProfile;
+    private JPanel m_optionPanel;
 
     private JComboBox comboBox_exportProfile;
 
-    private JTextPane lblMouseRightclickOn;
 
-    public static CustomExportDialog getDialog(Window parent, JXTable table, String exportName) {
-        if (m_singletonExcelDialog == null) {
-            m_singletonExcelDialog = new CustomExportDialog(parent, ExporterFactory.EXPORT_TABLE, true);
-        }
 
-        m_singletonExcelDialog.m_table = table;
-        m_singletonExcelDialog.m_exportName = exportName;
 
-        return m_singletonExcelDialog;
-    }
-
-    public static CustomExportDialog getDialog(Window parent, JPanel panel, String exportName) {
-        if (m_singletonImageDialog == null) {
-            m_singletonImageDialog = new CustomExportDialog(parent, ExporterFactory.EXPORT_IMAGE, true);
-        }
-
-        m_singletonImageDialog.m_panel = panel;
-        m_singletonImageDialog.m_imageExporter = null;
-        m_singletonImageDialog.m_exportName = exportName;
-
-        return m_singletonImageDialog;
-    }
-
-    public static CustomExportDialog getDialog(Window parent, JPanel panel, ImageExporterInterface imageExporter, String exportName) {
-        if (m_singletonImage2Dialog == null) {
-            m_singletonImage2Dialog = new CustomExportDialog(parent, ExporterFactory.EXPORT_IMAGE2, true);
-        }
-
-        m_singletonImage2Dialog.m_panel = panel;
-        m_singletonImage2Dialog.m_imageExporter = imageExporter;
-        m_singletonImage2Dialog.m_exportName = exportName;
-
-        return m_singletonImage2Dialog;
-    }
-
-    public static CustomExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption, boolean fileExportMode) {
+    public static CustomExportDialog getDialog(Window parent, boolean fileExportMode) {
         m_fileExportMode = fileExportMode;
-        if (m_singletonServerDialog == null) {
-            m_singletonServerDialog = new CustomExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption, fileExportMode);
-        } else if (!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)) {
-            m_singletonServerDialog = new CustomExportDialog(parent, ExporterFactory.EXPORT_FROM_SERVER, showExportAllPSMsOption, fileExportMode);
+        if (m_singletonDialog == null) {
+            m_singletonDialog = new CustomExportDialog(parent, fileExportMode);
         }
-        return m_singletonServerDialog;
+        return m_singletonDialog;
     }
 
-    public static CustomExportDialog getDialog(Window parent, Boolean showExportAllPSMsOption, int exportType, boolean fileExportMode) {
-        if (m_singletonServerDialog == null) {
-            m_singletonServerDialog = new CustomExportDialog(parent, exportType, showExportAllPSMsOption, fileExportMode);
-        } else if (!m_singletonServerDialog.m_showExportAllPSMsChB.equals(showExportAllPSMsOption)) {
-            m_singletonServerDialog = new CustomExportDialog(parent, exportType, showExportAllPSMsOption, fileExportMode);
-        }
-
-        return m_singletonServerDialog;
-    }
 
     public void setTask(DefaultDialog.ProgressTask task) {
         m_task = task;
     }
 
-    private CustomExportDialog(Window parent, int type, boolean fileExportMode) {
-        this(parent, type, null, fileExportMode);
-    }
-
-    private CustomExportDialog(Window parent, int type, Boolean showExportAllPSMsOption, boolean fileExportMode) {
+    private CustomExportDialog(Window parent, boolean fileExportMode) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
-        m_showExportAllPSMsChB = showExportAllPSMsOption;
-        m_exportType = type;
+
+        setResizable(true);
+        
         m_fileExportMode = fileExportMode;
 
         setTitle("Export");
-        //setButtonVisible(BUTTON_HELP, true);
+        
+        setButtonVisible(BUTTON_HELP, true);
         setHelpURL("http://biodev.extra.cea.fr/docs/proline/doku.php?id=how_to:studio:exportdata");
 
-        m_tabTitleIdHashMap = new HashMap<String, String>(); // this is used to store tab id/tab title matching
+
+        
+        m_tabTitleIdHashMap = new HashMap<>(); // this is used to store tab id/tab title matching
 
         setInternalComponent(createCustomExportPanel());
 
-        setButtonName(BUTTON_OK, ((m_exportType == ExporterFactory.EXPORT_IMAGE)
-                || (m_exportType == ExporterFactory.EXPORT_IMAGE2)) ? "Export Image" : "Export");
+        setButtonName(BUTTON_OK, "Export");
 
-        String defaultExportPath;
+        
         Preferences preferences = NbPreferences.root();
-        if ((m_exportType == ExporterFactory.EXPORT_TABLE) || (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) || (m_exportType == ExporterFactory.EXPORT_XIC)) {
-            defaultExportPath = preferences.get("DefaultExcelExportPath", "");
-        } else { // IMAGE
-            defaultExportPath = preferences.get("DefaultImageExportPath", "");
-        }
+        String defaultExportPath = preferences.get("DefaultExcelExportPath", "");
+      
         if (defaultExportPath.length() > 0) {
             m_fchooser = new JFileChooser(new File(defaultExportPath));
             m_exportFchooser = new JFileChooser(new File(defaultExportPath));
@@ -243,7 +174,7 @@ public class CustomExportDialog extends DefaultDialog {
         // decode json 
         m_exportConfig = new ExportConfig();
         String jsonString = "";
-        Path filePath = Paths.get(m_configFile.getText());
+        Path filePath = Paths.get(m_configFile.trim());
         try {
             jsonString = new String(Files.readAllBytes(filePath));
         } catch (IOException e) {
@@ -272,11 +203,11 @@ public class CustomExportDialog extends DefaultDialog {
                 String[] reformatedParamValues = new String[param.format_values.length];
                 for (int i = 0; i < param.format_values.length; i++) {
                     if (param.format_values[i].contains("xls")) {
-                        reformatedParamValues[i] = "Excel (." + param.format_values[i].toString() + ")";
+                        reformatedParamValues[i] = "Excel (." + param.format_values[i] + ")";
                     } else if (param.format_values[i].contains("tsv")) {
-                        reformatedParamValues[i] = "Tabulation separated values (." + param.format_values[i].toString() + ")";
+                        reformatedParamValues[i] = "Tabulation separated values (." + param.format_values[i] + ")";
                     } else if (param.format_values[i].contains("csv")) {
-                        reformatedParamValues[i] = "Comma separated values (." + param.format_values[i].toString() + ")";
+                        reformatedParamValues[i] = "Comma separated values (." + param.format_values[i] + ")";
                     }
                 }
                 m_exporTypeCombobox.setModel(new DefaultComboBoxModel(reformatedParamValues));
@@ -341,34 +272,33 @@ public class CustomExportDialog extends DefaultDialog {
         m_updateInProgress = true;
         m_tabbedPane.removeAll();
 
-        m_presentationHashMap = new HashMap<String, String>();
+        m_presentationHashMap = new HashMap<>();
         // get list of sheets from defaut.
         m_tabTitleIdHashMap.clear();
         for (int i = 0; i < defaultParam.sheets.length; i++) {
             m_tabTitleIdHashMap.put(defaultParam.sheets[i].title, defaultParam.sheets[i].id);
 
         }
-        ArrayList<String> addedTabs = new ArrayList<String>(); // tabs added (which are in default and custom)
+        ArrayList<String> addedTabs = new ArrayList<>(); // tabs added (which are in default and custom)
         // create tab panes
         if (param != null) {
             for (int i = 0; i < param.sheets.length; i++) {
 
-                panel = new JPanel();
+                JPanel tablePanel = new JPanel();
                 if (m_tabTitleIdHashMap.containsValue(param.sheets[i].id)) {
-                    m_tabbedPane.addTab(param.sheets[i].title, null, panel, null);
+                    m_tabbedPane.addTab(param.sheets[i].title, null, tablePanel, null);
                     m_presentationHashMap.put(param.sheets[i].id, param.sheets[i].presentation);
 					// put id in tooltip in order to find the tab title from the tooltip even if renamed.
                     // TODO: find a better way...
                     m_tabbedPane.setToolTipTextAt(i, param.sheets[i].id /*"Right click to Enable/Disable"*/);
                     addedTabs.add(param.sheets[i].id);
-                    panel.setLayout(new BorderLayout(0, 0));
+                    tablePanel.setLayout(new BorderLayout(0, 0));
 					// read fields to fill in jtable into this tabbed pane
 
-                    scrollPane = new JScrollPane();
-                    scrollPane.setBounds(0, 0, 600, 290);
-                    panel.add(scrollPane);
+                    JScrollPane tableScrollPane = new JScrollPane();
+                    tablePanel.add(tableScrollPane);
 
-                    table = new JTable();
+                    JTable table = new JTable();
 
                     table.setDragEnabled(true);
                     table.setDropMode(DropMode.INSERT_ROWS);
@@ -412,7 +342,7 @@ public class CustomExportDialog extends DefaultDialog {
                         }
                     };
 
-                    scrollPane.setViewportView(table);
+                    tableScrollPane.setViewportView(table);
 					// add the data into the model
 
 					// ---add ability to enable/disable individual tabs
@@ -427,11 +357,11 @@ public class CustomExportDialog extends DefaultDialog {
 
                         // if the field to add is contained in default field list
                         if (defaultFieldsList.contains(param.sheets[i].fields[j].id)) {
-                            Vector v = new Vector();
-                            v.add(param.sheets[i].fields[j].id);
-                            v.add(param.sheets[i].fields[j].title);
-                            v.add(true);
-                            tableModel.addRow(v);
+                            Object[] rowArray = new Object[3];
+                            rowArray[0] = param.sheets[i].fields[j].id;
+                            rowArray[1] = param.sheets[i].fields[j].title;
+                            rowArray[2] = Boolean.TRUE;
+                            tableModel.addRow(rowArray);
                             addedFieldsList.add(param.sheets[i].fields[j].id);
                         }
                     }
@@ -440,11 +370,11 @@ public class CustomExportDialog extends DefaultDialog {
                     for (int j = 0; j < defaultParam.sheets[sheetIndexInDefaultConfig].fields.length; j++) {
                         if (!addedFieldsList.contains(defaultParam.sheets[sheetIndexInDefaultConfig].fields[j].id)) {
                             // add the remaining fields to add
-                            Vector v = new Vector();
-                            v.add(defaultParam.sheets[sheetIndexInDefaultConfig].fields[j].id);
-                            v.add(defaultParam.sheets[sheetIndexInDefaultConfig].fields[j].title);
-                            v.add(false);
-                            tableModel.addRow(v);
+                            Object[] rowArray = new Object[3];
+                            rowArray[0] = defaultParam.sheets[sheetIndexInDefaultConfig].fields[j].id;
+                            rowArray[1] = defaultParam.sheets[sheetIndexInDefaultConfig].fields[j].title;
+                            rowArray[2] = Boolean.FALSE;
+                            tableModel.addRow(rowArray);
                         }
                     }
                     table.setModel(tableModel);
@@ -462,8 +392,8 @@ public class CustomExportDialog extends DefaultDialog {
             if (!addedTabs.contains(defaultParam.sheets[i].id)) {
                 nbCustomTabsAdded++;
                 // add the missing tab
-                panel = new JPanel();
-                m_tabbedPane.addTab(defaultParam.sheets[i].title, null, panel, null);
+                JPanel tablePanel = new JPanel();
+                m_tabbedPane.addTab(defaultParam.sheets[i].title, null, tablePanel, null);
                 m_presentationHashMap.put(defaultParam.sheets[i].id, defaultParam.sheets[i].presentation);
 				// put id in tooltip in order to find the tab title from the tooltip even if renamed.
                 // TODO: find a better way...
@@ -474,14 +404,13 @@ public class CustomExportDialog extends DefaultDialog {
                     m_tabbedPane.setEnabledAt(nbCustomTabsAdded - 1, false); // disable default not saved tab
                 }
 
-                panel.setLayout(new BorderLayout(0, 0));
+                tablePanel.setLayout(new BorderLayout(0, 0));
 				// read fields to fill in jtable into this tabbed pane
 
-                scrollPane = new JScrollPane();
-                scrollPane.setBounds(0, 0, 600, 290);
-                panel.add(scrollPane);
+                JScrollPane tableScrollPane = new JScrollPane();
+                tablePanel.add(tableScrollPane);
 
-                table = new JTable();
+                JTable table = new JTable();
 
                 table.setDragEnabled(true);
                 table.setDropMode(DropMode.INSERT_ROWS);
@@ -489,6 +418,7 @@ public class CustomExportDialog extends DefaultDialog {
                 table.setTransferHandler(new TableRowTransferHandler(table));
 
                 table.addMouseMotionListener(new MouseMotionListener() {
+                    @Override
                     public void mouseDragged(MouseEvent e) {
                         e.consume();
                         JComponent c = (JComponent) e.getSource();
@@ -525,15 +455,15 @@ public class CustomExportDialog extends DefaultDialog {
                     }
                 };
 
-                scrollPane.setViewportView(table);
+                tableScrollPane.setViewportView(table);
 
                 // add the default fields for the missing default tab sheets
                 for (int j = 0; j < defaultParam.sheets[i].fields.length; j++) {
-                    Vector v2 = new Vector();
-                    v2.add(defaultParam.sheets[i].fields[j].id);
-                    v2.add(defaultParam.sheets[i].fields[j].title);
-                    v2.add(defaultParam.sheets[i].fields[j].default_displayed);
-                    tableModel.addRow(v2);
+                    Object[] rowArray = new Object[3];
+                    rowArray[0] = defaultParam.sheets[i].fields[j].id;
+                    rowArray[1] = defaultParam.sheets[i].fields[j].title;
+                    rowArray[2] = defaultParam.sheets[i].fields[j].default_displayed;
+                    tableModel.addRow(rowArray);
                 }
                 table.setModel(tableModel);
             }
@@ -555,7 +485,7 @@ public class CustomExportDialog extends DefaultDialog {
     }
 
     private ArrayList<String> getFieldsFromParamSheet(ExportExcelSheet[] sheets, String sheetId) {
-        ArrayList<String> fieldsId = new ArrayList<String>();
+        ArrayList<String> fieldsId = new ArrayList<>();
         for (int i = 0; i < sheets.length; i++) {
             if (sheets[i].id.equals(sheetId)) {
 
@@ -570,235 +500,24 @@ public class CustomExportDialog extends DefaultDialog {
 
     public final JPanel createCustomExportPanel() {
 
-        // JPanel exportPanel = new JPanel(new GridBagLayout());
-        final JPanel exportPanel = new JPanel();
-        //exportPanel.setLayout(null);
-        //exportPanel.setSize(new Dimension(400, 250));
+        final JPanel insidePanel = new JPanel(new GridBagLayout());
+  
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
 
-        // added 
-        setBounds(100, 100, 600, 644); // gives absolute position in x, relative to the main ProlineStudio window...
-        setPreferredSize(new Dimension(580, 250)); // size of the main CustomExportDialog window.
+        c.gridx = 0;
+        c.gridy = 0;
+        JLabel lblExportToFile = new JLabel("Export to file:");
+        insidePanel.add(lblExportToFile, c);
 
-        final JPanel insidePanel = new JPanel(null);
-        exportPanel.add(insidePanel);
-        insidePanel.setPreferredSize(new Dimension(580, 550)); //size of the inside panel that contains all parameters to set
+        c.gridx++;
+        m_fileTextField = new JTextField(50);
+        insidePanel.add(m_fileTextField, c);
 
-        final JPanel optionPane = new JPanel();
-        optionPane.setVisible(false);
-        optionPane.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-        optionPane.setSize(new Dimension(600, 500));
-        optionPane.setPreferredSize(new Dimension(600, 500));
-        //optionPane.setBounds(new Rectangle(10, 105, 560, 446));// position du panneau dans la boite.
-        optionPane.setBounds(new Rectangle(10, 78, 560, 406));
-
-        insidePanel.setLayout(null);
-        insidePanel.add(optionPane);
-        optionPane.setLayout(null);
-
-        panel_1 = new JPanel();
-        panel_1.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-        panel_1.setBounds(10, 102, 540, 300);
-        optionPane.add(panel_1);
-        panel_1.setLayout(null);
-
-        lblExportExcelTabs = new JLabel("Configuration file:");
-        lblExportExcelTabs.setBounds(10, 15, 110, 14);
-        optionPane.add(lblExportExcelTabs);
-
-        scrollPane = new JScrollPane();
-
-        table = new JTable();
-        scrollPane.setViewportView(table);
-        table.setModel(new DefaultTableModel(
-                new Object[][]{},
-                new String[]{
-                    "Internal field name", "Displayed field name", "Export"
-                }
-        ) {
-            Class[] columnTypes = new Class[]{
-                Object.class, String.class, Boolean.class
-            };
-
-            @Override
-            public Class getColumnClass(int columnIndex) {
-                return columnTypes[columnIndex];
-            }
-            boolean[] columnEditables = new boolean[]{
-                false, true, true
-            };
-
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return columnEditables[column];
-            }
-        });
-        table.getColumnModel().getColumn(0).setPreferredWidth(141);
-
-        // *-*-*-
-        comboBox_Orientation = new JComboBox();
-        comboBox_Orientation.setBounds(79, 8, 91, 20);
-        panel_1.add(comboBox_Orientation);
-        comboBox_Orientation.setModel(new DefaultComboBoxModel(new String[]{"rows", "columns"}));
-        comboBox_Orientation.setName("");
-        comboBox_Orientation.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!m_updateInProgress) {
-                    presentationModeChanged();
-                }
-            }
-        });
-
-        lblOrientation = new JLabel("Orientation:");
-        lblOrientation.setBounds(10, 11, 91, 14);
-        panel_1.add(lblOrientation);
-
-        m_configFile = new JTextField();
-        m_configFile.setText("");
-        m_configFile.setBounds(100, 12, 255, 20);
-        optionPane.add(m_configFile);
-        m_configFile.setColumns(10);
-
-        m_exporTypeCombobox = new JComboBox();
-        m_exporTypeCombobox.setModel(new DefaultComboBoxModel(new String[]{"xlsx", "xls", "csv", "tsv"}));
-
-        comboBox_DateFormat = new JComboBox();
-        comboBox_DateFormat.setModel(new DefaultComboBoxModel(new String[]{"yyyyMMdd HH:mm:ss", "ddMMyyyy HH:mm:ss", "MMddyyyy HH:mm:ss"}));
-        comboBox_DateFormat.setBounds(88, 41, 161, 20);
-        optionPane.add(comboBox_DateFormat);
-
-        lblDateFormat = new JLabel("Date format:");
-        lblDateFormat.setBounds(10, 44, 68, 14);
-        optionPane.add(lblDateFormat);
-
-        comboBox_NumberSeparator = new JComboBox();
-        comboBox_NumberSeparator.setModel(new DefaultComboBoxModel(new String[]{".", ","}));
-        comboBox_NumberSeparator.setBounds(109, 69, 49, 20);
-        optionPane.add(comboBox_NumberSeparator);
-
-        lblNumberSeparator = new JLabel("Number separator:");
-        lblNumberSeparator.setBounds(10, 72, 110, 14);
-        optionPane.add(lblNumberSeparator);
-
-        lblProteinSets = new JLabel("Protein sets:");
-        lblProteinSets.setBounds(349, 44, 89, 14);
-        optionPane.add(lblProteinSets);
-
-        comboBox_ProteinSets = new JComboBox();
-        comboBox_ProteinSets.setModel(new DefaultComboBoxModel(EXPORT_PROTEIN_VALUES));
-        comboBox_ProteinSets.setBounds(429, 43, 121, 20);
-        optionPane.add(comboBox_ProteinSets);
-
-        btnNewButton = new JButton("Save");
-        btnNewButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveConfigFile();
-            }
-        });
-        btnNewButton.setIcon(IconManager.getIcon(IconManager.IconType.SAVE_SETTINGS));
-        btnNewButton.setBounds(468, 11, 82, 23);
-        optionPane.add(btnNewButton);
-
-        btnLoad = new JButton("Load");
-        btnLoad.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadConfigFile();
-            }
-        });
-        btnLoad.setIcon(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-        btnLoad.setBounds(365, 11, 89, 23);
-        optionPane.add(btnLoad);
-
-        m_tabbedPane = new DnDTabbedPane(JTabbedPane.BOTTOM);
-        m_tabbedPane.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-
-	        	//recalculateTabsIds(); // because drag n drop looses tolltiptext info, rebuild it
-                //recalculateTabTitleIdHashMap();
-                updatePresentationModeForNewlySelectedTab();
-
-            }
-        });
-
-        m_tabbedPane.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent arg0) {
-                if (SwingUtilities.isRightMouseButton(arg0)) {
-                    
-                    int tabIndex = m_tabbedPane.indexAtLocation(arg0.getX(), arg0.getY());
-                    if (tabIndex == -1) {
-                        return;
-                    }
-                    boolean tabEnabled = m_tabbedPane.isEnabledAt(tabIndex);
-                    m_tabbedPane.setEnabledAt(tabIndex, !tabEnabled);
-                    repaint();
-                    arg0.consume();
-                }
-
-            }
-        });
-
-        m_tabbedPane.setBounds(10, 36, 520, 248);
-        // add listener to allow tab rename:
-        TabTitleEditListener l = new TabTitleEditListener(m_tabbedPane, this);
-        m_tabbedPane.addMouseListener(l);
-
-        panel_1.add(m_tabbedPane);
-        m_tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-
-        lblMouseRightclickOn = new JTextPane();
-        lblMouseRightclickOn.setText("- Mouse Right-Click on tab to enable/disable sheet\r\n- Double Left-Click to rename sheet tab.\r\nReview all tabs and fields for export.  Once done, save and reload later when necessary.");
-
-        lblMouseRightclickOn.setBounds(10, 493, 560, 48);
-        lblMouseRightclickOn.setBackground(new Color(255, 233, 155));
-		insidePanel.add(lblMouseRightclickOn);
-
-        comboBox_exportProfile = new JComboBox();
-        comboBox_exportProfile.setModel(new DefaultComboBoxModel(new String[]{"Best", "All"}));
-        comboBox_exportProfile.setBounds(448, 69, 102, 20);
-        optionPane.add(comboBox_exportProfile);
-
-        lblExportProfile = new JLabel("Export profile:");
-        lblExportProfile.setBounds(349, 72, 89, 14);
-        optionPane.add(lblExportProfile);
-
-        lblExportToFile = new JLabel("Export to file:");
-        lblExportToFile.setBounds(10, 15, 77, 27);
-        insidePanel.add(lblExportToFile);
-
-        m_fileTextField = new JTextField();
-        m_fileTextField.setBounds(86, 15, 374, 27);
-        insidePanel.add(m_fileTextField);
-        m_fileTextField.setColumns(50);
-
-        // ---
-        chk_ExportOptions = new JCheckBox("Custom export");
-        chk_ExportOptions.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                optionPane.setVisible(chk_ExportOptions.isSelected());
-                if (!chk_ExportOptions.isSelected()) {
-                    //disable custom parameters and restore default ones
-                    m_exportConfig = null; //m_exportDefaultConfig;
-                    fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
-                    recalculateTabsIds();
-                    recalculateTabTitleIdHashMap();
-                    //m_exportConfig = m_exportDefaultConfig; // copy config to allow modifications: TODO: check if copy by value better
-                }
-                setSize(new Dimension(exportPanel.getWidth() + 6 /* drift? */, 200 + 450 * (chk_ExportOptions.isSelected() ? 1 : 0))); // elongate the window if option is selected
-            }
-        });
-        chk_ExportOptions.setBounds(474, 44, 104, 27);
-        insidePanel.add(chk_ExportOptions);
-
-        final JButton addFileButton = new JButton("");
-        addFileButton.setBounds(470, 14, 27, 30);
-        insidePanel.add(addFileButton);
-
-        addFileButton.setIcon(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-
+        final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
         addFileButton.addActionListener(new ActionListener() {
 
             @Override
@@ -860,26 +579,258 @@ public class CustomExportDialog extends DefaultDialog {
                 }
             }
         });
-
-        if ((m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) && m_showExportAllPSMsChB) {
-            m_exportAllPSMsChB = new JCheckBox(" Export all PSMs");
-            m_exportAllPSMsChB.setBounds(6, 78, 114, 20);
-            insidePanel.add(m_exportAllPSMsChB);
-        }
-
-        lbl_exportType = new JLabel("Export Type:");
-        lbl_exportType.setBounds(10, 44, 93, 27);
-        insidePanel.add(lbl_exportType);
-
+        c.gridx++;
+        insidePanel.add(addFileButton, c);
+        
+        
+        JLabel lbl_exportType = new JLabel("Export Type:");
         m_exporTypeCombobox = new JComboBox();
-        m_exporTypeCombobox.setBounds(86, 47, 206, 20);
-        insidePanel.add(new JSeparator(SwingConstants.HORIZONTAL));
-        insidePanel.add(new JLabel("Export Type:"));
-        insidePanel.add(m_exporTypeCombobox);
-        setPreferredSize(new Dimension(580, 200)); // size of the main CustomExportDialog window.
-        //----
-        return exportPanel;
+        m_exporTypeCombobox.setModel(new DefaultComboBoxModel(new String[]{"xlsx", "xls", "csv", "tsv"}));
+        c.gridx = 0;
+        c.gridy++;
+        insidePanel.add(lbl_exportType, c);
+        
+        c.gridx++;
+        insidePanel.add(m_exporTypeCombobox, c);
 
+
+        JPanel customButtonPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints cButtonPanel = new GridBagConstraints();
+        cButtonPanel.anchor = GridBagConstraints.NORTHWEST;
+        cButtonPanel.fill = GridBagConstraints.BOTH;
+        cButtonPanel.insets = new java.awt.Insets(0,0,0,0);
+        m_customOptionsButton = new ExpandButton("Custom export") {
+
+            @Override
+            public void onClick() {
+                boolean isExpanded = isExpanded();
+                m_optionPanel.setVisible(isExpanded);
+                
+                setButtonVisible(BUTTON_LOAD, isExpanded);
+                setButtonVisible(BUTTON_SAVE, isExpanded);
+                
+                if (! isExpanded) {
+                    //disable custom parameters and restore default ones
+                    m_exportConfig = null; //m_exportDefaultConfig;
+                    fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+                    recalculateTabsIds();
+                    recalculateTabTitleIdHashMap();
+                    //m_exportConfig = m_exportDefaultConfig; // copy config to allow modifications: TODO: check if copy by value better
+                }
+                m_singletonDialog.revalidate();
+                m_singletonDialog.repack();
+            }
+            
+        };
+        cButtonPanel.gridx = 0;
+        cButtonPanel.gridy = 0;
+        cButtonPanel.weightx = 1;
+        customButtonPanel.add(Box.createHorizontalBox(), cButtonPanel);
+        cButtonPanel.gridx++;
+        cButtonPanel.weightx = 0;
+        customButtonPanel.add(m_customOptionsButton, cButtonPanel);
+        
+        c.gridy++;
+        c.gridwidth = 3;
+        c.gridy++;
+        insidePanel.add(customButtonPanel, c);
+
+        m_optionPanel = createOptionPanel();
+        c.gridx=0;
+        c.gridwidth = 3;
+        c.gridy++;
+        insidePanel.add(m_optionPanel, c);
+
+        
+        
+        
+        /*
+        m_tableScrollPane = new JScrollPane();
+
+        m_table = new JTable();
+        m_tableScrollPane.setViewportView(m_table);
+        m_table.setModel(new DefaultTableModel(
+                new Object[][]{},
+                new String[]{
+                    "Internal field name", "Displayed field name", "Export"
+                }
+        ) {
+            Class[] columnTypes = new Class[]{
+                Object.class, String.class, Boolean.class
+            };
+
+            @Override
+            public Class getColumnClass(int columnIndex) {
+                return columnTypes[columnIndex];
+            }
+            boolean[] columnEditables = new boolean[]{
+                false, true, true
+            };
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return columnEditables[column];
+            }
+        });
+        m_table.getColumnModel().getColumn(0).setPreferredWidth(141);
+        */
+
+
+
+
+        return insidePanel;
+
+    }
+    
+    private JPanel createOptionPanel() {
+        JPanel optionPanel = new JPanel(new GridBagLayout());
+        optionPanel.setVisible(false);
+        optionPanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+        
+        JLabel lblDateFormat = new JLabel("Date format:");
+        comboBox_DateFormat = new JComboBox();
+        comboBox_DateFormat.setModel(new DefaultComboBoxModel(new String[]{"yyyyMMdd HH:mm:ss", "ddMMyyyy HH:mm:ss", "MMddyyyy HH:mm:ss"}));
+
+        JLabel lblProteinSets = new JLabel("Protein sets:");
+        comboBox_ProteinSets = new JComboBox();
+        comboBox_ProteinSets.setModel(new DefaultComboBoxModel(EXPORT_PROTEIN_VALUES));
+
+        JLabel lblNumberSeparator = new JLabel("Number separator:");
+        comboBox_NumberSeparator = new JComboBox();
+        comboBox_NumberSeparator.setModel(new DefaultComboBoxModel(new String[]{".", ","}));
+
+        JLabel lblExportProfile = new JLabel("Export profile:");
+        comboBox_exportProfile = new JComboBox();
+        comboBox_exportProfile.setModel(new DefaultComboBoxModel(new String[]{"Best", "All"}));
+
+        c.gridx = 0;
+        c.gridy = 0;
+        optionPanel.add(lblDateFormat, c);
+        
+        c.gridx++;
+        optionPanel.add(comboBox_DateFormat, c);
+        
+        c.gridx++;
+        optionPanel.add(lblProteinSets, c);
+        
+        c.gridx++;
+        optionPanel.add(comboBox_ProteinSets, c);
+        
+        c.gridx = 0;
+        c.gridy++;
+        optionPanel.add(lblNumberSeparator, c);
+        
+        c.gridx++;
+        optionPanel.add(comboBox_NumberSeparator, c);
+        
+        c.gridx++;
+        optionPanel.add(lblExportProfile, c);
+        
+        c.gridx++;
+        optionPanel.add(comboBox_exportProfile, c);
+
+        c.gridwidth = 4;
+        c.gridx = 0;
+        c.gridy++;
+        optionPanel.add(createTabbedOptionPanel(), c);
+        
+        return optionPanel;
+    }
+    
+    private JPanel createTabbedOptionPanel() {
+        JPanel tabbedOptionPanel = new JPanel(new GridBagLayout());
+        tabbedOptionPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+        
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.NORTHWEST;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new java.awt.Insets(5, 5, 5, 5);
+
+        
+        JLabel lblOrientation = new JLabel("Orientation:");
+        
+        comboBox_Orientation = new JComboBox();
+        comboBox_Orientation.setModel(new DefaultComboBoxModel(new String[]{"rows", "columns"}));
+        comboBox_Orientation.setName("");
+        comboBox_Orientation.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!m_updateInProgress) {
+                    presentationModeChanged();
+                }
+            }
+        });
+        
+        c.gridx = 0;
+        c.gridy = 0;
+        tabbedOptionPanel.add(lblOrientation, c);
+        
+        c.gridx++;
+        tabbedOptionPanel.add(comboBox_Orientation, c);
+        
+        c.gridx=0;
+        c.gridy++;
+        c.gridwidth = 2;
+        m_tabbedPane = createTabbedPane();
+        tabbedOptionPanel.add(m_tabbedPane, c);
+
+        return tabbedOptionPanel;
+    }
+    
+    public JTabbedPane createTabbedPane() {
+
+        final DnDTabbedPane tabbedPane = new DnDTabbedPane(JTabbedPane.BOTTOM);
+        tabbedPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+
+                updatePresentationModeForNewlySelectedTab();
+
+            }
+        });
+
+        tabbedPane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent arg0) {
+                if (SwingUtilities.isRightMouseButton(arg0)) {
+                    
+                    int tabIndex = tabbedPane.indexAtLocation(arg0.getX(), arg0.getY());
+                    if (tabIndex == -1) {
+                        return;
+                    }
+                    boolean tabEnabled = tabbedPane.isEnabledAt(tabIndex);
+                    tabbedPane.setEnabledAt(tabIndex, !tabEnabled);
+                    repaint();
+                    arg0.consume();
+                }
+
+            }
+        });
+
+        // add listener to allow tab rename:
+        TabTitleEditListener l = new TabTitleEditListener(tabbedPane, this);
+        tabbedPane.addMouseListener(l);
+
+        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        
+        return tabbedPane;
+    }
+    
+    @Override
+    protected boolean saveCalled() {
+        saveConfigFile();
+        return false;
+    }
+
+    @Override
+    protected boolean loadCalled() {
+        loadConfigFile();
+        return false;
     }
 
     protected void recalculateTabTitleIdHashMap() {
@@ -940,7 +891,7 @@ public class CustomExportDialog extends DefaultDialog {
     protected void loadConfigFile() {
 
         //-------
-        String configFile = m_configFile.getText().trim();
+        String configFile = m_configFile.trim();
 
         if (configFile.length() > 0) {
             File currentFile = new File(configFile);
@@ -951,13 +902,13 @@ public class CustomExportDialog extends DefaultDialog {
             }
         }
 
-        int result = m_exportFchooser.showOpenDialog(btnLoad);
+        int result = m_exportFchooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = m_exportFchooser.getSelectedFile();
 
             String absolutePath = file.getAbsolutePath();
 
-            m_configFile.setText(absolutePath);
+            m_configFile = absolutePath;
             loadExportConfig();
             if (m_exportDefaultConfig != null) {
             	// reorder param to contain all fields...
@@ -1001,7 +952,7 @@ public class CustomExportDialog extends DefaultDialog {
     }
 
     protected void saveConfigFile() {
-        String configFile = m_configFile.getText().trim();
+        String configFile = m_configFile.trim();
 
         if (configFile.length() > 0) {
             File currentFile = new File(configFile);
@@ -1013,7 +964,7 @@ public class CustomExportDialog extends DefaultDialog {
 
         }
 
-        int result = m_exportFchooser.showSaveDialog(btnLoad);
+        int result = m_exportFchooser.showSaveDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = m_exportFchooser.getSelectedFile();
 
@@ -1022,7 +973,7 @@ public class CustomExportDialog extends DefaultDialog {
             if (!absolutePath.endsWith("." + jsonExtension)) {
                 absolutePath += "." + jsonExtension;
             }
-            m_configFile.setText(absolutePath);
+            m_configFile = absolutePath;
             File f = new File(absolutePath);
 
             if (f.exists()) {
@@ -1204,7 +1155,7 @@ public class CustomExportDialog extends DefaultDialog {
 
     }
 
-    public final JPanel createExportPanel() {
+    /*public final JPanel createExportPanel() {
 
         JPanel exportPanel = new JPanel(new GridBagLayout());
 
@@ -1277,15 +1228,8 @@ public class CustomExportDialog extends DefaultDialog {
         c.gridwidth = 1;
         exportPanel.add(addFileButton, c);
 
-        if ((m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) && m_showExportAllPSMsChB) {
-            //Allow specific parameter in this case
-            c.gridy++;
-            c.gridx = 0;
-            c.gridwidth = 2;
-            
-        }
 
-        m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(m_exportType).toArray());
+        m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(ExporterFactory.EXPORT_FROM_SERVER).toArray());
         m_exporTypeCombobox.setSelectedIndex(0);
 
         c.gridy++;
@@ -1298,19 +1242,12 @@ public class CustomExportDialog extends DefaultDialog {
         exportPanel.add(m_exporTypeCombobox, c);
 
         return exportPanel;
-    }
+    }*/
 
     public String getFileName() {
         return m_fileTextField.getText().trim();
     }
 
-    public Boolean exportAllPSMs() {
-        if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER) {
-            return m_exportAllPSMsChB.isSelected();
-        } else {
-            return null;
-        }
-    }
 
     public ExporterFactory.ExporterInfo getExporterInfo() {
         return (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
@@ -1372,79 +1309,15 @@ public class CustomExportDialog extends DefaultDialog {
             return false;
         }
 
-        if (m_exportType == ExporterFactory.EXPORT_TABLE) {
+        startTask(m_singletonDialog.m_task);
 
-            final ExporterFactory.ExporterInfo exporterInfo = getExporterInfo();
-
-            ExportManager exporter = new ExportManager(m_table);
-            ProgressTask exportTask = exporter.getTask(exporterInfo.getExporter(), m_exportName, fileName);
-
-            startTask(exportTask);
-
-            Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
-        } else if (m_exportType == ExporterFactory.EXPORT_FROM_SERVER || m_exportType == ExporterFactory.EXPORT_XIC) {
-
-            startTask(m_singletonServerDialog.m_task);
-
-            Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
-
-        } else if (m_exportType == ExporterFactory.EXPORT_IMAGE) {
-            BufferedImage bi = new BufferedImage(m_panel.getSize().width, m_panel.getSize().height, BufferedImage.TYPE_INT_ARGB);
-            Graphics g = bi.createGraphics();
-            m_panel.paint(g);
-            g.dispose();
-            try {
-                ImageIO.write(bi, "png", new File(fileName));
-            } catch (IOException e) {
-                LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("Error exporting png", e);
-            }
-
-            Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
-            return true;
-        } else if (m_exportType == ExporterFactory.EXPORT_IMAGE2) {
-
-            try {
-                ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
-
-                if (exporterInfo.getName().contains("png")) {
-
-                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting png file...to: " + f.toPath().toString());
-                    m_imageExporter.generatePngImage(fileName);
-
-                } else if (exporterInfo.getName().contains("svg")) { // svg output
-
-                    LoggerFactory.getLogger("ProlineStudio.ResultExplorer").info("exporting svg file...to: " + f.toPath().toString());
-                    m_imageExporter.generateSvgImage(fileName);
-
-                }
-
-            } catch (Exception e) {
-                LoggerFactory.getLogger("ProlineStudio.ResultExplorer").error("error " + e.getMessage() + " while exporting picture");
-            }
-
-            Preferences preferences = NbPreferences.root();
-            preferences.put("DefaultExcelImagePath", f.getAbsoluteFile().getParentFile().getName());
-
-            return true;
-        }
+        Preferences preferences = NbPreferences.root();
+        preferences.put("DefaultExcelExportPath", f.getAbsoluteFile().getParentFile().getName());
 
         return false;
 
     }
 
-    @Override
-    public void setVisible(boolean v) {
-
-        if (!v) {
-            m_table = null;
-            m_panel = null;
-            m_exportName = null;
-        }
-        super.setVisible(v);
-    }
 
     @Override
     protected boolean cancelCalled() {
@@ -1504,7 +1377,7 @@ public class CustomExportDialog extends DefaultDialog {
     public void setDefaultExportConfig(String configStr) {
 
         logger.debug("setDefaultExportConfig");
-        m_configFile.setText("");
+        m_configFile = "";
         m_exportDefaultConfig = new Gson().fromJson(configStr, ExportConfig.class);
         // create a hashmap of tabs titles and ids in case of renaming
         m_tabTitleIdHashMap.clear();
@@ -1562,4 +1435,33 @@ public class CustomExportDialog extends DefaultDialog {
         fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
     }
 
+    
+    public abstract class ExpandButton extends JButton {
+
+        private boolean m_expanded = false;
+
+        public ExpandButton(String label) {
+            super(label, IconManager.getIcon(IconManager.IconType.ARROW_DOWN));
+            addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    m_expanded = !m_expanded;
+                    if (m_expanded) {
+                        setIcon(IconManager.getIcon(IconManager.IconType.ARROW_UP));
+                    } else {
+                        setIcon(IconManager.getIcon(IconManager.IconType.ARROW_DOWN));
+                    }
+                    
+                    onClick();
+                }
+            });
+
+        }
+
+        public boolean isExpanded() {
+            return m_expanded;
+        }
+        
+        public abstract void onClick();
+    }
 }

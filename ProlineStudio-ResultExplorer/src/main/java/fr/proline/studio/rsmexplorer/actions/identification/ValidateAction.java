@@ -15,7 +15,6 @@ import fr.proline.studio.dpm.AccessServiceThread;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.dpm.task.AbstractServiceCallback;
 import fr.proline.studio.dpm.task.ChangeTypicalProteinTask;
-import fr.proline.studio.dpm.task.SendProjectidAndRsmTasks;
 import fr.proline.studio.dpm.task.ValidationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.gui.OptionDialog;
@@ -32,7 +31,6 @@ import java.util.List;
 
 import javax.swing.tree.DefaultTreeModel;
 
-import org.jfree.util.Log;
 import org.openide.util.NbBundle;
 import org.openide.windows.WindowManager;
 
@@ -127,7 +125,6 @@ public class ValidateAction extends AbstractRSMAction {
                         public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
                             askValidation(dataSetNode, parserArguments, changeTypicalRules, scoringType);
-                            //askValidationRsm(dataSetNode, parserArguments, changeTypicalRules, scoringType,rsm);
                         }
                     };
 
@@ -183,36 +180,6 @@ public class ValidateAction extends AbstractRSMAction {
         AccessServiceThread.getAccessServiceThread().addTask(task);
     
     }
-    private void askValidationRsm(final DataSetNode dataSetNode, HashMap<String, String> parserArguments, final List<ChangeTypicalRule> changeTypicalRules, final String scoringType,final Long rsm) {
-
-        final DDataset d = dataSetNode.getDataset();
-
-        // used as out parameter for the service
-       
-        AbstractServiceCallback callback = new AbstractServiceCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success) {
-                if (success) {
-                	
-                    //JPM.TODO : manage error with errorMessage
-                    dataSetNode.setIsChanging(false);
-                    IdentificationTree tree = IdentificationTree.getCurrentTree();
-                    DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-                    treeModel.nodeChanged(dataSetNode);
-                }
-            }
-        };
-        SendProjectidAndRsmTasks task1 = new SendProjectidAndRsmTasks(callback,dataSetNode.getDataset(),parserArguments,rsm);
-        AccessServiceThread.getAccessServiceThread().addTask(task1);
-    
-    }
-
     private void changeTypicalProtein(final DataSetNode datasetNode, List<ChangeTypicalRule> changeTypicalRules) {
         
                 final DDataset d = datasetNode.getDataset();

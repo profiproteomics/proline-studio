@@ -27,7 +27,7 @@ import javax.jms.Message;
 import javax.jms.TextMessage;
 
 /**
- * compute Scpectral Count Quantitation via JMS
+ * compute Spectral Count Quantitation via JMS
  *
  * @author MB243701
  */

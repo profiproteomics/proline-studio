@@ -204,8 +204,9 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
         
         
         if (m_plots != null) {
+            if (m_plotArea.width >= 0 && m_plotArea.height >= 0) {
                 if (m_useDoubleBuffering) {
-                    boolean createDoubleBuffer = ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth()!=m_plotArea.width) || (m_doubleBuffer.getHeight()!=m_plotArea.height));
+                    boolean createDoubleBuffer = ((m_doubleBuffer == null) || (m_doubleBuffer.getWidth() != m_plotArea.width) || (m_doubleBuffer.getHeight() != m_plotArea.height));
                     if (createDoubleBuffer) {
                         m_doubleBuffer = new BufferedImage(m_plotArea.width, m_plotArea.height, BufferedImage.TYPE_INT_ARGB);
                     }
@@ -217,11 +218,10 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                         if ((m_plotVerticalGrid) && (m_xAxis != null)) {
                             m_xAxis.paintGrid(graphicBufferG2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                         }
-                        
+
                         if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
                             m_yAxis.paintGrid(graphicBufferG2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                         }
-                        
 
                         for (PlotAbstract plot : m_plots) {
                             plot.paint(graphicBufferG2d);
@@ -229,9 +229,9 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                         m_updateDoubleBuffer = false;
                     }
                     g2d.drawImage(m_doubleBuffer, m_plotArea.x, m_plotArea.y, null);
-                    
+
                 } else {
-                    
+
                     long startPlotTime = System.currentTimeMillis();
                     g.setColor(Color.white);
                     g.fillRect(m_plotArea.x, m_plotArea.y, m_plotArea.width, m_plotArea.height);
@@ -242,7 +242,6 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                     if ((m_plotHorizontalGrid) && (m_yAxis != null)) {
                         m_yAxis.paintGrid(g2d, m_plotArea.x, m_plotArea.width, m_plotArea.y, m_plotArea.height);
                     }
-                    
 
                     for (PlotAbstract plot : m_plots) {
                         plot.paint(g2d);
@@ -253,12 +252,12 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
                         m_useDoubleBuffering = true;
                     }
                 }
-                
+            }
             for (PlotAbstract plot : m_plots) {
                 plot.paintMarkers(g2d);
             }
         }
-        
+
         // set clipping area for zooming and selecting
         if ((m_xAxis != null) && (m_yAxis != null)) {
             int clipX = m_xAxis.valueToPixel(m_xAxis.getMinValue());
@@ -267,11 +266,11 @@ public class BasePlotPanel extends JPanel implements MouseListener, MouseMotionL
             int clipHeight = m_yAxis.valueToPixel(m_yAxis.getMinValue()) - clipY;
             g2d.setClip(clipX, clipY, clipWidth, clipHeight);
         }
-        
+
         m_zoomGesture.paint(g2d);
         m_selectionGesture.paint(g2d);
-        
-        if (this.m_drawCursor){
+
+        if (this.m_drawCursor) {
             // show coord
             paintCoord(g2d);
         }

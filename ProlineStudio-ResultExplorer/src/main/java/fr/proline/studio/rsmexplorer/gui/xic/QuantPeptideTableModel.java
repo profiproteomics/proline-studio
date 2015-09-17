@@ -184,27 +184,56 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
             }
             default: {
                 // Quant Channel columns 
+                int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
+                int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
                 if (peptideInstance == null) {
-                    return "";
+                    switch (id) {
+                        case COLTYPE_SELECTION_LEVEL:
+                            return Integer.toString(0);
+                        case COLTYPE_ABUNDANCE:
+                            return Float.toString(0);
+                        case COLTYPE_RAW_ABUNDANCE:
+                            Float.toString(0);
+                        case COLTYPE_PSM:
+                            return Integer.toString(0);
+                        case COLTYPE_IDENT_PSM:
+                            return Integer.toString(0);
+                    }
                 } else {
 
                     // retrieve quantPeptide for the quantChannelId
                     Map<Long, DQuantPeptide> quantPeptideByQchIds = peptide.getQuantPeptideByQchIds();
                     if (quantPeptideByQchIds == null) {
-                        return "";
+                        switch (id) {
+                            case COLTYPE_SELECTION_LEVEL:
+                                return Integer.toString(0);
+                            case COLTYPE_ABUNDANCE:
+                                return Float.toString(0);
+                            case COLTYPE_RAW_ABUNDANCE:
+                                Float.toString(0);
+                            case COLTYPE_PSM:
+                                return Integer.toString(0);
+                            case COLTYPE_IDENT_PSM:
+                                return Integer.toString(0);
+                        }
                     } else {
-                        int nbQc = (col - m_columnNames.length) / m_columnNamesQC.length;
-                        int id = col - m_columnNames.length - (nbQc * m_columnNamesQC.length);
+                        
                         DQuantPeptide quantPeptide = quantPeptideByQchIds.get(m_quantChannels[nbQc].getId());
                         if (quantPeptide == null) {
-                           return "";
+                           switch (id) {
+                                case COLTYPE_SELECTION_LEVEL : return Integer.toString(0);
+                                case COLTYPE_ABUNDANCE : return Float.toString(0);
+                                case COLTYPE_RAW_ABUNDANCE : Float.toString(0);
+                                case COLTYPE_PSM : return Integer.toString(0);
+                                case COLTYPE_IDENT_PSM : return Integer.toString(0);
+                            }
                         } else {
                             switch (id) {
-                                case COLTYPE_SELECTION_LEVEL : return (quantPeptide.getSelectionLevel() == null?"":Integer.toString(quantPeptide.getSelectionLevel()));
-                                case COLTYPE_ABUNDANCE : return ((quantPeptide.getAbundance() == null || quantPeptide.getAbundance().isNaN())? "":Float.toString(quantPeptide.getAbundance()));
-                                case COLTYPE_RAW_ABUNDANCE : return ((quantPeptide.getRawAbundance() == null || quantPeptide.getRawAbundance().isNaN())? "":Float.toString(quantPeptide.getRawAbundance()));
-                                case COLTYPE_PSM : return (quantPeptide.getPeptideMatchesCount()== null?"":Integer.toString(quantPeptide.getPeptideMatchesCount()));
-                                case COLTYPE_IDENT_PSM : return (quantPeptide.getIdentPeptideMatchCount()== null?"":Integer.toString(quantPeptide.getIdentPeptideMatchCount()));
+                                case COLTYPE_SELECTION_LEVEL : return (quantPeptide.getSelectionLevel() == null?Integer.toString(0):Integer.toString(quantPeptide.getSelectionLevel()));
+                                case COLTYPE_ABUNDANCE : return ((quantPeptide.getAbundance() == null || quantPeptide.getAbundance().isNaN())? Float.toString(0):Float.toString(quantPeptide.getAbundance()));
+                                case COLTYPE_RAW_ABUNDANCE : return ((quantPeptide.getRawAbundance() == null || quantPeptide.getRawAbundance().isNaN())? Float.toString(0):Float.toString(quantPeptide.getRawAbundance()));
+                                case COLTYPE_PSM : return (quantPeptide.getPeptideMatchesCount()== null?Integer.toString(0):Integer.toString(quantPeptide.getPeptideMatchesCount()));
+                                case COLTYPE_IDENT_PSM : return (quantPeptide.getIdentPeptideMatchCount()== null?Integer.toString(0):Integer.toString(quantPeptide.getIdentPeptideMatchCount()));
                             }
                         }
                     }

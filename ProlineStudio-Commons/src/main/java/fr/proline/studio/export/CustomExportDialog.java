@@ -6,7 +6,6 @@ import fr.proline.studio.utils.IconManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.io.BufferedWriter;
@@ -37,6 +36,8 @@ import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import fr.proline.studio.gui.CollapsablePanel;
+import fr.proline.studio.gui.CollapseListener;
 
 
 /**
@@ -50,7 +51,7 @@ import com.google.gson.GsonBuilder;
  * newly added fields or tabs are present in a custom file, they will be
  * ignored. The default is the reference for allowing data to be displayed.
  */
-public class CustomExportDialog extends DefaultDialog {
+public class CustomExportDialog extends DefaultDialog implements CollapseListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -60,7 +61,12 @@ public class CustomExportDialog extends DefaultDialog {
     private final static String EXPORT_PROTEIN_VALIDATED = "Validated only";
     private final static String[] EXPORT_PROTEIN_VALUES = new String[]{EXPORT_PROTEIN_VALIDATED, EXPORT_PROTEIN_ALL};
 
+    private static final String JSON_EXTENSION = "json";
+    private static final String TSV_EXTENSION = "tsv";
 
+    private static final FileNameExtensionFilter FILTER_EXCEL = new FileNameExtensionFilter("Excel File (.xlsx)", "xlsx");
+    private static final FileNameExtensionFilter FILTER_TSV = new FileNameExtensionFilter("Tabulation Separated Values (.tsv)", "tsv");
+    
     private static CustomExportDialog m_singletonDialog = null;
 
     private JTextField m_fileTextField;
@@ -74,11 +80,8 @@ public class CustomExportDialog extends DefaultDialog {
 
     private final JFileChooser m_fchooser;
     private final JFileChooser m_exportFchooser;
-    private final List<FileNameExtensionFilter> m_filterList = new ArrayList<>();
-    private static final String jsonExtension = "json";
-    private static final String tsvExtension = "tsv";
 
-    private DefaultDialog.ProgressTask m_task = null;
+    private ProgressTask m_task = null;
 
 
     // created by AW:
@@ -95,7 +98,6 @@ public class CustomExportDialog extends DefaultDialog {
     private JComboBox comboBox_NumberSeparator;
     private JComboBox comboBox_Orientation;
 
-    private ExpandButton m_customOptionsButton;
     public ExportConfig m_exportConfig;
     private ExportConfig m_exportDefaultConfig;
 
@@ -155,9 +157,16 @@ public class CustomExportDialog extends DefaultDialog {
             m_fchooser = new JFileChooser();
             m_exportFchooser = new JFileChooser();
         }
+
+
+        m_fchooser.addChoosableFileFilter(FILTER_EXCEL);
+        m_fchooser.addChoosableFileFilter(FILTER_TSV);
+
+                        
+        
         m_fchooser.setMultiSelectionEnabled(false);
         m_exportFchooser.setMultiSelectionEnabled(false);
-        FileNameExtensionFilter filterJson = new FileNameExtensionFilter("Custom Export Config (." + jsonExtension + ")", jsonExtension);
+        FileNameExtensionFilter filterJson = new FileNameExtensionFilter("Custom Export Config (." + JSON_EXTENSION + ")", JSON_EXTENSION);
         m_exportFchooser.setFileFilter(filterJson);
 
     }
@@ -167,7 +176,7 @@ public class CustomExportDialog extends DefaultDialog {
     }
 
     private boolean isTsv() {
-        return m_exporTypeCombobox.getSelectedItem() != null && m_exporTypeCombobox.getSelectedItem().toString().contains(tsvExtension);
+        return m_exporTypeCombobox.getSelectedItem() != null && m_exporTypeCombobox.getSelectedItem().toString().contains(TSV_EXTENSION);
     }
 
     private void loadExportConfig() {
@@ -286,7 +295,12 @@ public class CustomExportDialog extends DefaultDialog {
 
                 JPanel tablePanel = new JPanel();
                 if (m_tabTitleIdHashMap.containsValue(param.sheets[i].id)) {
-                    m_tabbedPane.addTab(param.sheets[i].title, null, tablePanel, null);
+                    m_tabbedPane.addTab(null, tablePanel);
+                    CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(m_tabbedPane, param.sheets[i].title);
+                    closableTabPanel.setSelected(true);
+                    m_tabbedPane.setTabComponentAt(m_tabbedPane.getTabCount()-1, closableTabPanel);
+                    
+                    
                     m_presentationHashMap.put(param.sheets[i].id, param.sheets[i].presentation);
 					// put id in tooltip in order to find the tab title from the tooltip even if renamed.
                     // TODO: find a better way...
@@ -296,6 +310,7 @@ public class CustomExportDialog extends DefaultDialog {
 					// read fields to fill in jtable into this tabbed pane
 
                     JScrollPane tableScrollPane = new JScrollPane();
+                    tableScrollPane.getViewport().setBackground(Color.white);
                     tablePanel.add(tableScrollPane);
 
                     JTable table = new JTable();
@@ -306,6 +321,7 @@ public class CustomExportDialog extends DefaultDialog {
                     table.setTransferHandler(new TableRowTransferHandler(table));
 
                     table.addMouseMotionListener(new MouseMotionListener() {
+                        @Override
                         public void mouseDragged(MouseEvent e) {
                             e.consume();
                             JComponent c = (JComponent) e.getSource();
@@ -313,6 +329,7 @@ public class CustomExportDialog extends DefaultDialog {
                             handler.exportAsDrag(c, e, TransferHandler.MOVE);
                         }
 
+                        @Override
                         public void mouseMoved(MouseEvent e) {
                         }
                     });
@@ -351,7 +368,7 @@ public class CustomExportDialog extends DefaultDialog {
 					// now add the fields
                     // add fields contained both in param and defaultparam
                     ArrayList<String> defaultFieldsList = getFieldsFromParamSheet(defaultParam.sheets, param.sheets[i].id);
-                    ArrayList<String> addedFieldsList = new ArrayList<String>();// to know which fields have already been added
+                    ArrayList<String> addedFieldsList = new ArrayList<>();// to know which fields have already been added
 
                     for (int j = 0; j < param.sheets[i].fields.length; j++) {
 
@@ -386,28 +403,37 @@ public class CustomExportDialog extends DefaultDialog {
         }
 
 	// now add the remaining default sheets that are not already added.
-        int nbCustomTabsAdded = addedTabs.size();
         for (int i = 0; i < defaultParam.sheets.length; i++) {
 
             if (!addedTabs.contains(defaultParam.sheets[i].id)) {
-                nbCustomTabsAdded++;
                 // add the missing tab
                 JPanel tablePanel = new JPanel();
-                m_tabbedPane.addTab(defaultParam.sheets[i].title, null, tablePanel, null);
+                m_tabbedPane.addTab(null, tablePanel);
+                int tabIndex = m_tabbedPane.getTabCount()-1;
+                
+                CheckboxTabPanel closableTabPanel =  new CheckboxTabPanel(m_tabbedPane, defaultParam.sheets[i].title);
+                m_tabbedPane.setTabComponentAt(tabIndex, closableTabPanel);
+                
                 m_presentationHashMap.put(defaultParam.sheets[i].id, defaultParam.sheets[i].presentation);
 				// put id in tooltip in order to find the tab title from the tooltip even if renamed.
                 // TODO: find a better way...
-                m_tabbedPane.setToolTipTextAt(nbCustomTabsAdded - 1, defaultParam.sheets[i].id /*"Right click to Enable/Disable"*/);
+                m_tabbedPane.setToolTipTextAt(tabIndex, defaultParam.sheets[i].id /*"Right click to Enable/Disable"*/);
 
-                m_tabbedPane.setEnabledAt(nbCustomTabsAdded - 1, defaultParam.sheets[i].default_displayed); // disable default not saved tab
+                boolean enabled;
                 if (param != null) {
-                    m_tabbedPane.setEnabledAt(nbCustomTabsAdded - 1, false); // disable default not saved tab
+                    enabled = false; // disable default not saved tab
+                    
+                } else {
+                    enabled = defaultParam.sheets[i].default_displayed;
                 }
+                m_tabbedPane.setEnabledAt(tabIndex, enabled); 
+                closableTabPanel.setSelected(enabled);
 
                 tablePanel.setLayout(new BorderLayout(0, 0));
 				// read fields to fill in jtable into this tabbed pane
 
                 JScrollPane tableScrollPane = new JScrollPane();
+                tableScrollPane.getViewport().setBackground(Color.white);
                 tablePanel.add(tableScrollPane);
 
                 JTable table = new JTable();
@@ -514,8 +540,10 @@ public class CustomExportDialog extends DefaultDialog {
         insidePanel.add(lblExportToFile, c);
 
         c.gridx++;
+        c.weightx = 1;
         m_fileTextField = new JTextField(50);
         insidePanel.add(m_fileTextField, c);
+        c.weightx = 0;
 
         final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
         addFileButton.addActionListener(new ActionListener() {
@@ -524,18 +552,15 @@ public class CustomExportDialog extends DefaultDialog {
             public void actionPerformed(ActionEvent e) {
 
                 if (m_exporTypeCombobox.getSelectedItem() != null) {
-                    FileNameExtensionFilter filter = null;
-                    if (m_exporTypeCombobox.getSelectedItem().toString().contains("xls")) {
-                        filter = new FileNameExtensionFilter("Excel File (.xlsx)", "xlsx");
-                    } else if (m_exporTypeCombobox.getSelectedItem().toString().contains("tsv")) {
-                        filter = new FileNameExtensionFilter("Tabulation Separated Values (.tsv)", "tsv");
-                    }
+
                     if (m_fileExportMode) {
                         // file mode
                         m_fchooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                        m_fchooser.addChoosableFileFilter(filter);
-                        m_filterList.add(filter);
-                        m_fchooser.setFileFilter(filter);
+                        if (m_exporTypeCombobox.getSelectedItem().toString().contains("xls")) {
+                            m_fchooser.setFileFilter(FILTER_EXCEL);
+                        } else {
+                            m_fchooser.setFileFilter(FILTER_TSV);
+                        }
                     } else {
                         // directory
                         m_fchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -565,7 +590,7 @@ public class CustomExportDialog extends DefaultDialog {
                     if (m_fileExportMode) {
                         if (fileName.indexOf('.') == -1) {
                             if (isTsv()) {
-                                absolutePath += "." + tsvExtension;
+                                absolutePath += "." + TSV_EXTENSION;
                             } else {
                                 absolutePath += "." + "xlsx"; //+ exporterInfo.getFileExtension();
                             }
@@ -591,92 +616,21 @@ public class CustomExportDialog extends DefaultDialog {
         insidePanel.add(lbl_exportType, c);
         
         c.gridx++;
+        c.weightx = 1;
         insidePanel.add(m_exporTypeCombobox, c);
+        c.weightx = 0;
 
-
-        JPanel customButtonPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints cButtonPanel = new GridBagConstraints();
-        cButtonPanel.anchor = GridBagConstraints.NORTHWEST;
-        cButtonPanel.fill = GridBagConstraints.BOTH;
-        cButtonPanel.insets = new java.awt.Insets(0,0,0,0);
-        m_customOptionsButton = new ExpandButton("Custom export") {
-
-            @Override
-            public void onClick() {
-                boolean isExpanded = isExpanded();
-                m_optionPanel.setVisible(isExpanded);
-                
-                setButtonVisible(BUTTON_LOAD, isExpanded);
-                setButtonVisible(BUTTON_SAVE, isExpanded);
-                
-                if (! isExpanded) {
-                    //disable custom parameters and restore default ones
-                    m_exportConfig = null; //m_exportDefaultConfig;
-                    fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
-                    recalculateTabsIds();
-                    recalculateTabTitleIdHashMap();
-                    //m_exportConfig = m_exportDefaultConfig; // copy config to allow modifications: TODO: check if copy by value better
-                }
-                m_singletonDialog.revalidate();
-                m_singletonDialog.repack();
-            }
-            
-        };
-        cButtonPanel.gridx = 0;
-        cButtonPanel.gridy = 0;
-        cButtonPanel.weightx = 1;
-        customButtonPanel.add(Box.createHorizontalBox(), cButtonPanel);
-        cButtonPanel.gridx++;
-        cButtonPanel.weightx = 0;
-        customButtonPanel.add(m_customOptionsButton, cButtonPanel);
-        
-        c.gridy++;
-        c.gridwidth = 3;
-        c.gridy++;
-        insidePanel.add(customButtonPanel, c);
 
         m_optionPanel = createOptionPanel();
         c.gridx=0;
         c.gridwidth = 3;
         c.gridy++;
-        insidePanel.add(m_optionPanel, c);
-
+        c.weighty = 1;
+        c.weightx = 1;
+        CollapsablePanel collapsablePanel = new CollapsablePanel("Custom Options", m_optionPanel, false);
+        insidePanel.add(collapsablePanel, c);
         
-        
-        
-        /*
-        m_tableScrollPane = new JScrollPane();
-
-        m_table = new JTable();
-        m_tableScrollPane.setViewportView(m_table);
-        m_table.setModel(new DefaultTableModel(
-                new Object[][]{},
-                new String[]{
-                    "Internal field name", "Displayed field name", "Export"
-                }
-        ) {
-            Class[] columnTypes = new Class[]{
-                Object.class, String.class, Boolean.class
-            };
-
-            @Override
-            public Class getColumnClass(int columnIndex) {
-                return columnTypes[columnIndex];
-            }
-            boolean[] columnEditables = new boolean[]{
-                false, true, true
-            };
-
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return columnEditables[column];
-            }
-        });
-        m_table.getColumnModel().getColumn(0).setPreferredWidth(141);
-        */
-
-
-
+        collapsablePanel.addCollapseListener(this);
 
         return insidePanel;
 
@@ -737,6 +691,8 @@ public class CustomExportDialog extends DefaultDialog {
         c.gridwidth = 4;
         c.gridx = 0;
         c.gridy++;
+        c.weightx = 1;
+        c.weighty = 1;
         optionPanel.add(createTabbedOptionPanel(), c);
         
         return optionPanel;
@@ -777,6 +733,8 @@ public class CustomExportDialog extends DefaultDialog {
         c.gridy++;
         c.gridwidth = 2;
         m_tabbedPane = createTabbedPane();
+        c.weightx = 1;
+        c.weighty = 1;
         tabbedOptionPanel.add(m_tabbedPane, c);
 
         return tabbedOptionPanel;
@@ -794,23 +752,6 @@ public class CustomExportDialog extends DefaultDialog {
             }
         });
 
-        tabbedPane.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent arg0) {
-                if (SwingUtilities.isRightMouseButton(arg0)) {
-                    
-                    int tabIndex = tabbedPane.indexAtLocation(arg0.getX(), arg0.getY());
-                    if (tabIndex == -1) {
-                        return;
-                    }
-                    boolean tabEnabled = tabbedPane.isEnabledAt(tabIndex);
-                    tabbedPane.setEnabledAt(tabIndex, !tabEnabled);
-                    repaint();
-                    arg0.consume();
-                }
-
-            }
-        });
 
         // add listener to allow tab rename:
         TabTitleEditListener l = new TabTitleEditListener(tabbedPane, this);
@@ -839,7 +780,14 @@ public class CustomExportDialog extends DefaultDialog {
         m_tabTitleIdHashMap.clear();
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) {
 
-            m_tabTitleIdHashMap.put(m_tabbedPane.getTitleAt(i), m_tabbedPane.getToolTipTextAt(i));
+            
+            CheckboxTabPanel comp = ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i));
+                    
+            if (comp == null) {
+                continue;
+            }
+            
+            m_tabTitleIdHashMap.put(comp.getText(), m_tabbedPane.getToolTipTextAt(i));
         }
 
     }
@@ -869,9 +817,6 @@ public class CustomExportDialog extends DefaultDialog {
 
             if (m_tabbedPane.getToolTipTextAt(i) == null) { // if tool tip has been erased
                 removedAtIndex = i;
-
-                String currentTabTitle = m_tabbedPane.getTitleAt(removedAtIndex);
-                String tabId = m_tabTitleIdHashMap.get(currentTabTitle);
 
             } else {
                 idFullList.remove(m_tabbedPane.getToolTipTextAt(i));
@@ -970,8 +915,8 @@ public class CustomExportDialog extends DefaultDialog {
 
             String absolutePath = file.getAbsolutePath();
             // add json if needed
-            if (!absolutePath.endsWith("." + jsonExtension)) {
-                absolutePath += "." + jsonExtension;
+            if (!absolutePath.endsWith("." + JSON_EXTENSION)) {
+                absolutePath += "." + JSON_EXTENSION;
             }
             m_configFile = absolutePath;
             File f = new File(absolutePath);
@@ -1042,7 +987,7 @@ public class CustomExportDialog extends DefaultDialog {
 		// returns the position in int for the specified tab title (excel sheet title)
         // it assumes the title names are unique
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) {
-            if (m_tabbedPane.getTitleAt(i).equals(tabTitle)) {
+            if (((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getText().equals(tabTitle)) {
                 return i;
             }
         }
@@ -1130,8 +1075,8 @@ public class CustomExportDialog extends DefaultDialog {
                 }
                 ec.sheets[usedTabNumber] = new ExportExcelSheet();
 
-				ec.sheets[usedTabNumber].id = tabTitleToTabId(m_tabbedPane.getTitleAt(i));
-                ec.sheets[usedTabNumber].title = m_tabbedPane.getTitleAt(i);
+		ec.sheets[usedTabNumber].id = tabTitleToTabId(((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getText());
+                ec.sheets[usedTabNumber].title = ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getText();
                 ec.sheets[usedTabNumber].presentation = m_presentationHashMap.get(m_tabbedPane.getToolTipTextAt(i)); //m_exportConfig.sheets[i].presentation;
 
                 ec.sheets[usedTabNumber].fields = new ExportExcelSheetField[nbSelectedRows];
@@ -1154,95 +1099,6 @@ public class CustomExportDialog extends DefaultDialog {
         return ec;
 
     }
-
-    /*public final JPanel createExportPanel() {
-
-        JPanel exportPanel = new JPanel(new GridBagLayout());
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.NORTHWEST;
-        c.fill = GridBagConstraints.BOTH;
-        c.insets = new java.awt.Insets(5, 5, 5, 5);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.gridwidth = 2;
-        m_fileTextField = new JTextField(30);
-        exportPanel.add(m_fileTextField, c);
-
-        final JButton addFileButton = new JButton(IconManager.getIcon(IconManager.IconType.OPEN_FILE));
-        addFileButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
-        addFileButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ExporterFactory.ExporterInfo exporterInfo = (ExporterFactory.ExporterInfo) m_exporTypeCombobox.getSelectedItem();
-                if (m_fileExportMode) {
-                    // file mode
-                    m_fchooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                    if (exporterInfo != null) {
-                        FileNameExtensionFilter filter = new FileNameExtensionFilter(exporterInfo.getName(), exporterInfo.getFileExtension());
-                        FileNameExtensionFilter existFilter = getFilterWithSameExtensions(filter);
-
-                        if (existFilter == null) {
-                            m_fchooser.addChoosableFileFilter(filter);
-                            m_filterList.add(filter);
-                            m_fchooser.setFileFilter(filter);
-                        } else {
-                            m_fchooser.setFileFilter(existFilter);
-                        }
-
-                    }
-                    String textFile = m_fileTextField.getText().trim();
-                    if (textFile.length() > 0) {
-                        File currentFile = new File(textFile);
-                        if (currentFile.isDirectory()) {
-                            m_fchooser.setCurrentDirectory(currentFile);
-                        } else {
-                            m_fchooser.setSelectedFile(currentFile);
-                        }
-                    }
-
-                } else {
-                    // directory
-                    m_fchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                }
-
-                int result = m_fchooser.showOpenDialog(addFileButton);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File file = m_fchooser.getSelectedFile();
-
-                    String absolutePath = file.getAbsolutePath();
-                    String fileName = file.getName();
-                    if (m_fileExportMode) {
-                        if (fileName.indexOf('.') == -1) {
-                            absolutePath += "." + (exporterInfo == null ? "xlsx " : exporterInfo.getFileExtension());
-                        }
-                    }
-                    m_fileTextField.setText(absolutePath);
-                }
-            }
-        });
-
-        c.gridx += 2;
-        c.gridwidth = 1;
-        exportPanel.add(addFileButton, c);
-
-
-        m_exporTypeCombobox = new JComboBox(ExporterFactory.getList(ExporterFactory.EXPORT_FROM_SERVER).toArray());
-        m_exporTypeCombobox.setSelectedIndex(0);
-
-        c.gridy++;
-        c.gridx = 0;
-        c.gridwidth = 1;
-        exportPanel.add(new JLabel("Export Type:"), c);
-
-        c.gridx++;
-        c.gridwidth = 2;
-        exportPanel.add(m_exporTypeCombobox, c);
-
-        return exportPanel;
-    }*/
 
     public String getFileName() {
         return m_fileTextField.getText().trim();
@@ -1325,32 +1181,7 @@ public class CustomExportDialog extends DefaultDialog {
         return true;
     }
 
-    /* compare filter based on the extensions, returns null if the filter is not already in the list, otherwise returns the object filter in the list*/
-    private FileNameExtensionFilter getFilterWithSameExtensions(FileNameExtensionFilter filter) {
-        FileNameExtensionFilter existFilter = null;
 
-        String[] newExtension = filter.getExtensions();
-        int nbNew = newExtension.length;
-        for (FileNameExtensionFilter f : m_filterList) {
-            String[] extensions = f.getExtensions();
-            boolean sameExt = true;
-            int nbE = extensions.length;
-            if (nbE == nbNew) {
-                for (int k = 0; k < nbE; k++) {
-                    if (!extensions[k].equals(newExtension[k])) {
-                        sameExt = false;
-                        break;
-                    }
-                }
-            }
-            if (sameExt) {
-                existFilter = f;
-                break;
-            }
-        }
-        return existFilter;
-
-    }
 
     /**
      * *
@@ -1435,33 +1266,29 @@ public class CustomExportDialog extends DefaultDialog {
         fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
     }
 
-    
-    public abstract class ExpandButton extends JButton {
 
-        private boolean m_expanded = false;
 
-        public ExpandButton(String label) {
-            super(label, IconManager.getIcon(IconManager.IconType.ARROW_DOWN));
-            addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    m_expanded = !m_expanded;
-                    if (m_expanded) {
-                        setIcon(IconManager.getIcon(IconManager.IconType.ARROW_UP));
-                    } else {
-                        setIcon(IconManager.getIcon(IconManager.IconType.ARROW_DOWN));
-                    }
-                    
-                    onClick();
-                }
-            });
+    @Override
+    public void collapse(boolean collapse) {
+        boolean isExpanded = !collapse;
+        m_optionPanel.setVisible(isExpanded);
 
+        setButtonVisible(BUTTON_LOAD, isExpanded);
+        setButtonVisible(BUTTON_SAVE, isExpanded);
+
+        if (!isExpanded) {
+            //disable custom parameters and restore default ones
+            m_exportConfig = null; //m_exportDefaultConfig;
+            fillExportFormatTable(m_exportDefaultConfig, m_exportConfig);
+            recalculateTabsIds();
+            recalculateTabTitleIdHashMap();
+            //m_exportConfig = m_exportDefaultConfig; // copy config to allow modifications: TODO: check if copy by value better
         }
-
-        public boolean isExpanded() {
-            return m_expanded;
-        }
-        
-        public abstract void onClick();
+        m_singletonDialog.revalidate();
+        m_singletonDialog.repack();
     }
+    
+    
+    
+    
 }

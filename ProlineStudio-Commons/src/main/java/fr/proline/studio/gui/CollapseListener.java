@@ -10,5 +10,5 @@ public interface CollapseListener {
     /**
      * the panel's status has changed from 'expand' or 'collapse' state
      */
-    public void collapse();
+    public void collapse(boolean collapse);
 }

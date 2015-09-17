@@ -4,7 +4,6 @@ import fr.proline.studio.filter.Filter;
 import fr.proline.studio.filter.FilterTableModelInterfaceV2;
 import fr.proline.studio.progress.ProgressBarDialog;
 import fr.proline.studio.progress.ProgressInterface;
-import fr.proline.studio.table.CompoundTableModel;
 import fr.proline.studio.utils.IconManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -93,7 +92,7 @@ public class SearchToggleButton extends JToggleButton {
 
         @Override
         public void doSearch(Filter f, boolean firstSearch) {
-            int modelRowIndex = ((CompoundTableModel) m_table.getModel()).search(m_table, f, firstSearch);
+            int modelRowIndex = m_tableModelFilterInterface.search(m_table, f, firstSearch);
             if (modelRowIndex == -1) {
                 return;
             }

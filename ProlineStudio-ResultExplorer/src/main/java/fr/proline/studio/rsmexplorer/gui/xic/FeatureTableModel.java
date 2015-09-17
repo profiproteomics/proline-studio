@@ -760,8 +760,14 @@ public class FeatureTableModel extends LazyTableModel implements GlobalTableMode
             if (qc != null) {
                 if (qc.getMzdbFileName() != null) {
                     String fn = qc.getMzdbFileName();
-                    MzdbInfo mzdbInfo = new MzdbInfo(fn, Double.valueOf(feature.getMoz()), Double.valueOf(feature.getElutionTime()), 
+                    MzdbInfo mzdbInfo;
+                    if (feature.getId() == -1){ // fake feature added to display predictedElutionTime
+                        mzdbInfo = new MzdbInfo(fn, Double.valueOf(feature.getMoz()), Double.valueOf(feature.getPredictedElutionTime()), 
+                            0.0, 0.0);
+                    }else{
+                        mzdbInfo = new MzdbInfo(fn, Double.valueOf(feature.getMoz()), Double.valueOf(feature.getElutionTime()), 
                             Double.valueOf(feature.getFirstScan().getTime()), Double.valueOf(feature.getLastScan().getTime()));
+                    }
                     if (!fileNameList.contains(fn)) {
                         mzdbInfos.add(mzdbInfo);
                         fileNameList.add(fn);

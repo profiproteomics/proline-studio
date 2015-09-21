@@ -5,7 +5,6 @@ package fr.proline.studio.rsmexplorer.adjacencymatrix.visualize;
 import fr.proline.studio.dam.tasks.data.LightPeptideMatch;
 import fr.proline.studio.dam.tasks.data.LightProteinMatch;
 import fr.proline.studio.export.ExportButton;
-import fr.proline.studio.export.ImageExporterInterface;
 import fr.proline.studio.gui.HourglassPanel;
 import fr.proline.studio.gui.SplittedPanelContainer;
 import fr.proline.studio.pattern.AbstractDataBox;
@@ -40,7 +39,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     private static final int DELTA = 3;
     private static final int TITLE_SIZE = 20;
     private static final int INFO_SIZE = 50;
-    private static final int PEPTIDE_NAME_SIZE = 80;
+    private static final int PEPTIDE_NAME_SIZE = 120;
     private static final int PROTEIN_NAME_SIZE = 80;
     private static final int VISIBILITY_MARGE_SIZE = 20;
 
@@ -73,9 +72,9 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
     private DrawVisualization m_drawVisualization = null;
     private HashMap<LightPeptideMatch, ArrayList<LightProteinMatch>> m_peptideToProteinMap = new HashMap<>();
 
-    private String[] m_info = new String[2];
+    private final String[] m_info = new String[2];
 
-    private JPanel m_internalPanel;
+    private final JPanel m_internalPanel;
     
     public MatrixPanel() {
         setLoading(0);
@@ -280,9 +279,9 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             int proteinsWidth = fontMetricsBold.stringWidth(PROTEINS);
             int peptidesWidth = fontMetricsBold.stringWidth(PEPTIDES);
 
-            g2d.drawString(PROTEINS, m_xOffset + matrixTotalWidth / 2 - proteinsWidth / 2, INFO_SIZE + TITLE_SIZE / 2);
+            g2d.drawString(PROTEINS, m_xOffset + (matrixTotalWidth - proteinsWidth + PEPTIDE_NAME_SIZE)/2, INFO_SIZE + TITLE_SIZE / 2);
 
-            label_line(g2d, (double) (m_xOffset + TITLE_SIZE / 2), matrixTotalHeight / 2 + peptidesWidth / 2, (double) 270 * java.lang.Math.PI / 180, PEPTIDES);
+            drawRotatedLine(g2d, (double) (m_xOffset + TITLE_SIZE/2), (matrixTotalHeight + peptidesWidth )/2+PROTEIN_NAME_SIZE, (double) 270 * java.lang.Math.PI / 180, PEPTIDES);
 
             g2d.setFont(new Font("Helvetica", Font.PLAIN, 11));
             FontMetrics fontMetricsPlain = g.getFontMetrics(g.getFont());
@@ -342,7 +341,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
 
             /*Drawing Labels*/
-            Color c = g2d.getColor();
+            int deltaFont = fontMetricsPlain.getAscent()-fontMetricsPlain.getDescent();
             g2d.setColor(new Color(212, 91, 91));
 
             int dIndex = 0;
@@ -357,13 +356,15 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                         break;
                     }
                 }
-                sequence = sequence.substring(0, i);
+                if ((i>0) && (i<sequence.length()-1)) {
+                    sequence = sequence.substring(0, i-1)+".";
+                }
 
 
                 Cell cell = m_cells.get(dIndex * columnCount);
                 double y = cell.getPixelY();
 
-                g2d.drawString(sequence, m_xOffset + TITLE_SIZE, (int) (y + (m_squareSize / 2)));
+                g2d.drawString(sequence, m_xOffset + TITLE_SIZE, (int) (y + (m_squareSize / 2) +deltaFont ));
 
 
 
@@ -387,7 +388,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                 Cell cell = m_cells.get(dIndex);
                 int x = cell.getPixelX();
                 int y = cell.getPixelY();
-                label_line(g2d, (double) (x + m_squareSize / 2), (double) (y - 5 - m_squareSize), (double) 270 * java.lang.Math.PI / 180, proteinName);
+                drawRotatedLine(g2d, (double) (x + m_squareSize / 2)+deltaFont, (double) (y - 5 - m_squareSize), (double) 270 * java.lang.Math.PI / 180, proteinName);
 
                 dIndex++;
 
@@ -401,13 +402,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                 g2d.drawString(m_info[0], 10, INFO_SIZE/3);
                 g2d.drawString(m_info[1], 10, 2*(INFO_SIZE/3));
             }
-
-
-            
-            
-
-            
-            
+ 
 
             if (m_firstPaint) {
                 setPreferredSize(new Dimension(matrixTotalWidth+VISIBILITY_MARGE_SIZE, matrixTotalHeight+VISIBILITY_MARGE_SIZE));
@@ -419,7 +414,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         }
 
 
-        private void label_line(Graphics g, double x, double y, double theta, String label) {
+        private void drawRotatedLine(Graphics g, double x, double y, double theta, String label) {
 
             Graphics2D g2D = (Graphics2D) g;
 
@@ -566,7 +561,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
             }
             
         }
-        private StringBuilder m_sb = new StringBuilder();
+        private final StringBuilder m_sb = new StringBuilder();
         
     }
     

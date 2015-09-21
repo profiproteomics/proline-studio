@@ -29,7 +29,7 @@ public class AdvancedSearchFloatingPanel extends JPanel {
     private Filter[] m_filters = null;
     
     private JToggleButton m_srcButton = null;
-    private AbstractSearch m_search = null;
+    private ApplySearchInterface m_search = null;
     
     private JButton m_searchButton;
 
@@ -37,10 +37,10 @@ public class AdvancedSearchFloatingPanel extends JPanel {
     private final JPanel m_searchOptionPanel = new JPanel(new GridBagLayout());
 
     
-    public AdvancedSearchFloatingPanel(AbstractSearch search) {
+    public AdvancedSearchFloatingPanel(ApplySearchInterface search) {
         this(search, "*", "<html>Search is based on wildcards:<br>  '*' : can replace all characters<br>  '?' : can replace one character<br><br>Use 'FOO*' to search a string starting with FOO. </html>");
     }
-    public AdvancedSearchFloatingPanel(AbstractSearch search, String defaultSearchValue, String defaultTooltip) {
+    public AdvancedSearchFloatingPanel(ApplySearchInterface search, String defaultSearchValue, String defaultTooltip) {
 
         m_search = search;
         

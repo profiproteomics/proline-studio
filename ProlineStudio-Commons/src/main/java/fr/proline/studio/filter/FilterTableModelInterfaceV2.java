@@ -1,9 +1,7 @@
 package fr.proline.studio.filter;
 
-import fr.proline.studio.progress.ProgressInterface;
 import fr.proline.studio.table.GlobalTableModelInterface;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import org.jdesktop.swingx.JXTable;
 
 
@@ -11,14 +9,12 @@ import org.jdesktop.swingx.JXTable;
  * Interface which must be respected to do a Filter Model
  * @author JM235353
  */
-public interface FilterTableModelInterfaceV2 extends GlobalTableModelInterface {
+public interface FilterTableModelInterfaceV2 extends GlobalTableModelInterface, FilterMapInterface {
 
     public void setTableModelSource(GlobalTableModelInterface tableModelSource);
     public GlobalTableModelInterface getTableModelSource();
     
     public void initFilters();
-    
-    public LinkedHashMap<Integer, Filter> getFilters();
     
     public Filter getColumnFilter(int col);
 

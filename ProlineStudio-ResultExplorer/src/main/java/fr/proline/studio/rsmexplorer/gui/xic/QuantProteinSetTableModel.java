@@ -425,10 +425,10 @@ public class QuantProteinSetTableModel extends LazyTableModel implements ExportT
                                     lazyData.setData(quantProteinSet.getSelectionLevel());
                                     break;
                                 case COLTYPE_ABUNDANCE:
-                                    lazyData.setData(quantProteinSet.getAbundance().isNaN() ? Float.valueOf(0) : quantProteinSet.getAbundance());
+                                    lazyData.setData((quantProteinSet.getAbundance() == null || quantProteinSet.getAbundance().isNaN()) ? Float.valueOf(0) : quantProteinSet.getAbundance());
                                     break;
                                 case COLTYPE_RAW_ABUNDANCE:
-                                    lazyData.setData(quantProteinSet.getRawAbundance().isNaN() ? Float.valueOf(0) : quantProteinSet.getRawAbundance());
+                                    lazyData.setData((quantProteinSet.getRawAbundance() == null || quantProteinSet.getRawAbundance().isNaN()) ? Float.valueOf(0) : quantProteinSet.getRawAbundance());
                                     break;
                                 case COLTYPE_PSM:
                                     lazyData.setData(quantProteinSet.getPeptideMatchesCount());

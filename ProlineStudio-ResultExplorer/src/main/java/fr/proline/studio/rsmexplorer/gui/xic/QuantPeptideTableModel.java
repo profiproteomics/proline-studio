@@ -574,10 +574,10 @@ public class QuantPeptideTableModel extends LazyTableModel implements GlobalTabl
                                     lazyData.setData(quantPeptide.getSelectionLevel());
                                     break;
                                 case COLTYPE_ABUNDANCE:
-                                    lazyData.setData(quantPeptide.getAbundance().isNaN() ? Float.valueOf(0) : quantPeptide.getAbundance());
+                                    lazyData.setData((quantPeptide.getAbundance() == null || quantPeptide.getAbundance().isNaN()) ? Float.valueOf(0) : quantPeptide.getAbundance());
                                     break;
                                 case COLTYPE_RAW_ABUNDANCE:
-                                    lazyData.setData(quantPeptide.getRawAbundance().isNaN() ? Float.valueOf(0) : quantPeptide.getRawAbundance());
+                                    lazyData.setData((quantPeptide.getRawAbundance() == null || quantPeptide.getRawAbundance().isNaN()) ? Float.valueOf(0) : quantPeptide.getRawAbundance());
                                     break;
                                 case COLTYPE_PSM:
                                     lazyData.setData(quantPeptide.getPeptideMatchesCount() == null ? Integer.valueOf(0) : quantPeptide.getPeptideMatchesCount());

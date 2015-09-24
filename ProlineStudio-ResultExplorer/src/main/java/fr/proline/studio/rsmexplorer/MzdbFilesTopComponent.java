@@ -22,11 +22,11 @@ autostore = false)
 @TopComponent.Description(preferredID = "MzdbFilesTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
-@TopComponent.Registration(mode = "explorer", openAtStartup = true)
+@TopComponent.Registration(mode = "explorer", openAtStartup = true, position=2)
 @ActionID(category = "Window", id = "fr.proline.studio.rsmexplorer.MzdbFilesTopComponent")
-@ActionReference(path = "Menu/Window" /*
- * , position = 333
- */)
+@ActionReference(path = "Menu/Window"
+ , position = 20
+ )
 @TopComponent.OpenActionRegistration(displayName = "#CTL_MzdbFilesAction",
 preferredID = "MzdbFilesTopComponent")
 @Messages({

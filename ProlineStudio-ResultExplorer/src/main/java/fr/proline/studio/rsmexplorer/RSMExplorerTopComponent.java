@@ -5,10 +5,8 @@ package fr.proline.studio.rsmexplorer;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
-import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import javax.swing.SwingUtilities;
 
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -28,11 +26,11 @@ autostore = false)
 @TopComponent.Description(preferredID = "RSMExplorerTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
-@TopComponent.Registration(mode = "explorer", openAtStartup = true)
+@TopComponent.Registration(mode = "explorer", openAtStartup = true, position=1)
 @ActionID(category = "Window", id = "fr.proline.studio.rsmexplorer.RSMExplorerTopComponent")
-@ActionReference(path = "Menu/Window" /*
- * , position = 333
- */)
+@ActionReference(path = "Menu/Window"
+ , position = 10
+ )
 @TopComponent.OpenActionRegistration(displayName = "#CTL_RSMExplorerAction",
 preferredID = "RSMExplorerTopComponent")
 @Messages({

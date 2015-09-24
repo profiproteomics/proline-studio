@@ -42,7 +42,7 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util</artifactId>
             <version>${netbeans.version}</version>
-        </dependency>
+        </dependency> 
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util-lookup</artifactId>
@@ -240,6 +240,34 @@
             <version>${netbeans.version}</version>
             <type>nbm-file</type>
         </dependency>
+        
+        <!-- FOR JAVA 8 -->
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-project-indexingbridge</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-editor-fold-nbui</artifactId>
+            <version>${netbeans.version}</version>
+            <type>nbm-file</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-csl-api</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-bracesmatching</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        
+        
 
         <!-- ProlineStudio dependencies -->
         <dependency>
@@ -277,18 +305,25 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.2.1</version>
+            <version>2.3.1</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ProlineStudio-R</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
+        
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.19</version>
+        </dependency>
         <!--  JFree common -->
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jcommon</artifactId>
-            <version>1.0.21</version>
+            <version>1.0.23</version>
         </dependency>
         
         <dependency> 
@@ -300,13 +335,30 @@
         <dependency>
             <groupId>org.swinglabs.swingx</groupId>
             <artifactId>swingx-all</artifactId>
-            <version>1.6.3</version>
+            <version>1.6.5-1</version>
             <type>jar</type>
         </dependency>
+        
         <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
-            <version>2.0.2</version>
+            <version>1.4.01</version>
+        </dependency> 
+        
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
+            <version>1.0.1.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>4.2.13.Final</version>
+        </dependency> 
+        <dependency>
+	  <groupId>org.python</groupId>
+	  <artifactId>jython</artifactId>
+	  <version>2.2</version>
         </dependency>
 
         <dependency>
@@ -326,6 +378,19 @@
             </exclusions>
         </dependency>
         
+        <!--  batik -->
+         <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-dom</artifactId>
+            <version>1.8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-svggen</artifactId>
+            <version>1.8</version>
+        </dependency>
+        
 
         <dependency> 
             <groupId>sape.inf.usi.ch</groupId> 
@@ -333,12 +398,12 @@
             <version>2015-04</version> 
         </dependency> 
         
+        
         <dependency>
             <groupId>net.sf.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>2.3</version>
         </dependency>
-
 
 
     </dependencies>

@@ -27,14 +27,14 @@
         </dependency>  
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
+            <artifactId>logback-core</artifactId> 
             <!-- Version inherited from ProFI-Pom -->
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <artifactId>logback-classic</artifactId> 
             <!-- Version inherited from ProFI-Pom -->
-        </dependency>
+        </dependency> 
     </dependencies>
 
     <build>

@@ -9,7 +9,6 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>fr.proline</groupId>
     <artifactId>ProlineStudio-parent</artifactId>
     <version>0.5.0-SNAPSHOT</version> <!-- ProlineStudio version -->
     <packaging>pom</packaging>
@@ -31,7 +30,7 @@
     </modules>
 
     <properties>
-        <netbeans.version>RELEASE711</netbeans.version>
+        <netbeans.version>RELEASE802</netbeans.version>
         <brandingToken>prolinestudio</brandingToken>
     </properties>
 
@@ -48,50 +47,9 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-            <version>1.0.17</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreesvg</artifactId>
-            <version>1.9</version>
-        </dependency>
-    
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-dom</artifactId>
-            <version>1.6</version>
-        </dependency> 
+        
 
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-svggen</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-ext</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-xml</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-awt-util</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-util</artifactId>
-            <version>1.6</version>
-        </dependency>
-
-	
+        
     </dependencies>
 
     <build>
@@ -125,8 +83,9 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <!-- Version inherited from ProFI-Pom -->
                     <configuration>
-                        <source>1.7</source> <!-- Java version : 1.7 -->
-                        <target>1.7</target>
+                        <compilerVersion>1.8</compilerVersion>
+                        <source>1.8</source> <!-- Java version : 1.8 -->
+                        <target>1.8</target>
                     </configuration>
                 </plugin>
         
@@ -136,7 +95,7 @@
 
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.1</version>
+                    <version>2.5.2</version>
                     <configuration>
                         <providerImplementations>
                             <svn>javasvn</svn>

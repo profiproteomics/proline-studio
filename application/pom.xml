@@ -14,8 +14,9 @@
     <name>ProlineStudio-app</name>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
-        <netbeans.run.params>-J-Xmx1024m  -J-Dfr.proline.level=1000 </netbeans.run.params>  <!-- -J-Dnetbeans.preresolve.classes=true -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
+        <netbeans.run.params.ide /> 
+        <netbeans.run.params>${netbeans.run.params.ide} -J-Xmx1024m  -J-Dfr.proline.level=1000 </netbeans.run.params>  <!-- -J-Dnetbeans.preresolve.classes=true -->
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
         <sqlite4java.version>1.0.392</sqlite4java.version>
         <sqlite4java.library.path>${project.build.directory}/${brandingToken}/sqlite4java</sqlite4java.library.path>

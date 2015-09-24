@@ -411,9 +411,10 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                             String queryQCName = "SELECT ds.name "
                                     + "FROM fr.proline.core.orm.uds.Dataset ds, fr.proline.core.orm.uds.QuantitationChannel qc "
                                     + "WHERE ds.resultSummaryId = qc.identResultSummaryId AND "
-                                    + "qc.id=:qChId ";
+                                    + "qc.id=:qChId AND ds.project.id=:projectId ";
                             TypedQuery<String> queryQCNameQ = entityManagerUDS.createQuery(queryQCName, String.class);
                             queryQCNameQ.setParameter("qChId", qc.getId());
+                            queryQCNameQ.setParameter("projectId", projectId);
                             try {
                                 String name = queryQCNameQ.getSingleResult();
                                 resultFileName = name;
@@ -453,8 +454,12 @@ public class DatabaseLoadXicMasterQuantTask extends AbstractDatabaseSlicerTask {
                         } catch (NoResultException | NonUniqueResultException e) {
 
                         }
-                        ResultSet rsetFound = entityManagerMSI.find(ResultSet.class, rsId);
-                        dqc.setIdentRs(rsetFound);
+                        if (rsId != null){
+                            ResultSet rsetFound = entityManagerMSI.find(ResultSet.class, rsId);
+                            dqc.setIdentRs(rsetFound);
+                        }else{
+                            dqc.setIdentRs(null);
+                        }
                         // search if a dataset with rsmId, rsId exists
                         String queryIdentDsS = "SELECT ds.id FROM Dataset ds WHERE ds.resultSetId=:rsId AND ds.resultSummaryId=:rsmId ";
                         TypedQuery<Long> queryIdentDs = entityManagerUDS.createQuery(queryIdentDsS, Long.class);

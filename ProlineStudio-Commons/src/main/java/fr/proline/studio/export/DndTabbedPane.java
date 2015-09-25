@@ -163,6 +163,7 @@ class DnDTabbedPane extends JTabbedPane {
             }
         }
 
+        @Override
         public void drop(DropTargetDropEvent e) {
             if (isDropAcceptable(e)) {
                 convertTab(dragTabIndex, getTargetTabIndex(e.getLocation()));
@@ -238,17 +239,18 @@ class DnDTabbedPane extends JTabbedPane {
         Component cmp = getComponentAt(prev);
         CheckboxTabPanel tabComponent = ((CheckboxTabPanel)getTabComponentAt(prev));
         String str = tabComponent.getText();
+        String idSheet = tabComponent.getSheetId();
         boolean isSelected = tabComponent.isSelected();
         if (next == getTabCount()) {
             remove(prev);
             addTab(null, cmp);
-            CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(this, str);
+            CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(this, str, idSheet);
             closableTabPanel.setSelected(isSelected);
             setTabComponentAt(getTabCount() - 1, closableTabPanel);
             setSelectedIndex(getTabCount() - 1);
         } else if (prev > next) {
             remove(prev);
-            CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(this, str);
+            CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(this, str, idSheet);
             closableTabPanel.setSelected(isSelected);
             insertTab(null, null, cmp, null, next);
             setTabComponentAt(next, closableTabPanel);
@@ -256,7 +258,7 @@ class DnDTabbedPane extends JTabbedPane {
         } else {
             remove(prev);
             insertTab(null, null, cmp, null, next - 1);
-            CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(this, str);
+            CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(this, str, idSheet);
             closableTabPanel.setSelected(isSelected);
             setTabComponentAt(next - 1, closableTabPanel);
             setSelectedIndex(next - 1);
@@ -304,7 +306,7 @@ class DnDTabbedPane extends JTabbedPane {
             try {
                 image = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             glassPane.setImage(image);
         }
@@ -318,6 +320,7 @@ class DnDTabbedPane extends JTabbedPane {
         return new Rectangle(0, 0, getWidth(), lastTab.y + lastTab.height);
     }
 
+    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (dragTabIndex >= 0) {

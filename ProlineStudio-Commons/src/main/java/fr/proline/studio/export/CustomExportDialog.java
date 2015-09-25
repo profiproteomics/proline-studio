@@ -19,7 +19,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.*;
@@ -296,7 +295,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 JPanel tablePanel = new JPanel();
                 if (m_tabTitleIdHashMap.containsValue(param.sheets[i].id)) {
                     m_tabbedPane.addTab(null, tablePanel);
-                    CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(m_tabbedPane, param.sheets[i].title);
+                    CheckboxTabPanel closableTabPanel = new CheckboxTabPanel(m_tabbedPane, param.sheets[i].title, param.sheets[i].id);
                     closableTabPanel.setSelected(true);
                     m_tabbedPane.setTabComponentAt(m_tabbedPane.getTabCount()-1, closableTabPanel);
                     
@@ -304,7 +303,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                     m_presentationHashMap.put(param.sheets[i].id, param.sheets[i].presentation);
 					// put id in tooltip in order to find the tab title from the tooltip even if renamed.
                     // TODO: find a better way...
-                    m_tabbedPane.setToolTipTextAt(i, param.sheets[i].id /*"Right click to Enable/Disable"*/);
+                    //m_tabbedPane.setToolTipTextAt(i, param.sheets[i].id /*"Right click to Enable/Disable"*/);
                     addedTabs.add(param.sheets[i].id);
                     tablePanel.setLayout(new BorderLayout(0, 0));
 					// read fields to fill in jtable into this tabbed pane
@@ -411,13 +410,13 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 m_tabbedPane.addTab(null, tablePanel);
                 int tabIndex = m_tabbedPane.getTabCount()-1;
                 
-                CheckboxTabPanel closableTabPanel =  new CheckboxTabPanel(m_tabbedPane, defaultParam.sheets[i].title);
+                CheckboxTabPanel closableTabPanel =  new CheckboxTabPanel(m_tabbedPane, defaultParam.sheets[i].title, defaultParam.sheets[i].id);
                 m_tabbedPane.setTabComponentAt(tabIndex, closableTabPanel);
                 
                 m_presentationHashMap.put(defaultParam.sheets[i].id, defaultParam.sheets[i].presentation);
 				// put id in tooltip in order to find the tab title from the tooltip even if renamed.
                 // TODO: find a better way...
-                m_tabbedPane.setToolTipTextAt(tabIndex, defaultParam.sheets[i].id /*"Right click to Enable/Disable"*/);
+                //m_tabbedPane.setToolTipTextAt(tabIndex, defaultParam.sheets[i].id /*"Right click to Enable/Disable"*/);
 
                 boolean enabled;
                 if (param != null) {
@@ -787,7 +786,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 continue;
             }
             
-            m_tabTitleIdHashMap.put(comp.getText(), m_tabbedPane.getToolTipTextAt(i));
+            m_tabTitleIdHashMap.put(comp.getText(), ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getSheetId());
         }
 
     }
@@ -806,7 +805,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             return;
         }
         // 1st
-        ArrayList<String> idFullList = new ArrayList<String>();
+        ArrayList<String> idFullList = new ArrayList<>();
         for (int i = 0; i < m_exportDefaultConfig.sheets.length; i++) {
             idFullList.add(m_exportDefaultConfig.sheets[i].id);
         }
@@ -815,11 +814,14 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         //HashMap<String,String> tabIdTitleHashMap = new HashMap<String,String>(); // title, id
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) {
 
-            if (m_tabbedPane.getToolTipTextAt(i) == null) { // if tool tip has been erased
+            CheckboxTabPanel c = (CheckboxTabPanel) m_tabbedPane.getTabComponentAt(i);
+            String sheetId = (c==null) ? null : c.getSheetId();
+            
+            if (sheetId == null) { // if tool tip has been erased
                 removedAtIndex = i;
 
             } else {
-                idFullList.remove(m_tabbedPane.getToolTipTextAt(i));
+                idFullList.remove(sheetId);
             }
         }
         if (removedAtIndex > -1) {
@@ -827,7 +829,8 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
                 logger.warn("Problem: more than one missing ID");
             } else if (idFullList.size() == 1) {
                 logger.warn("Fixed the missing id: " + idFullList.get(0));
-                m_tabbedPane.setToolTipTextAt(removedAtIndex, idFullList.get(0));
+                CheckboxTabPanel cRemoved = (CheckboxTabPanel) m_tabbedPane.getTabComponentAt(removedAtIndex);
+                if (cRemoved!=null) cRemoved.setSheetId(cRemoved.getSheetId());
             }
         }
 
@@ -880,7 +883,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 			
             recalculateTabsIds();
             recalculateTabTitleIdHashMap();
-            String selectedTabId = m_tabbedPane.getToolTipTextAt(m_tabbedPane.getSelectedIndex());
+            String selectedTabId = ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(m_tabbedPane.getSelectedIndex())).getSheetId();
             if (selectedTabId == null) {
 				logger.warn("ERROR: did not find tab by its id :" +selectedTabId);
             } else {
@@ -965,7 +968,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         int selectedTab = m_tabbedPane.getSelectedIndex();
         recalculateTabsIds();
         recalculateTabTitleIdHashMap();
-        String selectedTabId = m_tabbedPane.getToolTipTextAt(selectedTab);
+        String selectedTabId =  ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(selectedTab)).getSheetId();
 
         if (comboBox_Orientation.getSelectedIndex() == 0) {
 
@@ -1077,7 +1080,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
 
 		ec.sheets[usedTabNumber].id = tabTitleToTabId(((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getText());
                 ec.sheets[usedTabNumber].title = ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getText();
-                ec.sheets[usedTabNumber].presentation = m_presentationHashMap.get(m_tabbedPane.getToolTipTextAt(i)); //m_exportConfig.sheets[i].presentation;
+                ec.sheets[usedTabNumber].presentation = m_presentationHashMap.get(((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getSheetId()); //m_exportConfig.sheets[i].presentation;
 
                 ec.sheets[usedTabNumber].fields = new ExportExcelSheetField[nbSelectedRows];
 

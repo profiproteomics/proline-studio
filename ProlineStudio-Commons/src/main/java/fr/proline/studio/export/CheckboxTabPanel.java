@@ -89,4 +89,9 @@ public class CheckboxTabPanel extends JPanel {
         public String getText() {
             return m_label.getText();
         }
+        
+        public void setText(String text) {
+            m_label.setText(text);
+        }
+        
     }

@@ -26,7 +26,7 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
     private int editingIdx = -1;
     private int len = -1;
     private Dimension dim;
-    private Component tabComponent;
+    private CheckboxTabPanel tabComponent;
     private HashMap<String,String> m_tabTitleIdHashMap;
     CustomExportDialog m_customEd;
 	private String m_formerTitle;
@@ -76,11 +76,11 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
     }
     private void startEditing() {
         editingIdx = tabbedPane.getSelectedIndex();
-        tabComponent = tabbedPane.getTabComponentAt(editingIdx);
+        tabComponent = (CheckboxTabPanel) tabbedPane.getTabComponentAt(editingIdx);
         tabbedPane.setTabComponentAt(editingIdx, editor);
         editor.setVisible(true);
-        m_formerTitle = tabbedPane.getTitleAt(editingIdx);
-        editor.setText(tabbedPane.getTitleAt(editingIdx));
+        m_formerTitle = tabComponent.getText();
+        editor.setText(m_formerTitle);
         editor.selectAll();
         editor.requestFocusInWindow();
         len = editor.getText().length();
@@ -104,14 +104,16 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
         boolean canConfirmTitleChange = true;
         if (editingIdx >= 0 && !title.isEmpty()) {
         	for(int i=0;i<tabbedPane.getTabCount();i++) {
-        		if(editingIdx != i && tabbedPane.getTitleAt(i).equals(title)) {
+        		if(editingIdx != i && ((CheckboxTabPanel)tabbedPane.getTabComponentAt(i)).getText().equals(title)) {
         			cancelEditing();
         			canConfirmTitleChange = false;
         			// can't use twice the same title
         		}
         	}
         	if(canConfirmTitleChange) {
-	            tabbedPane.setTitleAt(editingIdx, title);
+	            ((JTextField)tabbedPane.getTabComponentAt(editingIdx)).setText(title);
+                    tabComponent.setText(title);
+                    tabbedPane.setTabComponentAt(editingIdx, tabComponent);
 	            String sheetId = m_tabTitleIdHashMap.get(m_formerTitle);
 	            m_tabTitleIdHashMap.remove(m_formerTitle);
 	            m_tabTitleIdHashMap.put(title, sheetId);
@@ -125,7 +127,7 @@ class TabTitleEditListener extends MouseAdapter implements MouseListener {
         		// do not change the title
         	}
         }
-        cancelEditing();
+         cancelEditing();
     }
 }
     

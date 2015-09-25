@@ -811,7 +811,6 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         }
 
         int removedAtIndex = -1;
-        //HashMap<String,String> tabIdTitleHashMap = new HashMap<String,String>(); // title, id
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) {
 
             CheckboxTabPanel c = (CheckboxTabPanel) m_tabbedPane.getTabComponentAt(i);
@@ -828,7 +827,7 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
             if (idFullList.size() > 1) {
                 logger.warn("Problem: more than one missing ID");
             } else if (idFullList.size() == 1) {
-                logger.warn("Fixed the missing id: " + idFullList.get(0));
+                //logger.warn("Fixed the missing id: " + idFullList.get(0));
                 CheckboxTabPanel cRemoved = (CheckboxTabPanel) m_tabbedPane.getTabComponentAt(removedAtIndex);
                 if (cRemoved!=null) cRemoved.setSheetId(cRemoved.getSheetId());
             }

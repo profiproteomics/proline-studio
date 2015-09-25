@@ -210,25 +210,20 @@ class DnDTabbedPane extends JTabbedPane {
     }
 
     private int getTargetTabIndex(Point glassPt) {
-        Point tabPt = SwingUtilities.convertPoint(glassPane, glassPt, DnDTabbedPane.this);
-        boolean isTB = getTabPlacement() == JTabbedPane.TOP || getTabPlacement() == JTabbedPane.BOTTOM;
+        Point tabPt = SwingUtilities.convertPoint(glassPane, glassPt, this);
         for (int i = 0; i < getTabCount(); i++) {
             Rectangle r = getBoundsAt(i);
-            if (isTB) {
-                r.setRect(r.x - r.width / 2, r.y, r.width, r.height);
-            } else {
-                r.setRect(r.x, r.y - r.height / 2, r.width, r.height);
-            }
             if (r.contains(tabPt)) {
-                return i;
+                r.translate(r.width/2, 0);
+                if (r.contains(tabPt)) {
+                    return i+1;
+                } else {
+                    return i;
+                }
             }
         }
         Rectangle r = getBoundsAt(getTabCount() - 1);
-        if (isTB) {
-            r.setRect(r.x + r.width / 2, r.y, r.width, r.height);
-        } else {
-            r.setRect(r.x, r.y + r.height / 2, r.width, r.height);
-        }
+        r.translate(r.width, 0);
         return r.contains(tabPt) ? getTabCount() : -1;
     }
 

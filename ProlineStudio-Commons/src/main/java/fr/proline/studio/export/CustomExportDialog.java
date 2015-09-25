@@ -779,14 +779,15 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         m_tabTitleIdHashMap.clear();
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) {
 
-            
-            CheckboxTabPanel comp = ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i));
-                    
-            if (comp == null) {
-                continue;
+            Component comp = m_tabbedPane.getTabComponentAt(i);
+            if ((comp == null) || !(comp instanceof CheckboxTabPanel)) {
+                continue; // editing mode
             }
             
-            m_tabTitleIdHashMap.put(comp.getText(), ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getSheetId());
+            CheckboxTabPanel c = ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i));
+
+            
+            m_tabTitleIdHashMap.put(c.getText(), ((CheckboxTabPanel)m_tabbedPane.getTabComponentAt(i)).getSheetId());
         }
 
     }
@@ -813,7 +814,12 @@ public class CustomExportDialog extends DefaultDialog implements CollapseListene
         int removedAtIndex = -1;
         for (int i = 0; i < m_tabbedPane.getTabCount(); i++) {
 
-            CheckboxTabPanel c = (CheckboxTabPanel) m_tabbedPane.getTabComponentAt(i);
+            Component comp = m_tabbedPane.getTabComponentAt(i);
+            if (!(comp instanceof CheckboxTabPanel)) {
+                return; // editing mode
+            }
+            
+            CheckboxTabPanel c = (CheckboxTabPanel) comp;
             String sheetId = (c==null) ? null : c.getSheetId();
             
             if (sheetId == null) { // if tool tip has been erased

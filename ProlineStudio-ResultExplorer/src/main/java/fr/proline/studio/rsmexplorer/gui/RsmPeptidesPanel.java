@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 import fr.proline.core.orm.msi.PeptideInstance;
 import fr.proline.core.orm.msi.ResultSummary;
+import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.comparedata.GlobalTabelModelProviderInterface;
@@ -385,7 +386,8 @@ public class RsmPeptidesPanel extends HourglassPanel implements DataBoxPanelInte
 
 
 
-            m_dataBox.propagateDataChanged(PeptideInstance.class); //JPM.TODO
+            m_dataBox.propagateDataChanged(PeptideInstance.class);
+            m_dataBox.propagateDataChanged(DPeptideMatch.class);
 
         }
 

@@ -108,7 +108,6 @@ public class ConnectedComponents {
 
             int tempCheck1 = componentSet.get(componentIndex).getProteinSize();
             int tempCheck2 = componentSet.get(componentIndex).getPeptideSize();
-            System.out.println("ComponentIndex:" + componentIndex + "   Protein array size: " + componentSet.get(componentIndex).getProteinSize() + " Peptide array size: " + componentSet.get(componentIndex).getPeptideSize());
             check1 = check1 + componentSet.get(componentIndex).getProteinSize();
             check2 = check2 + componentSet.get(componentIndex).getPeptideSize();
 

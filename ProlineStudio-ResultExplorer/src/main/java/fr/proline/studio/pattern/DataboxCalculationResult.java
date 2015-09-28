@@ -31,13 +31,8 @@ public class DataboxCalculationResult extends AbstractDataBox {
         
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(CompareDataInterface.class, true);
+        outParameter.addParameter(CompareDataInterface.class, false);
         registerOutParameter(outParameter);
-
-        outParameter = new GroupParameter();
-        outParameter.addParameter(CrossSelectionInterface.class, true);
-        registerOutParameter(outParameter);
-        
 
         
         

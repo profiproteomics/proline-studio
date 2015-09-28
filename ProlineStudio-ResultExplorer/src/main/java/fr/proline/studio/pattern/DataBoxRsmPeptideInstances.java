@@ -49,14 +49,9 @@ public class DataBoxRsmPeptideInstances extends AbstractDataBox {
         registerOutParameter(outParameter);
        
         outParameter = new GroupParameter();
-        outParameter.addParameter(CompareDataInterface.class, true);
+        outParameter.addParameter(CompareDataInterface.class, false);
         registerOutParameter(outParameter);
-        
-        outParameter = new GroupParameter();
-        outParameter.addParameter(CrossSelectionInterface.class, true);
-        registerOutParameter(outParameter);
-        
-        
+
         
     }
     

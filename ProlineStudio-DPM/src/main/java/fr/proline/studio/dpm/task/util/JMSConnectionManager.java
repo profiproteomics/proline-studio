@@ -25,7 +25,7 @@ public class JMSConnectionManager {
     protected static final Logger m_loggerProline = LoggerFactory.getLogger("ProlineStudio.DPM.Task");
 
     public static final String SERVICE_REQUEST_QUEUE_NAME = "ProlineServiceRequestQueue";
-
+  
     public static final String SERVICE_MONITORING_NOTIFICATION_TOPIC_NAME = "ProlineServiceMonitoringNotificationTopic";
 
     public static final String PROLINE_NODE_ID_KEY = "Proline_NodeId";
@@ -37,6 +37,8 @@ public class JMSConnectionManager {
     public static final String HORNET_Q_SAVE_STREAM_KEY = "JMS_HQ_SaveStream";
     
     public static final String PROLINE_PROCESS_METHOD_NAME = "process";
+        
+    public static final String PROLINE_USER_AUTHENTICATE_METHOD_NAME = "authenticate";
     
     public static final String PROLINE_GET_RSC_METHOD_NAME = "get_resource_as_stream";
     
@@ -81,7 +83,7 @@ public class JMSConnectionManager {
     }
     
     /**
-     * Set the JMS Server Host.
+     * Set the JMS Server Port.
      * Connection and session will be reseted
      * @param jmsPort 
      */

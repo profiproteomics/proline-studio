@@ -5,14 +5,9 @@ import fr.proline.studio.dam.taskinfo.TaskInfoManager;
 import fr.proline.studio.dpm.ServerConnectionManager;
 import fr.proline.studio.gui.InfoDialog;
 import fr.proline.studio.gui.OptionDialog;
-import fr.proline.studio.rsmexplorer.DataBoxViewerTopComponent;
-import fr.proline.studio.rsmexplorer.PropertiesTopComponent;
-import fr.proline.studio.rsmexplorer.TaskLogTopComponent;
 import fr.proline.studio.rsmexplorer.gui.ProjectExplorerPanel;
 import fr.proline.studio.rsmexplorer.gui.dialog.ServerConnectionDialog;
 import java.awt.event.ActionEvent;
-import java.util.Iterator;
-import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.SwingUtilities;
@@ -23,7 +18,6 @@ import org.openide.awt.ActionRegistration;
 import org.openide.util.ContextAwareAction;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
-import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
 /**

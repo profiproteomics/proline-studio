@@ -17,26 +17,41 @@ public abstract class ConnectionDialog extends DefaultDialog {
     protected JTextField m_userTextField;
     protected JPasswordField m_passwordField;
     protected JCheckBox m_rememberPasswordCheckBox;
-  
+    protected JCheckBox m_isJMSServerCheckBox;
+    protected boolean m_showJMSOption;
 
     protected ConnectionDialog(Window parent, String title, String serverParameterLabel, String serverHostLabel) {
         super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+        m_showJMSOption = false;
 
         setTitle(title);
 
-        JPanel internalPanel = createInternalPanel(serverParameterLabel, serverHostLabel);
+        JPanel internalPanel = createInternalPanel(serverParameterLabel, serverHostLabel, null);
         
         setInternalComponent(internalPanel);
 
     }
     
-    private JPanel createInternalPanel(String serverParameterLabel, String serverHostLabel) {
+    protected ConnectionDialog(Window parent, String title, String serverParameterLabel, String serverHostLabel, Boolean showJMSOption) {
+        super(parent, Dialog.ModalityType.APPLICATION_MODAL);
+        m_showJMSOption = showJMSOption;
+
+        setTitle(title);
+
+        String tooltip = "if connecting to JMS Server, specify the server name or IP address. Otherwise enter the server host URL";
+        JPanel internalPanel = createInternalPanel(serverParameterLabel, serverHostLabel, tooltip);
+        
+        setInternalComponent(internalPanel);
+
+    }
+    
+    private JPanel createInternalPanel(String serverParameterLabel, String serverHostLabel, String serverHostToolTip) {
 
         JPanel internalPanel = new JPanel();
         internalPanel.setLayout(new java.awt.GridBagLayout());
 
 
-        JPanel URLPanel = createHostPanel(serverParameterLabel, serverHostLabel);
+        JPanel URLPanel = createHostPanel(serverParameterLabel, serverHostLabel,serverHostToolTip);
         JPanel loginPanel = createLoginPanel();
 
         GridBagConstraints c = new GridBagConstraints();
@@ -57,12 +72,14 @@ public abstract class ConnectionDialog extends DefaultDialog {
     }
     
      
-    private JPanel createHostPanel(String serverParameterLabel, String serverHostLabel) {
+    private JPanel createHostPanel(String serverParameterLabel, String serverHostLabel,String serverHostToolTip) {
         
         JPanel URLPanel = new JPanel(new GridBagLayout());
         URLPanel.setBorder(BorderFactory.createTitledBorder(serverParameterLabel));
         
         JLabel serverLabel = new JLabel(serverHostLabel);
+        if(serverHostToolTip !=null)
+            serverLabel.setToolTipText(serverHostToolTip);
         m_serverURLTextField = new JTextField(30);
 
         GridBagConstraints c = new GridBagConstraints();
@@ -80,8 +97,13 @@ public abstract class ConnectionDialog extends DefaultDialog {
         c.weightx = 1;
         URLPanel.add(m_serverURLTextField, c);
         
-
-
+        if(m_showJMSOption){
+            c.gridx = 0;
+            c.gridy++;
+            c.gridwidth = 2;
+            m_isJMSServerCheckBox = new JCheckBox("JMS Server: ");
+            URLPanel.add(m_isJMSServerCheckBox, c);
+        }
         
         return URLPanel;
     }
@@ -142,8 +164,6 @@ public abstract class ConnectionDialog extends DefaultDialog {
 
     
     protected boolean checkParameters() {
-
-
         
         String serverURL = m_serverURLTextField.getText();
         if (serverURL.isEmpty()) {
@@ -151,7 +171,7 @@ public abstract class ConnectionDialog extends DefaultDialog {
             highlight(m_serverURLTextField);
             return false;
         }
-        if (serverURL.length() <= "http://".length()) {
+        if (!m_isJMSServerCheckBox.isSelected() && serverURL.length() <= "http://".length()) {
             setStatus(true, "The Server URL is incorrect");
             highlight(m_serverURLTextField);
             return false;

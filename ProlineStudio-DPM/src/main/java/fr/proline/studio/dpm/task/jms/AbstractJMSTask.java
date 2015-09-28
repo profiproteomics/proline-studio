@@ -95,7 +95,6 @@ public abstract class AbstractJMSTask  extends AbstractLongTask implements Messa
             m_currentState = JMSState.STATE_FAILED;
             m_taskError = new TaskError(ex);
             callback(false);
-
         }
     }
     

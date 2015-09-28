@@ -5,76 +5,67 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Message;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
-import fr.proline.core.orm.uds.dto.DDataset;
+import fr.profi.util.security.EncryptionManager;
+import fr.profi.util.security.SecurityUtils;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
-import fr.proline.studio.dpm.data.ChangeTypicalRule;
 import fr.proline.studio.dpm.jms.AccessJMSManagerThread;
 import static fr.proline.studio.dpm.task.jms.AbstractJMSTask.m_loggerProline;
 import fr.proline.studio.dpm.task.util.JMSConnectionManager;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 
 /**
- * Task to select typical protein in protein setq using regexp based rules
+ * Task for User authentication
+ *
  * @author VD225637
  */
-public class ChangeTypicalProteinTask extends AbstractJMSTask {
+public class AuthenticateUserTask extends AbstractJMSTask {
 
-    private DDataset m_dataset;
-    private List<ChangeTypicalRule> m_rules;
-    
-    public ChangeTypicalProteinTask(AbstractJMSCallback callback, DDataset dataset, List<ChangeTypicalRule> rules) {
-        super(callback, new TaskInfo("Change Typical Protein on Identification Summary " + dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
-        m_dataset = dataset;
-        m_rules=rules;
+    private String m_userName;
+    private String m_password;
+    private String[] m_databasePassword;
+
+    public AuthenticateUserTask(AbstractJMSCallback callback, String m_userName, String m_password, String[] m_databasePassword) {
+        super(callback, new TaskInfo("Check User " + m_userName, false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
+        this.m_userName = m_userName;
+        this.m_password = m_password;
+        this.m_databasePassword = m_databasePassword;
     }
-    
-    
+
     @Override
     public void taskRun() throws JMSException {
-        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_PROCESS_METHOD_NAME, Integer.valueOf(m_id));
+
+        final JSONRPC2Request jsonRequest = new JSONRPC2Request(JMSConnectionManager.PROLINE_USER_AUTHENTICATE_METHOD_NAME, Integer.valueOf(m_id));
         jsonRequest.setNamedParams(createParams());
-           
+
         final TextMessage message = AccessJMSManagerThread.getAccessJMSManagerThread().getSession().createTextMessage(jsonRequest.toJSONString());
 
         /* ReplyTo = Temporary Destination Queue for Server -> Client response */
         message.setJMSReplyTo(m_replyQueue);
-        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/dps/msi/ChangeTypicalProteinMatch");
-	
+        message.setStringProperty(JMSConnectionManager.PROLINE_SERVICE_NAME_KEY, "proline/admin/UserAccount");        
         setTaskInfoRequest(message.getText());
-        
+
         //  Send the Message
         m_producer.send(message);
         m_loggerProline.info("Message [{}] sent", message.getJMSMessageID());
-                    
+
     }
-    
+
     private HashMap<String, Object> createParams() {
         HashMap<String, Object> params = new HashMap<>();
-        params.put("project_id", m_dataset.getProject().getId());
-        params.put("result_summary_id", m_dataset.getResultSummaryId());
-            
-        // Peptide Pre-Filters
-        ArrayList allRules = new ArrayList();                
-        for(ChangeTypicalRule nextRule : m_rules){
-            Map<String, Object> ruleParams = new HashMap<>();
-            ruleParams.put("rule_regex", nextRule.getRulePattern());
-            ruleParams.put("rule_on_ac", nextRule.getApplyOnAccession());
-            allRules.add(ruleParams);
-        }
-        params.put("change_typical_rules", allRules);
+        params.put("login", m_userName);
+        params.put("password_hash", SecurityUtils.sha256Hex(m_password));
+        params.put("return_db_password", Boolean.TRUE);
+        EncryptionManager encryptionMgr = EncryptionManager.getEncryptionManager();
+        params.put("public_key", encryptionMgr.getPublicKeyAsString());
         
-        return params;            
+        return params;
     }
 
     @Override
-    public void taskDone(final Message jmsMessage) throws Exception {
-        
+    public void taskDone(Message jmsMessage) throws Exception {
         final TextMessage textMessage = (TextMessage) jmsMessage;
         final String jsonString = textMessage.getText();
 
@@ -97,15 +88,17 @@ public class ChangeTypicalProteinTask extends AbstractJMSTask {
 	    }
              
             final Object result = jsonResponse.getResult();
-            if (result == null || ! Boolean.class.isInstance(result) ) {
-		m_loggerProline.debug("Invalid result");
-                throw new Exception("Invalid result "+result);
+            if (result == null  ) {
+		m_loggerProline.debug("Internal Error : No DB password received");
+                throw new Exception("Internal Error : No DB password received ");
 	    } else {
-		m_loggerProline.debug("Result :\n" + result);                
+                String dbPwd = (String) result.toString();
+                m_databasePassword[0] = EncryptionManager.getEncryptionManager().decrypt(dbPwd);
+		m_loggerProline.debug("Result :\n" +  m_databasePassword[0]);                
 	    }
-        }
-          m_currentState = JMSState.STATE_DONE;
-        
+        }        
+        m_currentState = JMSState.STATE_DONE;
+
     }
-    
+
 }

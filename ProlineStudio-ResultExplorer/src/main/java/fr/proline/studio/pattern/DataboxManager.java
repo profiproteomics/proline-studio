@@ -19,7 +19,7 @@ public class DataboxManager {
     
     
     private final AbstractDataBox[] m_dataBoxStartingArray = { new DataBoxRsetAll(), new DataBoxRsetPSM(), new DataBoxRsetAllProteinMatch(),
-                                                 new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(),
+                                                 new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(), new DataBoxAdjacencyMatrixChoice(),
                                                  new DataBoxRsmAllProteinSet(), new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxXicProteinSet()  };
     
     private final AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(),
@@ -31,7 +31,8 @@ public class DataboxManager {
                                                  new DataBoxRsetPeptideSpectrumError(), new DataboxRsmPSMOfProteinSet(), new DataboxRsmPSMOfPeptide(), 
                                                  new DataboxGraphics(), new DataboxPSMOfMasterQuantPeptide() , 
                                                  new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxChildFeature(), new DataboxMultiGraphics(false, false), 
-                                                new DataboxMapAlignment()};
+                                                 new DataboxMapAlignment(),
+                                                 new DataBoxAdjacencyMatrix() };
     
     private DataboxManager() {
     }

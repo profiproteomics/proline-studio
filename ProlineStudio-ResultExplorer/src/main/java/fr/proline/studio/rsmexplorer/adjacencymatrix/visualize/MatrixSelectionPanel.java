@@ -358,20 +358,17 @@ public class MatrixSelectionPanel extends HourglassPanel implements DataBoxPanel
 
     @Override
     public ActionListener getRemoveAction(SplittedPanelContainer splittedPanel) {
-        //JPM.TODO
-        return null;
+        return m_dataBox.getRemoveAction(splittedPanel);
     }
 
     @Override
     public ActionListener getAddAction(SplittedPanelContainer splittedPanel) {
-       //JPM.TODO
-        return null; 
+       return m_dataBox.getAddAction(splittedPanel);
     }
 
     @Override
     public ActionListener getSaveAction(SplittedPanelContainer splittedPanel) {
-        //JPM.TODO
-        return null;
+        return m_dataBox.getSaveAction(splittedPanel);
     }
 
     

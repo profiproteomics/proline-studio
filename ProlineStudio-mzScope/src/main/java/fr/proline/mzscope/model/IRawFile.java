@@ -19,15 +19,15 @@ public interface IRawFile {
 
    public List<Feature> extractFeatures(FeaturesExtractionRequest params);
    
-   public Scan getScan(int scanIndex);
+   public Spectrum getSpectrum(int spectrumIndex);
 
-   public int getScanCount();
+   public int getSpectrumCount();
    
-   public int getScanId(double retentionTime);
+   public int getSpectrumId(double retentionTime);
    
-   public int getNextScanId(int scanIndex, int msLevel);
+   public int getNextSpectrumId(int spectrumIndex, int msLevel);
    
-   public int getPreviousScanId(int scanIndex, int msLevel);
+   public int getPreviousSpectrumId(int spectrumIndex, int msLevel);
    
    /**
     * return the list of MS/MS events times (sec) for the specified mass range

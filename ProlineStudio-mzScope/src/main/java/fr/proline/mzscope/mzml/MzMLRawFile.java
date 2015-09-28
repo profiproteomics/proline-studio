@@ -5,6 +5,7 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
+import fr.proline.mzscope.model.Spectrum;
 import java.io.File;
 import java.util.List;
 import org.slf4j.Logger;
@@ -57,11 +58,13 @@ public class MzMLRawFile implements IRawFile {
       return chromatogram;      
    }
   
-   public fr.proline.mzscope.model.Scan getScan(int scanIndex) {
-      return toModelScan(scans.get(scanIndex));
+   @Override
+   public Spectrum getSpectrum(int spectrumIndex) {
+      return toModelSpectrum(scans.get(spectrumIndex));
    }
 
-   public int getScanId(double retentionTime) {
+   @Override
+   public int getSpectrumId(double retentionTime) {
       for (Scan s : scans) {
          if (Math.abs(s.getRetentionTime() - retentionTime) < 0.001) 
             return s.getIndex();
@@ -69,21 +72,23 @@ public class MzMLRawFile implements IRawFile {
       return 0;
    }
 
-   public int getNextScanId(int scanIndex, int msLevel) {
-      return (int)Math.min(scanIndex+1, scans.size());
+   @Override
+   public int getNextSpectrumId(int spectrumIndex, int msLevel) {
+      return (int)Math.min(spectrumIndex+1, scans.size());
    }
 
-   public int getPreviousScanId(int scanIndex, int msLevel) {
-      return (int)Math.max(scanIndex-1, 0);
+   @Override
+   public int getPreviousSpectrumId(int spectrumIndex, int msLevel) {
+      return (int)Math.max(spectrumIndex-1, 0);
    }
 
-   private fr.proline.mzscope.model.Scan toModelScan(Scan mzmlScan) {
+   private fr.proline.mzscope.model.Spectrum toModelSpectrum(Scan mzmlScan) {
       
       double[] masses = new double[mzmlScan.getMasses().length];
       for (int k = 0; k < masses.length; k++) {
          masses[k] = (double)mzmlScan.getMasses()[k];
       }
-      return new fr.proline.mzscope.model.Scan(mzmlScan.getIndex(), mzmlScan.getRetentionTime(), masses, mzmlScan.getIntensities(), 1);
+      return new fr.proline.mzscope.model.Spectrum(mzmlScan.getIndex(), mzmlScan.getRetentionTime(), masses, mzmlScan.getIntensities(), 1);
    }
 
    @Override
@@ -97,7 +102,7 @@ public class MzMLRawFile implements IRawFile {
     }
 
    @Override
-   public int getScanCount() {
+   public int getSpectrumCount() {
       return scans.size();
    }
 

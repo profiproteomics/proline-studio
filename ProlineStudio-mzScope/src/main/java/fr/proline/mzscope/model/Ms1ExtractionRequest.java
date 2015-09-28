@@ -5,7 +5,7 @@
  */
 package fr.proline.mzscope.model;
 
-import fr.profi.mzdb.MzDbReader;
+import fr.profi.mzdb.XicMethod;
 
 /**
  *
@@ -17,7 +17,7 @@ public class Ms1ExtractionRequest extends ExtractionRequest {
 
       float mzTolPPM = 10.0f;
       double mz = -1.0;
-      MzDbReader.XicMethod method = MzDbReader.XicMethod.MAX;
+      XicMethod method = XicMethod.MAX;
 
       public T setMzTolPPM(float mzTolPPM) {
          this.mzTolPPM = mzTolPPM;
@@ -56,7 +56,7 @@ public class Ms1ExtractionRequest extends ExtractionRequest {
       }
 
       
-      public T setMethod(MzDbReader.XicMethod method) {
+      public T setMethod(XicMethod method) {
          this.method = method;
          return self();
       }
@@ -74,7 +74,7 @@ public class Ms1ExtractionRequest extends ExtractionRequest {
    
    private final float mzTolPPM;
    private final double mz;
-   private final MzDbReader.XicMethod method;
+   private final XicMethod method;
 
    protected Ms1ExtractionRequest(Builder builder) {
       super(builder);
@@ -91,7 +91,7 @@ public class Ms1ExtractionRequest extends ExtractionRequest {
       return mz;
    }
 
-   public MzDbReader.XicMethod getMethod() {
+   public XicMethod getMethod() {
       return method;
    }
    

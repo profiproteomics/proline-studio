@@ -5,7 +5,7 @@ import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
-import fr.proline.mzscope.model.Scan;
+import fr.proline.mzscope.model.Spectrum;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -60,76 +60,76 @@ public class ThreadedMzdbRawFile implements IRawFile {
    }
    
    @Override
-   public int getPreviousScanId(final int scanIndex, final int msLevel) {
+   public int getPreviousSpectrumId(final int spectrumIndex, final int msLevel) {
       try {
          return service.submit(new Callable<Integer>() {
             @Override
             public Integer call() {
-               return mzdbRawFile.getPreviousScanId(scanIndex, msLevel);
+               return mzdbRawFile.getPreviousSpectrumId(spectrumIndex, msLevel);
             }
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {
-         logger.error("getPreviousScanId call fail", ex);
+         logger.error("getPreviousSpectrumId call fail", ex);
       } 
       return -1;
    }
 
    @Override
-   public int getScanCount() {
+   public int getSpectrumCount() {
       try {
          return service.submit(new Callable<Integer>() {
             @Override
             public Integer call() {
-               return mzdbRawFile.getScanCount();
+               return mzdbRawFile.getSpectrumCount();
             }
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {
-         logger.error("getPreviousScanId call fail", ex);
+         logger.error("getPreviousSpectrumId call fail", ex);
       } 
       return -1;
    }
    
    @Override
-   public int getNextScanId(final int scanIndex, final int msLevel) {
+   public int getNextSpectrumId(final int spectrumIndex, final int msLevel) {
       try {
          return service.submit(new Callable<Integer>() {
             @Override
             public Integer call() {
-               return mzdbRawFile.getNextScanId(scanIndex, msLevel);
+               return mzdbRawFile.getNextSpectrumId(spectrumIndex, msLevel);
             }
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {
-         logger.error("getNextScanId call fail", ex);
+         logger.error("getNextSpectrumId call fail", ex);
       } 
       return -1;
    }
 
    @Override
-   public int getScanId(final double retentionTime) {
+   public int getSpectrumId(final double retentionTime) {
       try {
          return service.submit(new Callable<Integer>() {
             @Override
             public Integer call() {
-               return mzdbRawFile.getScanId(retentionTime);
+               return mzdbRawFile.getSpectrumId(retentionTime);
             }
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {
-          logger.error("getScanId call fail", ex);
+          logger.error("getSpectrumId call fail", ex);
       } 
       return -1;
    }
 
    @Override
-   public Scan getScan(final int scanIndex) {
+   public Spectrum getSpectrum(final int spectrumIndex) {
       try {
-         return service.submit(new Callable<Scan>() {
+         return service.submit(new Callable<Spectrum>() {
             @Override
-            public Scan call() {
-               return mzdbRawFile.getScan(scanIndex);
+            public Spectrum call() {
+               return mzdbRawFile.getSpectrum(spectrumIndex);
             }
          }).get();
       } catch (InterruptedException | ExecutionException ex ) {
-         logger.error("getScan call fail", ex);
+         logger.error("getSpectrum call fail", ex);
       } 
       return null;
    }

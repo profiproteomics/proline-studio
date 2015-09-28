@@ -8,13 +8,13 @@ import com.google.common.collect.Iterators;
 
 import fr.profi.mzdb.MzDbFeatureExtractor;
 import fr.profi.mzdb.MzDbReader;
-import fr.profi.mzdb.MzDbReader.XicMethod;
+import fr.profi.mzdb.XicMethod;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
-import fr.profi.mzdb.io.reader.RunSliceDataProvider;
+import fr.profi.mzdb.io.reader.provider.RunSliceDataProvider;
 import fr.profi.mzdb.model.Feature;
 import fr.profi.mzdb.model.Peak;
 import fr.profi.mzdb.model.PutativeFeature;
-import fr.profi.mzdb.model.ScanHeader;
+import fr.profi.mzdb.model.SpectrumHeader;
 import scala.Option;
 
 public class Main {
@@ -34,9 +34,9 @@ public class Main {
          FeatureExtractorConfig extractorConfig = new FeatureExtractorConfig(tolPPM, 5, 1, 3, 1200.0f, 0.05f, Option.empty() , 90, Option.empty());
          MzDbFeatureExtractor extractor = new MzDbFeatureExtractor(reader, 5, 5, extractorConfig);
          System.out.println("retrieve scan headers  ...");
-         ScanHeader[] scanHeaders = reader.getScanHeaders();
-         Iterator<ScanHeader> ms2ScanHeaders = Iterators.filter(Iterators.forArray(scanHeaders), new Predicate<ScanHeader>() {
-            public boolean apply(ScanHeader sh) {
+         SpectrumHeader[] spectrumHeaders = reader.getSpectrumHeaders();
+         Iterator<SpectrumHeader> ms2SpectrumHeaders = Iterators.filter(Iterators.forArray(spectrumHeaders), new Predicate<SpectrumHeader>() {
+            public boolean apply(SpectrumHeader sh) {
                return sh.getMsLevel() == 2;
             }
          });
@@ -44,8 +44,8 @@ public class Main {
          List<PutativeFeature> pfs = new ArrayList<PutativeFeature>();
 
          System.out.println("building putative features list from MS2 scan events...");
-         while (ms2ScanHeaders.hasNext()) {
-            ScanHeader scanH = ms2ScanHeaders.next();
+         while (ms2SpectrumHeaders.hasNext()) {
+            SpectrumHeader scanH = ms2SpectrumHeaders.next();
             if ((scanH.getElutionTime() > 30 * 60) && (scanH.getElutionTime() > 33 * 60)) {
                pfs.add(new PutativeFeature(
                        PutativeFeature.generateNewId(),
@@ -79,7 +79,7 @@ public class Main {
 
 //         System.out.println("headers length: " + f.getScanHeaders().length);
          System.out.println("Extract Chromatogram from selected feature ...");
-         Peak[] chromato = reader.getXIC(f.getMz() - f.getMz() * tolPPM / 1e6, f.getMz() + f.getMz() * tolPPM / 1e6, 1, XicMethod.SUM);
+         Peak[] chromato = reader.getMsXicInMzRange(f.getMz() - f.getMz() * tolPPM / 1e6, f.getMz() + f.getMz() * tolPPM / 1e6,  XicMethod.SUM);
          System.out.println("Chromato length: " + chromato.length);
 
 

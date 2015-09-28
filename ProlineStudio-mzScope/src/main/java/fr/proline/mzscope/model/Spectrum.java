@@ -1,9 +1,8 @@
 package fr.proline.mzscope.model;
 
-import fr.profi.mzdb.model.ScanData;
-import java.util.Arrays;
+import fr.profi.mzdb.model.SpectrumData;
 
-public class Scan {
+public class Spectrum {
 
    public static enum ScanType {
 
@@ -16,7 +15,7 @@ public class Scan {
    private float retentionTime;
    private double[] masses;
    private float[] intensities;
-   private ScanData scanData;
+   private SpectrumData spectrumData;
 //   private double[] peaksMz = null;
 //   private float[] peaksIntensities = null;
 
@@ -24,11 +23,11 @@ public class Scan {
    private Double precursorMz;
    private Integer precursorCharge;
 
-   public Scan(Integer index, float rt, double[] masses, float[] intensities, int msLevel) {
+   public Spectrum(Integer index, float rt, double[] masses, float[] intensities, int msLevel) {
       this(index, rt, masses, intensities, msLevel, (msLevel == 2) ? ScanType.CENTROID : ScanType.PROFILE);
    }
 
-   public Scan(Integer index, float rt, double[] masses, float[] intensities, int msLevel, ScanType type) {
+   public Spectrum(Integer index, float rt, double[] masses, float[] intensities, int msLevel, ScanType type) {
       this.index = index;
       this.masses = masses;
       this.intensities = intensities;
@@ -65,12 +64,12 @@ public class Scan {
       return msLevel;
    }
 
-   public ScanData getScanData() {
-      return scanData;
+   public SpectrumData getSpectrumData() {
+      return spectrumData;
    }
 
-   public void setScanData(ScanData scanData) {
-      this.scanData = scanData;
+   public void setSpectrumData(SpectrumData spectrumData) {
+      this.spectrumData = spectrumData;
    }
    
    /**

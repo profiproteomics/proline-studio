@@ -7,9 +7,6 @@ import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.MzScopeCallback;
 import fr.proline.mzscope.model.MzScopePreferences;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
-import fr.proline.studio.graphics.PlotLinear;
-import fr.proline.studio.graphics.marker.IntervalMarker;
-import fr.proline.studio.graphics.marker.LineMarker;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -197,13 +194,13 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
                     isFirstProcessCall = false;
                     displayChromatogram(chunks.get(0), DisplayMode.REPLACE);
                     k = 1;
-                    displayScan(getCurrentRawfile().getScanId(f.getElutionTime()));
+                    displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
                     chromatogramPanel.displayFeature(f);
                 }
                 for (; k < chunks.size(); k++) {
                     logger.info("add additionnal chromato");
                     displayChromatogram(chunks.get(k), DisplayMode.OVERLAY);
-                    displayScan(getCurrentRawfile().getScanId(f.getElutionTime()));
+                    displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
                     chromatogramPanel.displayFeature(f);
                 }
             }
@@ -291,7 +288,7 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
                 if (rawFile != null) {
                     chromatogramPanel.setCurrentChromatogram(mapChromatogramForRawFile.get(rawFile));
                     if(chromatogramPanel.getCurrentScanTime() != null) {
-                        int scanIdx = rawFile.getScanId(chromatogramPanel.getCurrentScanTime());
+                        int scanIdx = rawFile.getSpectrumId(chromatogramPanel.getCurrentScanTime());
                         displayScan(scanIdx);
                     }
                         hideMSMSEvents();

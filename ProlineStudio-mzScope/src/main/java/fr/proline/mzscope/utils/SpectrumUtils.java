@@ -1,6 +1,6 @@
 package fr.proline.mzscope.utils;
 
-import fr.profi.mzdb.model.ScanHeader;
+import fr.profi.mzdb.model.SpectrumHeader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,25 +10,25 @@ import java.util.List;
  *
  * @author MB243701
  */
-public class ScanUtils {
+public class SpectrumUtils {
 
     /**
-     * sort scanHeader by mz
+     * sort spectrumHeader by mz
      *
-     * @param scans
+     * @param spectrums
      * @return
      */
-    public static ScanHeader[] sortMs2ScanHeaders(ScanHeader[] scans) {
-        ScanHeader[] ms2ScanHeaders = null;
-        if (scans != null) {
-            int nbSc = scans.length;
-            ms2ScanHeaders = new ScanHeader[nbSc];
-            List<ScanHeader> list = Arrays.asList(scans);
+    public static SpectrumHeader[] sortMs2SpectrumHeaders(SpectrumHeader[] spectrums) {
+        SpectrumHeader[] ms2SpectrumHeaders = null;
+        if (spectrums != null) {
+            int nbSc = spectrums.length;
+            ms2SpectrumHeaders = new SpectrumHeader[nbSc];
+            List<SpectrumHeader> list = Arrays.asList(spectrums);
             // sort by precursorMz
-            Collections.sort(list, new Comparator<ScanHeader>() {
+            Collections.sort(list, new Comparator<SpectrumHeader>() {
 
                 @Override
-                public int compare(ScanHeader sc1, ScanHeader sc2) {
+                public int compare(SpectrumHeader sc1, SpectrumHeader sc2) {
                     if (sc1.getPrecursorMz() <= sc2.getPrecursorMz()){
                         return -1;
                     }else {
@@ -37,10 +37,10 @@ public class ScanUtils {
                 }
                 
             });
-            ms2ScanHeaders = list.toArray(new ScanHeader[nbSc]);
+            ms2SpectrumHeaders = list.toArray(new SpectrumHeader[nbSc]);
 
         }
-        return ms2ScanHeaders;
+        return ms2SpectrumHeaders;
     }
     
     public static int getNearestPeakIndex( double[] peaksMz, double value) {

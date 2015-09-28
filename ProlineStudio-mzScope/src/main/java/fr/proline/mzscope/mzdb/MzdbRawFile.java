@@ -11,21 +11,21 @@ import fr.profi.mzdb.MzDbReader;
 import fr.profi.mzdb.SmartPeakelFinderConfig;
 import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.profi.mzdb.algo.feature.extraction.FeatureExtractorConfig;
-import fr.profi.mzdb.io.reader.RunSliceDataProvider;
+import fr.profi.mzdb.io.reader.provider.RunSliceDataProvider;
 import fr.profi.mzdb.model.Feature;
 import fr.profi.mzdb.model.Peak;
 import fr.profi.mzdb.model.Peakel;
 import fr.profi.mzdb.model.PutativeFeature;
 import fr.profi.mzdb.model.RunSlice;
-import fr.profi.mzdb.model.ScanData;
-import fr.profi.mzdb.model.ScanHeader;
-import fr.profi.mzdb.model.ScanSlice;
+import fr.profi.mzdb.model.SpectrumData;
+import fr.profi.mzdb.model.SpectrumHeader;
+import fr.profi.mzdb.model.SpectrumSlice;
 import fr.proline.mzscope.model.Chromatogram;
 import fr.proline.mzscope.model.FeaturesExtractionRequest;
-import fr.proline.mzscope.model.Scan;
+import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
-import fr.proline.mzscope.utils.ScanUtils;
+import fr.proline.mzscope.utils.SpectrumUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.StreamCorruptedException;
@@ -55,8 +55,8 @@ public class MzdbRawFile implements IRawFile {
 
    private final File mzDbFile;
    private MzDbReader reader;
-   private ScanHeader[] ms2ScanHeaders = null;
-   private double[] ms2ScanHeaderByMz = null;
+   private SpectrumHeader[] ms2SpectrumHeaders = null;
+   private double[] ms2SpectrumHeaderByMz = null;
 
    public MzdbRawFile(File file) {
       mzDbFile = file;
@@ -75,12 +75,12 @@ public class MzdbRawFile implements IRawFile {
       }
    }
 
-   private void buildMs2ScanHeaderIndexes(ScanHeader[] scans) {
-      ms2ScanHeaders = ScanUtils.sortMs2ScanHeaders(scans);
-      ms2ScanHeaderByMz = new double[ms2ScanHeaders.length];
+   private void buildMs2SpectrumHeaderIndexes(SpectrumHeader[] spectrums) {
+      ms2SpectrumHeaders = SpectrumUtils.sortMs2SpectrumHeaders(spectrums);
+      ms2SpectrumHeaderByMz = new double[ms2SpectrumHeaders.length];
       int i = 0;
-      for (ScanHeader scan : ms2ScanHeaders) {
-         ms2ScanHeaderByMz[i] = scan.getPrecursorMz();
+      for (SpectrumHeader spectrum : ms2SpectrumHeaders) {
+         ms2SpectrumHeaderByMz[i] = spectrum.getPrecursorMz();
          i++;
       }
    }
@@ -99,7 +99,7 @@ public class MzdbRawFile implements IRawFile {
    public Chromatogram getTIC() {
       Chromatogram chromatogram = null;
       try {
-         ScanHeader[] headers = reader.getScanHeaders();
+         SpectrumHeader[] headers = reader.getSpectrumHeaders();
          double[] xAxisData = new double[headers.length];
          double[] yAxisData = new double[headers.length];
          for (int i = 0; i < headers.length; i++) {
@@ -122,7 +122,7 @@ public class MzdbRawFile implements IRawFile {
    public Chromatogram getBPI() {
       Chromatogram chromatogram = null;
       try {
-         ScanHeader[] headers = reader.getScanHeaders();
+         SpectrumHeader[] headers = reader.getSpectrumHeaders();
          double[] xAxisData = new double[headers.length];
          double[] yAxisData = new double[headers.length];
          for (int i = 0; i < headers.length; i++) {
@@ -145,7 +145,7 @@ public class MzdbRawFile implements IRawFile {
       long start = System.currentTimeMillis();
       Chromatogram chromatogram = null;
       try {
-         Peak[] peaks = reader.getXIC(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(), 1, params.getMethod());
+         Peak[] peaks = reader.getMsXicInMzRtRanges(params.getMinMz(), params.getMaxMz(), params.getElutionTimeLowerBound(), params.getElutionTimeUpperBound(),  params.getMethod());
          chromatogram = createChromatoFromPeaks(peaks);
          chromatogram.minMz = params.getMinMz();
          chromatogram.maxMz = params.getMaxMz();
@@ -166,20 +166,20 @@ public class MzdbRawFile implements IRawFile {
       List<Double> xAxisData = new ArrayList<>(peaks.length);
       List<Double> yAxisData = new ArrayList<>(peaks.length);
       try {
-      int previousScanId = (int)peaks[0].getLcContext().getScanId();
+      int previousSpectrumId = (int)peaks[0].getLcContext().getSpectrumId();
       for (Peak peak : peaks) {
-         int scanId = (int)peak.getLcContext().getScanId();
-         if (previousScanId != getPreviousScanId(scanId, 1)) {
+         int spectrumId = (int)peak.getLcContext().getSpectrumId();
+         if (previousSpectrumId != getPreviousSpectrumId(spectrumId, 1)) {
             // there is a gap between peaks, add 0 values after the previous peak and before this one
-            xAxisData.add(reader.getScanHeaderById().get((long)getNextScanId(previousScanId, 1)).getElutionTime() / 60.0);
+            xAxisData.add(reader.getSpectrumHeaderById().get((long)getNextSpectrumId(previousSpectrumId, 1)).getElutionTime() / 60.0);
             yAxisData.add(0.0);
-            xAxisData.add(reader.getScanHeaderById().get((long)getPreviousScanId(scanId, 1)).getElutionTime() / 60.0);
+            xAxisData.add(reader.getSpectrumHeaderById().get((long)getPreviousSpectrumId(spectrumId, 1)).getElutionTime() / 60.0);
             yAxisData.add(0.0);
          }
          double rt = peak.getLcContext().getElutionTime() / 60.0;
          xAxisData.add(rt);
          yAxisData.add((double) peak.getIntensity());
-         previousScanId = (int)peak.getLcContext().getScanId();
+         previousSpectrumId = (int)peak.getLcContext().getSpectrumId();
       }
       }catch (SQLiteException sle) {
          logger.error("Error while reading mzdb file",sle);
@@ -265,12 +265,12 @@ public class MzdbRawFile implements IRawFile {
             logger.info("processing peakel "+k);
          }
          if (!assigned[k]) {
-            ScanSlice[] slices = reader.getMsScanSlices(peakels[k].getApexMz()-5.0, peakels[k].getApexMz()+5.0, peakels[k].getApexElutionTime()-0.1f, peakels[k].getApexElutionTime()+0.1f);
+            SpectrumSlice[] slices = reader.getMsSpectrumSlices(peakels[k].getApexMz()-5.0, peakels[k].getApexMz()+5.0, peakels[k].getApexElutionTime()-0.1f, peakels[k].getApexElutionTime()+0.1f);
             int i = 0;
-            while((i < slices.length) && (slices[i].getHeader().getScanId() != peakels[k].getApexScanId())) {
+            while((i < slices.length) && (slices[i].getHeader().getSpectrumId() != peakels[k].getApexSpectrumId())) {
                i++;
             }
-            ScanData data = slices[i].getData();
+            SpectrumData data = slices[i].getData();
             Tuple2<Object,TheoreticalIsotopePattern>[] putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(data, peakels[k].getMz(), mzTolPPM);
             //TreeMap<Double, TheoreticalIsotopePattern> putativePatterns = IsotopePattern.getOrderedIPHypothesis(data, peakels[k].getMz());
             TheoreticalIsotopePattern bestPattern = putativePatterns[0]._2;
@@ -346,17 +346,17 @@ public class MzdbRawFile implements IRawFile {
    private List<Feature> extractFeaturesFromMs2(float tolPPM) {
       List<Feature> result = null;
       try {
-         logger.info("retrieve scan headers...");
-         ScanHeader[] ms2ScanHeaders = reader.getMs2ScanHeaders();
+         logger.info("retrieve spectrum headers...");
+         SpectrumHeader[] ms2SpectrumHeaders = reader.getMs2SpectrumHeaders();
 
          List<PutativeFeature> pfs = new ArrayList<PutativeFeature>();
-         logger.info("building putative features list from MS2 scan events...");
-         for (ScanHeader scanH : ms2ScanHeaders) {
+         logger.info("building putative features list from MS2 spectrum events...");
+         for (SpectrumHeader spectrumH : ms2SpectrumHeaders) {
             pfs.add(new PutativeFeature(
                     PutativeFeature.generateNewId(),
-                    scanH.getPrecursorMz(),
-                    scanH.getPrecursorCharge(),
-                    scanH.getId(),
+                    spectrumH.getPrecursorMz(),
+                    spectrumH.getPrecursorCharge(),
+                    spectrumH.getId(),
                     2
             ));
 
@@ -384,11 +384,11 @@ public class MzdbRawFile implements IRawFile {
    }
 
    @Override
-   public Scan getScan(int scanIndex) {
-      Scan scan = null;
+   public Spectrum getSpectrum(int spectrumIndex) {
+      Spectrum spectrum = null;
       try {
-         fr.profi.mzdb.model.Scan rawScan = reader.getScan((long)scanIndex);
-         ScanData data = rawScan.getData();
+         fr.profi.mzdb.model.Spectrum rawSpectrum = reader.getSpectrum((long)spectrumIndex);
+         SpectrumData data = rawSpectrum.getData();
          final double[] mzList = data.getMzList();
          final double[] leftSigma = new double[mzList.length];
          final double[] rightSigma = new double[mzList.length];
@@ -443,63 +443,63 @@ public class MzdbRawFile implements IRawFile {
             }
 
          }
-         scan = new Scan(scanIndex, rawScan.getHeader().getElutionTime(), Doubles.toArray(xAxisData), Floats.toArray(yAxisData), rawScan.getHeader().getMsLevel());
+         spectrum = new Spectrum(spectrumIndex, rawSpectrum.getHeader().getElutionTime(), Doubles.toArray(xAxisData), Floats.toArray(yAxisData), rawSpectrum.getHeader().getMsLevel());
          StringBuilder builder = new StringBuilder(getName());
 
-         if (scan.getMsLevel() == 2) {
-            builder.append(massFormatter.format(rawScan.getHeader().getPrecursorMz())).append(" (");
-            builder.append(rawScan.getHeader().getPrecursorCharge()).append("+) - ");
-            scan.setPrecursorMz(rawScan.getHeader().getPrecursorMz());
-            scan.setPrecursorCharge(rawScan.getHeader().getPrecursorCharge());
+         if (spectrum.getMsLevel() == 2) {
+            builder.append(massFormatter.format(rawSpectrum.getHeader().getPrecursorMz())).append(" (");
+            builder.append(rawSpectrum.getHeader().getPrecursorCharge()).append("+) - ");
+            spectrum.setPrecursorMz(rawSpectrum.getHeader().getPrecursorMz());
+            spectrum.setPrecursorCharge(rawSpectrum.getHeader().getPrecursorCharge());
          } else {
-            scan.setPrecursorMz(null);
-            scan.setPrecursorCharge(null);
+            spectrum.setPrecursorMz(null);
+            spectrum.setPrecursorCharge(null);
          }
-         builder.append(", sc=").append(scanIndex).append(", rt=").append(timeFormatter.format(rawScan.getHeader().getElutionTime() / 60.0));
-         builder.append(", ms").append(scan.getMsLevel());
-         //scan.setTitle(builder.toString());
-         scan.setTitle("");
-         scan.setScanData(data);
-         //logger.debug("mzdb Scan length {} rebuilded in Scan length {} ", mzList.length, xAxisData.size());
+         builder.append(", sc=").append(spectrumIndex).append(", rt=").append(timeFormatter.format(rawSpectrum.getHeader().getElutionTime() / 60.0));
+         builder.append(", ms").append(spectrum.getMsLevel());
+         //spectrum.setTitle(builder.toString());
+         spectrum.setTitle("");
+         spectrum.setSpectrumData(data);
+         //logger.debug("mzdb Spectrum length {} rebuilded in Spectrum length {} ", mzList.length, xAxisData.size());
       } catch (SQLiteException | StreamCorruptedException ex) {
-         logger.error("enable to retrieve Scan data", ex);
+         logger.error("enable to retrieve Spectrum data", ex);
       }
-      return scan;
+      return spectrum;
    }
 
    @Override
-   public int getScanId(double retentionTime) {
+   public int getSpectrumId(double retentionTime) {
       try {
-         return (int)reader.getScanHeaderForTime((float) retentionTime, 1).getScanId();
+         return (int)reader.getSpectrumHeaderForTime((float) retentionTime, 1).getSpectrumId();
       } catch (Exception ex) {
-         logger.error("enable to retrieve Scan Id", ex);
+         logger.error("enable to retrieve Spectrum Id", ex);
       }
       return 0;
    }
 
    @Override
-   public int getNextScanId(int scanIndex, int msLevel) {
-      return getNextSiblingScanId(scanIndex, msLevel, 1);
+   public int getNextSpectrumId(int spectrumIndex, int msLevel) {
+      return getNextSiblingSpectrumId(spectrumIndex, msLevel, 1);
    }
 
    @Override
-   public int getPreviousScanId(int scanIndex, int msLevel) {
-      return getNextSiblingScanId(scanIndex, msLevel, -1);
+   public int getPreviousSpectrumId(int spectrumIndex, int msLevel) {
+      return getNextSiblingSpectrumId(spectrumIndex, msLevel, -1);
    }
 
-   private int getNextSiblingScanId(int scanIndex, int msLevel, int way) {
+   private int getNextSiblingSpectrumId(int spectrumIndex, int msLevel, int way) {
       try {
-         ScanHeader header = reader.getScanHeaderById().get((long)scanIndex);
-         int maxScan = reader.getScansCount();
-         long k =  Math.max(1, Math.min(maxScan, header.getScanId() + way));
-         for (; (k > 0) && (k < maxScan); k += way) {
-            if (reader.getScanHeaderById().get(k).getMsLevel() == msLevel) {
+         SpectrumHeader header = reader.getSpectrumHeaderById().get((long)spectrumIndex);
+         int maxSpectrum = reader.getSpectraCount();
+         long k =  Math.max(1, Math.min(maxSpectrum, header.getSpectrumId() + way));
+         for (; (k > 0) && (k < maxSpectrum); k += way) {
+            if (reader.getSpectrumHeaderById().get(k).getMsLevel() == msLevel) {
                break;
             }
          }
          return (int)k;
       } catch (SQLiteException e) {
-         logger.error("Error while reading scansCount", e);
+         logger.error("Error while reading spectrumsCount", e);
       }
       return 0;
    }
@@ -518,23 +518,23 @@ public class MzdbRawFile implements IRawFile {
    public List<Float> getMsMsEvent(double minMz, double maxMz) {
       Long startTime = System.currentTimeMillis();
       List<Float> listMsMsEventTime = new ArrayList();
-      if (ms2ScanHeaders == null) {
+      if (ms2SpectrumHeaders == null) {
          try {
-            logger.debug("retrieve Ms2 ScanHeader");
-            buildMs2ScanHeaderIndexes(reader.getMs2ScanHeaders());
+            logger.debug("retrieve Ms2 SpectrumHeader");
+            buildMs2SpectrumHeaderIndexes(reader.getMs2SpectrumHeaders());
          } catch (SQLiteException ex) {
-            logger.error("Exception while retrieving ScanHeader " + ex);
+            logger.error("Exception while retrieving SpectrumHeader " + ex);
          }
       }
-      if (ms2ScanHeaders != null) {
-         int minId = ~Arrays.binarySearch(ms2ScanHeaderByMz, minMz);
-         int maxId = ~Arrays.binarySearch(ms2ScanHeaderByMz, maxMz);
+      if (ms2SpectrumHeaders != null) {
+         int minId = ~Arrays.binarySearch(ms2SpectrumHeaderByMz, minMz);
+         int maxId = ~Arrays.binarySearch(ms2SpectrumHeaderByMz, maxMz);
          if (minId != -1 && maxId != -1) {
             for (int i = minId; i <= maxId; i++) {
-               ScanHeader scanHeader = ms2ScanHeaders[i];
-               double mz = scanHeader.getPrecursorMz();
+               SpectrumHeader spectrumHeader = ms2SpectrumHeaders[i];
+               double mz = spectrumHeader.getPrecursorMz();
                if (mz >= minMz && mz <= maxMz) {
-                  listMsMsEventTime.add(scanHeader.getElutionTime());
+                  listMsMsEventTime.add(spectrumHeader.getElutionTime());
                }
             }
          }
@@ -571,9 +571,9 @@ public class MzdbRawFile implements IRawFile {
    }
 
    @Override
-   public int getScanCount() {
+   public int getSpectrumCount() {
       try {
-      return reader.getScansCount();
+      return reader.getSpectraCount();
       } catch (SQLiteException sle) {
          logger.error("Error while reading mzdb file", sle);
       }

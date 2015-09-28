@@ -5,7 +5,7 @@ import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.MzScopeCallback;
 import fr.proline.mzscope.model.MzScopePreferences;
-import fr.proline.mzscope.model.Scan;
+import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.utils.KeyEventDispatcherDecorator;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import fr.proline.studio.export.ExportButton;
@@ -47,7 +47,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
     protected ChromatogramPanel chromatogramPanel;
     protected SpectrumPanel spectrumContainerPanel;
     protected JToolBar chromatogramToolbar;
-    protected Scan currentScan;
+    protected Spectrum currentScan;
     protected JToggleButton displayMS2btn;
     
     
@@ -124,7 +124,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
 
               @Override
               public void propertyChange(PropertyChangeEvent evt) {
-                 displayScan(getCurrentRawfile().getScanId((Float)evt.getNewValue()));
+                 displayScan(getCurrentRawfile().getSpectrumId((Float)evt.getNewValue()));
               }
            });
         }
@@ -289,7 +289,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
             @Override
             protected void done() {
                chromatogramPanel.displayFeature(f);
-               displayScan(getCurrentRawfile().getScanId(f.getElutionTime()));
+               displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
             }
         };
         worker.execute();
@@ -298,7 +298,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
     @Override
     public void displayScan(long index) {
         if ((currentScan == null) || (index != currentScan.getIndex())) {
-            currentScan = getCurrentRawfile().getScan((int)index);
+            currentScan = getCurrentRawfile().getSpectrum((int)index);
             if (currentScan != null) {
                 chromatogramPanel.setCurrentScanTime(currentScan.getRetentionTime());
                 if (displayScan){
@@ -332,11 +332,11 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
         }
         if ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0) {
             if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                displayScan(getCurrentRawfile().getPreviousScanId(currentScan.getIndex(), currentScan.getMsLevel()));
+                displayScan(getCurrentRawfile().getPreviousSpectrumId(currentScan.getIndex(), currentScan.getMsLevel()));
                 e.consume();
                 return true;
             } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                displayScan(getCurrentRawfile().getNextScanId(currentScan.getIndex(), currentScan.getMsLevel()));
+                displayScan(getCurrentRawfile().getNextSpectrumId(currentScan.getIndex(), currentScan.getMsLevel()));
                 e.consume();
                 return true;
             }

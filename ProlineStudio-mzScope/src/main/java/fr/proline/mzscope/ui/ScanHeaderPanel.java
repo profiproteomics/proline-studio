@@ -1,6 +1,6 @@
 package fr.proline.mzscope.ui;
 
-import fr.proline.mzscope.model.Scan;
+import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
 import fr.proline.mzscope.utils.MzScopeConstants;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
@@ -61,7 +61,7 @@ public class ScanHeaderPanel extends JPanel {
     // mzdb fileName
     private String mzdbFileName;
     // current scan information
-    private Scan scan;
+    private Spectrum scan;
     // list of all scanIndex
     private List<Integer> scanIndexList;
     
@@ -71,7 +71,7 @@ public class ScanHeaderPanel extends JPanel {
     //events
     private EventListenerList listenerList = new EventListenerList();
 
-    public ScanHeaderPanel(Scan scan, List<Integer> scanIndexList, boolean displayXicModeVisible) {
+    public ScanHeaderPanel(Spectrum scan, List<Integer> scanIndexList, boolean displayXicModeVisible) {
         this.scan = scan;
         this.displayXicModeVisible = displayXicModeVisible;
         this.scanIndexList = scanIndexList;
@@ -315,7 +315,7 @@ public class ScanHeaderPanel extends JPanel {
      *
      * @param scan
      */
-    public void setScan(Scan scan) {
+    public void setScan(Spectrum scan) {
         this.scan = scan;
         updateScan();
     }

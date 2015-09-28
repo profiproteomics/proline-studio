@@ -1,6 +1,6 @@
 package fr.proline.mzscope.ui.model;
 
-import fr.proline.mzscope.model.Scan;
+import fr.proline.mzscope.model.Spectrum;
 import fr.proline.studio.comparedata.CompareDataInterface;
 import fr.proline.studio.graphics.PlotInformation;
 import java.awt.Color;
@@ -19,13 +19,13 @@ public class ScanTableModel extends AbstractTableModel implements CompareDataInt
     public static final int COLTYPE_SCAN_RETENTION_TIME = 2;
     public static final int COLTYPE_SCAN_MSLEVEL = 3;
     
-    private Scan scan;
+    private Spectrum scan;
     
     private String m_modelName;
     
     private Color scanColor;
     
-    public ScanTableModel(Scan scan) {
+    public ScanTableModel(Spectrum scan) {
         this.scan = scan;
     }
     

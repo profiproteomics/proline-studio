@@ -5,10 +5,10 @@ import fr.profi.ms.model.TheoreticalIsotopePattern;
 import fr.profi.mzdb.algo.IsotopicPatternScorer;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.MzScopePreferences;
-import fr.proline.mzscope.model.Scan;
+import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
 import static fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
-import fr.proline.mzscope.utils.ScanUtils;
+import fr.proline.mzscope.utils.SpectrumUtils;
 import fr.proline.studio.export.ExportButton;
 import fr.proline.studio.graphics.PlotAbstract;
 import fr.proline.studio.graphics.PlotLinear;
@@ -52,7 +52,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    protected JToolBar spectrumToolbar;
    private ScanHeaderPanel headerSpectrumPanel;
    protected PlotAbstract scanPlot;
-   protected Scan currentScan;
+   protected Spectrum currentScan;
    protected LineMarker positionMarker;
    private boolean keepMsLevel = true;
    protected DisplayMode xicModeDisplay = DisplayMode.REPLACE;
@@ -106,11 +106,11 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
    private void displayIsotopicPatterns() {
       float ppmTol = MzScopePreferences.getInstance().getMzPPMTolerance();
       
-      int nearestPeakIdx =  ScanUtils.getNearestPeakIndex(currentScan.getScanData().getMzList(), positionMarker.getValue());
-      if (ScanUtils.isInRange(currentScan.getScanData().getMzList()[nearestPeakIdx], positionMarker.getValue(), ppmTol)) {
-         ppmTol = (float)(1e6*currentScan.getScanData().getLeftHwhmList()[nearestPeakIdx]/currentScan.getScanData().getMzList()[nearestPeakIdx]);
+      int nearestPeakIdx =  SpectrumUtils.getNearestPeakIndex(currentScan.getSpectrumData().getMzList(), positionMarker.getValue());
+      if (SpectrumUtils.isInRange(currentScan.getSpectrumData().getMzList()[nearestPeakIdx], positionMarker.getValue(), ppmTol)) {
+         ppmTol = (float)(1e6*currentScan.getSpectrumData().getLeftHwhmList()[nearestPeakIdx]/currentScan.getSpectrumData().getMzList()[nearestPeakIdx]);
       }
-      Tuple2<Object,TheoreticalIsotopePattern>[]  putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(currentScan.getScanData(), positionMarker.getValue(), ppmTol);
+      Tuple2<Object,TheoreticalIsotopePattern>[]  putativePatterns = IsotopicPatternScorer.calclIsotopicPatternHypotheses(currentScan.getSpectrumData(), positionMarker.getValue(), ppmTol);
       
       logger.info("scanId=" + currentScan.getIndex() + ", mz = " + positionMarker.getValue() + ", ppm = " + ppmTol);
       for (Tuple2<Object,TheoreticalIsotopePattern> t : putativePatterns) {
@@ -131,25 +131,25 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
       TheoreticalIsotopePattern pattern = (TheoreticalIsotopePattern) putativePatterns[0]._2;
       int refIdx = 0;
-      int idx = ScanUtils.getNearestPeakIndex(currentScan.getScanData().getMzList(), positionMarker.getValue());
+      int idx = SpectrumUtils.getNearestPeakIndex(currentScan.getSpectrumData().getMzList(), positionMarker.getValue());
       for (Tuple2 t : pattern.mzAbundancePairs()) {
-         if (1e6 * (Math.abs(currentScan.getScanData().getMzList()[idx] - (double) t._1) / currentScan.getScanData().getMzList()[idx]) < ppmTol) {
+         if (1e6 * (Math.abs(currentScan.getSpectrumData().getMzList()[idx] - (double) t._1) / currentScan.getSpectrumData().getMzList()[idx]) < ppmTol) {
             break;
          }
          refIdx++;
       }
 
       if (refIdx < pattern.isotopeCount()) {
-         float abundance = currentScan.getScanData().getIntensityList()[idx];
+         float abundance = currentScan.getSpectrumData().getIntensityList()[idx];
          float normAbundance = (Float) pattern.mzAbundancePairs()[refIdx]._2;
          for (Tuple2 t : pattern.mzAbundancePairs()) {
             Double mz = (Double) t._1;
             Float ab = (Float) t._2;
             scanPlot.addMarker(new PointMarker(spectrumPlotPanel, new DataCoordinates(mz, ab * abundance / normAbundance), CyclicColorPalette.getColor(0)));
-            int peakIdx = ScanUtils.getPeakIndex(currentScan.getScanData().getMzList(), mz, ppmTol);
-            if ((peakIdx != -1) && (currentScan.getScanData().getIntensityList()[peakIdx] < 2.0 * ab * abundance / normAbundance)) {
-               logger.info("Peak found mz= "+mz+" expected= "+(ab * abundance / normAbundance)+" observed= "+currentScan.getScanData().getIntensityList()[peakIdx]);
-               scanPlot.addMarker(new PointMarker(spectrumPlotPanel, new DataCoordinates(currentScan.getScanData().getMzList()[peakIdx], currentScan.getScanData().getIntensityList()[peakIdx]), CyclicColorPalette.getColor(5)));
+            int peakIdx = SpectrumUtils.getPeakIndex(currentScan.getSpectrumData().getMzList(), mz, ppmTol);
+            if ((peakIdx != -1) && (currentScan.getSpectrumData().getIntensityList()[peakIdx] < 2.0 * ab * abundance / normAbundance)) {
+               logger.info("Peak found mz= "+mz+" expected= "+(ab * abundance / normAbundance)+" observed= "+currentScan.getSpectrumData().getIntensityList()[peakIdx]);
+               scanPlot.addMarker(new PointMarker(spectrumPlotPanel, new DataCoordinates(currentScan.getSpectrumData().getMzList()[peakIdx], currentScan.getSpectrumData().getIntensityList()[peakIdx]), CyclicColorPalette.getColor(5)));
             }
          }
       }
@@ -192,7 +192,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
    @Override
    public void updateRetentionTime(float retentionTime) {
-      int scanIdx = rawFilePanel.getCurrentRawfile().getScanId(retentionTime);
+      int scanIdx = rawFilePanel.getCurrentRawfile().getSpectrumId(retentionTime);
       rawFilePanel.displayScan(scanIdx);
    }
 
@@ -206,7 +206,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       scanPlot.addMarker(new IntervalMarker(spectrumPlotPanel, Color.orange, Color.RED, minMz, maxMz));
    }
    
-   public void displayScan(Scan scan) {
+   public void displayScan(Spectrum scan) {
 
       double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0;
 
@@ -221,7 +221,7 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
          Color plotColor = rawFilePanel.getPlotColor(rawFilePanel.getCurrentRawfile().getName());
          ScanTableModel scanModel = new ScanTableModel(scan);
          scanModel.setColor(plotColor);
-         if (scan.getDataType() == Scan.ScanType.CENTROID) { // mslevel2
+         if (scan.getDataType() == Spectrum.ScanType.CENTROID) { // mslevel2
             //stick plot
             scanPlot = new PlotStick(spectrumPlotPanel, scanModel, null, ScanTableModel.COLTYPE_SCAN_MASS, ScanTableModel.COLTYPE_SCAN_INTENSITIES);
             ((PlotStick) scanPlot).setStrokeFixed(true);
@@ -257,13 +257,13 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
 
    public int getNextScanIndex() {
       if (keepMsLevel) 
-         return (rawFilePanel.getCurrentRawfile().getNextScanId(currentScan.getIndex(), currentScan.getMsLevel()));
-      return Math.min(currentScan.getIndex() + 1, rawFilePanel.getCurrentRawfile().getScanCount()-1);
+         return (rawFilePanel.getCurrentRawfile().getNextSpectrumId(currentScan.getIndex(), currentScan.getMsLevel()));
+      return Math.min(currentScan.getIndex() + 1, rawFilePanel.getCurrentRawfile().getSpectrumCount()-1);
    } 
 
    public int getPreviousScanIndex() {
       if (keepMsLevel) 
-         return (rawFilePanel.getCurrentRawfile().getPreviousScanId(currentScan.getIndex(), currentScan.getMsLevel()));
+         return (rawFilePanel.getCurrentRawfile().getPreviousSpectrumId(currentScan.getIndex(), currentScan.getMsLevel()));
       return Math.max(1, currentScan.getIndex() - 1);
    } 
 

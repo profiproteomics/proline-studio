@@ -5,7 +5,7 @@ import fr.proline.mzscope.model.IFeature;
 import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.MzScopeCallback;
-import fr.proline.mzscope.model.Scan;
+import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
@@ -39,7 +39,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
     private JTabbedPane chromatogramContainerPanel;
     private ChromatogramPanel currentChromatogramPanel;
     protected SpectrumPanel spectrumContainerPanel;
-    protected Scan currentScan;
+    protected Spectrum currentScan;
 
     private final List<IRawFile> rawfiles;
     private final Map<IRawFile, Chromatogram> mapChromatogramForRawFile;
@@ -101,7 +101,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
               @Override
               public void propertyChange(PropertyChangeEvent evt) {
                  currentChromatogramPanel = (ChromatogramPanel)evt.getSource();
-                 displayScan(rawFile.getScanId((Float)evt.getNewValue()));
+                 displayScan(rawFile.getSpectrumId((Float)evt.getNewValue()));
               }
            });
         return chromatogramPanel;
@@ -178,7 +178,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
     @Override
     public void displayScan(long index) {
         if ((currentScan == null) || (index != currentScan.getIndex())) {
-            currentScan = getCurrentRawfile().getScan((int)index);
+            currentScan = getCurrentRawfile().getSpectrum((int)index);
             if (currentScan != null) {
                     spectrumContainerPanel.displayScan(currentScan);
             }

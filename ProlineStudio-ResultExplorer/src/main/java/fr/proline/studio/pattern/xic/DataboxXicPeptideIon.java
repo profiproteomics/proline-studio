@@ -53,8 +53,12 @@ public class DataboxXicPeptideIon extends AbstractDataBox {
         // One Dataset and list of Peptide
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DDataset.class, false);
+        registerInParameter(inParameter);
+        
+        inParameter = new GroupParameter();
         inParameter.addParameter(DMasterQuantPeptide.class, false);
         registerInParameter(inParameter);
+        
 
         // Register possible out parameters
         GroupParameter outParameter = new GroupParameter();

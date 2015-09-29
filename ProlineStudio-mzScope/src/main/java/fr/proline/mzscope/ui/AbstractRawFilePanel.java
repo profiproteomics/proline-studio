@@ -317,8 +317,6 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
 
     @Override
     public void displayScan(long index) {
-        /*Exception e = new Exception();
-        e.printStackTrace();*/
         if ((currentScan == null) || (index != currentScan.getIndex())) {
             if (rawFileLoading != null){
                 rawFileLoading.setWaitingState(true);

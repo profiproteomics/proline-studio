@@ -22,6 +22,8 @@ import javax.swing.SpinnerModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * header panel for the spectrum panel, which contains information (scanIndex,
@@ -31,6 +33,8 @@ import javax.swing.event.EventListenerList;
  * @author MB243701
  */
 public class ScanHeaderPanel extends JPanel {
+    
+    private static final Logger logger = LoggerFactory.getLogger(ScanHeaderPanel.class);
 
     private final static DecimalFormat TIME_FORMATTER = new DecimalFormat("0.00");
     private final static DecimalFormat MASS_FORMATTER = new DecimalFormat("0.####");
@@ -326,6 +330,9 @@ public class ScanHeaderPanel extends JPanel {
     public void setScanIndexList(List<Integer> scanIndexList) {
         this.scanIndexList = scanIndexList;
         this.spinnerScanIndexModel = new SpinnerListModel(scanIndexList);
+        if (scanIndexList.size() > 1){
+            spinnerScanIndexModel.setValue(scanIndexList.get(1));
+        }
         this.spinnerScanIndex.setModel(spinnerScanIndexModel);
         ((DefaultEditor) spinnerScanIndex.getEditor()).getTextField().setEditable(false);
         ((DefaultEditor) spinnerScanIndex.getEditor()).getTextField().setColumns(5);

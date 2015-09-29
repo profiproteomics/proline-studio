@@ -255,23 +255,24 @@ public class SpectrumPanel extends JPanel implements ScanHeaderListener, PlotPan
       }
    }
 
-   public int getNextScanIndex() {
+   public int getNextScanIndex(Integer spectrumIndex) {
       if (keepMsLevel) 
-         return (rawFilePanel.getCurrentRawfile().getNextSpectrumId(currentScan.getIndex(), currentScan.getMsLevel()));
+         return (rawFilePanel.getCurrentRawfile().getNextSpectrumId(spectrumIndex, currentScan.getMsLevel()));
       return Math.min(currentScan.getIndex() + 1, rawFilePanel.getCurrentRawfile().getSpectrumCount()-1);
    } 
 
-   public int getPreviousScanIndex() {
+   public int getPreviousScanIndex(Integer spectrumIndex) {
       if (keepMsLevel) 
-         return (rawFilePanel.getCurrentRawfile().getPreviousSpectrumId(currentScan.getIndex(), currentScan.getMsLevel()));
+         return (rawFilePanel.getCurrentRawfile().getPreviousSpectrumId(spectrumIndex, currentScan.getMsLevel()));
       return Math.max(1, currentScan.getIndex() - 1);
    } 
 
    private void updateScanIndexList() {
       List<Integer> listScanIndex = new ArrayList(3);
-      listScanIndex.add(getPreviousScanIndex());
-      listScanIndex.add(currentScan.getIndex());
-      listScanIndex.add(getNextScanIndex());
+      Integer currentIndex = currentScan.getIndex();
+      listScanIndex.add(getPreviousScanIndex(currentIndex));
+      listScanIndex.add(currentIndex);
+      listScanIndex.add(getNextScanIndex(currentIndex));
       headerSpectrumPanel.setScanIndexList(listScanIndex);
    }
 

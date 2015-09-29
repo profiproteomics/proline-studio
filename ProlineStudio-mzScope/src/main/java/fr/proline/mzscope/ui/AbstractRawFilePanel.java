@@ -371,11 +371,11 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
 
         } else {
             if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                displayScan(spectrumContainerPanel.getPreviousScanIndex());
+                displayScan(spectrumContainerPanel.getPreviousScanIndex(currentScan.getIndex()));
                 e.consume();
                 return true;
             } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                displayScan(spectrumContainerPanel.getNextScanIndex());
+                displayScan(spectrumContainerPanel.getNextScanIndex(currentScan.getIndex()));
                 e.consume();
                 return true;
             }

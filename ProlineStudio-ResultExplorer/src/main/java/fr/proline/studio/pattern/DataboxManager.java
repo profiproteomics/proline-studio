@@ -22,7 +22,7 @@ public class DataboxManager {
                                                  new DataBoxRsmPSM(), new DataBoxRsmPeptideInstances(), new DataBoxAdjacencyMatrixChoice(),
                                                  new DataBoxRsmAllProteinSet(), new DataboxXicPeptideSet(), new DataboxXicPeptideIon(), new DataboxXicProteinSet()  };
     
-    private final AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(),
+    private final AbstractDataBox[] m_dataBoxContinuingArray = { new DataBoxRsetPeptideSpectrum(), new DataBoxRsetPeptideSpectrumValues(),
                                                  new DataBoxRsetProteinsForPeptideMatch(),
                                                  new DataboxRsetPeptidesOfProtein(),
                                                  new DataBoxRsmPeptidesOfProtein(), new DataBoxRsmProteinAndPeptideSequence(),

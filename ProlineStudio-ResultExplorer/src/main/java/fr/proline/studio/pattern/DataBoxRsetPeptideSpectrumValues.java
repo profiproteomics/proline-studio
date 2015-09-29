@@ -1,52 +1,42 @@
+
 package fr.proline.studio.pattern;
 
-
-
 import fr.proline.core.orm.msi.MsQuery;
-import fr.proline.core.orm.msi.ObjectTree;
 import fr.proline.core.orm.msi.Spectrum;
 import fr.proline.core.orm.msi.dto.DMsQuery;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.AccessDatabaseThread;
 import fr.proline.studio.dam.tasks.AbstractDatabaseCallback;
 import fr.proline.studio.dam.tasks.DatabaseLoadSpectrumsTask;
-import fr.proline.studio.dam.tasks.DatabaseObjectTreeTask;
 import fr.proline.studio.dam.tasks.SubTask;
-import fr.proline.studio.rsmexplorer.gui.spectrum.RsetPeptideSpectrumPanel;
-import fr.proline.studio.rsmexplorer.gui.spectrum.PeptideFragmentationData;
+import fr.proline.studio.rsmexplorer.gui.spectrum.RsetPeptideSpectrumValuesPanel;
 
 /**
- * Databox for a Spectrum
+ *
  * @author JM235353
- */          
-public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
+ */
+public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
 
     private DPeptideMatch m_previousPeptideMatch = null;
-    private PeptideFragmentationData m_fragmentationData = null;
     
-    public DataBoxRsetPeptideSpectrum() {
-        super(DataboxType.DataBoxRsetPeptideSpectrum);
+    public DataBoxRsetPeptideSpectrumValues() {
+        super(DataboxType.DataBoxRsetPeptideSpectrumValues);
 
         // Name of this databox
-        m_typeName = "Spectrum";
-        m_description = "Spectrum of a Peptide";
+        m_typeName = "Spectrum Values";
+        m_description = "Spectrum Values of a Peptide";
 
         // Register in parameters
         GroupParameter inParameter = new GroupParameter();
         inParameter.addParameter(DPeptideMatch.class, false);
         registerInParameter(inParameter);
 
-        // Register possible out parameters
-        GroupParameter outParameter = new GroupParameter();
-        outParameter.addParameter(DMsQuery.class, false);
-        outParameter.addParameter(Spectrum.class, false);
-        outParameter.addParameter(PeptideFragmentationData.class, false);
-        registerOutParameter(outParameter);
+
     }
 
     @Override
     public void createPanel() {
-        RsetPeptideSpectrumPanel p = new RsetPeptideSpectrumPanel();
+        RsetPeptideSpectrumValuesPanel p = new RsetPeptideSpectrumValuesPanel();
         p.setName(m_typeName);
         p.setDataBox(this);
         m_panel = p;
@@ -60,10 +50,9 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
             return;
         }
         m_previousPeptideMatch = peptideMatch;
-        m_fragmentationData = null;
-        
+
         if (peptideMatch == null) {
-            ((RsetPeptideSpectrumPanel) m_panel).setData(null, null);
+            ((RsetPeptideSpectrumValuesPanel) m_panel).setData(null);
             return;
         }
 
@@ -85,7 +74,7 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
                 @Override
                 public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
 
-                    loadAnnotations(peptideMatch);
+                    ((RsetPeptideSpectrumValuesPanel) m_panel).setData(peptideMatch);
                     
                     setLoaded(loadingId);
                     
@@ -109,55 +98,13 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
 
 
         } else {
-            loadAnnotations(peptideMatch);
+            ((RsetPeptideSpectrumValuesPanel) m_panel).setData(peptideMatch);
         }
     }
     private Long m_previousTaskId = null;
     
     
-    public void loadAnnotations(final DPeptideMatch peptideMatch) {
 
-        final DataBoxRsetPeptideSpectrum _databox = this;
-
-        final ObjectTree[] objectTreeResult = new ObjectTree[1];
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
-
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                ObjectTree objectTree = objectTreeResult[0];
-                m_fragmentationData = (objectTree != null) ? new PeptideFragmentationData(peptideMatch, objectTree) : null;
-
-                ((RsetPeptideSpectrumPanel) m_panel).setData(peptideMatch, m_fragmentationData);
-
-                if (m_fragmentationData != null) {
-                    _databox.propagateDataChanged(PeptideFragmentationData.class);
-                }
-                
-                if (finished) {
-                    unregisterTask(taskId);
-                }
-
-            }
-        };
-
-        // Load data if needed asynchronously
-        DatabaseObjectTreeTask task = new DatabaseObjectTreeTask(callback, getProjectId(), peptideMatch, objectTreeResult);
-        Long taskId = task.getId();
-        if (m_previousFragmentationTaskId != null) {
-            // old task is suppressed if it has not been already done
-            AccessDatabaseThread.getAccessDatabaseThread().abortTask(m_previousFragmentationTaskId);
-        }
-        m_previousFragmentationTaskId = taskId;
-        registerTask(task);
-
-    }
-    private Long m_previousFragmentationTaskId = null;
     
     
     @Override
@@ -183,9 +130,6 @@ public class DataBoxRsetPeptideSpectrum extends AbstractDataBox {
                         }
                     }
                 }
-            }
-            if (parameterType.equals(PeptideFragmentationData.class)) {
-                return m_fragmentationData;
             }
         }
         return super.getData(getArray, parameterType);

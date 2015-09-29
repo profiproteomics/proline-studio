@@ -106,7 +106,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
         DataBoxAdjacencyMatrixChoice(35),
         DataBoxMapAlignment(36), 
         DataBoxMSQueries(37), 
-        DataBoxPSMForMsQuery(38);
+        DataBoxPSMForMsQuery(38),
+        DataBoxRsetPeptideSpectrumValues(39);
         
         int m_type;
         private static HashMap<Integer, DataboxType> m_databoxTypeMap = null;

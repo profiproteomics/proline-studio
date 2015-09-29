@@ -56,9 +56,22 @@ public class DataBoxRsetPeptideSpectrumValues extends AbstractDataBox {
             return;
         }
 
+        
         boolean needToLoadData = ((!peptideMatch.isMsQuerySet()) ||
                                   (!peptideMatch.getMsQuery().isSpectrumSet()));
 
+        // JPM.WART : look fo Spectrum table which will load same data
+        if (needToLoadData) {
+            AbstractDataBox previousBox = m_previousDataBox;
+            while (previousBox != null) {
+                if (previousBox instanceof DataBoxRsetPeptideSpectrum) {
+                    needToLoadData = false;
+                    break;
+                }
+                previousBox = previousBox.m_previousDataBox;
+            }
+        }
+        
         if (needToLoadData) {
 
             final int loadingId = setLoading();

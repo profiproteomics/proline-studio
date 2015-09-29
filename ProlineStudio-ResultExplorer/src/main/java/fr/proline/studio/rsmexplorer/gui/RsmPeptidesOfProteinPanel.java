@@ -62,9 +62,9 @@ public class RsmPeptidesOfProteinPanel extends HourglassPanel implements DataBox
     public RsmPeptidesOfProteinPanel() {
         setLayout(new BorderLayout());
         
-        JPanel proteinPanel = createPeptidesPanel();
+        JPanel peptidesPanel = createPeptidesPanel();
         
-        add(proteinPanel, BorderLayout.CENTER);
+        add(peptidesPanel, BorderLayout.CENTER);
     }
 
     private JPanel createPeptidesPanel() {

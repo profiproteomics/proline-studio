@@ -30,6 +30,7 @@
  */
 package fr.proline.mzscope.utils;
 
+import fr.proline.studio.utils.IconManager;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
@@ -41,10 +42,12 @@ import javax.swing.event.EventListenerList;
  * Component to be used as tabComponent; Contains a JLabel to show the text and
  * a JButton to close the tab it belongs to
  */
-public class ButtonTabComponent extends JPanel {
+public class ButtonTabComponent extends JPanel{
 
     //events
     private EventListenerList closeListenerList = new EventListenerList();
+    
+    private JButton waitingButton = null;
 
     public ButtonTabComponent(String text) {
         //unset default FlowLayout' gaps
@@ -68,6 +71,33 @@ public class ButtonTabComponent extends JPanel {
         add(button);
         //add more space to the top of the component
         setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
+    }
+    
+    /* display an icon for waiting process */
+    public void setWaitingState(boolean waitingState){
+        if (waitingState){
+            this.add(getWaitingButton(), 0);
+        }else if (this.waitingButton != null){
+            this.remove(0);
+            this.waitingButton = null;
+        }
+        repaint();
+    }
+    
+    private JButton getWaitingButton(){
+        if (this.waitingButton == null){
+            this.waitingButton = new JButton(IconManager.getIcon(IconManager.IconType.HOUR_GLASS_MINI9));
+            this.waitingButton.setToolTipText("loading data");
+            //Make the button looks the same for all Laf's
+            this.waitingButton.setUI(new BasicButtonUI());
+            //Make it transparent
+            this.waitingButton.setContentAreaFilled(false);
+            //No need to be focusable
+            this.waitingButton.setFocusable(false);
+            this.waitingButton.setBorder(BorderFactory.createEtchedBorder());
+            this.waitingButton.setBorderPainted(false);
+        }
+        return this.waitingButton;
     }
 
     /**

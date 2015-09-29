@@ -20,6 +20,8 @@ public class ExtractionRequest {
       float elutionTime = -1.0f;
       float elutionTimeLowerBound = -1.0f;
       float elutionTimeUpperBound = -1.0f;
+      
+      double mz = 0.0;
 
       @SuppressWarnings("unchecked")  // Smell 1
       protected T self() {
@@ -45,6 +47,11 @@ public class ExtractionRequest {
          this.elutionTimeUpperBound = stopRT;
          return self();
       }
+      
+      public T setMz(double mz){
+          this.mz = mz;
+          return self();
+      }
 
       public double getMinMz() {
          return minMz;
@@ -54,6 +61,10 @@ public class ExtractionRequest {
          return maxMz;
       }
       
+      public double getMz(){
+          return mz;
+      }
+      
       public ExtractionRequest build() {
             return new ExtractionRequest(this);
       }
@@ -61,6 +72,8 @@ public class ExtractionRequest {
 
    private final double minMz;
    private final double maxMz;
+   
+   private final double mz;
    // values in seconds !! 
    private final float elutionTimeLowerBound;
    private final float elutionTimeUpperBound;
@@ -72,6 +85,7 @@ public class ExtractionRequest {
       this.elutionTimeLowerBound = builder.elutionTimeLowerBound;
       this.elutionTimeUpperBound = builder.elutionTimeUpperBound;
       this.elutionTime = builder.elutionTime;
+      this.mz = builder.mz;
    }
    
    @Override
@@ -90,6 +104,10 @@ public class ExtractionRequest {
 
    public double getMaxMz() {
       return maxMz;
+   }
+   
+   public double getMz(){
+       return mz;
    }
 
    public float getElutionTimeLowerBound() {

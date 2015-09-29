@@ -51,6 +51,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
     protected JToggleButton displayMS2btn;
     
     
+    protected IRawFileLoading rawFileLoading;
+    
+    
     public AbstractRawFilePanel() {
         super();
         init();
@@ -63,6 +66,11 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
     public void setDisplayScan(boolean displayScan){
         this.displayScan = displayScan;
     }
+    
+    
+   public void setRawFileLoading(IRawFileLoading rawFileLoading){
+       this.rawFileLoading = rawFileLoading;
+   }
     
     private void init() {
         initComponents();
@@ -215,7 +223,7 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
         }
         final double minMz = chromatogramPanel.getCurrentChromatogram().minMz;
         final double maxMz = chromatogramPanel.getCurrentChromatogram().maxMz;
-
+        
         SwingWorker worker = new SwingWorker<List<Float>, Void>() {
             @Override
             protected List<Float> doInBackground() throws Exception {
@@ -251,6 +259,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
     
     @Override
     public void extractAndDisplayChromatogram(Ms1ExtractionRequest params, final DisplayMode mode, final MzScopeCallback callback) {
+        if (rawFileLoading != null){
+            rawFileLoading.setWaitingState(true);
+        }
         SwingWorker worker = new AbstractMs1ExtractionWorker(getCurrentRawfile(), params) {
             @Override
             protected void done() {
@@ -264,6 +275,10 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
                     logger.error("Error while extraction chromatogram", e);
                     if (callback != null) {
                        callback.callback(false);
+                    }
+                }finally {
+                    if (rawFileLoading != null){
+                        rawFileLoading.setWaitingState(false);
                     }
                 }
             }
@@ -279,7 +294,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
         builder.setMaxMz(f.getMz() + f.getMz() * ppm / 1e6).setMinMz(f.getMz() - f.getMz() * ppm / 1e6);
         // TODO : made this configurable un feature panel : extract around peakel rt or full time range
         //builder.setElutionTimeLowerBound(f.getBasePeakel().getFirstElutionTime()-5*60).setElutionTimeUpperBound(f.getBasePeakel().getLastElutionTime()+5*60);
-
+        if (rawFileLoading != null){
+            rawFileLoading.setWaitingState(true);
+        }
         SwingWorker worker = new SwingWorker<Chromatogram, Void>() {
             @Override
             protected Chromatogram doInBackground() throws Exception {
@@ -290,6 +307,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
             protected void done() {
                chromatogramPanel.displayFeature(f);
                displayScan(getCurrentRawfile().getSpectrumId(f.getElutionTime()));
+               if (rawFileLoading != null){
+                rawFileLoading.setWaitingState(false);
+               }
             }
         };
         worker.execute();
@@ -297,7 +317,12 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
 
     @Override
     public void displayScan(long index) {
+        /*Exception e = new Exception();
+        e.printStackTrace();*/
         if ((currentScan == null) || (index != currentScan.getIndex())) {
+            if (rawFileLoading != null){
+                rawFileLoading.setWaitingState(true);
+            }
             currentScan = getCurrentRawfile().getSpectrum((int)index);
             if (currentScan != null) {
                 chromatogramPanel.setCurrentScanTime(currentScan.getRetentionTime());
@@ -310,6 +335,9 @@ public abstract class AbstractRawFilePanel extends JPanel implements IRawFilePan
                     }
                     
                 }
+            }
+            if (rawFileLoading != null){
+                rawFileLoading.setWaitingState(false);
             }
         }
     }

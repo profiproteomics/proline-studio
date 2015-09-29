@@ -114,6 +114,9 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
     @Override
     protected void displayTIC() {
         final List<IRawFile> rawFiles = new ArrayList<>(rawfiles);
+        if (rawFileLoading != null){
+            rawFileLoading.setWaitingState(true);
+        }
         logger.info("Display {} TIC chromatograms", rawFiles.size());
         SwingWorker worker = new SwingWorker<Integer, Chromatogram>() {
 
@@ -154,6 +157,10 @@ public class MultiRawFilePanel extends AbstractRawFilePanel {
                     logger.info("{} TIC chromatogram extracted", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while reading chromatogram");
+                }finally{
+                    if (rawFileLoading != null){
+                        rawFileLoading.setWaitingState(false);
+                    }
                 }
             }
         };

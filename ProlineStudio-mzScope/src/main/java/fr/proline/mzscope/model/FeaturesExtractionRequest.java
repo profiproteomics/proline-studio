@@ -70,4 +70,46 @@ public class FeaturesExtractionRequest extends ExtractionRequest {
    }
    
    
+   public String getExtractionParamsString(){
+       StringBuilder sb = new StringBuilder();
+       String em = "";
+       switch (getExtractionMethod()) {
+           case EXTRACT_MS2_FEATURES: {
+               em = "Extract MS2 Features";
+               break;
+           }
+           case DETECT_PEAKELS: {
+               em = "Detect Peakels";
+               break;
+           }
+           case DETECT_FEATURES: {
+               em = "Detect Features";
+               break;
+           }
+       }
+       sb.append("<html>");
+       sb.append(em);
+       sb.append(": <br/>");
+       sb.append("m/z tolerance (ppm): ");
+       sb.append(Float.toString(mzTolPPM));
+       sb.append("<br/>");
+       if (isRemoveBaseline()){
+           sb.append("Use Peakels baseline remover <br/>");
+       }
+       if (Double.compare(getMinMz(),getMaxMz() ) == 0 && Double.compare(getMinMz(), 0.0) == 0){
+           sb.append("no m/z bounds");
+       }else if (Double.compare(getMz(), 0) != 0){
+           sb.append("at m/z: ");
+           sb.append(getMz());
+       }else{
+           sb.append("m/z bounds: ");
+           sb.append(getMinMz());
+           sb.append(" - ");
+           sb.append(getMaxMz());
+       }
+       sb.append("</html>");
+       
+       return sb.toString();
+   }
+   
 }

@@ -2,7 +2,6 @@ package fr.proline.mzscope.ui;
 
 import fr.proline.mzscope.model.Spectrum;
 import fr.proline.mzscope.ui.event.ScanHeaderListener;
-import fr.proline.mzscope.utils.MzScopeConstants;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

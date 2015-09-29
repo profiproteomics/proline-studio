@@ -436,6 +436,7 @@ public class ExtractionParamsDialog extends JDialog {
                 double m = Double.parseDouble(mzTF.getText());
                 extractionParams.setMaxMz(m + m * extractionParams.getMzTolPPM() / 1e6);
                 extractionParams.setMinMz(m - m * extractionParams.getMzTolPPM() / 1e6);
+                extractionParams.setMz(m);
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "m/z value is incorrect: " + mzTF.getText());
                 return;

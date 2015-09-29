@@ -40,7 +40,7 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
    public SingleRawFilePanel(IRawFile rawfile) {
       this(rawfile, true);
    }
-
+   
    @Override
    public IRawFile getCurrentRawfile() {
       return rawfile;
@@ -78,6 +78,9 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
    @Override
    public void displayTIC() {
       final IRawFile rawFile = this.rawfile;
+      if (rawFileLoading != null){
+        rawFileLoading.setWaitingState(true);
+      }
       logger.info("Display single TIC chromatogram");
       SwingWorker worker = new SwingWorker<Chromatogram, Void>() {
          @Override
@@ -92,6 +95,10 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
                setMsMsEventButtonEnabled(false);
             } catch (InterruptedException | ExecutionException e) {
                logger.error("Error while reading chromatogram");
+            }finally{
+                if (rawFileLoading != null){
+                    rawFileLoading.setWaitingState(false);
+                }
             }
          }
       };
@@ -100,6 +107,9 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
 
    @Override
    public void displayBPI() {
+       if (rawFileLoading != null){
+        rawFileLoading.setWaitingState(true);
+       }
       final IRawFile rawFile = this.rawfile;
       logger.info("Display single base peak chromatogram");
       SwingWorker worker = new SwingWorker<Chromatogram, Void>() {
@@ -115,6 +125,10 @@ public class SingleRawFilePanel extends AbstractRawFilePanel {
                setMsMsEventButtonEnabled(false);
             } catch (InterruptedException | ExecutionException e) {
                logger.error("Error while reading chromatogram");
+            }finally{
+                if (rawFileLoading != null){
+                    rawFileLoading.setWaitingState(false);
+                }
             }
          }
       };

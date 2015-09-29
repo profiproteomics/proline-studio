@@ -18,12 +18,15 @@ import fr.proline.mzscope.utils.MzScopeConstants;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Frame;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -210,17 +213,19 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
         }
     }
 
-    private void addRawTab(String s, Component c) {
-        addTab(viewersTabPane, s, c);
+    private ButtonTabComponent addRawTab(String s, Component c) {
+        ButtonTabComponent buttonTabComp = addTab(viewersTabPane, s, c, null);
         viewersTabPane.setSelectedComponent(c);
+        return buttonTabComp;
     }
 
-    private void addFeatureTab(String s, Component c) {
-        addTab(featuresTabPane, s, c);
+    private ButtonTabComponent addFeatureTab(String s, Component c, String tooltip) {
+        ButtonTabComponent buttonTabComp = addTab(featuresTabPane, s, c, tooltip);
         featuresTabPane.setSelectedComponent(c);
+        return buttonTabComp;
     }
 
-    private void addTab(final JTabbedPane tabPane, String s, final Component c) {
+    private ButtonTabComponent addTab(final JTabbedPane tabPane, String s, final Component c, String tooltip) {
         tabPane.add(s, c);
         int i = tabPane.getTabCount() - 1;
         ButtonTabComponent buttonTabComp = new ButtonTabComponent(s);
@@ -252,7 +257,21 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
                 }
             }
         });
+        if (tooltip != null){
+            buttonTabComp.setToolTipText(tooltip); // set tooltip disables the tab selection!
+            // so we force the selection
+            buttonTabComp.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int index = tabPane.indexOfTabComponent((Component) e.getSource());
+                    tabPane.setSelectedIndex(index);
+                }
+
+            });
+        }
         tabPane.setTabComponentAt(i, buttonTabComp);
+        return buttonTabComp;
     }
 
     public void displayRawAction(IRawFile rawfile, boolean displayDefaultChrom) {
@@ -273,9 +292,22 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
             }
         }
         if (!rawFilePanelExists) {
+            
             plotPanel = new SingleRawFilePanel(rawfile, displayDefaultChrom);
+            final ButtonTabComponent tabComp  = addRawTab(rawfile.getName(), plotPanel);
+            IRawFileLoading rawFileLoading = new IRawFileLoading() {
+
+                @Override
+                public void setWaitingState(boolean waitingState) {
+                    tabComp.setWaitingState(waitingState);
+                }
+            };
+            plotPanel.setRawFileLoading(rawFileLoading);
+            if (displayDefaultChrom){
+                tabComp.setWaitingState(true);
+            }
             //viewersTabPane.add(rawfile.getName(), plotPanel);
-            addRawTab(rawfile.getName(), plotPanel);
+            
             registerRawFilePanel(rawfile, plotPanel);
         }
     }
@@ -299,8 +331,19 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
         } else {
             name = rawfiles.get(0).getName();
         }
+        
+        
         AbstractRawFilePanel plotPanel = new MultiRawFilePanel(rawfiles);
-        addRawTab(name, plotPanel);
+        final ButtonTabComponent tabComp = addRawTab(name, plotPanel);
+        IRawFileLoading rawFileLoading = new IRawFileLoading() {
+
+            @Override
+            public void setWaitingState(boolean waitingState) {
+                tabComp.setWaitingState(waitingState);
+            }
+        };
+        plotPanel.setRawFileLoading(rawFileLoading);
+        tabComp.setWaitingState(true);
         for (IRawFile rawFile : rawfiles) {
             registerRawFilePanel(rawFile, plotPanel);
         }
@@ -341,7 +384,8 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
     private void extractFeatures(final IRawFile rawFile, final FeaturesExtractionRequest params) {
         if ((selectedRawFilePanel != null) && (viewersTabPane.getSelectedIndex() >= 0)) {
             final FeaturesPanel featurePanel = new FeaturesPanel(rawFile, this);
-            addFeatureTab(rawFile.getName(), featurePanel);
+            final ButtonTabComponent tabComp = addFeatureTab(rawFile.getName(), featurePanel, params.getExtractionParamsString());
+            tabComp.setWaitingState(true);
             fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_STARTED));
             final long start = System.currentTimeMillis();
             SwingWorker worker = new SwingWorker<List<Feature>, Void>() {
@@ -357,8 +401,9 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
                         logger.info("{} features/peakels extracted in {}", features.size(), (System.currentTimeMillis() - start) / 1000.0);
                         featurePanel.setFeatures(features);
                         featuresTabPane.setSelectedComponent(featurePanel);
+                        tabComp.setWaitingState(false);
                         fireExtractionEvent(new ExtractionEvent(this, ExtractionEvent.EXTRACTION_DONE));
-                    } catch (Exception e) {
+                    } catch (InterruptedException | ExecutionException e) {
                         logger.error("Error while reading chromatogram");
                     }
                 }
@@ -520,5 +565,5 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
         TabbedMultiRawFilePanel plotPanel = new TabbedMultiRawFilePanel(rawfiles);
         addRawTab("All", plotPanel);
     }
-
+    
 }

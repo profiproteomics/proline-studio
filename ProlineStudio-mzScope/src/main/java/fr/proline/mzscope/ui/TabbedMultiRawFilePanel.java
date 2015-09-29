@@ -90,7 +90,9 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
               currentChromatogramPanel = (ChromatogramPanel)chromatogramContainerPanel.getComponentAt(chromatogramContainerPanel.getSelectedIndex());
            }
         }) ;
-        chromatogramContainerPanel.setSelectedIndex(0);
+        if (chromatogramContainerPanel.getTabCount() >0 ){
+            chromatogramContainerPanel.setSelectedIndex(0);
+        }
         return chromatogramContainerPanel;
     }
     
@@ -166,7 +168,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
     public Color displayChromatogram(Chromatogram chromato, DisplayMode mode) {
        // TODO : dispach to multiple Components
        return null;
-    }
+       }
     
     
     // override display feature to display all xic

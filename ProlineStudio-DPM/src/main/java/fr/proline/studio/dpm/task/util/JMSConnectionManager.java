@@ -99,11 +99,11 @@ public class JMSConnectionManager {
             try{
                 createConnection();    
             }catch(Exception e){
-                 m_connection = null;
+                m_connection = null;
+                m_serviceQueue = null;
             }
             
-        }
-        
+        }        
         return m_connection;            
     }
     
@@ -119,7 +119,7 @@ public class JMSConnectionManager {
         return m_serviceQueue;
     }
     
-    private void createConnection(){
+    private void createConnection() throws JMSException{
         try {
             if(m_jmsServerHost == null)
                 throw new RuntimeException("JMS Host not defined ! ");
@@ -153,7 +153,8 @@ public class JMSConnectionManager {
                 } catch (Exception exClose) {
                     m_loggerProline.error("Error closing JMS Connection", exClose);
                 }
-            }
+            }            
+            throw je;
         }
     }
     

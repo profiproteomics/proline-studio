@@ -86,6 +86,7 @@
                         <compilerVersion>1.8</compilerVersion>
                         <source>1.8</source> <!-- Java version : 1.8 -->
                         <target>1.8</target>
+                        <useIncrementalCompilation>false</useIncrementalCompilation> <!-- to avoid "endPosTable already set" error -->
                     </configuration>
                 </plugin>
         

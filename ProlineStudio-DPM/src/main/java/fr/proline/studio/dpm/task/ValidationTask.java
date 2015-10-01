@@ -7,6 +7,7 @@ import com.google.api.client.util.ArrayMap;
 import fr.proline.core.orm.uds.dto.DDataset;
 import fr.proline.studio.dam.taskinfo.TaskError;
 import fr.proline.studio.dam.taskinfo.TaskInfo;
+import static fr.proline.studio.dpm.task.FilterRSMProtSetsTask.FILTER_KEYS;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,11 +42,7 @@ public class ValidationTask extends AbstractServiceTask {
     public static String SINGLE_PSM_QUERY_FILTER_NAME = "Single PSM per MS Query";               
     public static String SINGLE_PSM_RANK_FILTER_KEY = "SINGLE_PSM_PER_RANK";
     public static String SINGLE_PSM_RANK_FILTER_NAME = "Single PSM per Rank";               
-    
-    //Protein PreFilter
-    public static String SPECIFIC_PEP_FILTER_KEY = "SPECIFIC_PEP";
-    public static String SPECIFIC_PEP_FILTER_NAME = "Specific Peptides";               
-    
+        
     public ValidationTask(AbstractServiceCallback callback, DDataset dataset, String description, HashMap<String, String> argumentsMap, Integer[] resultSummaryId, String scoringType) {
         super(callback, false /*asynchronous*/, new TaskInfo("Validation of Search Result "+dataset.getName(), true, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_HIGH));
         m_dataset = dataset;
@@ -143,12 +140,13 @@ public class ValidationTask extends AbstractServiceTask {
                 
             // Protein Pre-Filters
             ArrayList proteinFilters = new ArrayList();
-            
-            if (m_argumentsMap.containsKey(SPECIFIC_PEP_FILTER_KEY)) {
-                HashMap filterCfg = new HashMap();
-                filterCfg.put("parameter", SPECIFIC_PEP_FILTER_KEY);
-                filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(SPECIFIC_PEP_FILTER_KEY)) );
-                proteinFilters.add(filterCfg);
+            for (String filterKey : FILTER_KEYS) {
+                if (m_argumentsMap.containsKey(filterKey)) {
+                    HashMap filterCfg = new HashMap();
+                    filterCfg.put("parameter", filterKey);
+                    filterCfg.put("threshold", Integer.valueOf(m_argumentsMap.get(filterKey)));
+                    proteinFilters.add(filterCfg);
+                }
             }
             
             params.put("prot_set_filters", proteinFilters);

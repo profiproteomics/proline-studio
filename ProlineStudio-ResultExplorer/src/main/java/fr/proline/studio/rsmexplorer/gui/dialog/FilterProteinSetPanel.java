@@ -5,9 +5,7 @@
  */
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
-import fr.proline.studio.dpm.task.FilterRSMProtSetsTask;
 import fr.proline.studio.parameter.AbstractParameter;
-import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ParameterComboboxRenderer;
 import fr.proline.studio.utils.IconManager;
 import java.awt.GridBagConstraints;
@@ -19,7 +17,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 /**
  *
@@ -32,9 +29,9 @@ public class FilterProteinSetPanel extends JPanel {
     private JButton m_addProteinPrefilterButton = null;
     private AbstractParameter[] m_proteinFilterParameters;
     
-    public FilterProteinSetPanel(String title) {
+    public FilterProteinSetPanel(String title,AbstractParameter[] proteinFilterParameters) {
         super(new GridBagLayout());
-        createParameters();
+        m_proteinFilterParameters = proteinFilterParameters;
         if (title != null && !title.isEmpty()) {
             setBorder(BorderFactory.createTitledBorder(title));
         }
@@ -42,19 +39,6 @@ public class FilterProteinSetPanel extends JPanel {
         initProteinFilterPanel();
     }
 
-    private void createParameters() {
-        m_proteinFilterParameters = new AbstractParameter[FilterRSMProtSetsTask.FILTER_KEYS.length + 1];
-        m_proteinFilterParameters[0] = null;
-        for (int index = 1; index <= FilterRSMProtSetsTask.FILTER_KEYS.length; index++) {
-            m_proteinFilterParameters[index] = new IntegerParameter(FilterRSMProtSetsTask.FILTER_KEYS[index - 1], FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
-            m_proteinFilterParameters[index].setAssociatedData(">=");
-            AbstractParameter p = m_proteinFilterParameters[index];
-            if (p != null) {
-                p.setUsed(false);
-                p.setCompulsory(false);
-            }
-        }
-    }
     
     public AbstractParameter[] getProteinSetFilterParameters() {        
         return m_proteinFilterParameters;        

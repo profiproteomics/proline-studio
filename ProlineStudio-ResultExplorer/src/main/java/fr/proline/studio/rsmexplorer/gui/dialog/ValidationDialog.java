@@ -8,6 +8,7 @@ import fr.proline.studio.dam.tasks.AbstractDatabaseTask;
 import fr.proline.studio.dam.tasks.DatabaseDataSetTask;
 import fr.proline.studio.dam.tasks.SubTask;
 import fr.proline.studio.dpm.data.ChangeTypicalRule;
+import fr.proline.studio.dpm.task.FilterRSMProtSetsTask;
 import fr.proline.studio.dpm.task.ValidationTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.*;
@@ -67,6 +68,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
     private JComboBox m_psmPrefilterJComboBox = null;
     private JButton m_addPsmPrefilterButton = null;
     
+    private AbstractParameter[] m_proteinPrefilterParameters;
     private FilterProteinSetPanel m_proteinPrefiltersPanel;
     
     private JLabel m_fdrLabel = null;
@@ -113,8 +115,6 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
         
-        //!! Should create panel before for ParameterInit !! Beurrrk :o) A Revoir
-        m_proteinPrefiltersPanel = new FilterProteinSetPanel(" Prefilter(s) ");
         m_parameterList = new ParameterList("Validation");
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());
@@ -494,9 +494,9 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;       
+        m_proteinPrefiltersPanel = new FilterProteinSetPanel(" Filter(s) ", m_proteinPrefilterParameters);
         m_proteinPrefiltersPanel.addComponentListener((ComponentListener) this);
         proteinSetFilterPanel.add(m_proteinPrefiltersPanel, c);
-//        proteinSetFilterPanel.add(createProteinPreFilterPanel(), c);
         
         c.gridy++;
         proteinSetFilterPanel.add(createProteinFDRFilterPanel(), c);
@@ -686,9 +686,7 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_psmPrefilterParameters[7].setAssociatedData(":");        
         m_psmPrefilterParameters[8] = new NoneParameter(ValidationTask.SINGLE_PSM_RANK_FILTER_KEY, ValidationTask.SINGLE_PSM_RANK_FILTER_NAME);
 //        m_psmPrefilterParameters[8].setAssociatedData("=");
-
-        for (int i = 0; i < m_psmPrefilterParameters.length; i++) {
-            AbstractParameter p = m_psmPrefilterParameters[i];
+        for (AbstractParameter p : m_psmPrefilterParameters) {
             if (p == null) {
                 continue;
             }
@@ -697,16 +695,18 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
             m_parameterList.add(p);
         }
 
-        AbstractParameter[] protFilterParamList = m_proteinPrefiltersPanel.getProteinSetFilterParameters();
-        for (AbstractParameter p : protFilterParamList) {           
-            if (p == null) {
-                continue;
+        m_proteinPrefilterParameters = new AbstractParameter[FilterRSMProtSetsTask.FILTER_KEYS.length + 1];
+        m_proteinPrefilterParameters[0] = null;
+         for (int index = 1; index <= FilterRSMProtSetsTask.FILTER_KEYS.length; index++) {
+            m_proteinPrefilterParameters[index] = new IntegerParameter(FilterRSMProtSetsTask.FILTER_KEYS[index - 1], FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
+            m_proteinPrefilterParameters[index].setAssociatedData(">=");
+            AbstractParameter p = m_proteinPrefilterParameters[index];
+            if (p != null) {
+                p.setUsed(false);
+                p.setCompulsory(false);
+                m_parameterList.add(p);
             }
-            p.setUsed(false);
-            p.setCompulsory(false);
-            m_parameterList.add(p);
-        }
-        
+        }        
         
         m_fdrTextField = new JTextField(5);
         m_fdrFilterParameter = new DoubleParameter("expected_fdr", "FDR", m_fdrTextField, new Double(5), new Double(0), new Double(10));
@@ -729,8 +729,6 @@ public class ValidationDialog extends DefaultDialog implements ComponentListener
         m_proteinFdrFilterParameter.setUsed(false);
         m_proteinFdrFilterParameter.setCompulsory(false);
         m_parameterList.add(m_proteinFdrFilterParameter);
-
-
 
     }
 

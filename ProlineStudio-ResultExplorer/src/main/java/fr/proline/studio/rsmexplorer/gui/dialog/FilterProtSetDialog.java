@@ -1,7 +1,9 @@
 package fr.proline.studio.rsmexplorer.gui.dialog;
 
+import fr.proline.studio.dpm.task.FilterRSMProtSetsTask;
 import fr.proline.studio.gui.DefaultDialog;
 import fr.proline.studio.parameter.AbstractParameter;
+import fr.proline.studio.parameter.IntegerParameter;
 import fr.proline.studio.parameter.ParameterError;
 import fr.proline.studio.parameter.ParameterList;
 import fr.proline.studio.settings.FilePreferences;
@@ -18,6 +20,7 @@ import java.util.HashMap;
 import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import org.openide.util.NbPreferences;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +33,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
     private static FilterProtSetDialog m_singletonDialog = null;
 
     private ParameterList m_parameterList;
+    private AbstractParameter[] m_proteinFilterParameters;
     private FilterProteinSetPanel m_proteinPrefiltersPanel;
 
     private final static String SETTINGS_KEY = "ProtSetFiltering";
@@ -50,8 +54,6 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         setButtonVisible(BUTTON_LOAD, true);
         setButtonVisible(BUTTON_SAVE, true);
 
-        //!! Should create panel before for ParameterInit !! Beurrrk :o) a revoir
-        m_proteinPrefiltersPanel = new FilterProteinSetPanel(" Filter(s) ");
         m_parameterList = new ParameterList("ProtSet Filtering");
         createParameters();
         m_parameterList.updateIsUsed(NbPreferences.root());
@@ -63,14 +65,18 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
     }
 
     private void createParameters() {
-        AbstractParameter[] pList = m_proteinPrefiltersPanel.getProteinSetFilterParameters();
-        for (AbstractParameter p : pList) {
-            if (p == null) {
-                continue;
+        
+        m_proteinFilterParameters = new AbstractParameter[FilterRSMProtSetsTask.FILTER_KEYS.length + 1];
+        m_proteinFilterParameters[0] = null;
+        for (int index = 1; index <= FilterRSMProtSetsTask.FILTER_KEYS.length; index++) {
+            m_proteinFilterParameters[index] = new IntegerParameter(FilterRSMProtSetsTask.FILTER_KEYS[index - 1], FilterRSMProtSetsTask.FILTER_NAME[index - 1], new JTextField(6), new Integer(1), new Integer(1), null);
+            m_proteinFilterParameters[index].setAssociatedData(">=");
+            AbstractParameter p = m_proteinFilterParameters[index];
+            if (p != null) {
+                p.setUsed(false);
+                p.setCompulsory(false);
+                m_parameterList.add(p);
             }
-            p.setUsed(false);
-            p.setCompulsory(false);
-            m_parameterList.add(p);
         }
     }
 
@@ -86,6 +92,7 @@ public class FilterProtSetDialog extends DefaultDialog implements ComponentListe
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
+        m_proteinPrefiltersPanel = new FilterProteinSetPanel(" Filter(s) ", m_proteinFilterParameters);
         m_proteinPrefiltersPanel.addComponentListener((ComponentListener) this);
         internalPanel.add(m_proteinPrefiltersPanel, c);
 

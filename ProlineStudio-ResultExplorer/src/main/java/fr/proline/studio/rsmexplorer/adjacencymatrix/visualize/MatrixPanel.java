@@ -58,7 +58,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
 
     private boolean m_firstPaint = true;
 
-    private int[] m_peptideRank;
+    private Integer[] m_peptideRank;
     private Float[] m_peptideScore;
     private Float[] m_proteinScore;
 
@@ -131,7 +131,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
         m_peptideCells = new ArrayList<>(rowCount);	//pepide score
         m_proteinCells = new ArrayList<>(columnCount);	// protine Score
 
-        m_peptideRank = new int[rowCount];
+        m_peptideRank = new Integer[rowCount];
 
         m_flagArray = new int[columnCount * rowCount];
 
@@ -552,7 +552,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                 m_sb.append("    Score: ");
                 m_sb.append(peptideMatch.getScore());
                 m_sb.append("    Rank: ");
-                m_sb.append(peptideMatch.getCDPrettyRank());
+                m_sb.append(peptideMatch.getCDPrettyRank() == null ? "-": peptideMatch.getCDPrettyRank());
                 info[1] = m_sb.toString();
                 m_sb.setLength(0);
             }
@@ -588,7 +588,7 @@ public class MatrixPanel extends HourglassPanel implements DataBoxPanelInterface
                 return COLOR_OVER;
             }
             
-            if (m_peptideRank[m_row] == 1) {
+            if (m_peptideRank[m_row] != null && m_peptideRank[m_row] == 1) {
                 return COLOR_PEPTIDE_RANK1;
             }
             

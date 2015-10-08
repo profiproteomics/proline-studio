@@ -77,8 +77,9 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     private final static int EMPTY_TRASH = 10;
     private final static int LOAD_DATASET_AND_RSM_INFO = 11;
     private final static int LOAD_DATASET = 12;
-    private final static int CLEAR_DATASET = 13;
-    private final static int LOAD_QUANTITATION = 14;
+    private final static int CLEAR_DATASET_RSM_AND_RSET = 13;
+    private final static int CLEAR_DATASET_RSM = 14;
+    private final static int LOAD_QUANTITATION = 15;
      
     private static final Object WRITE_DATASET_LOCK = new Object();
     
@@ -272,12 +273,13 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
     /**
      * Load Rset and Rsm of a dataset
      * @param dataset 
+     * @param rsmAndRset 
      */
-    public void initClearDataset(DDataset dataset) {
+    public void initClearDataset(DDataset dataset, boolean rsmAndRset) {
         setTaskInfo(new TaskInfo("Clear Dataset "+dataset.getName(), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_LOW));
         m_dataset = dataset;
 
-        m_action = CLEAR_DATASET;
+        m_action = (rsmAndRset) ? CLEAR_DATASET_RSM_AND_RSET : CLEAR_DATASET_RSM;
     }
     
     
@@ -314,7 +316,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
             case EMPTY_TRASH:
             case LOAD_DATASET_AND_RSM_INFO:
             case LOAD_DATASET:
-            case CLEAR_DATASET:
+            case CLEAR_DATASET_RSM_AND_RSET:
+            case CLEAR_DATASET_RSM:
             case LOAD_QUANTITATION:
                 return true; // done one time
          
@@ -368,7 +371,8 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
                 return fetchDatasetWithIDAndRSMInfo();
             case LOAD_DATASET:
                 return fetchDataset();
-            case CLEAR_DATASET:
+            case CLEAR_DATASET_RSM_AND_RSET:
+            case CLEAR_DATASET_RSM:
                 return clearDataset();
             case LOAD_QUANTITATION:
                 return fetchQuantitation();
@@ -1110,10 +1114,15 @@ public class DatabaseDataSetTask extends AbstractDatabaseTask {
         try {
             entityManagerUDS.getTransaction().begin();
 
-            String renameSQL = "UPDATE Dataset d set d.resultSetId=null,d.resultSummaryId=null where d.id = :datasetId";
-            Query renameQuery = entityManagerUDS.createQuery(renameSQL);
-            renameQuery.setParameter("datasetId", m_dataset.getId());
-            renameQuery.executeUpdate();
+            String updateSQL;
+            if (m_action == CLEAR_DATASET_RSM_AND_RSET) {
+                updateSQL = "UPDATE Dataset d set d.resultSetId=null,d.resultSummaryId=null where d.id = :datasetId";
+            } else {
+                updateSQL = "UPDATE Dataset d set d.resultSummaryId=null where d.id = :datasetId";
+            }
+            Query updateQuery = entityManagerUDS.createQuery(updateSQL);
+            updateQuery.setParameter("datasetId", m_dataset.getId());
+            updateQuery.executeUpdate();
 
             entityManagerUDS.getTransaction().commit();
 

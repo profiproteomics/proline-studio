@@ -16,7 +16,7 @@ import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.NbBundle;
 
 /**
- * Removed Identification Summary and potentially Search Result to a dataset
+ * Remove Identification Summary and potentially Search Result from a dataset
  * @author JM235353
  */
 public class ClearDatasetAction extends AbstractRSMAction {
@@ -52,8 +52,10 @@ public class ClearDatasetAction extends AbstractRSMAction {
                     if (success) {
                         DDataset dataset = node.getDataset();
                         dataset.setResultSummaryId(null);
+                        dataset.setResultSummary(null);
                         if (!node.isLeaf()) {
                             dataset.setResultSetId(null);
+                            dataset.setResultSet(null);
                         }
                     }
                     node.setIsChanging(false);
@@ -63,7 +65,7 @@ public class ClearDatasetAction extends AbstractRSMAction {
             
             DDataset dataset = node.getDataset();
             DatabaseDataSetTask task = new DatabaseDataSetTask(callback);
-            task.initClearDataset(dataset);
+            task.initClearDataset(dataset, !node.isLeaf());
             
             AccessDatabaseThread.getAccessDatabaseThread().addTask(task);
         }
@@ -104,8 +106,8 @@ public class ClearDatasetAction extends AbstractRSMAction {
                 }
                 AbstractNode parentNode = (AbstractNode) datasetNode.getParent();
                 if (parentNode.getType() == AbstractNode.NodeTypes.DATA_SET) {
-                    DataSetNode parentDatasetNode = (DataSetNode) node;
-                    if (parentDatasetNode.hasResultSet() || parentDatasetNode.hasResultSummary()) {
+                    DataSetNode parentDatasetNode = (DataSetNode) parentNode;
+                    if (parentDatasetNode.isChanging() || parentDatasetNode.hasResultSet() || parentDatasetNode.hasResultSummary()) {
                         // parent merged
                         setEnabled(false);
                         return;
@@ -116,6 +118,16 @@ public class ClearDatasetAction extends AbstractRSMAction {
                 if (!datasetNode.hasResultSummary() && ! datasetNode.hasResultSet()) {
                     setEnabled(false);
                     return;
+                } else {
+                    AbstractNode parentNode = (AbstractNode) datasetNode.getParent();
+                    if (parentNode.getType() == AbstractNode.NodeTypes.DATA_SET) {
+                        DataSetNode parentDatasetNode = (DataSetNode) parentNode;
+                        if (parentDatasetNode.isChanging() || parentDatasetNode.hasResultSet() || parentDatasetNode.hasResultSummary()) {
+                            // parent merged
+                            setEnabled(false);
+                            return;
+                        }
+                    }
                 }
             }
             

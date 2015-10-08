@@ -19,6 +19,7 @@ import fr.proline.studio.rsmexplorer.tree.AbstractNode;
 import fr.proline.studio.rsmexplorer.tree.identification.IdentificationTree;
 import fr.proline.studio.rsmexplorer.tree.AbstractTree;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultTreeModel;
@@ -37,71 +38,68 @@ public class MergeAction extends AbstractRSMAction {
     @Override
     public void actionPerformed(final AbstractNode[] selectedNodes, int x, int y) {
 
-        // merge done only on one node for the moment
-        final AbstractNode node = selectedNodes[0];
+        int nbSelectedNodes = selectedNodes.length;
+        for (int i = 0; i < nbSelectedNodes; i++) {
+            final AbstractNode node = (AbstractNode) selectedNodes[i];
 
-        AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
+            AbstractDatabaseCallback callback = new AbstractDatabaseCallback() {
 
-            @Override
-            public boolean mustBeCalledInAWT() {
-                return true;
-            }
-
-            @Override
-            public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
-
-                // check if we can do a merge
-                String error = null;
-                int nbChildren = node.getChildCount();
-                /*if (nbChildren == 1) {
-                    error = "Merge on an Dataset with only one Child is not possible";
-                }*/
-
-                ArrayList<Long> resultSetIdList = new ArrayList<>();
-                ArrayList<Long> resultSummaryIdList = new ArrayList<>();
-                for (int i = 0; i < nbChildren; i++) {
-                    DataSetNode childNode = (DataSetNode) node.getChildAt(i);
-                    if (childNode.isChanging()) {
-                        error = "Merge is not possible while a child Search Result is being imported or validated";
-                        break;
-                    }
-                    if (!childNode.hasResultSet()) {
-                        error = "Merge is not possible : " + childNode.getDataset().getName() + " has no Search Result";
-                        break;
-                    }
-
-                    resultSetIdList.add(childNode.getDataset().getResultSetId());
-                    if (childNode.hasResultSummary()) {
-                        resultSummaryIdList.add(childNode.getDataset().getResultSummaryId());
-                    }
+                @Override
+                public boolean mustBeCalledInAWT() {
+                    return true;
                 }
 
-                if (error != null) {
-                    JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
-                    return;
+                @Override
+                public void run(boolean success, long taskId, SubTask subTask, boolean finished) {
+
+                    // check if we can do a merge
+                    String error = null;
+                    int nbChildren = node.getChildCount();
+                    /*if (nbChildren == 1) {
+                     error = "Merge on an Dataset with only one Child is not possible";
+                     }*/
+
+                    ArrayList<Long> resultSetIdList = new ArrayList<>();
+                    ArrayList<Long> resultSummaryIdList = new ArrayList<>();
+                    for (int i = 0; i < nbChildren; i++) {
+                        DataSetNode childNode = (DataSetNode) node.getChildAt(i);
+                        if (childNode.isChanging()) {
+                            error = "Merge is not possible while a child Search Result is being imported or validated";
+                            break;
+                        }
+                        if (!childNode.hasResultSet()) {
+                            error = "Merge is not possible : " + childNode.getDataset().getName() + " has no Search Result";
+                            break;
+                        }
+
+                        resultSetIdList.add(childNode.getDataset().getResultSetId());
+                        if (childNode.hasResultSummary()) {
+                            resultSummaryIdList.add(childNode.getDataset().getResultSummaryId());
+                        }
+                    }
+
+                    if (error != null) {
+                        JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    if (resultSummaryIdList.size() == nbChildren) {
+                        // we do a merge on resultSummary
+                        askMergeService((DataSetNode) node, resultSummaryIdList, true);
+                    } else if (resultSummaryIdList.size() > 0) {
+                        // not all children have a result summary
+                        error = "Merge is not possible : some Search Results are not validated ";
+                        JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        // merge on result set
+                        askMergeService((DataSetNode) node, resultSetIdList, false);
+                    }
+
                 }
+            };
 
-
-                if (resultSummaryIdList.size()==nbChildren) {
-                    // we do a merge on resultSummary
-                    askMergeService((DataSetNode) node, resultSummaryIdList, true);
-                } else if (resultSummaryIdList.size()>0) {
-                    // not all children have a result summary
-                    error = "Merge is not possible : some Search Results are not validated ";
-                    JOptionPane.showMessageDialog(IdentificationTree.getCurrentTree(), error, "Warning", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    // merge on result set
-                    askMergeService((DataSetNode) node, resultSetIdList, false);
-                }
-
-                
-
-
-            }
-        };
-
-        IdentificationTree.getCurrentTree().loadInBackground(node, callback);
-
+            IdentificationTree.getCurrentTree().loadInBackground(node, callback);
+        }
     }
 
     private void askMergeService(final DataSetNode node, final List<Long> idList, final boolean mergeOnRsm) {
@@ -194,39 +192,64 @@ public class MergeAction extends AbstractRSMAction {
             return;
         }
         
-        if (selectedNodes.length != 1) {
+        int nbSelectedNodes = selectedNodes.length;
+        
+        if (nbSelectedNodes<0) {
             setEnabled(false);
             return;
         }
 
-        AbstractNode node = (AbstractNode) selectedNodes[0];
-
-        if (node.isChanging()) {
-            setEnabled(false);
-            return;
+        // check if the user has asked merge at the same time between children and
+        // parents, if it is the case, it is forbidden
+        HashSet<AbstractNode> allSelelectedNodeSet = new HashSet<>();
+        for (int i = 0; i < nbSelectedNodes; i++) {
+            AbstractNode node = selectedNodes[i];
+            allSelelectedNodeSet.add(node);
         }
-
-        if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
-            setEnabled(false);
-            return;
+        for (int i = 0; i < nbSelectedNodes; i++) {
+            AbstractNode node = selectedNodes[i];
+            node = (AbstractNode) node.getParent();
+            while (node != null) {
+                if (allSelelectedNodeSet.contains(node)) {
+                    setEnabled(false);
+                    return;
+                }
+                node = (AbstractNode) node.getParent();
+            }
         }
+        
+        
+        
+        for (int i = 0; i < nbSelectedNodes; i++) {
+            AbstractNode node = (AbstractNode) selectedNodes[i];
 
-        DataSetNode datasetNode = (DataSetNode) node;
+            if (node.isChanging()) {
+                setEnabled(false);
+                return;
+            }
 
-        if (datasetNode.isLeaf()) {
-            setEnabled(false);
-            return;
-        }
+            if (node.getType() != AbstractNode.NodeTypes.DATA_SET) {
+                setEnabled(false);
+                return;
+            }
 
-        Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
-        if (datasetType != Dataset.DatasetType.AGGREGATE) {
-            setEnabled(false);
-            return;
-        }
+            DataSetNode datasetNode = (DataSetNode) node;
 
-        if (datasetNode.hasResultSet()) {
-            setEnabled(false);
-            return;
+            if (datasetNode.isLeaf()) {
+                setEnabled(false);
+                return;
+            }
+
+            Dataset.DatasetType datasetType = ((DataSetData) datasetNode.getData()).getDatasetType();
+            if (datasetType != Dataset.DatasetType.AGGREGATE) {
+                setEnabled(false);
+                return;
+            }
+
+            if (datasetNode.hasResultSet()) {
+                setEnabled(false);
+                return;
+            }
         }
 
         setEnabled(true);

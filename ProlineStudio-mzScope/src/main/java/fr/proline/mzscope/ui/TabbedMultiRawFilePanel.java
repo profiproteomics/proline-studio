@@ -6,6 +6,7 @@ import fr.proline.mzscope.model.IRawFile;
 import fr.proline.mzscope.model.Ms1ExtractionRequest;
 import fr.proline.mzscope.model.MzScopeCallback;
 import fr.proline.mzscope.model.Spectrum;
+import fr.proline.mzscope.utils.ButtonTabComponent;
 import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import fr.proline.studio.utils.CyclicColorPalette;
 import java.awt.BorderLayout;
@@ -42,11 +43,15 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
 
     private final List<IRawFile> rawfiles;
     private final Map<IRawFile, Chromatogram> mapChromatogramForRawFile;
-
+    
+    private final Map<IRawFile, IRawFileLoading> mapRawFileLoading;
+    
+    
     public TabbedMultiRawFilePanel(List<IRawFile> rawfiles) {
         super();
         this.rawfiles = rawfiles;
         mapChromatogramForRawFile = new HashMap();
+        mapRawFileLoading = new HashMap();
         for (IRawFile rawFile : rawfiles) {
             mapChromatogramForRawFile.put(rawFile, null);
         }
@@ -59,7 +64,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
         this.setLayout(new BorderLayout());
         this.add(getSplitPane(), BorderLayout.CENTER);
     }
-
+    
     private JSplitPane getSplitPane() {
         if (this.splitPane == null) {
             splitPane = new JSplitPane();
@@ -80,7 +85,25 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
             chromatogramContainerPanel = new JTabbedPane();
             chromatogramContainerPanel.setName("chromatogramContainerPanel");
             for (IRawFile rawFile : rawfiles) {
+                ButtonTabComponent buttonTabComp = new ButtonTabComponent(rawFile.getName());
+                IRawFileLoading rawFileLoading = (boolean waitingState) -> {
+                    buttonTabComp.setWaitingState(waitingState);
+                };
+                mapRawFileLoading.put(rawFile, rawFileLoading);
+                buttonTabComp.addCloseTabListener(new ButtonTabComponent.CloseTabListener() {
+
+                    @Override
+                    public void closeTab(ButtonTabComponent buttonTabComponent) {
+                        int index = chromatogramContainerPanel.indexOfTabComponent(buttonTabComponent);
+                        if (index != -1) {
+                            chromatogramContainerPanel.remove(index);
+                        }
+                    }
+                    
+                });
                 chromatogramContainerPanel.addTab(rawFile.getName(), getChromatogramPanel(rawFile));
+                int i = chromatogramContainerPanel.getTabCount() - 1;
+                chromatogramContainerPanel.setTabComponentAt(i, buttonTabComp);
             }
         }
         chromatogramContainerPanel.addChangeListener(new ChangeListener() {
@@ -230,8 +253,9 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
 
             @Override
             protected Integer doInBackground() throws Exception {
-
+                    
                 for (IRawFile rawFile : rawfiles) {
+                    mapRawFileLoading.get(rawFile).setWaitingState(true);
                     Chromatogram c = rawFile.getTIC();
                     count++;
                     publish(c);
@@ -253,6 +277,10 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
                     logger.info("{} TIC chromatogram extracted", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while reading chromatogram");
+                }finally{
+                    for (IRawFile rawFile : rawfiles) {
+                        mapRawFileLoading.get(rawFile).setWaitingState(false);
+                    }
                 }
             }
         };

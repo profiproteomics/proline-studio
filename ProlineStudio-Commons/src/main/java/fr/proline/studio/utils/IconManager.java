@@ -279,7 +279,7 @@ public class IconManager {
             case OK:
                 return "fr/proline/studio/images/tick.png";
             case CANCEL:
-                return "fr/proline/studio/images/tick-red.png";
+                return "fr/proline/studio/images/cross.png";
             case DEFAULT:
                 return "fr/proline/studio/images/arrow-circle.png";
             case TICK_SMALL:

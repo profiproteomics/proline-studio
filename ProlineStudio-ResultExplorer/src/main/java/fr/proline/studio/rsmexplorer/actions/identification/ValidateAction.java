@@ -65,15 +65,15 @@ public class ValidateAction extends AbstractRSMAction {
             String message;
             if (nbAlreadyValidated == 1) {
                 if (nbNodes == 1) {
-                    message = "Search Result has been validated already.\nDo you want to re-validate it ?";
+                    message = "Search Result has been already validated.\nDo you want to re-validate it ?";
                 } else {
-                    message = "One of the Search Results has been validated already.\nDo you want to re-validate it ?";
+                    message = "One of the Search Results has been already validated.\nDo you want to re-validate it ?";
                 }
             } else {
                 if (nbNodes == nbAlreadyValidated) {
-                    message = "Search Results have been validated already.\nDo you want to re-validate them ?";
+                    message = "Search Results have been already validated.\nDo you want to re-validate them ?";
                 } else {
-                    message = "Some of the Search Results have been validated already.\nDo you want to re-validate them ?";
+                    message = "Some of the Search Results have been already validated.\nDo you want to re-validate them ?";
                 }
             }
             OptionDialog yesNoDialog = new OptionDialog(WindowManager.getDefault().getMainWindow(), "Re-Validate ?", message);

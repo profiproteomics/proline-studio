@@ -369,55 +369,15 @@ public class QuantitationTree extends AbstractTree implements TreeWillExpandList
     public void mousePressed(MouseEvent e) {
 
         if (SwingUtilities.isRightMouseButton(e)) {
+            manageSelectionOnRightClick(e);
 
-            int[] selectedRows = getSelectionRows();
-            int nbSelectedRows = selectedRows.length;
-            if (nbSelectedRows == 0) {
-                // no row is selected, we select the current row
-                int row = getRowForLocation(e.getX(), e.getY());
-                if (row != -1) {
-                    setSelectionRow(row);
-                }
-            } else if (nbSelectedRows == 1) {
-                // one row is selected
-                int row = getRowForLocation(e.getX(), e.getY());
-                if ((row != -1) && (e.isShiftDown() || e.isControlDown())) {
-                    addSelectionRow(row);
-                } else if ((row != -1) && (row != selectedRows[0])) {
-                    // we change the selection
-                    setSelectionRow(row);
-                }
-            } else {
-                // multiple row are already selected
-                // if ctrl or shift is down, we add the row to the selection
-                if (e.isShiftDown() || e.isControlDown()) {
-                    int row = getRowForLocation(e.getX(), e.getY());
-                    if (row != -1) {
-                        addSelectionRow(row);
-                    }
-                }
-            }
-
-        }/*
-         * else if (e.getClickCount() == 2) {
-         *
-         * // display All imported rset on double click AbstractNode[]
-         * selectedNodes = getSelectedNodes(); int nbNodes =
-         * selectedNodes.length; if (nbNodes == 1) { AbstractNode n =
-         * selectedNodes[0]; if (n instanceof RSMAllImportedNode) { new
-         * DisplayAllRsetAction().actionPerformed(selectedNodes, e.getX(),
-         * e.getY()); } }
         }
-         */
-
-
-
-
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
         if (m_isMainTree && SwingUtilities.isRightMouseButton(e)) {
+            manageSelectionOnRightClick(e);
             triggerPopup(e);
         }
     }

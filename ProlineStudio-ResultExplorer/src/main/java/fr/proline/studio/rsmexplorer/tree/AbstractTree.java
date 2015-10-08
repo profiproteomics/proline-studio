@@ -322,7 +322,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
         nodePath.remove(nodePath.size() - 1);
     }
     
-        /**
+    /**
      * Return an array of all selected nodes of the tree
      * @return 
      */
@@ -339,6 +339,51 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
         return nodes;
     }
+    
+    public boolean isSelected(int row) {
+        if (row == -1) {
+            return false;
+        }
+        return getSelectionModel().isRowSelected(row);
+    }
+    
+        
+    protected void manageSelectionOnRightClick(MouseEvent e) {
+
+        int[] selectedRows = getSelectionRows();
+        int nbSelectedRows = selectedRows.length;
+        if (nbSelectedRows == 0) {
+            // no row is selected, we select the current row
+            int row = getRowForLocation(e.getX(), e.getY());
+            if (row != -1) {
+                setSelectionRow(row);
+            }
+        } else if (nbSelectedRows == 1) {
+            // one row is selected
+            int row = getRowForLocation(e.getX(), e.getY());
+            if ((row != -1) && (e.isShiftDown() || e.isControlDown())) {
+                addSelectionRow(row);
+            } else if ((row != -1) && (row != selectedRows[0])) {
+                // we change the selection
+                setSelectionRow(row);
+            }
+        } else {
+            // multiple row are already selected
+            // if ctrl or shift is down, we add the row to the selection
+            if (e.isShiftDown() || e.isControlDown()) {
+                int row = getRowForLocation(e.getX(), e.getY());
+                if (row != -1) {
+                    addSelectionRow(row);
+                }
+            } else {
+                int row = getRowForLocation(e.getX(), e.getY());
+                if ((row != -1) && (!isSelected(row))) {
+                    setSelectionRow(row);
+                }
+            }
+        }
+    }
+    
     
     public void expandNodeIfNeeded(AbstractNode n) {
         final TreePath pathToExpand = new TreePath(n.getPath());
@@ -400,7 +445,7 @@ public abstract class AbstractTree extends JTree implements MouseListener {
 
         @Override
         public void setSelectionPaths(TreePath[] pPaths) {
-            List<TreePath> newSelectionList = new ArrayList<TreePath>();
+            List<TreePath> newSelectionList = new ArrayList<>();
             for(TreePath path : pPaths){
                 AbstractNode node = (AbstractNode) path.getLastPathComponent();
                 if(!node.isDisabled())

@@ -161,7 +161,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public Class getColumnClass(int col) {
-        
+        col = m_colUsed[col];
         if (col == COLTYPE_PEPTIDE_ID) {
             return Long.class;
         }
@@ -172,7 +172,7 @@ public class PeptideMatchTableModel extends LazyTableModel implements GlobalTabl
 
     @Override
     public int getSubTaskId(int col) {
- 
+        col = m_colUsed[col];
         switch (col) {
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE: // no data read at all (we only have the id of the PeptideMatch)
             case COLTYPE_PEPTIDE_IS_DECOY:

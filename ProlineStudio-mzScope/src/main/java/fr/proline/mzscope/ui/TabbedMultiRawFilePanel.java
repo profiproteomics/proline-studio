@@ -114,6 +114,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
         });
         if (chromatogramContainerPanel.getTabCount() > 0) {
             chromatogramContainerPanel.setSelectedIndex(0);
+            currentChromatogramPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(0);
         }
         return chromatogramContainerPanel;
     }
@@ -145,7 +146,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
         Chromatogram c = getCurrentChromatogram();
         if (c != null) {
             for (Map.Entry<IRawFile, Chromatogram> entrySet : mapChromatogramForRawFile.entrySet()) {
-                if (entrySet.getValue().equals(c)) {
+                if (c.equals(entrySet.getValue())) {
                     return entrySet.getKey();
                 }
             }
@@ -205,7 +206,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
             if (tabTitle.equals(rawFileName)) {  // see how to better get the tabComponent linked to a rawFile
                 ChromatogramPanel chromatoPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(t);
                 c = chromatoPanel.displayChromatogram(chromato, mode);
-                mapChromatogramForRawFile.put(getCurrentRawfile(), chromato);
+                mapChromatogramForRawFile.put(getRawFile(rawFileName), chromato);
             }
         }
         return c;
@@ -219,7 +220,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
 
     @Override
     public void displayScan(long index) {
-        if ((currentScan == null) || (index != currentScan.getIndex()) && getCurrentRawfile() != null) {
+        if (getCurrentRawfile() != null && ((currentScan == null) || (index != currentScan.getIndex()) )) {
             currentScan = getCurrentRawfile().getSpectrum((int) index);
             if (currentScan != null) {
                 spectrumContainerPanel.displayScan(currentScan);

@@ -109,7 +109,9 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
         chromatogramContainerPanel.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                currentChromatogramPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(chromatogramContainerPanel.getSelectedIndex());
+                if (chromatogramContainerPanel.getSelectedIndex() != -1){
+                    currentChromatogramPanel = (ChromatogramPanel) chromatogramContainerPanel.getComponentAt(chromatogramContainerPanel.getSelectedIndex());
+                }
             }
         });
         if (chromatogramContainerPanel.getTabCount() > 0) {
@@ -164,6 +166,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
             protected Integer doInBackground() throws Exception {
 
                 for (IRawFile rawFile : rawfiles) {
+                    mapRawFileLoading.get(rawFile).setWaitingState(true);
                     Chromatogram c = rawFile.getXIC(params);
                     count++;
                     publish(c);
@@ -174,13 +177,7 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
             @Override
             protected void process(List<Chromatogram> chunks) {
                 Chromatogram c = chunks.get(chunks.size() - 1);
-                if (count == 1) {
-                    logger.info("display first chromato");
-                    displayChromatogram(c, DisplayMode.REPLACE);
-                } else {
-                    logger.info("add additionnal chromato");
-                    displayChromatogram(c, DisplayMode.OVERLAY);
-                }
+                displayChromatogram(c, DisplayMode.REPLACE);
             }
 
             @Override
@@ -189,6 +186,10 @@ public class TabbedMultiRawFilePanel extends JPanel implements IRawFilePanel {
                     logger.info("{} TIC chromatogram extracted", get());
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while reading chromatogram");
+                }finally{
+                    rawfiles.stream().forEach((rawFile) -> {
+                        mapRawFileLoading.get(rawFile).setWaitingState(false);
+                    });
                 }
             }
         };

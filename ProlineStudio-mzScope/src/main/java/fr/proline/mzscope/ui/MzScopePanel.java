@@ -15,6 +15,7 @@ import fr.proline.mzscope.ui.dialog.ExtractionParamsDialog;
 import fr.proline.mzscope.ui.event.ExtractionEvent;
 import fr.proline.mzscope.ui.event.ExtractionStateListener;
 import fr.proline.mzscope.utils.MzScopeConstants;
+import fr.proline.mzscope.utils.MzScopeConstants.DisplayMode;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Frame;
@@ -546,7 +547,7 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
 
     @Override
     public void displayFeatureInCurrentRawFile(IFeature f) {
-        AbstractRawFilePanel panel = (AbstractRawFilePanel) viewersTabPane.getSelectedComponent();
+        IRawFilePanel panel = (IRawFilePanel) viewersTabPane.getSelectedComponent();
         if (panel != null) {
             panel.displayFeature(f);
         }
@@ -554,9 +555,13 @@ public class MzScopePanel extends JPanel implements IFeatureViewer, IExtractionE
 
     @Override
     public void extractChromatogramMass(Ms1ExtractionRequest params) {
-        AbstractRawFilePanel panel = (AbstractRawFilePanel) viewersTabPane.getSelectedComponent();
+        IRawFilePanel panel = (IRawFilePanel) viewersTabPane.getSelectedComponent();
         if (panel != null) {
-            panel.extractAndDisplayChromatogram(params, panel.getXicModeDisplay(), null);
+            DisplayMode xicModeDisplay = MzScopeConstants.DisplayMode.REPLACE;
+            if (panel instanceof AbstractRawFilePanel){
+                xicModeDisplay = ((AbstractRawFilePanel)panel).getXicModeDisplay();
+            }
+            panel.extractAndDisplayChromatogram(params, xicModeDisplay, null);
         }
     }
 

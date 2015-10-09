@@ -2,6 +2,7 @@ package fr.proline.studio.rsmexplorer.gui;
 
 
 
+import fr.proline.core.orm.msi.ResultSet;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DProteinSet;
 import fr.proline.studio.comparedata.AddDataAnalyzerButton;
@@ -55,7 +56,7 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
 
     private MarkerContainerPanel m_markerContainerPanel;
     
-    private boolean m_firstPanel;
+    private final boolean m_firstPanel;
     private JButton m_decoyButton;
 
     private SearchToggleButton m_searchToggleButton;
@@ -78,15 +79,18 @@ public class RsmProteinSetPanel extends HourglassPanel implements DataBoxPanelIn
     public void setData(Long taskId, DProteinSet[] proteinSets, boolean finished) {
         
         // update toolbar
-        if (m_firstPanel) {
-            ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
-            if (rsm != null) {
+        boolean mergedData = false;
+        ResultSummary rsm = (ResultSummary) m_dataBox.getData(false, ResultSummary.class);
+        if (rsm != null) {
+
+            if (m_firstPanel) {
                 m_decoyButton.setEnabled(rsm.getDecotResultSummary() != null);
             }
+            ResultSet.Type rsType = rsm.getResultSet().getType();
+            mergedData = (rsType == ResultSet.Type.USER) || (rsType == ResultSet.Type.DECOY_USER); // Merge or Decoy Merge
         }
-        
-        
-        ((ProteinSetTableModel) ((CompoundTableModel)m_proteinSetTable.getModel()).getBaseModel()).setData(taskId, proteinSets);
+ 
+        ((ProteinSetTableModel) ((CompoundTableModel)m_proteinSetTable.getModel()).getBaseModel()).setData(taskId, proteinSets, mergedData);
 
         // select the first row
         if ((proteinSets != null) && (proteinSets.length > 0)) {

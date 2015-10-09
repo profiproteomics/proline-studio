@@ -30,6 +30,15 @@ import javax.swing.table.TableCellRenderer;
  */
 public class ProteinSetTableModel extends LazyTableModel implements GlobalTableModelInterface {
 
+    // ---------------------------------------------------
+    // ---------------------------------------------------
+    // --- JPM.TODO clean up : different columns between merge/non merged Identification summaries
+    // --- are not used. Clean it up later when we will be sure that you will not use it
+    // --- To be cleaned : fied m_colUsed and associated code.
+    // ---------------------------------------------------
+    // ---------------------------------------------------
+    
+    
     public static final int COLTYPE_PROTEIN_SET_ID = 0;
     public static final int COLTYPE_PROTEIN_SET_NAME = 1;
     public static final int COLTYPE_PROTEIN_SET_DESCRIPTION = 2;
@@ -39,38 +48,59 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     public static final int COLTYPE_SPECTRAL_COUNT = 6;
     public static final int COLTYPE_SPECIFIC_SPECTRAL_COUNT = 7;
     public static final int COLTYPE_UNIQUE_SEQUENCES_COUNT = 8;
-    private static final String[] m_columnNames = {"Id", "Protein Set", "Description", "Score", "Proteins", "Peptides", "Peptide Match Count", "Specific Peptide Match Count", "Sequence Count"};
+    private static final String[] m_columnNames = {"Id", "Protein Set", "Description", "Score", "Proteins", "Peptides", "Spectral Count", "Specific Spectral Count", "Sequence Count"};
     
     private DProteinSet[] m_proteinSets = null;
-    
-    //private boolean m_isFiltering = false;
-    //private boolean m_filteringAsked = false;
+
+    private int[] m_colUsed = null;
     
     private String m_modelName;
     
+    private boolean m_mergedData = false;
     
     public ProteinSetTableModel(LazyTable table) {
         super(table);
+        setColUsed(m_mergedData);
     }
     
- 
+    private void setColUsed(boolean mergedRsm) {
+        if (mergedRsm) {
+            final int[] colUsed = {COLTYPE_PROTEIN_SET_ID, COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_DESCRIPTION, COLTYPE_PROTEIN_SCORE, COLTYPE_PROTEINS_COUNT, COLTYPE_PEPTIDES_COUNT, COLTYPE_SPECTRAL_COUNT, COLTYPE_SPECIFIC_SPECTRAL_COUNT, COLTYPE_UNIQUE_SEQUENCES_COUNT};
+            m_colUsed = colUsed;
+        } else {
+            final int[] colUsed = {COLTYPE_PROTEIN_SET_ID, COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_DESCRIPTION, COLTYPE_PROTEIN_SCORE, COLTYPE_PROTEINS_COUNT, COLTYPE_PEPTIDES_COUNT, COLTYPE_SPECTRAL_COUNT, COLTYPE_SPECIFIC_SPECTRAL_COUNT, COLTYPE_UNIQUE_SEQUENCES_COUNT};
+            m_colUsed = colUsed;
+        }
+    }
+    
+    public int convertColToColUsed(int col) {
+        for (int i = 0; i < m_colUsed.length; i++) {
+            if (col == m_colUsed[i]) {
+                return i;
+            }
+        }
+        return -1; // should not happen
+    }
     
     @Override
     public int getColumnCount() {
-        return m_columnNames.length;
+        return m_colUsed.length;
     }
 
     @Override
     public String getColumnName(int col) {
-        return m_columnNames[col];
+        return m_columnNames[m_colUsed[col]];
     }
     
     @Override
     public String getToolTipForHeader(int col) {
-        if (col == COLTYPE_PROTEINS_COUNT) {
+        int colUsed = m_colUsed[col];
+        if (colUsed == COLTYPE_PROTEINS_COUNT) {
             String urlSameset = IconManager.getURLForIcon(IconManager.IconType.SAME_SET);
             String urlSubset = IconManager.getURLForIcon(IconManager.IconType.SUB_SET);
             return "<html>Number of Proteins ( Sameset <img src=\"" + urlSameset + "\">&nbsp;,&nbsp; Subset <img src=\"" + urlSubset + "\">)</html>";
+        } else if ((colUsed == COLTYPE_SPECTRAL_COUNT) && (m_mergedData)) {
+            return "Number of PSM for all the merged Identification Summaries";
         } else {
             return getColumnName(col);
         }
@@ -83,7 +113,8 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
     @Override
     public Class getColumnClass(int col) {
-        if (col == COLTYPE_PROTEIN_SET_ID) {
+        int colUsed = m_colUsed[col];
+        if (colUsed == COLTYPE_PROTEIN_SET_ID) {
             return Long.class;
         }
         return LazyData.class;
@@ -115,24 +146,19 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
         if (m_proteinSets == null) {
             return 0;
         }
-        /*if ((!m_isFiltering) && (m_filteredIds != null)) {
-            return m_filteredIds.size();
-        }*/
+
         return m_proteinSets.length;
     }
 
     @Override
     public Object getValueAt(int row, int col) {
-        
-        /*int rowFiltered = row;
-        if ((!m_isFiltering) && (m_filteredIds != null)) {
-            rowFiltered = m_filteredIds.get(row).intValue();
-        }*/
-        
+
         // Retrieve Protein Set
         DProteinSet proteinSet = m_proteinSets[row];
         long rsmId = proteinSet.getResultSummaryId();
 
+        col =  m_colUsed[col];
+        
         switch (col) {
             case COLTYPE_PROTEIN_SET_ID: {
                 return proteinSet.getId();
@@ -260,32 +286,27 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
         }
         return null; // should never happen
     }
-    private static StringBuilder m_sb = new StringBuilder(20);
+    private static final StringBuilder m_sb = new StringBuilder(20);
 
 
     
 
      
     
-    public void setData(Long taskId, DProteinSet[] proteinSets) {
+    public void setData(Long taskId, DProteinSet[] proteinSets, boolean mergedData) {
         m_proteinSets = proteinSets;
         m_taskId = taskId;
         
         updateMinMax();
-        
-        /*if (m_restrainIds != null) {
-            m_restrainIds = null;
-            m_filteringAsked = true;
-        }
-        
-        if (m_filteringAsked) {
-            m_filteringAsked = false;
-            filter();
-        } else {*/
+
+        if (m_mergedData != mergedData) {
+            m_mergedData = mergedData;
+            setColUsed(mergedData);
+            fireTableStructureChanged();
+        } else {
             fireTableDataChanged();
-        //}
-        
-        
+        }
+
     }
     
     private void updateMinMax() {
@@ -414,7 +435,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
     @Override
     public Class getDataColumnClass(int columnIndex) {
-
+        columnIndex =  m_colUsed[columnIndex];
         switch (columnIndex) {
             case COLTYPE_PROTEIN_SET_ID: {
                 return Long.class;
@@ -451,7 +472,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
 
     @Override
     public int[] getKeysColumn() {
-        int[] keys = { COLTYPE_PROTEIN_SET_NAME, COLTYPE_PROTEIN_SET_ID };
+        int[] keys = {  convertColToColUsed(COLTYPE_PROTEIN_SET_NAME),  convertColToColUsed(COLTYPE_PROTEIN_SET_ID) };
         return keys;
     }
 
@@ -471,14 +492,23 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     }
 
    @Override
-   public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
-        filtersMap.put(COLTYPE_PROTEIN_SET_NAME, new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_NAME), null, COLTYPE_PROTEIN_SET_NAME));
-        filtersMap.put(COLTYPE_PROTEIN_SET_DESCRIPTION, new StringFilter(getColumnName(COLTYPE_PROTEIN_SET_DESCRIPTION), null, COLTYPE_PROTEIN_SET_DESCRIPTION));
-        filtersMap.put(COLTYPE_PROTEIN_SCORE, new DoubleFilter(getColumnName(COLTYPE_PROTEIN_SCORE), null, COLTYPE_PROTEIN_SCORE));
-        filtersMap.put(COLTYPE_PEPTIDES_COUNT, new IntegerFilter(getColumnName(COLTYPE_PEPTIDES_COUNT), null, COLTYPE_PEPTIDES_COUNT));
-        filtersMap.put(COLTYPE_SPECTRAL_COUNT, new IntegerFilter(getColumnName(COLTYPE_SPECTRAL_COUNT), null, COLTYPE_SPECTRAL_COUNT));
-        filtersMap.put(COLTYPE_SPECIFIC_SPECTRAL_COUNT, new IntegerFilter(getColumnName(COLTYPE_SPECIFIC_SPECTRAL_COUNT), null, COLTYPE_SPECIFIC_SPECTRAL_COUNT));
-        filtersMap.put(COLTYPE_UNIQUE_SEQUENCES_COUNT, new IntegerFilter(getColumnName(COLTYPE_UNIQUE_SEQUENCES_COUNT), null, COLTYPE_UNIQUE_SEQUENCES_COUNT));
+    public void addFilters(LinkedHashMap<Integer, Filter> filtersMap) {
+
+        int colIdx = 0;
+        
+        colIdx++; // COLTYPE_PROTEIN_SET_ID
+        
+        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_PROTEIN_SET_NAME
+        filtersMap.put(colIdx, new StringFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_PROTEIN_SET_DESCRIPTION
+        filtersMap.put(colIdx, new DoubleFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_PROTEIN_SCORE
+        colIdx++; // COLTYPE_PROTEINS_COUNT
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_PEPTIDES_COUNT
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_SPECTRAL_COUNT
+        /*if (m_mergedData) {
+            filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx)); colIdx++; // COLTYPE_BASIC_SPECTRAL_COUNT
+        }*/
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_SPECIFIC_SPECTRAL_COUNT
+        filtersMap.put(colIdx, new IntegerFilter(getColumnName(colIdx), null, colIdx));  colIdx++; // COLTYPE_UNIQUE_SEQUENCES_COUNT
     }
 
     @Override
@@ -515,6 +545,8 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
     @Override
     public TableCellRenderer getRenderer(int col) {
         
+        col =  m_colUsed[col];
+        
         if (m_rendererMap.containsKey(col)) {
             return m_rendererMap.get(col);
         }
@@ -534,7 +566,7 @@ public class ProteinSetTableModel extends LazyTableModel implements GlobalTableM
                 renderer = new ProteinCountRenderer();
                 break;
             }
-            // COLTYPE_PEPTIDES_COUNT COLTYPE_SPECTRAL_COUNT COLTYPE_SPECIFIC_SPECTRAL_COUNT COLTYPE_UNIQUE_SEQUENCES_COUNT
+            // COLTYPE_PEPTIDES_COUNT COLTYPE_SPECTRAL_COUNT COLTYPE_BASIC_SPECTRAL_COUNT COLTYPE_SPECIFIC_SPECTRAL_COUNT COLTYPE_UNIQUE_SEQUENCES_COUNT
            
         }
         m_rendererMap.put(col, renderer);

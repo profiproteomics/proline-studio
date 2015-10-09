@@ -194,6 +194,8 @@ public abstract class AbstractDataBox implements ChangeListener, ProgressInterfa
                     return new DataBoxMSQueries();
                 case DataBoxPSMForMsQuery:
                     return new DataboxPSMForMsQuery(false);
+                case DataBoxRsetPeptideSpectrumValues:
+                    return new DataBoxRsetPeptideSpectrumValues();
             }
             return null; // should not happen
         }

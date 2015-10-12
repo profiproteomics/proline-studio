@@ -36,12 +36,13 @@ public class DisplayRsetAction extends AbstractRSMAction {
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
         
+        m_displayMSQueryAction = new DisplayMSQueryForRsetAction(m_treeType);
         m_displayRsetPeptidesAction = new DisplayRsetPeptidesAction(m_treeType);
         m_displayRsetProteinMatchesAction = new DisplayRsetProteinMatchesAction(m_treeType);
         m_msDiagReportAction = new GenerateMSDiagReportAction(m_treeType, m_isJMSDefined); 
         m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
         m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSET, m_treeType);
-        m_displayMSQueryAction = new DisplayMSQueryForRsetAction(m_treeType);
+        
         
         ArrayList<String> savedWindowsList = WindowSavedManager.readSavedWindows();
         int nb = savedWindowsList.size();
@@ -55,16 +56,16 @@ public class DisplayRsetAction extends AbstractRSMAction {
             m_displaySavedWindowActionList.add(new DisplaySavedWindowAction(name, i, m_treeType));
         }
        
+        JMenuItem displayMSQueryItem = new JMenuItem(m_displayMSQueryAction);
         JMenuItem displayRsetPeptidesItem = new JMenuItem(m_displayRsetPeptidesAction);
         JMenuItem displayRsetProteinMatchesItem = new JMenuItem(m_displayRsetProteinMatchesAction);
-        JMenuItem displayMSQueryItem = new JMenuItem(m_displayMSQueryAction);
         JMenuItem displayMsDiagReportItem = new JMenuItem(m_msDiagReportAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
         JMenuItem manageUserWindowsItem = new JMenuItem(m_manageUserWindowsAction);
-                
+             
+        m_menu.add(displayMSQueryItem);
         m_menu.add(displayRsetPeptidesItem);
         m_menu.add(displayRsetProteinMatchesItem);
-        m_menu.add(displayMSQueryItem);
         m_menu.addSeparator();
         m_menu.add(displayMsDiagReportItem);
         m_menu.addSeparator();

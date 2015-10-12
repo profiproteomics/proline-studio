@@ -36,11 +36,12 @@ public class DisplayRsmAction extends AbstractRSMAction {
     public JMenuItem getPopupPresenter() {
         m_menu = new JMenu((String) getValue(NAME));
 
+        m_displayMSQueryAction = new DisplayMSQueryAction(m_treeType);
         m_displayRsmPSMAction = new DisplayRsmPSMAction(m_treeType);
         m_displayRsmPeptidesAction = new DisplayRsmPeptidesAction(m_treeType);
         m_displayRsmProteinSetsAction = new DisplayRsmProteinSetsAction(m_treeType);
         m_displayAdjacencyMatrixAction = new DisplayAdjacencyMatrixAction(m_treeType);
-        m_displayMSQueryAction = new DisplayMSQueryAction(m_treeType);
+        
         
         m_manageUserWindowsAction = new ManageUserWindowsAction(WindowSavedManager.SAVE_WINDOW_FOR_RSM, m_treeType);
         m_displayUserWindowAction = new DisplayUserWindowAction(WindowSavedManager.SAVE_WINDOW_FOR_RSM, m_treeType);
@@ -58,19 +59,18 @@ public class DisplayRsmAction extends AbstractRSMAction {
         }
 
 
+        JMenuItem displayMSQueryItem = new JMenuItem(m_displayMSQueryAction);
         JMenuItem displayRsmPSMItem = new JMenuItem(m_displayRsmPSMAction);
         JMenuItem displayRsmPeptidesItem = new JMenuItem(m_displayRsmPeptidesAction);
         JMenuItem displayRsmProteinSetsItem = new JMenuItem(m_displayRsmProteinSetsAction);
         JMenuItem displayAdjacencyMatrixItem = new JMenuItem(m_displayAdjacencyMatrixAction);
-        JMenuItem displayMSQueryItem = new JMenuItem(m_displayMSQueryAction);
         JMenuItem displayUserWindowItem = new JMenuItem(m_displayUserWindowAction);
         JMenuItem manageUserWindowsItem = new JMenuItem(m_manageUserWindowsAction);
 
-
+        m_menu.add(displayMSQueryItem);
         m_menu.add(displayRsmPSMItem);
         m_menu.add(displayRsmPeptidesItem);
         m_menu.add(displayRsmProteinSetsItem);
-        m_menu.add(displayMSQueryItem);
         m_menu.add(displayAdjacencyMatrixItem); //JPM : remove comment to see adjacency matrix
         m_menu.addSeparator();
         m_menu.add(displayUserWindowItem);

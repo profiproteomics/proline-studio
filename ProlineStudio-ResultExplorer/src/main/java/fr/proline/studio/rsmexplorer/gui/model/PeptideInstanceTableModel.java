@@ -10,6 +10,7 @@ import fr.proline.core.orm.msi.PeptideReadablePtmString;
 import fr.proline.core.orm.msi.ResultSummary;
 import fr.proline.core.orm.msi.dto.DPeptideMatch;
 import fr.proline.studio.dam.tasks.DatabaseLoadPeptideMatchTask;
+import fr.proline.studio.dam.tasks.DatabaseLoadPeptidesInstancesTask;
 import fr.proline.studio.filter.ConvertValueInterface;
 import fr.proline.studio.filter.DoubleFilter;
 import fr.proline.studio.filter.Filter;
@@ -51,11 +52,12 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
     
     public static final int COLTYPE_PEPTIDE_MISSED_CLIVAGE = 7;
     public static final int COLTYPE_PEPTIDE_NB_PROTEIN_SETS = 8;
-    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 9; 
+    public static final int COLTYPE_PEPTIDE_PROTEIN_SET_NAMES = 9;
+    public static final int COLTYPE_PEPTIDE_RETENTION_TIME = 10; 
     //public static final int COLTYPE_PEPTIDE_ION_PARENT_INTENSITY = 8;
-    public static final int COLTYPE_PEPTIDE_PTM = 10;
-    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Calc. Mass", "Exp. MoZ", "Ppm" /*"Delta MoZ"*/, "Charge", "Missed Cl.", "Protein Set Count", "RT", "PTM"};
-    private static final String[] m_columnTooltips = {"Peptide Id","Peptide", "Score", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" /*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Protein Set Count", "Retention Time", "Post Translational Modifications"};
+    public static final int COLTYPE_PEPTIDE_PTM = 11;
+    private static final String[] m_columnNames = {"Id", "Peptide", "Score", "Calc. Mass", "Exp. MoZ", "Ppm" /*"Delta MoZ"*/, "Charge", "Missed Cl.", "Protein Set Count", "Protein Sets", "RT", "PTM"};
+    private static final String[] m_columnTooltips = {"Peptide Id","Peptide", "Score", "Calculated Mass", "Experimental Mass to Charge Ratio", "parts-per-million" /*"Delta Mass to Charge Ratio"*/, "Charge", "Missed Clivage", "Protein Set Count", "Protein Sets", "Retention Time", "Post Translational Modifications"};
     private PeptideInstance[] m_peptideInstances = null;
 
     private String m_modelName;
@@ -102,6 +104,7 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
             //case COLTYPE_PEPTIDE_RETENTION_TIME:
             //case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
             case COLTYPE_PEPTIDE_PTM:
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
                 return LazyData.class;
             case COLTYPE_PEPTIDE_SCORE:
             case COLTYPE_PEPTIDE_EXPERIMENTAL_MOZ:
@@ -113,7 +116,6 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
             case COLTYPE_PEPTIDE_MISSED_CLIVAGE:
             case COLTYPE_PEPTIDE_NB_PROTEIN_SETS:
                 return Integer.class;
-            
             default:
                 return String.class;
         }
@@ -128,11 +130,8 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
             case COLTYPE_PEPTIDE_CALCULATED_MASS:
             case COLTYPE_PEPTIDE_PTM:
                 return DatabaseLoadPeptideMatchTask.SUB_TASK_PEPTIDE;
-            /*case COLTYPE_PEPTIDE_MSQUERY:
-                return DatabaseLoadPeptideMatchTask.SUB_TASK_MSQUERY;*/
-          /*case COLTYPE_PEPTIDE_RETENTION_TIME:*/
-            /*case COLTYPE_PEPTIDE_ION_PARENT_INTENSITY:
-                return DatabaseLoadPeptideMatchTask.SUB_TASK_SPECTRUM;*/
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES:
+                return DatabaseLoadPeptidesInstancesTask.SUB_TASK_PROTEINSET_NAME_LIST;
         }
         return -1;
     }
@@ -228,6 +227,19 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
             }
             case COLTYPE_PEPTIDE_NB_PROTEIN_SETS: {
                 return peptideInstance.getValidatedProteinSetCount();
+            }
+            case COLTYPE_PEPTIDE_PROTEIN_SET_NAMES: {
+                
+                LazyData lazyData = getLazyData(row,col);
+                
+                String proteinSetNames = peptideMatch.getProteinSetStringList();
+                if (proteinSetNames == null) {
+                    givePriorityTo(m_taskId, row, col);
+                    lazyData.setData(null);
+                } else {
+                    lazyData.setData(proteinSetNames);
+                }
+                return lazyData;
             }
             case COLTYPE_PEPTIDE_RETENTION_TIME: {
                 return peptideInstance.getElutionTime();
@@ -414,7 +426,9 @@ public class PeptideInstanceTableModel extends LazyTableModel implements GlobalT
         filtersMap.put(COLTYPE_PEPTIDE_CHARGE, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_CHARGE), null, COLTYPE_PEPTIDE_CHARGE));
         filtersMap.put(COLTYPE_PEPTIDE_MISSED_CLIVAGE, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_MISSED_CLIVAGE), null, COLTYPE_PEPTIDE_MISSED_CLIVAGE));
         filtersMap.put(COLTYPE_PEPTIDE_NB_PROTEIN_SETS, new IntegerFilter(getColumnName(COLTYPE_PEPTIDE_NB_PROTEIN_SETS), null, COLTYPE_PEPTIDE_NB_PROTEIN_SETS));
-
+        
+        filtersMap.put(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES, new StringFilter(getColumnName(COLTYPE_PEPTIDE_PROTEIN_SET_NAMES), null, COLTYPE_PEPTIDE_PROTEIN_SET_NAMES));
+        
     }
     
     @Override

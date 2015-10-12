@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fr.proline.studio.dam.tasks;
 
 import fr.proline.core.orm.msi.MsQuery;
@@ -30,8 +25,9 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
     // used to slice the task in sub tasks
     private static final int SLICE_SIZE = 1000;
     
-    public static final int SUB_TASK_COUNT_MSQUERY = 1; // <<----- get in sync  
+    
     public static final int SUB_TASK_MSQUERY = 0;
+    public static final int SUB_TASK_COUNT = 1; // <<----- get in sync  
     
     private long m_projectId = -1;
     private ResultSet m_resultSet;
@@ -53,7 +49,7 @@ public class DatabaseLoadMSQueriesTask extends AbstractDatabaseSlicerTask {
     }
 
     public void initLoadMSQueries(long projectId, ResultSet rs, List<MsQuery> listMsQueries, Map<Long, Integer> nbPeptideMatchesByMsQueryIdMap) {
-        init(SUB_TASK_COUNT_MSQUERY, new TaskInfo("Load MSQueries for resultSet "+(rs == null? "null":rs.getId()), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
+        init(SUB_TASK_COUNT, new TaskInfo("Load MSQueries for resultSet "+(rs == null? "null":rs.getId()), false, TASK_LIST_INFO, TaskInfo.INFO_IMPORTANCE_MEDIUM));
         m_projectId = projectId;
         m_resultSet = rs;
         m_listMsQueries = listMsQueries;
